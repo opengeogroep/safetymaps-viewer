@@ -507,7 +507,7 @@ dbkjs.documentReady = function () {
                     };
                     var transitionEvent = dbkjs.util.getTransitionEvent();
                      if(transitionEvent) {
-                         infoview.parent().on(transEvent, updateContentHeight);
+                         infoview.parent().on(transitionEvent, updateContentHeight);
                      } else {
                          updateContentHeight();
                      }
