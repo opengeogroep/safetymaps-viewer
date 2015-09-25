@@ -1030,5 +1030,20 @@ dbkjs.util = {
     },
     gcd: function (a, b) {
         return (b === 0) ? a : dbkjs.util.gcd(b, a % b);
+    },
+    getTransitionEvent: function() {
+        var el = document.createElement('fakeelement');
+        var transitions = {
+            'transition': 'transitionend',
+            'OTransition': 'oTransitionEnd',
+            'MozTransition': 'transitionend',
+            'WebkitTransition': 'webkitTransitionEnd'
+        };
+        for (t in transitions) {
+             if (el.style[t] !== undefined) {
+                 return transitions[t];
+             }
+         }
+         return null;
     }
 };

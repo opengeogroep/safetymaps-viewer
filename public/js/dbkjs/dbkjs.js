@@ -488,15 +488,29 @@ dbkjs.documentReady = function () {
                     $('#infopanel').toggle();
                 } else {
                     dbkjs.util.getModalPopup('dbkinfopanel').show();
+
+                    var infoview = dbkjs.util.getModalPopup('dbkinfopanel').getView();
+
                     if(dbkjs.options.splitScreenChecked) {
                         $("#mapc1map1").css({width: "55%"});
                         dbkjs.map.updateSize();
-                        dbkjs.util.getModalPopup('dbkinfopanel').getView().parent().css({width: "45%"});
+                        infoview.parent().css({width: "45%"});
                         $(".main-button-group").css({right: "45%"});
                         $("#vectorclickpanel").css({"width": "55%"});
                     } else {
-                        dbkjs.util.getModalPopup('dbkinfopanel').getView().parent().css({width: "100%"});
+                        infoview.parent().css({width: "100%"});
                     }
+
+                    // Update content height after width transition has ended
+                    var updateContentHeight = function() {
+                        infoview.find(".tab-content").css("height", infoview.height() - infoview.find(".nav-pills").height());
+                    };
+                    var transitionEvent = dbkjs.util.getTransitionEvent();
+                     if(transitionEvent) {
+                         infoview.parent().on(transEvent, updateContentHeight);
+                     } else {
+                         updateContentHeight();
+                     }
                 }
             } else if (this.id === "c_minimap") {
                 $('#minimappanel').toggle();
