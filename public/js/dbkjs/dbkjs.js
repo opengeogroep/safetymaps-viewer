@@ -404,7 +404,18 @@ dbkjs.documentReady = function () {
             // Create the infopanel
             dbkjs.util.createModalPopup({name: 'infopanel'}).getView().append($('<div></div>').attr({'id': 'infopanel_b'}));
             // Create the DBK infopanel
-            dbkjs.util.createModalPopup({name: 'dbkinfopanel'}).getView().append($('<div></div>').attr({'id': 'dbkinfopanel_b'}));
+            dbkjs.util.createModalPopup({
+                name: 'dbkinfopanel',
+                hideCallback: function() {
+                    if(dbkjs.options.enableSplitScreen) {
+                        $("#mapc1map1").css({width: "100%"});
+                        dbkjs.map.updateSize();
+                        dbkjs.util.getModalPopup('dbkinfopanel').getView().parent().css({width: "0%"});
+                        $(".main-button-group").css({right: "0%"});
+                        $("#vectorclickpanel").css({"width": "100%"});
+                    }
+                }
+            }).getView().append($('<div></div>').attr({'id': 'dbkinfopanel_b'}));
 
             // We are removing / moving some existing DIVS from HTML to convert prev. popups to fullscreen modal popups
             $('#baselayerpanel').remove();
@@ -445,6 +456,31 @@ dbkjs.documentReady = function () {
         }
         dbkjs.init();
 
+        // dbkjs.options.enableSplitScreen: enable split screen setting
+        // dbkjs.options.splitScreenChecked: split screen is enabled
+        if(dbkjs.options.enableSplitScreen) {
+            $(".main-button-group").css({paddingRight: "10px", width: "auto", float: "right", right: "0%"});
+
+            $(dbkjs).bind('dbkjs_init_complete', function() {
+                // Add config option to enable / disable split screen
+                $($("#settingspanel_b div.row")[0]).append('<div class="col-xs-12"><label><input type="checkbox" id="checkbox_splitScreen" ' + (dbkjs.options.splitScreenChecked ? 'checked' : '') + '>Toon informatie naast de kaart</label></div>');
+
+                $("#checkbox_splitScreen").on('change', function (e) {
+                    dbkjs.options.splitScreenChecked = e.target.checked;
+                });
+
+                // Hide info panel when modal popup is openend
+                $(dbkjs).on('modal_popup_show', function(e, name) {
+                    dbkjs.util.getModalPopup('dbkinfopanel').hide();
+                });
+
+                // Hide info panel when settings is opened
+                $("#c_settings").on('click', function(e) {
+                    dbkjs.util.getModalPopup('dbkinfopanel').hide();
+                });
+            });
+        }
+
         $('#infopanel_b').html(dbkjs.options.info);
         $('#tb03, #c_minimap').click(function () {
             if (this.id === "tb03") {
@@ -452,6 +488,15 @@ dbkjs.documentReady = function () {
                     $('#infopanel').toggle();
                 } else {
                     dbkjs.util.getModalPopup('dbkinfopanel').show();
+                    if(dbkjs.options.splitScreenChecked) {
+                        $("#mapc1map1").css({width: "55%"});
+                        dbkjs.map.updateSize();
+                        dbkjs.util.getModalPopup('dbkinfopanel').getView().parent().css({width: "45%"});
+                        $(".main-button-group").css({right: "45%"});
+                        $("#vectorclickpanel").css({"width": "55%"});
+                    } else {
+                        dbkjs.util.getModalPopup('dbkinfopanel').getView().parent().css({width: "100%"});
+                    }
                 }
             } else if (this.id === "c_minimap") {
                 $('#minimappanel').toggle();
