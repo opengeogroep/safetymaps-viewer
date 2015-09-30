@@ -34,6 +34,7 @@ dbkjs.modules.vrhincidenten = {
     currentIncidentId: null,
     readIncidentIds: null,
     activeIncidentIds: null,
+    alerted: null,
     exclamationFlashInterval: null,
     archiefMarker: null,
     dbkLayer: null,
@@ -49,11 +50,11 @@ dbkjs.modules.vrhincidenten = {
         var me = this;
 
         if(dbkjs.options.incidentenVehicleMode) {
-
             me.voertuignummer = window.localStorage.getItem("voertuignummer");
-            // TODO indien gevuld start ophalen inzet na token
 
             $(me).one('serviceInitialized', function() { me.getVoertuignummerTypeahead(); });
+
+            window.setInterval(function() { me.checkVoertuigInzetIncident(); }, 30000);
 
             $(dbkjs).one('dbkjs_init_complete', function() {
                 // Add config optie voor voertuignummer
@@ -64,9 +65,11 @@ dbkjs.modules.vrhincidenten = {
                 incidentSettings.insertAfter($("#settingspanel_b hr:last"));
 
                 var changeVoertuignummer = function(vn) {
-                    me.voertuignummer = vn;
-                    window.localStorage.setItem("voertuignummer", me.voertuignummer);
-                    console.log("voertuignummer changed", localStorage);
+                    if(me.voertuignummer != vn) {
+                        me.voertuignummer = vn;
+                        window.localStorage.setItem("voertuignummer", me.voertuignummer);
+                        me.geenVoertuigInzet();
+                    }
                 };
                 $("#input_voertuignummer").on('change', function(e) {
                     changeVoertuignummer($(e.target).val());
@@ -105,6 +108,7 @@ dbkjs.modules.vrhincidenten = {
             .click(function(e) {
                 e.preventDefault();
 
+                // TODO vehicleMode: open incidentPopup
                 me.onIncidentenLijstOpen();
             })
             .appendTo('#btngrp_3');
@@ -171,6 +175,38 @@ dbkjs.modules.vrhincidenten = {
                     });
         });
     },
+    checkVoertuigInzetIncident: function() {
+        var me = this;
+
+        if(!me.voertuignummer) {
+            return;
+        }
+    },
+    geenVoertuigInzet: function() {
+        this.setAlerted(false);
+        $('#incidentContent').html("");
+    },
+    setAlerted: function(alert) {
+        var me = this;
+        if(alert) {
+            $($("#btn_openvrhincidenten").css({color: 'red'}).children()[0]).removeClass("fa-fire").addClass("fa-exclamation");
+            me.exclamationFlashInterval = window.setInterval(function() {
+                var el = $($("#btn_openvrhincidenten").children()[0]);
+                if(el.hasClass("fa-fire")) {
+                    el.removeClass("fa-fire").addClass("fa-exclamation");
+                } else {
+                    el.removeClass("fa-exclamation").addClass("fa-fire");
+                }
+            }, 1500);
+        } else {
+            $($("#btn_openvrhincidenten").css({color: 'black'}).children()[0]).removeClass("fa-exclamation").addClass("fa-fire");
+            if(me.exclamationFlashInterval) {
+                window.clearInterval(me.exclamationFlashInterval);
+                me.exclamationFlashInterval = null;
+            }
+        }
+        me.alerted = alert;
+    },
     createStyle: function() {
         var css = '#eenheden div { margin: 3px; float: left } \n\
 #eenheden div { border-left: 1px solid #ddd; padding-left: 8px; } \n\
@@ -228,11 +264,7 @@ td { padding: 4px !important } ',
             }
         }
         if(read) {
-            $($("#btn_openvrhincidenten").css({color: 'black'}).children()[0]).removeClass("fa-exclamation").addClass("fa-fire");
-            if(me.exclamationFlashInterval) {
-                window.clearInterval(me.exclamationFlashInterval);
-                me.exclamationFlashInterval = null;
-            }
+            me.setAlerted(false);
         }
     },
     nieuweIncidentenLijst: function(incidentIds) {
@@ -252,7 +284,7 @@ td { padding: 4px !important } ',
 
         // Als incidentenlijst verborgen en nog geen alert check of nieuw incident id
         // nog niet in readIncidentIds
-        if(incidentListHidden && !me.exclamationFlashInterval) {
+        if(incidentListHidden && !me.alerted) {
             var newIncident = false;
             $.each(incidentIds, function(i, incidentIds) {
                 if(me.readIncidentIds.indexOf(incidentIds) === -1) {
@@ -262,15 +294,7 @@ td { padding: 4px !important } ',
             });
 
             if(newIncident) {
-                $($("#btn_openvrhincidenten").css({color: 'red'}).children()[0]).removeClass("fa-fire").addClass("fa-exclamation");
-                me.exclamationFlashInterval = window.setInterval(function() {
-                    var el = $($("#btn_openvrhincidenten").children()[0]);
-                    if(el.hasClass("fa-fire")) {
-                        el.removeClass("fa-fire").addClass("fa-exclamation");
-                    } else {
-                        el.removeClass("fa-exclamation").addClass("fa-fire");
-                    }
-                }, 1500);
+                me.setAlerted(true);
             }
         }
 
@@ -857,11 +881,7 @@ td { padding: 4px !important } ',
 
             $('#incidentContent').html(html);
 
-            me.incidentPopup.show();
-            $("#mapc1map1").css({width: "55%"});
-            dbkjs.map.updateSize();
-            me.incidentPopup.getView().parent().css({width: "45%"});
-            $(".main-button-group").css({right: "45%"});
+            me.showIncidentPopup();
 
             if(me.updateIncidentTimeout) {
                 window.clearTimeout(me.updateIncidentTimeout);
@@ -871,6 +891,14 @@ td { padding: 4px !important } ',
                 me.updateIncident(false);
             }, 10000);
         });
+    },
+    showIncidentPopup: function() {
+        var me = this;
+        me.incidentPopup.show();
+        $("#mapc1map1").css({width: "55%"});
+        dbkjs.map.updateSize();
+        me.incidentPopup.getView().parent().css({width: "45%"});
+        $(".main-button-group").css({right: "45%"});
     },
     archiefIncidentClick: function(incident, setCenter) {
 
