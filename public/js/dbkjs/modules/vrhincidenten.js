@@ -38,6 +38,7 @@ dbkjs.modules.vrhincidenten = {
     archiefMarker: null,
     dbkLayer: null,
     dbkLayer2: null,
+    voertuignummer: null,
     encode: function(s) {
         if(s) {
             return dbkjs.util.htmlEncode(s);
@@ -46,6 +47,46 @@ dbkjs.modules.vrhincidenten = {
     },
     register: function(options) {
         var me = this;
+
+        if(dbkjs.options.incidentenVehicleMode) {
+
+            me.voertuignummer = window.localStorage.getItem("voertuignummer");
+            // TODO indien gevuld start ophalen inzet na token
+
+            $(me).one('serviceInitialized', function() { me.getVoertuignummerTypeahead(); });
+
+            $(dbkjs).one('dbkjs_init_complete', function() {
+                // Add config optie voor voertuignummer
+
+                var incidentSettings = $("<div><h4>Meldkamerkoppeling</h4><p/>" +
+                        "<div class='row'><div class='col-xs-12'>Voertuignummer: <input type='text' id='input_voertuignummer'>" +
+                        "</div></div><p/><p/><hr>");
+                incidentSettings.insertAfter($("#settingspanel_b hr:last"));
+
+                var changeVoertuignummer = function(vn) {
+                    me.voertuignummer = vn;
+                    window.localStorage.setItem("voertuignummer", me.voertuignummer);
+                    console.log("voertuignummer changed", localStorage);
+                };
+                $("#input_voertuignummer").on('change', function(e) {
+                    changeVoertuignummer($(e.target).val());
+                });
+
+                $("#input_voertuignummer")
+                        .val(me.voertuignummer)
+                        .on('typeahead:selected', function(e, v) {
+                            changeVoertuignummer(v.value);
+                        });
+
+                if(!me.voertuignummer) {
+                    $("#c_settings").click();
+
+                    // Wait for transition to end to set focus
+                    window.setTimeout(function() { $("#input_voertuignummer").focus(); }, 1000);
+                }
+            });
+            //$($("#settingspanel_b div.row")[0]).append('<div class="col-xs-12"><label><input type="checkbox" id="checkbox_splitScreen" ' + (dbkjs.options.splitScreenChecked ? 'checked' : '') + '>Toon informatie naast de kaart</label></div>');
+        }
 
         this.createStyle();
         this.createPopups();
@@ -88,6 +129,47 @@ dbkjs.modules.vrhincidenten = {
         dbkjs.map.addLayer(this.markerLayer);
 
         this.initVrhService();
+    },
+    getVoertuignummerTypeahead: function() {
+        var me = this;
+        $.ajax({
+            url: me.layerUrls.inzetEenheidArchief + "/query",
+            dataType: "json",
+            data: {
+                f: "pjson",
+                token: me.token,
+                where: "T_IND_DISC_EENHEID = 'B'",
+                orderByFields: "CODE_VOERTUIGSOORT,ROEPNAAM_EENHEID,KAZ_NAAM",
+                outFields: "CODE_VOERTUIGSOORT,ROEPNAAM_EENHEID,KAZ_NAAM",
+                returnDistinctValues: true
+            },
+            cache: false
+        })
+        .done(function(data, textStatus, jqXHR) {
+            if(data.error) {
+                console.log("Fout bij ophalen voertuignummers uit inzet archief: " + data.error.code + ": "+ data.error.message);
+                return;
+            }
+            var datums = [];
+            $.each(data.features, function(i, feature) {
+                var a = feature.attributes;
+                datums.push( { value: a.ROEPNAAM_EENHEID, tokens: [a.CODE_VOERTUIGSOORT, a.ROEPNAAM_EENHEID, a.KAZ_NAAM] });
+            });
+            console.log("typeahead data", datums);
+            $("#input_voertuignummer")
+                    .typeahead({
+                        name: 'voertuignummers',
+                        local: datums,
+                        limit: 10,
+                        template: function(d) {
+                            var s = d.tokens[0] + " " + d.value;
+                            if(d.tokens[2]) {
+                                s += " (" + d.tokens[2] + ")";
+                            }
+                            return s;
+                        }
+                    });
+        });
     },
     createStyle: function() {
         var css = '#eenheden div { margin: 3px; float: left } \n\
@@ -315,6 +397,7 @@ td { padding: 4px !important } ',
             if(!me.layerUrls.incident) {
                 console.log("Fout: incidenten tabel niet gevonden in ArcGIS service " + dbkjs.options.vrhIncidentenUrl);
             } else {
+                $(me).trigger('serviceInitialized', me.layerUrls);
                 me.loadVrhIncidenten();
             }
         });
