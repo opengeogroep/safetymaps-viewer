@@ -21,6 +21,10 @@
 /**
  * Get incident information from an ArcGIS REST service configured on an Oracle
  * GMS replica database. Call initialize() after constructing the new object.
+ *
+ * Events:
+ * initialized: when initialize() resolves
+ *
  * @param {type} url The URL to the ArcGIS REST MapService
  * @returns {AGSIncidentService}
  */
@@ -63,6 +67,7 @@ AGSIncidentService.prototype.initialize = function(tokenUrl, user, pass) {
         })
         .done(function() {
             dInitialize.resolve();
+            $(me).triggerHandler('initialized');
         });
     });
     return dInitialize.promise();
@@ -155,7 +160,6 @@ AGSIncidentService.prototype.loadServiceInfo = function() {
                 var name = table.name.substring(table.name.indexOf(".")+1).replace("%", "");
                 me.tableUrls[name] = me.url + "/" + table.id;
             });
-            console.log("tableUrls", me.tableUrls);
             d.resolve();
         }
     });

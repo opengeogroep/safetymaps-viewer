@@ -22,5 +22,21 @@ var dbkjs = dbkjs || {};
 window.dbkjs = dbkjs;
 dbkjs.modules = dbkjs.modules || {};
 dbkjs.modules.incidents = {
+    service: null,
+    controller: null,
+    options: null,
+    register: function() {
+        this.options = dbkjs.options.incidents;
+
+        this.service = new AGSIncidentService(this.options.ags.incidentsUrl);
+
+        if(this.options.voertuigMode) {
+            controller = new VoertuigInzetController(this);
+        } else {
+            //controller = new IncidentMonitorController(this);
+        }
+
+        this.service.initialize(this.options.ags.tokenUrl, this.options.ags.user, this.options.ags.password);
+    }
 };
 
