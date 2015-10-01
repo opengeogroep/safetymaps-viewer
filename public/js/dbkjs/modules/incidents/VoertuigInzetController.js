@@ -97,7 +97,7 @@ VoertuigInzetController.prototype.enableVoertuignummerTypeahead = function() {
  * Change voertuignummer, persist in browser local storage. Start getting inzet
  * info if not null (service must be initialized). Will cancel previous timeout
  * for getting inzet data, immediately get info for updated voertuignummer.
- * 
+ *
  * @param {boolean} noDuplicateCheck get info even when argument is the same as
  *   instance variable this.voertuignummer, use when starting up
  */
@@ -156,5 +156,25 @@ VoertuigInzetController.prototype.geenInzet = function() {
 };
 
 VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
-    console.log("inzet, incident id " + incidentId);
+    var me = this;
+    if(incidentId !== me.incidentId) {
+        console.log("new inzet, incident id " + incidentId);
+
+        me.incidentId = incidentId;
+        var responseIncidentId = incidentId;
+
+        me.service.getAllIncidentInfo(responseIncidentId)
+        .fail(function(e) {
+            dbkjs.gui.showError("Kan incidentinfo niet ophalen: " + e);
+        })
+        .done(function(incident) {
+            if(responseIncidentId !== me.incidentId) {
+                // IncidentId was changed since request was fired off, ignore!
+                return;
+            }
+            console.log("incident info", incident);
+        });
+    } else {
+        console.log("same incident");
+    }
 };

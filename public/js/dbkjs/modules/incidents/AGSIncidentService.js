@@ -255,3 +255,196 @@ AGSIncidentService.prototype.getVoertuigInzet = function(voertuignummer) {
     }
     return d.promise();
 };
+
+/**
+ * Get all info for incident: incident properties, classificatie, karakteristiek,
+ * kladblok.
+ * @param {Integer} incidentId
+ * @param {boolean} archief Use archive tables instead of current incident tables
+ * @returns {Promise} A promise which will be resolved with an object with the
+ *  incident attributes as returned by AGS, with additional properties for
+ *  classificatie, karakteristiek and kladlok all in one when succesfull. Rejected
+ *  on failure (of any subrequest) or if incident was not found.
+ */
+AGSIncidentService.prototype.getAllIncidentInfo = function(incidentId, archief) {
+    var me = this;
+    var d = $.Deferred();
+
+    if(!incidentId) {
+        d.reject("Null incidentId");
+    } else {
+        // First get incident, if not found don't do requests for additional
+        // properties
+        me.getIncident(incidentId, archief)
+        .fail(function(e) {
+            d.reject(e);
+        })
+        .done(function(incident) {
+
+            if(!incident) {
+                d.resolve(null);
+            } else {
+                // Get additional properties
+                var dClassificatie;
+
+                if(archief) {
+                    // Classificaties directly in incident attributes
+                    var a = [];
+                    if(incident.BRW_MELDING_CL) {
+                        a.push(incident.BRW_MELDING_CL);
+                    }
+                    if(incident.BRW_MELDING_CL1) {
+                        a.push(incident.BRW_MELDING_CL1);
+                    }
+                    if(incident.BRW_MELDING_CL2) {
+                        a.push(incident.BRW_MELDING_CL2);
+                    }
+                    dClassificatie = a.length === 0 ? "" : a.join(", ");
+                } else {
+                    dClassificatie = me.getClassificaties(incident);
+                }
+
+                //var dKarakteristiek = me.getKarakteristiek(incidentId, archief);
+                //var dKladblok = me.getKladblok(incidentId, archief);
+
+                $.when(dClassificatie/*, dKarakteristiek, dKladblok*/)
+                .fail(function(classificatie, karakteristiek, kladblok) {
+                    d.reject("Kan geen extra incident info ophalen, classificaties: " +
+                        classificatie + ", karakteristiek: " + karakteristiek +
+                        ", kladblok: " + kladblok);
+                })
+                .done(function(classificatie, karakteristiek, kladblok) {
+
+                    // Set additional properties in incident
+
+                    incident.classificatie = classificatie;
+
+                    d.resolve(incident);
+                });
+            }
+        });
+    }
+    return d.promise();
+};
+
+AGSIncidentService.prototype.getIncident = function(incidentId, archief) {
+    var me = this;
+    var d = $.Deferred();
+
+    $.ajax(me.tableUrls[archief ? "GMSARC_INCIDENT" : "GMS_INCIDENT"] + "/query", {
+        dataType: "json",
+        data: {
+            f: "pjson",
+            token: me.token,
+            where: "INCIDENT_ID = " + incidentId,
+            outFields: "*"
+        }
+    })
+    .always(function(data, textStatus, jqXHR) {
+        if(data.error) {
+            d.reject(me.getAGSError(data));
+        } else if(!data.features) {
+            d.reject(jqXHR.statusText);
+        } else {
+            if(data.features.length === 0) {
+                d.resolve(null);
+            } else {
+                d.resolve(data.features[0].attributes);
+            }
+        }
+    });
+
+    return d.promise();
+};
+
+/**
+ * Get classificaties for one or multiple incidenten. Pass a single object with
+ * an (optional) BRW_MELDING_CL_ID property or an array of them. For a single
+ * object resolves to null or a string with the classification. When an array
+ * is passed as argument, resolves to an object with the INCIDENT_ID properties
+ * of the objects in the array as properties and the classifications as property
+ * values (if the object in the array had a BRW_MELDING_CL_ID).
+ * @param {type} incidenten Array or object with BRW_MELDING_CL_ID and INCIDENT_ID properties
+ * @returns {Promise} A promise to be resolved as described above or rejected on
+ *   error.
+ */
+AGSIncidentService.prototype.getClassificaties = function(incidenten) {
+    var me = this;
+    var d = $.Deferred();
+
+    var meldingClIds = [];
+    if(incidenten instanceof Array) {
+        $.each(incidenten, function(i, incident) {
+            if(incident.BRW_MELDING_CL_ID) {
+                meldingClIds.push(incident.BRW_MELDING_CL_ID);
+            }
+        });
+    } else {
+        // Get classificaties voor single incident
+        if(incidenten.BRW_MELDING_CL_ID) {
+            meldingClIds = [incidenten.BRW_MELDING_CL_ID];
+        }
+    }
+
+    if(meldingClIds.length === 0) {
+        if(incidenten instanceof Array) {
+            d.resolve({});
+        } else {
+            d.resolve(null);
+        }
+    } else {
+        $.ajax(me.tableUrls.GMS_MLD_CLASS_NIVO_VIEW + "/query", {
+            dataType: "json",
+            data: {
+                f: "pjson",
+                token: me.token,
+                where: "MELDING_CL_ID IN (" + meldingClIds.join(",") + ")",
+                outFields: "*"
+            }
+        })
+        .always(function(data, textStatus, jqXHR) {
+            if(data.error) {
+                d.reject(me.getAGSError(data));
+            } else if(!data.features) {
+                d.reject(jqXHR.statusText);
+            } else {
+                if(data.features.length === 0) {
+                    if(incidenten instanceof Array) {
+                        d.resolve({});
+                    } else {
+                        d.resolve(null);
+                    }
+                } else {
+                    var classificaties = {};
+                    $.each(data.features, function(i, cl) {
+                        var c = cl.attributes;
+                        var vals = [];
+                        if(c.NIVO1) {
+                            vals.push(c.NIVO1);
+                        }
+                        if(c.NIVO2) {
+                            vals.push(c.NIVO2);
+                        }
+                        if(c.NIVO3) {
+                            vals.push(c.NIVO3);
+                        }
+                        classificaties[c.MELDING_CL_ID] = vals.join(", ");
+                    });
+
+                    if(incidenten instanceof Array) {
+                        var classificatiesByIncidentId = {};
+                        $.each(incidenten, function(i, incident) {
+                            if(incident.BRW_MELDING_CL_ID && classificaties[incident.BRW_MELDING_CL_ID]) {
+                                classificatiesByIncidentId[incident.INCIDENT_ID] = classificaties[incident.BRW_MELDING_CL_ID];
+                            }
+                        });
+                        d.resolve(classificatiesByIncidentId);
+                    } else {
+                        d.resolve(classificaties[incidenten.BRW_MELDING_CL_ID]);
+                    }
+                }
+            }
+        });
+    }
+    return d.promise();
+};

@@ -31,9 +31,9 @@ dbkjs.modules.incidents = {
         this.service = new AGSIncidentService(this.options.ags.incidentsUrl);
 
         if(this.options.voertuigMode) {
-            controller = new VoertuigInzetController(this);
+            this.controller = new VoertuigInzetController(this);
         } else {
-            //controller = new IncidentMonitorController(this);
+            //this.controller = new IncidentMonitorController(this);
         }
 
         this.service.initialize(this.options.ags.tokenUrl, this.options.ags.user, this.options.ags.password);
