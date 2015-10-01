@@ -34,6 +34,7 @@ function VoertuigInzetController(incidents) {
 
     $(this.service).on('initialized', function() {
         me.enableVoertuignummerTypeahead();
+        me.setVoertuignummer(me.voertuignummer, true);
     });
 }
 
@@ -69,14 +70,6 @@ VoertuigInzetController.prototype.addConfigControls = function() {
 };
 
 /**
- * Change voertuignummer, persist in browser local storage.
- */
-VoertuigInzetController.prototype.setVoertuignummer = function(voertuignummer) {
-    this.voertuignummer = voertuignummer;
-    window.localStorage.setItem("voertuignummer", voertuignummer);
-};
-
-/**
  * Get and enable typeahead data for voertuignummer config control. Service
  * must be initialized.
  */
@@ -98,4 +91,70 @@ VoertuigInzetController.prototype.enableVoertuignummerTypeahead = function() {
             }
         });
     });
+};
+
+/**
+ * Change voertuignummer, persist in browser local storage. Start getting inzet
+ * info if not null (service must be initialized). Will cancel previous timeout
+ * for getting inzet data, immediately get info for updated voertuignummer.
+ * 
+ * @param {boolean} noDuplicateCheck get info even when argument is the same as
+ *   instance variable this.voertuignummer, use when starting up
+ */
+VoertuigInzetController.prototype.setVoertuignummer = function(voertuignummer, noDuplicateCheck) {
+    var me = this;
+    if(me.voertuignummer === voertuignummer && !noDuplicateCheck) {
+        return;
+    }
+    me.voertuignummer = voertuignummer;
+    window.localStorage.setItem("voertuignummer", voertuignummer);
+
+    me.cancelGetInzetInfo();
+    me.getInzetInfo();
+};
+
+VoertuigInzetController.prototype.cancelGetInzetInfo = function() {
+    var me = this;
+    if(me.getInzetTimeout) {
+        window.clearTimeout(me.getInzetTimeout);
+        me.getInzetTimeout = null;
+    }
+};
+
+VoertuigInzetController.prototype.getInzetInfo = function() {
+    var me = this;
+
+    if(!me.voertuignummer) {
+        return;
+    }
+
+    var responseVoertuignummer = me.voertuignummer;
+    me.service.getVoertuigInzet(responseVoertuignummer)
+    .always(function() {
+        me.getInzetTimeout = window.setTimeout(function() {
+            me.getInzetInfo();
+        }, 30000);
+    })
+    .fail(function(e) {
+        dbkjs.gui.showError("Kan meldkamerinfo niet ophalen: " + e);
+    })
+    .done(function(incidentId) {
+        if(responseVoertuignummer !== me.voertuignummer) {
+            // Voertuignummer was changed since request was fired off, ignore!
+            return;
+        }
+        if(incidentId) {
+            me.inzetIncident(incidentId);
+        } else {
+            me.geenInzet();
+        }
+    });
+};
+
+VoertuigInzetController.prototype.geenInzet = function() {
+    console.log("geen inzet");
+};
+
+VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
+    console.log("inzet, incident id " + incidentId);
 };
