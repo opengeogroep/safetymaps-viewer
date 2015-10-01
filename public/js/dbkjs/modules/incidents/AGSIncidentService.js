@@ -174,3 +174,39 @@ AGSIncidentService.prototype.getIncidentTitle = function(incident) {
             + this.encode(incident.PLAATS_NAAM));
 };
 
+/**
+ * Get all voertuignummers from inzet archive as typeahead datums, value is
+ * ROEPNAAM_EENHEID, tokens also include CODE_VOERTUIGSOORT and KAZ_NAAM.
+ * @returns {Promise} A promise which on success will resolve with the datums
+ *   array as argument.
+ */
+AGSIncidentService.prototype.getVoertuignummerTypeahead = function() {
+    var me = this;
+    var d = $.Deferred();
+    $.ajax(me.tableUrls.GMSARC_INZET_EENHEID + "/query", {
+        dataType: "json",
+        data: {
+            f: "pjson",
+            token: me.token,
+            where: "T_IND_DISC_EENHEID = 'B'",
+            orderByFields: "CODE_VOERTUIGSOORT,ROEPNAAM_EENHEID,KAZ_NAAM",
+            outFields: "CODE_VOERTUIGSOORT,ROEPNAAM_EENHEID,KAZ_NAAM",
+            returnDistinctValues: true
+        }
+    })
+    .always(function(data, textStatus, jqXHR) {
+        if(data.error) {
+            d.reject(me.getAGSError(data));
+        } else if(!data.features) {
+            d.reject(jqXHR.statusText);
+        } else {
+            var datums = [];
+            $.each(data.features, function(i, feature) {
+                var a = feature.attributes;
+                datums.push( { value: a.ROEPNAAM_EENHEID, tokens: [a.CODE_VOERTUIGSOORT, a.ROEPNAAM_EENHEID, a.KAZ_NAAM] });
+            });
+            d.resolve(datums);
+        }
+    });
+    return d.promise();
+};
