@@ -130,8 +130,9 @@ AGSIncidentService.prototype.getToken = function(tokenUrl, user, pass) {
 };
 
 /**
- * Get MapService info to map table names to layer URLs.
- * @returns {unresolved}
+ * Get AGS MapService info to map table names to URLs.
+ * @returns {Promise} A promise which will be resolved when this.tableUrls is
+ *   initialized or be rejected on error.
  */
 AGSIncidentService.prototype.loadServiceInfo = function() {
     var me = this;
@@ -163,7 +164,7 @@ AGSIncidentService.prototype.loadServiceInfo = function() {
 
 /**
  * Static utility function: get display string for incident object
- * @param {Object} incident
+ * @param {Object} incident as received from AGS
  * @returns {String}
  */
 AGSIncidentService.prototype.getIncidentTitle = function(incident) {
@@ -208,5 +209,45 @@ AGSIncidentService.prototype.getVoertuignummerTypeahead = function() {
             d.resolve(datums);
         }
     });
+    return d.promise();
+};
+
+/**
+ * Get incident ID where the voertuignummer is currently ingezet.
+ * @param {String} voertuignummer for which incident inzet is to be checked
+ * @returns {Promise} A promise which will resolve with null when the voertuig
+ *   is not ingezet or the incident ID for the incident when it is. The promise
+ *   will be rejected on error.
+ */
+AGSIncidentService.prototype.getVoertuigInzet = function(voertuignummer) {
+    var me = this;
+    var d = $.Deferred();
+
+    if(!voertuignummer) {
+        d.reject("Null voertuignummer");
+    } else {
+        $.ajax(me.tableUrls.GMS_INZET_EENHEID + "/query", {
+            dataType: "json",
+            data: {
+                f: "pjson",
+                token: me.token,
+                where: "T_IND_DISC_EENHEID = 'B' AND ROEPNAAM_EENHEID = '" + voertuignummer + "' AND DTG_EIND_ACTIE IS NULL",
+                outFields: "INCIDENT_ID"
+            }
+        })
+        .always(function(data, textStatus, jqXHR) {
+            if(data.error) {
+                d.reject(me.getAGSError(data));
+            } else if(!data.features) {
+                d.reject(jqXHR.statusText);
+            } else {
+                if(data.features.length === 0) {
+                    d.resolve(null);
+                } else {
+                    d.resolve(data.features[0].attributes.INCIDENT_ID);
+                }
+            }
+        });
+    }
     return d.promise();
 };
