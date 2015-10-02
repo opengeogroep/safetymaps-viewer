@@ -95,6 +95,49 @@ AGSIncidentService.prototype.getAGSMoment = function(epoch) {
 };
 
 /**
+ * Static utility function: resolve a deffered with the results from a AGS table
+ * query returning the feature attributes as objects in an array or reject the
+ * deferred on error.
+ * @param {jQuery.Deferred} d The deferred to resolve or reject
+ * @param {object} data from ajax response
+ * @param {object} jqXHR from ajax response
+ * @param {function} processFunction optional: function to process result with.
+ *   If specified will be called for each feature with attributes as argument.
+ *   The last returned value from this function will be used to resolve the
+ *   promise with.
+ * @param {function} noResultFunction optional function to provide the argument
+ *   to resolve with if no features found, if not specified resolves to an
+ *   empty array.
+ * @param {function} postProcessFunction optional function to call to provide
+ *   the resolve argument after processing all features. Use if post processing
+ *   is needed with data from all features and the last result of the
+ *   processFunction cannot be used to resolve the promise with.
+ * @returns {undefined}
+ */
+AGSIncidentService.prototype.resolveAGSFeatures = function(d, data, jqXHR, processFunction, noResultFunction, postProcessFunction) {
+    var me = this;
+    if(data.error) {
+        d.reject(me.getAGSError(data));
+    } else if(!data.features) {
+        d.reject(jqXHR.statusText);
+    } else {
+        var result = noResultFunction ? noResultFunction() : [];
+        $.each(data.features, function(i, feature) {
+            if(processFunction) {
+                result = processFunction(feature.attributes);
+            } else {
+                result.push(feature.attributes);
+            }
+        });
+        if(postProcessFunction) {
+            d.resolve(postProcessFunction());
+        } else {
+            d.resolve(result);
+        }
+    }
+};
+
+/**
  * Get the AGS authentication token, and set timeout to automatically refresh it
  * once it will expire.
  * @param {string} tokenUrl
@@ -200,18 +243,11 @@ AGSIncidentService.prototype.getVoertuignummerTypeahead = function() {
         }
     })
     .always(function(data, textStatus, jqXHR) {
-        if(data.error) {
-            d.reject(me.getAGSError(data));
-        } else if(!data.features) {
-            d.reject(jqXHR.statusText);
-        } else {
-            var datums = [];
-            $.each(data.features, function(i, feature) {
-                var a = feature.attributes;
-                datums.push( { value: a.ROEPNAAM_EENHEID, tokens: [a.CODE_VOERTUIGSOORT, a.ROEPNAAM_EENHEID, a.KAZ_NAAM] });
-            });
-            d.resolve(datums);
-        }
+        var datums = [];
+        me.resolveAGSFeatures(d, data, jqXHR, function(f) {
+            datums.push( { value: f.ROEPNAAM_EENHEID, tokens: [f.CODE_VOERTUIGSOORT, f.ROEPNAAM_EENHEID, f.KAZ_NAAM] });
+            return datums;
+        });
     });
     return d.promise();
 };
@@ -240,17 +276,12 @@ AGSIncidentService.prototype.getVoertuigInzet = function(voertuignummer) {
             }
         })
         .always(function(data, textStatus, jqXHR) {
-            if(data.error) {
-                d.reject(me.getAGSError(data));
-            } else if(!data.features) {
-                d.reject(jqXHR.statusText);
-            } else {
-                if(data.features.length === 0) {
-                    d.resolve(null);
-                } else {
-                    d.resolve(data.features[0].attributes.INCIDENT_ID);
-                }
-            }
+            me.resolveAGSFeatures(d, data, jqXHR, function(f) {
+                return f.INCIDENT_ID;
+            },
+            function() {
+                return null;
+            });
         });
     }
     return d.promise();
@@ -305,9 +336,9 @@ AGSIncidentService.prototype.getAllIncidentInfo = function(incidentId, archief) 
                 }
 
                 var dKarakteristiek = me.getKarakteristiek(incidentId, archief);
-                //var dKladblok = me.getKladblok(incidentId, archief);
+                var dKladblok = me.getKladblok(incidentId, archief);
 
-                $.when(dClassificatie, dKarakteristiek/*, dKladblok*/)
+                $.when(dClassificatie, dKarakteristiek, dKladblok)
                 .fail(function(classificatie, karakteristiek, kladblok) {
                     d.reject("Kan geen extra incident info ophalen, classificaties: " +
                         classificatie + ", karakteristiek: " + karakteristiek +
@@ -316,9 +347,9 @@ AGSIncidentService.prototype.getAllIncidentInfo = function(incidentId, archief) 
                 .done(function(classificatie, karakteristiek, kladblok) {
 
                     // Set additional properties in incident
-
                     incident.classificatie = classificatie;
                     incident.karakteristiek = karakteristiek;
+                    incident.kladblok = kladblok;
 
                     d.resolve(incident);
                 });
@@ -353,17 +384,12 @@ AGSIncidentService.prototype.getIncident = function(incidentId, archief) {
         }
     })
     .always(function(data, textStatus, jqXHR) {
-        if(data.error) {
-            d.reject(me.getAGSError(data));
-        } else if(!data.features) {
-            d.reject(jqXHR.statusText);
-        } else {
-            if(data.features.length === 0) {
-                d.resolve(null);
-            } else {
-                d.resolve(data.features[0].attributes);
-            }
-        }
+        me.resolveAGSFeatures(d, data, jqXHR, function(f) {
+            return f;
+        },
+        function() {
+            return null;
+        });
     });
 
     return d.promise();
@@ -417,47 +443,43 @@ AGSIncidentService.prototype.getClassificaties = function(incidenten) {
         }
     })
     .always(function(data, textStatus, jqXHR) {
-        if(data.error) {
-            d.reject(me.getAGSError(data));
-        } else if(!data.features) {
-            d.reject(jqXHR.statusText);
-        } else {
-            if(data.features.length === 0) {
-                if(incidenten instanceof Array) {
-                    d.resolve({});
-                } else {
-                    d.resolve(null);
-                }
-            } else {
-                var classificaties = {};
-                $.each(data.features, function(i, cl) {
-                    var c = cl.attributes;
-                    var vals = [];
-                    if(c.NIVO1) {
-                        vals.push(c.NIVO1);
-                    }
-                    if(c.NIVO2) {
-                        vals.push(c.NIVO2);
-                    }
-                    if(c.NIVO3) {
-                        vals.push(c.NIVO3);
-                    }
-                    classificaties[c.MELDING_CL_ID] = vals.join(", ");
-                });
-
-                if(incidenten instanceof Array) {
-                    var classificatiesByIncidentId = {};
-                    $.each(incidenten, function(i, incident) {
-                        if(incident.BRW_MELDING_CL_ID && classificaties[incident.BRW_MELDING_CL_ID]) {
-                            classificatiesByIncidentId[incident.INCIDENT_ID] = classificaties[incident.BRW_MELDING_CL_ID];
-                        }
-                    });
-                    d.resolve(classificatiesByIncidentId);
-                } else {
-                    d.resolve(classificaties[incidenten.BRW_MELDING_CL_ID]);
-                }
+        var classificaties = {};
+        me.resolveAGSFeatures(d, data, jqXHR, function(c) {
+            // processFunction
+            var vals = [];
+            if(c.NIVO1) {
+                vals.push(c.NIVO1);
             }
-        }
+            if(c.NIVO2) {
+                vals.push(c.NIVO2);
+            }
+            if(c.NIVO3) {
+                vals.push(c.NIVO3);
+            }
+            classificaties[c.MELDING_CL_ID] = vals.join(", ");
+        },
+        function() {
+            // noResultFunction
+            if(incidenten instanceof Array) {
+                return {};
+            } else {
+                return null;
+            }
+        },
+        function() {
+            // postProcessFunction
+            if(incidenten instanceof Array) {
+                var classificatiesByIncidentId = {};
+                $.each(incidenten, function(i, incident) {
+                    if(incident.BRW_MELDING_CL_ID && classificaties[incident.BRW_MELDING_CL_ID]) {
+                        classificatiesByIncidentId[incident.INCIDENT_ID] = classificaties[incident.BRW_MELDING_CL_ID];
+                    }
+                });
+                return classificatiesByIncidentId;
+            } else {
+                return classificaties[incidenten.BRW_MELDING_CL_ID];
+            }
+        });
     });
     return d.promise();
 };
@@ -486,17 +508,31 @@ AGSIncidentService.prototype.getKarakteristiek = function(incidentId) {
         }
     })
     .always(function(data, textStatus, jqXHR) {
-        if(data.error) {
-            d.reject(me.getAGSError(data));
-        } else if(!data.features) {
-            d.reject(jqXHR.statusText);
-        } else {
-            var k = [];
-            $.each(data.features, function(i, feature) {
-                k.push(feature.attributes);
-            });
-            d.resolve(k);
+        me.resolveAGSFeatures(d, data, jqXHR);
+    });
+    return d.promise();
+};
+
+AGSIncidentService.prototype.getKladblok = function(incidentId, archief) {
+    var me = this;
+    var d = $.Deferred();
+
+    if(!incidentId) {
+        return d.resolve([]);
+    }
+
+    $.ajax(me.tableUrls[archief ? "GMSARC_KLADBLOK" : "GMS_KLADBLOK"] + "/query", {
+        dataType: "json",
+        data: {
+            f: "pjson",
+            token: me.token,
+            where: "INCIDENT_ID = " + incidentId + " AND TYPE_KLADBLOK_REGEL = 'KB' AND T_IND_DISC_KLADBLOK_REGEL LIKE '_B_' AND WIJZIGING_ID IS NULL",
+            orderByFields: "DTG_KLADBLOK_REGEL,KLADBLOK_REGEL_ID,VOLG_NR_KLADBLOK_REGEL",
+            outFields: "*"
         }
+    })
+    .always(function(data, textStatus, jqXHR) {
+        me.resolveAGSFeatures(d, data, jqXHR);
     });
     return d.promise();
 };
