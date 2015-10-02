@@ -172,14 +172,18 @@ SplitScreenWindow.prototype.hide = function() {
 };
 
 SplitScreenWindow.prototype.show = function() {
-    if(this.isSplitScreen && !this.isVisible()) {
+    if(this.isVisible()) {
+        return;
+    }
+    if(this.isSplitScreen) {
 
-        $("#mapc1map1").css({width: "55%"});
-        dbkjs.map.updateSize();
         this.popup.css({width: "45%"});
 
-        // XXX move to dbkjs event 'split_screen_show';
         function afterScreenSplit() {
+            $("#mapc1map1").css({width: "55%"});
+            dbkjs.map.updateSize();
+
+            // XXX move to dbkjs event 'split_screen_show';
             $(".main-button-group").css({right: "45%"});
             $("#vectorclickpanel").css({"width": "55%"});
         };
@@ -189,7 +193,7 @@ SplitScreenWindow.prototype.show = function() {
         } else {
             afterScreenSplit();
         }
-    } else {
+    } else if(!this.isSplitScreen) {
         this.popup.css({width: "100%"});
     }
     ModalWindow.prototype.show.call(this);
