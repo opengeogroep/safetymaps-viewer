@@ -27,13 +27,25 @@
 function VoertuigInzetController(incidents) {
     var me = this;
     me.service = incidents.service;
+
+    me.button = new AlertableButton("btn_incident", "Incident", "bell-o");
+    $(me.button).on('click', function() {
+        me.incidentDetailsWindow.show();
+        me.zoomToIncident();
+    });
+
     me.incidentDetailsWindow = new IncidentDetailsWindow();
     me.incidentDetailsWindow.createElements("Incident");
+    $(me.incidentDetailsWindow).on('show', function() {
+        me.button.setAlerted(false);
+    });
+
     me.markerLayer = new IncidentMarkerLayer();
     $(me.markerLayer).on('click', function(incident, marker) {
         me.markerClick(incident, marker);
     });
     me.marker = null;
+
     me.voertuignummer = window.localStorage.getItem("voertuignummer");
 
     me.addConfigControls();
@@ -142,7 +154,9 @@ VoertuigInzetController.prototype.getInzetInfo = function() {
         }, 30000);
     })
     .fail(function(e) {
-        dbkjs.gui.showError("Kan meldkamerinfo niet ophalen: " + e);
+        var msg = "Kan meldkamerinfo niet ophalen: " + e;
+        dbkjs.gui.showError(msg);
+        me.incidentDetailsWindow.showError(msg);
     })
     .done(function(incidentId) {
         if(responseVoertuignummer !== me.voertuignummer) {
@@ -152,6 +166,10 @@ VoertuigInzetController.prototype.getInzetInfo = function() {
         if(incidentId) {
             me.inzetIncident(incidentId);
         } else {
+            if(me.incidentId) {
+                $("#zoom_extent").click();
+                dbkjs.util.alert('Inzet beeindigd');
+            }
             me.geenInzet();
         }
     });
@@ -159,28 +177,35 @@ VoertuigInzetController.prototype.getInzetInfo = function() {
 
 VoertuigInzetController.prototype.geenInzet = function() {
     console.log("geen inzet");
+    this.disableIncidentUpdates();
     this.incidentId = null;
     this.incident = null;
     this.incidentDetailsWindow.data(null);
     this.incidentDetailsWindow.hide();
     this.markerLayer.clear();
+
+    this.button.setAlerted(false);
+    this.button.setIcon("bell-o");
 };
 
 VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
     var me = this;
     if(incidentId !== me.incidentId) {
         console.log("new inzet, incident id " + incidentId);
+        me.geenInzet();
 
         me.incidentId = incidentId;
         var responseIncidentId = incidentId;
 
         me.service.getAllIncidentInfo(responseIncidentId)
         .fail(function(e) {
-            dbkjs.gui.showError("Kan incidentinfo niet ophalen: " + e);
+            var msg = "Kan incidentinfo niet ophalen: " + e;
+            dbkjs.gui.showError(msg);
+            me.incidentDetailsWindow.showError(msg);
         })
         .done(function(incident) {
             if(responseIncidentId !== me.incidentId) {
-                // IncidentId was changed since request was fired off, ignore!
+                // Incident was cancelled or changed since request was fired off, ignore
                 return;
             }
             console.log("incident info", incident);
@@ -188,14 +213,87 @@ VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
             me.incidentDetailsWindow.data(incident);
             me.markerLayer.addIncident(incident, true);
             me.markerLayer.setZIndexFix();
+
+            me.zoomToIncident();
+            me.enableIncidentUpdates();
+
+            me.button.setAlerted(true);
+            me.button.setIcon("bell");
         });
     } else {
         console.log("same incident");
     }
 };
 
+VoertuigInzetController.prototype.zoomToIncident = function() {
+    if(this.incident && this.incident.T_X_COORD_LOC && this.incident.T_Y_COORD_LOC) {
+        dbkjs.map.setCenter(new OpenLayers.LonLat(this.incident.T_X_COORD_LOC, this.incident.T_Y_COORD_LOC), dbkjs.options.zoom);
+    }
+}
+
 VoertuigInzetController.prototype.markerClick = function(incident, marker) {
-    var me = this;
     this.incidentDetailsWindow.show();
-    dbkjs.map.setCenter(new OpenLayers.LonLat(me.incident.T_X_COORD_LOC, me.incident.T_Y_COORD_LOC), dbkjs.options.zoom);
+    this.zoomToIncident();
+};
+
+VoertuigInzetController.prototype.enableIncidentUpdates = function() {
+    var me = this;
+
+    this.disableIncidentUpdates();
+
+    if(!this.incident) {
+        return;
+    }
+
+    this.updateIncidentTimeout = window.setTimeout(function() {
+        me.updateIncident(me.incidentId);
+    }, 15000);
+};
+
+VoertuigInzetController.prototype.disableIncidentUpdates = function() {
+    if(this.updateIncidentTimeout) {
+        window.clearTimeout(this.updateIncidentTimeout);
+        this.updateIncidentTimeout = null;
+    }
+};
+
+VoertuigInzetController.prototype.updateIncident = function(incidentId) {
+    var me = this;
+    if(this.incidentId !== incidentId) {
+        // Incident cancelled or changed since timeout was set, ignore
+        return;
+
+        me.service.getAllIncidentInfo(incidentId)
+        .fail(function(e) {
+            var msg = "Kan incidentinfo niet updaten: " + e;
+            dbkjs.gui.showError(msg);
+            // Leave incidentDetailsWindow contents with old info
+        })
+        .done(function(incident) {
+            if(me.incidentId !== incidentId) {
+                // Incident cancelled or changed since request was fired off, ignore
+                return;
+            }
+
+            // Check if updated, enable alert state if true
+            var oldIncident = JSON.toString(me.incident);
+            if(oldIncident === JSON.toString(incident)) {
+                console.log("incident the same");
+            } else {
+                console.log("incident updated");
+
+                if(!me.incidentDetailsWindow.isVisible()) {
+                    me.button.setAlerted(true);
+                }
+
+                me.incident = incident;
+                me.incidentDetailsWindow.data(incident, true);
+
+                // Possibly update marker position
+                me.markerLayer.clear();
+                me.markerLayer.addIncident(incident, true);
+                me.markerLayer.setZIndexFix();
+            }
+        });
+    }
 };
