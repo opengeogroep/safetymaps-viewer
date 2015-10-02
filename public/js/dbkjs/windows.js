@@ -26,6 +26,7 @@
  * Events:
  * show
  * hide
+ * elements_created after createElements() completed
  * dbkjs modal_popup_show
  * @param {string} name
  * @returns {ModalDialog}
@@ -75,6 +76,8 @@ ModalWindow.prototype.createElements = function(title) {
             me.hide();
         }
     });
+
+    $(this).triggerHandler('elements_created');
 };
 
 ModalWindow.prototype.getName = function() {
