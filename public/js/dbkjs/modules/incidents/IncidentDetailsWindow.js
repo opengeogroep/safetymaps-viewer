@@ -25,23 +25,36 @@
  */
 function IncidentDetailsWindow() {
     SplitScreenWindow.call(this, "incidentDetails", "Incident");
+
+    $(this).on('elements_created', function() {
+        var v = ModalWindow.prototype.getView.call(this);
+        v.html("Bezig...");
+    });
 }
 
 IncidentDetailsWindow.prototype = Object.create(SplitScreenWindow.prototype);
 IncidentDetailsWindow.prototype.constructor = IncidentDetailsWindow;
 
+IncidentDetailsWindow.prototype.showError = function(e) {
+    this.getView().text(e);
+};
+
 /**
  * Render an incident in the window view.
  * @param {object} incident Complete incident from AGSIncidentService.getAllIncidentInfo()
+ * @param {boolean} restoreScrollTop
  * @returns {undefined}
  */
-IncidentDetailsWindow.prototype.data = function(incident) {
-    var e = ModalWindow.prototype.getView.call(this);
+IncidentDetailsWindow.prototype.data = function(incident, restoreScrollTop) {
+    var v = this.getView();
 
-    e.html("");
+    v.html("");
     if(!incident) {
+        v.text("Er is momenteel geen incident waavoor dit voertuig is ingezet.");
         return;
     }
+
+    var scrollTop = v.scrollTop();
 
     var html = '<div style:"width: 100%" class="table-responsive">';
     html += '<table class="table table-hover">';
@@ -124,5 +137,9 @@ IncidentDetailsWindow.prototype.data = function(incident) {
 
     html += '</table>';
 
-    this.getView().html(html);
+    v.html(html);
+
+    if(restoreScrollTop) {
+        v.scrollTop(scrollTop);
+    }
 };
