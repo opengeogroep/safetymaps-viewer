@@ -25,7 +25,7 @@
  * Events:
  * initialized: when initialize() resolves
  *
- * @param {type} url The URL to the ArcGIS REST MapService
+ * @param {string} url The URL to the ArcGIS REST MapService
  * @returns {AGSIncidentService}
  */
 function AGSIncidentService(url) {
@@ -39,9 +39,9 @@ function AGSIncidentService(url) {
 /**
  * Get authentication token (if tokenUrl, user and pass supplied) and load service
  * info.
- * @param {String} tokenUrl optional
- * @param {String} user optional
- * @param {String} pass optional
+ * @param {string} tokenUrl optional
+ * @param {string} user optional
+ * @param {string} pass optional
  * @returns {Promise} A promise which will be resolved when the service info
  *  is succesfully loaded, or rejected on error.
  */
@@ -77,7 +77,7 @@ AGSIncidentService.prototype.initialize = function(tokenUrl, user, pass) {
  * Static utility function: return a string with the information from an AGS
  * response with error property.
  * @param {Object} data Response from AGS service with error property
- * @returns {String} Description of the error
+ * @returns {string} Description of the error
  */
 AGSIncidentService.prototype.getAGSError = function(data) {
     return "Error code " + data.error.code + ": " + data.error.message;
@@ -85,7 +85,7 @@ AGSIncidentService.prototype.getAGSError = function(data) {
 
 /**
  * Static utility function: return a moment from epoch value returned by AGS.
- * @param {type} epoch as returned by AGS. Requires: moment.js
+ * @param {number} epoch as returned by AGS. Requires: moment.js
  * @returns {moment} the moment at the time defined by the epoch
  */
 AGSIncidentService.prototype.getAGSMoment = function(epoch) {
@@ -97,9 +97,9 @@ AGSIncidentService.prototype.getAGSMoment = function(epoch) {
 /**
  * Get the AGS authentication token, and set timeout to automatically refresh it
  * once it will expire.
- * @param {String} tokenUrl
- * @param {String} user
- * @param {String} pass
+ * @param {string} tokenUrl
+ * @param {string} user
+ * @param {string} pass
  * @returns {Promise} A promise which will be rejected on error or resolved
  *   when the token is succesfully retrieved (this.token updated with the token).
  */
@@ -169,14 +169,14 @@ AGSIncidentService.prototype.loadServiceInfo = function() {
 /**
  * Static utility function: get display string for incident object
  * @param {Object} incident as received from AGS
- * @returns {String}
+ * @returns {string}
  */
 AGSIncidentService.prototype.getIncidentTitle = function(incident) {
     return this.getAGSMoment(incident.DTG_START_INCIDENT).format("D-M-YYYY HH:mm:ss") + " "
-            + this.encode((incident.PRIORITEIT_INCIDENT_BRANDWEER ? " PRIO "
+            + dbkjs.util.htmlEncode((incident.PRIORITEIT_INCIDENT_BRANDWEER ? " PRIO "
             + incident.PRIORITEIT_INCIDENT_BRANDWEER : "") + " "
             + incident.T_GUI_LOCATIE + ", "
-            + this.encode(incident.PLAATS_NAAM));
+            + dbkjs.util.htmlEncode(incident.PLAATS_NAAM));
 };
 
 /**
@@ -218,7 +218,7 @@ AGSIncidentService.prototype.getVoertuignummerTypeahead = function() {
 
 /**
  * Get incident ID where the voertuignummer is currently ingezet.
- * @param {String} voertuignummer for which incident inzet is to be checked
+ * @param {string} voertuignummer for which incident inzet is to be checked
  * @returns {Promise} A promise which will resolve with null when the voertuig
  *   is not ingezet or the incident ID for the incident when it is. The promise
  *   will be rejected on error.
@@ -259,11 +259,11 @@ AGSIncidentService.prototype.getVoertuigInzet = function(voertuignummer) {
 /**
  * Get all info for incident: incident properties, classificatie, karakteristiek,
  * kladblok.
- * @param {Integer} incidentId
+ * @param {number} incidentId
  * @param {boolean} archief Use archive tables instead of current incident tables
  * @returns {Promise} A promise which will be resolved with an object with the
  *  incident attributes as returned by AGS, with additional properties for
- *  classificatie, karakteristiek and kladlok all in one when succesfull. Rejected
+ *  classificatie, karakteristiek and kladlok all in one when succesful. Rejected
  *  on failure (of any subrequest) or if incident was not found.
  */
 AGSIncidentService.prototype.getAllIncidentInfo = function(incidentId, archief) {
@@ -304,10 +304,10 @@ AGSIncidentService.prototype.getAllIncidentInfo = function(incidentId, archief) 
                     dClassificatie = me.getClassificaties(incident);
                 }
 
-                //var dKarakteristiek = me.getKarakteristiek(incidentId, archief);
+                var dKarakteristiek = me.getKarakteristiek(incidentId, archief);
                 //var dKladblok = me.getKladblok(incidentId, archief);
 
-                $.when(dClassificatie/*, dKarakteristiek, dKladblok*/)
+                $.when(dClassificatie, dKarakteristiek/*, dKladblok*/)
                 .fail(function(classificatie, karakteristiek, kladblok) {
                     d.reject("Kan geen extra incident info ophalen, classificaties: " +
                         classificatie + ", karakteristiek: " + karakteristiek +
@@ -318,6 +318,7 @@ AGSIncidentService.prototype.getAllIncidentInfo = function(incidentId, archief) 
                     // Set additional properties in incident
 
                     incident.classificatie = classificatie;
+                    incident.karakteristiek = karakteristiek;
 
                     d.resolve(incident);
                 });
@@ -327,9 +328,20 @@ AGSIncidentService.prototype.getAllIncidentInfo = function(incidentId, archief) 
     return d.promise();
 };
 
+/**
+ * Get incident properties for incident id
+ * @param {number} incidentId
+ * @param {boolean} archief set to true to get archived incident
+ * @returns {Promise} Resolved with incident attributes on success, null if
+ *   incident not found or rejected on error.
+ */
 AGSIncidentService.prototype.getIncident = function(incidentId, archief) {
     var me = this;
     var d = $.Deferred();
+
+    if(!incidentId) {
+        return d.resolve(null);
+    }
 
     $.ajax(me.tableUrls[archief ? "GMSARC_INCIDENT" : "GMS_INCIDENT"] + "/query", {
         dataType: "json",
@@ -392,59 +404,99 @@ AGSIncidentService.prototype.getClassificaties = function(incidenten) {
         } else {
             d.resolve(null);
         }
-    } else {
-        $.ajax(me.tableUrls.GMS_MLD_CLASS_NIVO_VIEW + "/query", {
-            dataType: "json",
-            data: {
-                f: "pjson",
-                token: me.token,
-                where: "MELDING_CL_ID IN (" + meldingClIds.join(",") + ")",
-                outFields: "*"
-            }
-        })
-        .always(function(data, textStatus, jqXHR) {
-            if(data.error) {
-                d.reject(me.getAGSError(data));
-            } else if(!data.features) {
-                d.reject(jqXHR.statusText);
-            } else {
-                if(data.features.length === 0) {
-                    if(incidenten instanceof Array) {
-                        d.resolve({});
-                    } else {
-                        d.resolve(null);
-                    }
-                } else {
-                    var classificaties = {};
-                    $.each(data.features, function(i, cl) {
-                        var c = cl.attributes;
-                        var vals = [];
-                        if(c.NIVO1) {
-                            vals.push(c.NIVO1);
-                        }
-                        if(c.NIVO2) {
-                            vals.push(c.NIVO2);
-                        }
-                        if(c.NIVO3) {
-                            vals.push(c.NIVO3);
-                        }
-                        classificaties[c.MELDING_CL_ID] = vals.join(", ");
-                    });
+        return d;
+    }
 
-                    if(incidenten instanceof Array) {
-                        var classificatiesByIncidentId = {};
-                        $.each(incidenten, function(i, incident) {
-                            if(incident.BRW_MELDING_CL_ID && classificaties[incident.BRW_MELDING_CL_ID]) {
-                                classificatiesByIncidentId[incident.INCIDENT_ID] = classificaties[incident.BRW_MELDING_CL_ID];
-                            }
-                        });
-                        d.resolve(classificatiesByIncidentId);
-                    } else {
-                        d.resolve(classificaties[incidenten.BRW_MELDING_CL_ID]);
+    $.ajax(me.tableUrls.GMS_MLD_CLASS_NIVO_VIEW + "/query", {
+        dataType: "json",
+        data: {
+            f: "pjson",
+            token: me.token,
+            where: "MELDING_CL_ID IN (" + meldingClIds.join(",") + ")",
+            outFields: "*"
+        }
+    })
+    .always(function(data, textStatus, jqXHR) {
+        if(data.error) {
+            d.reject(me.getAGSError(data));
+        } else if(!data.features) {
+            d.reject(jqXHR.statusText);
+        } else {
+            if(data.features.length === 0) {
+                if(incidenten instanceof Array) {
+                    d.resolve({});
+                } else {
+                    d.resolve(null);
+                }
+            } else {
+                var classificaties = {};
+                $.each(data.features, function(i, cl) {
+                    var c = cl.attributes;
+                    var vals = [];
+                    if(c.NIVO1) {
+                        vals.push(c.NIVO1);
                     }
+                    if(c.NIVO2) {
+                        vals.push(c.NIVO2);
+                    }
+                    if(c.NIVO3) {
+                        vals.push(c.NIVO3);
+                    }
+                    classificaties[c.MELDING_CL_ID] = vals.join(", ");
+                });
+
+                if(incidenten instanceof Array) {
+                    var classificatiesByIncidentId = {};
+                    $.each(incidenten, function(i, incident) {
+                        if(incident.BRW_MELDING_CL_ID && classificaties[incident.BRW_MELDING_CL_ID]) {
+                            classificatiesByIncidentId[incident.INCIDENT_ID] = classificaties[incident.BRW_MELDING_CL_ID];
+                        }
+                    });
+                    d.resolve(classificatiesByIncidentId);
+                } else {
+                    d.resolve(classificaties[incidenten.BRW_MELDING_CL_ID]);
                 }
             }
-        });
+        }
+    });
+    return d.promise();
+};
+
+/**
+ * Gets karakteristieken for incident id
+ * @param {number} incidentId
+ * @returns {Promise} Resolved with array with karakteristieken when succesful
+ *   or rejected on error
+ */
+AGSIncidentService.prototype.getKarakteristiek = function(incidentId) {
+    var me = this;
+    var d = $.Deferred();
+
+    if(!incidentId) {
+        return d.resolve([]);
     }
+
+    $.ajax(me.tableUrls.GMSARC_KARAKTERISTIEK + "/query", {
+        dataType: "json",
+        data: {
+            f: "pjson",
+            token: me.token,
+            where: "INCIDENT_ID = " + incidentId,
+            outFields: "NAAM_KARAKTERISTIEK,ACTUELE_KAR_WAARDE"
+        }
+    })
+    .always(function(data, textStatus, jqXHR) {
+        if(data.error) {
+            d.reject(me.getAGSError(data));
+        } else if(!data.features) {
+            d.reject(jqXHR.statusText);
+        } else {
+            var k = [];
+            $.each(data.features, function(i, feature) {
+                k.push(feature.attributes);
+            });
+            d.resolve(k);
+        }
+    });
     return d.promise();
 };
