@@ -292,12 +292,13 @@ AGSIncidentService.prototype.getVoertuigInzet = function(voertuignummer) {
  * kladblok.
  * @param {number} incidentId
  * @param {boolean} archief Use archive tables instead of current incident tables
+ * @param {boolean} noInzetEenheden Do not get inzet eenheden
  * @returns {Promise} A promise which will be resolved with an object with the
  *  incident attributes as returned by AGS, with additional properties for
  *  classificatie, karakteristiek and kladlok all in one when succesful. Rejected
  *  on failure (of any subrequest) or if incident was not found.
  */
-AGSIncidentService.prototype.getAllIncidentInfo = function(incidentId, archief) {
+AGSIncidentService.prototype.getAllIncidentInfo = function(incidentId, archief, noInzetEenheden) {
     var me = this;
     var d = $.Deferred();
 
@@ -337,7 +338,7 @@ AGSIncidentService.prototype.getAllIncidentInfo = function(incidentId, archief) 
 
                 var dKarakteristiek = me.getKarakteristiek(incidentId, archief);
                 var dKladblok = me.getKladblok(incidentId, archief);
-                var dInzetEenheden = me.getInzetEenheden(incidentId, archief, false);
+                var dInzetEenheden = noInzetEenheden ? null : me.getInzetEenheden(incidentId, archief, false);
 
                 $.when(dClassificatie, dKarakteristiek, dKladblok, dInzetEenheden)
                 .fail(function(classificatie, karakteristiek, kladblok, inzetEenheden) {

@@ -45,7 +45,7 @@ IncidentDetailsWindow.prototype.showError = function(e) {
  * @param {boolean} restoreScrollTop
  * @returns {undefined}
  */
-IncidentDetailsWindow.prototype.data = function(incident, restoreScrollTop) {
+IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScrollTop) {
     var v = this.getView();
 
     v.html("");
@@ -102,26 +102,28 @@ IncidentDetailsWindow.prototype.data = function(incident, restoreScrollTop) {
     }
     html += '</td></tr>';
 
-    html += '<tr><td>Ingezette eenheden:</td><td id="eenheden">';
-    var eenhBrw = "", eenhPol = "", eenhAmbu = "";
-    $.each(incident.inzetEenheden, function(i, inzet) {
-        var eenheid = (inzet.CODE_VOERTUIGSOORT ? inzet.CODE_VOERTUIGSOORT : "") + " " + inzet.ROEPNAAM_EENHEID;
-        if(inzet.KAZ_NAAM) {
-            eenheid += " (" + inzet.KAZ_NAAM + ")";
-        }
-        var span = (inzet.DTG_EIND_ACTIE ? "<span class='einde'>" : "<span>") + dbkjs.util.htmlEncode(eenheid) + "</span><br/>";
-        if(inzet.T_IND_DISC_EENHEID === "B") {
-            eenhBrw += span;
-        } else if(inzet.T_IND_DISC_EENHEID === "P") {
-            eenhPol += span;
-        } else if(inzet.T_IND_DISC_EENHEID === "A") {
-            eenhAmbu += span;
-        }
-    });
-    html += '<div id="brw"><b>Brandweer</b><br/>' + eenhBrw + '</div>';
-    html += '<div id="pol"><b>Politie</b><br/>' + eenhPol + '</div>';
-    html += '<div id="ambu"><b>Ambu</b><br/>' + eenhAmbu + '</div>';
-    html += '</td></tr>';
+    if(showInzet) {
+        html += '<tr><td>Ingezette eenheden:</td><td id="eenheden">';
+        var eenhBrw = "", eenhPol = "", eenhAmbu = "";
+        $.each(incident.inzetEenheden, function(i, inzet) {
+            var eenheid = (inzet.CODE_VOERTUIGSOORT ? inzet.CODE_VOERTUIGSOORT : "") + " " + inzet.ROEPNAAM_EENHEID;
+            if(inzet.KAZ_NAAM) {
+                eenheid += " (" + inzet.KAZ_NAAM + ")";
+            }
+            var span = (inzet.DTG_EIND_ACTIE ? "<span class='einde'>" : "<span>") + dbkjs.util.htmlEncode(eenheid) + "</span><br/>";
+            if(inzet.T_IND_DISC_EENHEID === "B") {
+                eenhBrw += span;
+            } else if(inzet.T_IND_DISC_EENHEID === "P") {
+                eenhPol += span;
+            } else if(inzet.T_IND_DISC_EENHEID === "A") {
+                eenhAmbu += span;
+            }
+        });
+        html += '<div id="brw"><b>Brandweer</b><br/>' + eenhBrw + '</div>';
+        html += '<div id="pol"><b>Politie</b><br/>' + eenhPol + '</div>';
+        html += '<div id="ambu"><b>Ambu</b><br/>' + eenhAmbu + '</div>';
+        html += '</td></tr>';
+    }
 
 
     if(incident.kladblok.length !== 0) {

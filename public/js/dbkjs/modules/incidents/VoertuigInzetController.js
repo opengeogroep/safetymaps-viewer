@@ -207,7 +207,7 @@ VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
                 return;
             }
             me.incident = incident;
-            me.incidentDetailsWindow.data(incident);
+            me.incidentDetailsWindow.data(incident, false);
             me.markerLayer.addIncident(incident, true);
             me.markerLayer.setZIndexFix();
 
@@ -278,7 +278,7 @@ VoertuigInzetController.prototype.updateIncident = function(incidentId) {
                 }
 
                 me.incident = incident;
-                me.incidentDetailsWindow.data(incident, true);
+                me.incidentDetailsWindow.data(incident, false, true);
 
                 // Possibly update marker position
                 me.markerLayer.clear();
