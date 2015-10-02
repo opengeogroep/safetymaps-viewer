@@ -120,7 +120,7 @@ dbkjs.protocol.jsonDBK = {
         var _obj = dbkjs.protocol.jsonDBK;
         $.each(_obj.layers, function (lindex, lyr) {
             var currentVisibility = _obj.layersVisible;
-            if (currentVisibility && !dbkjs.modules.layertoggle.isLayerEnabled(lyr.name)) {
+            if (currentVisibility && !dbkjs.modules.vrhinzetbalk.isLayerEnabled(lyr.name)) {
                 currentVisibility = false;
             }
             lyr.setVisibility(currentVisibility);
