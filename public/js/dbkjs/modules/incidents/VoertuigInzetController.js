@@ -168,7 +168,14 @@ VoertuigInzetController.prototype.getInzetInfo = function() {
         } else {
             if(me.incidentId) {
                 $("#zoom_extent").click();
-                dbkjs.util.alert('Inzet beeindigd');
+
+                // Wait for layer loading messages to clear...
+                window.setTimeout(function() {
+                    dbkjs.util.alert('Melding', 'Inzet beeindigd');
+                    window.setTimeout(function() {
+                        $('#systeem_meldingen').hide();
+                    }, 10000);
+                }, 3000);
             }
             me.geenInzet();
         }
