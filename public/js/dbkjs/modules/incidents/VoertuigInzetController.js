@@ -156,6 +156,7 @@ VoertuigInzetController.prototype.getInzetInfo = function() {
     .fail(function(e) {
         var msg = "Kan meldkamerinfo niet ophalen: " + e;
         dbkjs.gui.showError(msg);
+        this.button.setIcon("bell-slash");
         me.incidentDetailsWindow.showError(msg);
     })
     .done(function(incidentId) {
@@ -206,6 +207,7 @@ VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
         .fail(function(e) {
             var msg = "Kan incidentinfo niet ophalen: " + e;
             dbkjs.gui.showError(msg);
+            this.button.setIcon("bell-slash");
             me.incidentDetailsWindow.showError(msg);
         })
         .done(function(incident) {

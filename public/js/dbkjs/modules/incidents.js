@@ -22,6 +22,7 @@ var dbkjs = dbkjs || {};
 window.dbkjs = dbkjs;
 dbkjs.modules = dbkjs.modules || {};
 dbkjs.modules.incidents = {
+    id: "dbk.module.incidents",
     service: null,
     controller: null,
     options: null,
