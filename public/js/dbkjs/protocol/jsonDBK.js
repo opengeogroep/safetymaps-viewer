@@ -342,6 +342,24 @@ dbkjs.protocol.jsonDBK = {
                 algemeen_table.append(_obj.constructRow(formelenaam, i18n.t('dbk.formalName')));
             }
             algemeen_table.append(_obj.constructRow(informelenaam, i18n.t('dbk.alternativeName')));
+
+            // Show the adres as normal table row, after formele/informelenaam
+            // No BAG links
+            if(dbkjs.options.adresFirstInTable && DBKObject.adres && DBKObject.adres.length > 0) {
+                var waarde = DBKObject.adres[0];
+                var openbareruimtenaam = dbkjs.util.isJsonNull(waarde.openbareRuimteNaam) ? '' : waarde.openbareRuimteNaam;
+                var huisnummer = dbkjs.util.isJsonNull(waarde.huisnummer) ? '' : ' ' + waarde.huisnummer;
+                var huisnummertoevoeging = dbkjs.util.isJsonNull(waarde.huisnummertoevoeging) ? '' : ' ' + waarde.huisnummertoevoeging;
+                var huisletter = dbkjs.util.isJsonNull(waarde.huisletter) ? '' : ' ' + waarde.huisletter;
+                var postcode = dbkjs.util.isJsonNull(waarde.postcode) ? '' : ' ' + waarde.postcode;
+                var woonplaatsnaam = dbkjs.util.isJsonNull(waarde.woonplaatsNaam) ? '' : ' ' + waarde.woonplaatsNaam;
+                var gemeentenaam = dbkjs.util.isJsonNull(waarde.gemeenteNaam) ? '' : ' ' + waarde.gemeenteNaam;
+                var adresText = openbareruimtenaam +
+                        huisnummer + huisnummertoevoeging + huisletter + '<br/>' +
+                        woonplaatsnaam + postcode + gemeentenaam;
+                algemeen_table.append(_obj.constructRow(adresText, 'Adres'));
+            }
+
             algemeen_table.append(_obj.constructRow(controledatum, i18n.t('dbk.dateChecked')));
             if (dbkjs.showStatus) {
               var status = dbkjs.util.isJsonNull(DBKObject.status) ? '<span class="label label-warning">' +
@@ -361,7 +379,7 @@ dbkjs.protocol.jsonDBK = {
             algemeen_table.append(_obj.constructRow(informelenaam, i18n.t('dbk.alternativeName')));
             algemeen_table.append(_obj.constructRow(controledatum, i18n.t('dbk.dateChecked')));
         }
-        if (DBKObject.adres) {
+        if (!dbkjs.options.adresFirstInTable && DBKObject.adres) {
             //adres is een array of null
             $.each(DBKObject.adres, function (adres_index, waarde) {
                 var bag_button;
