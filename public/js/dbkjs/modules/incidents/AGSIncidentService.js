@@ -337,19 +337,21 @@ AGSIncidentService.prototype.getAllIncidentInfo = function(incidentId, archief) 
 
                 var dKarakteristiek = me.getKarakteristiek(incidentId, archief);
                 var dKladblok = me.getKladblok(incidentId, archief);
+                var dInzetEenheden = me.getInzetEenheden(incidentId, archief, false);
 
-                $.when(dClassificatie, dKarakteristiek, dKladblok)
-                .fail(function(classificatie, karakteristiek, kladblok) {
+                $.when(dClassificatie, dKarakteristiek, dKladblok, dInzetEenheden)
+                .fail(function(classificatie, karakteristiek, kladblok, inzetEenheden) {
                     d.reject("Kan geen extra incident info ophalen, classificaties: " +
                         classificatie + ", karakteristiek: " + karakteristiek +
-                        ", kladblok: " + kladblok);
+                        ", kladblok: " + kladblok + ", inzet eenheden: " + inzetEenheden);
                 })
-                .done(function(classificatie, karakteristiek, kladblok) {
+                .done(function(classificatie, karakteristiek, kladblok, inzetEenheden) {
 
                     // Set additional properties in incident
                     incident.classificatie = classificatie;
                     incident.karakteristiek = karakteristiek;
                     incident.kladblok = kladblok;
+                    incident.inzetEenheden = inzetEenheden;
 
                     d.resolve(incident);
                 });
@@ -528,6 +530,31 @@ AGSIncidentService.prototype.getKladblok = function(incidentId, archief) {
             token: me.token,
             where: "INCIDENT_ID = " + incidentId + " AND TYPE_KLADBLOK_REGEL = 'KB' AND T_IND_DISC_KLADBLOK_REGEL LIKE '_B_' AND WIJZIGING_ID IS NULL",
             orderByFields: "DTG_KLADBLOK_REGEL,KLADBLOK_REGEL_ID,VOLG_NR_KLADBLOK_REGEL",
+            outFields: "*"
+        }
+    })
+    .always(function(data, textStatus, jqXHR) {
+        me.resolveAGSFeatures(d, data, jqXHR);
+    });
+    return d.promise();
+};
+
+AGSIncidentService.prototype.getInzetEenheden = function(incidentIds, archief, alleenBrandweer) {
+    var me = this;
+    var d = $.Deferred();
+
+    if(!incidentIds || incidentIds.length === 0) {
+        return d.resolve(incidentIds instanceof Array ? [] : null);
+    }
+    incidentIds = incidentIds instanceof Array ? incidentIds : [incidentIds];
+
+    $.ajax(me.tableUrls[archief ? "GMSARC_INZET_EENHEID" : "GMS_INZET_EENHEID"] + "/query", {
+        dataType: "json",
+        data: {
+            f: "pjson",
+            token: me.token,
+            where: "INCIDENT_ID IN (" + incidentIds.join(",") + ") " + (alleenBrandweer ? "AND T_IND_DISC_EENHEID = 'B'" : ""),
+            orderByFields: "DTG_OPDRACHT_INZET",
             outFields: "*"
         }
     })
