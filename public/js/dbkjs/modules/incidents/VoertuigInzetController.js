@@ -154,6 +154,7 @@ VoertuigInzetController.prototype.getInzetInfo = function() {
 
 VoertuigInzetController.prototype.geenInzet = function() {
     console.log("geen inzet");
+    me.incidentDetailsWindow.data(null);
 };
 
 VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
