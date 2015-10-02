@@ -176,7 +176,6 @@ VoertuigInzetController.prototype.getInzetInfo = function() {
 };
 
 VoertuigInzetController.prototype.geenInzet = function() {
-    console.log("geen inzet");
     this.disableIncidentUpdates();
     this.incidentId = null;
     this.incident = null;
@@ -191,7 +190,6 @@ VoertuigInzetController.prototype.geenInzet = function() {
 VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
     var me = this;
     if(incidentId !== me.incidentId) {
-        console.log("new inzet, incident id " + incidentId);
         me.geenInzet();
 
         me.incidentId = incidentId;
@@ -208,7 +206,6 @@ VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
                 // Incident was cancelled or changed since request was fired off, ignore
                 return;
             }
-            console.log("incident info", incident);
             me.incident = incident;
             me.incidentDetailsWindow.data(incident);
             me.markerLayer.addIncident(incident, true);
@@ -220,8 +217,6 @@ VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
             me.button.setAlerted(true);
             me.button.setIcon("bell");
         });
-    } else {
-        console.log("same incident");
     }
 };
 
@@ -277,11 +272,7 @@ VoertuigInzetController.prototype.updateIncident = function(incidentId) {
 
             // Check if updated, enable alert state if true
             var oldIncident = JSON.toString(me.incident);
-            if(oldIncident === JSON.toString(incident)) {
-                console.log("incident the same");
-            } else {
-                console.log("incident updated");
-
+            if(oldIncident !== JSON.toString(incident)) {
                 if(!me.incidentDetailsWindow.isVisible()) {
                     me.button.setAlerted(true);
                 }

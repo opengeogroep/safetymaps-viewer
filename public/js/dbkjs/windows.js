@@ -71,7 +71,6 @@ ModalWindow.prototype.createElements = function(title) {
 
     $(dbkjs).on('modal_popup_show', function(e, popupName) {
         // Hide ourselves when another popup is shown
-        console.log("modal popup show for " + popupName + " received by " + me.name);
         if(me.name !== popupName) {
             me.hide();
         }
