@@ -37,7 +37,7 @@ function AlertableButton(id, title, icon) {
 
         $(me).triggerHandler('click', id);
     })
-    .appendTo('#btngrp_3');
+    .prependTo('.layertoggle-btn-group');
 }
 
 AlertableButton.prototype.setAlerted = function(alert) {
