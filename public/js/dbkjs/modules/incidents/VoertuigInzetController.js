@@ -202,7 +202,7 @@ VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
         me.incidentId = incidentId;
         var responseIncidentId = incidentId;
 
-        me.service.getAllIncidentInfo(responseIncidentId)
+        me.service.getAllIncidentInfo(responseIncidentId, false, true)
         .fail(function(e) {
             var msg = "Kan incidentinfo niet ophalen: " + e;
             dbkjs.gui.showError(msg);
@@ -265,7 +265,7 @@ VoertuigInzetController.prototype.updateIncident = function(incidentId) {
         // Incident cancelled or changed since timeout was set, ignore
         return;
 
-        me.service.getAllIncidentInfo(incidentId)
+        me.service.getAllIncidentInfo(incidentId, false, true)
         .fail(function(e) {
             var msg = "Kan incidentinfo niet updaten: " + e;
             dbkjs.gui.showError(msg);
@@ -278,8 +278,8 @@ VoertuigInzetController.prototype.updateIncident = function(incidentId) {
             }
 
             // Check if updated, enable alert state if true
-            var oldIncident = JSON.toString(me.incident);
-            if(oldIncident !== JSON.toString(incident)) {
+            var oldIncident = JSON.stringify(me.incident);
+            if(oldIncident !== JSON.stringify(incident)) {
                 if(!me.incidentDetailsWindow.isVisible()) {
                     me.button.setAlerted(true);
                 }
