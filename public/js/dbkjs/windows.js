@@ -134,16 +134,26 @@ function SplitScreenWindow(name) {
 SplitScreenWindow.prototype = Object.create(ModalWindow.prototype);
 SplitScreenWindow.prototype.constructor = SplitScreenWindow;
 
+SplitScreenWindow.prototype.createElements = function(title) {
+    ModalWindow.prototype.createElements.call(this, title);
+    $(this.popup).find("a").html('<i class="fa fa-arrow-left"/> Kaart');
+};
+
 SplitScreenWindow.prototype.isSplitScreen = function() {
     return this.isSplitScreen;
 };
 
 SplitScreenWindow.prototype.setSplitScreen = function(splitScreen) {
-    this.isSplitScreen = splitScreen;
-    if(this.isVisible()) {
+    var wasVisible = this.isVisible();
+    if(wasVisible) {
         this.hide();
+    }
+    this.isSplitScreen = splitScreen;
+    if(wasVisible) {
         this.show();
     }
+    $(this.popup).find("a").html('<i class="fa fa-arrow-left"/> ' + (splitScreen ? 'Kaart' : 'Terug'));
+
     $(this).triggerHandler('splitScreenChange', splitScreen, this.visible);
 };
 
