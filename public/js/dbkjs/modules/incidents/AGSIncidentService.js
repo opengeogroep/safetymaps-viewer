@@ -353,6 +353,10 @@ AGSIncidentService.prototype.getAllIncidentInfo = function(incidentId, archief) 
                     incident.kladblok = kladblok;
                     incident.inzetEenheden = inzetEenheden;
 
+                    incident.getTitle = function() {
+                        return me.getIncidentTitle(incident);
+                    };
+
                     d.resolve(incident);
                 });
             }

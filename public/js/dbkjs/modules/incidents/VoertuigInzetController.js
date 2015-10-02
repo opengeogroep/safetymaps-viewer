@@ -27,7 +27,8 @@
 function VoertuigInzetController(incidents) {
     var me = this;
     me.service = incidents.service;
-
+    me.incidentDetailsWindow = new IncidentDetailsWindow();
+    me.incidentDetailsWindow.createElements("Incident");
     me.voertuignummer = window.localStorage.getItem("voertuignummer");
 
     me.addConfigControls();
@@ -173,6 +174,7 @@ VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
                 return;
             }
             console.log("incident info", incident);
+            me.incidentDetailsWindow.data(incident);
         });
     } else {
         console.log("same incident");
