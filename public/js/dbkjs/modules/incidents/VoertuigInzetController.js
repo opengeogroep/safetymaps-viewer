@@ -29,6 +29,11 @@ function VoertuigInzetController(incidents) {
     me.service = incidents.service;
     me.incidentDetailsWindow = new IncidentDetailsWindow();
     me.incidentDetailsWindow.createElements("Incident");
+    me.markerLayer = new IncidentMarkerLayer();
+    $(me.markerLayer).on('click', function(incident, marker) {
+        me.markerClick(incident, marker);
+    });
+    me.marker = null;
     me.voertuignummer = window.localStorage.getItem("voertuignummer");
 
     me.addConfigControls();
@@ -154,7 +159,11 @@ VoertuigInzetController.prototype.getInzetInfo = function() {
 
 VoertuigInzetController.prototype.geenInzet = function() {
     console.log("geen inzet");
-    me.incidentDetailsWindow.data(null);
+    this.incidentId = null;
+    this.incident = null;
+    this.incidentDetailsWindow.data(null);
+    this.incidentDetailsWindow.hide();
+    this.markerLayer.clear();
 };
 
 VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
@@ -175,9 +184,18 @@ VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
                 return;
             }
             console.log("incident info", incident);
+            me.incident = incident;
             me.incidentDetailsWindow.data(incident);
+            me.markerLayer.addIncident(incident, true);
+            me.markerLayer.setZIndexFix();
         });
     } else {
         console.log("same incident");
     }
+};
+
+VoertuigInzetController.prototype.markerClick = function(incident, marker) {
+    var me = this;
+    this.incidentDetailsWindow.show();
+    dbkjs.map.setCenter(new OpenLayers.LonLat(me.incident.T_X_COORD_LOC, me.incident.T_Y_COORD_LOC), dbkjs.options.zoom);
 };
