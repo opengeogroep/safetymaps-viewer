@@ -266,36 +266,36 @@ VoertuigInzetController.prototype.updateIncident = function(incidentId) {
     if(this.incidentId !== incidentId) {
         // Incident cancelled or changed since timeout was set, ignore
         return;
-
-        me.service.getAllIncidentInfo(incidentId, false, true)
-        .fail(function(e) {
-            var msg = "Kan incidentinfo niet updaten: " + e;
-            dbkjs.gui.showError(msg);
-            // Leave incidentDetailsWindow contents with old info
-        })
-        .done(function(incident) {
-            if(me.incidentId !== incidentId) {
-                // Incident cancelled or changed since request was fired off, ignore
-                return;
-            }
-
-            // Always update window, updates moment.fromNow() times
-            me.incidentDetailsWindow.data(incident, false, true);
-
-            // Check if updated, enable alert state if true
-            var oldIncidentHtml = incidentDetailsWindow.html(me.incident, false, true);
-            if(oldIncident !== incidentDetailsWindow.html(incident, false, true)) {
-                if(!me.incidentDetailsWindow.isVisible()) {
-                    me.button.setAlerted(true);
-                }
-
-                me.incident = incident;
-
-                // Possibly update marker position
-                me.markerLayer.clear();
-                me.markerLayer.addIncident(incident, true);
-                me.markerLayer.setZIndexFix();
-            }
-        });
     }
+
+    me.service.getAllIncidentInfo(incidentId, false, true)
+    .fail(function(e) {
+        var msg = "Kan incidentinfo niet updaten: " + e;
+        dbkjs.gui.showError(msg);
+        // Leave incidentDetailsWindow contents with old info
+    })
+    .done(function(incident) {
+        if(me.incidentId !== incidentId) {
+            // Incident cancelled or changed since request was fired off, ignore
+            return;
+        }
+
+        // Always update window, updates moment.fromNow() times
+        me.incidentDetailsWindow.data(incident, false, true);
+
+        // Check if updated, enable alert state if true
+        var oldIncidentHtml = me.incidentDetailsWindow.getIncidentHtml(me.incident, false, true);
+        if(oldIncidentHtml !== me.incidentDetailsWindow.getIncidentHtml(incident, false, true)) {
+            if(!me.incidentDetailsWindow.isVisible()) {
+                me.button.setAlerted(true);
+            }
+
+            me.incident = incident;
+
+            // Possibly update marker position
+            me.markerLayer.clear();
+            me.markerLayer.addIncident(incident, true);
+            me.markerLayer.setZIndexFix();
+        }
+    });
 };
