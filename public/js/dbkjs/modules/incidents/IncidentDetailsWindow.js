@@ -56,6 +56,23 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
 
     var scrollTop = v.scrollTop();
 
+    v.html(this.getIncidentHtml(incident, showInzet, false));
+
+    if(restoreScrollTop) {
+        v.scrollTop(scrollTop);
+    }
+};
+
+/**
+ * Get HTML to display incident. Boolean specificies whether to leave out time
+ * dependent information ('1 minute ago') to compare changes.
+ * @param {object} incident
+ * @param {boolean} showInzet show voertuig inzet
+ * @param {boolean} compareMode the result should only depend on the incident
+ *   parameter, not other factors such as current time
+ * @returns {undefined}
+ */
+IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, compareMode) {
     var html = '<div style:"width: 100%" class="table-responsive">';
     html += '<table class="table table-hover">';
 
@@ -73,7 +90,7 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
             var v;
             if(column.date) {
                 var d = AGSIncidentService.prototype.getAGSMoment(p);
-                v = d.format("dddd, D-M-YYYY HH:mm:ss") + " (" + d.fromNow() + ")";
+                v = d.format("dddd, D-M-YYYY HH:mm:ss") + (compareMode ? "" : " (" + d.fromNow() + ")");
             } else {
                 v = dbkjs.util.htmlEncode(p);
             }
@@ -139,9 +156,5 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
 
     html += '</table>';
 
-    v.html(html);
-
-    if(restoreScrollTop) {
-        v.scrollTop(scrollTop);
-    }
+    return html;
 };

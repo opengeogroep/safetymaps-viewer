@@ -279,15 +279,17 @@ VoertuigInzetController.prototype.updateIncident = function(incidentId) {
                 return;
             }
 
+            // Always update window, updates moment.fromNow() times
+            me.incidentDetailsWindow.data(incident, false, true);
+
             // Check if updated, enable alert state if true
-            var oldIncident = JSON.stringify(me.incident);
-            if(oldIncident !== JSON.stringify(incident)) {
+            var oldIncidentHtml = incidentDetailsWindow.html(me.incident, false, true);
+            if(oldIncident !== incidentDetailsWindow.html(incident, false, true)) {
                 if(!me.incidentDetailsWindow.isVisible()) {
                     me.button.setAlerted(true);
                 }
 
                 me.incident = incident;
-                me.incidentDetailsWindow.data(incident, false, true);
 
                 // Possibly update marker position
                 me.markerLayer.clear();
