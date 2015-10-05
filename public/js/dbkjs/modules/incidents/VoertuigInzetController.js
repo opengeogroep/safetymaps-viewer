@@ -249,15 +249,15 @@ VoertuigInzetController.prototype.enableIncidentUpdates = function() {
         return;
     }
 
-    this.updateIncidentTimeout = window.setTimeout(function() {
+    this.updateIncidentInterval = window.setInterval(function() {
         me.updateIncident(me.incidentId);
     }, 15000);
 };
 
 VoertuigInzetController.prototype.disableIncidentUpdates = function() {
-    if(this.updateIncidentTimeout) {
-        window.clearTimeout(this.updateIncidentTimeout);
-        this.updateIncidentTimeout = null;
+    if(this.updateIncidentInterval) {
+        window.clearInterval(this.updateIncidentInterval);
+        this.updateIncidentInterval = null;
     }
 };
 
