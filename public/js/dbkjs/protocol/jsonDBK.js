@@ -107,8 +107,8 @@ dbkjs.protocol.jsonDBK = {
         _obj.layersVisible = true;
         $.each(_obj.layers, function (lindex, lyr) {
             //afhankelijkheid van module layertoggle kan niet worden afgedwongen.
-            if (dbkjs.modules.layertoggle) {
-                if (dbkjs.modules.layertoggle.isLayerEnabled(lyr.name)) {
+            if (dbkjs.modules.vrhinzetbalk) {
+                if (dbkjs.modules.vrhinzetbalk.isLayerEnabled(lyr.name)) {
                     lyr.setVisibility(true);
                 }
             } else {
