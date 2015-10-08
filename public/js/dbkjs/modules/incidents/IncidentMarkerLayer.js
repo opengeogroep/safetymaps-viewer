@@ -24,7 +24,7 @@ function IncidentMarkerLayer() {
     });
     dbkjs.map.addLayer(this.layer);
 
-    this.size = new OpenLayers.Size(20,25);
+    this.size = new OpenLayers.Size(24,26);
     this.offset = new OpenLayers.Pixel(-(this.size.w/2), -this.size.h);
 }
 
@@ -35,7 +35,7 @@ IncidentMarkerLayer.prototype.addIncident = function(incident, red) {
 
         var marker = new OpenLayers.Marker(
             pos,
-            new OpenLayers.Icon(red ? "images/marker-red.png" : "images/marker-grey.png", this.size, this.offset)
+            new OpenLayers.Icon(red ? "images/bell.png" : "images/marker-grey.png", this.size, this.offset)
         );
         marker.id = incident.INCIDENT_ID;
         marker.events.register("click", marker, function() { me.markerClick(marker, incident); });
