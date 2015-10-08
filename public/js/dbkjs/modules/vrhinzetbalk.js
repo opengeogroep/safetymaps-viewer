@@ -18,6 +18,25 @@
  *
  */
 
+dbkjs.config.styles.brandweervoorziening.styles.default.context.mydisplay = function(feature) {
+    return dbkjs.modules.vrhinzetbalk.isBrandweervoorzieningHidden(feature) ? "none" : "true";
+};
+
+dbkjs.config.styles.hulplijn.styles.default.defaultStyle.display = "${display}";
+dbkjs.config.styles.hulplijn.styles.default.propertyStyles.display = true;
+dbkjs.config.styles.hulplijn1.styles.default.defaultStyle.display = "${display}";
+dbkjs.config.styles.hulplijn1.styles.default.propertyStyles.display = true;
+dbkjs.config.styles.hulplijn2.styles.default.defaultStyle.display = "${display}";
+dbkjs.config.styles.hulplijn2.styles.default.propertyStyles.display = true;
+
+function hulplijnDisplay(feature) {
+    return dbkjs.modules.vrhinzetbalk.isHulplijnHidden(feature) ? "none" : "true";
+};
+dbkjs.config.styles.hulplijn.styles.default.context.display = hulplijnDisplay;
+dbkjs.config.styles.hulplijn1.styles.default.context.display = hulplijnDisplay;
+dbkjs.config.styles.hulplijn2.styles.default.context.display = hulplijnDisplay;
+
+
 var dbkjs = dbkjs || {};
 window.dbkjs = dbkjs;
 dbkjs.modules = dbkjs.modules || {};
@@ -30,37 +49,105 @@ dbkjs.modules.vrhinzetbalk = {
         toggleBasis: {
             label: 'Basisgegevens',
             icon: 'fa-bus',
-            layers: [ 'Toegang terrein' ],
-            category: 'objectinformatie',
-            active: true
+            layers: [ 'Toegang terrein' ], // XXX
+            active: true,
+            css: {
+                'background-color': 'green',
+                color: 'white'
+            },
+            brandweervoorzieningen: [
+                'Tr504',    // Indicator/flitslicht
+                'Tb1.008',  // Opstelplaats 1e TS
+                'Tb1.010',  // Opstelplaats RV
+                'Tb1.004a', // BMC
+                'Tb1.004',  // Brandweerpaneel
+                'To04',     // Brandweerinfokast
+                'Tb1.005'   // Nevenpaneel
+            ],
+            hulplijnen: [
+                "Bbarrier"  // Slagboom
+            ],
+            wms: ['Basis']
         },
-        'toggleGebouw': {
+        toggleGebouw: {
             label: 'Gebouwgegevens',
-            icon: 'fa-building',
-            layers: [ ],
-            category: 'preventief',
-            active: true
+            icon: 'fa-industry',
+            layers: [ ], // XXX Binnenmuur
+            active: false,
+            css: {
+                'background-color': 'black',
+                color: 'white'
+            },
+            brandweervoorzieningen: [
+                'Tbk7.004', // Lift
+                'Tn05',     // Nooduitgang
+                'To1.001',  // Trap
+                'To1.002',  // Trap rond
+                'To1.003',  // Trappenhuis
+                'Tb2.025',  // Afsluiter LPG
+                'Tb2.021',  // Afsluiter gas
+                'Tb2.043',  // Noodstop
+                'To03',     // Noodstroom aggegraat
+                // XXX schacht/kanaal
+                'Tb2.002',  // Noodschakelaar CV
+                'Tb2.001',  // Noodschakelaar neon
+                'Tb2.003',  // Schakelaar elektriciteit
+                'Tb2.004',  // Schakelaar luchtbehandeling
+                'To02'      // Slaapplaats
+                // XXX hellingbaan
+            ],
+            wms: ['Gebouw']
         },
         toggleBluswater: {
             label: 'Bluswatergegevens',
-            img: 'images/nen1414/Tb4.002.png',
+            img: 'images/inzetbalk-brandkraan.png',
             style: 'height: 36px; margin-bottom: 5px',
             layers: [ ],
-            category: 'preparatief',
-            active: true
+            active: false,
+            css: {
+                'background-color': '#2D2DFF',
+                color: 'white'
+            },
+            brandweervoorzieningen: [
+                'Tb2.024',  // Afsluiter omloopleiding
+                'Tb2.026',  // Afsluiter schuimvormend middel
+                'Tb2.023',  // Afsluiter sprinkler
+                'Tb2.022',  // Afsluiter water
+                'Tb02',     // Brandslanghaspel
+                'Tb.1007a', // Droge blusleiding afnamepunt
+                'Tb4.024',  // Gas blusinstallatie / Blussysteem kooldioxide
+                'Tb1.011',  // Gas detectiepaneel
+                'Tb4.005'   // Gesprinklerde ruimte
+            ],
+            hulplijnen: [
+                "DBL Leiding"
+            ],
+            wms: ['Water']
         },
         toggleBrandweer: {
             label: 'Brandweergegevens',
             img: 'images/brwzw.png',
             style: 'width: 32px; margin-bottom: 6px',
             layers: [ 'Brandcompartiment', 'Gevaarlijke stoffen' ],
-            category: 'repressief',
-            active: true
+            active: false,
+            css: {
+                'background-color': 'red',
+                color: 'white'
+            },
+            brandweervoorzieningen: [
+                'Tbk5.001',  // Brandweerlift
+                'Tb1.002',   // Overige ingangen / neveningang
+                'Tb1.009',   // Opstelplaats overige blusvoertuigen
+                'Tb2.005',   // Schakelaar rook-/warmteafvoer
+            ],
+            wms: ['Brandweer']
         }
     },
     disabledLayers: [],
     register: function() {
         var me = this;
+
+        $("#tb03").css('background-color', 'yellow');
 
         var buttonGroup = $('.layertoggle-btn-group');
         $.each(me.availableToggles, function(toggleKey, toggleOptions) {
@@ -96,29 +183,60 @@ dbkjs.modules.vrhinzetbalk = {
                 e.preventDefault();
                 if (toggle.hasClass('on')) {
                     toggle.removeClass('on');
-                    dbkjs.setDbkCategoryVisibility(toggleOptions.category, false);
                     me.disableLayers(toggleOptions.layers);
                 } else {
                     toggle.addClass('on');
-                    dbkjs.setDbkCategoryVisibility(toggleOptions.category, true);
                     me.enableLayers(toggleOptions.layers);
                 }
-                if(toggleKey === "toggleBluswater") {
-                    dbkjs.map.getLayersByName("Brandkranen eigen terrein")[0].setVisibility(toggle.hasClass('on'));
+                if(toggleOptions.wms) {
+                    $.each(toggleOptions.wms, function(i, wms) {
+                        var l = dbkjs.map.getLayersByName(wms);
+                        if(l && l.length === 1) {
+                            l[0].setVisibility(toggle.hasClass('on'));
+                        }
+                    });
                 }
 
                 dbkjs.protocol.jsonDBK.resetLayers();
+                dbkjs.protocol.jsonDBK.layerBrandweervoorziening.redraw();
+                dbkjs.protocol.jsonDBK.layerHulplijn.redraw();
+                dbkjs.protocol.jsonDBK.layerHulplijn1.redraw();
+                dbkjs.protocol.jsonDBK.layerHulplijn2.redraw();
+
             })
             .appendTo(buttonGroup);
-            // Enable layers by default (by adding them all to enabledLayers)
-            //_obj.enableLayers(toggleOptions.layers);
+            if(toggleOptions.css) {
+                toggle.css(toggleOptions.css);
+            }
         });
-        // XXX
-//        window.setTimeout(function() {
-//            dbkjs.protocol.jsonDBK.resetLayers();
-        //}, 5000);
+        dbkjs.protocol.jsonDBK.resetLayers();
+    },
+    isBrandweervoorzieningHidden: function(feature) {
+        var hide = false;
+        $.each(this.availableToggles, function(toggleKey, toggleOptions) {
+            var on = $("#btn_" + toggleKey).hasClass('on');
+            if(!on && toggleOptions.brandweervoorzieningen && toggleOptions.brandweervoorzieningen.indexOf(feature.attributes.type) !== -1) {
+                hide = true;
+                return false;
+            }
+        });
+        return hide;
+    },
+    isHulplijnHidden: function(feature) {
+        var hide = false;
+        $.each(this.availableToggles, function(toggleKey, toggleOptions) {
+            var on = $("#btn_" + toggleKey).hasClass('on');
+            if(!on && toggleOptions.hulplijnen && toggleOptions.hulplijnen.indexOf(feature.attributes.type) !== -1) {
+                hide = true;
+                return false;
+            }
+        });
+        return hide;
     },
     enableLayers: function(layers) {
+        if(!layers) {
+            return;
+        }
         var me = this;
         // Temp array
         var disabledLayers = [].concat(me.disabledLayers);
@@ -128,6 +246,9 @@ dbkjs.modules.vrhinzetbalk = {
         });
     },
     disableLayers: function(layers) {
+        if(!layers) {
+            return;
+        }
         var me = this;
         // Add all layers
         var disabledLayers = me.disabledLayers.concat(layers);
