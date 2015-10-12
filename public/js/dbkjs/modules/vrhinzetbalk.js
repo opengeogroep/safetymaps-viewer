@@ -88,13 +88,13 @@ dbkjs.modules.vrhinzetbalk = {
                 'Tb2.021',  // Afsluiter gas
                 'Tb2.043',  // Noodstop
                 'To03',     // Noodstroom aggegraat
-                // XXX schacht/kanaal
+                'Falck11',  // Schacht/kanaal
                 'Tb2.002',  // Noodschakelaar CV
                 'Tb2.001',  // Noodschakelaar neon
                 'Tb2.003',  // Schakelaar elektriciteit
                 'Tb2.004',  // Schakelaar luchtbehandeling
-                'To02'      // Slaapplaats
-                // XXX hellingbaan
+                'To02',     // Slaapplaats
+                'Falck36'   // Hellingbaan
             ],
             wms: ['Gebouw']
         },
