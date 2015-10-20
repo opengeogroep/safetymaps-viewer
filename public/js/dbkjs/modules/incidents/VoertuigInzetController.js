@@ -220,7 +220,9 @@ VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
             me.markerLayer.addIncident(incident, true);
             me.markerLayer.setZIndexFix();
 
+            dbkjs.protocol.jsonDBK.deselect();
             me.zoomToIncident();
+            me.incidentDetailsWindow.show();
             me.enableIncidentUpdates();
 
             me.button.setAlerted(true);
