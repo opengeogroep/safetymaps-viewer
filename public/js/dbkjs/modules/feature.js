@@ -263,7 +263,8 @@ dbkjs.modules.feature = {
         } else {
             this.zoomToPandgeometrie();
         }
-        // getActive() changed, hide it
+    },
+    updateFilter: function() {
         this.layer.redraw();
     },
     zoomToPandgeometrie: function() {

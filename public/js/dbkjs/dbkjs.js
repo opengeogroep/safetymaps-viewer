@@ -415,7 +415,11 @@ dbkjs.documentReady = function () {
                         $("#vectorclickpanel").css({"width": "100%"});
                     }
                 }
-            }).getView().append($('<div></div>').attr({'id': 'dbkinfopanel_b'}));
+            }).getView().append(
+                    $('<div></div>')
+                    .attr({'id': 'dbkinfopanel_b'})
+                    .text(i18n.t("dialogs.noinfo"))
+            );
 
             // We are removing / moving some existing DIVS from HTML to convert prev. popups to fullscreen modal popups
             $('#baselayerpanel').remove();
