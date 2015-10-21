@@ -147,6 +147,14 @@ dbkjs.modules.vrhinzetbalk = {
     register: function() {
         var me = this;
 
+        $(dbkjs).one("dbkjs_init_complete", function() {
+            if(dbkjs.modules.incidents && dbkjs.modules.incidents.controller) {
+                $(dbkjs.modules.incidents.controller).on("new_incident", function() {
+                    me.resetToDefault();
+                });
+            }
+        });
+
         $("#tb03").css('background-color', 'yellow');
 
         var buttonGroup = $('.layertoggle-btn-group');
@@ -210,6 +218,14 @@ dbkjs.modules.vrhinzetbalk = {
             }
         });
         dbkjs.protocol.jsonDBK.resetLayers();
+    },
+    resetToDefault: function() {
+        $.each(this.availableToggles, function(toggleKey, toggleOptions) {
+            var button = $("#btn_" + toggleKey);
+            if(toggleOptions.active !== button.hasClass("on")) {
+                button.click();
+            }
+        });
     },
     isBrandweervoorzieningHidden: function(feature) {
         var hide = false;
