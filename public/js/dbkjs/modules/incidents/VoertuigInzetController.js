@@ -51,7 +51,9 @@ function VoertuigInzetController(incidents) {
     me.addConfigControls();
 
     $(this.service).on('initialized', function() {
-        me.enableVoertuignummerTypeahead();
+        if(incidents.options.voertuignummerTypeahead) {
+            me.enableVoertuignummerTypeahead();
+        }
         me.setVoertuignummer(me.voertuignummer, true);
     });
 }
