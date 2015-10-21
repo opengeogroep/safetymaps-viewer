@@ -73,9 +73,10 @@ dbkjs.modules.vrhinzetbalk = {
             ],
             hulplijnen: [
                 "Bbarrier",  // Slagboom
-                "HEAT"    ,  // Schadecirkel
+                "HEAT"       // Schadecirkel
             ],
-            wms: ['Basis']
+            wms: ['Basis'],
+            setTopLayerIndex: true
         },
         toggleGebouw: {
             label: 'Gebouwgegevens',
@@ -171,6 +172,18 @@ dbkjs.modules.vrhinzetbalk = {
 
             if(!toggleOptions.active) {
                 me.disabledLayers = me.disabledLayers.concat(toggleOptions.layers);
+            } else {
+                if(toggleOptions.wms) {
+                    $.each(toggleOptions.wms, function(i, wms) {
+                        var l = dbkjs.map.getLayersByName(wms);
+                        if(l && l.length === 1) {
+                            l[0].setVisibility(true);
+                        }
+                        if(toggleOptions.setTopLayerIndex) {
+                            dbkjs.map.setLayerIndex(l, dbkjs.map.layers.length-1);
+                        }
+                    });
+                }
             }
             var i;
             if(toggleOptions.img) {
