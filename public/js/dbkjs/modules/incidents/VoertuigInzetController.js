@@ -21,6 +21,11 @@
 /**
  * Controller for displaying incident info for a specific voertuig when it is
  * ingezet.
+ *
+ * Events:
+ * new_incident: when new incident is received
+ * end_incident: inzet for incident was ended (may not trigger for some koppelingen)
+ *
  * @param {Object} incidents dbk module
  * @returns {VoertuigInzetController}
  */
@@ -181,13 +186,13 @@ VoertuigInzetController.prototype.getInzetInfo = function() {
                         $('#systeem_meldingen').hide();
                     }, 10000);
                 }, 3000);
+                me.geenInzet(true);
             }
-            me.geenInzet();
         }
     });
 };
 
-VoertuigInzetController.prototype.geenInzet = function() {
+VoertuigInzetController.prototype.geenInzet = function(triggerEvent) {
     this.disableIncidentUpdates();
     this.incidentId = null;
     this.incident = null;
@@ -197,12 +202,16 @@ VoertuigInzetController.prototype.geenInzet = function() {
 
     this.button.setAlerted(false);
     this.button.setIcon("bell-o");
+
+    if(triggerEvent) {
+        $(me).triggerHandler("end_incident");
+    }
 };
 
 VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
     var me = this;
     if(incidentId !== me.incidentId) {
-        me.geenInzet();
+        me.geenInzet(false);
 
         me.incidentId = incidentId;
         var responseIncidentId = incidentId;
@@ -231,6 +240,8 @@ VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
             me.enableIncidentUpdates();
 
             me.button.setIcon("bell");
+
+            $(me).triggerHandler("new_incident", incident);
         });
     }
 };
