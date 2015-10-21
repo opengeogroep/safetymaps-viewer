@@ -548,6 +548,7 @@ dbkjs.protocol.jsonDBK = {
                     "indication": myGeometry.gevaarsindicatienummer,
                     "information": information,
                     "unnumber": myGeometry.UNnummer,
+                    "radius": myGeometry.radius,
                     "fid": "gevaarlijkestof_ft_" + idx
                 };
                 var geviblock = '';

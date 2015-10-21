@@ -78,6 +78,7 @@ dbkjs.protocol.jsonDBK.constructGevaarlijkestof = function(feature){
                 "indication": myGeometry.gevaarsindicatienummer,
                 "information": myGeometry.aanvullendeInformatie,
                 "unnumber": myGeometry.UNnummer,
+                "radius": myGeometry.radius,
                 "fid": "gevaarlijkestof_ft_" + idx
             };
             var myrow = _obj.constructGevaarlijkestofRow(myFeature.attributes);
