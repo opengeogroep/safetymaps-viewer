@@ -108,7 +108,7 @@ dbkjs.modules.vrhinzetbalk = {
         },
         toggleBluswater: {
             label: 'Bluswatergegevens',
-            img: 'images/inzetbalk-brandkraan.png',
+            img: 'images/brandkraan.png',
             style: 'height: 36px; margin-bottom: 5px',
             layers: [ ],
             active: false,
@@ -182,8 +182,7 @@ dbkjs.modules.vrhinzetbalk = {
             } else {
                 i = $('<i/>')
                 .attr({
-                    class: "fa " + toggleOptions.icon,
-                    style: "width: 27.5px"
+                    class: "fa " + toggleOptions.icon
                 });
             }
 

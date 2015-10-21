@@ -77,7 +77,7 @@ html, body {
     background-color: #b92c28 !important;
 }
 .layertoggle-btn-group .btn {
-    position: relative;
+    width: 58px;
 }
 .layertoggle-btn-group .on:after {
     content: ' ';
