@@ -48,6 +48,8 @@ function VoertuigInzetController(incidents) {
 
     me.voertuignummer = window.localStorage.getItem("voertuignummer");
 
+    me.dbkSelectMaxDistance = incidents.options.dbkSelectMaxDistance || 250;
+
     me.addConfigControls();
 
     $(this.service).on('initialized', function() {
@@ -223,6 +225,7 @@ VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
             me.markerLayer.setZIndexFix();
 
             dbkjs.protocol.jsonDBK.deselect();
+            me.selectIncidentDBK(incident);
             me.zoomToIncident();
             me.incidentDetailsWindow.show();
             me.enableIncidentUpdates();
@@ -233,11 +236,103 @@ VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
     }
 };
 
+/**
+ * Find and select DBK for the incident.
+ * @param {object} incident
+ */
+VoertuigInzetController.prototype.selectIncidentDBK = function(incident) {
+    var me = this;
+
+    //var postcode = incident.POSTCODE;
+    var straat1 = incident.NAAM_LOCATIE1;
+    var straat2 = incident.NAAM_LOCATIE2;
+    var plaats = incident.PLAATS_NAAM;
+    var huisnummer = incident.HUIS_PAAL_NR;
+    var x = incident.T_X_COORD_LOC;
+    var y = incident.T_Y_COORD_LOC;
+
+    if(!dbkjs.modules.feature.features) {
+        return;
+    }
+
+    var matches = [];
+    var huisnummerMatches = [];
+    $.each(dbkjs.modules.feature.features, function (index, f) {
+        var fas = f.attributes.adres;
+        if(!fas) {
+            return true;
+        }
+        var distance = null;
+        if(x && y && f.geometry) {
+            var dx = f.geometry.x - x;
+            var dy = f.geometry.y - y;
+            distance = Math.sqrt(dx*dx + dy*dy);
+        }
+        if(!distance || distance > me.dbkSelectMaxDistance) {
+            return true;
+        }
+        console.log("DBK within max distance: " + Math.round(distance) + "m, DBK " + f.attributes.formeleNaam);
+        $.each(fas, function (index, fa) {
+            if(!fa) {
+                return true;
+            }
+
+            //var matchPostcode = postcode && fa.postcode && postcode === fa.postcode;
+
+            var matchWoonplaats = false;
+            if(plaats && fa.woonplaatsNaam) {
+                plaats = plaats.toLowerCase();
+                var dbkPlaats = dbkPlaats.toLowerCase();
+                if(dbkPlaats === "den haag") {
+                    dbkPlaats = "'s-gravenhage";
+                }
+                matchWoonplaats = plaats === dbkPlaats;
+            }
+            var matchStraat = straat1 && fa.openbareRuimteNaam && fa.openbareRuimteNaam.toLowerCase().indexOf(straat1.toLowerCase()) !== -1;
+            matchStraat = matchStraat || (straat2 && fa.openbareRuimteNaam && fa.openbareRuimteNaam.toLowerCase().indexOf(straat2.toLowerCase()) !== -1);
+
+            var matchHuisnummer = huisnummer && fa.huisnummer && huisnummer === Number(fa.huisnummer);
+
+            if(matchWoonplaats && matchStraat) {
+                matches.push({
+                    dbk: fa,
+                    distance: distance
+                });
+                console.log("Added DBK match", matches[matches.length-1]);
+
+                if(matchHuisnummer) {
+                    huisnummerMatches.push(fa);
+                }
+                return false; // don't search other adresses of this dbk
+            }
+        });
+    });
+
+    var dbk = null;
+    if(huisnummerMatches.length === 1) {
+        dbk = huisnummerMatches[0];
+    } else {
+        var minDist = null;
+        $.each(matches, function(i, match) {
+            if(!minDist || match.distance < minDist) {
+                dbk = match.dbk;
+                minDist = match.distance;
+            }
+        });
+    }
+    if(dbk) {
+        console.log("Matched incident DBK", dbk);
+        dbkjs.protocol.jsonDBK.process(dbk, null, true); // no zooming
+    } else {
+        console.log("Could not match incident DBK");
+    }
+};
+
 VoertuigInzetController.prototype.zoomToIncident = function() {
     if(this.incident && this.incident.T_X_COORD_LOC && this.incident.T_Y_COORD_LOC) {
         dbkjs.map.setCenter(new OpenLayers.LonLat(this.incident.T_X_COORD_LOC, this.incident.T_Y_COORD_LOC), dbkjs.options.zoom);
     }
-}
+};
 
 VoertuigInzetController.prototype.markerClick = function(incident, marker) {
     this.incidentDetailsWindow.show();
