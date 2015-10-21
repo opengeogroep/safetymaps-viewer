@@ -163,7 +163,7 @@ dbkjs.modules.vrhinzetbalk = {
             }
         });
 
-        $("#tb03").css('background-color', 'yellow');
+        $("#tb03").css('background-color', 'yellow').html("<img src='images/i.png' style='margin-bottom: 5px'>");
 
         var buttonGroup = $('.layertoggle-btn-group');
         $.each(me.availableToggles, function(toggleKey, toggleOptions) {
