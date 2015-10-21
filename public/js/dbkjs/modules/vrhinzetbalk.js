@@ -172,19 +172,22 @@ dbkjs.modules.vrhinzetbalk = {
 
             if(!toggleOptions.active) {
                 me.disabledLayers = me.disabledLayers.concat(toggleOptions.layers);
-            } else {
-                if(toggleOptions.wms) {
+            }
+
+            if(toggleOptions.wms) {
+                $(dbkjs).one("dbkjs_init_complete", function() {
                     $.each(toggleOptions.wms, function(i, wms) {
                         var l = dbkjs.map.getLayersByName(wms);
                         if(l && l.length === 1) {
-                            l[0].setVisibility(true);
+                            l[0].setVisibility(toggleOptions.active);
                         }
                         if(toggleOptions.setTopLayerIndex) {
                             dbkjs.map.setLayerIndex(l, dbkjs.map.layers.length-1);
                         }
                     });
-                }
+                });
             }
+
             var i;
             if(toggleOptions.img) {
                 i = $('<img/>')
