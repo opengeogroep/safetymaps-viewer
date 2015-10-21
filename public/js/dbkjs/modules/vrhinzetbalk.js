@@ -56,6 +56,13 @@ dbkjs.modules.vrhinzetbalk = {
                 color: 'white'
             },
             brandweervoorzieningen: [
+                'TbeRIJ',   // Bereidbaar
+                'TbeBus',   // Bussluis
+                'TbeHoogte',// Doorrijhoogte
+                'Tbe05',    // Niet toegankelijk
+                'Tbe06',    // Parkeerplaats
+                'Tbe02',    // Poller
+                'Tbe01',    // Sleutel of ring paal
                 'Tr504',    // Indicator/flitslicht
                 'Tb1.008',  // Opstelplaats 1e TS
                 'Tb1.010',  // Opstelplaats RV
@@ -65,7 +72,8 @@ dbkjs.modules.vrhinzetbalk = {
                 'Tb1.005'   // Nevenpaneel
             ],
             hulplijnen: [
-                "Bbarrier"  // Slagboom
+                "Bbarrier",  // Slagboom
+                "HEAT"    ,  // Schadecirkel
             ],
             wms: ['Basis']
         },
