@@ -230,7 +230,6 @@ VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
             me.incidentDetailsWindow.show();
             me.enableIncidentUpdates();
 
-            me.button.setAlerted(true);
             me.button.setIcon("bell");
         });
     }
