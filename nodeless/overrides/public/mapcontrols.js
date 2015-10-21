@@ -9,7 +9,7 @@ dbkjs.mapcontrols.createMapControls = function() {
 
     if(dbkjs.options.showZoomButtons) {
 
-        var zoomContainer = $("<div/>").css({
+        var zoomContainer = $("<div id='zoom_buttons'/>").css({
             "position": "absolute",
             "left": "20px",
             "bottom": "100px",
