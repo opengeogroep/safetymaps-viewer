@@ -261,6 +261,8 @@ VoertuigInzetController.prototype.selectIncidentDBK = function(incident) {
     var x = incident.T_X_COORD_LOC;
     var y = incident.T_Y_COORD_LOC;
 
+    console.log("Zoeken naar DBK voor incident NAAM_LOCATIE1=" + straat1 + ", NAAM_LOCATIE2=" + straat2 +
+            ", PLAATS_NAAM=" + plaats + ", HUIS_PAAL_NR=" + huisnummer + ", positie=" + x +"," + y);
     if(!dbkjs.modules.feature.features) {
         return;
     }
@@ -281,7 +283,7 @@ VoertuigInzetController.prototype.selectIncidentDBK = function(incident) {
         if(!distance || distance > me.dbkSelectMaxDistance) {
             return true;
         }
-        console.log("DBK within max distance: " + Math.round(distance) + "m, DBK " + f.attributes.formeleNaam);
+        console.log("DBK binnen max afstand: " + f.attributes.formeleNaam + ", " + Math.round(distance) + "m");
         $.each(fas, function (index, fa) {
             if(!fa) {
                 return true;
@@ -292,7 +294,7 @@ VoertuigInzetController.prototype.selectIncidentDBK = function(incident) {
             var matchWoonplaats = false;
             if(plaats && fa.woonplaatsNaam) {
                 plaats = plaats.toLowerCase();
-                var dbkPlaats = dbkPlaats.toLowerCase();
+                var dbkPlaats = fa.woonplaatsNaam.toLowerCase();
                 if(dbkPlaats === "den haag") {
                     dbkPlaats = "'s-gravenhage";
                 }
@@ -305,13 +307,13 @@ VoertuigInzetController.prototype.selectIncidentDBK = function(incident) {
 
             if(matchWoonplaats && matchStraat) {
                 matches.push({
-                    dbk: fa,
+                    dbk: f,
                     distance: distance
                 });
-                console.log("Added DBK match", matches[matches.length-1]);
+                console.log("DBK adres matcht " + (matchHuisnummer ? "incl huisnummer" : "excl huisnummer") +" : " + f.attributes.formeleNaam + ", adres: " + fa.openbareRuimteNaam + " " + fa.huisnummer + ", " + fa.woonplaatsNaam);
 
                 if(matchHuisnummer) {
-                    huisnummerMatches.push(fa);
+                    huisnummerMatches.push(f);
                 }
                 return false; // don't search other adresses of this dbk
             }
@@ -331,7 +333,7 @@ VoertuigInzetController.prototype.selectIncidentDBK = function(incident) {
         });
     }
     if(dbk) {
-        console.log("Matched incident DBK", dbk);
+        console.log("DBK geselecteerd: " + dbk.attributes.formeleNaam);
         dbkjs.protocol.jsonDBK.process(dbk, null, true); // no zooming
     } else {
         console.log("Could not match incident DBK");
