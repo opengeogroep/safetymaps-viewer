@@ -160,42 +160,65 @@ SplitScreenWindow.prototype.setSplitScreen = function(splitScreen) {
 };
 
 SplitScreenWindow.prototype.hide = function() {
-    if(this.isSplitScreen && this.isVisible()) {
-        $("#mapc1map1").css({width: "100%"});
-        dbkjs.map.updateSize();
-
+    if(!this.isVisible()) {
+        return;
+    }
+    if(!this.isSplitScreen) {
+        ModalWindow.prototype.hide.call(this);
+    } else {
         // XXX move to dbkjs event 'split_screen_hide'
         $(".main-button-group").css({right: "0%"});
         $("#vectorclickpanel").css({"width": "100%"});
-    }
 
-    ModalWindow.prototype.hide.call(this);
-    this.popup.css({width: "0%"});
+        $("#mapc1map1").css({width: "100%"});
+        this.popup.css({width: "0%"});
+
+        // Hack required to avoid OpenLayers maxExtent bug
+        window.setTimeout(function() {
+            dbkjs.map.updateSize();
+        }, 500);
+        // Hack required to show layers
+        window.setTimeout(function() {
+            $.each(dbkjs.map.layers, function(i,l) {
+                l.redraw();
+            });
+        }, 600);
+
+
+        this.visible = false;
+        $(this).triggerHandler('hide');
+    }
 };
 
 SplitScreenWindow.prototype.show = function() {
     if(this.isVisible()) {
         return;
     }
-    if(this.isSplitScreen) {
+    if(!this.isSplitScreen) {
+        ModalWindow.prototype.show.call(this);
+    } else {
+        // Event should cause other modal popups to hide
+        $(dbkjs).trigger('modal_popup_show', this.name);
 
-        this.popup.css({width: "45%"});
-        $("#mapc1map1").css({width: "55%"});
         // XXX move to dbkjs event 'split_screen_show';
         $(".main-button-group").css({right: "45%"});
         $("#vectorclickpanel").css({"width": "55%"});
 
-        function afterScreenSplit() {
+        $("#mapc1map1").css({width: "55%"});
+        this.popup.css({width: "45%"});
+
+        // Hack required to avoid OpenLayers maxExtent bug
+        window.setTimeout(function() {
             dbkjs.map.updateSize();
-        };
-        var transitionEvent = dbkjs.util.getTransitionEvent();
-        if(transitionEvent) {
-            this.popup.one(transitionEvent, afterScreenSplit);
-        } else {
-            afterScreenSplit();
-        }
-    } else if(!this.isSplitScreen) {
-        this.popup.css({width: "100%"});
+        }, 500);
+        // Hack required to show layers
+        window.setTimeout(function() {
+            $.each(dbkjs.map.layers, function(i,l) {
+                l.redraw();
+            });
+        }, 600);
+
+        this.visible = true;
+        $(this).triggerHandler('show');
     }
-    ModalWindow.prototype.show.call(this);
 };
