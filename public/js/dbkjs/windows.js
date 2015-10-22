@@ -180,14 +180,13 @@ SplitScreenWindow.prototype.show = function() {
     if(this.isSplitScreen) {
 
         this.popup.css({width: "45%"});
+        $("#mapc1map1").css({width: "55%"});
+        // XXX move to dbkjs event 'split_screen_show';
+        $(".main-button-group").css({right: "45%"});
+        $("#vectorclickpanel").css({"width": "55%"});
 
         function afterScreenSplit() {
-            $("#mapc1map1").css({width: "55%"});
             dbkjs.map.updateSize();
-
-            // XXX move to dbkjs event 'split_screen_show';
-            $(".main-button-group").css({right: "45%"});
-            $("#vectorclickpanel").css({"width": "55%"});
         };
         var transitionEvent = dbkjs.util.getTransitionEvent();
         if(transitionEvent) {
