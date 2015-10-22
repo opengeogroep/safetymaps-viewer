@@ -975,7 +975,7 @@ dbkjs.util = {
                 popup.css('width');
                 popup.addClass('modal-popup-active');
 
-                $(dbkjs).trigger('modal_popup_show', options.name);
+                $(dbkjs).trigger('modal_popup_show', {popupName: options.name});
             },
             hide: function () {
                 hidingFunction();

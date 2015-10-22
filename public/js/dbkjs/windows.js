@@ -69,14 +69,18 @@ ModalWindow.prototype.createElements = function(title) {
         .addClass('modal-popup-view')
         .appendTo(this.popup);
 
-    $(dbkjs).on('modal_popup_show', function(e, popupName) {
-        // Hide ourselves when another popup is shown
-        if(me.name !== popupName) {
-            me.hide();
-        }
+    $(dbkjs).on('modal_popup_show', function() {
+        me.modalPopupShowEvent.apply(me, arguments);
     });
 
     $(this).triggerHandler('elements_created');
+};
+
+ModalWindow.prototype.modalPopupShowEvent = function(event, params) {
+    // Hide ourselves when another popup is shown
+    if(me.name !== params.popupName) {
+        me.hide();
+    }
 };
 
 ModalWindow.prototype.getName = function() {
@@ -93,23 +97,28 @@ ModalWindow.prototype.isVisible = function() {
 
 ModalWindow.prototype.show = function() {
     // Event should cause other modal popups to hide
-    $(dbkjs).trigger('modal_popup_show', this.name);
+    $(dbkjs).trigger('modal_popup_show', {popupName: this.name});
 
-    // request css property to force layout computation, making animation possible
-    // see http://stackoverflow.com/questions/7069167/css-transition-not-firing
-    this.popup.css('width');
-    this.popup.addClass('modal-popup-active');
+    this.popup.css('width', '100%');
     this.visible = true;
     $(this).triggerHandler('show');
 };
 
 ModalWindow.prototype.hide = function() {
     if(this.isVisible()) {
-        this.popup.removeClass('modal-popup-active');
+        this.popup.css('width', '0%');
         this.visible = false;
         $(this).triggerHandler('hide');
     }
 };
+
+ModalWindow.prototype.toggle = function() {
+    if(this.isVisible()) {
+        this.hide();
+    } else {
+        this.show();
+    }
+}
 
 ModalWindow.prototype.getTitleElement = function() {
     return this.titleElement;
@@ -127,10 +136,16 @@ ModalWindow.prototype.getTitleElement = function() {
  */
 function SplitScreenWindow(name) {
     ModalWindow.call(this, name);
-    this.isSplitScreen = true;
+    this.splitScreen = true;
 
     // XXX always, also fixes cannot click map next to buttons
     $(".main-button-group").css({paddingRight: "10px", width: "auto", float: "right", right: "0%"});
+
+    // Listen to global event for user split screen setting
+    var me = this;
+    $(dbkjs).on('setting_changed_splitscreen', function(event, splitScreenEnabled) {
+        me.setSplitScreen(splitScreenEnabled);
+    });
 };
 
 SplitScreenWindow.prototype = Object.create(ModalWindow.prototype);
@@ -146,11 +161,14 @@ SplitScreenWindow.prototype.isSplitScreen = function() {
 };
 
 SplitScreenWindow.prototype.setSplitScreen = function(splitScreen) {
+    if(splitScreen === this.splitScreen) {
+        return;
+    }
     var wasVisible = this.isVisible();
     if(wasVisible) {
         this.hide();
     }
-    this.isSplitScreen = splitScreen;
+    this.splitScreen = splitScreen;
     if(wasVisible) {
         this.show();
     }
@@ -159,31 +177,38 @@ SplitScreenWindow.prototype.setSplitScreen = function(splitScreen) {
     $(this).triggerHandler('splitScreenChange', splitScreen, this.visible);
 };
 
-SplitScreenWindow.prototype.hide = function() {
+SplitScreenWindow.prototype.modalPopupShowEvent = function(event, params) {
+    if(params.popupName !== this.popupName) {
+        this.hide(params.isSplitScreen);
+    }
+};
+
+SplitScreenWindow.prototype.hide = function(noMapAdjust) {
     if(!this.isVisible()) {
         return;
     }
-    if(!this.isSplitScreen) {
+    if(!this.splitScreen) {
         ModalWindow.prototype.hide.call(this);
     } else {
-        // XXX move to dbkjs event 'split_screen_hide'
-        $(".main-button-group").css({right: "0%"});
-        $("#vectorclickpanel").css({"width": "100%"});
-
-        $("#mapc1map1").css({width: "100%"});
         this.popup.css({width: "0%"});
+        if(!noMapAdjust) {
+            // XXX move to dbkjs event 'split_screen_hide'
+            $(".main-button-group").css({right: "0%"});
+            $("#vectorclickpanel").css({"width": "100%"});
 
-        // Hack required to avoid OpenLayers maxExtent bug
-        window.setTimeout(function() {
-            dbkjs.map.updateSize();
-        }, 500);
-        // Hack required to show layers
-        window.setTimeout(function() {
-            $.each(dbkjs.map.layers, function(i,l) {
-                l.redraw();
-            });
-        }, 600);
+            $("#mapc1map1").css({width: "100%"});
 
+            // Hack required to avoid OpenLayers maxExtent bug
+            window.setTimeout(function() {
+                dbkjs.map.updateSize();
+            }, 500);
+            // Hack required to show layers
+            window.setTimeout(function() {
+                $.each(dbkjs.map.layers, function(i,l) {
+                    l.redraw();
+                });
+            }, 600);
+        }
 
         this.visible = false;
         $(this).triggerHandler('hide');
@@ -194,11 +219,13 @@ SplitScreenWindow.prototype.show = function() {
     if(this.isVisible()) {
         return;
     }
-    if(!this.isSplitScreen) {
+    if(!this.splitScreen) {
         ModalWindow.prototype.show.call(this);
     } else {
         // Event should cause other modal popups to hide
-        $(dbkjs).trigger('modal_popup_show', this.name);
+        // isSplitScreen means split screen dialog is shown, if other split
+        // screen window is open do not adjust map width
+        $(dbkjs).trigger('modal_popup_show', { popupName: this.name, isSplitScreen:  true});
 
         // XXX move to dbkjs event 'split_screen_show';
         $(".main-button-group").css({right: "45%"});
