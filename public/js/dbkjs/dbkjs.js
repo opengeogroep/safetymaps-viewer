@@ -403,19 +403,11 @@ dbkjs.documentReady = function () {
         } else {
             // Create the infopanel
             dbkjs.util.createModalPopup({name: 'infopanel'}).getView().append($('<div></div>').attr({'id': 'infopanel_b'}));
+
             // Create the DBK infopanel
-            dbkjs.util.createModalPopup({
-                name: 'dbkinfopanel',
-                hideCallback: function() {
-                    if(dbkjs.options.enableSplitScreen) {
-                        $("#mapc1map1").css({width: "100%"});
-                        dbkjs.map.updateSize();
-                        dbkjs.util.getModalPopup('dbkinfopanel').getView().parent().css({width: "0%"});
-                        $(".main-button-group").css({right: "0%"});
-                        $("#vectorclickpanel").css({"width": "100%"});
-                    }
-                }
-            }).getView().append(
+            dbkjs.dbkInfoPanel = new SplitScreenWindow("dbkinfopanel");
+            dbkjs.dbkInfoPanel.createElements();
+            dbkjs.dbkInfoPanel.getView().append(
                     $('<div></div>')
                     .attr({'id': 'dbkinfopanel_b'})
                     .text(i18n.t("dialogs.noinfo"))
@@ -471,54 +463,26 @@ dbkjs.documentReady = function () {
 
                 $("#checkbox_splitScreen").on('change', function (e) {
                     dbkjs.options.splitScreenChecked = e.target.checked;
+                    $(dbkjs).triggerHandler('setting_changed_splitscreen', dbkjs.options.splitScreenChecked);
                 });
 
-                // Hide info panel when modal popup is openend
-                $(dbkjs).on('modal_popup_show', function(e, name) {
-                    dbkjs.util.getModalPopup('dbkinfopanel').hide();
-                });
-
-                // Hide info panel when settings is opened
+                // Hide all modal popups when settings is opened
                 $("#c_settings").on('click', function(e) {
-                    dbkjs.util.getModalPopup('dbkinfopanel').hide();
+                    $(dbkjs).triggerHandler('modal_popup_show', {popupName: 'settings'});
                 });
             });
         }
 
         $('#infopanel_b').html(dbkjs.options.info);
-        $('#tb03, #c_minimap').click(function () {
-            if (this.id === "tb03") {
-                if (dbkjs.viewmode !== 'fullscreen') {
-                    $('#infopanel').toggle();
-                } else {
-                    dbkjs.util.getModalPopup('dbkinfopanel').show();
-
-                    var infoview = dbkjs.util.getModalPopup('dbkinfopanel').getView();
-
-                    if(dbkjs.options.splitScreenChecked) {
-                        $("#mapc1map1").css({width: "55%"});
-                        dbkjs.map.updateSize();
-                        infoview.parent().css({width: "45%"});
-                        $(".main-button-group").css({right: "45%"});
-                        $("#vectorclickpanel").css({"width": "55%"});
-                    } else {
-                        infoview.parent().css({width: "100%"});
-                    }
-
-                    // Update content height after width transition has ended
-                    var updateContentHeight = function() {
-                        infoview.find(".tab-content").css("height", infoview.height() - infoview.find(".nav-pills").height());
-                    };
-                    var transitionEvent = dbkjs.util.getTransitionEvent();
-                     if(transitionEvent) {
-                         infoview.parent().on(transitionEvent, updateContentHeight);
-                     } else {
-                         updateContentHeight();
-                     }
-                }
-            } else if (this.id === "c_minimap") {
-                $('#minimappanel').toggle();
+        $('#tb03').click(function () {
+            if (dbkjs.viewmode !== 'fullscreen') {
+                $('#infopanel').toggle();
+            } else {
+                dbkjs.dbkInfoPanel.toggle();
             }
+        });
+        $("#c_minimap").click(function() {
+            $('#minimappanel').toggle();
         });
         // Added touchstart event to trigger click on. There was some weird behaviour combined with FastClick,
         // this seems to fix the issue
