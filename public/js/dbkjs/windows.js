@@ -208,6 +208,11 @@ SplitScreenWindow.prototype.show = function() {
         this.popup.css({width: "45%"});
 
         // Hack required to avoid OpenLayers maxExtent bug
+
+        // https://github.com/openlayers/openlayers/issues/669
+        // https://groups.google.com/forum/#!topic/geoext-viewer-devel/CdKNko7LVg8
+        // Either upgrade OL or use null TileManager
+
         window.setTimeout(function() {
             dbkjs.map.updateSize();
         }, 500);
