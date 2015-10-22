@@ -76,15 +76,11 @@ VoertuigInzetController.prototype.addConfigControls = function() {
                 "</div></div><p/><p/><hr>");
         incidentSettings.insertAfter($("#settingspanel_b hr:last"));
 
-        $("#input_voertuignummer").on('change', function(e) {
-            me.setVoertuignummer($(e.target).val());
+        $("#settingspanel").on('hidden.bs.modal', function() {
+            me.setVoertuignummer($("#input_voertuignummer").val());
         });
 
-        $("#input_voertuignummer")
-        .val(me.voertuignummer)
-        .on('typeahead:selected', function(e, v) {
-            me.setVoertuignummer(v.value);
-        });
+        $("#input_voertuignummer").val(me.voertuignummer);
 
         if(!me.voertuignummer) {
             // Open config window when voertuignummer not configured
