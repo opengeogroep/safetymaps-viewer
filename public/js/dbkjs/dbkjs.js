@@ -407,6 +407,21 @@ dbkjs.documentReady = function () {
             // Create the DBK infopanel
             dbkjs.dbkInfoPanel = new SplitScreenWindow("dbkinfopanel");
             dbkjs.dbkInfoPanel.createElements();
+
+            // Put tabs at the bottom after width transition has ended
+            var updateContentHeight = function() {
+                var view = dbkjs.dbkInfoPanel.getView();
+                view.find(".tab-content").css("height", view.height() - view.find(".nav-pills").height());
+            };
+            $(dbkjs.dbkInfoPanel).on("show", function() {
+                var event = dbkjs.util.getTransitionEvent();
+                if(event) {
+                    dbkjs.dbkInfoPanel.getView().parent().on(event, updateContentHeight);
+                } else {
+                    updateContentHeight();
+                }
+            });
+
             dbkjs.dbkInfoPanel.getView().append(
                     $('<div></div>')
                     .attr({'id': 'dbkinfopanel_b'})
