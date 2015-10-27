@@ -78,6 +78,50 @@ dbkjs.modules.vrhinzetbalk = {
             wms: ['Basis'],
             setTopLayerIndex: true
         },
+        toggleBrandweer: {
+            label: 'Brandweergegevens',
+            img: 'images/brwzw.png',
+            style: 'width: 32px; margin-bottom: 6px',
+            layers: [ 'Brandcompartiment', 'Gevaarlijke stoffen' ],
+            active: false,
+            css: {
+                'background-color': 'red',
+                color: 'white'
+            },
+            brandweervoorzieningen: [
+                'Tbk5.001',  // Brandweerlift
+                'Tb1.002',   // Overige ingangen / neveningang
+                'Tb1.009',   // Opstelplaats overige blusvoertuigen
+                'Tb2.005',   // Schakelaar rook-/warmteafvoer
+            ],
+            wms: ['Brandweer']
+        },
+        toggleBluswater: {
+            label: 'Bluswatergegevens',
+            img: 'images/brandkraan.png',
+            style: 'height: 36px; margin-bottom: 5px',
+            layers: [ ],
+            active: false,
+            css: {
+                'background-color': '#2D2DFF',
+                color: 'white'
+            },
+            brandweervoorzieningen: [
+                'Tb2.024',  // Afsluiter omloopleiding
+                'Tb2.026',  // Afsluiter schuimvormend middel
+                'Tb2.023',  // Afsluiter sprinkler
+                'Tb2.022',  // Afsluiter water
+                'Tb02',     // Brandslanghaspel
+                'Tb.1007a', // Droge blusleiding afnamepunt
+                'Tb4.024',  // Gas blusinstallatie / Blussysteem kooldioxide
+                'Tb1.011',  // Gas detectiepaneel
+                'Tb4.005'   // Gesprinklerde ruimte
+            ],
+            hulplijnen: [
+                "DBL Leiding"
+            ],
+            wms: ['Water']
+        },
         toggleGebouw: {
             label: 'Gebouwgegevens',
             icon: 'fa-industry',
@@ -106,50 +150,6 @@ dbkjs.modules.vrhinzetbalk = {
                 'Falck36'   // Hellingbaan
             ],
             wms: ['Gebouw']
-        },
-        toggleBluswater: {
-            label: 'Bluswatergegevens',
-            img: 'images/brandkraan.png',
-            style: 'height: 36px; margin-bottom: 5px',
-            layers: [ ],
-            active: false,
-            css: {
-                'background-color': '#2D2DFF',
-                color: 'white'
-            },
-            brandweervoorzieningen: [
-                'Tb2.024',  // Afsluiter omloopleiding
-                'Tb2.026',  // Afsluiter schuimvormend middel
-                'Tb2.023',  // Afsluiter sprinkler
-                'Tb2.022',  // Afsluiter water
-                'Tb02',     // Brandslanghaspel
-                'Tb.1007a', // Droge blusleiding afnamepunt
-                'Tb4.024',  // Gas blusinstallatie / Blussysteem kooldioxide
-                'Tb1.011',  // Gas detectiepaneel
-                'Tb4.005'   // Gesprinklerde ruimte
-            ],
-            hulplijnen: [
-                "DBL Leiding"
-            ],
-            wms: ['Water']
-        },
-        toggleBrandweer: {
-            label: 'Brandweergegevens',
-            img: 'images/brwzw.png',
-            style: 'width: 32px; margin-bottom: 6px',
-            layers: [ 'Brandcompartiment', 'Gevaarlijke stoffen' ],
-            active: false,
-            css: {
-                'background-color': 'red',
-                color: 'white'
-            },
-            brandweervoorzieningen: [
-                'Tbk5.001',  // Brandweerlift
-                'Tb1.002',   // Overige ingangen / neveningang
-                'Tb1.009',   // Opstelplaats overige blusvoertuigen
-                'Tb2.005',   // Schakelaar rook-/warmteafvoer
-            ],
-            wms: ['Brandweer']
         }
     },
     disabledLayers: [],
