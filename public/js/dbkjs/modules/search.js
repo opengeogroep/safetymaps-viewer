@@ -218,7 +218,23 @@ dbkjs.modules.search = {
                 's_oms': { 'icon': 'fa fa-bell', 'text': i18n.t("search.oms"), 'placeholder': i18n.t("search.omsplaceholder"), 'search': 'oms' }
             };
 
+        if(dbkjs.options.searchTabs) {
+            $("#s_dbk, #s_address").on('click', function(e) {
+                currentSearch = $(e.target).attr("id").substring(2);
+
+                $("#search_input").attr("placeholder", i18n.t("search." + currentSearch + "placeholder"));
+                window.setTimeout(function() {
+                    searchField.keyup();
+                }, 100);
+            });
+        }
+
         searchField.on('keyup', function(e) {
+
+            if(dbkjs.options.searchTabs) {
+                currentSearch = $("#search_tabs li.active a").attr("id").substring(2);
+            }
+
             var searchText = searchField.val();
             if(searchText.length === 0) {
                 $('.search_result').html('');
