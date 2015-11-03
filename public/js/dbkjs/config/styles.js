@@ -288,6 +288,7 @@ dbkjs.config.styles = {
                         case "60 minuten brandwerende scheiding":
                             return "#5da03b";
                         case "> 60 minuten brandwerende scheiding":
+                        case "> 120 minuten brandwerende scheiding":
                             return "#ff0000";
                         case "Rookwerende scheiding":
                             return "#009cdd";
@@ -300,6 +301,7 @@ dbkjs.config.styles = {
                     switch (feature.attributes.type) {
                         case "60 minuten brandwerende scheiding":
                         case "> 60 minuten brandwerende scheiding":
+                        case "> 120 minuten brandwerende scheiding":
                             return dbkjs.scaleStyleValue(4);
                         default:
                             return dbkjs.scaleStyleValue(2);
@@ -313,6 +315,7 @@ dbkjs.config.styles = {
                         case "60 minuten brandwerende scheiding":
                             return dbkjs.scaleStyleValue(4) + " " + dbkjs.scaleStyleValue(4);
                         case "> 60 minuten brandwerende scheiding":
+                        case "> 120 minuten brandwerende scheiding":
                             return "solid";
                         case "Rookwerende scheiding":
                             return dbkjs.scaleStyleValue(8) + " " + dbkjs.scaleStyleValue(4) + dbkjs.scaleStyleValue(2) + " " + dbkjs.scaleStyleValue(4);

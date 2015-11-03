@@ -49,7 +49,7 @@ dbkjs.modules.vrhinzetbalk = {
         toggleBasis: {
             label: 'Basisgegevens',
             icon: 'fa-bus',
-            layers: [ 'Toegang terrein' ], // XXX
+            layers: [ 'Toegang terrein', 'Tekst objecten' ], // XXX
             active: true,
             css: {
                 'background-color': 'green',
@@ -69,11 +69,13 @@ dbkjs.modules.vrhinzetbalk = {
                 'Tb1.004a', // BMC
                 'Tb1.004',  // Brandweerpaneel
                 'To04',     // Brandweerinfokast
-                'Tb1.005'   // Nevenpaneel
+                'Tb1.005',   // Nevenpaneel
+                'Tb1.001'   // Brandweeringang
             ],
             hulplijnen: [
                 "Bbarrier",  // Slagboom
-                "HEAT"       // Schadecirkel
+                "HEAT",      // Schadecirkel
+                "Fence"
             ],
             wms: ['Basis'],
             setTopLayerIndex: true
@@ -93,8 +95,21 @@ dbkjs.modules.vrhinzetbalk = {
                 'Tb1.002',   // Overige ingangen / neveningang
                 'Tb1.009',   // Opstelplaats overige blusvoertuigen
                 'Tb2.005',   // Schakelaar rook-/warmteafvoer
+                'Tw16',
+                'Tw14',
+                'Tw12',
+                'Tw10',
+                'Tw28',
+                'Tw24',
+                'Tw23',
+                'Tw22',
+                'Tw21',
+                'Tw03',
+                'Tw02',
+                'Tw01'
             ],
-            wms: ['Brandweer']
+            wms: ['Brandweer'],
+            setTopLayerIndex: true
         },
         toggleBluswater: {
             label: 'Bluswatergegevens',
@@ -110,7 +125,6 @@ dbkjs.modules.vrhinzetbalk = {
                 'Tb2.024',  // Afsluiter omloopleiding
                 'Tb2.026',  // Afsluiter schuimvormend middel
                 'Tb2.023',  // Afsluiter sprinkler
-                'Tb2.022',  // Afsluiter water
                 'Tb02',     // Brandslanghaspel
                 'Tb.1007a', // Droge blusleiding afnamepunt
                 'Tb4.024',  // Gas blusinstallatie / Blussysteem kooldioxide
@@ -120,7 +134,8 @@ dbkjs.modules.vrhinzetbalk = {
             hulplijnen: [
                 "DBL Leiding"
             ],
-            wms: ['Water']
+            wms: ['Water'],
+            setTopLayerIndex: true
         },
         toggleGebouw: {
             label: 'Gebouwgegevens',
@@ -139,6 +154,7 @@ dbkjs.modules.vrhinzetbalk = {
                 'To1.003',  // Trappenhuis
                 'Tb2.025',  // Afsluiter LPG
                 'Tb2.021',  // Afsluiter gas
+                'Tb2.022',  // Afsluiter water
                 'Tb2.043',  // Noodstop
                 'To03',     // Noodstroom aggegraat
                 'Falck11',  // Schacht/kanaal
@@ -149,7 +165,8 @@ dbkjs.modules.vrhinzetbalk = {
                 'To02',     // Slaapplaats
                 'Falck36'   // Hellingbaan
             ],
-            wms: ['Gebouw']
+            wms: ['Gebouw'],
+            setTopLayerIndex: true
         }
     },
     disabledLayers: [],
