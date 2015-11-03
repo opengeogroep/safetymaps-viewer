@@ -132,6 +132,9 @@ dbkjs.protocol.jsonDBK.constructOmsdetail = function(feature) {
 };
 
 dbkjs.protocol.jsonDBK.getfeatureinfo = function(e){
+    if(dbkjs.protocol.jsonDBK.selectlayers.indexOf(e.feature.layer) === -1) {
+        return;
+    }
     $('#vectorclickpanel_h').html('<span class="h4"><i class="fa fa-info-circle">&nbsp;' + e.feature.layer.name + '</span>');
     if(e.feature.layer.name === 'Gevaarlijke stoffen' || e.feature.layer.name === 'Brandweervoorziening') {
         var html = $('<div class="table-responsive"></div>'),

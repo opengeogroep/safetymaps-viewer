@@ -80,13 +80,19 @@ dbkjs.protocol.jsonDBK = {
             _obj.layerGevaarlijkestof,
             _obj.layerTekstobject
         ];
-        _obj.selectlayers = [];
+        _obj.selectlayers = [
+            _obj.layerBrandweervoorziening,
+            _obj.layerBrandcompartiment,
+            _obj.layerGevaarlijkestof,
+            _obj.layerToegangterrein
+        ];
         _obj.hoverlayers = [
             _obj.layerBrandweervoorziening,
             _obj.layerBrandcompartiment,
             _obj.layerGevaarlijkestof,
             _obj.layerHulplijn,
-            _obj.layerToegangterrein
+            _obj.layerToegangterrein,
+            _obj.layerTekstobject
         ];
         dbkjs.map.addLayers(_obj.layers);
         dbkjs.selectControl.setLayer((dbkjs.selectControl.layers || dbkjs.selectControl.layer).concat(_obj.hoverlayers));
@@ -127,6 +133,9 @@ dbkjs.protocol.jsonDBK = {
         });
     },
     getfeatureinfo: function (e) {
+        if(dbkjs.protocol.jsonDBK.selectlayers.indexOf(e.feature.layer) === -1) {
+            return;
+        }
         dbkjs.gui.detailsPanelUpdateTitle(e.feature.layer.name);
         html = '<div style:"width: 100%" class="table-responsive">';
         html += '<table class="table table-hover">';
