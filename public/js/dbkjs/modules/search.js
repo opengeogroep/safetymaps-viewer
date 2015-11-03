@@ -220,12 +220,15 @@ dbkjs.modules.search = {
 
         if(dbkjs.options.searchTabs) {
             $("#s_dbk, #s_address").on('click', function(e) {
-                currentSearch = $(e.target).attr("id").substring(2);
+                var searchId = $(e.target).attr("id");
+                if(searchId && searchId.startsWith("s_")) {
+                    currentSearch = searchId.substring(2);
 
-                $("#search_input").attr("placeholder", i18n.t("search." + currentSearch + "placeholder"));
-                window.setTimeout(function() {
-                    searchField.keyup();
-                }, 100);
+                    $("#search_input").attr("placeholder", i18n.t("search." + currentSearch + "placeholder"));
+                    window.setTimeout(function() {
+                        searchField.keyup();
+                    }, 100);
+                }
             });
         }
 
