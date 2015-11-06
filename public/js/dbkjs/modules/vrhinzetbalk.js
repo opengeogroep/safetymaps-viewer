@@ -106,7 +106,8 @@ dbkjs.modules.vrhinzetbalk = {
                 'Tw21',
                 'Tw03',
                 'Tw02',
-                'Tw01'
+                'Tw01',
+                'TwTemp'
             ],
             wms: ['Brandweer'],
             setTopLayerIndex: true
@@ -140,7 +141,7 @@ dbkjs.modules.vrhinzetbalk = {
         toggleGebouw: {
             label: 'Gebouwgegevens',
             icon: 'fa-industry',
-            layers: [ ], // XXX Binnenmuur
+            layers: [ ],
             active: false,
             css: {
                 'background-color': 'black',
@@ -164,6 +165,9 @@ dbkjs.modules.vrhinzetbalk = {
                 'Tb2.004',  // Schakelaar luchtbehandeling
                 'To02',     // Slaapplaats
                 'Falck36'   // Hellingbaan
+            ],
+            hulplijnen: [
+                "Binnenmuur"
             ],
             wms: ['Gebouw'],
             setTopLayerIndex: true
