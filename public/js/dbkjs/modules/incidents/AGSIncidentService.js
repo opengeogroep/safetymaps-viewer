@@ -442,6 +442,7 @@ AGSIncidentService.prototype.getClassificaties = function(incidenten) {
 
     $.ajax(me.tableUrls.GMS_MLD_CLASS_NIVO_VIEW + "/query", {
         dataType: "json",
+        method: "POST",
         data: {
             f: "pjson",
             token: me.token,
@@ -555,6 +556,7 @@ AGSIncidentService.prototype.getInzetEenheden = function(incidentIds, archief, a
 
     $.ajax(me.tableUrls[archief ? "GMSARC_INZET_EENHEID" : "GMS_INZET_EENHEID"] + "/query", {
         dataType: "json",
+        method: "POST",
         data: {
             f: "pjson",
             token: me.token,
