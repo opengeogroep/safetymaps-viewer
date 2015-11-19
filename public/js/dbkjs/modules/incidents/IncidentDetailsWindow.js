@@ -150,7 +150,7 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
             pre += AGSIncidentService.prototype.getAGSMoment(k.DTG_KLADBLOK_REGEL).format("DD-MM-YYYY HH:mm:ss ") +
                     dbkjs.util.htmlEncode(k.INHOUD_KLADBLOK_REGEL) + "\n";
         });
-        html += "Kladblok:<br/><pre>" + pre + "</pre>";
+        html += "Kladblok:<br/><pre><span style='font-size: 16px'>" + pre + "</span></pre>";
         html += '</td></tr>';
     }
 
