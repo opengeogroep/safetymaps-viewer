@@ -24,7 +24,7 @@
  * @returns {IncidentDetailsWindow}
  */
 function IncidentDetailsWindow() {
-    SplitScreenWindow.call(this, "incidentDetails", "Incident");
+    SplitScreenWindow.call(this, "incidentDetails");
 
     $(this).on('elements_created', function() {
         var v = ModalWindow.prototype.getView.call(this);
