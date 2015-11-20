@@ -24,6 +24,7 @@
  *
  * Events:
  * initialized: when initialize() resolves
+ * token: when token received/changed
  *
  * @param {string} url The URL to the ArcGIS REST MapService
  * @returns {AGSIncidentService}
@@ -161,6 +162,7 @@ AGSIncidentService.prototype.getToken = function(tokenUrl, user, pass) {
     .always(function(data, textStatus, jqXHR) {
         if(data.token) {
             me.token = data.token;
+            $(me).triggerHandler('token', me.token);
 
             window.setTimeout(function() {
                 // failure is ignored when updating token, maybe trigger event?
