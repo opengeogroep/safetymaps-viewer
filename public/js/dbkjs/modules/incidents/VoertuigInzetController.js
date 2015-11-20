@@ -34,6 +34,8 @@ function VoertuigInzetController(incidents) {
     me.service = incidents.service;
 
     me.button = new AlertableButton("btn_incident", "Incident", "bell-o");
+    me.button.getElement().prependTo('.layertoggle-btn-group');
+
     $(me.button).on('click', function() {
         me.incidentDetailsWindow.show();
         me.zoomToIncident();

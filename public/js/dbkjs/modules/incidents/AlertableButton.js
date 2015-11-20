@@ -36,9 +36,12 @@ function AlertableButton(id, title, icon) {
         e.preventDefault();
 
         $(me).triggerHandler('click', id);
-    })
-    .prependTo('.layertoggle-btn-group');
+    });
 }
+
+AlertableButton.prototype.getElement = function() {
+    return this.a;
+};
 
 AlertableButton.prototype.setAlerted = function(alert) {
     var me = this;
