@@ -622,7 +622,7 @@ AGSIncidentService.prototype.getCurrentIncidents = function() {
                 // Add inzet to incident
                 $.each(incidents, function(j, incident) {
                     if(inzetEenheid.INCIDENT_ID === incident.INCIDENT_ID) {
-                        if(incident.inzetEenheden) {
+                        if(incident.inzetBrandweerEenheden) {
                             incident.inzetBrandweerEenheden.push(inzetEenheid);
                         } else {
                             incident.inzetBrandweerEenheden = [inzetEenheid];
@@ -698,6 +698,17 @@ AGSIncidentService.prototype.getArchivedIncidents = function(highestArchivedInci
             // Filter out incidents without inzet
             var incidentIdsMetInzet = [];
             $.each(inzet, function(i, inzetEenheid) {
+                // Add inzet to incident
+                $.each(incidents, function(j, incident) {
+                    if(inzetEenheid.INCIDENT_ID === incident.INCIDENT_ID) {
+                        if(incident.inzetBrandweerEenheden) {
+                            incident.inzetBrandweerEenheden.push(inzetEenheid);
+                        } else {
+                            incident.inzetBrandweerEenheden = [inzetEenheid];
+                        }
+                    }
+                });
+
                 incidentIdsMetInzet.push(inzetEenheid.INCIDENT_ID);
             });
             var incidentenMetInzet = [];

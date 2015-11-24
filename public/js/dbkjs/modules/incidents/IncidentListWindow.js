@@ -112,7 +112,7 @@ IncidentListWindow.prototype.data = function(currentIncidents, archivedIncidents
                 " met actuele inzet brandweereenheden");
 
     h.appendTo(d);
-    me.listIncidents(d, actueleInzet, null, function(r, incident) {
+    me.listIncidents(d, actueleInzet, null, true, function(r, incident) {
         $(r).on('click', function() {
             $(me).trigger('click', { incident: incident, archief: false });
         });
@@ -120,7 +120,7 @@ IncidentListWindow.prototype.data = function(currentIncidents, archivedIncidents
 
     var h = $("<div class='header archief'/>").html("Gearchiveerde/inzet be&euml;indigde incidenten");
     h.appendTo(d);
-    me.listIncidents(d, beeindigdeInzet.concat(archivedIncidents), actueleIncidentIds, function(r, incident) {
+    me.listIncidents(d, beeindigdeInzet.concat(archivedIncidents), actueleIncidentIds, false, function(r, incident) {
         $(r).on('click', function() {
             $(me).trigger('click', { incident: incident, archief: true });
         });
@@ -132,7 +132,7 @@ IncidentListWindow.prototype.data = function(currentIncidents, archivedIncidents
     }
 };
 
-IncidentListWindow.prototype.listIncidents = function(el, incidents, incidentIdsToSkip, incidentDivFunction) {
+IncidentListWindow.prototype.listIncidents = function(el, incidents, incidentIdsToSkip, showInzetInTitle, incidentDivFunction) {
     var me = this;
 
     incidents.sort(function(lhs, rhs) {
@@ -153,7 +153,7 @@ IncidentListWindow.prototype.listIncidents = function(el, incidents, incidentIds
 
         var start = dbkjs.modules.incidents.controller.service.getAGSMoment(incident.DTG_START_INCIDENT);
         var actueleInzet = [];
-        if(incident.inzetBrandweerEenheden) {
+        if(showInzetInTitle && incident.inzetBrandweerEenheden) {
             $.each(incident.inzetBrandweerEenheden, function(j, eenheid) {
                 if(!eenheid.DTG_EIND_ACTIE) {
                     actueleInzet.push(eenheid.CODE_VOERTUIGSOORT + " " + eenheid.ROEPNAAM_EENHEID + (eenheid.KAZ_NAAM ? " (" + eenheid.KAZ_NAAM + ")" : ""));
