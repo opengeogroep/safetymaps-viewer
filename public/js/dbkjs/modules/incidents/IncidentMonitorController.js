@@ -124,7 +124,10 @@ IncidentMonitorController.prototype.markerClick = function(incident, marker) {
 IncidentMonitorController.prototype.getIncidentList = function() {
     var me = this;
 
-    me.service.getCurrentIncidents()
+    var dCurrent = me.service.getCurrentIncidents();
+    var dArchived = me.service.getArchivedIncidents(me.highestArchiveIncidentId);
+
+    $.when(dCurrent, dArchived)
     .always(function() {
         me.getIncidentListTimeout = window.setTimeout(function() {
             me.getIncidentList();
@@ -136,19 +139,38 @@ IncidentMonitorController.prototype.getIncidentList = function() {
         me.button.setIcon("bell-slash");
         me.incidentListWindow.showError(msg);
     })
-    .done(function(currentIncidents) {
-        me.service.getArchivedIncidents(currentIncidents, me.highestArchiveIncidentId)
-        .fail(function(e) {
-            var msg = "Kan incidentenlijst niet ophalen: " + e;
-            dbkjs.gui.showError(msg);
-            me.button.setIcon("bell-slash");
-            me.incidentListWindow.showError(msg);
-        })
-        .done(function(archivedIncidents) {
-            me.highestArchiveIncidentId = archivedIncidents.highestIncidentId;
-            console.log("current", currentIncidents, "archived", archivedIncidents);
-        });
+    .done(function(currentIncidents, archivedIncidents) {
+        me.processNewArchivedIncidents(archivedIncidents);
+        me.incidentListWindow.data(currentIncidents, me.archivedIncidents, true);
     });
+};
+
+IncidentMonitorController.prototype.processNewArchivedIncidents = function(archivedIncidents) {
+    var me = this;
+
+    // Save highest ID to request only new archived incidents with higher ID
+    // next time
+    me.highestArchiveIncidentId = archivedIncidents.highestIncidentId;
+
+    if(archivedIncidents.incidents.length > 0) {
+        console.log("New archived incidents: " + archivedIncidents.incidents.length + ", highest id " + me.highestArchiveIncidentId);
+    }
+
+    // Update archived incident list
+    me.archivedIncidents = archivedIncidents.incidents.concat(me.archivedIncidents ? me.archivedIncidents : []);
+
+    // Remove old archived incidents (start incident more than 24 hours ago)
+    var cutoff = new moment().subtract(24, 'hours');
+    var list = [];
+    $.each(me.archivedIncidents, function(i, incident) {
+        var incidentStart = me.service.getAGSMoment(incident.DTG_START_INCIDENT);
+        if(incidentStart.isBefore(cutoff)) {
+            console.log("Incident started at " + incidentStart.format() + " before 24 hours ago " + cutoff.format() + ", removing from list", incident);
+        } else {
+            list.push(incident);
+        }
+    });
+    me.archivedIncidents = list;
 };
 
 IncidentMonitorController.prototype.enableIncidentUpdates = function() {

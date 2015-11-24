@@ -615,10 +615,22 @@ AGSIncidentService.prototype.getCurrentIncidents = function() {
             d.reject(e);
         })
         .done(function(inzet, classificaties) {
-            // Filter out incidents without inzet
+
             var incidentIdsMetInzet = [];
             var incidentIdsMetBeeindigdeInzet = [];
             $.each(inzet, function(i, inzetEenheid) {
+                // Add inzet to incident
+                $.each(incidents, function(j, incident) {
+                    if(inzetEenheid.INCIDENT_ID === incident.INCIDENT_ID) {
+                        if(incident.inzetEenheden) {
+                            incident.inzetBrandweerEenheden.push(inzetEenheid);
+                        } else {
+                            incident.inzetBrandweerEenheden = [inzetEenheid];
+                        }
+                    }
+                });
+
+                // Save if inzet is beeindigd
                 if(inzetEenheid.DTG_EIND_ACTIE) {
                     incidentIdsMetBeeindigdeInzet.push(inzetEenheid.INCIDENT_ID);
                 } else {
@@ -626,34 +638,29 @@ AGSIncidentService.prototype.getCurrentIncidents = function() {
                 }
             });
             var incidentenMetInzet = [];
-            var incidentenMetBeeindigdeInzet = [];
-            var incidentIds = [];
             $.each(incidents, function(i, incident) {
                 incident.classificaties = classificaties[incident.INCIDENT_ID];
+
+                // Only incidents with inzet (actueel or beeindigd) returned
+                // Only incidents with actuele inzet have actueleInzet set to true
                 if(incidentIdsMetInzet.indexOf(incident.INCIDENT_ID) !== -1) {
+                    incident.actueleInzet = true;
                     incidentenMetInzet.push(incident);
-                    incidentIds.push(incident.INCIDENT_ID);
                 } else if(incidentIdsMetBeeindigdeInzet.indexOf(incident.INCIDENT_ID) !== -1) {
-                    incidentenMetBeeindigdeInzet.push(incident);
-                    incidentIds.push(incident.INCIDENT_ID);
+                    incident.actueleInzet = false;
+                    incidentenMetInzet.push(incident);
                 }
             });
-            d.resolve({
-                metInzet: incidentenMetInzet,
-                beeindigdeInzet: incidentenMetBeeindigdeInzet,
-                incidentIds: incidentIds
-            });
+            d.resolve(incidentenMetInzet);
         });
     });
 
     return d.promise();
 };
 
-AGSIncidentService.prototype.getArchivedIncidents = function(currentIncidents, highestArchivedIncidentId) {
+AGSIncidentService.prototype.getArchivedIncidents = function(highestArchivedIncidentId) {
     var me = this;
     var d = $.Deferred();
-
-    var where = currentIncidents.incidentIds.length === 0 ? "" : "INCIDENT_ID NOT IN (" + currentIncidents.incidentIds.join(",") + ") AND ";
 
     var dIncidents = $.Deferred();
     $.ajax(me.tableUrls["GMSARC_INCIDENT"] + "/query", {
@@ -661,7 +668,7 @@ AGSIncidentService.prototype.getArchivedIncidents = function(currentIncidents, h
         data: {
             f: "pjson",
             token: me.token,
-            where: where + "IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3 " +
+            where: "IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3 " +
                 "AND DTG_START_INCIDENT > TO_DATE('" + new moment().subtract(24, 'hours').format("YYYY-MM-DD HH:mm:ss") + "','YYYY-MM-DD HH24:MI:SS') " +
                 "AND INCIDENT_ID > " + (highestArchivedIncidentId ? highestArchivedIncidentId : 0),
             orderByFields: "DTG_START_INCIDENT DESC",
@@ -704,7 +711,7 @@ AGSIncidentService.prototype.getArchivedIncidents = function(currentIncidents, h
             });
             d.resolve({
                 highestIncidentId: highestIncidentId,
-                incidents: incidents
+                incidents: incidentenMetInzet
             });
         });
     });
