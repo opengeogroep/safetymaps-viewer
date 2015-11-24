@@ -194,7 +194,7 @@ VoertuigInzetController.prototype.geenInzet = function(triggerEvent) {
     this.disableIncidentUpdates();
     this.incidentId = null;
     this.incident = null;
-    this.incidentDetailsWindow.data(null);
+    this.incidentDetailsWindow.data("Er is momenteel geen incident waavoor dit voertuig is ingezet.");
     this.incidentDetailsWindow.hide();
     this.markerLayer.clear();
 
@@ -228,7 +228,7 @@ VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
             }
             me.incident = incident;
             me.incidentDetailsWindow.data(incident, false);
-            me.markerLayer.addIncident(incident, true);
+            me.markerLayer.addIncident(incident, false);
             me.markerLayer.setZIndexFix();
 
             dbkjs.protocol.jsonDBK.deselect();
