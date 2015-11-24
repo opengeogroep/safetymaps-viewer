@@ -26,12 +26,10 @@
  */
 function IncidentListWindow() {
     SplitScreenWindow.call(this, "incidentList");
-
-    // Create style
-
-    //  text-overflow: ellipsis;
-
     var me = this;
+
+    me.createStyle();
+
     $(this).on('elements_created', function() {
         me.getView().html("Verbinden met incidentenservice...");
 
@@ -50,6 +48,30 @@ function IncidentListWindow() {
 
 IncidentListWindow.prototype = Object.create(SplitScreenWindow.prototype);
 IncidentListWindow.prototype.constructor = IncidentListWindow;
+
+IncidentListWindow.prototype.createStyle = function() {
+    // Create style
+    var css = '.incidentList .header { font-size: 18px; margin: 5px 0px 5px 0px } ' +
+        //'.incidentList .list .incident.even { background-color: #; } ' +
+        '.incidentList .list .incident.odd { background-color: #ECECEC; } ' +
+        '.incidentList .list div.incident:hover { background-color: #DCE0E8; cursor: pointer; cursor: hand; } ' +
+        '.incidentList .list .incident { width: 100%; } ' +
+        '.incidentList .list .incident span { padding: 0px 2px 2px 0px; vertical-align: top } ' +
+        '.incidentList .list .incident span.locatie { display: inline-block; width: 25%; }' +
+        '.incidentList .list .incident span.classificatie { display: inline-block; width: 30%; }' +
+        '.incidentList .list .incident span.plaats { display: inline-block; width: 15%; }';
+
+    var head = document.getElementsByTagName('head')[0];
+    var style = document.createElement('style');
+
+    style.type = 'text/css';
+    if(style.styleSheet) {
+        style.styleSheet.cssText = css;
+    } else {
+        style.appendChild(document.createTextNode(css));
+    }
+    head.appendChild(style);
+};
 
 IncidentListWindow.prototype.showError = function(e) {
     this.getView().html("");
@@ -84,18 +106,25 @@ IncidentListWindow.prototype.data = function(currentIncidents, archivedIncidents
     });
 
     var d = $("<div class='incidentList'/>");
-    console.log(currentIncidents, archivedIncidents);
     var h = $("<div class='header actueleInzet'/>")
             .html(actueleInzet.length === 0 ? "Geen actieve incidenten" :
                 (actueleInzet.length === 1 ? "&Eacute;&eacute;n actief incident" : actueleInzet.length + " actieve incidenten") +
                 " met actuele inzet brandweereenheden");
 
     h.appendTo(d);
-    me.listIncidents(d, actueleInzet);
+    me.listIncidents(d, actueleInzet, null, function(r, incident) {
+        $(r).on('click', function() {
+            $(me).trigger('click', { incident: incident, archief: false });
+        });
+    });
 
     var h = $("<div class='header archief'/>").html("Gearchiveerde/inzet be&euml;indigde incidenten");
     h.appendTo(d);
-    me.listIncidents(d, beeindigdeInzet.concat(archivedIncidents), actueleIncidentIds);
+    me.listIncidents(d, beeindigdeInzet.concat(archivedIncidents), actueleIncidentIds, function(r, incident) {
+        $(r).on('click', function() {
+            $(me).trigger('click', { incident: incident, archief: true });
+        });
+    });
     d.appendTo(v);
 
     if(restoreScrollTop) {
@@ -103,7 +132,7 @@ IncidentListWindow.prototype.data = function(currentIncidents, archivedIncidents
     }
 };
 
-IncidentListWindow.prototype.listIncidents = function(el, incidents, incidentIdsToSkip) {
+IncidentListWindow.prototype.listIncidents = function(el, incidents, incidentIdsToSkip, incidentDivFunction) {
     var me = this;
 
     incidents.sort(function(lhs, rhs) {
@@ -122,19 +151,34 @@ IncidentListWindow.prototype.listIncidents = function(el, incidents, incidentIds
         }
         incidentIdsToSkip.push(incident.INCIDENT_ID);
 
-        var r = $("<div class='incident'/>").addClass(odd ? "odd" : "even");
+        var start = dbkjs.modules.incidents.controller.service.getAGSMoment(incident.DTG_START_INCIDENT);
+        var actueleInzet = [];
+        if(incident.inzetBrandweerEenheden) {
+            $.each(incident.inzetBrandweerEenheden, function(j, eenheid) {
+                if(!eenheid.DTG_EIND_ACTIE) {
+                    actueleInzet.push(eenheid.CODE_VOERTUIGSOORT + " " + eenheid.ROEPNAAM_EENHEID + (eenheid.KAZ_NAAM ? " (" + eenheid.KAZ_NAAM + ")" : ""));
+                }
+            });
+        }
+        var r = $("<div class='incident'/>")
+                .addClass(odd ? "odd" : "even")
+                .attr("title", start.fromNow() + (actueleInzet.length > 0 ? ", " + actueleInzet.join(", ") : ""));
         odd = !odd;
 
         if(dbkjs.options.incidents.incidentListFunction) {
             dbkjs.options.incidents.incidentListFunction(r, incident);
         }
 
-        $("<span class='time'/>").text(dbkjs.modules.incidents.controller.service.getAGSMoment(incident.DTG_START_INCIDENT).format("D-M-YYYY HH:mm:ss")).appendTo(r);
+        $("<span class='time'/>").text(start.format("D-M-YYYY HH:mm:ss")).appendTo(r);
         $("<span class='prio'/>").text(incident.PRIORITEIT_INCIDENT_BRANDWEER ? " PRIO " + incident.PRIORITEIT_INCIDENT_BRANDWEER : "").appendTo(r);
         $("<span class='locatie'/>").text(incident.T_GUI_LOCATIE).appendTo(r);
         $("<span class='plaats'/>").text(incident.PLAATS_NAAM).appendTo(r);
         $("<span class='classificatie'/>").text(incident.classificaties).appendTo(r);
+        $("<span class='fromNow'/>").text(start.fromNow()).appendTo(r);
 
+        if(incidentDivFunction) {
+            incidentDivFunction(r, incident);
+        }
         r.appendTo(d);
     });
     d.appendTo(el);

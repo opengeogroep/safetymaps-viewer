@@ -30,6 +30,10 @@ function IncidentMonitorController(incidents) {
     var me = this;
     me.service = incidents.service;
 
+    me.createStyle();
+
+    me.createStreetViewButton();
+
     me.button = new AlertableButton("btn_incidentlist", "Incidentenlijst", "bell-o");
     me.button.getElement().appendTo('#btngrp_3');
     $(me.button).on('click', function() {
@@ -46,6 +50,10 @@ function IncidentMonitorController(incidents) {
     .append('<i class="fa fa-repeat" style="width: 27.5px"></i>')
     .click(function(e) {
         me.incidentDetailsWindow.hide();
+        if(me.archiefMarker) {
+            console.log("reset, removing archief marker");
+            me.markerLayer.removeMarker(me.archiefMarker);
+        }
         $("#zoom_extent").click();
     })
     .appendTo('#btngrp_3');
@@ -55,17 +63,31 @@ function IncidentMonitorController(incidents) {
     $(me.incidentListWindow).on('show', function() {
         me.button.setAlerted(false);
     });
+    $(me.incidentListWindow).on('click', function(e, obj) {
+        me.selectIncident(obj);
+    });
 
     me.incidentDetailsWindow = new IncidentDetailsWindow();
     me.incidentDetailsWindow.createElements("Incident");
-/*
+    me.incidentDetailsWindow.setSplitScreen(true);
     $(me.incidentDetailsWindow).on('show', function() {
         me.button.setAlerted(false);
     });
-*/
+    $(me.incidentDetailsWindow).on('hide', function() {
+        me.disableIncidentUpdates();
+    });
+    // Replace "<- Kaart" with button
+    me.incidentDetailsWindow.getView().parent().find(".modal-popup-close").remove()
+
+    $("<button class='btn btn-primary' style='float: left; margin: 5px'><i class='fa fa-arrow-left'></i></button>")
+    .prependTo(me.incidentDetailsWindow.getView().parent())
+    .click(function() {
+        me.incidentDetailsWindow.hide();
+    });
+
     me.markerLayer = new IncidentMarkerLayer();
-    $(me.markerLayer).on('click', function(incident, marker) {
-        me.markerClick(incident, marker);
+    $(me.markerLayer).on('click', function(e, obj) {
+        me.selectIncident(obj);
     });
     me.marker = null;
 
@@ -76,6 +98,61 @@ function IncidentMonitorController(incidents) {
         me.getIncidentList();
     });
 }
+
+IncidentMonitorController.prototype.createStyle = function() {
+    // Create style
+    var css = 'table td { padding: 3px !important } ' +
+            '#kladblok span { font-size: 12px !important }';
+
+    var head = document.getElementsByTagName('head')[0];
+    var style = document.createElement('style');
+
+    style.type = 'text/css';
+    if(style.styleSheet) {
+        style.styleSheet.cssText = css;
+    } else {
+        style.appendChild(document.createTextNode(css));
+    }
+    head.appendChild(style);
+};
+
+IncidentMonitorController.prototype.createStreetViewButton = function() {
+    var me = this;
+
+    var clicked = false;
+    var div = $("<div/>").attr("style", "position: absolute; left: 20px; bottom: 143px; z-index: 3000");
+    var a = $("<a/>")
+            .attr("title", "Open StreetView")
+            .addClass("btn btn-default olButton")
+            .attr("style", "display: block; font-size: 24px")
+            .on("click", function() {
+                if(clicked) {
+                    $("#mapc1map1").attr("style", "");
+
+                } else {
+                    $("#mapc1map1").attr("style", "cursor: crosshair");
+                }
+                clicked = !clicked;
+            });
+    $("<i/>").addClass("fa fa-street-view").appendTo(a);
+    a.appendTo(div);
+    div.appendTo("#mapc1map1");
+    dbkjs.map.events.register("click", me, function(event) {
+        if(clicked) {
+            $("#mapc1map1").attr("style", "");
+            clicked = false;
+            var lonLat = dbkjs.map.getLonLatFromPixel(event.xy);
+            Proj4js.defs["EPSG:28992"] = "+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.237,50.0087,465.658,-0.406857,0.350733,-1.87035,4.0812 +units=m +no_defs";
+            Proj4js.defs["EPSG:4236"] = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs ";
+            var p = new Proj4js.Point(lonLat.lon, lonLat.lat);
+            var t = Proj4js.transform(new Proj4js.Proj("EPSG:28992"), new Proj4js.Proj("EPSG:4236"), p);
+            var url = "http://maps.google.nl/maps?q=[y],[x]&z=16&layer=c&cbll=[y],[x]&cbp=12,0,,0,0";
+            url = url.replace(/\[x\]/g, t.x);
+            url = url.replace(/\[y\]/g, t.y);
+            window.open(url);
+        }
+    });
+};
 
 /**
  * Add additional AGS layers from config.
@@ -113,12 +190,30 @@ IncidentMonitorController.prototype.zoomToIncident = function() {
     }
 };
 
-IncidentMonitorController.prototype.markerClick = function(incident, marker) {
+IncidentMonitorController.prototype.selectIncident = function(obj) {
+    var me = this;
+    console.log("select incident", obj);
+    if(me.archiefMarker) {
+        console.log("selected incident, removing archief marker");
+        me.markerLayer.removeMarker(me.archiefMarker);
+    }
 
-    // TODO select incident
-
-    this.incidentDetailsWindow.show();
-    this.zoomToIncident();
+    me.incident = obj.incident;
+    me.archief = !!obj.archief;
+    if(me.archief) {
+        console.log("added incident marker");
+        me.archiefMarker = me.markerLayer.addIncident(me.incident, true);
+    }
+    me.incidentId = obj.incident.INCIDENT_ID;
+    me.incidentDetailsWindow.data("Ophalen incidentgegevens...");
+    me.updateIncident(me.incidentId, me.archief);
+    me.incidentDetailsWindow.show();
+    me.zoomToIncident();
+    if(!me.archief) {
+        me.enableIncidentUpdates();
+    } else {
+        me.disableIncidentUpdates();
+    }
 };
 
 IncidentMonitorController.prototype.getIncidentList = function() {
@@ -142,6 +237,7 @@ IncidentMonitorController.prototype.getIncidentList = function() {
     .done(function(currentIncidents, archivedIncidents) {
         me.processNewArchivedIncidents(archivedIncidents);
         me.incidentListWindow.data(currentIncidents, me.archivedIncidents, true);
+        me.updateMarkerLayer(currentIncidents);
     });
 };
 
@@ -173,6 +269,21 @@ IncidentMonitorController.prototype.processNewArchivedIncidents = function(archi
     me.archivedIncidents = list;
 };
 
+IncidentMonitorController.prototype.updateMarkerLayer = function(incidents) {
+    var me = this;
+    me.markerLayer.clear();
+    $.each(incidents, function(i, incident) {
+        if(incident.actueleInzet) {
+            me.markerLayer.addIncident(incident, false);
+        }
+    });
+    if(me.archiefMarker) {
+        console.log("updated marker layer, added archief marker");
+        me.archiefMarker = me.markerLayer.addIncident(me.incident, true);
+    }
+    me.markerLayer.setZIndexFix();
+};
+
 IncidentMonitorController.prototype.enableIncidentUpdates = function() {
     var me = this;
 
@@ -183,7 +294,7 @@ IncidentMonitorController.prototype.enableIncidentUpdates = function() {
     }
 
     this.updateIncidentInterval = window.setInterval(function() {
-        me.updateIncident(me.incidentId);
+        me.updateIncident(me.incidentId, me.archief);
     }, 15000);
 };
 
@@ -194,14 +305,14 @@ IncidentMonitorController.prototype.disableIncidentUpdates = function() {
     }
 };
 
-IncidentMonitorController.prototype.updateIncident = function(incidentId) {
+IncidentMonitorController.prototype.updateIncident = function(incidentId, archief) {
     var me = this;
     if(this.incidentId !== incidentId) {
         // Incident cancelled or changed since timeout was set, ignore
         return;
     }
 
-    me.service.getAllIncidentInfo(incidentId, false, true)
+    me.service.getAllIncidentInfo(incidentId, archief, false)
     .fail(function(e) {
         var msg = "Kan incidentinfo niet updaten: " + e;
         dbkjs.gui.showError(msg);
@@ -214,21 +325,6 @@ IncidentMonitorController.prototype.updateIncident = function(incidentId) {
         }
 
         // Always update window, updates moment.fromNow() times
-        me.incidentDetailsWindow.data(incident, false, true);
-
-        // Check if updated, enable alert state if true
-        var oldIncidentHtml = me.incidentDetailsWindow.getIncidentHtml(me.incident, false, true);
-        if(oldIncidentHtml !== me.incidentDetailsWindow.getIncidentHtml(incident, false, true)) {
-            if(!me.incidentDetailsWindow.isVisible()) {
-                me.button.setAlerted(true);
-            }
-
-            me.incident = incident;
-
-            // Possibly update marker position
-            me.markerLayer.clear();
-            me.markerLayer.addIncident(incident, true);
-            me.markerLayer.setZIndexFix();
-        }
+        me.incidentDetailsWindow.data(incident, true, true);
     });
 };
