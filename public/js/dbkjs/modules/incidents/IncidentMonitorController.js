@@ -72,6 +72,8 @@ function IncidentMonitorController(incidents) {
     $(this.service).on('initialized', function() {
         console.log("service init");
         me.addAGSLayers();
+
+        me.getIncidentList();
     });
 }
 
@@ -117,6 +119,36 @@ IncidentMonitorController.prototype.markerClick = function(incident, marker) {
 
     this.incidentDetailsWindow.show();
     this.zoomToIncident();
+};
+
+IncidentMonitorController.prototype.getIncidentList = function() {
+    var me = this;
+
+    me.service.getCurrentIncidents()
+    .always(function() {
+        me.getIncidentListTimeout = window.setTimeout(function() {
+            me.getIncidentList();
+        }, 30000);
+    })
+    .fail(function(e) {
+        var msg = "Kan incidentenlijst niet ophalen: " + e;
+        dbkjs.gui.showError(msg);
+        me.button.setIcon("bell-slash");
+        me.incidentListWindow.showError(msg);
+    })
+    .done(function(currentIncidents) {
+        me.service.getArchivedIncidents(currentIncidents, me.highestArchiveIncidentId)
+        .fail(function(e) {
+            var msg = "Kan incidentenlijst niet ophalen: " + e;
+            dbkjs.gui.showError(msg);
+            me.button.setIcon("bell-slash");
+            me.incidentListWindow.showError(msg);
+        })
+        .done(function(archivedIncidents) {
+            me.highestArchiveIncidentId = archivedIncidents.highestIncidentId;
+            console.log("current", currentIncidents, "archived", archivedIncidents);
+        });
+    });
 };
 
 IncidentMonitorController.prototype.enableIncidentUpdates = function() {

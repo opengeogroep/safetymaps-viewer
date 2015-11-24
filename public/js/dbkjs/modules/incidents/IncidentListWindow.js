@@ -25,7 +25,7 @@
  * @returns {IncidentListWindow}
  */
 function IncidentListWindow() {
-    SplitScreenWindow.call(this, "inxcidentList");
+    SplitScreenWindow.call(this, "incidentList");
 
     var me = this;
     $(this).on('elements_created', function() {
@@ -48,6 +48,7 @@ IncidentListWindow.prototype = Object.create(SplitScreenWindow.prototype);
 IncidentListWindow.prototype.constructor = IncidentListWindow;
 
 IncidentListWindow.prototype.showError = function(e) {
+    this.getView().html("");
     this.getView().text(e);
 };
 
