@@ -81,7 +81,7 @@ AGSIncidentService.prototype.initialize = function(tokenUrl, user, pass) {
  * @returns {string} Description of the error
  */
 AGSIncidentService.prototype.getAGSError = function(data) {
-    return "Error code " + data.error.code + ": " + data.error.message;
+    return "Error code " + data.error.code + ": " + data.error.message + (data.error.details ? " (" + data.error.details + ")" : "");
 };
 
 /**
@@ -564,11 +564,164 @@ AGSIncidentService.prototype.getInzetEenheden = function(incidentIds, archief, a
             token: me.token,
             where: "INCIDENT_ID IN (" + incidentIds.join(",") + ") " + (alleenBrandweer ? "AND T_IND_DISC_EENHEID = 'B'" : ""),
             orderByFields: "DTG_OPDRACHT_INZET",
-            outFields: "*"
+            outFields: "INCIDENT_ID,DTG_OPDRACHT_INZET," + (archief ? "" : "DTG_EIND_ACTIE,") + "CODE_VOERTUIGSOORT,ROEPNAAM_EENHEID,KAZ_NAAM,T_IND_DISC_EENHEID"
         }
     })
     .always(function(data, textStatus, jqXHR) {
         me.resolveAGSFeatures(d, data, jqXHR);
     });
     return d.promise();
+};
+
+/**
+ * Get list of current events with active inzet
+ * @returns {undefined}
+ */
+AGSIncidentService.prototype.getCurrentIncidents = function() {
+    var me = this;
+    var d = $.Deferred();
+
+    var dIncidents = $.Deferred();
+    $.ajax(me.tableUrls["GMS_INCIDENT"] + "/query", {
+        dataType: "json",
+        data: {
+            f: "pjson",
+            token: me.token,
+            where: "IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3",
+            orderByFields: "DTG_START_INCIDENT DESC",
+            outFields: "INCIDENT_ID,T_X_COORD_LOC,T_Y_COORD_LOC,DTG_START_INCIDENT,PRIORITEIT_INCIDENT_BRANDWEER,T_GUI_LOCATIE,PLAATS_NAAM,BRW_MELDING_CL_ID"
+        },
+        cache: false
+    })
+    .always(function(data, textStatus, jqXHR) {
+        me.resolveAGSFeatures(dIncidents, data, jqXHR);
+    });
+
+    dIncidents
+    .fail(function(e) {
+        d.reject(e);
+    })
+    .done(function(incidents) {
+        // Filter on active inzet
+        var incidentIds = [];
+        $.each(incidents, function(i, incident) {
+            incidentIds.push(incident.INCIDENT_ID);
+        });
+        var dInzetEenheden = me.getInzetEenheden(incidentIds, false, true);
+        var dClassificaties = me.getClassificaties(incidents);
+
+        $.when(dInzetEenheden, dClassificaties)
+        .fail(function(e) {
+            d.reject(e);
+        })
+        .done(function(inzet, classificaties) {
+            // Filter out incidents without inzet
+            var incidentIdsMetInzet = [];
+            var incidentIdsMetBeeindigdeInzet = [];
+            $.each(inzet, function(i, inzetEenheid) {
+                if(inzetEenheid.DTG_EIND_ACTIE) {
+                    incidentIdsMetBeeindigdeInzet.push(inzetEenheid.INCIDENT_ID);
+                } else {
+                    incidentIdsMetInzet.push(inzetEenheid.INCIDENT_ID);
+                }
+            });
+            var incidentenMetInzet = [];
+            var incidentenMetBeeindigdeInzet = [];
+            var incidentIds = [];
+            $.each(incidents, function(i, incident) {
+                incident.classificaties = classificaties[incident.INCIDENT_ID];
+                if(incidentIdsMetInzet.indexOf(incident.INCIDENT_ID) !== -1) {
+                    incidentenMetInzet.push(incident);
+                    incidentIds.push(incident.INCIDENT_ID);
+                } else if(incidentIdsMetBeeindigdeInzet.indexOf(incident.INCIDENT_ID) !== -1) {
+                    incidentenMetBeeindigdeInzet.push(incident);
+                    incidentIds.push(incident.INCIDENT_ID);
+                }
+            });
+            d.resolve({
+                metInzet: incidentenMetInzet,
+                beeindigdeInzet: incidentenMetBeeindigdeInzet,
+                incidentIds: incidentIds
+            });
+        });
+    });
+
+    return d.promise();
+};
+
+AGSIncidentService.prototype.getArchivedIncidents = function(currentIncidents, highestArchivedIncidentId) {
+    var me = this;
+    var d = $.Deferred();
+
+    var where = currentIncidents.incidentIds.length === 0 ? "" : "INCIDENT_ID NOT IN (" + currentIncidents.incidentIds.join(",") + ") AND ";
+
+    var dIncidents = $.Deferred();
+    $.ajax(me.tableUrls["GMSARC_INCIDENT"] + "/query", {
+        dataType: "json",
+        data: {
+            f: "pjson",
+            token: me.token,
+            where: where + "IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3 " +
+                "AND DTG_START_INCIDENT > TO_DATE('" + new moment().subtract(24, 'hours').format("YYYY-MM-DD HH:mm:ss") + "','YYYY-MM-DD HH24:MI:SS') " +
+                "AND INCIDENT_ID > " + (highestArchivedIncidentId ? highestArchivedIncidentId : 0),
+            orderByFields: "DTG_START_INCIDENT DESC",
+            outFields: "INCIDENT_ID,T_X_COORD_LOC,T_Y_COORD_LOC,DTG_START_INCIDENT,PRIORITEIT_INCIDENT_BRANDWEER,T_GUI_LOCATIE,PLAATS_NAAM,BRW_MELDING_CL,BRW_MELDING_CL1,BRW_MELDING_CL2"
+        },
+        cache: false
+    })
+    .always(function(data, textStatus, jqXHR) {
+        me.resolveAGSFeatures(dIncidents, data, jqXHR);
+    });
+
+    dIncidents
+    .fail(function(e) {
+        d.reject(e);
+    })
+    .done(function(incidents) {
+        // Filter on active inzet
+        var incidentIds = [];
+        $.each(incidents, function(i, incident) {
+            incidentIds.push(incident.INCIDENT_ID);
+        });
+        me.getInzetEenheden(incidentIds, true, true)
+        .fail(function(e) {
+            d.reject(e);
+        })
+        .done(function(inzet) {
+            // Filter out incidents without inzet
+            var incidentIdsMetInzet = [];
+            $.each(inzet, function(i, inzetEenheid) {
+                incidentIdsMetInzet.push(inzetEenheid.INCIDENT_ID);
+            });
+            var incidentenMetInzet = [];
+            var highestIncidentId = highestArchivedIncidentId;
+            $.each(incidents, function(i, incident) {
+                incident.classificaties = me.getArchiefIncidentClassificaties(incident);
+                highestIncidentId = !highestIncidentId || incident.INCIDENT_ID > highestIncidentId ? incident.INCIDENT_ID : highestIncidentId;
+                if(incidentIdsMetInzet.indexOf(incident.INCIDENT_ID) !== -1) {
+                    incidentenMetInzet.push(incident);
+                }
+            });
+            d.resolve({
+                highestIncidentId: highestIncidentId,
+                incidents: incidents
+            });
+        });
+    });
+
+    return d.promise();
+};
+
+AGSIncidentService.prototype.getArchiefIncidentClassificaties = function(incident) {
+    var classificaties = [];
+    if(incident.BRW_MELDING_CL) {
+        classificaties.push(incident.BRW_MELDING_CL);
+    }
+    if(incident.BRW_MELDING_CL1) {
+        classificaties.push(incident.BRW_MELDING_CL1);
+    }
+    if(incident.BRW_MELDING_CL2) {
+        classificaties.push(incident.BRW_MELDING_CL2);
+    }
+    return classificaties.length === 0 ? "" : classificaties.join(", ");
 };
