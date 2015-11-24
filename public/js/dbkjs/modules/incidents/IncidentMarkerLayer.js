@@ -28,17 +28,17 @@ function IncidentMarkerLayer() {
     this.offset = new OpenLayers.Pixel(-(this.size.w/2), -this.size.h);
 }
 
-IncidentMarkerLayer.prototype.addIncident = function(incident, red) {
+IncidentMarkerLayer.prototype.addIncident = function(incident, archief) {
     var me = this;
     if(incident.T_X_COORD_LOC && incident.T_Y_COORD_LOC) {
         var pos = new OpenLayers.LonLat(incident.T_X_COORD_LOC, incident.T_Y_COORD_LOC);
 
         var marker = new OpenLayers.Marker(
             pos,
-            new OpenLayers.Icon(red ? "images/bell.png" : "images/marker-grey.png", this.size, this.offset)
+            new OpenLayers.Icon(!archief ? "images/bell.png" : "images/bell-gray.png", this.size, this.offset)
         );
         marker.id = incident.INCIDENT_ID;
-        marker.events.register("click", marker, function() { me.markerClick(marker, incident); });
+        marker.events.register("click", marker, function() { me.markerClick(marker, incident, archief); });
         this.layer.addMarker(marker);
         return marker;
     }
@@ -56,6 +56,6 @@ IncidentMarkerLayer.prototype.clear = function() {
     this.layer.clearMarkers();
 };
 
-IncidentMarkerLayer.prototype.markerClick = function(marker, incident) {
-    $(this).triggerHandler('click', incident, marker);
+IncidentMarkerLayer.prototype.markerClick = function(marker, incident, archief) {
+    $(this).triggerHandler('click', { incident: incident, archief: archief, marker: marker});
 };
