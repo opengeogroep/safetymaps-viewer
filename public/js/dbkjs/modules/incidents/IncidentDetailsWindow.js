@@ -47,14 +47,13 @@ IncidentDetailsWindow.prototype.showError = function(e) {
  */
 IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScrollTop) {
     var v = this.getView();
+    var scrollTop = v.scrollTop();
 
     v.html("");
-    if(!incident) {
-        v.text("Er is momenteel geen incident waavoor dit voertuig is ingezet.");
+    if(typeof incident === "string") {
+        v.text(incident);
         return;
     }
-
-    var scrollTop = v.scrollTop();
 
     v.html(this.getIncidentHtml(incident, showInzet, false));
 
