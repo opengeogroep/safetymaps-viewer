@@ -52,6 +52,7 @@ function IncidentMonitorController(incidents) {
         me.incidentDetailsWindow.hide();
         if(me.archiefMarker) {
             me.markerLayer.removeMarker(me.archiefMarker);
+            me.archiefMarker = null;
         }
         $("#zoom_extent").click();
     })
@@ -68,7 +69,10 @@ function IncidentMonitorController(incidents) {
 
     me.incidentDetailsWindow = new IncidentDetailsWindow();
     me.incidentDetailsWindow.createElements("Incident");
-    me.incidentDetailsWindow.setSplitScreen(true);
+    me.incidentDetailsWindow.setSplitScreen($(window).width() > 700);
+    $(window).on('resize', function() {
+        me.incidentDetailsWindow.setSplitScreen($(window).width() > 700);
+    });
     $(me.incidentDetailsWindow).on('show', function() {
         me.button.setAlerted(false);
     });
