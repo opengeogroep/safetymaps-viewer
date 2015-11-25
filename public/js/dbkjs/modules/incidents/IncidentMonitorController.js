@@ -51,7 +51,6 @@ function IncidentMonitorController(incidents) {
     .click(function(e) {
         me.incidentDetailsWindow.hide();
         if(me.archiefMarker) {
-            console.log("reset, removing archief marker");
             me.markerLayer.removeMarker(me.archiefMarker);
         }
         $("#zoom_extent").click();
@@ -76,9 +75,9 @@ function IncidentMonitorController(incidents) {
     $(me.incidentDetailsWindow).on('hide', function() {
         me.disableIncidentUpdates();
     });
+
     // Replace "<- Kaart" with button
     me.incidentDetailsWindow.getView().parent().find(".modal-popup-close").remove()
-
     $("<button class='btn btn-primary' style='float: left; margin: 5px'><i class='fa fa-arrow-left'></i></button>")
     .prependTo(me.incidentDetailsWindow.getView().parent())
     .click(function() {
@@ -92,15 +91,12 @@ function IncidentMonitorController(incidents) {
     me.marker = null;
 
     $(this.service).on('initialized', function() {
-        console.log("service init");
         me.addAGSLayers();
-
         me.getIncidentList();
     });
 }
 
 IncidentMonitorController.prototype.createStyle = function() {
-    // Create style
     var css = 'table td { padding: 3px !important } ' +
             '#kladblok span { font-size: 12px !important }';
 
@@ -122,24 +118,27 @@ IncidentMonitorController.prototype.createStreetViewButton = function() {
     var clicked = false;
     var div = $("<div/>").attr("style", "position: absolute; left: 20px; bottom: 143px; z-index: 3000");
     var a = $("<a/>")
+            .attr("id", "streetview-a")
             .attr("title", "Open StreetView")
             .addClass("btn btn-default olButton")
             .attr("style", "display: block; font-size: 24px")
             .on("click", function() {
                 if(clicked) {
                     $("#mapc1map1").attr("style", "");
-
+                    $("#streetview-a").removeClass("btn-primary");
                 } else {
                     $("#mapc1map1").attr("style", "cursor: crosshair");
+                    $("#streetview-a").addClass("btn-primary");
                 }
                 clicked = !clicked;
             });
     $("<i/>").addClass("fa fa-street-view").appendTo(a);
     a.appendTo(div);
     div.appendTo("#mapc1map1");
-    dbkjs.map.events.register("click", me, function(event) {
+
+    var handler = function(event) {
         if(clicked) {
-            $("#mapc1map1").attr("style", "");
+            $("#streetview-a").click();
             clicked = false;
             var lonLat = dbkjs.map.getLonLatFromPixel(event.xy);
             Proj4js.defs["EPSG:28992"] = "+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.237,50.0087,465.658,-0.406857,0.350733,-1.87035,4.0812 +units=m +no_defs";
@@ -151,7 +150,10 @@ IncidentMonitorController.prototype.createStreetViewButton = function() {
             url = url.replace(/\[y\]/g, t.y);
             window.open(url);
         }
-    });
+    };
+
+    dbkjs.map.events.register("click", me, handler);
+    dbkjs.map.events.register("touchstart", me, handler);
 };
 
 /**
@@ -192,16 +194,13 @@ IncidentMonitorController.prototype.zoomToIncident = function() {
 
 IncidentMonitorController.prototype.selectIncident = function(obj) {
     var me = this;
-    console.log("select incident", obj);
     if(me.archiefMarker) {
-        console.log("selected incident, removing archief marker");
         me.markerLayer.removeMarker(me.archiefMarker);
     }
 
     me.incident = obj.incident;
     me.archief = !!obj.archief;
     if(me.archief) {
-        console.log("added incident marker");
         me.archiefMarker = me.markerLayer.addIncident(me.incident, true);
     }
     me.incidentId = obj.incident.INCIDENT_ID;
@@ -248,10 +247,6 @@ IncidentMonitorController.prototype.processNewArchivedIncidents = function(archi
     // next time
     me.highestArchiveIncidentId = archivedIncidents.highestIncidentId;
 
-    if(archivedIncidents.incidents.length > 0) {
-        console.log("New archived incidents: " + archivedIncidents.incidents.length + ", highest id " + me.highestArchiveIncidentId);
-    }
-
     // Update archived incident list
     me.archivedIncidents = archivedIncidents.incidents.concat(me.archivedIncidents ? me.archivedIncidents : []);
 
@@ -260,9 +255,7 @@ IncidentMonitorController.prototype.processNewArchivedIncidents = function(archi
     var list = [];
     $.each(me.archivedIncidents, function(i, incident) {
         var incidentStart = me.service.getAGSMoment(incident.DTG_START_INCIDENT);
-        if(incidentStart.isBefore(cutoff)) {
-            console.log("Incident started at " + incidentStart.format() + " before 24 hours ago " + cutoff.format() + ", removing from list", incident);
-        } else {
+        if(!incidentStart.isBefore(cutoff)) {
             list.push(incident);
         }
     });
@@ -278,7 +271,6 @@ IncidentMonitorController.prototype.updateMarkerLayer = function(incidents) {
         }
     });
     if(me.archiefMarker) {
-        console.log("updated marker layer, added archief marker");
         me.archiefMarker = me.markerLayer.addIncident(me.incident, true);
     }
     me.markerLayer.setZIndexFix();
