@@ -38,7 +38,9 @@ IncidentMarkerLayer.prototype.addIncident = function(incident, archief) {
             new OpenLayers.Icon(!archief ? "images/bell.png" : "images/bell-gray.png", this.size, this.offset)
         );
         marker.id = incident.INCIDENT_ID;
-        marker.events.register("click", marker, function() { me.markerClick(marker, incident, archief); });
+        var handler = function() { me.markerClick(marker, incident, archief); };
+        marker.events.register("click", marker, handler);
+        marker.events.register("touchstart", marker, handler);
         this.layer.addMarker(marker);
         return marker;
     }
