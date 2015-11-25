@@ -55,11 +55,25 @@ IncidentListWindow.prototype.createStyle = function() {
         //'.incidentList .list .incident.even { background-color: #; } ' +
         '.incidentList .list .incident.odd { background-color: #ECECEC; } ' +
         '.incidentList .list div.incident:hover { background-color: #DCE0E8; cursor: pointer; cursor: hand; } ' +
-        '.incidentList .list .incident { width: 100%; } ' +
-        '.incidentList .list .incident span { padding: 0px 2px 2px 0px; vertical-align: top } ' +
-        '.incidentList .list .incident span.locatie { display: inline-block; width: 25%; }' +
-        '.incidentList .list .incident span.classificatie { display: inline-block; width: 30%; }' +
-        '.incidentList .list .incident span.plaats { display: inline-block; width: 15%; }';
+        '.incidentList .list .incident { width: 100%; white-space: nowrap; min-width: 500px; } ' +
+        '.incidentList .list .incident span { padding: 0px 2px 2px 0px; vertical-align: top; overflow: hidden; text-overflow: ellipsis; } ' +
+        '.incidentList .list .incident span.prio::before { content: "PRIO " } ' +
+        '.incidentList .list .incident span.locatie { display: inline-block; width: 35%; } ' +
+        '.incidentList .list .incident span.classificatie { display: inline-block; width: 25%; } ' +
+        '.incidentList .list .incident span.plaats { display: inline-block; width: 120px; } ' +
+        '@media (max-width: 1000px) { \n\
+.incidentList .list .incident span.fromNow { display: none; } \n\
+.incidentList .list .incident span.classificatie { width: 30%; } \n\
+.incidentList .list .incident span.locatie { width: 40%; } \n\
+.incidentList .list .incident span.prio::before { content: " P" } \n\
+} ' +
+        '@media (max-width: 900px) { \n\
+.incidentList .list .incident span.classificatie { display: none; }\n\
+.incidentList .list .incident span.locatie { width: 60%; } \n\
+} ' +
+        '@media (max-width: 600px) { \n\
+.incidentList .list .incident span.locatie { width: 50%; } \n\
+} ';
 
     var head = document.getElementsByTagName('head')[0];
     var style = document.createElement('style');
@@ -162,7 +176,7 @@ IncidentListWindow.prototype.listIncidents = function(el, incidents, incidentIds
         }
         var r = $("<div class='incident'/>")
                 .addClass(odd ? "odd" : "even")
-                .attr("title", (actueleInzet.length > 0 ? ", " + actueleInzet.join(", ") : ""));
+                .attr("title", incident.T_GUI_LOCATIE + (actueleInzet.length > 0 ? ", " + actueleInzet.join(", ") : ""));
         odd = !odd;
 
         if(dbkjs.options.incidents.incidentListFunction) {
@@ -170,7 +184,7 @@ IncidentListWindow.prototype.listIncidents = function(el, incidents, incidentIds
         }
 
         $("<span class='time'/>").text(start.format("D-M-YYYY HH:mm:ss")).appendTo(r);
-        $("<span class='prio'/>").text(incident.PRIORITEIT_INCIDENT_BRANDWEER ? " PRIO " + incident.PRIORITEIT_INCIDENT_BRANDWEER : "").appendTo(r);
+        $("<span class='prio'/>").html(incident.PRIORITEIT_INCIDENT_BRANDWEER ? incident.PRIORITEIT_INCIDENT_BRANDWEER + " " : "&nbsp;&nbsp;").appendTo(r);
         $("<span class='locatie'/>").text(incident.T_GUI_LOCATIE).appendTo(r);
         $("<span class='plaats'/>").text(incident.PLAATS_NAAM).appendTo(r);
         $("<span class='classificatie'/>").text(incident.classificaties).appendTo(r);
