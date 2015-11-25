@@ -122,7 +122,7 @@ IncidentListWindow.prototype.data = function(currentIncidents, archivedIncidents
     h.appendTo(d);
     me.listIncidents(d, beeindigdeInzet.concat(archivedIncidents), actueleIncidentIds, false, function(r, incident) {
         $(r).on('click', function() {
-            $(me).trigger('click', { incident: incident, archief: true });
+            $(me).trigger('click', { incident: incident, archief: archivedIncidents.indexOf(incident) !== -1 });
         });
     });
     d.appendTo(v);
@@ -162,7 +162,7 @@ IncidentListWindow.prototype.listIncidents = function(el, incidents, incidentIds
         }
         var r = $("<div class='incident'/>")
                 .addClass(odd ? "odd" : "even")
-                .attr("title", start.fromNow() + (actueleInzet.length > 0 ? ", " + actueleInzet.join(", ") : ""));
+                .attr("title", (actueleInzet.length > 0 ? ", " + actueleInzet.join(", ") : ""));
         odd = !odd;
 
         if(dbkjs.options.incidents.incidentListFunction) {
