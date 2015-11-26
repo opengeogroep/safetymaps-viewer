@@ -536,7 +536,7 @@ AGSIncidentService.prototype.getKladblok = function(incidentId, archief) {
         data: {
             f: "pjson",
             token: me.token,
-            where: "INCIDENT_ID = " + incidentId + " AND TYPE_KLADBLOK_REGEL = 'KB' AND T_IND_DISC_KLADBLOK_REGEL LIKE '_B_' AND WIJZIGING_ID IS NULL",
+            where: "INCIDENT_ID = " + incidentId + " AND TYPE_KLADBLOK_REGEL = 'KB' AND WIJZIGING_ID IS NULL",
             orderByFields: "DTG_KLADBLOK_REGEL,KLADBLOK_REGEL_ID,VOLG_NR_KLADBLOK_REGEL",
             outFields: "*"
         }

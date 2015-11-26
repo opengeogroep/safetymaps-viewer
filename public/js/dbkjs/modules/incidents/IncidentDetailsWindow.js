@@ -42,10 +42,16 @@ IncidentDetailsWindow.prototype.showError = function(e) {
 };
 
 IncidentDetailsWindow.prototype.createStyle = function() {
-    var css = '#eenheden div { margin: 3px; float: left } \n\
-#eenheden div { border-left: 1px solid #ddd; padding-left: 8px; } \n\
-#eenheden span.einde { color: gray } \n\
-#kladblok { clear: both; padding-top: 10px; }';
+    var css = '#eenheden div { margin: 3px; float: left } \
+#eenheden div { border-left: 1px solid #ddd; padding-left: 8px; } \
+#eenheden span.einde { color: gray } \
+#kladblok { clear: both; padding-top: 10px; white-space: pre; font-size: 14px; } \
+#kladblok span.brw { font-weight: bold; } \
+#kladblok span.pol { color: blue; } \
+#pol span { color: blue; } \
+#kladblok span.ambu { color: orange; display: none; } \
+table td { padding: 3px !important; } \
+';
         head = document.getElementsByTagName('head')[0],
         style = document.createElement('style');
 
@@ -91,7 +97,7 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
  * @returns {undefined}
  */
 IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, compareMode) {
-    var html = '<div style:"width: 100%" class="table-responsive">';
+    var html = '<div style="width: 100%" class="table-responsive incidentDetails">';
     html += '<table class="table table-hover">';
 
     var columns = [
@@ -121,12 +127,13 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
 
     html += '<tr><td>Melding classificatie:</td><td>' + dbkjs.util.htmlEncode(incident.classificatie) + '</td></tr>';
 
-    html += '<tr><td>Karakteristieken:</td><td>';
     if(!incident.karakteristiek || incident.karakteristiek.length === 0) {
+        html += '<tr><td>Karakteristieken:</td><td>';
         html += "<h4>-</h4>";
     } else {
-        html += '<div style:"width: 100%" class="table-responsive">';
-        html += '<table class="table table-hover">';
+        html += '<tr><td colspan="2">Karakteristieken:<br/>';
+        html += '<div class="table-responsive" style="margin: 0px 10px 0px 10px">';
+        html += '<table class="table table-hover" style="width: auto">';
         $.each(incident.karakteristiek, function(i, k) {
             if(!k.ACTUELE_KAR_WAARDE) {
                 return;
@@ -165,10 +172,22 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
         html += '<tr><td id="kladblok" colspan="2">';
         var pre = "";
         $.each(incident.kladblok, function(i, k) {
-            pre += AGSIncidentService.prototype.getAGSMoment(k.DTG_KLADBLOK_REGEL).format("DD-MM-YYYY HH:mm:ss ") +
-                    dbkjs.util.htmlEncode(k.INHOUD_KLADBLOK_REGEL) + "\n";
+            var c = "";
+            var ind = k.T_IND_DISC_KLADBLOK_REGEL;
+            if(ind.indexOf("B") !== -1) {
+                c += "brw ";
+            }
+            if(ind.indexOf("P") !== -1) {
+                c += "pol ";
+            }
+            if(ind.indexOf("A") !== -1) {
+                c += "ambu ";
+            }
+            pre += "<span class='" + c + "'>" + AGSIncidentService.prototype.getAGSMoment(k.DTG_KLADBLOK_REGEL).format("HH:mm ") +
+                    dbkjs.util.htmlEncode(k.INHOUD_KLADBLOK_REGEL) + "\n</span>";
+
         });
-        html += "Kladblok:<br/><pre><span style='font-size: 16px'>" + pre + "</span></pre>";
+        html += "Kladblok:<br/>" + pre + "</pre>";
         html += '</td></tr>';
     }
 

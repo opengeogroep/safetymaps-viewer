@@ -30,8 +30,6 @@ function IncidentMonitorController(incidents) {
     var me = this;
     me.service = incidents.service;
 
-    me.createStyle();
-
     me.createStreetViewButton();
 
     me.button = new AlertableButton("btn_incidentlist", "Incidentenlijst", "bell-o");
@@ -100,22 +98,6 @@ function IncidentMonitorController(incidents) {
     });
 }
 
-IncidentMonitorController.prototype.createStyle = function() {
-    var css = 'table td { padding: 3px !important } ' +
-            '#kladblok span { font-size: 12px !important }';
-
-    var head = document.getElementsByTagName('head')[0];
-    var style = document.createElement('style');
-
-    style.type = 'text/css';
-    if(style.styleSheet) {
-        style.styleSheet.cssText = css;
-    } else {
-        style.appendChild(document.createTextNode(css));
-    }
-    head.appendChild(style);
-};
-
 IncidentMonitorController.prototype.createStreetViewButton = function() {
     var me = this;
 
@@ -152,6 +134,7 @@ IncidentMonitorController.prototype.createStreetViewButton = function() {
             var url = "http://maps.google.nl/maps?q=[y],[x]&z=16&layer=c&cbll=[y],[x]&cbp=12,0,,0,0";
             url = url.replace(/\[x\]/g, t.x);
             url = url.replace(/\[y\]/g, t.y);
+            console.log("StreetView URL: " + url);
             window.open(url);
         }
     };

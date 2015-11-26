@@ -183,7 +183,7 @@ IncidentListWindow.prototype.listIncidents = function(el, incidents, incidentIds
             dbkjs.options.incidents.incidentListFunction(r, incident);
         }
 
-        $("<span class='time'/>").text(start.format("D-M-YYYY HH:mm:ss")).appendTo(r);
+        $("<span class='time'/>").text(start.format("D-M-YYYY HH:mm")).appendTo(r);
         $("<span class='prio'/>").html(incident.PRIORITEIT_INCIDENT_BRANDWEER ? incident.PRIORITEIT_INCIDENT_BRANDWEER + " " : "&nbsp;&nbsp;").appendTo(r);
         $("<span class='locatie'/>").text(incident.T_GUI_LOCATIE).appendTo(r);
         $("<span class='plaats'/>").text(incident.PLAATS_NAAM).appendTo(r);
