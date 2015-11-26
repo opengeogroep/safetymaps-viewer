@@ -154,7 +154,7 @@ AGSIncidentService.prototype.getToken = function(tokenUrl, user, pass) {
     $.ajax(tokenUrl, {
         dataType: "json",
         data: {
-            f: "pjson",
+            f: "json",
             username: user,
             password: pass
         }
@@ -190,7 +190,7 @@ AGSIncidentService.prototype.loadServiceInfo = function() {
     $.ajax(me.url, {
         dataType: "json",
         data: {
-            f: "pjson",
+            f: "json",
             token: me.token
         }
     })
@@ -236,7 +236,7 @@ AGSIncidentService.prototype.getVoertuignummerTypeahead = function() {
     $.ajax(me.tableUrls.GMSARC_INZET_EENHEID + "/query", {
         dataType: "json",
         data: {
-            f: "pjson",
+            f: "json",
             token: me.token,
             where: "T_IND_DISC_EENHEID = 'B'",
             orderByFields: "CODE_VOERTUIGSOORT,ROEPNAAM_EENHEID,KAZ_NAAM",
@@ -271,7 +271,7 @@ AGSIncidentService.prototype.getVoertuigInzet = function(voertuignummer) {
         $.ajax(me.tableUrls.GMS_INZET_EENHEID + "/query", {
             dataType: "json",
             data: {
-                f: "pjson",
+                f: "json",
                 token: me.token,
                 where: "T_IND_DISC_EENHEID = 'B' AND ROEPNAAM_EENHEID = '" + voertuignummer + "' AND DTG_EIND_ACTIE IS NULL",
                 outFields: "INCIDENT_ID"
@@ -386,7 +386,7 @@ AGSIncidentService.prototype.getIncident = function(incidentId, archief) {
     $.ajax(me.tableUrls[archief ? "GMSARC_INCIDENT" : "GMS_INCIDENT"] + "/query", {
         dataType: "json",
         data: {
-            f: "pjson",
+            f: "json",
             token: me.token,
             where: "INCIDENT_ID = " + incidentId,
             outFields: "*"
@@ -446,7 +446,7 @@ AGSIncidentService.prototype.getClassificaties = function(incidenten) {
         dataType: "json",
         method: "POST",
         data: {
-            f: "pjson",
+            f: "json",
             token: me.token,
             where: "MELDING_CL_ID IN (" + meldingClIds.join(",") + ")",
             outFields: "*"
@@ -511,7 +511,7 @@ AGSIncidentService.prototype.getKarakteristiek = function(incidentId) {
     $.ajax(me.tableUrls.GMSARC_KARAKTERISTIEK + "/query", {
         dataType: "json",
         data: {
-            f: "pjson",
+            f: "json",
             token: me.token,
             where: "INCIDENT_ID = " + incidentId,
             outFields: "NAAM_KARAKTERISTIEK,ACTUELE_KAR_WAARDE"
@@ -534,7 +534,7 @@ AGSIncidentService.prototype.getKladblok = function(incidentId, archief) {
     $.ajax(me.tableUrls[archief ? "GMSARC_KLADBLOK" : "GMS_KLADBLOK"] + "/query", {
         dataType: "json",
         data: {
-            f: "pjson",
+            f: "json",
             token: me.token,
             where: "INCIDENT_ID = " + incidentId + " AND TYPE_KLADBLOK_REGEL = 'KB' AND WIJZIGING_ID IS NULL",
             orderByFields: "DTG_KLADBLOK_REGEL,KLADBLOK_REGEL_ID,VOLG_NR_KLADBLOK_REGEL",
@@ -560,7 +560,7 @@ AGSIncidentService.prototype.getInzetEenheden = function(incidentIds, archief, a
         dataType: "json",
         method: "POST",
         data: {
-            f: "pjson",
+            f: "json",
             token: me.token,
             where: "INCIDENT_ID IN (" + incidentIds.join(",") + ") " + (alleenBrandweer ? "AND T_IND_DISC_EENHEID = 'B'" : ""),
             orderByFields: "DTG_OPDRACHT_INZET",
@@ -585,7 +585,7 @@ AGSIncidentService.prototype.getCurrentIncidents = function() {
     $.ajax(me.tableUrls["GMS_INCIDENT"] + "/query", {
         dataType: "json",
         data: {
-            f: "pjson",
+            f: "json",
             token: me.token,
             where: "IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3",
             orderByFields: "DTG_START_INCIDENT DESC",
@@ -666,7 +666,7 @@ AGSIncidentService.prototype.getArchivedIncidents = function(highestArchivedInci
     $.ajax(me.tableUrls["GMSARC_INCIDENT"] + "/query", {
         dataType: "json",
         data: {
-            f: "pjson",
+            f: "json",
             token: me.token,
             where: "IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3 " +
                 "AND DTG_START_INCIDENT > TO_DATE('" + new moment().subtract(24, 'hours').format("YYYY-MM-DD HH:mm:ss") + "','YYYY-MM-DD HH24:MI:SS') " +
