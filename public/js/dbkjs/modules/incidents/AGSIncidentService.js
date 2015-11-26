@@ -52,7 +52,10 @@ AGSIncidentService.prototype.initialize = function(tokenUrl, user, pass) {
 
     var dToken;
     if(tokenUrl && user && pass) {
-        dToken = me.getToken(tokenUrl, user, pass);
+        me.getTokenWithParams = function() {
+            return me.getToken(tokenUrl, user, pass);
+        };
+        dToken = me.getTokenWithParams();
     } else {
         dToken = $.Deferred().resolve(null);
     }
@@ -75,13 +78,60 @@ AGSIncidentService.prototype.initialize = function(tokenUrl, user, pass) {
 };
 
 /**
+ * Perform Ajax request, in case of invalid token (error code 498) repeat request
+ * after getting token. When device is suspended/sleeping, the timeout to update
+ * to token may not have fired.
+ * @param {type} settings parameter for $.ajax()
+ * @returns {Deferred}
+ */
+AGSIncidentService.prototype.doAGSAjax = function(settings) {
+    var me = this;
+    var d = $.Deferred();
+
+    $.ajax(settings)
+    .always(function() {
+        d.always.apply(d, arguments);
+    })
+    .fail(function() {
+        d.reject.apply(d, arguments);
+    })
+    .done(function(data) {
+        if(data.error && data.error.code === 498) {
+            console.log("Invalid token " + me.token + ", trying to update and retry ajax call: ", settings);
+            me.getTokenWithParams()
+            .fail(function(e) {
+                d.reject("Invalid token, could not get new token: " + e);
+            })
+            .done(function() {
+                console.log("Retrying ajax request with new token " + me.token);
+                $.ajax(settings)
+                .always(function() {
+                    d.always.apply(d, arguments);
+                })
+                .fail(function() {
+                    console.log("New Ajax request failed", arguments);
+                    d.fail.apply(d, arguments);
+                })
+                .done(function() {
+                    console.log("New Ajax request succeeded");
+                    d.done.apply(d, arguments);
+                });
+            });
+        } else {
+            d.resolve.apply(d, arguments);
+        }
+    });
+    return d.promise();
+};
+
+/**
  * Static utility function: return a string with the information from an AGS
  * response with error property.
  * @param {Object} data Response from AGS service with error property
  * @returns {string} Description of the error
  */
 AGSIncidentService.prototype.getAGSError = function(data) {
-    return "Error code " + data.error.code + ": " + data.error.message + (data.error.details ? " (" + data.error.details + ")" : "");
+    return "Error code " + data.error.code + ": " + data.error.message + (!dbkjs.util.isJsonNull(data.error.details) ? " (" + data.error.details + ")" : "");
 };
 
 /**
@@ -268,7 +318,8 @@ AGSIncidentService.prototype.getVoertuigInzet = function(voertuignummer) {
     if(!voertuignummer) {
         d.reject("Null voertuignummer");
     } else {
-        $.ajax(me.tableUrls.GMS_INZET_EENHEID + "/query", {
+        me.doAGSAjax({
+            url: me.tableUrls.GMS_INZET_EENHEID + "/query",
             dataType: "json",
             data: {
                 f: "json",
@@ -383,7 +434,8 @@ AGSIncidentService.prototype.getIncident = function(incidentId, archief) {
         return d.resolve(null);
     }
 
-    $.ajax(me.tableUrls[archief ? "GMSARC_INCIDENT" : "GMS_INCIDENT"] + "/query", {
+    me.doAGSAjax({
+        url: me.tableUrls[archief ? "GMSARC_INCIDENT" : "GMS_INCIDENT"] + "/query",
         dataType: "json",
         data: {
             f: "json",
@@ -442,7 +494,8 @@ AGSIncidentService.prototype.getClassificaties = function(incidenten) {
         return d;
     }
 
-    $.ajax(me.tableUrls.GMS_MLD_CLASS_NIVO_VIEW + "/query", {
+    me.doAGSAjax({
+        url: me.tableUrls.GMS_MLD_CLASS_NIVO_VIEW + "/query",
         dataType: "json",
         method: "POST",
         data: {
@@ -508,7 +561,8 @@ AGSIncidentService.prototype.getKarakteristiek = function(incidentId) {
         return d.resolve([]);
     }
 
-    $.ajax(me.tableUrls.GMSARC_KARAKTERISTIEK + "/query", {
+    me.doAGSAjax({
+        url: me.tableUrls.GMSARC_KARAKTERISTIEK + "/query",
         dataType: "json",
         data: {
             f: "json",
@@ -531,7 +585,8 @@ AGSIncidentService.prototype.getKladblok = function(incidentId, archief) {
         return d.resolve([]);
     }
 
-    $.ajax(me.tableUrls[archief ? "GMSARC_KLADBLOK" : "GMS_KLADBLOK"] + "/query", {
+    me.doAGSAjax({
+        url: me.tableUrls[archief ? "GMSARC_KLADBLOK" : "GMS_KLADBLOK"] + "/query",
         dataType: "json",
         data: {
             f: "json",
@@ -556,7 +611,8 @@ AGSIncidentService.prototype.getInzetEenheden = function(incidentIds, archief, a
     }
     incidentIds = incidentIds instanceof Array ? incidentIds : [incidentIds];
 
-    $.ajax(me.tableUrls[archief ? "GMSARC_INZET_EENHEID" : "GMS_INZET_EENHEID"] + "/query", {
+    me.doAGSAjax({
+        url: me.tableUrls[archief ? "GMSARC_INZET_EENHEID" : "GMS_INZET_EENHEID"] + "/query",
         dataType: "json",
         method: "POST",
         data: {
@@ -582,7 +638,8 @@ AGSIncidentService.prototype.getCurrentIncidents = function() {
     var d = $.Deferred();
 
     var dIncidents = $.Deferred();
-    $.ajax(me.tableUrls["GMS_INCIDENT"] + "/query", {
+    me.doAGSAjax({
+        url: me.tableUrls["GMS_INCIDENT"] + "/query",
         dataType: "json",
         data: {
             f: "json",
@@ -663,7 +720,8 @@ AGSIncidentService.prototype.getArchivedIncidents = function(highestArchivedInci
     var d = $.Deferred();
 
     var dIncidents = $.Deferred();
-    $.ajax(me.tableUrls["GMSARC_INCIDENT"] + "/query", {
+    me.doAGSAjax({
+        url: me.tableUrls["GMSARC_INCIDENT"] + "/query",
         dataType: "json",
         data: {
             f: "json",
