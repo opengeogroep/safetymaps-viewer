@@ -26,6 +26,8 @@
 function IncidentDetailsWindow() {
     SplitScreenWindow.call(this, "incidentDetails");
 
+    this.createStyle();
+
     $(this).on('elements_created', function() {
         var v = ModalWindow.prototype.getView.call(this);
         v.html("Bezig...");
@@ -37,6 +39,23 @@ IncidentDetailsWindow.prototype.constructor = IncidentDetailsWindow;
 
 IncidentDetailsWindow.prototype.showError = function(e) {
     this.getView().text(e);
+};
+
+IncidentDetailsWindow.prototype.createStyle = function() {
+    var css = '#eenheden div { margin: 3px; float: left } \n\
+#eenheden div { border-left: 1px solid #ddd; padding-left: 8px; } \n\
+#eenheden span.einde { color: gray } \n\
+#kladblok { clear: both; padding-top: 10px; }';
+        head = document.getElementsByTagName('head')[0],
+        style = document.createElement('style');
+
+    style.type = 'text/css';
+    if(style.styleSheet) {
+        style.styleSheet.cssText = css;
+    } else {
+        style.appendChild(document.createTextNode(css));
+    }
+    head.appendChild(style);
 };
 
 /**
@@ -119,7 +138,7 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
     html += '</td></tr>';
 
     if(showInzet) {
-        html += '<tr><td>Ingezette eenheden:</td><td id="eenheden">';
+        html += '<tr><td colspan="2" id="eenheden">';
         var eenhBrw = "", eenhPol = "", eenhAmbu = "";
         $.each(incident.inzetEenheden, function(i, inzet) {
             var eenheid = (inzet.CODE_VOERTUIGSOORT ? inzet.CODE_VOERTUIGSOORT : "") + " " + inzet.ROEPNAAM_EENHEID;
