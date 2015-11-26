@@ -55,24 +55,23 @@ IncidentListWindow.prototype.createStyle = function() {
         //'.incidentList .list .incident.even { background-color: #; } ' +
         '.incidentList .list .incident.odd { background-color: #ECECEC; } ' +
         '.incidentList .list div.incident:hover { background-color: #DCE0E8; cursor: pointer; cursor: hand; } ' +
-        '.incidentList .list .incident { width: 100%; white-space: nowrap; min-width: 500px; } ' +
-        '.incidentList .list .incident span { padding: 0px 2px 2px 0px; vertical-align: top; overflow: hidden; text-overflow: ellipsis; } ' +
+        '.incidentList .list .incident { width: 100%; white-space: nowrap; min-width: 900px; } ' +
+        '.incidentList .list .incident span { padding: 0px 2px 2px 0px; vertical-align: top; display: inline-block; overflow: hidden; text-overflow: ellipsis; } ' +
         '.incidentList .list .incident span.prio::before { content: "PRIO " } ' +
-        '.incidentList .list .incident span.locatie { display: inline-block; width: 35%; } ' +
-        '.incidentList .list .incident span.classificatie { display: inline-block; width: 25%; } ' +
-        '.incidentList .list .incident span.plaats { display: inline-block; width: 120px; } ' +
+        '.incidentList .list .incident span.locatie { width: 35% } ' +
+        '.incidentList .list .incident span.classificatie { width: 30%; } ' +
+        '.incidentList .list .incident span.plaats { width: 130px; } ' +
         '@media (max-width: 1000px) { \n\
 .incidentList .list .incident span.fromNow { display: none; } \n\
-.incidentList .list .incident span.classificatie { width: 30%; } \n\
-.incidentList .list .incident span.locatie { width: 40%; } \n\
+.incidentList .list .incident span.classificatie { width: 35% } \n\
+.incidentList .list .incident span.locatie { } \n\
 .incidentList .list .incident span.prio::before { content: " P" } \n\
 } ' +
         '@media (max-width: 900px) { \n\
-.incidentList .list .incident span.classificatie { display: none; }\n\
-.incidentList .list .incident span.locatie { width: 60%; } \n\
+.incidentList .list .incident span.locatie { } \n\
 } ' +
         '@media (max-width: 600px) { \n\
-.incidentList .list .incident span.locatie { width: 50%; } \n\
+.incidentList .list .incident span.locatie { width: 25% } \n\
 } ';
 
     var head = document.getElementsByTagName('head')[0];
