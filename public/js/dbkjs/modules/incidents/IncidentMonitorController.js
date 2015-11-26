@@ -50,9 +50,9 @@ function IncidentMonitorController(incidents) {
     .append('<i class="fa fa-repeat" style="width: 27.5px"></i>')
     .click(function(e) {
         me.incidentDetailsWindow.hide();
-        if(me.archiefMarker) {
-            me.markerLayer.removeMarker(me.archiefMarker);
-            me.archiefMarker = null;
+        if(me.selectedIncidentMarker) {
+            me.markerLayer.removeMarker(me.selectedIncidentMarker);
+            me.selectedIncidentMarker = null;
         }
         $("#zoom_extent").click();
     })
@@ -198,14 +198,14 @@ IncidentMonitorController.prototype.zoomToIncident = function() {
 
 IncidentMonitorController.prototype.selectIncident = function(obj) {
     var me = this;
-    if(me.archiefMarker) {
-        me.markerLayer.removeMarker(me.archiefMarker);
+    if(me.selectedIncidentMarker) {
+        me.markerLayer.removeMarker(me.selectedIncidentMarker);
     }
 
     me.incident = obj.incident;
     me.archief = !!obj.archief;
-    if(me.archief) {
-        me.archiefMarker = me.markerLayer.addIncident(me.incident, true);
+    if(obj.addMarker) {
+        me.selectedIncidentMarker = me.markerLayer.addIncident(me.incident, true);
     }
     me.incidentId = obj.incident.INCIDENT_ID;
     me.incidentDetailsWindow.data("Ophalen incidentgegevens...");
@@ -274,8 +274,8 @@ IncidentMonitorController.prototype.updateMarkerLayer = function(incidents) {
             me.markerLayer.addIncident(incident, false);
         }
     });
-    if(me.archiefMarker) {
-        me.archiefMarker = me.markerLayer.addIncident(me.incident, true);
+    if(me.selectedIncidentMarker) {
+        me.selectedIncidentMarker = me.markerLayer.addIncident(me.incident, true);
     }
     me.markerLayer.setZIndexFix();
 };

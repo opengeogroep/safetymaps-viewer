@@ -128,7 +128,7 @@ IncidentListWindow.prototype.data = function(currentIncidents, archivedIncidents
     h.appendTo(d);
     me.listIncidents(d, actueleInzet, null, true, function(r, incident) {
         $(r).on('click', function() {
-            $(me).trigger('click', { incident: incident, archief: false });
+            $(me).trigger('click', { incident: incident, addMarker: false, archief: false });
         });
     });
 
@@ -136,7 +136,7 @@ IncidentListWindow.prototype.data = function(currentIncidents, archivedIncidents
     h.appendTo(d);
     me.listIncidents(d, beeindigdeInzet.concat(archivedIncidents), actueleIncidentIds, false, function(r, incident) {
         $(r).on('click', function() {
-            $(me).trigger('click', { incident: incident, archief: archivedIncidents.indexOf(incident) !== -1 });
+            $(me).trigger('click', { incident: incident, addMarker: true, archief: archivedIncidents.indexOf(incident) !== -1 });
         });
     });
     d.appendTo(v);
