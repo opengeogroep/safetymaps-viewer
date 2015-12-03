@@ -30,8 +30,6 @@ function IncidentMonitorController(incidents) {
     var me = this;
     me.service = incidents.service;
 
-    me.createStreetViewButton();
-
     me.button = new AlertableButton("btn_incidentlist", "Incidentenlijst", "bell-o");
     me.button.getElement().appendTo('#btngrp_3');
     $(me.button).on('click', function() {
@@ -97,51 +95,6 @@ function IncidentMonitorController(incidents) {
         me.getIncidentList();
     });
 }
-
-IncidentMonitorController.prototype.createStreetViewButton = function() {
-    var me = this;
-
-    var clicked = false;
-    var div = $("<div/>").attr("style", "position: absolute; left: 20px; bottom: 143px; z-index: 3000");
-    var a = $("<a/>")
-            .attr("id", "streetview-a")
-            .attr("title", "Open StreetView")
-            .addClass("btn btn-default olButton")
-            .attr("style", "display: block; font-size: 24px")
-            .on("click", function() {
-                if(clicked) {
-                    $("#mapc1map1").attr("style", "");
-                    $("#streetview-a").removeClass("btn-primary");
-                } else {
-                    $("#mapc1map1").attr("style", "cursor: crosshair");
-                    $("#streetview-a").addClass("btn-primary");
-                }
-                clicked = !clicked;
-            });
-    $("<i/>").addClass("fa fa-street-view").appendTo(a);
-    a.appendTo(div);
-    div.appendTo("#mapc1map1");
-
-    var handler = function(event) {
-        if(clicked) {
-            $("#streetview-a").click();
-            clicked = false;
-            var lonLat = dbkjs.map.getLonLatFromPixel(event.xy);
-            Proj4js.defs["EPSG:28992"] = "+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.237,50.0087,465.658,-0.406857,0.350733,-1.87035,4.0812 +units=m +no_defs";
-            Proj4js.defs["EPSG:4236"] = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs ";
-            var p = new Proj4js.Point(lonLat.lon, lonLat.lat);
-            var t = Proj4js.transform(new Proj4js.Proj("EPSG:28992"), new Proj4js.Proj("EPSG:4236"), p);
-            var url = "http://maps.google.nl/maps?q=[y],[x]&z=16&layer=c&cbll=[y],[x]&cbp=12,0,,0,0";
-            url = url.replace(/\[x\]/g, t.x);
-            url = url.replace(/\[y\]/g, t.y);
-            console.log("StreetView URL: " + url);
-            window.open(url);
-        }
-    };
-
-    dbkjs.map.events.register("click", me, handler);
-    dbkjs.map.events.register("touchstart", me, handler);
-};
 
 /**
  * Add additional AGS layers from config.
