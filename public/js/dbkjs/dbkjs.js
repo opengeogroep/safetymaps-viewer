@@ -392,7 +392,6 @@ dbkjs.documentReady = function () {
             }
             return val;
         });
-        document.title = dbkjs.options.APPLICATION + ' ' + dbkjs.options.VERSION;
         OpenLayers.Lang[dbkjsLang] = OpenLayers.Util.applyDefaults(
             {'Scale = 1 : ${scaleDenom}': i18n.t("app.scale")}
         );
