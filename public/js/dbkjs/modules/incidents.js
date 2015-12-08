@@ -37,7 +37,13 @@ dbkjs.modules.incidents = {
             this.controller = new IncidentMonitorController(this);
         }
 
-        this.service.initialize(this.options.ags.tokenUrl, this.options.ags.user, this.options.ags.password);
+        this.service.initialize(this.options.ags.tokenUrl, this.options.ags.user, this.options.ags.password)
+        .fail(function(e) {
+            // Avoid map loading messages hiding our error message
+            window.setTimeout(function() {
+                dbkjs.util.alert("Fout bij initialiseren meldingenservice", e, "alert-danger");
+            }, 3000);
+        });
     }
 };
 
