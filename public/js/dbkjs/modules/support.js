@@ -73,7 +73,7 @@ dbkjs.modules.support = {
                 });
                 dbkjs.map.addControl(_obj.drag);
                 _obj.drag.activate();
-                $('#supportpanel_b').html('');
+                $('#supportpanel_b').html('').css('padding-top', '0px');
                 //Selectie voor kaartlagen
                 var layerarray = [];
                 $.each(dbkjs.map.layers, function (l_index, layer) {
@@ -86,7 +86,7 @@ dbkjs.modules.support = {
                 });
                 layerarray.sort();
                 var p = $('<form id="support-form"  class="form-horizontal" role="form"></form>');
-                //p.append('<p class="bg-info">' + i18n.t('email.help') +'</p>');
+                $("#supportpanel_b").prepend('<p id="email_help"><i>' + i18n.t('email.help') +'</i></p>');
                 var laag_input = $('<div class="form-group"></div>');
                 var select = $('<select name="subject" class="form-control"></select>');
                 select.append('<option selected>' + i18n.t('email.generalmessage') + '</option>');
