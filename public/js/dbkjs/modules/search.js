@@ -53,7 +53,8 @@ dbkjs.modules.search = {
         } else {
             this.inlineLayout();
         }
-        this.layer = new OpenLayers.Layer.Vector('search');
+        // Layer name starts with _ to hide in support module layer list
+        this.layer = new OpenLayers.Layer.Vector('_search');
         dbkjs.map.addLayer(this.layer);
     },
     inlineLayout: function() {

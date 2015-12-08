@@ -19,7 +19,8 @@
  */
 
 function IncidentMarkerLayer() {
-    this.layer = new OpenLayers.Layer.Markers("Incident markers", {
+    // Layer name starts with _ to hide in support module layer list
+    this.layer = new OpenLayers.Layer.Markers("_Incident markers", {
         rendererOptions: { zIndexing: true }
     });
     dbkjs.map.addLayer(this.layer);

@@ -77,9 +77,9 @@ dbkjs.modules.support = {
                 //Selectie voor kaartlagen
                 var layerarray = [];
                 $.each(dbkjs.map.layers, function (l_index, layer) {
+                    // TODO: prefix the layers with _, remove hardcoded list here
                     if ($.inArray(layer.name, ['hulplijn1', 'hulplijn2', 'Feature', 'Support', 'print']) === -1) {
-                        //layername mag niet beginnen met OpenLayers_
-                        if (layer.name.substring(0, 11) !== "OpenLayers_" && layer.getVisibility()) {
+                        if (!layer.name.startsWith("OpenLayers_") && !layer.name.startsWith("_") && layer.getVisibility()) {
                             layerarray.push(layer.name);
                         }
                     }
@@ -90,12 +90,16 @@ dbkjs.modules.support = {
                 var laag_input = $('<div class="form-group"></div>');
                 var select = $('<select name="subject" class="form-control"></select>');
                 select.append('<option selected>' + i18n.t('email.generalmessage') + '</option>');
-                var ignoreLayers = ["GMS Marker", "GPS Marker", "search"];
-                $.each(layerarray, function (l_index, name) {
-                    if ($.inArray(name, ignoreLayers) === -1) {
-                        select.append('<option>' + name + '</option>');
+                if(dbkjs.options.organisation.support.subjects) {
+                    var subjects = dbkjs.options.organisation.support.subjects.split(",");
+                    for(var i = 0; i < subjects.length; i++) {
+                        select.append('<option>' + subjects[i] + '</option>');
                     }
-                });
+                } else {
+                    $.each(layerarray, function (l_index, name) {
+                        select.append('<option>' + name + '</option>');
+                    });
+                }
                 laag_input.append('<label class="col-sm-2 control-label" for="subject">' + i18n.t('email.subject') + '</label>');
                 laag_input.append($('<div class="col-sm-10"></div>').append(select));
                 p.append(laag_input);

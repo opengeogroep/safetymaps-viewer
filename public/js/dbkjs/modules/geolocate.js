@@ -30,7 +30,8 @@ dbkjs.modules.geolocate = {
         strokeWidth: 1,
         fillOpacity: 0.1
     },
-    layer: new OpenLayers.Layer.Vector('GPS location'),
+    // Layer name starts with _ to hide in support module layer list
+    layer: new OpenLayers.Layer.Vector('_GPS location'),
     firstGeolocation: true,
 
     /**

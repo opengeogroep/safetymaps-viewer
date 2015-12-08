@@ -65,7 +65,8 @@ dbkjs.modules.gms = {
             })
             .appendTo('#btngrp_3');
 
-        this.markers = new OpenLayers.Layer.Markers("GMS Marker");
+        // Layer name starts with _ to hide in support module layer list
+        this.markers = new OpenLayers.Layer.Markers("_GMS Marker");
         dbkjs.map.addLayer(this.markers);
 
         this.checkFeaturesLoaded();

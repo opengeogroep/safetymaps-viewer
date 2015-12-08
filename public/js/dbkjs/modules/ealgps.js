@@ -46,7 +46,8 @@ dbkjs.modules.ealgps = {
             })
             .appendTo('#btngrp_3');
 
-        this.markers = new OpenLayers.Layer.Markers("GPS Marker");
+        // Layer name starts with _ to hide in support module layer list
+        this.markers = new OpenLayers.Layer.Markers("_GPS Marker");
         dbkjs.map.addLayer(this.markers);
 
         this.loadGps();
