@@ -1,8 +1,8 @@
 /**
  *  Copyright (c) 2014 Milo van der Linden (milo@dogodigi.net)
- * 
+ *
  *  This file is part of opendispatcher/safetymapsDBK
- *  
+ *
  *  opendispatcher is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
@@ -21,7 +21,7 @@
 /* global exports, global */
 
 /**
- * 
+ *
  * @param {type} req
  * @param {type} res
  * @returns success or error message
@@ -29,10 +29,10 @@
 exports.postAnnotation = function (req, res) {
     var t = res.locals.t;
     var nodemailer = require("nodemailer");
-    var smtp = nodemailer.createTransport(global.conf.get('support:smtp'));
+    var smtp = nodemailer.createTransport("SMTP", global.conf.get('support:smtp'));
     // @todo get email from request, it can be changed in the database.
     email = global.conf.get('support:sendto');
-    
+
     var search = global.conf.get('support:linkreplace:search');
     var replacement = global.conf.get('support:linkreplace:replacement');
 
@@ -40,7 +40,7 @@ exports.postAnnotation = function (req, res) {
     if(search && replacement) {
         var link = link.replace(new RegExp(search), replacement);
     }
-    
+
     var htmltemplate = t("email.annotationtitle") + ',<br/><br/>' +
             '<table>' +
             '<tr><th>' + t("email.title") + '</th><td>' + t("email.new") + '</td></tr>' +
