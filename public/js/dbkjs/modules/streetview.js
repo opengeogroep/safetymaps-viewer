@@ -48,7 +48,6 @@
  * - adds btn-primary state to indicate activated state;
  * - listens to deactivate event.
  */
-var clicks=0;
 
 var dbkjs = dbkjs || {};
 window.dbkjs = dbkjs;
