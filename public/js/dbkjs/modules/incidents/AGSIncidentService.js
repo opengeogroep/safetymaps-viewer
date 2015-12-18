@@ -203,6 +203,7 @@ AGSIncidentService.prototype.getToken = function(tokenUrl, user, pass) {
 
     $.ajax(tokenUrl, {
         dataType: "json",
+        method: "POST",
         data: {
             f: "json",
             username: user,
@@ -727,7 +728,7 @@ AGSIncidentService.prototype.getArchivedIncidents = function(highestArchivedInci
             f: "json",
             token: me.token,
             where: "IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3 " +
-                "AND DTG_START_INCIDENT > TO_DATE('" + new moment().subtract(24, 'hours').format("YYYY-MM-DD HH:mm:ss") + "','YYYY-MM-DD HH24:MI:SS') " +
+                "AND DTG_START_INCIDENT > timestamp '" + new moment().subtract(24, 'hours').format("YYYY-MM-DD HH:mm:ss") + "' " +
                 "AND INCIDENT_ID > " + (highestArchivedIncidentId ? highestArchivedIncidentId : 0),
             orderByFields: "DTG_START_INCIDENT DESC",
             outFields: "INCIDENT_ID,T_X_COORD_LOC,T_Y_COORD_LOC,DTG_START_INCIDENT,PRIORITEIT_INCIDENT_BRANDWEER,T_GUI_LOCATIE,PLAATS_NAAM,BRW_MELDING_CL,BRW_MELDING_CL1,BRW_MELDING_CL2"
