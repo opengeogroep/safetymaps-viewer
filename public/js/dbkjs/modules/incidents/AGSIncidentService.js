@@ -89,13 +89,10 @@ AGSIncidentService.prototype.doAGSAjax = function(settings) {
     var d = $.Deferred();
 
     $.ajax(settings)
-    .always(function() {
-        d.always.apply(d, arguments);
+    .fail(function(jqXHR, textStatus, errorThrown) {
+        d.reject(me.getAjaxError(jqXHR, textStatus, errorThrown));
     })
-    .fail(function() {
-        d.reject.apply(d, arguments);
-    })
-    .done(function(data) {
+    .done(function(data, textStatus, jqXHR) {
         if(data.error && data.error.code === 498) {
             console.log("Invalid token " + me.token + ", trying to update and retry ajax call: ", settings);
             me.getTokenWithParams()
@@ -105,20 +102,17 @@ AGSIncidentService.prototype.doAGSAjax = function(settings) {
             .done(function() {
                 console.log("Retrying ajax request with new token " + me.token);
                 $.ajax(settings)
-                .always(function() {
-                    d.always.apply(d, arguments);
-                })
-                .fail(function() {
+                .fail(function(jqXHR, textStatus, errorThrown) {
                     console.log("New Ajax request failed", arguments);
-                    d.fail.apply(d, arguments);
+                    d.reject(me.getAjaxError(jqXHR, textStatus, errorThrown));
                 })
                 .done(function() {
                     console.log("New Ajax request succeeded");
-                    d.done.apply(d, arguments);
+                    d.resolve(data, textStatus, jqXHR);
                 });
             });
         } else {
-            d.resolve.apply(d, arguments);
+            d.resolve(data, textStatus, jqXHR);
         }
     });
     return d.promise();
@@ -170,7 +164,7 @@ AGSIncidentService.prototype.resolveAGSFeatures = function(d, data, jqXHR, proce
     if(data.error) {
         d.reject(me.getAGSError(data));
     } else if(!data.features) {
-        d.reject(jqXHR.statusText);
+        d.reject('No features in response "' + jqXHR.responseText + '"');
     } else {
         var result = noResultFunction ? noResultFunction() : [];
         $.each(data.features, function(i, feature) {
@@ -186,6 +180,17 @@ AGSIncidentService.prototype.resolveAGSFeatures = function(d, data, jqXHR, proce
             d.resolve(result);
         }
     }
+};
+
+AGSIncidentService.prototype.getAjaxError = function(jqXHR, textStatus, errorThrown) {
+    var msg = textStatus;
+    if(jqXHR.status) {
+        msg += ", status: " + jqXHR.status + (jqXHR.statusText ? " " + jqXHR.statusText : "");
+    }
+    if(errorThrown && errorThrown !== jqXHR.statusText) {
+        msg += ", " + errorThrown;
+    }
+    return msg;
 };
 
 /**
@@ -210,7 +215,10 @@ AGSIncidentService.prototype.getToken = function(tokenUrl, user, pass) {
             password: pass
         }
     })
-    .always(function(data, textStatus, jqXHR) {
+    .fail(function(jqXHR, textStatus, errorThrown) {
+        d.reject(me.getAjaxError(jqXHR, textStatus, errorThrown));
+    })
+    .done(function(data, textStatus, jqXHR) {
         if(data.token) {
             me.token = data.token;
             $(me).triggerHandler('token', me.token);
@@ -224,7 +232,7 @@ AGSIncidentService.prototype.getToken = function(tokenUrl, user, pass) {
         } else if(data.error) {
             d.reject(me.getAGSError(data));
         } else {
-            d.reject(jqXHR.statusText);
+            d.reject('No token in response "' + jqXHR.responseText + '"');
         }
     });
     return d.promise();
@@ -245,11 +253,14 @@ AGSIncidentService.prototype.loadServiceInfo = function() {
             token: me.token
         }
     })
-    .always(function(data, textStatus, jqXHR) {
+    .fail(function(jqXHR, textStatus, errorThrown) {
+        d.reject(me.getAjaxError(jqXHR, textStatus, errorThrown));
+    })
+    .done(function(data, textStatus, jqXHR) {
         if(data.error) {
             d.reject(me.getAGSError(data));
         } else if(!data.tables) {
-            d.reject(jqXHR.statusText);
+            d.reject('No tables in service info ' + jqXHR.responseText + '"');
         } else {
             me.tableUrls = {};
             $.each(data.tables, function(i,table) {
@@ -295,7 +306,10 @@ AGSIncidentService.prototype.getVoertuignummerTypeahead = function() {
             returnDistinctValues: true
         }
     })
-    .always(function(data, textStatus, jqXHR) {
+    .fail(function(jqXHR, textStatus, errorThrown) {
+        d.reject(me.getAjaxError(jqXHR, textStatus, errorThrown));
+    })
+    .done(function(data, textStatus, jqXHR) {
         var datums = [];
         me.resolveAGSFeatures(d, data, jqXHR, function(f) {
             datums.push( { value: f.ROEPNAAM_EENHEID, tokens: [f.CODE_VOERTUIGSOORT, f.ROEPNAAM_EENHEID, f.KAZ_NAAM] });
@@ -319,8 +333,9 @@ AGSIncidentService.prototype.getVoertuigInzet = function(voertuignummer) {
     if(!voertuignummer) {
         d.reject("Null voertuignummer");
     } else {
+        var table = "GMS_INZET_EENHEID";
         me.doAGSAjax({
-            url: me.tableUrls.GMS_INZET_EENHEID + "/query",
+            url: me.tableUrls[table] + "/query",
             dataType: "json",
             data: {
                 f: "json",
@@ -329,7 +344,10 @@ AGSIncidentService.prototype.getVoertuigInzet = function(voertuignummer) {
                 outFields: "INCIDENT_ID"
             }
         })
-        .always(function(data, textStatus, jqXHR) {
+        .fail(function(e) {
+            d.reject(table + ": " + e);
+        })
+        .done(function(data, textStatus, jqXHR) {
             me.resolveAGSFeatures(d, data, jqXHR, function(f) {
                 return f.INCIDENT_ID;
             },
@@ -435,8 +453,9 @@ AGSIncidentService.prototype.getIncident = function(incidentId, archief) {
         return d.resolve(null);
     }
 
+    var table = archief ? "GMSARC_INCIDENT" : "GMS_INCIDENT";
     me.doAGSAjax({
-        url: me.tableUrls[archief ? "GMSARC_INCIDENT" : "GMS_INCIDENT"] + "/query",
+        url: me.tableUrls[table] + "/query",
         dataType: "json",
         data: {
             f: "json",
@@ -445,7 +464,10 @@ AGSIncidentService.prototype.getIncident = function(incidentId, archief) {
             outFields: "*"
         }
     })
-    .always(function(data, textStatus, jqXHR) {
+    .fail(function(e) {
+        d.reject(table + ": " + e);
+    })
+    .done(function(data, textStatus, jqXHR) {
         me.resolveAGSFeatures(d, data, jqXHR, function(f) {
             return f;
         },
@@ -495,8 +517,9 @@ AGSIncidentService.prototype.getClassificaties = function(incidenten) {
         return d;
     }
 
+    var table = "GMS_MLD_CLASS_NIVO_VIEW";
     me.doAGSAjax({
-        url: me.tableUrls.GMS_MLD_CLASS_NIVO_VIEW + "/query",
+        url: me.tableUrls[table] + "/query",
         dataType: "json",
         method: "POST",
         data: {
@@ -506,7 +529,10 @@ AGSIncidentService.prototype.getClassificaties = function(incidenten) {
             outFields: "*"
         }
     })
-    .always(function(data, textStatus, jqXHR) {
+    .fail(function(e) {
+        d.reject(table + ": " + e);
+    })
+    .done(function(data, textStatus, jqXHR) {
         var classificaties = {};
         me.resolveAGSFeatures(d, data, jqXHR, function(c) {
             // processFunction
@@ -562,8 +588,9 @@ AGSIncidentService.prototype.getKarakteristiek = function(incidentId) {
         return d.resolve([]);
     }
 
+    var table = "GMSARC_KARAKTERISTIEK";
     me.doAGSAjax({
-        url: me.tableUrls.GMSARC_KARAKTERISTIEK + "/query",
+        url: me.tableUrls[table] + "/query",
         dataType: "json",
         data: {
             f: "json",
@@ -572,7 +599,10 @@ AGSIncidentService.prototype.getKarakteristiek = function(incidentId) {
             outFields: "NAAM_KARAKTERISTIEK,ACTUELE_KAR_WAARDE"
         }
     })
-    .always(function(data, textStatus, jqXHR) {
+    .fail(function(e) {
+        d.reject(table + ": " + e);
+    })
+    .done(function(data, textStatus, jqXHR) {
         me.resolveAGSFeatures(d, data, jqXHR);
     });
     return d.promise();
@@ -586,8 +616,9 @@ AGSIncidentService.prototype.getKladblok = function(incidentId, archief) {
         return d.resolve([]);
     }
 
+    var table = archief ? "GMSARC_KLADBLOK" : "GMS_KLADBLOK";
     me.doAGSAjax({
-        url: me.tableUrls[archief ? "GMSARC_KLADBLOK" : "GMS_KLADBLOK"] + "/query",
+        url: me.tableUrls[table] + "/query",
         dataType: "json",
         data: {
             f: "json",
@@ -597,7 +628,10 @@ AGSIncidentService.prototype.getKladblok = function(incidentId, archief) {
             outFields: "*"
         }
     })
-    .always(function(data, textStatus, jqXHR) {
+    .fail(function(e) {
+        d.reject(table + ": " + e);
+    })
+    .done(function(data, textStatus, jqXHR) {
         me.resolveAGSFeatures(d, data, jqXHR);
     });
     return d.promise();
@@ -612,8 +646,9 @@ AGSIncidentService.prototype.getInzetEenheden = function(incidentIds, archief, a
     }
     incidentIds = incidentIds instanceof Array ? incidentIds : [incidentIds];
 
+    var table = archief ? "GMSARC_INZET_EENHEID" : "GMS_INZET_EENHEID";
     me.doAGSAjax({
-        url: me.tableUrls[archief ? "GMSARC_INZET_EENHEID" : "GMS_INZET_EENHEID"] + "/query",
+        url: me.tableUrls[table] + "/query",
         dataType: "json",
         method: "POST",
         data: {
@@ -624,7 +659,10 @@ AGSIncidentService.prototype.getInzetEenheden = function(incidentIds, archief, a
             outFields: "INCIDENT_ID,DTG_OPDRACHT_INZET," + (archief ? "" : "DTG_EIND_ACTIE,") + "CODE_VOERTUIGSOORT,ROEPNAAM_EENHEID,KAZ_NAAM,T_IND_DISC_EENHEID"
         }
     })
-    .always(function(data, textStatus, jqXHR) {
+    .fail(function(e) {
+        d.reject(table + ": " + e);
+    })
+    .done(function(data, textStatus, jqXHR) {
         me.resolveAGSFeatures(d, data, jqXHR);
     });
     return d.promise();
@@ -639,8 +677,9 @@ AGSIncidentService.prototype.getCurrentIncidents = function() {
     var d = $.Deferred();
 
     var dIncidents = $.Deferred();
+    var table = "GMS_INCIDENT";
     me.doAGSAjax({
-        url: me.tableUrls["GMS_INCIDENT"] + "/query",
+        url: me.tableUrls[table] + "/query",
         dataType: "json",
         data: {
             f: "json",
@@ -651,7 +690,10 @@ AGSIncidentService.prototype.getCurrentIncidents = function() {
         },
         cache: false
     })
-    .always(function(data, textStatus, jqXHR) {
+    .fail(function(e) {
+        d.reject(table + ": " + e);
+    })
+    .done(function(data, textStatus, jqXHR) {
         me.resolveAGSFeatures(dIncidents, data, jqXHR);
     });
 
@@ -721,8 +763,9 @@ AGSIncidentService.prototype.getArchivedIncidents = function(highestArchivedInci
     var d = $.Deferred();
 
     var dIncidents = $.Deferred();
+    var table = "GMSARC_INCIDENT";
     me.doAGSAjax({
-        url: me.tableUrls["GMSARC_INCIDENT"] + "/query",
+        url: me.tableUrls[table] + "/query",
         dataType: "json",
         data: {
             f: "json",
@@ -735,7 +778,10 @@ AGSIncidentService.prototype.getArchivedIncidents = function(highestArchivedInci
         },
         cache: false
     })
-    .always(function(data, textStatus, jqXHR) {
+    .fail(function(e) {
+        d.reject(table + ": " + e);
+    })
+    .done(function(data, textStatus, jqXHR) {
         me.resolveAGSFeatures(dIncidents, data, jqXHR);
     });
 
