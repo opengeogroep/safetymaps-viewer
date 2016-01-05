@@ -174,6 +174,8 @@ IncidentMonitorController.prototype.getIncidentList = function() {
         me.incidentListWindow.showError(msg);
     })
     .done(function(currentIncidents, archivedIncidents) {
+        me.button.setIcon("bell-o");
+        $('#systeem_meldingen').hide(); // XXX
         me.processNewArchivedIncidents(archivedIncidents);
         me.incidentListWindow.data(currentIncidents, me.archivedIncidents, true);
         me.updateMarkerLayer(currentIncidents);
