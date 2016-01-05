@@ -117,6 +117,8 @@ IncidentListWindow.prototype.data = function(currentIncidents, archivedIncidents
             beeindigdeInzet.push(incident);
         }
     });
+    // Usable by IncidentMonitorController for new incident alerts
+    me.actueleIncidentIds = actueleIncidentIds.slice();
 
     var d = $("<div class='incidentList'/>");
     var h = $("<div class='header actueleInzet'/>")

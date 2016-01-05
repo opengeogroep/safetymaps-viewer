@@ -57,7 +57,7 @@ function IncidentMonitorController(incidents) {
     me.incidentListWindow = new IncidentListWindow();
     me.incidentListWindow.createElements("Incidenten");
     $(me.incidentListWindow).on('show', function() {
-        me.button.setAlerted(false);
+        me.setAllIncidentsRead();
     });
     $(me.incidentListWindow).on('click', function(e, obj) {
         me.selectIncident(obj);
@@ -68,9 +68,6 @@ function IncidentMonitorController(incidents) {
     me.incidentDetailsWindow.setSplitScreen($(window).width() > 700);
     $(window).on('resize', function() {
         me.incidentDetailsWindow.setSplitScreen($(window).width() > 700);
-    });
-    $(me.incidentDetailsWindow).on('show', function() {
-        me.button.setAlerted(false);
     });
     $(me.incidentDetailsWindow).on('hide', function() {
         me.disableIncidentUpdates();
@@ -95,6 +92,58 @@ function IncidentMonitorController(incidents) {
         me.getIncidentList();
     });
 }
+
+IncidentMonitorController.prototype.setAllIncidentsRead = function() {
+    var me = this;
+    me.button.setAlerted(false);
+    me.readCurrentIncidentIds = me.currentIncidentIds ? me.currentIncidentIds : [];
+};
+
+IncidentMonitorController.prototype.checkUnreadIncidents = function(newCurrentIncidentIds) {
+    var me = this;
+    if(!me.currentIncidentIds) {
+        // First incident list
+        me.currentIncidentIds = newCurrentIncidentIds;
+        me.readCurrentIncidents = [];
+
+        if(me.currentIncidentIds.length > 0) {
+            me.button.setAlerted(true);
+        }
+        console.log("First incident list, ids: " + me.currentIncidentIds);
+    } else {
+        $.each(newCurrentIncidentIds, function(i, incidentId) {
+            if(me.currentIncidentIds.indexOf(incidentId) === -1) {
+                // New incident
+                console.log("New incident ", incidentId);
+                me.button.setAlerted(true);
+                return false;
+            }
+        });
+        me.currentIncidentIds = newCurrentIncidentIds;
+    }
+};
+
+IncidentMonitorController.prototype.incidentRead = function(incidentId) {
+    var me = this;
+    if(!me.readCurrentIncidentIds || me.readCurrentIncidentIds.indexOf(incidentId) === -1) {
+        // Incident was not read before
+        console.log("Incident shown which was not shown before: " + incidentId);
+        me.readCurrentIncidentIds.push(incidentId);
+
+        // Check if all incidents are now read
+        var allRead = true;
+        $.each(me.currentIncidentIds, function(i, checkIncidentId) {
+            if(me.readCurrentIncidentIds.indexOf(checkIncidentId) === -1) {
+                allRead = false;
+                return false;
+            }
+        });
+        if(allRead) {
+            console.log("All incident ids read");
+            me.button.setAlerted(false);
+        }
+    }
+};
 
 /**
  * Add additional AGS layers from config.
@@ -147,6 +196,7 @@ IncidentMonitorController.prototype.selectIncident = function(obj) {
     me.incidentDetailsWindow.data("Ophalen incidentgegevens...");
     me.updateIncident(me.incidentId, me.archief);
     me.incidentDetailsWindow.show();
+    me.incidentRead(me.incidentId);
     me.zoomToIncident();
     if(!me.archief) {
         me.enableIncidentUpdates();
@@ -178,7 +228,9 @@ IncidentMonitorController.prototype.getIncidentList = function() {
         $('#systeem_meldingen').hide(); // XXX
         me.processNewArchivedIncidents(archivedIncidents);
         me.incidentListWindow.data(currentIncidents, me.archivedIncidents, true);
+        // TODO: only me.incidentListWindow.actueleIncidentIds ?
         me.updateMarkerLayer(currentIncidents);
+        me.checkUnreadIncidents(me.incidentListWindow.actueleIncidentIds);
     });
 };
 
