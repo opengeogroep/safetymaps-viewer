@@ -128,7 +128,11 @@ IncidentMonitorController.prototype.incidentRead = function(incidentId) {
     if(!me.readCurrentIncidentIds || me.readCurrentIncidentIds.indexOf(incidentId) === -1) {
         // Incident was not read before
         console.log("Incident shown which was not shown before: " + incidentId);
-        me.readCurrentIncidentIds.push(incidentId);
+        if(!me.readCurrentIncidentIds) {
+            me.readCurrentIncidentIds = [incidentId];
+        } else {
+            me.readCurrentIncidentIds.push(incidentId);
+        }
 
         // Check if all incidents are now read
         var allRead = true;
