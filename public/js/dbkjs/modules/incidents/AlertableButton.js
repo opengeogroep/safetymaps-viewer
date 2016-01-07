@@ -49,7 +49,7 @@ AlertableButton.prototype.setAlerted = function(alert) {
         $(me.a).css({color: 'red'});
         var $i = $(me.i);
         $i.removeClass("fa-" + me.icon).addClass("fa-exclamation");
-        this.exclamationFlashInterval = window.setInterval(function() {
+        me.exclamationFlashInterval = window.setInterval(function() {
             if($i.hasClass("fa-" + me.icon)) {
                 $i.removeClass("fa-" + me.icon).addClass("fa-exclamation");
             } else {
