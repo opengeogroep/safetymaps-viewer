@@ -45,6 +45,7 @@ function IncidentMonitorController(incidents) {
     })
     .append('<i class="fa fa-repeat" style="width: 27.5px"></i>')
     .click(function(e) {
+        me.getIncidentList();
         me.incidentDetailsWindow.hide();
         if(me.selectedIncidentMarker) {
             me.markerLayer.removeMarker(me.selectedIncidentMarker);
@@ -91,7 +92,13 @@ function IncidentMonitorController(incidents) {
         me.addAGSLayers();
         me.getIncidentList();
     });
+
+    window.setInterval(function() {
+        me.checkIncidentListOutdated();
+    }, 500);
 }
+
+IncidentMonitorController.prototype.UPDATE_INTERVAL_MS = 30000;
 
 IncidentMonitorController.prototype.setAllIncidentsRead = function() {
     var me = this;
@@ -209,17 +216,30 @@ IncidentMonitorController.prototype.selectIncident = function(obj) {
     }
 };
 
+IncidentMonitorController.prototype.checkIncidentListOutdated = function() {
+    var me = this;
+    var lastUpdate = new Date().getTime() - me.lastGetIncidentList;
+    if(lastUpdate > me.UPDATE_INTERVAL_MS + 5000) {
+        console.log("incident list outdated, last updated " + (lastUpdate/1000.0) + "s ago, updating now");
+        me.getIncidentList();
+    }
+};
+
 IncidentMonitorController.prototype.getIncidentList = function() {
     var me = this;
+
+    window.clearTimeout(me.getIncidentListTimeout);
+    me.lastGetIncidentList = new Date().getTime();
 
     var dCurrent = me.service.getCurrentIncidents();
     var dArchived = me.service.getArchivedIncidents(me.highestArchiveIncidentId);
 
     $.when(dCurrent, dArchived)
     .always(function() {
+        window.clearTimeout(me.getIncidentListTimeout);
         me.getIncidentListTimeout = window.setTimeout(function() {
             me.getIncidentList();
-        }, 30000);
+        }, me.UPDATE_INTERVAL_MS);
     })
     .fail(function(e) {
         var msg = "Kan incidentenlijst niet ophalen: " + e;
