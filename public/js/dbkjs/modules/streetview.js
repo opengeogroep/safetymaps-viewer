@@ -110,7 +110,7 @@ dbkjs.modules.streetview = {
         window.open(url);
     },
     createDefaultMobileButton: function() {
-        var activated = false;
+        var me = this;
         var div = $("<div/>").attr("style", "position: absolute; left: 20px; bottom: 143px; z-index: 3000");
         var a = $("<a/>")
                 .attr("id", "streetview-a")
@@ -118,14 +118,13 @@ dbkjs.modules.streetview = {
                 .addClass("btn btn-default olButton")
                 .attr("style", "display: block; font-size: 24px")
                 .on("click", function() {
-                    if(activated) {
+                    if(me.active) {
                         dbkjs.modules.streetview.deactivate();
                     } else {
                         $("#mapc1map1").attr("style", "cursor: crosshair");
                         $("#streetview-a").addClass("btn-primary");
                         dbkjs.modules.streetview.activate();
                     }
-                    activated = !activated;
                 });
         $("<i/>").addClass("fa fa-street-view").appendTo(a);
         a.appendTo(div);
@@ -134,7 +133,6 @@ dbkjs.modules.streetview = {
         $(dbkjs.modules.streetview).on('deactivate', function() {
             $("#mapc1map1").attr("style", "");
             $("#streetview-a").removeClass("btn-primary");
-            activated = false;
         });
     }
 };
