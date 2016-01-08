@@ -45,7 +45,7 @@ AlertableButton.prototype.getElement = function() {
 
 AlertableButton.prototype.setAlerted = function(alert) {
     var me = this;
-    if(alert) {
+    if(alert && !me.alerted) {
         $(me.a).css({color: 'red'});
         var $i = $(me.i);
         $i.removeClass("fa-" + me.icon).addClass("fa-exclamation");
@@ -57,7 +57,7 @@ AlertableButton.prototype.setAlerted = function(alert) {
                 $i.removeClass("fa-exclamation").addClass("fa-" + me.icon);
             }
         }, 1500);
-    } else {
+    } else if(!alert && me.alerted) {
         $(me.a).css({color: 'black'});
         $(me.i).removeClass("fa-exclamation").addClass("fa-" + me.icon);
         window.clearInterval(me.exclamationFlashInterval);
