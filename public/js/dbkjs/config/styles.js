@@ -318,7 +318,7 @@ dbkjs.config.styles = {
                         case "> 120 minuten brandwerende scheiding":
                             return "solid";
                         case "Rookwerende scheiding":
-                            return dbkjs.scaleStyleValue(8) + " " + dbkjs.scaleStyleValue(4) + dbkjs.scaleStyleValue(2) + " " + dbkjs.scaleStyleValue(4);
+                            return dbkjs.scaleStyleValue(8) + " " + dbkjs.scaleStyleValue(4);
                         default:
                             return dbkjs.scaleStyleValue(10) + " " + dbkjs.scaleStyleValue(10);
                     }
