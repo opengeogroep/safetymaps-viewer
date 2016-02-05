@@ -75,7 +75,7 @@ function IncidentMonitorController(incidents) {
     });
 
     // Replace "<- Kaart" with button
-    me.incidentDetailsWindow.getView().parent().find(".modal-popup-close").remove()
+    me.incidentDetailsWindow.getView().parent().find(".modal-popup-close").remove();
     $("<button class='btn btn-primary' style='float: left; margin: 5px'><i class='fa fa-arrow-left'></i></button>")
     .prependTo(me.incidentDetailsWindow.getView().parent())
     .click(function() {
@@ -88,6 +88,8 @@ function IncidentMonitorController(incidents) {
     });
     me.marker = null;
 
+    me.failedUpdateTries = 0;
+
     $(this.service).on('initialized', function() {
         me.addAGSLayers();
         me.getIncidentList();
@@ -99,6 +101,8 @@ function IncidentMonitorController(incidents) {
 }
 
 IncidentMonitorController.prototype.UPDATE_INTERVAL_MS = 30000;
+IncidentMonitorController.prototype.UPDATE_INTERVAL_ERROR_MS = 5000;
+IncidentMonitorController.prototype.UPDATE_TRIES = 3;
 
 IncidentMonitorController.prototype.setAllIncidentsRead = function() {
     var me = this;
@@ -235,19 +239,31 @@ IncidentMonitorController.prototype.getIncidentList = function() {
     var dArchived = me.service.getArchivedIncidents(me.highestArchiveIncidentId);
 
     $.when(dCurrent, dArchived)
-    .always(function() {
+    .fail(function(e) {
+        window.clearTimeout(me.getIncidentListTimeout);
+        me.getIncidentListTimeout = window.setTimeout(function() {
+            me.getIncidentList();
+        }, me.UPDATE_INTERVAL_ERROR_MS);
+
+        me.failedUpdateTries = me.failedUpdateTries + 1;
+
+        console.log("Error getting incident list, try: " + me.failedUpdateTries + ", error: " + e);
+
+        // Only show error after number of failed tries
+        if(me.failedUpdateTries > me.UPDATE_TRIES) {
+            var msg = "Kan incidentenlijst niet ophalen na " + me.failedUpdateTries + " pogingen: " + e;
+            dbkjs.gui.showError(msg);
+            me.button.setIcon("bell-slash");
+            me.incidentListWindow.showError(msg);
+        }
+    })
+    .done(function(currentIncidents, archivedIncidents) {
         window.clearTimeout(me.getIncidentListTimeout);
         me.getIncidentListTimeout = window.setTimeout(function() {
             me.getIncidentList();
         }, me.UPDATE_INTERVAL_MS);
-    })
-    .fail(function(e) {
-        var msg = "Kan incidentenlijst niet ophalen: " + e;
-        dbkjs.gui.showError(msg);
-        me.button.setIcon("bell-slash");
-        me.incidentListWindow.showError(msg);
-    })
-    .done(function(currentIncidents, archivedIncidents) {
+
+        me.failedUpdateTries = 0;
         me.button.setIcon("bell-o");
         $('#systeem_meldingen').hide(); // XXX
         me.processNewArchivedIncidents(archivedIncidents);
