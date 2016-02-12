@@ -321,6 +321,9 @@ dbkjs.modules.gms = {
             var dbk = null;
             $.each(dbkjs.modules.feature.features, function(index, f) {
                 var fas = f.attributes.adres;
+                if(!fas) {
+                    return true;
+                }
                 $.each(fas, function(index, fa) {
                     if(fa) {
                         var matchPostcode = a.Postcode && fa.postcode && a.Postcode === fa.postcode;
