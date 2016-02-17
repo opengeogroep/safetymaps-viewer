@@ -29,8 +29,14 @@ dbkjs.bind_dbkjs_init_complete = function() {
 };
 
 dbkjs.challengeAuth = function() {
-    var params = {srid: dbkjs.options.projection.srid, cache: false};
-    $.getJSON(dbkjs.dataPath + 'organisation.json', params).done(function(data) {
+    var params = {srid: dbkjs.options.projection.srid};
+    $.ajax({
+        dataType: "json",
+        url: dbkjs.dataPath + 'organisation.json',
+        data: params,
+        cache: false
+    })
+    .done(function (data) {
         if (data.organisation) {
             dbkjs.options.organisation = data.organisation;
             if (dbkjs.options.organisation.title) {
