@@ -97,8 +97,14 @@ dbkjs.activateClick = function () {
 };
 
 dbkjs.challengeAuth = function () {
-    var params = {srid: dbkjs.options.projection.srid, cache: false};
-    $.getJSON(dbkjs.dataPath + 'organisation.json', params).done(function (data) {
+    var params = {srid: dbkjs.options.projection.srid};
+    $.ajax({
+        dataType: "json",
+        url: dbkjs.dataPath + 'organisation.json',
+        data: params,
+        cache: false
+    })
+    .done(function (data) {
         if (data.organisation) {
             dbkjs.options.organisation = data.organisation;
             if (dbkjs.options.organisation.title) {
@@ -267,6 +273,21 @@ dbkjs.loadOrganisationCapabilities = function () {
     }
 };
 
+dbkjs.zoomToFixedMapResolutionForBounds = function(bounds) {
+    dbkjs.map.zoomToExtent(bounds);
+
+    var res = dbkjs.map.getResolution();
+    var zoomIndex = 1;
+    for(; zoomIndex < dbkjs.map.options.resolutions.length; zoomIndex++) {
+        if(dbkjs.map.options.resolutions[zoomIndex] < res) {
+            break;
+        }
+    }
+    zoomIndex--;
+    console.log("orig res: " + res + ", higher map resolution at index " + zoomIndex + ", res " + dbkjs.map.options.resolutions[zoomIndex]);
+    dbkjs.map.setCenter(dbkjs.map.getCenter(), zoomIndex);
+}
+
 dbkjs.finishMap = function () {
     //find the div that contains the baseLayer.name
     var listItems = $("#baselayerpanel_ul li");
@@ -290,6 +311,10 @@ dbkjs.finishMap = function () {
         dbkjs.argparser = new dbkjs.argParser();
         dbkjs.map.addControl(dbkjs.argparser);
     } else {
+        if(dbkjs.options.initialZoomed) {
+            return;
+        }
+        dbkjs.options.initialZoomed = true;
         if (dbkjs.options.organisation.area) {
             if (dbkjs.options.organisation.area.geometry.type === "Point") {
                 dbkjs.map.setCenter(
@@ -304,7 +329,7 @@ dbkjs.finishMap = function () {
                         );
             } else if (dbkjs.options.organisation.area.geometry.type === "Polygon") {
                 if (dbkjs.viewmode === 'fullscreen') {
-                    dbkjs.map.zoomToExtent(areaGeometry.getBounds());
+                    dbkjs.zoomToFixedMapResolutionForBounds(areaGeometry.getBounds())
                 } else {
                     //get the projection for the Polygon
                     var crs = dbkjs.options.organisation.area.geometry.crs.properties.name || "EPSG:4326";
@@ -518,7 +543,7 @@ dbkjs.documentReady = function () {
                             );
                 } else if (dbkjs.options.organisation.area.geometry.type === "Polygon") {
                     if (dbkjs.viewmode === 'fullscreen') {
-                        dbkjs.map.zoomToExtent(areaGeometry.getBounds());
+                        dbkjs.zoomToFixedMapResolutionForBounds(areaGeometry);
                     } else {
                         var crs = dbkjs.options.organisation.area.geometry.crs.properties.name || "EPSG:4326";
                         dbkjs.map.zoomToExtent(areaGeometry.getBounds().transform(crs, dbkjs.map.getProjectionObject()));

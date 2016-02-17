@@ -84,7 +84,7 @@ dbkjs.modules.vrhinzetbalk = {
             label: 'Brandweergegevens',
             img: 'images/brwzw.png',
             style: 'width: 32px; margin-bottom: 6px',
-            layers: [ 'Brandcompartiment', 'Gevaarlijke stoffen' ],
+            layers: [ 'Brandcompartiment', 'Brandcompartiment label', 'Gevaarlijke stoffen' ],
             active: false,
             css: {
                 'background-color': 'red',

@@ -47,6 +47,9 @@ dbkjs.protocol.jsonDBK = {
         _obj.layerBrandcompartiment = new OpenLayers.Layer.Vector("Brandcompartiment", {
             styleMap: dbkjs.config.styles.dbkcompartiment
         });
+        _obj.layerBrandcompartimentLabels = new OpenLayers.Layer.Vector("Brandcompartiment label", {
+            styleMap: dbkjs.config.styles.compartimentlabel
+        });
         _obj.layerHulplijn2 = new OpenLayers.Layer.Vector("hulplijn2", {
             styleMap: dbkjs.config.styles.hulplijn2
         });
@@ -72,6 +75,7 @@ dbkjs.protocol.jsonDBK = {
         _obj.layers = [
             _obj.layerPandgeometrie,
             _obj.layerBrandcompartiment,
+            _obj.layerBrandcompartimentLabels,
             _obj.layerHulplijn2,
             _obj.layerHulplijn1,
             _obj.layerHulplijn,
@@ -961,6 +965,8 @@ dbkjs.protocol.jsonDBK = {
         var _obj = dbkjs.protocol.jsonDBK;
         if (feature.brandcompartiment) {
             var features = [];
+            var labelFeatures = [];
+            //var labelOffsetDebug = "";
             $.each(feature.brandcompartiment, function (idx, myGeometry) {
                 var myline = new OpenLayers.Format.GeoJSON().read(myGeometry.geometry, "Geometry");
                 if (!dbkjs.util.isJsonNull(myGeometry.Label)) {
@@ -982,10 +988,42 @@ dbkjs.protocol.jsonDBK = {
                         "informatie": myGeometry.aanvullendeInformatie
                     };
                     features.push(myFeature);
-                }
+                    console.log("Creating label points for line ", myline);
+                    for(var i = 0; i < myline.components.length-1; i++) {
+                        var start = myline.components[i];
+                        var end = myline.components[i+1];
+                        var midx = start.x + (end.x - start.x)/2;
+                        var midy = start.y + (end.y - start.y)/2;
 
+                        var opposite = (end.y - start.y);
+                        var adjacent = (end.x - start.x);
+                        var theta = Math.atan2(opposite, adjacent);
+                        var angle = -theta * (180/Math.PI);
+
+/*
+                        // Calculate label start point, some distance perpendicular to the line
+                        // See styles.js, compartimentlabel style labelXOffset and labelXOffset functions
+                        // Can use scale dependant distance there if needed
+                        var dist = 2;
+                        var perpendicularAngle = theta + Math.PI/2;
+                        var labelx = midx + Math.cos(perpendicularAngle) * dist;
+                        var labely = midy + Math.sin(perpendicularAngle) * dist;
+                        labelOffsetDebug += "LINESTRING(" + start.x + " " + start.y + ", " + end.x + " " + end.y + ")\n";
+                        labelOffsetDebug += "LINESTRING(" + midx + " " + midy + ", " + labelx + " " + labely + ")\n";
+*/
+                        var labelPoint = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(midx, midy), {
+                            "type": myGeometry.typeScheiding,
+                            "label": myGeometry.Label,
+                            "rotation": angle,
+                            "theta": theta
+                        });
+                        labelFeatures.push(labelPoint);
+                    }
+                }
             });
+            //console.log(labelOffsetDebug);
             _obj.layerBrandcompartiment.addFeatures(features);
+            _obj.layerBrandcompartimentLabels.addFeatures(labelFeatures);
             _obj.activateSelect(_obj.layerBrandcompartiment);
         }
     },

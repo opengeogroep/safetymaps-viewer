@@ -270,15 +270,7 @@ dbkjs.config.styles = {
             strokeColor: "${mycolor}",
             strokeWidth: "${mystrokewidth}",
             strokeLinecap: "butt",
-            strokeDashstyle: "${mystrokedashstyle}",
-            fontColor: "${mycolor}",
-            pointRadius: 5,
-            fontSize: "12px",
-            fontWeight: "bold",
-            labelSelect: true,
-            labelOutlineColor: "#ffffff",
-            labelOutlineWidth: 1,
-            label: "${mylabel}"
+            strokeDashstyle: "${mystrokedashstyle}"
         }, {
             context: {
                 mycolor: function (feature) {
@@ -322,18 +314,54 @@ dbkjs.config.styles = {
                         default:
                             return dbkjs.scaleStyleValue(10) + " " + dbkjs.scaleStyleValue(10);
                     }
-                },
-                mylabel: function (feature) {
-                    if (feature.attributes.label) {
-                        return feature.attributes.label;
-                    } else {
-                        return "";
-                    }
                 }
             }
         }),
         "temporary": new OpenLayers.Style({strokeColor: "#009FC3"}),
         "select": new OpenLayers.Style({strokeColor: "#8F00C3"})
+    }),
+    compartimentlabel: new OpenLayers.StyleMap({
+        "default": new OpenLayers.Style({
+            fontColor: "${mycolor}",
+            fontSize: "16px",
+            labelSelect: false,
+            labelOutlineColor: "#ffffff",
+            labelOutlineWidth: 2,
+            label: "${mylabel}",
+            labelAlign: "cb",
+            rotation: "${rotation}",
+            labelXOffset: "${labelXOffset}",
+            labelYOffset: "${labelYOffset}"
+        }, {
+            context: {
+                mycolor: function(feature) {
+                    return dbkjs.config.styles.dbkcompartiment.styles.default.context.mycolor(feature);
+                },
+                mylabel: function(feature) {
+                    if(feature.attributes.label) {
+                        return feature.attributes.label;
+                    }
+                    switch(feature.attributes.type) {
+                        case "30 minuten brandwerende scheiding":
+                            return "30'";
+                        case "60 minuten brandwerende scheiding":
+                            return "60'";
+                        case "> 60 minuten brandwerende scheiding":
+                            return ">60'";
+                        case "> 120 minuten brandwerende scheiding":
+                            return ">120'";
+                        default:
+                            return "";
+                    }
+                },
+                labelYOffset: function(feature) {
+                    return Math.sin(feature.attributes.theta + Math.PI/2) * 5;
+                },
+                labelXOffset: function(feature) {
+                    return Math.cos(feature.attributes.theta + Math.PI/2) * 5;
+                }
+            }
+        })
     }),
     hulplijn: new OpenLayers.StyleMap({
         'default': new OpenLayers.Style({
