@@ -543,7 +543,7 @@ dbkjs.documentReady = function () {
                             );
                 } else if (dbkjs.options.organisation.area.geometry.type === "Polygon") {
                     if (dbkjs.viewmode === 'fullscreen') {
-                        dbkjs.zoomToFixedMapResolutionForBounds(areaGeometry);
+                        dbkjs.zoomToFixedMapResolutionForBounds(areaGeometry.getBounds());
                     } else {
                         var crs = dbkjs.options.organisation.area.geometry.crs.properties.name || "EPSG:4326";
                         dbkjs.map.zoomToExtent(areaGeometry.getBounds().transform(crs, dbkjs.map.getProjectionObject()));
