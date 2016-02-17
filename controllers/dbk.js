@@ -104,7 +104,7 @@ exports.getFeatures = function(req, res) {
         if(!srid){
             srid = 4326;
         }
-        var query_str = 'select "feature" from dbk.dbkfeatures_json($1)';
+        var query_str = 'select "feature" from dbk.dbkfeatures_adres_json($1)';
         global.pool.query(query_str, [srid],
             function(err, result){
                 if(err) {
