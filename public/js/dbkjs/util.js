@@ -212,6 +212,9 @@ OpenLayers.Strategy.Cluster.prototype.cluster = function(event) {
         var clusters = [];
         var feature, clustered, cluster;
         var screenBounds = this.layer.map.getExtent();
+        if(screenBounds === null) {
+            return;
+        }
         for (var i = 0; i < this.features.length; ++i) {
             feature = this.features[i];
             if(feature.geometry) {
