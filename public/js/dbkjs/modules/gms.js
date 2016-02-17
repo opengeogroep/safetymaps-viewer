@@ -212,6 +212,7 @@ dbkjs.modules.gms = {
 
                 this.selectDbk();
 
+                dbkjs.options.initialZoomed = true;
                 this.zoom();
             }
         } else {
