@@ -12,7 +12,7 @@ dbkjs.mapcontrols.createMapControls = function() {
         var zoomContainer = $("<div id='zoom_buttons'/>").css({
             "position": "absolute",
             "left": "20px",
-            "bottom": "100px",
+            "bottom": "80px",
             "z-index": "3000"
         });
         zoomContainer.appendTo("#mapc1map1");
