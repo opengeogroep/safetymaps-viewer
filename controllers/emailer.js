@@ -29,7 +29,7 @@
 exports.postAnnotation = function (req, res) {
     var t = res.locals.t;
     var nodemailer = require("nodemailer");
-    var smtp = nodemailer.createTransport("SMTP", global.conf.get('support:smtp'));
+    var smtp = nodemailer.createTransport(global.conf.get('support:smtp'));
     // @todo get email from request, it can be changed in the database.
     email = global.conf.get('support:sendto');
 
