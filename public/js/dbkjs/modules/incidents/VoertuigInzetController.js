@@ -177,6 +177,8 @@ VoertuigInzetController.prototype.getInzetInfo = function() {
         if(incidentId) {
             me.inzetIncident(incidentId);
         } else {
+            me.incidentDetailsWindow.showError("Laatst informatie opgehaald op " + new moment().format("LLL") + " voor voertuignummer " + responseVoertuignummer + ".");
+
             if(me.incidentId) {
                 $("#zoom_extent").click();
 
