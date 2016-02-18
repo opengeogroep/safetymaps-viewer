@@ -988,7 +988,6 @@ dbkjs.protocol.jsonDBK = {
                         "informatie": myGeometry.aanvullendeInformatie
                     };
                     features.push(myFeature);
-                    console.log("Creating label points for line ", myline);
                     for(var i = 0; i < myline.components.length-1; i++) {
                         var start = myline.components[i];
                         var end = myline.components[i+1];
