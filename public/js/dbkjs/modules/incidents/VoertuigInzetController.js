@@ -167,6 +167,9 @@ VoertuigInzetController.prototype.getInzetInfo = function() {
         me.incidentDetailsWindow.showError(msg);
     })
     .done(function(incidentId) {
+        $('#systeem_meldingen').hide();
+        me.button.setIcon("bell-o");
+
         if(responseVoertuignummer !== me.voertuignummer) {
             // Voertuignummer was changed since request was fired off, ignore!
             return;
