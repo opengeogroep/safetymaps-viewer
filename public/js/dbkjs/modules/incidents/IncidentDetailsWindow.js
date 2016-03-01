@@ -176,6 +176,8 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
             var ind = k.T_IND_DISC_KLADBLOK_REGEL;
             if(ind.indexOf("B") !== -1) {
                 c += "brw ";
+            } else {
+		return;
             }
             if(ind.indexOf("P") !== -1) {
                 c += "pol ";
