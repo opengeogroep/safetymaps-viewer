@@ -526,7 +526,7 @@ AGSIncidentService.prototype.getClassificaties = function(incidenten) {
             f: "json",
             token: me.token,
             where: "MELDING_CL_ID IN (" + meldingClIds.join(",") + ")",
-            outFields: "*"
+            outFields: "MELDING_CL_ID,NIVO1,NIVO2,NIVO3"
         }
     })
     .fail(function(e) {
