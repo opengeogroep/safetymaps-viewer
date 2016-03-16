@@ -64,7 +64,7 @@ function VehiclePositionLayer() {
                 dbkjs.map.addPopup(me.popup);
             },
             onUnselect: function(f) {
-                this.removePopup();
+                me.removePopup();
                 f.popup = null;
             }
     });
