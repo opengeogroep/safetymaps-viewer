@@ -152,7 +152,16 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
             if(inzet.KAZ_NAAM) {
                 eenheid += " (" + inzet.KAZ_NAAM + ")";
             }
-            var span = (inzet.DTG_EIND_ACTIE ? "<span class='einde'>" : "<span>") + dbkjs.util.htmlEncode(eenheid) + "</span><br/>";
+            var tooltip;
+            if(!inzet.DTG_EIND_ACTIE) {
+                var start = AGSIncidentService.prototype.getAGSMoment(inzet.DTG_OPDRACHT_INZET);
+                tooltip = "sinds " + start.format("HH:mm") + ", " + start.fromNow();
+            } else {
+                var einde = AGSIncidentService.prototype.getAGSMoment(inzet.DTG_EIND_ACTIE);
+                tooltip = "actie be&euml;indigd om " + einde.format("HH:mm") + ", " + einde.fromNow();
+            }
+
+            var span = (inzet.DTG_EIND_ACTIE ? "<span class='einde' " : "<span ") + " title='" + tooltip + "'>" + dbkjs.util.htmlEncode(eenheid) + "</span><br/>";
             if(inzet.T_IND_DISC_EENHEID === "B") {
                 eenhBrw += span;
             } else if(inzet.T_IND_DISC_EENHEID === "P") {
