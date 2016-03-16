@@ -22,8 +22,8 @@ function VehiclePositionLayer() {
     // Layer name starts with _ to hide in support module layer list
     this.layer = new OpenLayers.Layer.Vector("_Vehicle positions", {
         styleMap: new OpenLayers.StyleMap({
-            "default": {
-                externalGraphic: "images/zwaailicht.gif",
+            "default": new OpenLayers.Style({
+                externalGraphic: "${graphic}",
                 graphicWidth: 16,
                 graphicHeight: 16,
                 pointRadius: 8,
@@ -34,42 +34,56 @@ function VehiclePositionLayer() {
                 labelYOffset: -16,
                 labelOutlineColor: "white",
                 labelOutlineWidth: 3
-            }
+            }, {
+                context: {
+                    graphic: function(feature) {
+                        return feature.attributes.Status === 1 ? "images/zwaailicht-uit.png" : "images/zwaailicht.gif";
+                    }
+                }
+            })
         })
     });
 
     dbkjs.map.addLayer(this.layer);
 
     var me = this;
-    var selectedFeature;
-
-    function onPopupClose(evt) {
-        me.selectControl.unselect(selectedFeature);
-    };
 
     this.selectControl = new OpenLayers.Control.SelectFeature(this.layer, {
             onSelect: function(f) {
-                console.log("feature select", f);
-                me.selectedFeature = f;
-
-                me.removePopup();
-
-                var dateTime = moment(f.attributes.PosDate + " " + f.attributes.PosTime, "DD-MM-YYYY HH:mm:ss");
-                me.popup = new OpenLayers.Popup.FramedCloud(null,
-                                         f.geometry.getBounds().getCenterLonLat(),
-                                         null,
-                                         "<div style='font-size: 12px'>Pos. van " + dateTime.fromNow() + "<br>Status: " + f.attributes.Status + "<br>Snelheid / richting: " + f.attributes.Speed + " / " + f.attributes.Direction + "<br>Aanrijtijd: " + f.attributes.Aanrijtijd + "</div>",
-                                         null, true, onPopupClose);
-                f.popup = me.popup;
-                dbkjs.map.addPopup(me.popup);
+                me.selectFeature(f);
             },
             onUnselect: function(f) {
-                me.removePopup();
-                f.popup = null;
+                me.unselectFeature(f);
             }
     });
     dbkjs.map.addControl(this.selectControl);
     this.selectControl.activate();
+}
+
+VehiclePositionLayer.prototype.selectFeature = function(f) {
+    var me = this;
+    me.selectedFeature = f;
+    me.removePopup();
+
+    function onPopupClose(evt) {
+        me.unselectFeature(me.selectedFeature);
+    };
+
+    var dateTime = moment(f.attributes.PosDate + " " + f.attributes.PosTime, "DD-MM-YYYY HH:mm:ss");
+    me.popup = new OpenLayers.Popup.FramedCloud(null,
+                             f.geometry.getBounds().getCenterLonLat(),
+                             null,
+                             "<div style='font-size: 12px; overflow: hidden'>Pos. van " + dateTime.fromNow() + "<br>Status: " + f.attributes.Status + "</div>",
+                             null, true, onPopupClose);
+    f.popup = me.popup;
+    dbkjs.map.addPopup(me.popup);
+};
+
+VehiclePositionLayer.prototype.unselectFeature = function(f) {
+    var me = this;
+    me.selectedFeature = null;
+    me.removePopup();
+    f.popup = null;
 }
 
 VehiclePositionLayer.prototype.removePopup = function() {
@@ -82,7 +96,25 @@ VehiclePositionLayer.prototype.removePopup = function() {
 };
 
 VehiclePositionLayer.prototype.features = function(features) {
-    this.removePopup();
+    var me = this;
+    var selected = me.selectedFeature;
+    if(selected) {
+        me.unselectFeature(selected);
+    }
     this.layer.destroyFeatures();
     this.layer.addFeatures(features);
+
+    var reselected = null;
+    if(selected) {
+        $.each(features, function(i, f) {
+            if(f.attributes.Voertuigsoort === selected.attributes.Voertuigsoort && f.attributes.Roepnaam === selected.attributes.Roepnaam) {
+                reselected = f;
+                return false;
+            }
+        });
+    }
+    if(reselected) {
+        console.log("reselecting feature ", reselected.attributes);
+        me.selectFeature(reselected);
+    }
 };
