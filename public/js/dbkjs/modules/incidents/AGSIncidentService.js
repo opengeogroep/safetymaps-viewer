@@ -27,11 +27,13 @@
  * token: when token received/changed
  *
  * @param {string} url The URL to the ArcGIS REST MapService
+ * @param {string} vehiclePositionsUrl Optional URL to ArcGIS REST MapService for vehicle positions
  * @returns {AGSIncidentService}
  */
-function AGSIncidentService(url) {
+function AGSIncidentService(url, vehiclePositionsUrl) {
     var me = this;
     me.url = url;
+    me.vehiclePosUrl = vehiclePositionsUrl;
     if(!me.url) {
         throw "Null AGS incident service URL";
     }
@@ -270,6 +272,36 @@ AGSIncidentService.prototype.loadServiceInfo = function() {
             d.resolve();
         }
     });
+
+    me.dVehiclePosInit = null;
+    if(me.vehiclePosUrl) {
+        me.dVehiclePosInit = $.Deferred();
+
+        $.ajax(me.vehiclePosUrl, {
+            dataType: "json",
+            data: {
+                f: "json",
+                token: me.token
+            }
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            me.dVehiclePosInit.reject(me.getAjaxError(jqXHR, textStatus, errorThrown));
+        })
+        .done(function(data, textStatus, jqXHR) {
+            if(data.error) {
+                me.dVehiclePosInit.reject(me.getAGSError(data));
+            } else if(!data.tables) {
+                me.dVehiclePosInit.reject('No tables in vehicle pos service info ' + jqXHR.responseText + '"');
+            } else {
+                me.vehiclePosLayerUrls = {};
+                $.each(data.layers, function(i,layer) {
+                    var name = layer.name.substring(layer.name.lastIndexOf(".")+1).replace("%", "");
+                    me.vehiclePosLayerUrls[name] = me.vehiclePosUrl + "/" + layer.id;
+                });
+                me.dVehiclePosInit.resolve();
+            }
+        });
+    }
     return d.promise();
 };
 
@@ -847,4 +879,60 @@ AGSIncidentService.prototype.getArchiefIncidentClassificaties = function(inciden
         classificaties.push(incident.BRW_MELDING_CL2);
     }
     return classificaties.length === 0 ? "" : classificaties.join(", ");
+};
+
+AGSIncidentService.prototype.getVehiclePositions = function(vehicles) {
+
+    var me = this;
+
+    if(me.vehiclePosLayerUrls === null) {
+        return $.Deferred().resolveWith([]);
+    }
+
+/*
+    var where = "";
+
+    $.each(vehicles, function(i, v) {
+        if(where !== "") {
+            where += " OR ";
+        }
+        where += "(Voertuigsoort = '" + v.CODE_VOERTUIGSOORT + "' AND Roepnummer = '" + v.ROEPNAAM_EENHEID + "')";
+    });
+
+    if(where === "") {
+        return $.Deferred().resolve({});
+    }
+*/
+    var d = $.Deferred();
+    me.doAGSAjax({
+        url: me.vehiclePosLayerUrls["Brandweer_Eenheden"] + "/query",
+        dataType: "json",
+        data: {
+            f: "json",
+            token: me.token,
+            where: "IncidentID <> ''",
+            outFields: "*"
+        },
+        cache: false
+    })
+    .fail(function(e) {
+        d.reject("Fout voertuigposities: " + e);
+    })
+    .done(function(data, textStatus, jqXHR) {
+        if(!data.features) {
+            d.reject("Geen features in voertuigposities");
+        } else {
+            var features = [];
+
+            $.each(data.features, function(i, f) {
+                var p = new Proj4js.Point(f.geometry.x, f.geometry. y);
+                var t = Proj4js.transform(new Proj4js.Proj("EPSG:4326"), new Proj4js.Proj(dbkjs.options.projection.code), p);
+                var p = new OpenLayers.Geometry.Point(t.x, t.y);
+                var feature = new OpenLayers.Feature.Vector(p, f.attributes);
+                features.push(feature);
+            });
+            d.resolve(features);
+        }
+    });
+    return d.promise();
 };

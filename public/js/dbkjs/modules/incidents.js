@@ -29,7 +29,7 @@ dbkjs.modules.incidents = {
     register: function() {
         this.options = dbkjs.options.incidents;
 
-        this.service = new AGSIncidentService(this.options.ags.incidentsUrl);
+        this.service = new AGSIncidentService(this.options.ags.incidentsUrl, this.options.ags.vehiclePosUrl);
 
         if(this.options.voertuigMode) {
             this.controller = new VoertuigInzetController(this);

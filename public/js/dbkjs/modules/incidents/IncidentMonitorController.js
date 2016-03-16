@@ -88,6 +88,8 @@ function IncidentMonitorController(incidents) {
     });
     me.marker = null;
 
+    me.vehiclePositionLayer = new VehiclePositionLayer();
+
     me.failedUpdateTries = 0;
 
     $(this.service).on('initialized', function() {
@@ -270,6 +272,7 @@ IncidentMonitorController.prototype.getIncidentList = function() {
         me.incidentListWindow.data(currentIncidents, me.archivedIncidents, true);
         // TODO: only me.incidentListWindow.actueleIncidentIds ?
         me.updateMarkerLayer(currentIncidents);
+        me.updateVehiclePositionLayer(currentIncidents);
         me.checkUnreadIncidents(me.incidentListWindow.actueleIncidentIds);
     });
 };
@@ -308,6 +311,32 @@ IncidentMonitorController.prototype.updateMarkerLayer = function(incidents) {
         me.selectedIncidentMarker = me.markerLayer.addIncident(me.incident, true);
     }
     me.markerLayer.setZIndexFix();
+};
+
+IncidentMonitorController.prototype.updateVehiclePositionLayer = function(incidents) {
+    var me = this;
+
+    var vehicles = {};
+    var haveInzet = false;
+    $.each(incidents, function(i, incident) {
+        if(incident.actueleInzet) {
+            $.each(incident.inzetBrandweerEenheden, function(j, inzet) {
+                if(inzet.DTG_EIND_ACTIE === null) {
+                    vehicles[inzet.CODE_VOERTUIGSOORT + " " + inzet.ROEPNAAM_EENHEID] = inzet;
+                    haveInzet = true;
+                }
+            });
+        }
+    });
+
+    if(haveInzet) {
+        me.service.getVehiclePositions()
+        .done(function(features) {
+            me.vehiclePositionLayer.features(features);
+        });
+    } else {
+        me.vehiclePositionLayer.features([]);
+    }
 };
 
 IncidentMonitorController.prototype.enableIncidentUpdates = function() {
