@@ -58,6 +58,8 @@ function VehiclePositionLayer() {
     });
     dbkjs.map.addControl(this.selectControl);
     this.selectControl.activate();
+
+    $("#baselayerpanel_b").append('<hr/><label><input type="checkbox" checked onclick="dbkjs.modules.incidents.controller.vehiclePositionLayer.layer.setVisibility(event.target.checked)">Toon voertuigposities</label>');
 }
 
 VehiclePositionLayer.prototype.selectFeature = function(f) {
