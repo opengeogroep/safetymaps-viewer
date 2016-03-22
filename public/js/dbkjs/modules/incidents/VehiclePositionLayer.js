@@ -99,24 +99,9 @@ VehiclePositionLayer.prototype.removePopup = function() {
 
 VehiclePositionLayer.prototype.features = function(features) {
     var me = this;
-    var selected = me.selectedFeature;
-    if(selected) {
-        me.unselectFeature(selected);
+    if(me.selectedFeature) {
+        me.selectControl.unselectAll();
     }
     this.layer.destroyFeatures();
     this.layer.addFeatures(features);
-
-    var reselected = null;
-    if(selected) {
-        $.each(features, function(i, f) {
-            if(f.attributes.Voertuigsoort === selected.attributes.Voertuigsoort && f.attributes.Roepnaam === selected.attributes.Roepnaam) {
-                reselected = f;
-                return false;
-            }
-        });
-    }
-    if(reselected) {
-        console.log("reselecting feature ", reselected.attributes);
-        me.selectFeature(reselected);
-    }
 };
