@@ -186,7 +186,9 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
             if(ind.indexOf("B") !== -1) {
                 c += "brw ";
             } else {
-		return;
+                if(typeof dbkjs.options.incidents.kladblokP === "undefined" || !dbkjs.options.incidents.kladblokP) {
+                    return;
+                }
             }
             if(ind.indexOf("P") !== -1) {
                 c += "pol ";
