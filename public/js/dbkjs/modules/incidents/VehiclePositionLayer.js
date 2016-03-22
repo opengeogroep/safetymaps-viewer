@@ -86,7 +86,7 @@ VehiclePositionLayer.prototype.unselectFeature = function(f) {
     me.selectedFeature = null;
     me.removePopup();
     f.popup = null;
-}
+};
 
 VehiclePositionLayer.prototype.removePopup = function() {
     var me = this;
