@@ -45,7 +45,7 @@ IncidentDetailsWindow.prototype.createStyle = function() {
     var css = '#eenheden div { margin: 3px; float: left } \
 #eenheden div { border-left: 1px solid #ddd; padding-left: 8px; } \
 #eenheden span.einde { color: gray } \
-#kladblok { clear: both; padding-top: 10px; white-space: pre; font-size: 15px; } \
+#kladblok { clear: both; padding-top: 10px; white-space: pre; } \
 #kladblok span.brw { font-weight: bold; } \
 #kladblok span.pol { color: blue; } \
 #pol span { color: blue; } \
