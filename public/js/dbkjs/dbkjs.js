@@ -233,7 +233,8 @@ dbkjs.loadOrganisationCapabilities = function () {
                   parent,
                   index,
                   metadata,
-                  layertype
+                  layertype,
+                  wms_v.gid
               );
           } else {
               params = wms_v.params || {};

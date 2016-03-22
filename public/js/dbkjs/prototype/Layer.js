@@ -27,7 +27,7 @@ dbkjs.Layer = dbkjs.Class({
     layer: null,
     div: null,
     legend: null,
-    initialize: function (name, url, params, options, parent, index, metadata, layertype) {
+    initialize: function (name, url, params, options, parent, index, metadata, layertype, gid) {
         var ly;
         var dv_panel_content;
         var defaultparams = {
@@ -120,7 +120,7 @@ dbkjs.Layer = dbkjs.Class({
                 dbkjs.map.setLayerIndex(this.layer, 0);
             }
 
-            var dv_panel_heading = $('<div class="panel-heading"></div>');
+            var dv_panel_heading = $('<div class="panel-heading" data-layer-gid="' + gid + '"></div>');
             var dv_panel_title = $('<h4 class="panel-title"></div>');
             dv_panel_title.append(name + '&nbsp;<a class="accordion-toggle" data-toggle="collapse" href="#collapse_' +
                     this.id + '" data-parent="' + parent + '" ><i class="fa fa-info-circle"></i></a>');

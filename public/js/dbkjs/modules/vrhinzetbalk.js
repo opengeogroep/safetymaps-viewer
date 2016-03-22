@@ -77,7 +77,7 @@ dbkjs.modules.vrhinzetbalk = {
                 "HEAT",      // Schadecirkel
                 "Fence"
             ],
-            wms: ['Basis'],
+            wms: 'Basis',
             setTopLayerIndex: true
         },
         toggleBrandweer: {
@@ -109,7 +109,7 @@ dbkjs.modules.vrhinzetbalk = {
                 'Tw01',
                 'TwTemp'
             ],
-            wms: ['Brandweer'],
+            wms: 'Brandweer',
             setTopLayerIndex: true
         },
         toggleBluswater: {
@@ -135,7 +135,7 @@ dbkjs.modules.vrhinzetbalk = {
             hulplijnen: [
                 "DBL Leiding"
             ],
-            wms: ['Water'],
+            wms: 'Water',
             setTopLayerIndex: true
         },
         toggleGebouw: {
@@ -169,11 +169,27 @@ dbkjs.modules.vrhinzetbalk = {
             hulplijnen: [
                 "Binnenmuur"
             ],
-            wms: ['Gebouw'],
+            wms: 'Gebouw',
             setTopLayerIndex: true
         }
     },
     disabledLayers: [],
+    findConfiguredLayers: function(name) {
+        // Find layers with name as given
+        var olLayers = dbkjs.map.getLayersByName(name);
+        var organisationLayers = [];
+        // Find layers from options with different name but name in abstract
+        // (as configured by safetymaps-server)
+        $.each(dbkjs.options.organisation.wms, function(i, wms) {
+            if(wms.name === name) {
+                organisationLayers.push(wms);
+            } else if (wms.abstract === name) {
+                olLayers = olLayers.concat(dbkjs.map.getLayersByName(wms.name));
+                organisationLayers.push(wms);
+            }
+        });
+        return { olLayers: olLayers, organisationLayers: organisationLayers };
+    },
     register: function() {
         var me = this;
 
@@ -196,13 +212,19 @@ dbkjs.modules.vrhinzetbalk = {
             }
 
             $(dbkjs).one("dbkjs_init_complete", function() {
-                $.each(toggleOptions.wms, function(i, wms) {
-                    var l = dbkjs.map.getLayersByName(wms);
-                    if(l && l.length === 1) {
-                        l[0].setVisibility(toggleOptions.active);
-                        if(toggleOptions.setTopLayerIndex) {
-                            dbkjs.map.setLayerIndex(l[0], dbkjs.map.layers.length-1);
-                        }
+                var ll = me.findConfiguredLayers(toggleOptions.wms)
+                $.each(ll.olLayers, function(j,l) {
+                    l.setVisibility(toggleOptions.active);
+
+                    if(toggleOptions.setTopLayerIndex) {// TODO handled by wms.index
+                        dbkjs.map.setLayerIndex(l, dbkjs.map.layers.length-1);
+                    }
+                });
+                // Hide from legend if parent not null
+                $.each(ll.organisationLayers, function(j,l) {
+                    if(l.parent !== null) {
+                        console.log("hiding legend for " + l.name + " gid " + l.gid, $("div[data-layer-gid=" + l.gid + "]"));
+                        $("div[data-layer-gid=" + l.gid + "]").parent().hide();
                     }
                 });
             });
@@ -239,11 +261,9 @@ dbkjs.modules.vrhinzetbalk = {
                     me.enableLayers(toggleOptions.layers);
                 }
                 if(toggleOptions.wms) {
-                    $.each(toggleOptions.wms, function(i, wms) {
-                        var l = dbkjs.map.getLayersByName(wms);
-                        if(l && l.length === 1) {
-                            l[0].setVisibility(toggle.hasClass('on'));
-                        }
+                    $.each(me.findConfiguredLayers(toggleOptions.wms).olLayers, function(j,l) {
+                        console.log("Setting layer " + l.name + " visibility: " + toggle.hasClass('on'));
+                        l.setVisibility(toggle.hasClass('on'));
                     });
                 }
 
