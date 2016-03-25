@@ -38,6 +38,7 @@ dbkjs.modules.feature = {
     layer: null,
     currentCluster: [],
     selection: null,
+    autoUpdateInterval: null,
     /**
      * The layer that will hold the incidents
      */
@@ -125,6 +126,12 @@ dbkjs.modules.feature = {
         });
 
         _obj.get();
+
+        if(dbkjs.options.autoFeatureUpdateInterval) {
+            _obj.autoUpdateInterval = window.setInterval(function() {
+                _obj.get();
+            }, dbkjs.options.autoFeatureUpdateInterval);
+        }
     },
     get: function() {
         var _obj = dbkjs.modules.feature;
