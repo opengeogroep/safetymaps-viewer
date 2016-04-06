@@ -166,12 +166,19 @@ dbkjs.successAuth = function () {
     dbkjs.gui.setLogo();
 
     //register modules
-    $.each(dbkjs.modules, function (mod_index, module) {
-        if ($.inArray(mod_index, dbkjs.options.organisation.modules) > -1
-	|| (dbkjs.options.additionalModules && $.inArray(mod_index, dbkjs.options.additionalModules) > -1)) {
-            if (module.register) {
-                module.register({namespace: dbkjs.options.organisation.workspace, url: 'geoserver/', visible: true, viewmode: dbkjs.viewmode});
+    $.each(dbkjs.modules, function (name, module) {
+        var enabled = false;
+        $.each(dbkjs.options.organisation.modules, function(i, m) {
+            if(m.name === name) {
+                enabled = true;
+                module.options = m.options;
+                return false;
             }
+        });
+        enabled = enabled || dbkjs.options.additionalModules && $.inArray(name, dbkjs.options.additionalModules) > -1;
+
+        if(enabled && module.register) {
+            module.register({namespace: dbkjs.options.organisation.workspace, url: 'geoserver/', visible: true, viewmode: dbkjs.viewmode});
         }
     });
 

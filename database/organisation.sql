@@ -63,7 +63,8 @@ grant select on table organisation.care to public;
 CREATE TABLE organisation.modules (
     gid serial PRIMARY KEY,
     name character varying,
-    enabled boolean
+    enabled boolean,
+    options json
 );
 grant select on table organisation.modules to public;
 
@@ -79,8 +80,7 @@ SELECT t.gid,
 	( SELECT row_to_json(a) from ( select 
 	mail, button from organisation.support) a) as support,
       (
-      select array_agg(name)
-      from organisation.modules where enabled = true
+      select array_to_json(array_agg(row_to_json(mods))) from (select name,options from organisation.modules where enabled) mods
       ) as modules,
       (
       select array_to_json(array_agg(row_to_json(a)))
