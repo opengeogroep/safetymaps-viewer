@@ -291,9 +291,9 @@ dbkjs.protocol.jsonDBK = {
             dbkjs.util.alert(i18n.t('app.error'), i18n.t('dialogs.infoNotFound'), 'alert-danger');
         }
     },
-    constructRow: function (val, caption) {
+    constructRow: function (val, caption, id) {
         if (!dbkjs.util.isJsonNull(val)) {
-            var output = '<tr><td>' + caption + '</td><td>' + val + '</td></tr>';
+            var output = '<tr' + (id ? ' id="' + id + '"' : "") + '><td>' + caption + '</td><td>' + val + '</td></tr>';
             return output;
         } else {
             return '';
@@ -315,12 +315,12 @@ dbkjs.protocol.jsonDBK = {
                 i18n.t('dbk.noEmergencyResponse') + '</span>';
         if (!dbkjs.util.isJsonNull(DBKObject.BHVaanwezig)) {
             if (DBKObject.BHVaanwezig === true) {
-               bhvaanwezig = '<span class="label label-success">' +
-                   i18n.t('dbk.emergencyResponsePresent') + '</span>';
+            bhvaanwezig = '<span class="label label-success">' +
+                i18n.t('dbk.emergencyResponsePresent') + '</span>';
             } else {
                 bhvaanwezig = '<span class="label label-warning">' +
                     i18n.t('dbk.noEmergencyResponse') + '</span>';
-            }
+        }
         }
         var informelenaam = dbkjs.util.isJsonNull(DBKObject.informeleNaam) ? '' : DBKObject.informeleNaam;
         var risicoklasse = dbkjs.util.isJsonNull(DBKObject.risicoklasse) ? '' : DBKObject.risicoklasse;
@@ -367,7 +367,7 @@ dbkjs.protocol.jsonDBK = {
                 var formelenaam = dbkjs.util.isJsonNull(DBKObject.formeleNaam) ? '' : DBKObject.formeleNaam;
                 algemeen_table.append(_obj.constructRow(formelenaam, i18n.t('dbk.formalName')));
             }
-            algemeen_table.append(_obj.constructRow(informelenaam, i18n.t('dbk.alternativeName')));
+            algemeen_table.append(_obj.constructRow(informelenaam, i18n.t('dbk.alternativeName'), "informelenaam"));
 
             // Show the adres as normal table row, after formele/informelenaam
             // No BAG links
@@ -386,23 +386,23 @@ dbkjs.protocol.jsonDBK = {
                 algemeen_table.append(_obj.constructRow(adresText, 'Adres'));
             }
 
-            algemeen_table.append(_obj.constructRow(controledatum, i18n.t('dbk.dateChecked')));
+            algemeen_table.append(_obj.constructRow(controledatum, i18n.t('dbk.dateChecked'), "controledatum"));
             if (dbkjs.showStatus) {
               var status = dbkjs.util.isJsonNull(DBKObject.status) ? '<span class="label label-warning">' +
                       i18n.t('dbk.unknown') + '</span>' : DBKObject.status;
                 algemeen_table.append(_obj.constructRow(status, i18n.t('dbk.status')));
             }
-            algemeen_table.append(_obj.constructRow(bhvaanwezig, i18n.t('dbk.emergencyResponse')));
+            algemeen_table.append(_obj.constructRow(bhvaanwezig, i18n.t('dbk.emergencyResponse'), "bhvaanwezig"));
             algemeen_table.append(_obj.constructRow(inzetprocedure, i18n.t('dbk.procedure')));
             algemeen_table.append(_obj.constructRow(gebouwconstructie, 'Gebouwconstructie'));
             algemeen_table.append(_obj.constructRow(omsnummer, i18n.t('dbk.fireAlarmCode')));
             algemeen_table.append(_obj.constructRow(gebruikstype, i18n.t('dbk.application')));
             algemeen_table.append(_obj.constructRow(risicoklasse, i18n.t('dbk.risk')));
-            algemeen_table.append(_obj.constructRow(bouwlaag, i18n.t('dbk.level')));
+            algemeen_table.append(_obj.constructRow(bouwlaag, i18n.t('dbk.level'), "bouwlaag"));
             algemeen_table.append(_obj.constructRow(laagstebouwlaag, i18n.t('dbk.lowLevel') + ' (' + i18n.t('dbk.floor') + ')'));
             algemeen_table.append(_obj.constructRow(hoogstebouwlaag, i18n.t('dbk.highLevel') + ' (' + i18n.t('dbk.floor') + ')'));
         } else if (dbktype === "gebied") {
-            algemeen_table.append(_obj.constructRow(informelenaam, i18n.t('dbk.alternativeName')));
+            algemeen_table.append(_obj.constructRow(informelenaam, i18n.t('dbk.alternativeName'), "informelenaam"));
             algemeen_table.append(_obj.constructRow(controledatum, i18n.t('dbk.dateChecked')));
         }
         if (!dbkjs.options.adresFirstInTable && DBKObject.adres) {
