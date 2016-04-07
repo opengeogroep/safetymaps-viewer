@@ -56,7 +56,7 @@ dbkjs.protocol.jsonDBK.constructBrandweervoorzieningRow = function(brandweervoor
                     brandweervoorziening.type +'" title="'+
                     brandweervoorziening.type+'"></td>' +
                 '<td>' + brandweervoorziening.name + '</td>' +
-                '<td>' + brandweervoorziening.information + '</td>' +
+                '<td>' + (brandweervoorziening.information ? brandweervoorziening.information : '') + '</td>' +
             '</tr>');
 };
 

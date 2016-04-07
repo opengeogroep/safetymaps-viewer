@@ -518,7 +518,7 @@ dbkjs.protocol.jsonDBK = {
                         myFeature.attributes.type + '" title="' +
                         myFeature.attributes.type + '"></td>' +
                         '<td>' + myFeature.attributes.name + '</td>' +
-                        '<td>' + myFeature.attributes.information + '</td>' +
+                        '<td>' + (myFeature.attributes.information ? myFeature.attributes.information : '') + '</td>' +
                         '</tr>');
                 //@@ Toekennen van callback verplaatst naar info().
                 bv_table.append(myrow);
