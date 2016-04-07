@@ -35,29 +35,28 @@ dbkjs.protocol.jsonDBK.constructBrandweervoorziening = function(feature){
         bv_table_div.append(bv_table);
         bv_div.append(bv_table_div);
         _obj.panel_group.append(bv_div);
-        _obj.panel_tabs.append('<li><a data-toggle="tab" href="#' + id + '">'+ i18n.t('dbk.prevention')+ '</a></li>');
+        _obj.panel_tabs.append(Mustache.render('<li><a data-toggle="tab" href="#{{id}}">{{#t}}dbk.prevention{{/t}}</a></li>', dbkjs.util.mustachei18n({id: id})));
     }
 };
 
 dbkjs.protocol.jsonDBK.constructBrandweervoorzieningHeader = function() {
     var bv_table = $('<table class="table table-hover"></table>');
-        bv_table.append('<tr><th>' +
-                i18n.t('prevention.type') + '</th><th>' +
-                i18n.t('prevention.name') + '</th><th>' +
-                i18n.t('prevention.comment') + '</th></tr>');
+        bv_table.append(Mustache.render(
+            '<tr><th>{{#t}}prevention.type{{/t}}</th>' +
+            '<th>{{#t}}prevention.name{{/t}}</th>' +
+            '<th>{{#t}}prevention.comment{{/t}}</th></tr>', dbkjs.util.mustachei18n()));
     return bv_table;
 };
 
 dbkjs.protocol.jsonDBK.constructBrandweervoorzieningRow = function(brandweervoorziening) {
     var img = "images/" + brandweervoorziening.namespace.toLowerCase() + '/' +  brandweervoorziening.type + '.png';
     img = typeof imagesBase64 === 'undefined'  ? dbkjs.basePath + img : imagesBase64[img];
-    return $('<tr>' +
-                '<td><img class="thumb" src="' + img + '" alt="'+
-                    brandweervoorziening.type +'" title="'+
-                    brandweervoorziening.type+'"></td>' +
-                '<td>' + brandweervoorziening.name + '</td>' +
-                '<td>' + (brandweervoorziening.information ? brandweervoorziening.information : '') + '</td>' +
-            '</tr>');
+    return $(Mustache.render(
+            '<tr>' +
+                '<td><img class="thumb" src="{{img}}" alt="{{brandweervoorziening.type}}" title="{{brandweervoorziening.type}}"></td>' +
+                '<td>{{brandweervoorziening.name}}</td>' +
+                '<td>{{brandweervoorziening.information}}</td>' +
+            '</tr>', { img: img, brandweervoorziening: brandweervoorziening }));
 };
 
 dbkjs.protocol.jsonDBK.constructGevaarlijkestof = function(feature){
@@ -96,36 +95,34 @@ dbkjs.protocol.jsonDBK.constructGevaarlijkestof = function(feature){
         bv_table_div.append(bv_table);
         bv_div.append(bv_table_div);
         _obj.panel_group.append(bv_div);
-        _obj.panel_tabs.append('<li><a data-toggle="tab" href="#' + id + '">'+ i18n.t('dbk.chemicals')+ '</a></li>');
+        _obj.panel_tabs.append(Mustache.render('<li><a data-toggle="tab" href="#{{id}}">{{#t}}dbk.chemicals{{/t}}</a></li>', dbkjs.util.mustachei18n({ id: id})));
     }
 };
 
 dbkjs.protocol.jsonDBK.constructGevaarlijkestofHeader = function() {
     var bv_table = $('<table class="table table-hover"></table>');
-        bv_table.append('<tr><th>' +
-            i18n.t('chemicals.type') + '</th><th>' +
-            i18n.t('chemicals.indication') + '</th><th>' +
-            i18n.t('chemicals.name') + '</th><th>' +
-            i18n.t('chemicals.quantity') + '</th><th>' +
-            i18n.t('chemicals.information') + '</th></tr>');
+        bv_table.append(Mustache.render(
+                '<tr>' +
+                    '<th>{{#t}}chemicals.type{{/t}}</th>' +
+                    '<th>{{#t}}chemicals.indication{{/t}}</th>' +
+                    '<th>{{#t}}chemicals.name{{/t}}</th>' +
+                    '<th>{{#t}}chemicals.quantity{{/t}}</th>' +
+                    '<th>{{#t}}chemicals.information{{/t}}</th>' +
+                '</tr>', dbkjs.util.mustachei18n()));
     return bv_table;
 };
 
 dbkjs.protocol.jsonDBK.constructGevaarlijkestofRow = function(gevaarlijkestof) {
     var img = 'images/' + gevaarlijkestof.namespace.toLowerCase() + '/' +  gevaarlijkestof.type + '.png';
     img = typeof imagesBase64 === 'undefined'  ? dbkjs.basePath + img : imagesBase64[img];
-    return $('<tr>' +
-        '<td><img class="thumb" src="' + img + '" alt="'+
-            gevaarlijkestof.type +'" title="'+
-            gevaarlijkestof.type+'"></td>' +
-        '<td>' + '<div class="gevicode">' + gevaarlijkestof.indication +
-            '</div><div class="unnummer">' +
-            gevaarlijkestof.unnumber + '</div>' + '</td>' +
-        '<td>' + gevaarlijkestof.name + '</td>' +
-        '<td>' + gevaarlijkestof.quantity + '</td>' +
-
-        '<td>' + gevaarlijkestof.information + '</td>' +
-        '</tr>');
+    return $(Mustache.render(
+        '<tr>' +
+            '<td><img class="thumb" src="{{img}}" alt="{{gevaarlijkestof.type}}" title="{{gevaarlijkestof.type}}"></td>' +
+            '<td><div class="gevicode">{{gevaarlijkestof.indication}}</div><div class="unnummer">{{gevaarlijkestof.unnumber}}</div></td>' +
+            '<td>{{gevaarlijkestof.name}}</td>' +
+            '<td>{{gevaarlijkestof.quantity}}</td>' +
+            '<td>{{gevaarlijkestof.information}}</td>' +
+        '</tr>', {img: img, gevaarlijkestof: gevaarlijkestof}));
 };
 
 dbkjs.protocol.jsonDBK.constructOmsdetail = function(feature) {

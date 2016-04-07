@@ -1048,5 +1048,16 @@ dbkjs.util = {
              }
          }
          return null;
+    },
+    mustachei18n: function(obj) {
+        if(!obj) {
+            obj = {};
+        }
+        obj.t = function() {
+            return function(text, render) {
+                return render(i18n.t(text));
+            };
+        };
+        return obj;
     }
 };
