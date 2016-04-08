@@ -76,6 +76,7 @@ dbkjs.protocol.jsonDBK.constructGevaarlijkestof = function(feature){
                 "quantity": myGeometry.hoeveelheid ? myGeometry.hoeveelheid.replace(/([0-9]+)([lL])/,"$1\u2113") : myGeometry.hoeveelheid,
                 "indication": myGeometry.gevaarsindicatienummer,
                 "information": myGeometry.aanvullendeInformatie,
+                "ericKaart": myGeometry.ericKaart,
                 "unnumber": myGeometry.UNnummer,
                 "radius": myGeometry.radius,
                 "fid": "gevaarlijkestof_ft_" + idx
@@ -121,7 +122,7 @@ dbkjs.protocol.jsonDBK.constructGevaarlijkestofRow = function(gevaarlijkestof) {
             '<td><div class="gevicode">{{gevaarlijkestof.indication}}</div><div class="unnummer">{{gevaarlijkestof.unnumber}}</div></td>' +
             '<td>{{gevaarlijkestof.name}}</td>' +
             '<td>{{gevaarlijkestof.quantity}}</td>' +
-            '<td>{{gevaarlijkestof.information}}</td>' +
+            '<td>{{gevaarlijkestof.information}}{{#gevaarlijkestof.ericKaart}} (ERIC-kaart: {{gevaarlijkestof.ericKaart}}){{/gevaarlijkestof.ericKaart}}</td>' +
         '</tr>', {img: img, gevaarlijkestof: gevaarlijkestof}));
 };
 
