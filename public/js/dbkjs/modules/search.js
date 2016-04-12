@@ -222,7 +222,7 @@ dbkjs.modules.search = {
         if(dbkjs.options.searchTabs) {
             $("#s_dbk, #s_address").on('click', function(e) {
                 var searchId = $(e.target).attr("id");
-                if(searchId && searchId.startsWith("s_")) {
+                if(searchId && searchId.indexOf("s_") === 0) {
                     currentSearch = searchId.substring(2);
 
                     $("#search_input").attr("placeholder", i18n.t("search." + currentSearch + "placeholder"));
