@@ -74,6 +74,7 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
     var v = this.getView();
     var scrollTop = v.scrollTop();
 
+    v.css("-webkit-overflow-scrolling", "touch");
     v.html("");
     if(typeof incident === "string") {
         v.text(incident);
