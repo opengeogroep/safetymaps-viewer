@@ -29,21 +29,25 @@ dbkjs.modules.incidents = {
     register: function() {
         this.options = dbkjs.options.incidents;
 
-        this.service = new AGSIncidentService(this.options.ags.incidentsUrl, this.options.ags.vehiclePosUrl);
-
-        if(this.options.voertuigMode) {
-            this.controller = new VoertuigInzetController(this);
+        if(this.options.mdt) {
+            this.controller = new MDTController(this);
         } else {
-            this.controller = new IncidentMonitorController(this);
-        }
+            this.service = new AGSIncidentService(this.options.ags.incidentsUrl, this.options.ags.vehiclePosUrl);
 
-        this.service.initialize(this.options.ags.tokenUrl, this.options.ags.user, this.options.ags.password)
-        .fail(function(e) {
-            // Avoid map loading messages hiding our error message
-            window.setTimeout(function() {
-                dbkjs.util.alert("Fout bij initialiseren meldingenservice", e, "alert-danger");
-            }, 3000);
-        });
+            if(this.options.voertuigMode) {
+                this.controller = new VoertuigInzetController(this);
+            } else {
+                this.controller = new IncidentMonitorController(this);
+            }
+
+            this.service.initialize(this.options.ags.tokenUrl, this.options.ags.user, this.options.ags.password)
+            .fail(function(e) {
+                // Avoid map loading messages hiding our error message
+                window.setTimeout(function() {
+                    dbkjs.util.alert("Fout bij initialiseren meldingenservice", e, "alert-danger");
+                }, 3000);
+            });
+        }
     }
 };
 

@@ -70,7 +70,7 @@ table td { padding: 3px !important; } \
  * @param {boolean} restoreScrollTop
  * @returns {undefined}
  */
-IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScrollTop) {
+IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScrollTop, isXml) {
     var v = this.getView();
     var scrollTop = v.scrollTop();
 
@@ -81,7 +81,7 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
         return;
     }
 
-    v.html(this.getIncidentHtml(incident, showInzet, false));
+    v.html(isXml ? this.getXmlIncidentHtml(incident, showInzet, false) : this.getIncidentHtml(incident, showInzet, false));
 
     if(restoreScrollTop) {
         v.scrollTop(scrollTop);
@@ -200,6 +200,106 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
             pre += "<span class='" + c + "'>" + AGSIncidentService.prototype.getAGSMoment(k.DTG_KLADBLOK_REGEL).format("HH:mm ") +
                     dbkjs.util.htmlEncode(k.INHOUD_KLADBLOK_REGEL) + "\n</span>";
 
+        });
+        html += "Kladblok:<br/>" + pre + "</pre>";
+        html += '</td></tr>';
+    }
+
+    html += '</table>';
+
+    return html;
+};
+
+/**
+ * Get HTML to display XML incident. Boolean specificies whether to leave out
+ * time dependent information ('1 minute ago') to compare changes.
+ * @param {xml object} incident
+ * @param {boolean} showInzet show voertuig inzet
+ * @param {boolean} compareMode the result should only depend on the incident
+ *   parameter, not other factors such as current time
+ * @returns {undefined}
+ */
+IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInzet, compareMode) {
+    var html = '<div style="width: 100%" class="table-responsive incidentDetails">';
+    html += '<table class="table table-hover">';
+
+    var template = "{{#separator}}<tr><td>&nbsp;</td><td></td></tr>{{/separator}}<tr><td><span>{{label}}</span>: </td><td>{{value}}</td></tr>";
+
+    var startS = $(incident).find("StartDatumTijd").text();
+    var v = "";
+    if(startS !== "") {
+        var d = moment(startS);
+        v = d.format("dddd, D-M-YYYY HH:mm:ss") + (compareMode ? "" : " (" + d.fromNow() + ")");
+    }
+    html += Mustache.render(template, { label: "Start incident", value: v});
+
+    var adres = $(incident).find("IncidentLocatie Adres");
+    v = Mustache.render("{{#x}}Straat{{/x}} {{#x}}Huisnummer{{/x}}{{#x}}HnToevoeging{{/x}} {{#x}}HnAanduiding{{/x}}", {
+        x: function() {
+            return function(text, render) {
+                return render($(adres).find(text).text());
+            };
+        }
+    });
+    html += Mustache.render(template, { label: "Adres", value: v });
+
+    html += Mustache.render(template, { label: "Postcode", value: $(adres).find("Postcode").text() });
+    html += Mustache.render(template, { label: "Woonplaats", value: $(adres).find("Woonplaats").text() });
+
+    html += Mustache.render(template, { separator: true, label: "Prioriteit", value: $(incident).find("Prioriteit").text() });
+
+
+    html += Mustache.render(template, { label: "Melding classificatie", value: $(incident).find("Classificatie").text() });
+
+    var karakteristiek = $(incident).find("Karakteristiek");
+
+    if(karakteristiek.length === 0) {
+        html += '<tr><td>Karakteristieken:</td><td>';
+        html += "<h4>-</h4>";
+    } else {
+        html += '<tr><td colspan="2">Karakteristieken:<br/>';
+        html += '<div class="table-responsive" style="margin: 0px 10px 0px 10px">';
+        html += '<table class="table table-hover" style="width: auto">';
+        $.each(karakteristiek, function(i, k) {
+            v = {};
+            v.naam = $(k).find("KarakteristiekNaam").text();
+            v.waarde = $(k).find("KarakteristiekWaarde").text();
+
+            html += Mustache.render("<tr><td>{{naam}}</td><td>{{waarde}}</td></tr>", v);
+        });
+        html += '</table><div/>';
+    }
+    html += '</td></tr>';
+
+    if(showInzet) {
+        html += '<tr><td colspan="2" id="eenheden">';
+        var eenhBrw = "", eenhPol = "", eenhAmbu = "";
+        $.each($(incident).find("GekoppeldeEenheden Eenheid"), function(i, eenheid) {
+            var naam = $(eenheid).find("Roepnaam").text();
+            var disc = $(eenheid).find("Disc").text();
+
+            var span = "<span>" + dbkjs.util.htmlEncode(naam) + "</span><br/>";
+            if("B--" === disc) {
+                eenhBrw += span;
+            } else if("--P" === disc) {
+                eenhPol += span;
+            } else if("-A-" === disc) {
+                eenhAmbu += span;
+            }
+        });
+        html += '<div id="brw"><b>Brandweer</b><br/>' + eenhBrw + '</div>';
+        html += '<div id="pol"><b>Politie</b><br/>' + eenhPol + '</div>';
+        html += '<div id="ambu"><b>Ambu</b><br/>' + eenhAmbu + '</div>';
+        html += '</td></tr>';
+    }
+
+    var kladblok = $(incident).find("Kladblok");
+
+    if(kladblok.length !== 0) {
+        html += '<tr><td id="kladblok" colspan="2">';
+        var pre = "";
+        $.each(kladblok, function(i, k) {
+            pre += "<span class='brw'>" + dbkjs.util.htmlEncode($(k).text()) + "\n</span>";
         });
         html += "Kladblok:<br/>" + pre + "</pre>";
         html += '</td></tr>';

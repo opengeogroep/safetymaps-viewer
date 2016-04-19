@@ -31,20 +31,27 @@ function IncidentMarkerLayer() {
 
 IncidentMarkerLayer.prototype.addIncident = function(incident, archief) {
     var me = this;
-    if(incident.T_X_COORD_LOC && incident.T_Y_COORD_LOC) {
-        var pos = new OpenLayers.LonLat(incident.T_X_COORD_LOC, incident.T_Y_COORD_LOC);
+    var x, y;
 
-        var marker = new OpenLayers.Marker(
-            pos,
-            new OpenLayers.Icon(!archief ? "images/bell.png" : "images/bell-gray.png", this.size, this.offset)
-        );
-        marker.id = incident.INCIDENT_ID;
-        var handler = function() { me.markerClick(marker, incident, archief); };
-        marker.events.register("click", marker, handler);
-        marker.events.register("touchstart", marker, handler);
-        this.layer.addMarker(marker);
-        return marker;
+    if(incident.T_X_COORD_LOC && incident.T_Y_COORD_LOC) {
+        x = incident.T_X_COORD_LOC;
+        y = incident.T_Y_COORD_LOC;
+    } else {
+        x = $(incident).find("IncidentLocatie XYCoordinaten XCoordinaat").text();
+        y = $(incident).find("IncidentLocatie XYCoordinaten YCoordinaat").text();
     }
+    var pos = new OpenLayers.LonLat(x, y);
+
+    var marker = new OpenLayers.Marker(
+        pos,
+        new OpenLayers.Icon(!archief ? "images/bell.png" : "images/bell-gray.png", this.size, this.offset)
+    );
+    marker.id = incident.INCIDENT_ID;
+    var handler = function() { me.markerClick(marker, incident, archief); };
+    marker.events.register("click", marker, handler);
+    marker.events.register("touchstart", marker, handler);
+    this.layer.addMarker(marker);
+    return marker;
 };
 
 IncidentMarkerLayer.prototype.setZIndexFix = function() {
