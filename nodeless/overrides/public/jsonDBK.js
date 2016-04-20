@@ -109,6 +109,7 @@ dbkjs.protocol.jsonDBK.constructGevaarlijkestofHeader = function() {
                     '<th>{{#t}}chemicals.name{{/t}}</th>' +
                     '<th>{{#t}}chemicals.quantity{{/t}}</th>' +
                     '<th>{{#t}}chemicals.information{{/t}}</th>' +
+                    '<th>ERIC-kaart</th>' +
                 '</tr>', dbkjs.util.mustachei18n()));
     return bv_table;
 };
@@ -122,7 +123,8 @@ dbkjs.protocol.jsonDBK.constructGevaarlijkestofRow = function(gevaarlijkestof) {
             '<td><div class="gevicode">{{gevaarlijkestof.indication}}</div><div class="unnummer">{{gevaarlijkestof.unnumber}}</div></td>' +
             '<td>{{gevaarlijkestof.name}}</td>' +
             '<td>{{gevaarlijkestof.quantity}}</td>' +
-            '<td>{{gevaarlijkestof.information}}{{#gevaarlijkestof.ericKaart}} (ERIC-kaart: {{gevaarlijkestof.ericKaart}}){{/gevaarlijkestof.ericKaart}}</td>' +
+            '<td>{{gevaarlijkestof.information}}</td>' +
+            '<td>{{gevaarlijkestof.ericKaart}}</td>' +
         '</tr>', {img: img, gevaarlijkestof: gevaarlijkestof}));
 };
 
