@@ -68,11 +68,27 @@ MDTController.prototype.getMDTInfo = function() {
         }, 15000);
     })
     .done(function(xml) {
+        var first = me.xml === null;
         me.xml = xml;
         me.incidentDetailsWindow.data(xml, true, true, true);
+        var newHtml = me.incidentDetailsWindow.getXmlIncidentHtml(xml, true, true);
+        var newId = $(xml).find("Incident IncidentNr").text();
         me.markerLayer.clear();
         me.markerLayer.addIncident(xml, false);
         me.markerLayer.setZIndexFix();
+        if(first) {
+            me.zoomToIncident();
+            me.button.setAlerted(true);
+        } else {
+            if(me.html !== newHtml) {
+                me.button.setAlerted(true);
+            }
+            if(me.incidentId !== newId) {
+                me.zoomToIncident();
+            }
+        }
+        me.html = newHtml;
+        me.incidentId = newId;
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         me.xml = null;
