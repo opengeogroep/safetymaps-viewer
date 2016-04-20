@@ -24,6 +24,7 @@ dbkjs.modules = dbkjs.modules || {};
 
 dbkjs.modules.geolocate = {
     id: 'dbk.modules.geolocate',
+    options: null,
     style: {
         strokeColor: '#CCCC00',
         fillColor: '#CCCC00',
@@ -68,63 +69,85 @@ dbkjs.modules.geolocate = {
         };
         window.resizeInterval = window.setInterval(resize, 50, point, radius);
     },
-
-    control: new OpenLayers.Control.Geolocate({
-        bind: true,
-        geolocationOptions: {
-            enableHighAccuracy: true,
-            maximumAge: 0,
-            timeout: 7000
+    locationupdated: function(e) {
+        var _obj = dbkjs.modules.geolocate;
+        
+        _obj.layer.removeAllFeatures();
+        var circle = new OpenLayers.Feature.Vector(
+            OpenLayers.Geometry.Polygon.createRegularPolygon(
+                new OpenLayers.Geometry.Point(e.point.x, e.point.y),
+                e.position.coords.accuracy/2,
+                40,
+                0
+            ),
+            {},
+            _obj.style
+        );
+        _obj.layer.addFeatures([
+            new OpenLayers.Feature.Vector(
+                e.point,
+                {},
+                {
+                    graphicName: 'circle',
+                    fillColor: '#CCCC00',
+                    strokeColor: '#CCCC00',
+                    strokeWidth: 1,
+                    fillOpacity: 0.3,
+                    pointRadius: 10
+                }
+            ),
+            circle
+        ]);
+        if (dbkjs.modules.geolocate.firstGeolocation) {
+            dbkjs.map.zoomToExtent(_obj.layer.getDataExtent());
+            _obj.pulsate(circle);
+            _obj.firstGeolocation = false;
+            _obj.bind = true;
         }
-    }),
+    },
     register: function(){
         var _obj = dbkjs.modules.geolocate;
+
+        _obj.options = $.extend({
+            provider: "geolocate"
+        }, _obj.options);
+
+        if(_obj.options.provider === "geolocate") {
+            _obj.control = new OpenLayers.Control.Geolocate({
+                bind: true,
+                geolocationOptions: {
+                    enableHighAccuracy: true,
+                    maximumAge: 0,
+                    timeout: 7000
+                }
+            });
+
+            dbkjs.map.addControl(_obj.control);
+            _obj.control.events.register("locationupdated",_obj.control,function(e) {
+                _obj.locationupdated(e);
+            });
+
+            this.provider = {
+                activate: function() {
+                    _obj.control.activate();
+                },
+                deactivate: function() {
+                    _obj.control.deactivate();
+                }
+            };
+        }
+
         $('#btngrp_3').append('<a id="btn_geolocate" class="btn btn-default navbar-btn" href="#" title="' + i18n.t('map.zoomLocation') + '"><i class="fa fa-crosshairs"></i></a>');
         $('#btn_geolocate').click(function(){
             if ($(this).hasClass('active')) {
                 _obj.layer.removeAllFeatures();
-                _obj.control.deactivate();
+                _obj.provider.deactivate();
                 $(this).removeClass('active');
             } else {
                 $(this).addClass('active');
-                _obj.control.activate();
+                _obj.provider.activate();
             }
         });
-        dbkjs.map.addControl(_obj.control);
         dbkjs.map.addLayers([_obj.layer]);
-        _obj.control.events.register("locationupdated",_obj.control,function(e) {
-            _obj.layer.removeAllFeatures();
-            var circle = new OpenLayers.Feature.Vector(
-                OpenLayers.Geometry.Polygon.createRegularPolygon(
-                    new OpenLayers.Geometry.Point(e.point.x, e.point.y),
-                    e.position.coords.accuracy/2,
-                    40,
-                    0
-                ),
-                {},
-                _obj.style
-            );
-            _obj.layer.addFeatures([
-                new OpenLayers.Feature.Vector(
-                    e.point,
-                    {},
-                    {
-                        graphicName: 'circle',
-                        fillColor: '#CCCC00',
-                        strokeColor: '#CCCC00',
-                        strokeWidth: 1,
-                        fillOpacity: 0.3,
-                        pointRadius: 10
-                    }
-                ),
-                circle
-            ]);
-            if (dbkjs.modules.geolocate.firstGeolocation) {
-                dbkjs.map.zoomToExtent(_obj.layer.getDataExtent());
-                _obj.pulsate(circle);
-                _obj.firstGeolocation = false;
-                _obj.bind = true;
-            }
-        });
     }
 };
