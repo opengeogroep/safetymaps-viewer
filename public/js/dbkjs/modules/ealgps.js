@@ -132,7 +132,7 @@ dbkjs.modules.ealgps = {
 
 
         var size = new OpenLayers.Size(36,36);
-        var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
+        var offset = new OpenLayers.Pixel(-(size.w/2), -(size.h/2));
         me.gpsMarker = new OpenLayers.Marker(
                 me.reprojectToOpenLayersLonLat(),
                 new OpenLayers.Icon("images/marker-gps.png", size, offset));
