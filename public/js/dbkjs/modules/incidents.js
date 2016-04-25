@@ -29,6 +29,11 @@ dbkjs.modules.incidents = {
     register: function() {
         this.options = dbkjs.options.incidents;
 
+        var params = OpenLayers.Util.getParameters();
+        if(params.mdt && "true" !== params.mdt) {
+            this.options.mdt = false;
+        }
+
         if(this.options.mdt) {
             this.controller = new MDTController(this);
         } else {
