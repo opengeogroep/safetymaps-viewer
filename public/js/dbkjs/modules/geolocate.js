@@ -122,6 +122,9 @@ dbkjs.modules.geolocate = {
             _obj.bind = true;
         }
     },
+    locationlost: function(e) {
+        $("#btn_geolocate").css("color", "gray");
+    },
     center: function(e) {
         var _obj = dbkjs.modules.geolocate;
         if(_obj.position !== null) {
@@ -197,12 +200,15 @@ dbkjs.modules.geolocate = {
             cache: false,
             dataType: "json"
         })
+        .always(function() {
+            window.setTimeout(function() {
+                _obj.getNmea();
+            }, _obj.options.nmeaUpdateInterval);
+        })
         .done(function(nmea) {
             if(!_obj.activated) {
                 return;
             }
-
-            console.log("got nmea", nmea);
 
             var gga = nmea.$GPGGA.sentence.split(",");
 
@@ -223,10 +229,9 @@ dbkjs.modules.geolocate = {
                         point: new OpenLayers.Geometry.Point(pos.lon, pos.lat)
                     });
                 }
+            } else {
+                _obj.locationlost();
             }
-            window.setTimeout(function() {
-                _obj.getNmea();
-            }, _obj.options.nmeaUpdateInterval);
         });
     },
     register: function(){
@@ -283,11 +288,11 @@ dbkjs.modules.geolocate = {
             };
         }
 
-        $('#btngrp_3').append('<a id="btn_geolocate" class="btn btn-default navbar-btn" href="#" title="' + i18n.t('map.zoomLocation') + '"><i class="fa fa-crosshairs"></i></a>')
-                .css("color", _obj.options.activateOnStart ? "gray" : "inherit")
-        ;
+        $('#btngrp_3').append('<a id="btn_geolocate" class="btn btn-default navbar-btn" href="#" title="' + i18n.t('map.zoomLocation') + '"><i class="fa fa-crosshairs"></i></a>');
 
         if(_obj.options.activateOnStart) {
+            $("#btn_geolocate").css("color", "gray");
+
             _obj.provider.activate();
 
             // When activated on start the button mode is center on position,
