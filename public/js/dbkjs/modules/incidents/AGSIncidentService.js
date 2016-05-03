@@ -910,7 +910,7 @@ AGSIncidentService.prototype.getVehiclePositions = function(vehicles) {
         data: {
             f: "json",
             token: me.token,
-            where: "IncidentID <> ''",
+            where: "Discipline='B'",
             outFields: "*"
         },
         cache: false

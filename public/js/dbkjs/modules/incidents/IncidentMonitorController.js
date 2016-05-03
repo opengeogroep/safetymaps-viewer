@@ -329,14 +329,14 @@ IncidentMonitorController.prototype.updateVehiclePositionLayer = function(incide
         }
     });
 
-    if(haveInzet) {
+    //if(haveInzet) {
         me.service.getVehiclePositions()
         .done(function(features) {
             me.vehiclePositionLayer.features(features);
         });
-    } else {
-        me.vehiclePositionLayer.features([]);
-    }
+    //} else {
+    //    me.vehiclePositionLayer.features([]);
+    //}
 };
 
 IncidentMonitorController.prototype.enableIncidentUpdates = function() {
