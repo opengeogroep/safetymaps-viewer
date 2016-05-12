@@ -310,7 +310,7 @@ dbkjs.modules.gms = {
         } else {
         }
         if(g.Kladblok) {
-            row(e(dbkjs.util.nl2br(g.Kladblok)), "Kladblok");
+            row(dbkjs.util.nl2br(e(g.Kladblok)), "Kladblok");
         }
 
         $("#gms").replaceWith(table_div);
