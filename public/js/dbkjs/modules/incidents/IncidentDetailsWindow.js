@@ -26,6 +26,8 @@
 function IncidentDetailsWindow() {
     SplitScreenWindow.call(this, "incidentDetails");
 
+    this.ghor = dbkjs.modules.incidents.options.ghor;
+
     this.createStyle();
 
     $(this).on('elements_created', function() {
@@ -42,6 +44,7 @@ IncidentDetailsWindow.prototype.showError = function(e) {
 };
 
 IncidentDetailsWindow.prototype.createStyle = function() {
+    var me = this;
     var css = '#eenheden div { margin: 3px; float: left } \
 #eenheden div { border-left: 1px solid #ddd; padding-left: 8px; } \
 #eenheden span.einde { color: gray } \
@@ -49,7 +52,7 @@ IncidentDetailsWindow.prototype.createStyle = function() {
 #kladblok span.brw { font-weight: bold; } \
 #kladblok span.pol { color: blue; } \
 #pol span { color: blue; } \
-#kladblok span.ambu { color: orange; display: none; } \
+#kladblok span.ambu { color: orange; ' + (me.ghor ? '' : 'display: none;') + ' } \
 table td { padding: 3px !important; } \
 ';
         head = document.getElementsByTagName('head')[0],
@@ -98,6 +101,8 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
  * @returns {undefined}
  */
 IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, compareMode) {
+    var me = this;
+
     var html = '<div style="width: 100%" class="table-responsive incidentDetails">';
     html += '<table class="table table-hover">';
 
@@ -106,8 +111,11 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
         { property: 'T_GUI_LOCATIE', date: false, label: 'Adres' },
         { property: 'POSTCODE', date: false, label: 'Postcode' },
         { property: 'PLAATS_NAAM', date: false, label: 'Woonplaats' },
-        { property: 'PRIORITEIT_INCIDENT_BRANDWEER', date: false, label: 'Prioriteit', separate: true }
+        { property: 'PRIORITEIT_INCIDENT_BRANDWEER', date: false, label: me.ghor ? 'Prioriteit brandweer' : 'Prioriteit', separate: true }
     ];
+    if(me.ghor) {
+        columns.push({ property: 'PRIORITEIT_INCIDENT_POLITIE', date: false, label: 'Prioriteit politie', separate: false});
+    }
 
     $.each(columns, function(i, column) {
         var p = incident[column.property];

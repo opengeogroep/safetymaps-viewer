@@ -34,6 +34,12 @@ dbkjs.modules.incidents = {
             this.options.mdt = false;
         }
 
+        this.options.ghor = params.ghor && "true" === params.ghor;
+
+        if(window.location.host.indexOf("ghor") !== -1) {
+            this.options.ghor = true;
+        }
+
         if(this.options.mdt) {
             this.controller = new MDTController(this);
         } else {

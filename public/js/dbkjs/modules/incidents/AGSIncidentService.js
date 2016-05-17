@@ -32,6 +32,7 @@
  */
 function AGSIncidentService(url, vehiclePositionsUrl) {
     var me = this;
+    me.ghor = dbkjs.modules.incidents.options.ghor;
     me.url = url;
     me.vehiclePosUrl = vehiclePositionsUrl;
     if(!me.url) {
@@ -669,7 +670,7 @@ AGSIncidentService.prototype.getKladblok = function(incidentId, archief) {
     return d.promise();
 };
 
-AGSIncidentService.prototype.getInzetEenheden = function(incidentIds, archief, alleenBrandweer) {
+AGSIncidentService.prototype.getInzetEenheden = function(incidentIds, archief, filterEenheidCategorie) {
     var me = this;
     var d = $.Deferred();
 
@@ -679,6 +680,7 @@ AGSIncidentService.prototype.getInzetEenheden = function(incidentIds, archief, a
     incidentIds = incidentIds instanceof Array ? incidentIds : [incidentIds];
 
     var table = archief ? "GMSARC_INZET_EENHEID" : "GMS_INZET_EENHEID";
+    var eenheidCatFilter = me.ghor ? "AND T_IND_DISC_EENHEID = 'A'" : "AND T_IND_DISC_EENHEID = 'B'";
     me.doAGSAjax({
         url: me.tableUrls[table] + "/query",
         dataType: "json",
@@ -686,7 +688,7 @@ AGSIncidentService.prototype.getInzetEenheden = function(incidentIds, archief, a
         data: {
             f: "json",
             token: me.token,
-            where: "INCIDENT_ID IN (" + incidentIds.join(",") + ") " + (alleenBrandweer ? "AND T_IND_DISC_EENHEID = 'B'" : ""),
+            where: "INCIDENT_ID IN (" + incidentIds.join(",") + ") " + (filterEenheidCategorie ? eenheidCatFilter : ""),
             orderByFields: "DTG_OPDRACHT_INZET",
             outFields: "INCIDENT_ID,DTG_OPDRACHT_INZET," + (archief ? "" : "DTG_EIND_ACTIE,") + "CODE_VOERTUIGSOORT,ROEPNAAM_EENHEID,KAZ_NAAM,T_IND_DISC_EENHEID"
         }
@@ -716,9 +718,9 @@ AGSIncidentService.prototype.getCurrentIncidents = function() {
         data: {
             f: "json",
             token: me.token,
-            where: "IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3",
+            where: me.ghor ? "IND_DISC_INCIDENT LIKE '__A'" : "IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3",
             orderByFields: "DTG_START_INCIDENT DESC",
-            outFields: "INCIDENT_ID,T_X_COORD_LOC,T_Y_COORD_LOC,DTG_START_INCIDENT,PRIORITEIT_INCIDENT_BRANDWEER,T_GUI_LOCATIE,PLAATS_NAAM,BRW_MELDING_CL_ID"
+            outFields: "INCIDENT_ID,T_X_COORD_LOC,T_Y_COORD_LOC,DTG_START_INCIDENT,PRIORITEIT_INCIDENT_BRANDWEER,PRIORITEIT_INCIDENT_POLITIE,T_GUI_LOCATIE,PLAATS_NAAM,BRW_MELDING_CL_ID"
         },
         cache: false
     })
@@ -796,17 +798,18 @@ AGSIncidentService.prototype.getArchivedIncidents = function(highestArchivedInci
 
     var dIncidents = $.Deferred();
     var table = "GMSARC_INCIDENT";
+    var filterPart1 = me.ghor ? "IND_DISC_INCIDENT LIKE '__A' " : "IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3 ";
     me.doAGSAjax({
         url: me.tableUrls[table] + "/query",
         dataType: "json",
         data: {
             f: "json",
             token: me.token,
-            where: "IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3 " +
+            where: filterPart1 +
                 "AND DTG_START_INCIDENT > timestamp '" + new moment().subtract(24, 'hours').format("YYYY-MM-DD HH:mm:ss") + "' " +
                 "AND INCIDENT_ID > " + (highestArchivedIncidentId ? highestArchivedIncidentId : 0),
             orderByFields: "DTG_START_INCIDENT DESC",
-            outFields: "INCIDENT_ID,T_X_COORD_LOC,T_Y_COORD_LOC,DTG_START_INCIDENT,PRIORITEIT_INCIDENT_BRANDWEER,T_GUI_LOCATIE,PLAATS_NAAM,BRW_MELDING_CL,BRW_MELDING_CL1,BRW_MELDING_CL2"
+            outFields: "INCIDENT_ID,T_X_COORD_LOC,T_Y_COORD_LOC,DTG_START_INCIDENT,PRIORITEIT_INCIDENT_BRANDWEER,PRIORITEIT_INCIDENT_POLITIE,T_GUI_LOCATIE,PLAATS_NAAM,BRW_MELDING_CL,BRW_MELDING_CL1,BRW_MELDING_CL2"
         },
         cache: false
     })

@@ -29,6 +29,7 @@
 function IncidentMonitorController(incidents) {
     var me = this;
     me.service = incidents.service;
+    me.ghor = incidents.options.ghor;
 
     me.button = new AlertableButton("btn_incidentlist", "Incidentenlijst", "bell-o");
     me.button.getElement().appendTo('#btngrp_3');
@@ -88,7 +89,9 @@ function IncidentMonitorController(incidents) {
     });
     me.marker = null;
 
-    me.vehiclePositionLayer = new VehiclePositionLayer();
+    if(!me.ghor) {
+        me.vehiclePositionLayer = new VehiclePositionLayer();
+    }
 
     me.failedUpdateTries = 0;
 
@@ -168,12 +171,12 @@ IncidentMonitorController.prototype.incidentRead = function(incidentId) {
 IncidentMonitorController.prototype.addAGSLayers = function() {
     var me = this;
 
-    $("#baselayerpanel_b").append('<hr/><label><input type="checkbox" checked onclick="dbkjs.modules.incidents.controller.setAGSLayersVisibility(event.target.checked)">Toon DBK\'s</label>');
+    $("#baselayerpanel_b").append('<hr/><label><input type="checkbox" ' + (me.ghor ? '' : 'checked' )+ ' onclick="dbkjs.modules.incidents.controller.setAGSLayersVisibility(event.target.checked)">Toon DBK\'s</label>');
 
     me.additionalLayers = [];
     if(dbkjs.options.incidents.ags.agsLayers) {
         $.each(dbkjs.options.incidents.ags.agsLayers, function(i, l) {
-            var layer = new OpenLayers.Layer.ArcGIS93Rest("DBK"+i, l, { transparent: "true", layers: "hide:0,25", token: me.service.token }, { maxResolution: 0.42 });
+            var layer = new OpenLayers.Layer.ArcGIS93Rest("DBK"+i, l, { transparent: "true", layers: "hide:0,25", token: me.service.token }, { maxResolution: 0.42, visibility: !me.ghor });
             dbkjs.map.addLayer(layer);
             me.additionalLayers.push(layer);
         });
@@ -315,6 +318,9 @@ IncidentMonitorController.prototype.updateMarkerLayer = function(incidents) {
 
 IncidentMonitorController.prototype.updateVehiclePositionLayer = function(incidents) {
     var me = this;
+    if(me.ghor) {
+        return;
+    }
 
     var vehicles = {};
     var haveInzet = false;
