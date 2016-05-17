@@ -65,7 +65,7 @@ MDTController.prototype.getMDTInfo = function() {
     .always(function() {
         window.setTimeout(function() {
             me.getMDTInfo();
-        }, 15000);
+        }, 1000);
     })
     .done(function(xml) {
         var first = me.xml === null;
