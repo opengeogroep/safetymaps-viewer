@@ -40,6 +40,13 @@ IncidentMarkerLayer.prototype.addIncident = function(incident, archief) {
         x = $(incident).find("IncidentLocatie XYCoordinaten XCoordinaat").text();
         y = $(incident).find("IncidentLocatie XYCoordinaten YCoordinaat").text();
     }
+
+    if(x === me.x && y === me.y) {
+        return;
+    }
+
+    this.layer.clearMarkers();
+    
     var pos = new OpenLayers.LonLat(x, y);
 
     var marker = new OpenLayers.Marker(
@@ -51,6 +58,10 @@ IncidentMarkerLayer.prototype.addIncident = function(incident, archief) {
     marker.events.register("click", marker, handler);
     marker.events.register("touchstart", marker, handler);
     this.layer.addMarker(marker);
+
+    me.x = x;
+    me.y = y;
+
     return marker;
 };
 

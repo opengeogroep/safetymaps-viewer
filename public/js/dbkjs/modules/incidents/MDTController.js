@@ -77,7 +77,7 @@ MDTController.prototype.getMDTInfo = function() {
         me.incidentDetailsWindow.data(xml, true, true, true);
         var newHtml = me.incidentDetailsWindow.getXmlIncidentHtml(xml, true, true);
         var newId = $(xml).find("Incident IncidentNr").text();
-        me.markerLayer.clear();
+        //me.markerLayer.clear();
         me.markerLayer.addIncident(xml, false);
         me.markerLayer.setZIndexFix();
         if(first) {
@@ -102,7 +102,7 @@ MDTController.prototype.getMDTInfo = function() {
 
 MDTController.prototype.newIncident = function() {
     var me = this;
-    
+
     dbkjs.protocol.jsonDBK.deselect();
 
     if(this.xml) {
