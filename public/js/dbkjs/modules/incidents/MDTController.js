@@ -101,6 +101,8 @@ MDTController.prototype.getMDTInfo = function() {
 };
 
 MDTController.prototype.newIncident = function() {
+    var me = this;
+    
     dbkjs.protocol.jsonDBK.deselect();
 
     if(this.xml) {
