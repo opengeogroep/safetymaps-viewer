@@ -125,7 +125,7 @@ VehiclePositionLayer.prototype.selectFeature = function(f) {
     me.popup = new OpenLayers.Popup.FramedCloud(null,
                              f.geometry.getBounds().getCenterLonLat(),
                              null,
-                             "<div style='font-size: 12px; overflow: hidden'>Pos. van " + dateTime.fromNow() + "<br>Status: " + f.attributes.Status + "</div>",
+                             "<div style='font-size: 12px; overflow: hidden'>Pos. van " + dateTime.fromNow() + "<br>Status: " + f.attributes.Status + "<br>Mobile ID: " + f.attributes.MobileID +" </div>",
                              null, true, onPopupClose);
     f.popup = me.popup;
     dbkjs.map.addPopup(me.popup);
