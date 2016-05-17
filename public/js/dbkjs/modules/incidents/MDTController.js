@@ -52,7 +52,11 @@ function MDTController(incidents) {
 
     me.xml = null;
 
-    me.getMDTInfo();
+    $(dbkjs).one("dbkjs_init_complete", function() {
+        window.setTimeout(function() {
+            me.getMDTInfo();
+        }, 1000);
+    });
 };
 
 MDTController.prototype.getMDTInfo = function() {
@@ -77,14 +81,14 @@ MDTController.prototype.getMDTInfo = function() {
         me.markerLayer.addIncident(xml, false);
         me.markerLayer.setZIndexFix();
         if(first) {
-            me.zoomToIncident();
+            me.newIncident();
             me.button.setAlerted(true);
         } else {
             if(me.html !== newHtml) {
                 me.button.setAlerted(true);
             }
             if(me.incidentId !== newId) {
-                me.zoomToIncident();
+                me.newIncident();
             }
         }
         me.html = newHtml;
@@ -96,12 +100,58 @@ MDTController.prototype.getMDTInfo = function() {
     });
 };
 
-MDTController.prototype.zoomToIncident = function() {
+MDTController.prototype.newIncident = function() {
+    dbkjs.protocol.jsonDBK.deselect();
+
     if(this.xml) {
         var x = $(this.xml).find("IncidentLocatie XYCoordinaten XCoordinaat").text();
         var y = $(this.xml).find("IncidentLocatie XYCoordinaten YCoordinaat").text();
         dbkjs.map.setCenter(new OpenLayers.LonLat(x, y), dbkjs.options.zoom);
     }
+
+    // Try to find DBK
+
+    var postcode = $(this.xml).find("IncidentLocatie Adres Postcode").text();
+    var huisnummer = $(this.xml).find("IncidentLocatie Adres Huisnummer").text();
+
+    this.selectedDbkFeature = null;
+
+    if(dbkjs.modules.feature.features && postcode && huisnummer) {
+        console.log("Finding DBK for incident adres " + postcode + " " + huisnummer);
+
+        var dbk = null;
+        $.each(dbkjs.modules.feature.features, function(index, f) {
+            var fas = f.attributes.adres;
+            if(!fas) {
+                return true;
+            }
+            $.each(fas, function(index, fa) {
+                if(fa) {
+                    var matchPostcode = fa.postcode && postcode === fa.postcode;
+                    var matchHuisnummer = fa.huisnummer && Number(huisnummer) === fa.huisnummer;
+
+                    if(matchHuisnummer) {
+                        if(matchPostcode) {
+                            dbk = f;
+                            return false;
+                        }
+                    }
+                }
+            });
+
+            if(dbk) {
+                return false;
+            }
+        });
+
+        this.selectedDbkFeature = dbk;
+
+        if(dbk) {
+            dbkjs.protocol.jsonDBK.process(dbk, null, true);
+        }
+    }
+
+    $(me).triggerHandler("new_incident", null);
 };
 
 MDTController.prototype.markerClick = function(incident, marker) {
