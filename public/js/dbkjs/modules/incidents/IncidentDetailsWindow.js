@@ -301,6 +301,11 @@ IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInze
         html += '</td></tr>';
     }
 
+    var afspraak = $(incident).find("AfspraakOpLocatie").text();
+    if(afspraak) {
+        html += Mustache.render("<tr><td>Afspraak op locatie:</td><td>{{v}}</td></tr>", {v: afspraak});
+    }
+
     var kladblok = $(incident).find("Kladblok");
 
     if(kladblok.length !== 0) {
