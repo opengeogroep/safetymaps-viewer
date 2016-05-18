@@ -71,10 +71,10 @@ MDTController.prototype.getMDTInfo = function() {
             me.getMDTInfo();
         }, 1000);
     })
-    .done(function(xml) {
+    .done(function(xml, textStatus, jqXHR) {
         var first = me.xml === null;
         me.xml = xml;
-        me.incidentDetailsWindow.data(xml, true, true, true);
+        me.incidentDetailsWindow.data(xml, true, true, true, jqXHR.getResponseHeader("Last-Modified"));
         var newHtml = me.incidentDetailsWindow.getXmlIncidentHtml(xml, true, true);
         var newId = $(xml).find("Incident IncidentNr").text();
         //me.markerLayer.clear();
