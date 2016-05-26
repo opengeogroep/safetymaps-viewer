@@ -113,13 +113,18 @@ MDTController.prototype.newIncident = function() {
 
     // Try to find DBK
 
-    var postcode = $(this.xml).find("IncidentLocatie Adres Postcode").text();
-    var huisnummer = $(this.xml).find("IncidentLocatie Adres Huisnummer").text();
+    var adres = $(this.xml).find("IncidentLocatie Adres");
+    var postcode = $(adres).find("Postcode").text();
+    var woonplaats = $(adres).find("Woonplaats").text();
+    var huisnummer = $(adres).find("Huisnummer").text();
+    var toevoeging = $(adres).find("HnToevoeging").text();
+    var aanduiding = $(adres).find("HnAanduiding").text();
+    var straat = $(adres).find("Straat").text();
 
     this.selectedDbkFeature = null;
 
     if(dbkjs.modules.feature.features && postcode && huisnummer) {
-        console.log("Finding DBK for incident adres " + postcode + " " + huisnummer);
+        console.log("Finding DBK for incident adres " + postcode + " " + woonplaats + " " + huisnummer + "|" + aanduiding + "|" + toevoeging);
 
         var dbk = null;
         $.each(dbkjs.modules.feature.features, function(index, f) {
@@ -141,6 +146,40 @@ MDTController.prototype.newIncident = function() {
                 }
             });
 
+            if(dbk) {
+                return false;
+            }
+
+            if(f.attributes.adressen) {
+                $.each(f.attributes.adressen, function(i, a) {
+                    var matchPostcode = a.postcode && a.postcode === postcode;
+                    var matchWoonplaats = a.woonplaats && a.woonplaats === woonplaats;
+                    var matchStraat = a.straatnaam && a.straatnaam === straat;
+                    if(matchPostcode || (matchWoonplaats && matchStraat) && a.nummers) {
+                        console.log("Checking nummers for match DBK " + f.attributes.formeleNaam + ", "  + a.straatnaam + ", " + a.postcode + " " + a.woonplaats);
+                        $.each(a.nummers, function(j, n) {
+                            var parts = n.split("|");
+                            var matchHuisnummer = parts[0] === huisnummer;
+                            var matchHuisletter = aanduiding === "";
+                            var matchToevoeging = toevoeging === "";
+                            if(parts.length > 1) {
+                                matchHuisletter = aanduiding === parts[1];
+                            }
+                            if(parts.length > 2) {
+                                matchToevoeging = toevoeging === parts[2];
+                            }
+                            if(matchHuisnummer && matchHuisletter && matchToevoeging) {
+                                console.log("Matched DBK with nummer " + n + ", matchHuisletter=" + matchHuisletter + ",matchToevoeging=" + matchToevoeging);
+                                dbk = f;
+                                return false;
+                            }
+                        });
+                        if(dbk) {
+                            return false;
+                        }
+                    }
+                });
+            }
             if(dbk) {
                 return false;
             }
