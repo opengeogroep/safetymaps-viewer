@@ -988,22 +988,28 @@ dbkjs.protocol.jsonDBK = {
                         "informatie": myGeometry.aanvullendeInformatie
                     };
                     features.push(myFeature);
-                    var lineLength = myline.getLength();
-                    var metersBetweenLabels = (typeof compartimentMetersPerLabel === 'undefined' ? 10 : compartimentMetersPerLabel);
-                    if(lineLength < metersBetweenLabels / 2) {
-                        //console.log("Not labeling line of length " + lineLength);
-                        return;
-                    }
-                    var numLabels = Math.round(lineLength / metersBetweenLabels + 0.5);
-                    var distanceBetweenLabels = lineLength / numLabels;
-                    //console.log("Creating " + numLabels + " label points for line of length " + lineLength + " (" + myline.components.length + " components) with distance between labels of " + distanceBetweenLabels);
-                    for(var fraction = 0.5/numLabels; fraction < 1; fraction += (1/numLabels)) {
-                        var point = _obj.ST_LineInterpolatePointWithAngle(myline, fraction);
-                        var labelPoint = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(point.x, point.y), {
+
+                    for(var i = 0; i < myline.components.length-1; i++) {
+                        var start = myline.components[i];
+                        var end = myline.components[i+1];
+
+                        if(start.distanceTo(end) < 7.5) {
+                            continue;
+                        }
+
+                        var midx = start.x + (end.x - start.x)/2;
+                        var midy = start.y + (end.y - start.y)/2;
+
+                        var opposite = (end.y - start.y);
+                        var adjacent = (end.x - start.x);
+                        var theta = Math.atan2(opposite, adjacent);
+                        var angle = -theta * (180/Math.PI);
+
+                        var labelPoint = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(midx, midy), {
                             "type": myGeometry.typeScheiding,
                             "label": myGeometry.Label,
-                            "rotation": point.angle,
-                            "theta": point.theta
+                            "rotation": angle,
+                            "theta": theta
                         });
                         labelFeatures.push(labelPoint);
                     }
@@ -1014,56 +1020,6 @@ dbkjs.protocol.jsonDBK = {
             _obj.layerBrandcompartimentLabels.addFeatures(labelFeatures);
             _obj.activateSelect(_obj.layerBrandcompartiment);
         }
-    },
-    /**
-     * Like http://postgis.net/docs/ST_LineInterpolatePoint.html, returns a point interpolated along a
-     * line and additionaly returns the angle of the line segment at the point.
-     * @param {type} line OpenLayers.Geometry.LineString
-     * @param {type} fraction Number between 0 and 1 representing fraction of total length
-     *   of linestring the point has to be located
-     * @returns {object} An object with x, y, angle (degrees) and theta (radians)
-     */
-    ST_LineInterpolatePointWithAngle: function(line, fraction) {
-        if(fraction < 0 || fraction > 1) {
-            throw "Invalid fraction passed to ST_LineInterpolatePointWithAngle(): " + fraction;
-        }
-        var length = 0;
-        var lengthAtPoint = line.getLength() * fraction;
-        for(var i = 0; i < line.components.length; i++) {
-            var start = line.components[i];
-            var end = line.components[i+1];
-
-            // Determine length of segment and if point is somewhere on this segment
-            var segmentLength = start.distanceTo(end);
-            if(segmentLength === 0) {
-                continue;
-            }
-
-            if(length + segmentLength < lengthAtPoint) {
-                length += segmentLength;
-            } else {
-                var pointLengthAlongSegment = lengthAtPoint - length;
-
-                var dx = end.x - start.x;
-                var dy = end.y - start.y;
-
-                var x = start.x + (pointLengthAlongSegment / segmentLength) * dx;
-                var y = start.y + (pointLengthAlongSegment / segmentLength) * dy;
-
-                var opposite = (end.y - start.y);
-                var adjacent = (end.x - start.x);
-                var theta = Math.atan2(opposite, adjacent);
-                var angle = -theta * (180/Math.PI);
-
-                return {
-                    x: x,
-                    y: y,
-                    angle: angle,
-                    theta: theta
-                };
-            }
-        }
-        // Can not reach here, even with fraction === 1
     },
     constructTekstobject: function (feature) {
         var _obj = dbkjs.protocol.jsonDBK;
