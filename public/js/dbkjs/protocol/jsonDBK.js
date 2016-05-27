@@ -224,6 +224,18 @@ dbkjs.protocol.jsonDBK = {
             }
         });
     },
+    constructInfoDiv: function(feature, objecttype) {
+        var _obj = dbkjs.protocol.jsonDBK;
+        _obj.constructAlgemeen(dbkjs.options.feature, objecttype);
+        _obj.constructContact(dbkjs.options.feature);
+        _obj.constructOmsdetail(dbkjs.options.feature);
+        _obj.constructBijzonderheid(dbkjs.options.feature);
+        _obj.constructVerblijf(dbkjs.options.feature);
+        _obj.constructMedia(dbkjs.options.feature);
+        _obj.constructFloors(dbkjs.options.feature);
+        _obj.constructBrandweervoorziening(dbkjs.options.feature);
+        _obj.constructGevaarlijkestof(dbkjs.options.feature);
+    },
     info: function (data, noZoom) {
         var _obj = dbkjs.protocol.jsonDBK;
         var objecttype = "object";
@@ -234,29 +246,27 @@ dbkjs.protocol.jsonDBK = {
                 dbkjs.options.feature = data.DBKGebied;
                 objecttype = "gebied";
             }
+
+            dbkjs.options.dbk = dbkjs.options.feature.identificatie;
+            dbkjs.disableloadlayer = true;
+            if (dbkjs.permalink) {
+                dbkjs.permalink.updateLink();
+            }
+
             _obj.panel_group = $('<div class="tab-content"></div>');
             _obj.panel_tabs = $('<ul class="nav nav-pills"></ul>');
+            _obj.constructInfoDiv(dbkjs.options.feature, objecttype);
             var div = $('<div class="tabbable"></div>');
-            if (_obj.constructAlgemeen(dbkjs.options.feature, objecttype)) {
-                dbkjs.gui.infoPanelUpdateTitle('<i class="fa fa-building"></i> ' + dbkjs.options.feature.formeleNaam);
-                _obj.constructContact(dbkjs.options.feature);
-                _obj.constructOmsdetail(dbkjs.options.feature);
-                _obj.constructBijzonderheid(dbkjs.options.feature);
-                _obj.constructVerblijf(dbkjs.options.feature);
-                _obj.constructMedia(dbkjs.options.feature);
-                _obj.constructFloors(dbkjs.options.feature);
-                _obj.constructBrandweervoorziening(dbkjs.options.feature);
-                _obj.constructGevaarlijkestof(dbkjs.options.feature);
-                div.append(_obj.panel_group);
-                div.append(_obj.panel_tabs);
-                if (dbkjs.viewmode === 'fullscreen') {
-                    $('#dbkinfopanel_b').html(div);
-                } else {
-                    dbkjs.gui.infoPanelUpdateHtml('');
-                    dbkjs.gui.infoPanelAddItems(div);
-                }
-                $('#systeem_meldingen').hide();
+            div.append(_obj.panel_group);
+            div.append(_obj.panel_tabs);
+            if (dbkjs.viewmode === 'fullscreen') {
+                $('#dbkinfopanel_b').html(div);
+            } else {
+                dbkjs.gui.infoPanelUpdateHtml('');
+                dbkjs.gui.infoPanelAddItems(div);
             }
+            dbkjs.gui.infoPanelUpdateTitle('<i class="fa fa-building"></i> ' + dbkjs.options.feature.formeleNaam);
+            $('#systeem_meldingen').hide();
 
             // Construct additional geometries.
             _obj.constructPandGeometrie(dbkjs.options.feature);
@@ -301,12 +311,11 @@ dbkjs.protocol.jsonDBK = {
     },
     constructAlgemeen: function (DBKObject, dbktype) {
         var _obj = dbkjs.protocol.jsonDBK;
-        /** Algemene dbk info **/
 
-        if (dbkjs.viewmode === 'fullscreen') {
-            // XXX niet meer nodig?
-            dbkjs.util.changeDialogTitle('<i class="fa fa-building"></i> ' + DBKObject.formeleNaam);
-        }
+        var active_tab = _obj.active_tab === 'algemeen' ? 'active' : '';
+        _obj.panel_algemeen = $('<div class="tab-pane ' + active_tab + '" id="collapse_algemeen_' + DBKObject.identificatie + '"></div>');
+        var algemeen_table_div = $('<div class="table-responsive"></div>');
+        var algemeen_table = $('<table class="table table-hover"></table>');
 
         var controledatum = dbkjs.util.isJsonNull(DBKObject.controleDatum) ? '<span class="label label-warning">' +
                 i18n.t('dbk.unknown') + '</span>' : moment(DBKObject.controleDatum).format('YYYY-MM-DD hh:mm');
@@ -320,7 +329,7 @@ dbkjs.protocol.jsonDBK = {
             } else {
                 bhvaanwezig = '<span class="label label-warning">' +
                     i18n.t('dbk.noEmergencyResponse') + '</span>';
-        }
+            }
         }
         var informelenaam = dbkjs.util.isJsonNull(DBKObject.informeleNaam) ? '' : DBKObject.informeleNaam;
         var risicoklasse = dbkjs.util.isJsonNull(DBKObject.risicoklasse) ? '' : DBKObject.risicoklasse;
@@ -351,15 +360,6 @@ dbkjs.protocol.jsonDBK = {
             hoogstebouwlaag = i18n.t('dbk.unknown');
         }
         dbkjs.options.feature.bouwlaag = bouwlaag;
-        var active_tab = _obj.active_tab === 'algemeen' ? 'active' : '';
-        dbkjs.options.dbk = DBKObject.identificatie;
-        dbkjs.disableloadlayer = true;
-        if (dbkjs.permalink) {
-            dbkjs.permalink.updateLink();
-        }
-        _obj.panel_algemeen = $('<div class="tab-pane ' + active_tab + '" id="collapse_algemeen_' + DBKObject.identificatie + '"></div>');
-        var algemeen_table_div = $('<div class="table-responsive"></div>');
-        var algemeen_table = $('<table class="table table-hover"></table>');
         if (dbktype === "object") {
             if(dbkjs.viewmode === 'fullscreen') {
                 // In fullscreen mode is er geen window title met formele naam,
@@ -483,7 +483,6 @@ dbkjs.protocol.jsonDBK = {
             _obj.panel_tabs.html('<li><a data-toggle="tab" href="#collapse_algemeen_' + DBKObject.identificatie + '">' + i18n.t('dbk.general') + '</a></li>');
         }
         _obj.panel_tabs.html();
-        return true;
     },
     constructBrandweervoorziening: function (feature) {
         var _obj = dbkjs.protocol.jsonDBK;
@@ -604,7 +603,7 @@ dbkjs.protocol.jsonDBK = {
             $.each(feature.verdiepingen, function (verdiepingen_index, waarde) {
                 var myrow;
                 var sterretje = '';
-                if (waarde.type === 'hoofdobject') {
+                    if (waarde.type === 'hoofdobject') {
                     sterretje = ' (' + i18n.t('dbk.mainobject') + ')';
                 }
                 if (waarde.identificatie !== feature.identificatie) {
