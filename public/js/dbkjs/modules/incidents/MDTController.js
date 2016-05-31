@@ -100,6 +100,14 @@ MDTController.prototype.getMDTInfo = function() {
     });
 };
 
+MDTController.prototype.zoomToIncident = function() {
+    if(this.xml) {
+        var x = $(this.xml).find("IncidentLocatie XYCoordinaten XCoordinaat").text();
+        var y = $(this.xml).find("IncidentLocatie XYCoordinaten YCoordinaat").text();
+        dbkjs.map.setCenter(new OpenLayers.LonLat(x, y), dbkjs.options.zoom);
+    }
+};
+
 MDTController.prototype.newIncident = function() {
     var me = this;
 
