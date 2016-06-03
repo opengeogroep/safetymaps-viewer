@@ -1,8 +1,8 @@
 /*!
  *  Copyright (c) 2014 Milo van der Linden (milo@dogodigi.net)
- * 
+ *
  *  This file is part of opendispatcher/safetymapsDBK
- *  
+ *
  *  opendispatcher is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
@@ -28,10 +28,17 @@ dbkjs.modules.measure = {
     area_control: null,
     register: function() {
         var _obj = dbkjs.modules.measure;
-        $('#btngrp_3').append('<a id="btn_measure_distance" class="btn btn-default navbar-btn" href="#" title="' +
-                i18n.t('map.measureDistance') + '"><i class="fa fa-arrows-v fa-rotate-45"></i></a>');
-        $('#btngrp_3').append('<a id="btn_measure_area" class="btn btn-default navbar-btn" href="#" title="' +
-                i18n.t('map.measureArea') + '"><i class="fa fa-bookmark-o fa-rotate-45"></i></a>');
+
+        _obj.options = $.extend({
+            showButtons: true
+        }, _obj.options);
+
+        if(_obj.options.showButtons) {
+            $('#btngrp_3').append('<a id="btn_measure_distance" class="btn btn-default navbar-btn" href="#" title="' +
+                    i18n.t('map.measureDistance') + '"><i class="fa fa-arrows-v fa-rotate-45"></i></a>');
+            $('#btngrp_3').append('<a id="btn_measure_area" class="btn btn-default navbar-btn" href="#" title="' +
+                    i18n.t('map.measureArea') + '"><i class="fa fa-bookmark-o fa-rotate-45"></i></a>');
+        }
 
         // style the sketch fancy
         var sketchSymbolizers = {
