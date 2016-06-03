@@ -77,8 +77,7 @@ MDTController.prototype.getMDTInfo = function() {
         me.incidentDetailsWindow.data(xml, true, true, true, jqXHR.getResponseHeader("Last-Modified"));
         var newHtml = me.incidentDetailsWindow.getXmlIncidentHtml(xml, true, true);
         var newId = $(xml).find("Incident IncidentNr").text();
-        //me.markerLayer.clear();
-        me.markerLayer.addIncident(xml, false);
+        me.markerLayer.addIncident(xml, false, true);
         me.markerLayer.setZIndexFix();
         if(first) {
             me.newIncident();

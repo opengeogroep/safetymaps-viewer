@@ -233,7 +233,7 @@ VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
             }
             me.incident = incident;
             me.incidentDetailsWindow.data(incident, false);
-            me.markerLayer.addIncident(incident, false);
+            me.markerLayer.addIncident(incident, false, true);
             me.markerLayer.setZIndexFix();
 
             dbkjs.protocol.jsonDBK.deselect();
@@ -407,8 +407,7 @@ VoertuigInzetController.prototype.updateIncident = function(incidentId) {
             me.incident = incident;
 
             // Possibly update marker position
-            me.markerLayer.clear();
-            me.markerLayer.addIncident(incident, true);
+            me.markerLayer.addIncident(incident, true, true);
             me.markerLayer.setZIndexFix();
         }
     });
