@@ -101,35 +101,47 @@ dbkjs.modules.measure = {
         });
         dbkjs.map.addControl(_obj.area_control);
         $('#btn_measure_distance').click(function() {
-            $('#measure').html('');
-            if(dbkjs.viewmode === "fullscreen") {
-                $('#measure').hide();
-            }
-            if ($(this).hasClass('active')) {
-                _obj.area_control.deactivate();
-                _obj.distance_control.deactivate();
-                $(this).removeClass('active');
-            } else {
-                $(this).addClass('active');
-                _obj.area_control.deactivate();
-                _obj.distance_control.activate();
-            }
+            _obj.toggleMeasureDistance();
         });
         $('#btn_measure_area').click(function() {
-            $('#measure').html('');
-            if(dbkjs.viewmode === "fullscreen") {
-                $('#measure').hide();
-            }
-            if ($(this).hasClass('active')) {
-                _obj.area_control.deactivate();
-                _obj.distance_control.deactivate();
-                $(this).removeClass('active');
-            } else {
-                $(this).addClass('active');
-                _obj.distance_control.deactivate();
-                _obj.area_control.activate();
-            }
+            _obj.toggleMeasureArea();
         });
+    },
+    toggleMeasureDistance: function() {
+        var me = this;
+        $('#measure').html('');
+        if(dbkjs.viewmode === "fullscreen") {
+            $('#measure').hide();
+        }
+        if(me.distance_control.active) {
+            me.area_control.deactivate();
+            me.distance_control.deactivate();
+            $('#btn_measure_distance').removeClass("active");
+        } else {
+            $('#btn_measure_distance').addClass('active');
+            if(me.area_control.active) {
+                me.toggleMeasureArea();
+            }
+            me.distance_control.activate();
+        }
+    },
+    toggleMeasureArea: function() {
+        var me = this;
+        $('#measure').html('');
+        if(dbkjs.viewmode === "fullscreen") {
+            $('#measure').hide();
+        }
+        if(me.area_control.active) {
+            me.area_control.deactivate();
+            me.distance_control.deactivate();
+            $('#btn_measure_area').removeClass("active");
+        } else {
+            $('#btn_measure_area').addClass('active');
+            if(me.distance_control.active) {
+                me.toggleMeasureDistance();
+            }
+            me.area_control.activate();
+        }
     },
     handleMeasurements: function(event) {
         //var geometry = event.geometry;
