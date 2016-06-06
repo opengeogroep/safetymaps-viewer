@@ -105,6 +105,9 @@ dbkjs.Layer = dbkjs.Class({
         //let op, de map moet worden meegegeven in de opties
 
         dbkjs.map.addLayer(this.layer);
+
+        var tabIds = {}, tabCount = 0;
+
         if (!options.isBaseLayer) {
             var newparent = "";
             var nameArray = name.split("\\");
@@ -138,17 +141,19 @@ dbkjs.Layer = dbkjs.Class({
             }
 
             if (dbkjs.util.isJsonNull(parent) && !dbkjs.util.isJsonNull(newparent)) {
-                var findMyParent = 'overlay_tab' + newparent.toLowerCase();
-                if ($('#' + findMyParent).length === 0 && $('#' + findMyParent + '_panel').length === 0) {
+                if(typeof tabIds[newparent] === "undefined") {
+                    parent = "overlay_tab" + tabCount++;
+                    tabIds[newparent] = parent;
+
                     //create a panel to hold the layer
-                    $('#overlaypanel_ul').append('<li><a href="#' + findMyParent +
+                    $('#overlaypanel_ul').append('<li><a href="#' + parent +
                             '" data-toggle="tab">' + newparent + '</a></li>');
                     $('#overlaypanel_div').append('<div class="tab-pane" id="' +
-                            findMyParent + '">' +
-                            '<div id="' + findMyParent + '_panel" class="panel-group"></div>' +
+                            parent + '">' +
+                            '<div id="' + parent + '_panel" class="panel-group"></div>' +
                             '</div>');
                 }
-                parent = '#' + findMyParent;
+                parent = "#" + tabIds[newparent];
             }
 
             if (dbkjs.viewmode === 'fullscreen') {
