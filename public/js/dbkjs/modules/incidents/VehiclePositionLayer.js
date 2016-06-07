@@ -29,7 +29,7 @@ function VehiclePositionLayer() {
         if(!me.showMoving) {
             return feature.attributes.IncidentID === "" ? "none": "visible";
         }
-        return feature.attributes.IncidentID === "" && feature.attributes.Speed === 0 ? "none" : "visible";
+        return feature.attributes.IncidentID === "" && feature.attributes.Speed <= 5 ? "none" : "visible";
     };
 
     // Layer name starts with _ to hide in support module layer list
