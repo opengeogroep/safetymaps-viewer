@@ -256,90 +256,80 @@ VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
 VoertuigInzetController.prototype.selectIncidentDBK = function(incident) {
     var me = this;
 
-    //var postcode = incident.POSTCODE;
-    var straat1 = incident.NAAM_LOCATIE1;
-    var straat2 = incident.NAAM_LOCATIE2;
-    var plaats = incident.PLAATS_NAAM;
+    var postcode = incident.POSTCODE;
+    var woonplaats = incident.PLAATS_NAAM;
     var huisnummer = incident.HUIS_PAAL_NR;
-    var x = incident.T_X_COORD_LOC;
-    var y = incident.T_Y_COORD_LOC;
+    var toevoeging = incident.HUIS_NR_TOEV;
+    var aanduiding = incident.HUIS_NR_AANDUIDING;
+    var straat =  incident.NAAM_LOCATIE1;
 
-    console.log("Zoeken naar DBK voor incident NAAM_LOCATIE1=" + straat1 + ", NAAM_LOCATIE2=" + straat2 +
-            ", PLAATS_NAAM=" + plaats + ", HUIS_PAAL_NR=" + huisnummer + ", positie=" + x +"," + y);
-    if(!dbkjs.modules.feature.features) {
-        return;
-    }
+    console.log("Zoeken naar DBK voor incident POSTCODE=" + postcode + ", WOONPLAATS=" + woonplaats +
+            ", HUIS_PAAL_NR=" + huisnummer + ", HUIS_NR_TOEV=" + toevoeging + ", HUIS_NR_AANDUIDING=" + aanduiding +
+            ", NAAM_LOCATIE1=" + straat);
 
-    var matches = [];
-    var huisnummerMatches = [];
-    $.each(dbkjs.modules.feature.features, function (index, f) {
-        var fas = f.attributes.adres;
-        if(!fas) {
-            return true;
-        }
-        var distance = null;
-        if(x && y && f.geometry) {
-            var dx = f.geometry.x - x;
-            var dy = f.geometry.y - y;
-            distance = Math.sqrt(dx*dx + dy*dy);
-        }
-        if(!distance || distance > me.dbkSelectMaxDistance) {
-            return true;
-        }
-        console.log("DBK binnen max afstand: " + f.attributes.formeleNaam + ", " + Math.round(distance) + "m");
-        $.each(fas, function (index, fa) {
-            if(!fa) {
+    if(dbkjs.modules.feature.features && postcode && huisnummer) {
+        var dbk = null;
+        $.each(dbkjs.modules.feature.features, function(index, f) {
+            var fas = f.attributes.adres;
+            if(!fas) {
                 return true;
             }
+            $.each(fas, function(index, fa) {
+                if(fa) {
+                    var matchPostcode = fa.postcode && postcode === fa.postcode;
+                    var matchHuisnummer = fa.huisnummer && Number(huisnummer) === fa.huisnummer;
 
-            //var matchPostcode = postcode && fa.postcode && postcode === fa.postcode;
-
-            var matchWoonplaats = false;
-            if(plaats && fa.woonplaatsNaam) {
-                plaats = plaats.toLowerCase();
-                var dbkPlaats = fa.woonplaatsNaam.toLowerCase();
-                if(dbkPlaats === "den haag") {
-                    dbkPlaats = "'s-gravenhage";
+                    if(matchHuisnummer) {
+                        if(matchPostcode) {
+                            dbk = f;
+                            return false;
+                        }
+                    }
                 }
-                matchWoonplaats = plaats === dbkPlaats;
+            });
+
+            if(dbk) {
+                return false;
             }
-            var matchStraat = straat1 && fa.openbareRuimteNaam && fa.openbareRuimteNaam.toLowerCase().indexOf(straat1.toLowerCase()) !== -1;
-            matchStraat = matchStraat || (straat2 && fa.openbareRuimteNaam && fa.openbareRuimteNaam.toLowerCase().indexOf(straat2.toLowerCase()) !== -1);
 
-            var matchHuisnummer = huisnummer && fa.huisnummer && huisnummer === Number(fa.huisnummer);
-
-            if(matchWoonplaats && matchStraat) {
-                matches.push({
-                    dbk: f,
-                    distance: distance
+            if(f.attributes.adressen) {
+                $.each(f.attributes.adressen, function(i, a) {
+                    var matchPostcode = a.postcode && a.postcode === postcode;
+                    var matchWoonplaats = a.woonplaats && a.woonplaats === woonplaats;
+                    var matchStraat = a.straatnaam && a.straatnaam === straat;
+                    if(matchPostcode || (matchWoonplaats && matchStraat) && a.nummers) {
+                        console.log("Checking nummers for match DBK " + f.attributes.formeleNaam + ", "  + a.straatnaam + ", " + a.postcode + " " + a.woonplaats);
+                        $.each(a.nummers, function(j, n) {
+                            var parts = n.split("|");
+                            var matchHuisnummer = parts[0] === huisnummer;
+                            var matchHuisletter = aanduiding === "";
+                            var matchToevoeging = toevoeging === "";
+                            if(parts.length > 1) {
+                                matchHuisletter = aanduiding === parts[1];
+                            }
+                            if(parts.length > 2) {
+                                matchToevoeging = toevoeging === parts[2];
+                            }
+                            if(matchHuisnummer && matchHuisletter && matchToevoeging) {
+                                console.log("Matched DBK with nummer " + n + ", matchHuisletter=" + matchHuisletter + ",matchToevoeging=" + matchToevoeging);
+                                dbk = f;
+                                return false;
+                            }
+                        });
+                        if(dbk) {
+                            return false;
+                        }
+                    }
                 });
-                console.log("DBK adres matcht " + (matchHuisnummer ? "incl huisnummer" : "excl huisnummer") +" : " + f.attributes.formeleNaam + ", adres: " + fa.openbareRuimteNaam + " " + fa.huisnummer + ", " + fa.woonplaatsNaam);
-
-                if(matchHuisnummer) {
-                    huisnummerMatches.push(f);
-                }
-                return false; // don't search other adresses of this dbk
+            }
+            if(dbk) {
+                return false;
             }
         });
-    });
 
-    var dbk = null;
-    if(huisnummerMatches.length === 1) {
-        dbk = huisnummerMatches[0];
-    } else {
-        var minDist = null;
-        $.each(matches, function(i, match) {
-            if(!minDist || match.distance < minDist) {
-                dbk = match.dbk;
-                minDist = match.distance;
-            }
-        });
-    }
-    if(dbk) {
-        console.log("DBK geselecteerd: " + dbk.attributes.formeleNaam);
-        dbkjs.protocol.jsonDBK.process(dbk, null, true); // no zooming
-    } else {
-        console.log("Could not match incident DBK");
+        if(dbk) {
+            dbkjs.protocol.jsonDBK.process(dbk, null, true);
+        }
     }
 };
 
