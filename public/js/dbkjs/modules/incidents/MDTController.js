@@ -29,6 +29,7 @@
  */
 function MDTController(incidents) {
     var me = this;
+    me.first = true;
 
     me.button = new AlertableButton("btn_incident", "Incident", "bell-o");
     me.button.getElement().prependTo('.layertoggle-btn-group');
@@ -62,16 +63,25 @@ function MDTController(incidents) {
 MDTController.prototype.getMDTInfo = function() {
     var me = this;
 
-    $.ajax("/gms.xml", {
-        cache: false,
-        dataType: "xml"
-    })
+    var options = { dataType: "xml" };
+
+    if(me.first) {
+        me.first = false;
+        options.cache = false;
+    } else {
+        options.ifModified = true;
+    }
+
+    $.ajax("/gms.xml", options)
     .always(function() {
         window.setTimeout(function() {
             me.getMDTInfo();
-        }, 1000);
+        }, 3000);
     })
     .done(function(xml, textStatus, jqXHR) {
+        if(textStatus === "notmodified") {
+            return;
+        }
         var first = me.xml === null;
         me.xml = xml;
         me.incidentDetailsWindow.data(xml, true, true, true, jqXHR.getResponseHeader("Last-Modified"));
