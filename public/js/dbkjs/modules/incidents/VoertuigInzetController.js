@@ -259,12 +259,12 @@ VoertuigInzetController.prototype.selectIncidentDBK = function(incident) {
     var postcode = incident.POSTCODE;
     var woonplaats = incident.PLAATS_NAAM;
     var huisnummer = incident.HUIS_PAAL_NR;
+    var huisletter = incident.HUISLETTER;
     var toevoeging = incident.HUIS_NR_TOEV;
-    var aanduiding = incident.HUIS_NR_AANDUIDING;
     var straat =  incident.NAAM_LOCATIE1;
 
     console.log("Zoeken naar DBK voor incident POSTCODE=" + postcode + ", WOONPLAATS=" + woonplaats +
-            ", HUIS_PAAL_NR=" + huisnummer + ", HUIS_NR_TOEV=" + toevoeging + ", HUIS_NR_AANDUIDING=" + aanduiding +
+            ", HUIS_PAAL_NR=" + huisnummer + ", HUISLETTER=" + huisletter + ", HUIS_NR_TOEV=" + toevoeging +
             ", NAAM_LOCATIE1=" + straat);
 
     if(dbkjs.modules.feature.features && postcode && huisnummer) {
@@ -302,10 +302,10 @@ VoertuigInzetController.prototype.selectIncidentDBK = function(incident) {
                         $.each(a.nummers, function(j, n) {
                             var parts = n.split("|");
                             var matchHuisnummer = Number(parts[0]) === huisnummer;
-                            var matchHuisletter = aanduiding === "";
+                            var matchHuisletter = huisletter === "";
                             var matchToevoeging = toevoeging === "";
                             if(parts.length > 1) {
-                                matchHuisletter = aanduiding === parts[1];
+                                matchHuisletter = huisletter === parts[1];
                             }
                             if(parts.length > 2) {
                                 matchToevoeging = toevoeging === parts[2];

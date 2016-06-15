@@ -134,8 +134,8 @@ MDTController.prototype.newIncident = function() {
     var postcode = $(adres).find("Postcode").text();
     var woonplaats = $(adres).find("Woonplaats").text();
     var huisnummer = $(adres).find("Huisnummer").text();
-    var toevoeging = $(adres).find("HnToevoeging").text();
-    var aanduiding = $(adres).find("HnAanduiding").text();
+//    var huisletter = $(adres).find("HnAanduiding").text();
+//    var toevoeging = $(adres).find("HnToevoeging").text();
     var straat = $(adres).find("Straat").text();
 
     this.selectedDbkFeature = null;
@@ -176,17 +176,17 @@ MDTController.prototype.newIncident = function() {
                         console.log("Checking nummers for match DBK " + f.attributes.formeleNaam + ", "  + a.straatnaam + ", " + a.postcode + " " + a.woonplaats);
                         $.each(a.nummers, function(j, n) {
                             var parts = n.split("|");
-                            var matchHuisnummer = Number(parts[0]) === huisnummer;
-                            var matchHuisletter = aanduiding === "";
+                            var matchHuisnummer = Number(parts[0]) === huisnummer;/*
+                            var matchHuisletter = huisletter === "";
                             var matchToevoeging = toevoeging === "";
                             if(parts.length > 1) {
-                                matchHuisletter = aanduiding === parts[1];
+                                matchHuisletter = huisletter === parts[1];
                             }
                             if(parts.length > 2) {
                                 matchToevoeging = toevoeging === parts[2];
-                            }
-                            if(matchHuisnummer && matchHuisletter && matchToevoeging) {
-                                console.log("Matched DBK with nummer " + n + ", matchHuisletter=" + matchHuisletter + ",matchToevoeging=" + matchToevoeging);
+                            }*/
+                            if(matchHuisnummer/* && matchHuisletter && matchToevoeging*/) {
+                                console.log("Matched DBK with nummer " + n /*+ ", matchHuisletter=" + matchHuisletter + ",matchToevoeging=" + matchToevoeging*/);
                                 dbk = f;
                                 return false;
                             }
