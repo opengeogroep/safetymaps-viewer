@@ -176,7 +176,7 @@ MDTController.prototype.newIncident = function() {
                         console.log("Checking nummers for match DBK " + f.attributes.formeleNaam + ", "  + a.straatnaam + ", " + a.postcode + " " + a.woonplaats);
                         $.each(a.nummers, function(j, n) {
                             var parts = n.split("|");
-                            var matchHuisnummer = parts[0] === huisnummer;
+                            var matchHuisnummer = Number(parts[0]) === huisnummer;
                             var matchHuisletter = aanduiding === "";
                             var matchToevoeging = toevoeging === "";
                             if(parts.length > 1) {
