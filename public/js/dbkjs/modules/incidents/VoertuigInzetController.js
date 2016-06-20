@@ -302,8 +302,8 @@ VoertuigInzetController.prototype.selectIncidentDBK = function(incident) {
                         $.each(a.nummers, function(j, n) {
                             var parts = n.split("|");
                             var matchHuisnummer = Number(parts[0]) === huisnummer;
-                            var matchHuisletter = huisletter === "";
-                            var matchToevoeging = toevoeging === "";
+                            var matchHuisletter = huisletter === null;
+                            var matchToevoeging = toevoeging === null;
                             if(parts.length > 1) {
                                 matchHuisletter = huisletter === parts[1];
                             }
