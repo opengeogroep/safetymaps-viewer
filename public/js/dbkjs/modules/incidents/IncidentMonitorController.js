@@ -176,7 +176,7 @@ IncidentMonitorController.prototype.addAGSLayers = function() {
     me.additionalLayers = [];
     if(dbkjs.options.incidents.ags.agsLayers) {
         $.each(dbkjs.options.incidents.ags.agsLayers, function(i, l) {
-            var layer = new OpenLayers.Layer.ArcGIS93Rest("DBK"+i, l, { transparent: "true", layers: "hide:0,25", token: me.service.token }, { maxResolution: 0.42, visibility: !me.ghor });
+            var layer = new OpenLayers.Layer.ArcGIS93Rest("DBK"+i, l.url, $.extend(l.params || {}, { transparent: "true", token: me.service.token }), { maxResolution: 0.42, visibility: !me.ghor });
             dbkjs.map.addLayer(layer);
             me.additionalLayers.push(layer);
         });
