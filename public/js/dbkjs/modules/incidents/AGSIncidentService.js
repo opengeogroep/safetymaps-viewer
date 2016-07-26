@@ -403,7 +403,7 @@ AGSIncidentService.prototype.getVoertuigInzet = function(voertuignummer) {
  *  classificatie, karakteristiek and kladlok all in one when succesful. Rejected
  *  on failure (of any subrequest) or if incident was not found.
  */
-AGSIncidentService.prototype.getAllIncidentInfo = function(incidentId, archief, noInzetEenheden) {
+AGSIncidentService.prototype.getAllIncidentInfo = function(incidentId, archief, noInzetEenheden, noKladblok) {
     var me = this;
     var d = $.Deferred();
 
@@ -442,7 +442,7 @@ AGSIncidentService.prototype.getAllIncidentInfo = function(incidentId, archief, 
                 }
 
                 var dKarakteristiek = me.getKarakteristiek(incidentId, archief);
-                var dKladblok = me.getKladblok(incidentId, archief);
+                var dKladblok = noKladblok ? null : me.getKladblok(incidentId, archief);
                 var dInzetEenheden = noInzetEenheden ? null : me.getInzetEenheden(incidentId, archief, false);
 
                 $.when(dClassificatie, dKarakteristiek, dKladblok, dInzetEenheden)

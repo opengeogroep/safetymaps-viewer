@@ -31,6 +31,19 @@ function IncidentMonitorController(incidents) {
     me.service = incidents.service;
     me.ghor = incidents.options.ghor;
 
+    me.kb = false;
+    $.ajax("kb", { cache: false } )
+    .always(function(jqXHR) {
+        if(jqXHR.status === 404) {
+            console.log("KB access!");
+            me.kb = true;
+        } else if(jqXHR.status !== 403) {
+            console.log("Unexpected status: " + jqXHR + " " + jqXHR.statusText, jqXHR.responseText);
+        } else {
+            console.log("No KB access!");
+        }
+    });
+
     me.button = new AlertableButton("btn_incidentlist", "Incidentenlijst", "bell-o");
     me.button.getElement().appendTo('#btngrp_3');
     $(me.button).on('click', function() {
@@ -373,7 +386,7 @@ IncidentMonitorController.prototype.updateIncident = function(incidentId, archie
         return;
     }
 
-    me.service.getAllIncidentInfo(incidentId, archief, false)
+    me.service.getAllIncidentInfo(incidentId, archief, false, !me.kb)
     .fail(function(e) {
         var msg = "Kan incidentinfo niet updaten: " + e;
         dbkjs.gui.showError(msg);

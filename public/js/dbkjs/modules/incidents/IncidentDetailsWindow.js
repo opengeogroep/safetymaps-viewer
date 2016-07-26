@@ -185,8 +185,7 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
         html += '</td></tr>';
     }
 
-
-    if(incident.kladblok.length !== 0) {
+    if(incident.kladblok && incident.kladblok.length !== 0) {
         html += '<tr><td id="kladblok" colspan="2">';
         var pre = "";
         $.each(incident.kladblok, function(i, k) {
