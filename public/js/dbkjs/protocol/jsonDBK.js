@@ -295,6 +295,8 @@ dbkjs.protocol.jsonDBK = {
                 _obj.addRowClickHandler("#floorslist", "verdiepingen");
             }
 
+            dbkjs.modules.feature.layer.redraw();
+
             _obj.processing = false;
         } else {
             dbkjs.options.feature = null;
