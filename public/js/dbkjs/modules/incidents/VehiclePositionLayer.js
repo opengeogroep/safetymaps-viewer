@@ -23,7 +23,8 @@ function VehiclePositionLayer() {
 
     var me = this;
 
-    this.showMoving = false;
+    this.showMoving = window.localStorage.getItem("VehiclePositionLayer.showMoving") === "true";
+    this.visibility = !(window.localStorage.getItem("VehiclePositionLayer.hidden") === "true");
 
     function displayFunction(feature) {
         if(!me.showMoving) {
@@ -85,6 +86,8 @@ function VehiclePositionLayer() {
             })
         })
     });
+    this.layer.setVisibility(this.visibility);
+    this.layer2.setVisibility(this.visibility);
 
     dbkjs.map.addLayer(this.layer);
     dbkjs.map.addLayer(this.layer2);
@@ -102,14 +105,15 @@ function VehiclePositionLayer() {
     dbkjs.map.addControl(this.selectControl);
     this.selectControl.activate();
 
-    $("#baselayerpanel_b").append('<hr/><label><input type="checkbox" checked onclick="dbkjs.modules.incidents.controller.vehiclePositionLayer.layer.setVisibility(event.target.checked)">Toon voertuigposities</label>');
-    $("#baselayerpanel_b").append('<hr/><label><input type="checkbox" onclick="dbkjs.modules.incidents.controller.vehiclePositionLayer.setShowMoving(event.target.checked)">Toon bewegende voertuigen niet gekoppeld aan incident (grijs)</label>');
+    $("#baselayerpanel_b").append('<hr/><label><input type="checkbox" ' + (this.visibility ? 'checked' : '') + ' onclick="dbkjs.modules.incidents.controller.vehiclePositionLayer.setVisibility(event.target.checked)">Toon voertuigposities</label>');
+    $("#baselayerpanel_b").append('<hr/><label><input type="checkbox" ' + (this.showMoving ? 'checked' : '') + ' onclick="dbkjs.modules.incidents.controller.vehiclePositionLayer.setShowMoving(event.target.checked)">Toon bewegende voertuigen niet gekoppeld aan incident (grijs)</label>');
 }
 
 VehiclePositionLayer.prototype.setShowMoving = function(showMoving) {
     this.showMoving = showMoving;
     this.layer.redraw();
     this.layer2.redraw();
+    window.localStorage.setItem("VehiclePositionLayer.showMoving", showMoving);
 };
 
 VehiclePositionLayer.prototype.selectFeature = function(f) {
@@ -160,4 +164,11 @@ VehiclePositionLayer.prototype.features = function(features) {
         features2.push(f.clone());
     });
     this.layer2.addFeatures(features2);
+};
+
+VehiclePositionLayer.prototype.setVisibility = function(visible) {
+    this.visibility = visible;
+    this.layer.setVisibility(visible);
+    this.layer2.setVisibility(visible);
+    window.localStorage.setItem("VehiclePositionLayer.hidden", !visible);
 };
