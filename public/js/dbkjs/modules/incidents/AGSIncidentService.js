@@ -680,7 +680,7 @@ AGSIncidentService.prototype.getInzetEenheden = function(incidentIds, archief, f
     incidentIds = incidentIds instanceof Array ? incidentIds : [incidentIds];
 
     var table = archief ? "GMSARC_INZET_EENHEID" : "GMS_INZET_EENHEID";
-    var eenheidCatFilter = me.ghor ? "AND T_IND_DISC_EENHEID = 'A'" : "AND T_IND_DISC_EENHEID = 'B'";
+    var eenheidCatFilter = me.ghor ? "" : "AND T_IND_DISC_EENHEID = 'B'";
     me.doAGSAjax({
         url: me.tableUrls[table] + "/query",
         dataType: "json",
@@ -718,7 +718,7 @@ AGSIncidentService.prototype.getCurrentIncidents = function() {
         data: {
             f: "json",
             token: me.token,
-            where: me.ghor ? "IND_DISC_INCIDENT LIKE '__A'" : "IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3",
+            where: me.ghor ? "(IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3) OR IND_DISC_INCIDENT LIKE '__A'" : "IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3",
             orderByFields: "DTG_START_INCIDENT DESC",
             outFields: "INCIDENT_ID,T_X_COORD_LOC,T_Y_COORD_LOC,DTG_START_INCIDENT,PRIORITEIT_INCIDENT_BRANDWEER,PRIORITEIT_INCIDENT_POLITIE,T_GUI_LOCATIE,PLAATS_NAAM,BRW_MELDING_CL_ID"
         },
@@ -756,10 +756,10 @@ AGSIncidentService.prototype.getCurrentIncidents = function() {
                 // Add inzet to incident
                 $.each(incidents, function(j, incident) {
                     if(inzetEenheid.INCIDENT_ID === incident.INCIDENT_ID) {
-                        if(incident.inzetBrandweerEenheden) {
-                            incident.inzetBrandweerEenheden.push(inzetEenheid);
+                        if(incident.inzetEenheden) {
+                            incident.inzetEenheden.push(inzetEenheid);
                         } else {
-                            incident.inzetBrandweerEenheden = [inzetEenheid];
+                            incident.inzetEenheden = [inzetEenheid];
                         }
                     }
                 });
@@ -785,6 +785,17 @@ AGSIncidentService.prototype.getCurrentIncidents = function() {
                     incidentenMetInzet.push(incident);
                 }
             });
+            $.each(incidentenMetInzet, function(i, incident) {
+                if(!incident.inzetEenheden) {
+                    incident.inzetEenheden = [];
+                }
+                incident.inzetEenhedenStats = me.getInzetEenhedenStats(incident);
+            });
+            if(me.ghor) {
+                incidentenMetInzet = $.grep(incidentenMetInzet, function(incident) {
+                    return incident.inzetEenhedenStats.B.total !== 0 || incident.inzetEenhedenStats.A.total !== 0;
+                });
+            }
             d.resolve(incidentenMetInzet);
         });
     });
@@ -841,10 +852,10 @@ AGSIncidentService.prototype.getArchivedIncidents = function(highestArchivedInci
                 // Add inzet to incident
                 $.each(incidents, function(j, incident) {
                     if(inzetEenheid.INCIDENT_ID === incident.INCIDENT_ID) {
-                        if(incident.inzetBrandweerEenheden) {
-                            incident.inzetBrandweerEenheden.push(inzetEenheid);
+                        if(incident.inzetEenheden) {
+                            incident.inzetEenheden.push(inzetEenheid);
                         } else {
-                            incident.inzetBrandweerEenheden = [inzetEenheid];
+                            incident.inzetEenheden = [inzetEenheid];
                         }
                     }
                 });
@@ -859,7 +870,17 @@ AGSIncidentService.prototype.getArchivedIncidents = function(highestArchivedInci
                 if(incidentIdsMetInzet.indexOf(incident.INCIDENT_ID) !== -1) {
                     incidentenMetInzet.push(incident);
                 }
+
+                if(!incident.inzetEenheden) {
+                    incident.inzetEenheden = [];
+                }
+                incident.inzetEenhedenStats = me.getInzetEenhedenStats(incident);
             });
+            if(me.ghor) {
+                incidentenMetInzet = $.grep(incidentenMetInzet, function(incident) {
+                    return incident.inzetEenhedenStats.B.total !== 0 || incident.inzetEenhedenStats.A.total !== 0;
+                });
+            }
             d.resolve({
                 highestIncidentId: highestIncidentId,
                 incidents: incidentenMetInzet
@@ -868,6 +889,42 @@ AGSIncidentService.prototype.getArchivedIncidents = function(highestArchivedInci
     });
 
     return d.promise();
+};
+
+/**
+ * Tel aantal actuele inzet eenheden per discipline en soort voertuig
+ */
+AGSIncidentService.prototype.getInzetEenhedenStats = function(incident) {
+    var eenheidStats = {
+        "B": {
+            "total": 0
+        },
+        "P": {
+            "total": 0
+        },
+        "A": {
+            "total": 0
+        }
+    };
+    if(incident.inzetEenheden) {
+        $.each(incident.inzetEenheden, function(j, eenheid) {
+            if(!eenheid.DTG_EIND_ACTIE) {
+                eenheidStats[eenheid.T_IND_DISC_EENHEID].total++;
+                var soort = eenheid.CODE_VOERTUIGSOORT;
+                if(soort !== null) {
+                    var soortCount = eenheidStats[eenheid.T_IND_DISC_EENHEID][soort];
+                    if(typeof soortCount === "undefined") {
+                        soortCount = 0;
+                    }
+                    eenheidStats[eenheid.T_IND_DISC_EENHEID][soort] = soortCount + 1;
+                }
+            }
+        });
+    }
+    eenheidStats.standard = eenheidStats.A.total === 1 &&  eenheidStats.B.total === 0 && eenheidStats.P.total === 0;
+    
+
+    return eenheidStats;
 };
 
 AGSIncidentService.prototype.getArchiefIncidentClassificaties = function(incident) {

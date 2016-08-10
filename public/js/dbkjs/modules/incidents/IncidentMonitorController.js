@@ -104,6 +104,22 @@ function IncidentMonitorController(incidents) {
 
     if(!me.ghor) {
         me.vehiclePositionLayer = new VehiclePositionLayer();
+    } else {
+        me.ghorFilterStandard = false;
+
+
+        $('<a></a>')
+        .attr({
+            'id': 'btn_standardfilter',
+            'class': 'btn btn-default navbar-btn',
+            'href': '#',
+            'title': 'Filter standaardincidenten'
+        })
+        .append('<i class="fa fa-filter" style="width: 27.5px"></i>')
+        .click(function(e) {
+            me.ghorFilterStandardClick();
+        })
+        .appendTo('#btngrp_3');
     }
 
     me.failedUpdateTries = 0;
@@ -121,6 +137,21 @@ function IncidentMonitorController(incidents) {
 IncidentMonitorController.prototype.UPDATE_INTERVAL_MS = 30000;
 IncidentMonitorController.prototype.UPDATE_INTERVAL_ERROR_MS = 5000;
 IncidentMonitorController.prototype.UPDATE_TRIES = 3;
+
+IncidentMonitorController.prototype.ghorFilterStandardClick = function() {
+    var me = this;
+    me.ghorFilterStandard = !me.ghorFilterStandard;
+    $("a#btn_standardfilter").toggleClass("active", me.ghorFilterStandard).blur();
+
+    me.updateInterface();
+};
+
+IncidentMonitorController.prototype.ghorFilterIncidents = function(incidents) {
+    var me = this;
+    return $.grep(incidents, function(incident) {
+        return me.ghorFilterStandard ? !incident.inzetEenhedenStats.standard : true;
+    });
+};
 
 IncidentMonitorController.prototype.setAllIncidentsRead = function() {
     var me = this;
@@ -247,6 +278,21 @@ IncidentMonitorController.prototype.checkIncidentListOutdated = function() {
     }
 };
 
+IncidentMonitorController.prototype.updateInterface = function() {
+    var me = this;
+    if(!me.currentIncidents) {
+        return;
+    }
+
+    var currentFiltered = me.ghor ? me.ghorFilterIncidents(me.currentIncidents) : me.currentIncidents;
+    var archivedFiltered =  me.ghor ? me.ghorFilterIncidents(me.archivedIncidents) : me.archivedIncidents;
+    me.incidentListWindow.data(currentFiltered, archivedFiltered, true);
+    // TODO: only me.incidentListWindow.actueleIncidentIds ?
+    me.updateMarkerLayer(currentFiltered);
+
+    me.updateVehiclePositionLayer(currentFiltered);
+};
+
 IncidentMonitorController.prototype.getIncidentList = function() {
     var me = this;
 
@@ -285,9 +331,8 @@ IncidentMonitorController.prototype.getIncidentList = function() {
         me.button.setIcon("bell-o");
         $('#systeem_meldingen').hide(); // XXX
         me.processNewArchivedIncidents(archivedIncidents);
-        me.incidentListWindow.data(currentIncidents, me.archivedIncidents, true);
-        // TODO: only me.incidentListWindow.actueleIncidentIds ?
-        me.updateMarkerLayer(currentIncidents);
+        me.currentIncidents = currentIncidents;
+        me.updateInterface();
         me.updateVehiclePositionLayer(currentIncidents);
         me.checkUnreadIncidents(me.incidentListWindow.actueleIncidentIds);
     });
@@ -339,7 +384,7 @@ IncidentMonitorController.prototype.updateVehiclePositionLayer = function(incide
     var haveInzet = false;
     $.each(incidents, function(i, incident) {
         if(incident.actueleInzet) {
-            $.each(incident.inzetBrandweerEenheden, function(j, inzet) {
+            $.each(incident.inzetEenheden, function(j, inzet) {
                 if(inzet.DTG_EIND_ACTIE === null) {
                     vehicles[inzet.CODE_VOERTUIGSOORT + " " + inzet.ROEPNAAM_EENHEID] = inzet;
                     haveInzet = true;

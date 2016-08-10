@@ -19,6 +19,8 @@
  */
 
 function IncidentMarkerLayer() {
+    this.ghor = dbkjs.modules.incidents.options.ghor;
+
     // Layer name starts with _ to hide in support module layer list
     this.layer = new OpenLayers.Layer.Markers("_Incident markers", {
         rendererOptions: { zIndexing: true }
@@ -54,10 +56,30 @@ IncidentMarkerLayer.prototype.addIncident = function(incident, archief, singleMa
 
     var pos = new OpenLayers.LonLat(x, y);
 
+    var icon;
+    if(me.ghor) {
+        var b = incident.inzetEenhedenStats.B.total;
+        var a = incident.inzetEenhedenStats.A.total;
+        if(archief) {
+            icon = "images/bell-gray.png";
+        } else if(b !== 0 && a !== 0) {
+            icon = "images/bell-yellowred.png";
+        } else if(a !== 0) {
+            icon = "images/bell-yellow.png";
+        } else {
+            icon = "images/bell.png";
+        }
+    } else {
+        icon = !archief ? "images/bell.png" : "images/bell-gray.png";
+    }
+
     var marker = new OpenLayers.Marker(
         pos,
-        new OpenLayers.Icon(!archief ? "images/bell.png" : "images/bell-gray.png", this.size, this.offset)
+        new OpenLayers.Icon(icon, this.size, this.offset)
     );
+    if(me.ghor && incident.inzetEenhedenStats.standard) {
+        marker.setOpacity(0.5);
+    }
     marker.id = incident.INCIDENT_ID;
     var handler = function() { me.markerClick(marker, incident, archief); };
     marker.events.register("click", marker, handler);

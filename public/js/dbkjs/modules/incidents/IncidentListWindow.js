@@ -125,7 +125,7 @@ IncidentListWindow.prototype.data = function(currentIncidents, archivedIncidents
     var h = $("<div class='header actueleInzet'/>")
             .html(actueleInzet.length === 0 ? "Geen actieve incidenten" :
                 (actueleInzet.length === 1 ? "&Eacute;&eacute;n actief incident" : actueleInzet.length + " actieve incidenten") +
-                " met actuele inzet " + (me.ghor ? "GHOR-" : "brandweer") + "eenheden");
+                " met actuele inzet " + (me.ghor ? "" : "brandweer") + "eenheden");
 
     h.appendTo(d);
     me.listIncidents(d, actueleInzet, null, true, function(r, incident) {
@@ -169,16 +169,14 @@ IncidentListWindow.prototype.listIncidents = function(el, incidents, incidentIds
 
         var start = dbkjs.modules.incidents.controller.service.getAGSMoment(incident.DTG_START_INCIDENT);
         var actueleInzet = [];
-        if(showInzetInTitle && incident.inzetBrandweerEenheden) {
-            $.each(incident.inzetBrandweerEenheden, function(j, eenheid) {
-                if(!eenheid.DTG_EIND_ACTIE) {
-                    actueleInzet.push(eenheid.CODE_VOERTUIGSOORT + " " + eenheid.ROEPNAAM_EENHEID + (eenheid.KAZ_NAAM ? " (" + eenheid.KAZ_NAAM + ")" : ""));
-                }
-            });
-        }
+        $.each(incident.inzetEenheden, function(j, eenheid) {
+            if(!eenheid.DTG_EIND_ACTIE) {
+                actueleInzet.push(eenheid.CODE_VOERTUIGSOORT + " " + eenheid.ROEPNAAM_EENHEID + (eenheid.KAZ_NAAM ? " (" + eenheid.KAZ_NAAM + ")" : ""));
+            }
+        });
         var r = $("<div class='incident'/>")
                 .addClass(odd ? "odd" : "even")
-                .attr("title", incident.T_GUI_LOCATIE + (actueleInzet.length > 0 ? ", " + actueleInzet.join(", ") : ""));
+                .attr("title", incident.T_GUI_LOCATIE + (showInzetInTitle && actueleInzet.length > 0 ? ", " + actueleInzet.join(", ") : ""));
         odd = !odd;
 
         if(dbkjs.options.incidents.incidentListFunction) {
@@ -193,7 +191,56 @@ IncidentListWindow.prototype.listIncidents = function(el, incidents, incidentIds
         }
         $("<span class='locatie'/>").text(incident.T_GUI_LOCATIE).appendTo(r);
         $("<span class='plaats'/>").text(incident.PLAATS_NAAM).appendTo(r);
-        $("<span class='classificatie'/>").text(incident.classificaties).appendTo(r);
+
+        var classificaties = incident.classificaties || "";
+        if(me.ghor) {
+            var a = incident.inzetEenhedenStats.A;
+            var icons = {
+                "ambulance": 0,
+                "motorcycle": 0,
+                "medkit": 0,
+                "stethoscope": 0
+            };
+            $.each(a, function(soort, count) {
+                if(soort !== "total") {
+                    if(soort.indexOf("MMT") !== -1) {
+                        icons.stethoscope += count;
+                    } else if(soort === "MOTOR") {
+                        icons.motorcycle += count;
+                    } else if(soort === "HAP") {
+                        icons.medkit += count;
+                    } else {
+                        icons.ambulance += count;
+                    }
+                }
+            });
+
+            function multiIcon(soort,count) {
+                var icon = "<i class='fa fa-" + soort + "' style='margin-right: 5px'></i>";
+                if(typeof count === "undefined") {
+                    count = icons[soort];
+                }
+                if(count > 3) {
+                    //console.log(JSON.stringify(eenheden) + " " + JSON.stringify(icons));
+                    return count + "&times;" + icon + "&nbsp;";
+                } else if(count > 0) {
+                    return icon.repeat(count);
+                } else {
+                    return "";
+                }
+            }
+            icons = multiIcon("ambulance") + multiIcon("motorcycle") + multiIcon("stethoscope") + multiIcon("medkit") ;
+            if(incident.inzetEenhedenStats.standard) {
+                icons = "<span style='color: grey'>" + icons + "</span>";
+            }
+            if(incident.inzetEenhedenStats.B.total !== 0) {
+                icons += "<span style='color: red'>" + multiIcon("fire-extinguisher",incident.inzetEenhedenStats.B.total) + "</span>";
+            }
+            if(incident.inzetEenhedenStats.P.total !== 0) {
+                icons += "<span style='color: blue'>" + multiIcon("cab",incident.inzetEenhedenStats.P.total) + "</span>";
+            }
+        }
+        $("<span class='classificatie'/>").html(icons + classificaties).appendTo(r);
         $("<span class='fromNow'/>").text(start.fromNow()).appendTo(r);
 
         if(incidentDivFunction) {
