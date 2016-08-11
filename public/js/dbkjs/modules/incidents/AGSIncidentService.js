@@ -922,7 +922,7 @@ AGSIncidentService.prototype.getInzetEenhedenStats = function(incident) {
         });
     }
     eenheidStats.standard = eenheidStats.A.total === 1 &&  eenheidStats.B.total === 0 && eenheidStats.P.total === 0;
-    
+
 
     return eenheidStats;
 };
@@ -970,7 +970,7 @@ AGSIncidentService.prototype.getVehiclePositions = function(vehicles) {
         data: {
             f: "json",
             token: me.token,
-            where: "Discipline='B'",
+            where: "Discipline='B' and (IncidentID <> '' or Speed > 5)",
             outFields: "*"
         },
         cache: false
