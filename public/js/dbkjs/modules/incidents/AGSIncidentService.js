@@ -670,7 +670,7 @@ AGSIncidentService.prototype.getKladblok = function(incidentId, archief) {
     return d.promise();
 };
 
-AGSIncidentService.prototype.getInzetEenheden = function(incidentIds, archief, filterEenheidCategorie) {
+AGSIncidentService.prototype.getInzetEenheden = function(incidentIds, archief) {
     var me = this;
     var d = $.Deferred();
 
@@ -680,7 +680,6 @@ AGSIncidentService.prototype.getInzetEenheden = function(incidentIds, archief, f
     incidentIds = incidentIds instanceof Array ? incidentIds : [incidentIds];
 
     var table = archief ? "GMSARC_INZET_EENHEID" : "GMS_INZET_EENHEID";
-    var eenheidCatFilter = me.ghor ? "" : "AND T_IND_DISC_EENHEID = 'B'";
     me.doAGSAjax({
         url: me.tableUrls[table] + "/query",
         dataType: "json",
@@ -688,7 +687,7 @@ AGSIncidentService.prototype.getInzetEenheden = function(incidentIds, archief, f
         data: {
             f: "json",
             token: me.token,
-            where: "INCIDENT_ID IN (" + incidentIds.join(",") + ") " + (filterEenheidCategorie ? eenheidCatFilter : ""),
+            where: "INCIDENT_ID IN (" + incidentIds.join(",") + ") ",
             orderByFields: "DTG_OPDRACHT_INZET",
             outFields: "INCIDENT_ID,DTG_OPDRACHT_INZET," + (archief ? "" : "DTG_EIND_ACTIE,") + "CODE_VOERTUIGSOORT,ROEPNAAM_EENHEID,KAZ_NAAM,T_IND_DISC_EENHEID"
         }
@@ -741,7 +740,7 @@ AGSIncidentService.prototype.getCurrentIncidents = function() {
         $.each(incidents, function(i, incident) {
             incidentIds.push(incident.INCIDENT_ID);
         });
-        var dInzetEenheden = me.getInzetEenheden(incidentIds, false, true);
+        var dInzetEenheden = me.getInzetEenheden(incidentIds, false);
         var dClassificaties = me.getClassificaties(incidents);
 
         $.when(dInzetEenheden, dClassificaties)
@@ -791,11 +790,13 @@ AGSIncidentService.prototype.getCurrentIncidents = function() {
                 }
                 incident.inzetEenhedenStats = me.getInzetEenhedenStats(incident);
             });
-            if(me.ghor) {
-                incidentenMetInzet = $.grep(incidentenMetInzet, function(incident) {
+            incidentenMetInzet = $.grep(incidentenMetInzet, function(incident) {
+                if(me.ghor) {
                     return incident.inzetEenhedenStats.B.total !== 0 || incident.inzetEenhedenStats.A.total !== 0;
-                });
-            }
+                } else {
+                    return incident.inzetEenhedenStats.B.total !== 0;
+                }
+            });
             d.resolve(incidentenMetInzet);
         });
     });
@@ -841,7 +842,7 @@ AGSIncidentService.prototype.getArchivedIncidents = function(highestArchivedInci
         $.each(incidents, function(i, incident) {
             incidentIds.push(incident.INCIDENT_ID);
         });
-        me.getInzetEenheden(incidentIds, true, true)
+        me.getInzetEenheden(incidentIds, true)
         .fail(function(e) {
             d.reject(e);
         })
@@ -876,11 +877,13 @@ AGSIncidentService.prototype.getArchivedIncidents = function(highestArchivedInci
                 }
                 incident.inzetEenhedenStats = me.getInzetEenhedenStats(incident);
             });
-            if(me.ghor) {
-                incidentenMetInzet = $.grep(incidentenMetInzet, function(incident) {
+            incidentenMetInzet = $.grep(incidentenMetInzet, function(incident) {
+                if(me.ghor) {
                     return incident.inzetEenhedenStats.B.total !== 0 || incident.inzetEenhedenStats.A.total !== 0;
-                });
-            }
+                } else {
+                    return incident.inzetEenhedenStats.B.total !== 0;
+                }
+            });
             d.resolve({
                 highestIncidentId: highestIncidentId,
                 incidents: incidentenMetInzet
