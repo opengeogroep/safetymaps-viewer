@@ -256,6 +256,14 @@ VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
 VoertuigInzetController.prototype.selectIncidentDBK = function(incident) {
     var me = this;
 
+    if(!dbkjs.modules.feature.features || dbkjs.modules.feature.features.length === 0) {
+        console.log("Waiting for features to be loaded before selecting incident DBK");
+        window.setTimeout(function() {
+            me.selectIncidentDBK(incident);
+        }, 1000);
+        return;
+    }
+
     var postcode = incident.POSTCODE;
     var woonplaats = incident.PLAATS_NAAM;
     var huisnummer = incident.HUIS_PAAL_NR;
@@ -263,11 +271,11 @@ VoertuigInzetController.prototype.selectIncidentDBK = function(incident) {
     var toevoeging = incident.HUIS_NR_TOEV;
     var straat =  incident.NAAM_LOCATIE1;
 
-    console.log("Zoeken naar DBK voor incident POSTCODE=" + postcode + ", WOONPLAATS=" + woonplaats +
-            ", HUIS_PAAL_NR=" + huisnummer + ", HUISLETTER=" + huisletter + ", HUIS_NR_TOEV=" + toevoeging +
-            ", NAAM_LOCATIE1=" + straat);
+    if(postcode && huisnummer) {
+        console.log("Zoeken naar DBK voor incident POSTCODE=" + postcode + ", WOONPLAATS=" + woonplaats +
+                ", HUIS_PAAL_NR=" + huisnummer + ", HUISLETTER=" + huisletter + ", HUIS_NR_TOEV=" + toevoeging +
+                ", NAAM_LOCATIE1=" + straat);
 
-    if(dbkjs.modules.feature.features && postcode && huisnummer) {
         var dbk = null;
         $.each(dbkjs.modules.feature.features, function(index, f) {
             var fas = f.attributes.adres;
