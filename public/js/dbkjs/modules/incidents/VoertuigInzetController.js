@@ -266,7 +266,7 @@ VoertuigInzetController.prototype.selectIncidentDBK = function(incident) {
 
     var postcode = incident.POSTCODE;
     var woonplaats = incident.PLAATS_NAAM;
-    var huisnummer = incident.HUIS_PAAL_NR;
+    var huisnummer = Number(incident.HUIS_PAAL_NR);
     var huisletter = incident.HUISLETTER;
     var toevoeging = incident.HUIS_NR_TOEV;
     var straat =  incident.NAAM_LOCATIE1;
@@ -285,7 +285,7 @@ VoertuigInzetController.prototype.selectIncidentDBK = function(incident) {
             $.each(fas, function(index, fa) {
                 if(fa) {
                     var matchPostcode = fa.postcode && postcode === fa.postcode;
-                    var matchHuisnummer = fa.huisnummer && Number(huisnummer) === fa.huisnummer;
+                    var matchHuisnummer = fa.huisnummer && huisnummer === fa.huisnummer;
 
                     if(matchHuisnummer) {
                         if(matchPostcode) {
