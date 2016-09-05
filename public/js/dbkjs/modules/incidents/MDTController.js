@@ -141,7 +141,7 @@ MDTController.prototype.newIncident = function() {
     this.selectedDbkFeature = null;
 
     if(dbkjs.modules.feature.features && postcode && huisnummer) {
-        console.log("Finding DBK for incident adres " + postcode + " " + woonplaats + " " + huisnummer + "|" + aanduiding + "|" + toevoeging);
+        console.log("Finding DBK for incident adres " + postcode + " " + woonplaats + " " + huisnummer/* + "|" + aanduiding + "|" + toevoeging*/);
 
         var dbk = null;
         $.each(dbkjs.modules.feature.features, function(index, f) {
