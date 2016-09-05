@@ -49,7 +49,7 @@ IncidentDetailsWindow.prototype.createStyle = function() {
 #eenheden div { border-left: 1px solid #ddd; padding-left: 8px; } \
 #eenheden span.einde { color: gray } \
 #kladblok { clear: both; padding-top: 10px; white-space: pre; } \
-#kladblok span.brw { font-weight: bold; } \
+#kladblok span.brw { font-weight: bold; color: red } \
 #kladblok span.pol { color: blue; } \
 #pol span { color: blue; } \
 #kladblok span.ambu { color: orange; ' + (me.ghor ? '' : 'display: none;') + ' } \
