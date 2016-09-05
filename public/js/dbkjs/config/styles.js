@@ -596,11 +596,22 @@ dbkjs.config.styles = {
             pointRadius: "${myradius}",
             externalGraphic: "${myicon}",
             rotation: "${myrotation}",
-            display: "${mydisplay}"
+            display: "${mydisplay}",
+            graphicOpacity: "${myGraphicOpacity}"
+
         }, {
             context: {
                 myicon: function(feature) {
-                    var img = "images/" + feature.attributes.namespace.toLowerCase() + "/" + feature.attributes.type + ".png";
+                    var icon = feature.attributes.type;
+                    if(feature.attributes.information !== "") {
+                        if(typeof imagesBase64 !== 'undefined') {
+                            var imgi = "images/" + feature.attributes.namespace.toLowerCase() + "/" + icon + "_i.png";
+                            if(typeof imagesBase64[imgi] !== 'undefined') {
+                                icon += "_i";
+                            }
+                        }
+                    }
+                    var img = "images/" + feature.attributes.namespace.toLowerCase() + "/" + icon + ".png";
                     return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + img : imagesBase64[img];
                 },
                 myrotation: function(feature) {
@@ -651,7 +662,16 @@ dbkjs.config.styles = {
                     return dbkjs.scaleStyleValue(12);
                 },
                 myicon: function(feature) {
-                    var img = "images/" + feature.attributes.namespace.toLowerCase() + "/" + feature.attributes.type + ".png";
+                    var icon = feature.attributes.type;
+                    if(feature.attributes.information !== "") {
+                        if(typeof imagesBase64 !== 'undefined') {
+                            var imgi = "images/" + feature.attributes.namespace.toLowerCase() + "/" + icon + "_i.png";
+                            if(typeof imagesBase64[imgi] !== 'undefined') {
+                                icon += "_i";
+                            }
+                        }
+                    }
+                    var img = "images/" + feature.attributes.namespace.toLowerCase() + "/" + icon + ".png";
                     return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + img : imagesBase64[img];
                 }
             }
