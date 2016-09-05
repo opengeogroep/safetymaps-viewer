@@ -272,7 +272,7 @@ IncidentListWindow.prototype.getIncidentEenhedenIcons = function(incident) {
             html += "<span style='color: blue'>" + multiIcon("cab",incident.inzetEenhedenStats.P.total) + "</span>";
         }
     } else {
-        html = htmlB;
+        html = "<span style='color: red'>" + htmlB + "</span>";
         if(incident.inzetEenhedenStats.P.total !== 0) {
             html += "<span style='color: blue'>" + multiIcon("cab",incident.inzetEenhedenStats.P.total) + "</span>";
         }
