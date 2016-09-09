@@ -788,25 +788,33 @@ dbkjs.protocol.jsonDBK = {
                 } else {
                     active = '';
                 }
-                var timestamp = new Date().getTime();
                 var realpath = dbkjs.mediaPath + waarde.URL;
-                //@@var realpath = dbkjs.basePath + 'media/' + waarde.URL;
+                if(dbkjs.util.endsWith(waarde.URL.toLowerCase(), '.jpeg') || dbkjs.util.endsWith(waarde.URL.toLowerCase(), '.jpg') || dbkjs.util.endsWith(waarde.URL.toLowerCase(), '.png')) {
+                    waarde.filetype = 'afbeelding';
+                }
                 if (waarde.filetype === "document" || waarde.filetype === "pdf" || waarde.filetype === "doc" || waarde.filetype === "docx") {
-                    image_carousel_inner.append('<div class="item ' + active +
-                            '"><img src="' + dbkjs.basePath + 'images/missing.gif""><div class="carousel-caption"><a href="' + realpath +
-                            //@@'"><img src="images/missing.gif""><div class="carousel-caption"><a href="' + realpath +
-                            '" target="_blank"><h1><i class="fa fa-download fa-3"></h1></i></a><h3>' +
-                            waarde.naam +
-                            '</h3><a href="' + realpath + '" target="_blank"><h2>' + i18n.t('app.download') + '</h2></a></div></div>');
+                    if(dbkjs.util.endsWith(waarde.URL.toLowerCase(), '.pdf')) {
+                        image_carousel_inner.append(
+                            '<div class="item ' + active + '">' +
+                                '<h3 class="pdf-heading" style="margin: 0; text-align: center; height: 28px"><a href="' + realpath + '" target="_blank">' + waarde.naam + '</a></h3>' +
+                                '<div class="pdf-embed" id="pdf_embed_' + foto_index + '" data-url="' + realpath + '"/>' +
+                            '</div>'
+                        );
+                    } else {
+                        image_carousel_inner.append('<div class="item ' + active +
+                                '"><img src="' + dbkjs.basePath + 'images/missing.gif""><div class="carousel-caption"><a href="' + realpath +
+                                '" target="_blank"><h1><i class="fa fa-download fa-3"></h1></i></a><h3>' +
+                                waarde.naam +
+                                '</h3><a href="' + realpath + '" target="_blank"><h2>' + i18n.t('app.download') + '</h2></a></div></div>');
+                    }
                 } else if (waarde.filetype === "weblink") {
                     image_carousel_inner.append('<div class="item ' + active +
                             '"><img src="' + dbkjs.basePath + 'images/missing.gif""><div class="carousel-caption"><a href="' + waarde.URL +
-                            //@@'"><img src="images/missing.gif""><div class="carousel-caption"><a href="' + waarde.URL +
                             '" target="_blank"><h1><i class="fa fa-external-link fa-3"></i></h1><h2>' +
                             i18n.t('app.hyperlink') + '</h2></a></div></div>'
                             );
                 } else if (waarde.filetype === 'afbeelding') {
-                    image_carousel_inner.append('<div class="item ' + active + '"><img src="' + realpath +
+                    image_carousel_inner.append('<div class="item ' + active + '"><img class="img-full" src="' + realpath +
                             '" onerror="dbkjs.util.mediaError(this);"><div class="carousel-caption"><h3>' +
                             waarde.naam + '</h3></div></div>');
                     feature.images.push(realpath);
@@ -819,9 +827,11 @@ dbkjs.protocol.jsonDBK = {
             image_carousel.append(image_carousel_nav);
             image_carousel.append(image_carousel_inner);
             if (feature.foto.length > 1) {
-                image_carousel.append('<a class="left carousel-control" href="#' + car_id + '" data-slide="prev">' +
+                // Style "bottom: auto" om alleen pijlen bovenaan te hebben, niet
+                // over PDFs heen
+                image_carousel.append('<a class="left carousel-control" style="bottom: auto" href="#' + car_id + '" data-slide="prev">' +
                         '<span class="fa fa-arrow-left"></span></a>');
-                image_carousel.append('<a class="right carousel-control" href="#' + car_id + '" data-slide="next">' +
+                image_carousel.append('<a class="right carousel-control" style="bottom: auto" href="#' + car_id + '" data-slide="next">' +
                         '<span class="fa fa-arrow-right"></span></a>');
             }
             foto_div.append(image_carousel);

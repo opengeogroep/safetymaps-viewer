@@ -443,8 +443,14 @@ dbkjs.documentReady = function () {
             // Put tabs at the bottom after width transition has ended
             var updateContentHeight = function() {
                 var view = dbkjs.dbkInfoPanel.getView();
-                view.find(".tab-content").css("height", view.height() - view.find(".nav-pills").height());
+                var tabContentHeight = view.height() - view.find(".nav-pills").height();
+                view.find(".tab-content").css("height", tabContentHeight);
+
+                view.find(".pdf-embed").css("height", tabContentHeight - 28);
+                view.find(".img-full").css("height", tabContentHeight);
             };
+            $(window).resize(updateContentHeight);
+
             $(dbkjs.dbkInfoPanel).on("show", function() {
                 var event = dbkjs.util.getTransitionEvent();
                 if(event) {
@@ -452,6 +458,15 @@ dbkjs.documentReady = function () {
                 } else {
                     updateContentHeight();
                 }
+
+                $.each(dbkjs.dbkInfoPanel.getView().find(".pdf-embed"), function(i, pdf) {
+                    if(pdf.children.length === 0) {
+                        console.log("embedding PDF " + $(pdf).attr("data-url"));
+                        PDFObject.embed($(pdf).attr("data-url"), pdf, {
+                            PDFJS_URL: "js/libs/pdfjs-1.5.188-minified/web/viewer.html"
+                        });
+                    }
+                });
             });
 
             dbkjs.dbkInfoPanel.getView().append(
