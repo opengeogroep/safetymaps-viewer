@@ -519,8 +519,10 @@ dbkjs.documentReady = function () {
         if(dbkjs.options.enableSplitScreen) {
             $(".main-button-group").css({paddingRight: "10px", width: "auto", float: "right", right: "0%"});
 
-            $(dbkjs).bind('dbkjs_init_complete', function() {
+            var addSplitscreenOption = function() {
                 // Add config option to enable / disable split screen
+
+
                 $($("#settingspanel_b div.row")[0]).append('<div class="col-xs-12"><label><input type="checkbox" id="checkbox_splitScreen" ' + (dbkjs.options.splitScreenChecked ? 'checked' : '') + '>Toon informatie naast de kaart</label></div>');
 
                 $("#checkbox_splitScreen").on('change', function (e) {
@@ -532,7 +534,18 @@ dbkjs.documentReady = function () {
                 $("#c_settings").on('click', function(e) {
                     $(dbkjs).triggerHandler('modal_popup_show', {popupName: 'settings'});
                 });
-            });
+            };
+
+            // XXX timing dependent for #settingspanel_b div.row appears, not
+            // only dbkjs_init_compelete...
+            var check = function() {
+                if($("#settingspanel_b div.row").length === 0) {
+                    window.setTimeout(check, 500);
+                } else {
+                    addSplitscreenOption();
+                }
+            };
+            $(dbkjs).bind('dbkjs_init_complete', check);
         }
 
         $('#infopanel_b').html(dbkjs.options.info);
