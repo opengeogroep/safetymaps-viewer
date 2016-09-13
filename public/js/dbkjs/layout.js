@@ -1,8 +1,8 @@
 /*!
  *  Copyright (c) 2014 Milo van der Linden (milo@dogodigi.net)
- * 
+ *
  *  This file is part of opendispatcher/safetymapsDBK
- *  
+ *
  *  opendispatcher is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
@@ -47,7 +47,8 @@ dbkjs.layout = {
                 '<p><hr/><div class="row"><div class="col-xs-12">' +
                 '<p style="padding-bottom: 15px">' + i18n.t('app.styleSizeAdjust') + '</p>' +
                 '<input id="slider_styleSizeAdjust" style="width: 210px" data-slider-id="styleSizeAdjustSlider" type="text" ' +
-                ' data-slider-min="-4" data-slider-max="10" data-slider-step="1"/>' +
+                ' data-slider-min="' + (dbkjs.options.styleSizeMin ? dbkjs.options.styleSizeMin : '-4') + '" ' +
+                ' data-slider-max="' + (dbkjs.options.styleSizeMax ? dbkjs.options.styleSizeMax : '10') + '" data-slider-step="1"/>' +
                 '</div></div></p>'
                 );
 
@@ -73,7 +74,7 @@ dbkjs.layout = {
         var _relapp = 'Opendispatcher';
         var _reldate = 'N/A';
         var _relremarks = 'The app is running in development mode';
-        
+
         if (window.dbkjsbuildinfo) {
             _relversion = dbkjsbuildinfo.VERSION || 'Development';
             _relapp = dbkjsbuildinfo.APPLICATION || 'Opendispatcher';
