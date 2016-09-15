@@ -105,7 +105,7 @@ dbkjs.modules.connectionmonitor = {
             dataType: "json",
             cache: false,
             ifModified: true,
-            timeout: 3000,
+            timeout: 5000,
             complete: function(jqXHR, textStatus) {
                 if(textStatus === "success" || textStatus === "notmodified") {
                     me.onConnectionOK();
