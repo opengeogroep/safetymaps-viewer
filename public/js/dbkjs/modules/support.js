@@ -171,7 +171,7 @@ dbkjs.modules.support = {
                         }).always(function(data, textStatus, errorThrown) {
                             var message;
                             if(textStatus === "success") {
-                                if(data.result || data.status === "ok") {
+                                if(data.result || data.status === "ok" || data.success) {
                                     message = i18n.t('email.sent');
                                 } else {
                                     message = i18n.t('email.error') + " ";
