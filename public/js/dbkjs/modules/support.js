@@ -167,30 +167,35 @@ dbkjs.modules.support = {
                             type: "POST",
                             url: url,
                             dataType: "json",
-                            data: data,
-                            success: function (result) {
-                                $('#supportpanel_b').html('<p class="bg-info">' + i18n.t('email.sent') + '</p>');
-                                _obj.layer.destroyFeatures();
-                                _obj.drag.deactivate();
-                                dbkjs.map.removeControl(_obj.drag);
-                                dbkjs.hoverControl.activate();
-                                dbkjs.selectControl.activate();
-
-                                setTimeout(function () {
-                                    supportpanel.find(".close").click();
-                                }, 5000);
-                            },
-                            error: function (response) {
-                                $('#supportpanel_b').html('<p class="bg-info">' + i18n.t('email.error') + '</p>');
-                                _obj.layer.destroyFeatures();
-                                _obj.drag.deactivate();
-                                dbkjs.map.removeControl(_obj.drag);
-                                dbkjs.hoverControl.activate();
-                                dbkjs.selectControl.activate();
-                                setTimeout(function () {
-                                    supportpanel.find(".close").click();
-                                }, 5000);
+                            data: data
+                        }).always(function(data, textStatus, errorThrown) {
+                            var message;
+                            if(textStatus === "success") {
+                                if(data.result || data.status === "ok") {
+                                    message = i18n.t('email.sent');
+                                } else {
+                                    message = i18n.t('email.error') + " ";
+                                    if(data.error) {
+                                        message += data.error;
+                                    }
+                                    if(data.message) {
+                                        message += data.message;
+                                    }
+                                }
+                            } else {
+                                message = i18n.t('email.error') + " " + errorThrown;
                             }
+                            $('#supportpanel_b').html('<p class="bg-info">' + message + '</p>');
+
+                            _obj.layer.destroyFeatures();
+                            _obj.drag.deactivate();
+                            dbkjs.map.removeControl(_obj.drag);
+                            dbkjs.hoverControl.activate();
+                            dbkjs.selectControl.activate();
+
+                            setTimeout(function () {
+                                supportpanel.find(".close").click();
+                            }, 5000);
                         });
                         _obj.layer.destroyFeatures();
                         _obj.drag.deactivate();
