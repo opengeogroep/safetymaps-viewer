@@ -10,6 +10,7 @@ dbkjs.modules.search.createSearchGroup = function() {
             '<ul id="search_tabs" class="nav nav-pills" style="margin-bottom: 10px">' +
                     '<li class="active"><a data-toggle="tab" href="#" id="s_dbk"><i class="fa fa-building"></i> ' + i18n.t("search.dbk") + '</a></li>' +
                     '<li><a  data-toggle="tab" href="#" id="s_address"><i class="fa fa-home"></i> ' + i18n.t("search.address") + '</a></li>' +
+                    '<li><a  data-toggle="tab" href="#" id="s_oms"><i class="fa fa-bell"></i> ' + i18n.t("search.oms") + '</a></li>' +
                 '</ul>'
         );
 
