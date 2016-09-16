@@ -153,7 +153,7 @@ create view dbk."Brandweervoorziening" as (
 		tbv.naam as "naamVoorziening",
         p."Rotatie"::double precision as hoek,
         tbv.radius as radius
-    from wfs."Brandweervoorziening" p left join dbk.type_brandweervoorziening tbv on p."Symbol_Type_ID" = tbv.gid
+    from wfs."Brandweervoorziening" p join dbk.type_brandweervoorziening tbv on p."Symbol_Type_ID" = tbv.gid
 );
 grant select on table dbk."Brandweervoorziening" to public;
 create view dbk."GevaarlijkeStof" as (
