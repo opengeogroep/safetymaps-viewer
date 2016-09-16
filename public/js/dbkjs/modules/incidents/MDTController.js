@@ -36,7 +36,7 @@ function MDTController(incidents) {
 
     $(me.button).on('click', function() {
         me.incidentDetailsWindow.show();
-        me.zoomToIncident();
+        //me.zoomToIncident();
     });
 
     me.incidentDetailsWindow = new IncidentDetailsWindow();
@@ -52,6 +52,18 @@ function MDTController(incidents) {
     me.marker = null;
 
     me.xml = null;
+
+    $('.dbk-title').on('click', function() {
+        if(me.selectedDbkFeature) {
+            if(dbkjs.options.feature.identificatie !== me.selectedDbkFeature.attributes.identificatie) {
+                dbkjs.modules.feature.handleDbkOmsSearch(me.selectedDbkFeature);
+            } else {
+                dbkjs.modules.feature.zoomToFeature(me.selectedDbkFeature);
+            }
+        } else {
+            me.zoomToIncident();
+        }
+    });
 
     $(dbkjs).one("dbkjs_init_complete", function() {
         window.setTimeout(function() {
@@ -122,11 +134,7 @@ MDTController.prototype.newIncident = function() {
 
     dbkjs.protocol.jsonDBK.deselect();
 
-    if(this.xml) {
-        var x = $(this.xml).find("IncidentLocatie XYCoordinaten XCoordinaat").text();
-        var y = $(this.xml).find("IncidentLocatie XYCoordinaten YCoordinaat").text();
-        dbkjs.map.setCenter(new OpenLayers.LonLat(x, y), dbkjs.options.zoom);
-    }
+    me.zoomToIncident();
 
     // Try to find DBK
 
@@ -137,6 +145,15 @@ MDTController.prototype.newIncident = function() {
 //    var huisletter = $(adres).find("HnAanduiding").text();
 //    var toevoeging = $(adres).find("HnToevoeging").text();
     var straat = $(adres).find("Straat").text();
+
+    var title = Mustache.render("{{#x}}Straat{{/x}} {{#x}}Huisnummer{{/x}}{{#x}}HnToevoeging{{/x}} {{#x}}HnAanduiding{{/x}}", {
+        x: function() {
+            return function(text, render) {
+                return render($(adres).find(text).text());
+            };
+        }
+    });
+    me.updateBalkrechtsonder(title);
 
     this.selectedDbkFeature = null;
 
@@ -202,6 +219,12 @@ MDTController.prototype.newIncident = function() {
     }
 
     $(me).triggerHandler("new_incident", null);
+};
+
+MDTController.prototype.updateBalkrechtsonder = function(title) {
+    $('.dbk-title')
+        .text(title)
+        .css('visibility', 'visible');
 };
 
 MDTController.prototype.markerClick = function(incident, marker) {
