@@ -146,7 +146,7 @@ MDTController.prototype.newIncident = function() {
 //    var toevoeging = $(adres).find("HnToevoeging").text();
     var straat = $(adres).find("Straat").text();
 
-    var title = Mustache.render("{{#x}}Straat{{/x}} {{#x}}Huisnummer{{/x}}{{#x}}HnToevoeging{{/x}} {{#x}}HnAanduiding{{/x}}", {
+    var title = Mustache.render("{{#x}}Straat{{/x}} {{#x}}Huisnummer{{/x}}{{#x}}HnToevoeging{{/x}} {{#x}}HnAanduiding{{/x}}, {{#x}}Woonplaats{{/x}}", {
         x: function() {
             return function(text, render) {
                 return render($(adres).find(text).text());
