@@ -42,6 +42,8 @@ dbkjs.modules.incidents = {
 
         if(this.options.mdt) {
             this.controller = new MDTController(this);
+        } else if(this.options.falck) {
+            this.controller = new FalckIncidentsController(this);
         } else {
             this.service = new AGSIncidentService(this.options.ags.incidentsUrl, this.options.ags.vehiclePosUrl);
 

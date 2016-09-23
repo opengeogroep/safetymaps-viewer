@@ -38,6 +38,9 @@ IncidentMarkerLayer.prototype.addIncident = function(incident, archief, singleMa
     if(incident.T_X_COORD_LOC && incident.T_Y_COORD_LOC) {
         x = incident.T_X_COORD_LOC;
         y = incident.T_Y_COORD_LOC;
+    } else if(incident.IncidentLocatie) {
+        x = incident.IncidentLocatie.XCoordinaat;
+        y = incident.IncidentLocatie.YCoordinaat;
     } else {
         x = $(incident).find("IncidentLocatie XYCoordinaten XCoordinaat").text();
         y = $(incident).find("IncidentLocatie XYCoordinaten YCoordinaat").text();

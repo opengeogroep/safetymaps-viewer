@@ -103,6 +103,10 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
 IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, compareMode) {
     var me = this;
 
+    if(incident.IncidentNummer) {
+        return me.getIncidentHtmlFalck(incident, showInzet, compareMode);
+    }
+
     var html = '<div style="width: 100%" class="table-responsive incidentDetails">';
     html += '<table class="table table-hover">';
 
@@ -206,6 +210,98 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
             }
             pre += "<span class='" + c + "'>" + AGSIncidentService.prototype.getAGSMoment(k.DTG_KLADBLOK_REGEL).format("HH:mm ") +
                     dbkjs.util.htmlEncode(k.INHOUD_KLADBLOK_REGEL) + "\n</span>";
+
+        });
+        html += "Kladblok:<br/>" + pre + "</pre>";
+        html += '</td></tr>';
+    }
+
+    html += '</table>';
+
+    return html;
+};
+
+IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showInzet, compareMode) {
+    var me = this;
+
+    var html = '<div style="width: 100%" class="table-responsive incidentDetails">';
+    html += '<table class="table table-hover">';
+
+    var d;
+    d = new moment(incident.BrwDisciplineGegevens.StartDTG);
+
+    html += '<tr><td><span>Start incident</span>: </td><td>' + d.format("dddd, D-M-YYYY HH:mm:ss")  + (compareMode ? "" : " (" + d.fromNow() + ")") + '</td></tr>';
+    var a = incident.IncidentLocatie;
+    html += '<tr><td><span>Adres:</span>: </td><td>' + a.NaamLocatie1 + " " + a.Huisnummer + a.HnToevoeging + " " + a.HnAanduiding + '</td></tr>';
+    html += '<tr><td><span>Postcode:</span>: </td><td>' + a.Postcode + '</td></tr>';
+    html += '<tr><td><span>Woonplaats:</span>: </td><td>' + a.Plaatsnaam + '</td></tr>';
+
+    var c = [];
+    var m = incident.BrwDisciplineGegevens;
+    if(m.Meldingsclassificatie1) {
+        c.push(m.Meldingsclassificatie1);
+    }
+    if(m.Meldingsclassificatie2) {
+        c.push(m.Meldingsclassificatie2);
+    }
+    if(m.Meldingsclassificatie3) {
+        c.push(m.Meldingsclassificatie3);
+    }
+
+    html += '<tr><td>Melding classificatie:</td><td>' + c.join(", ") + '</td></tr>';
+
+    if(!incident.Karakteristieken || incident.Karakteristieken.length === 0) {
+        html += '<tr><td>Karakteristieken:</td><td>';
+        html += "<h4>-</h4>";
+    } else {
+        html += '<tr><td colspan="2">Karakteristieken:<br/>';
+        html += '<div class="table-responsive" style="margin: 0px 10px 0px 10px">';
+        html += '<table class="table table-hover" style="width: auto">';
+        $.each(incident.Karakteristieken, function(i, k) {
+            html += "<tr><td>" + dbkjs.util.htmlEncode(k.Naam) + "</td><td>" + dbkjs.util.htmlEncode(k.Waarden.join(", ")) + "</td></tr>";
+        });
+        html += '</table><div/>';
+    }
+    html += '</td></tr>';
+/*
+    if(showInzet) {
+        html += '<tr><td colspan="2" id="eenheden">';
+        var eenhBrw = "", eenhPol = "", eenhAmbu = "";
+        $.each(incident.inzetEenheden, function(i, inzet) {
+            var eenheid = (inzet.CODE_VOERTUIGSOORT ? inzet.CODE_VOERTUIGSOORT : "") + " " + inzet.ROEPNAAM_EENHEID;
+            if(inzet.KAZ_NAAM) {
+                eenheid += " (" + inzet.KAZ_NAAM + ")";
+            }
+            var tooltip;
+            if(!inzet.DTG_EIND_ACTIE) {
+                var start = AGSIncidentService.prototype.getAGSMoment(inzet.DTG_OPDRACHT_INZET);
+                tooltip = "sinds " + start.format("HH:mm") + ", " + start.fromNow();
+            } else {
+                var einde = AGSIncidentService.prototype.getAGSMoment(inzet.DTG_EIND_ACTIE);
+                tooltip = "actie be&euml;indigd om " + einde.format("HH:mm") + ", " + einde.fromNow();
+            }
+
+            var span = (inzet.DTG_EIND_ACTIE ? "<span class='einde' " : "<span ") + " title='" + tooltip + "'>" + dbkjs.util.htmlEncode(eenheid) + "</span><br/>";
+            if(inzet.T_IND_DISC_EENHEID === "B") {
+                eenhBrw += span;
+            } else if(inzet.T_IND_DISC_EENHEID === "P") {
+                eenhPol += span;
+            } else if(inzet.T_IND_DISC_EENHEID === "A") {
+                eenhAmbu += span;
+            }
+        });
+        html += '<div id="brw"><b>Brandweer</b><br/>' + eenhBrw + '</div>';
+        html += '<div id="pol"><b>Politie</b><br/>' + eenhPol + '</div>';
+        html += '<div id="ambu"><b>Ambu</b><br/>' + eenhAmbu + '</div>';
+        html += '</td></tr>';
+    }
+*/
+    if(incident.Kladblokregels && incident.Kladblokregels.length !== 0) {
+        html += '<tr><td id="kladblok" colspan="2">';
+        var pre = "";
+        $.each(incident.Kladblokregels, function(i, k) {
+            pre += "<span class='brw'>" + new moment(k.DTG).format("HH:mm ") +
+                    dbkjs.util.htmlEncode(k.Inhoud) + "\n</span>";
 
         });
         html += "Kladblok:<br/>" + pre + "</pre>";
