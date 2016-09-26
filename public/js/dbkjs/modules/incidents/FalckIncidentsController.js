@@ -174,13 +174,13 @@ FalckIncidentsController.prototype.getInzetInfo = function() {
         me.button.setIcon("bell-o");
 
         data = data[0];
-        var incidenten = data.Incidenten;
+        var incidenten = data && data.Incidenten ? data.Incidenten : null;
         if(incidenten && incidenten.length > 0) {
             console.log("Got incidents for voertuig " + me.voertuignummer + ": " + incidenten);
             me.inzetIncident(incidenten[incidenten.length-1]);
         } else {
             console.log("No incidents for voertuig " + me.voertuignummer);
-            me.incidentDetailsWindow.showError("Laatst informatie opgehaald op " + new moment().format("LLL") + " voor voertuignummer " + responseVoertuignummer + ".");
+            me.incidentDetailsWindow.showError("Geen actief incident voor voertuig " + me.voertuignummer + ". Laatst informatie opgehaald op " + new moment().format("LLL") + ".");
 
             if(me.incidentId) {
                 $("#zoom_extent").click();
@@ -234,15 +234,15 @@ FalckIncidentsController.prototype.inzetIncident = function(incidentId) {
             incident = incident[0];
             me.incident = incident;
             console.log("Got incident data", incident);
-            me.incidentDetailsWindow.data(incident, false);
+            me.incidentDetailsWindow.data(incident, true);
             me.markerLayer.addIncident(incident, false, true);
-            //me.markerLayer.setZIndexFix();
-            //me.updateBalkrechtsonder(XXX);
-            //dbkjs.protocol.jsonDBK.deselect();
-            //me.selectIncidentDBK(incident);
-            //me.zoomToIncident();
-            //me.incidentDetailsWindow.show();
-            //me.enableIncidentUpdates();
+            me.markerLayer.setZIndexFix();
+            me.updateBalkrechtsonder();
+            dbkjs.protocol.jsonDBK.deselect();
+            me.selectIncidentDBK(incident);
+            me.zoomToIncident();
+            me.incidentDetailsWindow.show();
+            me.enableIncidentUpdates();
 
             me.button.setIcon("bell");
 
@@ -253,8 +253,23 @@ FalckIncidentsController.prototype.inzetIncident = function(incidentId) {
 
 
 FalckIncidentsController.prototype.zoomToIncident = function() {
-    if(this.incident && this.incident.T_X_COORD_LOC && this.incident.T_Y_COORD_LOC) {
-        dbkjs.map.setCenter(new OpenLayers.LonLat(this.incident.T_X_COORD_LOC, this.incident.T_Y_COORD_LOC), dbkjs.options.zoom);
+    if(this.incident && this.incident.IncidentLocatie && this.incident.IncidentLocatie.XCoordinaat && this.incident.IncidentLocatie.YCoordinaat) {
+        dbkjs.map.setCenter(new OpenLayers.LonLat(this.incident.IncidentLocatie.XCoordinaat, this.incident.IncidentLocatie.YCoordinaat), dbkjs.options.zoom);
+    }
+};
+
+FalckIncidentsController.prototype.updateBalkrechtsonder = function() {
+    if(!this.incident || !this.incident.IncidentLocatie) {
+        $('.dbk-title')
+            .text("")
+            .css('visibility', 'hidden');
+    } else {
+        var a = this.incident.IncidentLocatie;
+        var title = a.NaamLocatie1 + " " + a.Huisnummer + (a.HnToevoeging ? a.HnToevoeging : "") + " " + (a.HnAanduiding ? a.HnAanduiding : "") + ", " + a.Plaatsnaam;
+
+        $('.dbk-title')
+            .text(title)
+            .css('visibility', 'visible');
     }
 };
 
@@ -284,9 +299,135 @@ FalckIncidentsController.prototype.disableIncidentUpdates = function() {
     }
 };
 
-FalckIncidentsController.prototype.updateBalkrechtsonder = function(title) {
-    $('.dbk-title')
-        .text(title)
-        .css('visibility', 'visible');
+FalckIncidentsController.prototype.updateIncident = function(incidentId) {
+    var me = this;
+    if(this.incidentId !== incidentId) {
+        // Incident cancelled or changed since timeout was set, ignore
+        return;
+    }
+
+    $.ajax(me.options.incidentsUrl + "/incident/" + incidentId, {
+        dataType: "json"
+    })
+    .fail(function(e) {
+        var msg = "Kan incidentinfo niet updaten: " + e;
+        dbkjs.gui.showError(msg);
+        me.incidentDetailsWindow.showError(msg);
+        // Leave incidentDetailsWindow contents with old info
+    })
+    .done(function(incident) {
+        if(me.incidentId !== incidentId) {
+            // Incident cancelled or changed since request was fired off, ignore
+            return;
+        }
+        incident = incident[0];
+        // Always update window, updates moment.fromNow() times
+        me.incidentDetailsWindow.data(incident, true, true);
+
+        // Check if updated, enable alert state if true
+        var oldIncidentHtml = me.incidentDetailsWindow.getIncidentHtml(me.incident, true, true);
+        if(oldIncidentHtml !== me.incidentDetailsWindow.getIncidentHtml(incident, true, true)) {
+            if(!me.incidentDetailsWindow.isVisible()) {
+                me.button.setAlerted(true);
+            }
+
+            me.incident = incident;
+
+            // Possibly update marker position
+            me.markerLayer.addIncident(incident, true, true);
+            me.markerLayer.setZIndexFix();
+
+            me.updateBalkrechtsonder();
+        }
+    });
 };
 
+FalckIncidentsController.prototype.selectIncidentDBK = function(incident) {
+    var me = this;
+
+    if(!dbkjs.modules.feature.features || dbkjs.modules.feature.features.length === 0) {
+        console.log("Waiting for features to be loaded before selecting incident DBK");
+        window.setTimeout(function() {
+            me.selectIncidentDBK(incident);
+        }, 1000);
+        return;
+    }
+
+    var l = incident.IncidentLocatie;
+
+    var postcode = l.Postcode;
+    var woonplaats = l.Plaatsnaam;
+    var huisnummer = l.Huisnummer;
+    var huisletter = l.HnAanduiding;
+    var toevoeging = l.HnToevoeging;
+    var straat = l.NaamLocatie1;
+
+    if(postcode && huisnummer) {
+        console.log("Zoeken naar DBK voor incident postcode=" + postcode + ", plaatsnaam=" + woonplaats +
+                ", huisnummer=" + huisnummer + ", aanduiding/letter=" + huisletter + ", toevoeging=" + toevoeging +
+                ", naam locatie=" + straat);
+
+        var dbk = null;
+        $.each(dbkjs.modules.feature.features, function(index, f) {
+            var fas = f.attributes.adres;
+            if(!fas) {
+                return true;
+            }
+            $.each(fas, function(index, fa) {
+                if(fa) {
+                    var matchPostcode = fa.postcode && postcode === fa.postcode;
+                    var matchHuisnummer = fa.huisnummer && huisnummer === fa.huisnummer;
+
+                    if(matchHuisnummer) {
+                        if(matchPostcode) {
+                            dbk = f;
+                            return false;
+                        }
+                    }
+                }
+            });
+
+            if(dbk) {
+                return false;
+            }
+
+            if(f.attributes.adressen) {
+                $.each(f.attributes.adressen, function(i, a) {
+                    var matchPostcode = a.postcode && a.postcode === postcode;
+                    var matchWoonplaats = a.woonplaats && a.woonplaats === woonplaats;
+                    var matchStraat = a.straatnaam && a.straatnaam === straat;
+                    if(matchPostcode || (matchWoonplaats && matchStraat) && a.nummers) {
+                        console.log("Checking nummers for match DBK " + f.attributes.formeleNaam + ", "  + a.straatnaam + ", " + a.postcode + " " + a.woonplaats);
+                        $.each(a.nummers, function(j, n) {
+                            var parts = n.split("|");
+                            var matchHuisnummer = Number(parts[0]) === huisnummer;
+                            var matchHuisletter = huisletter === null;
+                            var matchToevoeging = toevoeging === null;
+                            if(parts.length > 1) {
+                                matchHuisletter = huisletter === parts[1];
+                            }
+                            if(parts.length > 2) {
+                                matchToevoeging = toevoeging === parts[2];
+                            }
+                            if(matchHuisnummer && matchHuisletter && matchToevoeging) {
+                                console.log("Matched DBK with nummer " + n + ", matchHuisletter=" + matchHuisletter + ",matchToevoeging=" + matchToevoeging);
+                                dbk = f;
+                                return false;
+                            }
+                        });
+                        if(dbk) {
+                            return false;
+                        }
+                    }
+                });
+            }
+            if(dbk) {
+                return false;
+            }
+        });
+
+        if(dbk) {
+            dbkjs.protocol.jsonDBK.process(dbk, null, true);
+        }
+    }
+};

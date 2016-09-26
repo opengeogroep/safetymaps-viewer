@@ -232,9 +232,9 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
 
     html += '<tr><td><span>Start incident</span>: </td><td>' + d.format("dddd, D-M-YYYY HH:mm:ss")  + (compareMode ? "" : " (" + d.fromNow() + ")") + '</td></tr>';
     var a = incident.IncidentLocatie;
-    html += '<tr><td><span>Adres:</span>: </td><td>' + a.NaamLocatie1 + " " + a.Huisnummer + a.HnToevoeging + " " + a.HnAanduiding + '</td></tr>';
-    html += '<tr><td><span>Postcode:</span>: </td><td>' + a.Postcode + '</td></tr>';
-    html += '<tr><td><span>Woonplaats:</span>: </td><td>' + a.Plaatsnaam + '</td></tr>';
+    html += '<tr><td><span>Adres</span>: </td><td>' + (a.NaamLocatie1 ? a.NaamLocatie1 : "") + " " + (a.Huisnummer ? a.Huisnummer : "") + (a.HnToevoeging ? a.HnToevoeging : "") + " " + (a.HnAanduiding ? a.HnAanduiding : "") + '</td></tr>';
+    html += '<tr><td><span>Postcode</span>: </td><td>' + (a.Postcode ? a.Postcode : "-") + '</td></tr>';
+    html += '<tr><td><span>Woonplaats</span>: </td><td>' + (a.Plaatsnaam ? a.Plaatsnaam : "-") + '</td></tr>';
 
     var c = [];
     var m = incident.BrwDisciplineGegevens;
@@ -263,39 +263,20 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
         html += '</table><div/>';
     }
     html += '</td></tr>';
-/*
-    if(showInzet) {
-        html += '<tr><td colspan="2" id="eenheden">';
-        var eenhBrw = "", eenhPol = "", eenhAmbu = "";
-        $.each(incident.inzetEenheden, function(i, inzet) {
-            var eenheid = (inzet.CODE_VOERTUIGSOORT ? inzet.CODE_VOERTUIGSOORT : "") + " " + inzet.ROEPNAAM_EENHEID;
-            if(inzet.KAZ_NAAM) {
-                eenheid += " (" + inzet.KAZ_NAAM + ")";
-            }
-            var tooltip;
-            if(!inzet.DTG_EIND_ACTIE) {
-                var start = AGSIncidentService.prototype.getAGSMoment(inzet.DTG_OPDRACHT_INZET);
-                tooltip = "sinds " + start.format("HH:mm") + ", " + start.fromNow();
-            } else {
-                var einde = AGSIncidentService.prototype.getAGSMoment(inzet.DTG_EIND_ACTIE);
-                tooltip = "actie be&euml;indigd om " + einde.format("HH:mm") + ", " + einde.fromNow();
-            }
 
-            var span = (inzet.DTG_EIND_ACTIE ? "<span class='einde' " : "<span ") + " title='" + tooltip + "'>" + dbkjs.util.htmlEncode(eenheid) + "</span><br/>";
-            if(inzet.T_IND_DISC_EENHEID === "B") {
-                eenhBrw += span;
-            } else if(inzet.T_IND_DISC_EENHEID === "P") {
-                eenhPol += span;
-            } else if(inzet.T_IND_DISC_EENHEID === "A") {
-                eenhAmbu += span;
+    if(showInzet) {
+        html += '<tr><td>Eenheden: </td><td>';
+        $.each(incident.BetrokkenEenheden, function(i, inzet) {
+            if(i > 0) {
+                html += ", ";
+            }
+            if(inzet.Discipline === "B") {
+                html += dbkjs.util.htmlEncode(inzet.Roepnaam);
             }
         });
-        html += '<div id="brw"><b>Brandweer</b><br/>' + eenhBrw + '</div>';
-        html += '<div id="pol"><b>Politie</b><br/>' + eenhPol + '</div>';
-        html += '<div id="ambu"><b>Ambu</b><br/>' + eenhAmbu + '</div>';
         html += '</td></tr>';
     }
-*/
+
     if(incident.Kladblokregels && incident.Kladblokregels.length !== 0) {
         html += '<tr><td id="kladblok" colspan="2">';
         var pre = "";
