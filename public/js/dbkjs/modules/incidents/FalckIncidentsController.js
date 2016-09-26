@@ -358,13 +358,13 @@ FalckIncidentsController.prototype.selectIncidentDBK = function(incident) {
     var postcode = l.Postcode;
     var woonplaats = l.Plaatsnaam;
     var huisnummer = l.Huisnummer;
-    var huisletter = l.HnAanduiding;
-    var toevoeging = l.HnToevoeging;
+//    var huisletter = l.HnAanduiding;
+//    var toevoeging = l.HnToevoeging;
     var straat = l.NaamLocatie1;
 
     if(postcode && huisnummer) {
         console.log("Zoeken naar DBK voor incident postcode=" + postcode + ", plaatsnaam=" + woonplaats +
-                ", huisnummer=" + huisnummer + ", aanduiding/letter=" + huisletter + ", toevoeging=" + toevoeging +
+                ", huisnummer=" + huisnummer + /*", aanduiding/letter=" + huisletter + ", toevoeging=" + toevoeging +*/
                 ", naam locatie=" + straat);
 
         var dbk = null;
@@ -401,16 +401,8 @@ FalckIncidentsController.prototype.selectIncidentDBK = function(incident) {
                         $.each(a.nummers, function(j, n) {
                             var parts = n.split("|");
                             var matchHuisnummer = Number(parts[0]) === huisnummer;
-                            var matchHuisletter = huisletter === null;
-                            var matchToevoeging = toevoeging === null;
-                            if(parts.length > 1) {
-                                matchHuisletter = huisletter === parts[1];
-                            }
-                            if(parts.length > 2) {
-                                matchToevoeging = toevoeging === parts[2];
-                            }
-                            if(matchHuisnummer && matchHuisletter && matchToevoeging) {
-                                console.log("Matched DBK with nummer " + n + ", matchHuisletter=" + matchHuisletter + ",matchToevoeging=" + matchToevoeging);
+                            if(matchHuisnummer) {
+                                console.log("Matched DBK with nummer " + n /*+ ", matchHuisletter=" + matchHuisletter + ",matchToevoeging=" + matchToevoeging*/);
                                 dbk = f;
                                 return false;
                             }
