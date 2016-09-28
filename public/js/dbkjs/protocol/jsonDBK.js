@@ -600,15 +600,20 @@ dbkjs.protocol.jsonDBK = {
             var verdiepingen_div = $('<div class="tab-pane ' + active_tab + '" id="' + id + '"></div>');
             var verdiepingen_table_div = $('<div class="table-responsive"></div>');
             var verdiepingen_table = $('<table id ="floorslist" class="table table-hover"></table>');
-            verdiepingen_table.append('<tr><th>' +
-                    i18n.t('dbk.floor') + '</th></tr>');
+            var verdiepingen_table_header = '<tr><th>' + i18n.t('dbk.floor') + '</th>';
+
+            verdiepingen_table_header += '<th>'+ i18n.t('app.name') +'</th>';
+            verdiepingen_table_header += '</tr>';
+            verdiepingen_table.append(verdiepingen_table_header);
             $.each(feature.verdiepingen, function (verdiepingen_index, waarde) {
                 var myrow;
                 var sterretje = '';
                     if (waarde.type === 'hoofdobject') {
                     sterretje = ' (' + i18n.t('dbk.mainobject') + ')';
                 }
-                if (waarde.identificatie !== feature.identificatie) {
+                var isCurrentObject = waarde.identificatie === feature.identificatie;
+                sterretje += "<td>" + (isCurrentObject ? '<strong><em>' :'') + waarde.informeleNaam + " (" + waarde.formeleNaam + ")"+(isCurrentObject ? '</strong></em>' :'')+ "</td>";
+                if(!isCurrentObject) {
                     //Show the hyperlink!
                     myrow = $('<tr id="' + waarde.identificatie + '">' +
                         '<td>' + waarde.bouwlaag + sterretje + '</td>' +
