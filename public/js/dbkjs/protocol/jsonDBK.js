@@ -66,6 +66,9 @@ dbkjs.protocol.jsonDBK = {
         _obj.layerBrandweervoorziening = new OpenLayers.Layer.Vector("Brandweervoorziening", {
             styleMap: dbkjs.config.styles.brandweervoorziening
         });
+        _obj.layerComm = new OpenLayers.Layer.Vector("Comm", {
+             styleMap: dbkjs.config.styles.comm
+        });
         _obj.layerGevaarlijkestof = new OpenLayers.Layer.Vector("Gevaarlijke stoffen", {
             styleMap: dbkjs.config.styles.gevaarlijkestof
         });
@@ -81,17 +84,20 @@ dbkjs.protocol.jsonDBK = {
             _obj.layerHulplijn,
             _obj.layerToegangterrein,
             _obj.layerBrandweervoorziening,
+            _obj.layerComm,
             _obj.layerGevaarlijkestof,
             _obj.layerTekstobject
         ];
         _obj.selectlayers = [
             _obj.layerBrandweervoorziening,
+            _obj.layerComm,
             _obj.layerBrandcompartiment,
             _obj.layerGevaarlijkestof,
             _obj.layerToegangterrein
         ];
         _obj.hoverlayers = [
             _obj.layerBrandweervoorziening,
+            _obj.layerComm,
             _obj.layerBrandcompartiment,
             _obj.layerGevaarlijkestof,
             _obj.layerHulplijn,
@@ -234,6 +240,7 @@ dbkjs.protocol.jsonDBK = {
         _obj.constructMedia(dbkjs.options.feature);
         _obj.constructFloors(dbkjs.options.feature);
         _obj.constructBrandweervoorziening(dbkjs.options.feature);
+        _obj.constructAfwijkendebinnendekking(dbkjs.options.feature);
         _obj.constructGevaarlijkestof(dbkjs.options.feature);
     },
     info: function (data, noZoom) {
@@ -533,6 +540,73 @@ dbkjs.protocol.jsonDBK = {
             _obj.panel_group.append(bv_div);
             _obj.panel_tabs.append('<li><a data-toggle="tab" href="#' + id + '">' + i18n.t('dbk.prevention') + '</a></li>');
 
+        }
+    },
+    constructAfwijkendebinnendekkingHeader: function() {
+        var comm_table = $('<table id="commlist" class="table table-hover"></table>');
+        comm_table.append(Mustache.render(
+                '<tr>' +
+                    '<th/>' +
+                    '<th>{{#t}}comm.ispossible{{/t}}</th>' +
+                    '<th>{{#t}}comm.alternative{{/t}}</th>' +
+                    '<th>{{#t}}comm.information{{/t}}</th>' +
+                '</tr>', dbkjs.util.mustachei18n()));
+        return comm_table;
+    },
+    constructAfwijkendebinnendekkingRow: function(comm) {
+        var img = 'images/' + comm.namespace.toLowerCase() + '/' +  comm.type + '.png';
+        img = typeof imagesBase64 === 'undefined'  ? dbkjs.basePath + img : imagesBase64[img];
+        return $(Mustache.render(
+            '<tr>' +
+                '<td><img class="thumb" src="{{img}}" alt="{{comm.status}}" title="{{comm.status}}"></td>' +
+                '<td>{{comm.status}}</td>' +
+                '<td>{{comm.alternative}}</td>' +
+                '<td>{{comm.information}}</td>' +
+            '</tr>', {img: img, comm: comm}));
+    },
+    constructAfwijkendebinnendekking: function (feature) {
+        var _obj = dbkjs.protocol.jsonDBK;
+        if (feature.afwijkendebinnendekking) {
+            var id = 'collapse_comm_' + feature.identificatie;
+            var comm_div = $('<div class="tab-pane" id="' + id + '"></div>');
+            var comm_table_div = $('<div class="table-responsive"></div>');
+            var comm_table = _obj.constructAfwijkendebinnendekkingHeader();
+            var features = [];
+            $.each(feature.afwijkendebinnendekking, function (idx, myGeometry) {
+                var information = myGeometry.aanvullendeInformatie || '';
+                var alternative = myGeometry.alternatieveCommInfrastructuur || '';
+                var myFeature = new OpenLayers.Feature.Vector(new OpenLayers.Format.GeoJSON().read(myGeometry.geometry, "Geometry"));
+                myFeature.attributes = {
+                    "possible": myGeometry.dekking,
+                    "alternative": alternative,
+                    "information": information,
+                    "fid": "comm_ft_" + idx
+                };
+                myFeature.attributes.namespace = 'other';
+                myFeature.attributes.type = 'Dekking_nOK';
+                var comm_status = i18n.t('comm.impossible');
+                if(myGeometry.dekking) {
+                    myFeature.attributes.type = 'Dekking_OK';
+                    comm_status = i18n.t('comm.possible');
+                }
+                myFeature.attributes.status = comm_status;
+                var myrow = _obj.constructAfwijkendebinnendekkingRow(myFeature.attributes);
+                myrow.mouseover(function(){
+                    dbkjs.selectControl.select(myFeature);
+                });
+                myrow.mouseout(function(){
+                    dbkjs.selectControl.unselect(myFeature);
+                });
+                comm_table.append(myrow);
+                features.push(myFeature);
+
+            });
+            _obj.layerComm.addFeatures(features);
+            _obj.activateSelect(_obj.layerComm);
+            comm_table_div.append(comm_table);
+            comm_div.append(comm_table_div);
+            _obj.panel_group.append(comm_div);
+            _obj.panel_tabs.append('<li><a data-toggle="tab" href="#' + id + '">' + i18n.t('dbk.comm') + '</a></li>');
         }
     },
     constructGevaarlijkestof: function (feature) {

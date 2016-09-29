@@ -719,5 +719,37 @@ dbkjs.config.styles = {
         }),
         'select': new OpenLayers.Style({}),
         'temporary': new OpenLayers.Style({})
-    })
+    }),
+    comm: new OpenLayers.StyleMap({
+         "default": new OpenLayers.Style({
+             pointRadius: "${myradius}",
+             externalGraphic: "${myicon}"
+         }, {
+             context: {
+                 myradius: function (feature) {
+                     return dbkjs.scaleStyleValue(12);
+                 },
+                 myicon: function (feature) {
+                     var img = "images/" + feature.attributes.namespace + "/" + feature.attributes.type + ".png";
+                     return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + img : imagesBase64[img];
+                 }
+             }
+         }), 'select': new OpenLayers.Style({
+             pointRadius: "${myradius}"
+         }, {
+             context: {
+                 myradius: function (feature) {
+                     return dbkjs.scaleStyleValue(20);
+                 }
+             }
+         }), 'temporary': new OpenLayers.Style({
+             pointRadius: "${myradius}"
+         }, {
+             context: {
+                 myradius: function (feature) {
+                     return dbkjs.scaleStyleValue(25);
+                 }
+             }
+         })
+     })
 };

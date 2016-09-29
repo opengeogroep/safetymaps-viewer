@@ -136,7 +136,7 @@ dbkjs.protocol.jsonDBK.getfeatureinfo = function(e){
         return;
     }
     $('#vectorclickpanel_h').html('<span class="h4"><i class="fa fa-info-circle">&nbsp;' + e.feature.layer.name + '</span>');
-    if(e.feature.layer.name === 'Gevaarlijke stoffen' || e.feature.layer.name === 'Brandweervoorziening') {
+    if(e.feature.layer.name === 'Gevaarlijke stoffen' || e.feature.layer.name === 'Brandweervoorziening' || e.feature.layer.name === 'Comm') {
         var html = $('<div class="table-responsive"></div>'),
             table = '';
         if(e.feature.layer.name === 'Gevaarlijke stoffen') {
@@ -148,6 +148,10 @@ dbkjs.protocol.jsonDBK.getfeatureinfo = function(e){
             table = dbkjs.protocol.jsonDBK.constructBrandweervoorzieningHeader();
             table.append(dbkjs.protocol.jsonDBK.constructBrandweervoorzieningRow(e.feature.attributes));
         };
+        if(e.feature.layer.name === 'Comm') {
+            table = dbkjs.protocol.jsonDBK.constructAfwijkendebinnendekkingHeader();
+            table.append(dbkjs.protocol.jsonDBK.constructAfwijkendebinnendekkingRow(e.feature.attributes));
+        }
         html.append(table);
         $('#vectorclickpanel_b').html('').append(html);
         if(dbkjs.viewmode === 'fullscreen') {
