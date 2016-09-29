@@ -62,7 +62,7 @@ function VehiclePositionLayer() {
                         if(feature.attributes.IncidentID === "") {
                             return "images/zwaailicht-grijs.png";
                         }
-                        return feature.attributes.Status === 1 ? "images/zwaailicht-uit.png" : "images/zwaailicht.gif";
+                        return "images/zwaailicht-uit.png";
                     }
                 }
             })
