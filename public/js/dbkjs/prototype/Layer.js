@@ -252,9 +252,10 @@ dbkjs.Layer = dbkjs.Class({
     panel: function (response) {
         _obj = this;
         //verwerk de featureinformatie
-        g = new OpenLayers.Format.GML.v3();
+        g = new OpenLayers.Format.WMSGetFeatureInfo();
 
-        features = g.read(response.responseText);
+        features = g.read($.parseXML(response.responseText));
+        console.log("Feature info for layer "+ _obj.layer.name + ": "+ features.length + " features returned", response.responseText);
         if (features.length > 0) {
             html = '<div class="table-responsive"><table class="table table-hover">';
             for (var feat in features) {
@@ -267,14 +268,19 @@ dbkjs.Layer = dbkjs.Class({
                 }
             }
             html += '</table></div>';
-            dbkjs.util.appendTab(dbkjs.wms_panel.attr("id"), _obj.layer.name, html, true, _obj.id + '_pn');
             if(dbkjs.viewmode === "fullscreen") {
-                dbkjs.util.getModalPopup('wmsclickpanel').show();
+                $('#vectorclickpanel_b').html(html);
+                $('#vectorclickpanel').show();
             } else {
+                dbkjs.util.appendTab(dbkjs.wms_panel.attr("id"), _obj.layer.name, html, true, _obj.id + '_pn');
                 $('#wmsclickpanel').show();
             }
         } else {
-            dbkjs.util.removeTab(dbkjs.wms_panel.attr("id"), _obj.id + '_pn');
+            if(dbkjs.viewmode === "fullscreen") {
+                $('#vectorclickpanel').hide();
+            } else {
+                dbkjs.util.removeTab(dbkjs.wms_panel.attr("id"), _obj.id + '_pn');
+            }
         }
     }
 });
