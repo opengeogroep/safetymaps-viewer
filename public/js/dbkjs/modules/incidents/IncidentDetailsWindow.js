@@ -309,6 +309,8 @@ IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInze
 
     var template = "{{#separator}}<tr><td>&nbsp;</td><td></td></tr>{{/separator}}<tr><td><span>{{label}}</span>: </td><td>{{value}}</td></tr>";
 
+    html += Mustache.render(template, { label: "Nummer", value: $(incident).find("IncidentNr").text()});
+
     var startS = $(incident).find("StartDatumTijd").text();
     var v = "";
     if(startS !== "") {
