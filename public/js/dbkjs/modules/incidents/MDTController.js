@@ -92,6 +92,9 @@ MDTController.prototype.getMDTInfo = function() {
     })
     .done(function(xml, textStatus, jqXHR) {
         if(textStatus === "notmodified") {
+            if(me.xml) {
+                me.incidentDetailsWindow.data(me.xml, true, true, true, jqXHR.getResponseHeader("Last-Modified"));
+            }
             return;
         }
         var first = me.xml === null;
