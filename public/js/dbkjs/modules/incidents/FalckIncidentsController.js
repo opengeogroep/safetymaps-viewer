@@ -105,6 +105,8 @@ FalckIncidentsController.prototype.addConfigControls = function() {
     });
     $("#settingspanel").on('hidden.bs.modal', function() {
         me.setVoertuignummer($("#input_voertuignummer").val());
+        $("#input_voertuignummer").attr("disabled", "disabled");
+        $("#input_voertuignummer").css("background-color", "transparent");
     });
 
     $("#input_voertuignummer").val(me.voertuignummer);
