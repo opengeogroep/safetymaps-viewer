@@ -91,6 +91,28 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
     }
 };
 
+IncidentDetailsWindow.prototype.getIncidentAdres = function(incident, isXml) {
+    if(isXml) {
+        // MDT XML
+        var adres = $(incident).find("IncidentLocatie Adres");
+        return Mustache.render("{{#x}}Straat{{/x}} {{#x}}Huisnummer{{/x}}{{#x}}HnToevoeging{{/x}} {{#x}}HnAanduiding{{/x}}", {
+            x: function() {
+                return function(text, render) {
+                    return render($(adres).find(text).text());
+                };
+            }
+        });
+    } else if (incident.IncidentNummer) {
+        // Falck JSON
+        var a = incident.IncidentLocatie;
+        return Mustache.render("{{NaamLocatie1}} {{Huisnummer}} {{HnToevoeging}} {{HnAanduiding}} {{Letter}} {{Paalnummer}}", a);
+    } else {
+        // Oracle GMS replica AGS JSON
+        return incident.T_GUI_LOCATIE;
+    }
+};
+
+
 /**
  * Get HTML to display incident. Boolean specificies whether to leave out time
  * dependent information ('1 minute ago') to compare changes.
@@ -230,11 +252,14 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
     var d;
     d = new moment(incident.BrwDisciplineGegevens.StartDTG);
 
-    html += '<tr><td><span>Start incident</span>: </td><td>' + d.format("dddd, D-M-YYYY HH:mm:ss")  + (compareMode ? "" : " (" + d.fromNow() + ")") + '</td></tr>';
+    html += '<tr><td>Start incident: </td><td>' + d.format("dddd, D-M-YYYY HH:mm:ss")  + (compareMode ? "" : " (" + d.fromNow() + ")") + '</td></tr>';
     var a = incident.IncidentLocatie;
-    html += '<tr><td><span>Adres</span>: </td><td>' + (a.NaamLocatie1 ? a.NaamLocatie1 : "") + " " + (a.Huisnummer ? a.Huisnummer : "") + (a.HnToevoeging ? a.HnToevoeging : "") + " " + (a.HnAanduiding ? a.HnAanduiding : "") + '</td></tr>';
-    html += '<tr><td><span>Postcode</span>: </td><td>' + (a.Postcode ? a.Postcode : "-") + '</td></tr>';
-    html += '<tr><td><span>Woonplaats</span>: </td><td>' + (a.Plaatsnaam ? a.Plaatsnaam : "-") + '</td></tr>';
+    html += '<tr><td>Adres/locatie: </td><td>' + me.getIncidentAdres(incident, false) + '</td></tr>';
+    if(a.NaamLocatie2) {
+        html += '<tr><td></td><td>' + dbkjs.util.htmlEncode(a.NaamLocatie2) + '</td></tr>';
+    }
+    html += '<tr><td>Postcode: </td><td>' + (a.Postcode ? a.Postcode : "-") + '</td></tr>';
+    html += '<tr><td>Woonplaats: </td><td>' + (a.Plaatsnaam ? a.Plaatsnaam : "-") + '</td></tr>';
 
     var c = [];
     var m = incident.BrwDisciplineGegevens;
