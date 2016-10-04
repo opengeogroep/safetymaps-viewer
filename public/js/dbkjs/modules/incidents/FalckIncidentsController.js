@@ -82,10 +82,27 @@ function FalckIncidentsController(incidents) {
 FalckIncidentsController.prototype.addConfigControls = function() {
     var me = this;
     var incidentSettings = $("<div><h4>Meldkamerkoppeling</h4><p/>" +
-            "<div class='row'><div class='col-xs-12'>Voertuignummer: <input type='text' id='input_voertuignummer'>" +
-            "</div></div><p/><p/><hr>");
+            "<div class='row'><div class='col-xs-12'>Voertuignummer: <input type='text' disabled id='input_voertuignummer'>" +
+            "<button class='btn btn-primary' style='margin-left: 10px' id='btn_enable_voertuignummer'>Wijzigen</button></div></div><p/><p/><hr>");
     incidentSettings.insertAfter($("#settingspanel_b hr:last"));
 
+    $("#btn_enable_voertuignummer").on('click', function() {
+        var input = $("#input_voertuignummer");
+        if(input.prop("disabled")) {
+            if(me.options.voertuignummerCode) {
+                var p = prompt(me.options.voertuignummerCodeText)
+                if(p !== me.options.voertuignummerCode) {
+                    if(p !== null) {
+                        alert('Ongeldige code');
+                    }
+                    return;
+                }
+            }
+            input.removeAttr("disabled")
+            input.css("background-color", "");
+            input.focus();
+        }
+    });
     $("#settingspanel").on('hidden.bs.modal', function() {
         me.setVoertuignummer($("#input_voertuignummer").val());
     });
@@ -259,16 +276,14 @@ FalckIncidentsController.prototype.zoomToIncident = function() {
 };
 
 FalckIncidentsController.prototype.updateBalkrechtsonder = function() {
+    var me = this;
     if(!this.incident || !this.incident.IncidentLocatie) {
         $('.dbk-title')
             .text("")
             .css('visibility', 'hidden');
     } else {
-        var a = this.incident.IncidentLocatie;
-        var title = a.NaamLocatie1 + " " + a.Huisnummer + (a.HnToevoeging ? a.HnToevoeging : "") + " " + (a.HnAanduiding ? a.HnAanduiding : "") + ", " + a.Plaatsnaam;
-
         $('.dbk-title')
-            .text(title)
+            .text(me.incidentDetailsWindow.getIncidentAdres(me.incident, false))
             .css('visibility', 'visible');
     }
 };
@@ -320,9 +335,23 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
             // Incident cancelled or changed since request was fired off, ignore
             return;
         }
+        if(incident.length === 0) {
+            me.geenInzet(true);
+            return;
+        }
         incident = incident[0];
+        me.button.setIcon("bell");
+
         // Always update window, updates moment.fromNow() times
         me.incidentDetailsWindow.data(incident, true, true);
+
+        // Check if position updated
+        if(incident.IncidentLocatie && incident.IncidentLocatie.XCoordinaat && incident.IncidentLocatie.YCoordinaat
+        && (me.incident.IncidentLocatie.XCoordinaat !== incident.IncidentLocatie.XCoordinaat
+            || me.incident.IncidentLocatie.YCoordinaat !== incident.IncidentLocatie.YCoordinaat)) {
+
+            me.zoomToIncident();
+        }
 
         // Check if updated, enable alert state if true
         var oldIncidentHtml = me.incidentDetailsWindow.getIncidentHtml(me.incident, true, true);
