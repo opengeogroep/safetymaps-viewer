@@ -603,7 +603,7 @@ dbkjs.config.styles = {
             context: {
                 myicon: function(feature) {
                     var icon = feature.attributes.type;
-                    if(feature.attributes.information !== "") {
+                    if(feature.attributes.information && feature.attributes.information !== "") {
                         if(typeof imagesBase64 !== 'undefined') {
                             var imgi = "images/" + feature.attributes.namespace.toLowerCase() + "/" + icon + "_i.png";
                             if(typeof imagesBase64[imgi] !== 'undefined') {
