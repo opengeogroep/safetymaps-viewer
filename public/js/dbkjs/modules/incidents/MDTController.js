@@ -29,7 +29,6 @@
  */
 function MDTController(incidents) {
     var me = this;
-    me.first = true;
 
     me.button = new AlertableButton("btn_incident", "Incident", "bell-o");
     me.button.getElement().prependTo('.layertoggle-btn-group');
@@ -75,31 +74,16 @@ function MDTController(incidents) {
 MDTController.prototype.getMDTInfo = function() {
     var me = this;
 
-    var options = { dataType: "xml" };
-
-    if(me.first) {
-        me.first = false;
-        options.cache = false;
-    } else {
-        options.ifModified = true;
-    }
-
-    $.ajax("/gms.xml", options)
+    $.ajax("/gms.xml", { dataType: "xml", cache: false })
     .always(function() {
         window.setTimeout(function() {
             me.getMDTInfo();
         }, 3000);
     })
     .done(function(xml, textStatus, jqXHR) {
-        if(textStatus === "notmodified") {
-            if(me.xml) {
-                me.incidentDetailsWindow.data(me.xml, true, true, true, jqXHR.getResponseHeader("Last-Modified"));
-            }
-            return;
-        }
         var first = me.xml === null;
         me.xml = xml;
-        me.incidentDetailsWindow.data(xml, true, true, true, jqXHR.getResponseHeader("Last-Modified"));
+        me.incidentDetailsWindow.data(xml, true, true, true);
         var newHtml = me.incidentDetailsWindow.getXmlIncidentHtml(xml, true, true);
         var newId = $(xml).find("Incident IncidentNr").text();
         me.markerLayer.addIncident(xml, false, true);

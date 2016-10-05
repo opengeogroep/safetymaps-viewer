@@ -73,7 +73,7 @@ table td { padding: 3px !important; } \
  * @param {boolean} restoreScrollTop
  * @returns {undefined}
  */
-IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScrollTop, isXml, lastModified) {
+IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScrollTop, isXml) {
     var v = this.getView();
     var scrollTop = v.scrollTop();
 
@@ -84,7 +84,7 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
         return;
     }
 
-    v.html(isXml ? this.getXmlIncidentHtml(incident, showInzet, false, lastModified) : this.getIncidentHtml(incident, showInzet, false));
+    v.html(isXml ? this.getXmlIncidentHtml(incident, showInzet, false) : this.getIncidentHtml(incident, showInzet, false));
 
     if(restoreScrollTop) {
         v.scrollTop(scrollTop);
@@ -328,7 +328,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
  *   parameter, not other factors such as current time
  * @returns {undefined}
  */
-IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInzet, compareMode, lastModified) {
+IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInzet, compareMode) {
     var html = '<div style="width: 100%" class="table-responsive incidentDetails">';
     html += '<table class="table table-hover">';
 
@@ -337,14 +337,17 @@ IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInze
     html += Mustache.render(template, { label: "Nummer", value: $(incident).find("IncidentNr").text()});
 
     var startS = $(incident).find("StartDatumTijd").text();
-    var v = "";
+    var d = null;
     if(startS !== "") {
-        var d = moment(startS);
-        v = d.format("dddd, D-M-YYYY HH:mm:ss") + (compareMode ? "" : " (" + d.fromNow() + ")");
-    } else if(lastModified) {
-        var d = moment(lastModified);
-        v = d.format("dddd, D-M-YYYY HH:mm:ss") + (compareMode ? "" : " (" + d.fromNow() + ")");
+        d = moment(startS);
+    } else {
+        var date = $(incident).find("XmlMsgKop MsgDate").text();
+        var time = $(incident).find("XmlMsgKop MsgTime").text();
+        if(date !== "" && time !== "") {
+            d = moment(date + " " + time);
+        }
     }
+    var v = d === null ? "" : d.format("dddd, D-M-YYYY HH:mm:ss") + (compareMode ? "" : " (" + d.fromNow() + ")");
     html += Mustache.render(template, { label: "Start incident", value: v});
 
     var adres = $(incident).find("IncidentLocatie Adres");
