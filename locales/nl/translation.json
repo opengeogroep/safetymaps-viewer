@@ -272,7 +272,7 @@
      },
      "comm":{
         "ispossible": "Dekking",
-        "possible": "Beperkt",
+        "possible": "Aanwezig",
         "impossible": "Geen",
         "alternative": "Alternatief",
         "information": "Opmerkingen"
