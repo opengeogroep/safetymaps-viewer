@@ -18,25 +18,6 @@
  *
  */
 
-dbkjs.config.styles.brandweervoorziening.styles.default.context.mydisplay = function(feature) {
-    return dbkjs.modules.vrhinzetbalk.isBrandweervoorzieningHidden(feature) ? "none" : "true";
-};
-
-dbkjs.config.styles.hulplijn.styles.default.defaultStyle.display = "${display}";
-dbkjs.config.styles.hulplijn.styles.default.propertyStyles.display = true;
-dbkjs.config.styles.hulplijn1.styles.default.defaultStyle.display = "${display}";
-dbkjs.config.styles.hulplijn1.styles.default.propertyStyles.display = true;
-dbkjs.config.styles.hulplijn2.styles.default.defaultStyle.display = "${display}";
-dbkjs.config.styles.hulplijn2.styles.default.propertyStyles.display = true;
-
-function hulplijnDisplay(feature) {
-    return dbkjs.modules.vrhinzetbalk.isHulplijnHidden(feature) ? "none" : "true";
-};
-dbkjs.config.styles.hulplijn.styles.default.context.display = hulplijnDisplay;
-dbkjs.config.styles.hulplijn1.styles.default.context.display = hulplijnDisplay;
-dbkjs.config.styles.hulplijn2.styles.default.context.display = hulplijnDisplay;
-
-
 var dbkjs = dbkjs || {};
 window.dbkjs = dbkjs;
 dbkjs.modules = dbkjs.modules || {};
@@ -190,8 +171,29 @@ dbkjs.modules.vrhinzetbalk = {
         });
         return { olLayers: olLayers, organisationLayers: organisationLayers };
     },
+    rewriteStyles: function() {
+        dbkjs.config.styles.brandweervoorziening.styles.default.context.mydisplay = function(feature) {
+            return dbkjs.modules.vrhinzetbalk.isBrandweervoorzieningHidden(feature) ? "none" : "true";
+        };
+
+        dbkjs.config.styles.hulplijn.styles.default.defaultStyle.display = "${display}";
+        dbkjs.config.styles.hulplijn.styles.default.propertyStyles.display = true;
+        dbkjs.config.styles.hulplijn1.styles.default.defaultStyle.display = "${display}";
+        dbkjs.config.styles.hulplijn1.styles.default.propertyStyles.display = true;
+        dbkjs.config.styles.hulplijn2.styles.default.defaultStyle.display = "${display}";
+        dbkjs.config.styles.hulplijn2.styles.default.propertyStyles.display = true;
+
+        function hulplijnDisplay(feature) {
+            return dbkjs.modules.vrhinzetbalk.isHulplijnHidden(feature) ? "none" : "true";
+        };
+        dbkjs.config.styles.hulplijn.styles.default.context.display = hulplijnDisplay;
+        dbkjs.config.styles.hulplijn1.styles.default.context.display = hulplijnDisplay;
+        dbkjs.config.styles.hulplijn2.styles.default.context.display = hulplijnDisplay;
+    },
     register: function() {
         var me = this;
+
+        me.rewriteStyles();
 
         $(dbkjs).one("dbkjs_init_complete", function() {
             if(dbkjs.modules.incidents && dbkjs.modules.incidents.controller) {
