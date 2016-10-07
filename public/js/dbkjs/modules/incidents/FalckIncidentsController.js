@@ -306,7 +306,7 @@ FalckIncidentsController.prototype.updateBalkrechtsonder = function() {
             if(e.Discipline !== "B" || me.voertuignummer === e.Roepnaam) {
                 return;
             }
-            if(displayEenheden.length === 1) {
+            if(displayEenheden.length === 4) {
                 extraCount++;
             } else {
                 displayEenheden.push(e.Roepnaam);
