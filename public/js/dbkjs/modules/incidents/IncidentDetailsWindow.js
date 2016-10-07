@@ -101,11 +101,11 @@ IncidentDetailsWindow.prototype.getIncidentAdres = function(incident, isXml) {
                     return render($(adres).find(text).text());
                 };
             }
-        });
+        }).trim();
     } else if (incident.IncidentNummer) {
         // Falck JSON
         var a = incident.IncidentLocatie;
-        return Mustache.render("{{NaamLocatie1}} {{Huisnummer}} {{HnToevoeging}} {{HnAanduiding}} {{Letter}} {{Paalnummer}}", a);
+        return Mustache.render("{{NaamLocatie1}} {{Huisnummer}}{{Letter}} {{HnToevoeging}} {{HnAanduiding}} {{Paalnummer}}", a).trim();
     } else {
         // Oracle GMS replica AGS JSON
         return incident.T_GUI_LOCATIE;
@@ -273,6 +273,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
         c.push(m.Meldingsclassificatie3);
     }
 
+    html += '<tr><td>Prioriteit:</td><td>' + m.Prioriteit + '</td></tr>';
     html += '<tr><td>Melding classificatie:</td><td>' + c.join(", ") + '</td></tr>';
 
     if(!incident.Karakteristieken || incident.Karakteristieken.length === 0) {

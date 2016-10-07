@@ -284,8 +284,43 @@ FalckIncidentsController.prototype.updateBalkrechtsonder = function() {
             .text("")
             .css('visibility', 'hidden');
     } else {
+        var c = [];
+        var m = me.incident.BrwDisciplineGegevens;
+        if(m.Meldingsclassificatie1) {
+            c.push(m.Meldingsclassificatie1);
+        }
+        if(m.Meldingsclassificatie2) {
+            c.push(m.Meldingsclassificatie2);
+        }
+        if(m.Meldingsclassificatie3) {
+            c.push(m.Meldingsclassificatie3);
+        }
+
+        var title = "<i class='fa fa-bell'/> P " + me.incident.BrwDisciplineGegevens.Prioriteit + " " + c.join(", ") + " - " +
+                dbkjs.util.htmlEncode(me.incidentDetailsWindow.getIncidentAdres(me.incident, false)) +
+                " " + dbkjs.util.htmlEncode(me.incident.IncidentLocatie.Plaatsnaam);
+
+        var displayEenheden = [];
+        var extraCount = 0;
+        $.each(me.incident.BetrokkenEenheden, function(i, e) {
+            if(e.Discipline !== "B" || me.voertuignummer === e.Roepnaam) {
+                return;
+            }
+            if(displayEenheden.length === 1) {
+                extraCount++;
+            } else {
+                displayEenheden.push(e.Roepnaam);
+            }
+        });
+        if(displayEenheden.length > 0) {
+            title += ", " + displayEenheden.join(" ");
+            if(extraCount > 0) {
+                title += " <b>+" + extraCount + "</b>";
+            }
+        }
+
         $('.dbk-title')
-            .text(me.incidentDetailsWindow.getIncidentAdres(me.incident, false))
+            .html(title)
             .css('visibility', 'visible');
     }
 };
@@ -342,33 +377,40 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
             return;
         }
         incident = incident[0];
+        var oldIncident = me.incident;
+        me.incident = incident;
         me.button.setIcon("bell");
 
         // Always update window, updates moment.fromNow() times
         me.incidentDetailsWindow.data(incident, true, true);
 
-        // Check if position updated
-        if(incident.IncidentLocatie && incident.IncidentLocatie.XCoordinaat && incident.IncidentLocatie.YCoordinaat
-        && (me.incident.IncidentLocatie.XCoordinaat !== incident.IncidentLocatie.XCoordinaat
-            || me.incident.IncidentLocatie.YCoordinaat !== incident.IncidentLocatie.YCoordinaat)) {
-
-            me.zoomToIncident();
-        }
-
         // Check if updated, enable alert state if true
-        var oldIncidentHtml = me.incidentDetailsWindow.getIncidentHtml(me.incident, true, true);
+        var oldIncidentHtml = me.incidentDetailsWindow.getIncidentHtml(oldIncident, true, true);
         if(oldIncidentHtml !== me.incidentDetailsWindow.getIncidentHtml(incident, true, true)) {
             if(!me.incidentDetailsWindow.isVisible()) {
                 me.button.setAlerted(true);
             }
 
-            me.incident = incident;
-
             // Possibly update marker position
-            me.markerLayer.addIncident(incident, true, true);
+            me.markerLayer.addIncident(incident, false, true);
             me.markerLayer.setZIndexFix();
 
             me.updateBalkrechtsonder();
+        }
+
+        // Check if position updated
+        var oldX = null, oldY = null;
+        if(oldIncident.IncidentLocatie) {
+            oldX = oldIncident.IncidentLocatie.XCoordinaat;
+            oldY = oldIncident.IncidentLocatie.YCoordinaat;
+        }
+
+        if(incident.IncidentLocatie
+        && (incident.IncidentLocatie.XCoordinaat !== oldX
+            || incident.IncidentLocatie.YCoordinaat !== oldY)) {
+
+            // This function uses coords in me.incident, updated in previous if stmt
+            me.zoomToIncident();
         }
     });
 };
