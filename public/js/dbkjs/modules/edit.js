@@ -65,13 +65,15 @@ dbkjs.editStyles = {
 dbkjs.modules.edit = {
     id: "dbk.module.edit",
     active: null,
-    options: null,
     catchClick: null,
     layer: null,
     register: function() {
         var me = this;
 
-        me.options = dbkjs.options.edit;
+        me.options = $.extend({
+            showMeasureButtons: true
+        }, me.options);
+
         me.active = false;
         me.catchClick = false;
 
@@ -118,6 +120,10 @@ dbkjs.modules.edit = {
         me.plusButton.div.show();
         me.selectButton.div.show();
         me.minusButton.div.show();
+        if(me.options.showMeasureButtons) {
+            me.measureDistanceButton.div.show();
+            me.measureAreaButton.div.show();
+        }
 
         $(me).triggerHandler("activate");
     },
@@ -134,6 +140,12 @@ dbkjs.modules.edit = {
         me.selectButton.deactivate();
         me.minusButton.deactivate();
         me.properties.hide();
+        if(me.options.showMeasureButtons) {
+            me.measureDistanceButton.div.hide();
+            me.measureAreaButton.div.hide();
+            me.measureDistanceButton.deactivate();
+            me.measureAreaButton.deactivate();
+        }
 
         $("#mapc1map1").css("cursor", "auto");
         me.catchClick = false;
@@ -236,7 +248,7 @@ dbkjs.modules.edit = {
         me.editBox = $("<div/>")
                 .attr("id", "edit-box")
                 .addClass("edit-box panel")
-                .attr("style", "position: absolute; opacity: 1.0; left: 80px; bottom: 44px; width: 60px; height: 171px; z-index: 2998; border-color: rgb(104,104,104);")
+                .attr("style", "position: absolute; opacity: 1.0; left: 80px; bottom: 44px; width: 60px; height: " + (me.options.showMeasureButtons ? "280" : "171") + "px; z-index: 2998; border-color: rgb(104,104,104);")
                 .hide()
                 .appendTo("#mapc1map1");
 
@@ -292,6 +304,36 @@ dbkjs.modules.edit = {
                 me.drag.deactivate();
             }
         });
+        if(me.options.showMeasureButtons) {
+            me.measureDistanceButton = me.createButton("measureDistance", "Meet afstand", 86, 288, "fa-arrows-v fa-rotate-45");
+            me.measureDistanceButton.div.hide();
+            $(me.measureDistanceButton).on("click", function() {
+                if(dbkjs.modules.measure.distance_control.active) {
+                    me.measureDistanceButton.deactivate();
+                } else {
+                    me.measureDistanceButton.activate();
+                    me.minusButton.deactivate();
+                    me.plusButton.deactivate();
+                    me.selectButton.deactivate();
+                    me.properties.hide();
+                }
+                dbkjs.modules.measure.toggleMeasureDistance();
+            });
+            me.measureAreaButton = me.createButton("measureArea", "Meet oppervlakte", 86, 234, "fa-bookmark-o fa-rotate-45");
+            me.measureAreaButton.div.hide();
+            $(me.measureAreaButton).on("click", function() {
+                if(dbkjs.modules.measure.area_control.active) {
+                    me.measureAreaButton.deactivate();
+                } else {
+                    me.measureAreaButton.activate();
+                    me.minusButton.deactivate();
+                    me.plusButton.deactivate();
+                    me.selectButton.deactivate();
+                    me.properties.hide();
+                }
+                dbkjs.modules.measure.toggleMeasureArea();
+            });
+        }
 
         // Create symbol properties window
 
