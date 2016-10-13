@@ -83,3 +83,22 @@
     overflow: hidden;
     margin-top: 5px
 }
+
+#symbolpicker {
+    bottom:0;
+    left:0;
+    margin-bottom:0;
+    top: 150px;
+}
+
+#symbolpicker .panel-footer {
+    display: none;
+}
+
+#symbolpicker h3:first-child {
+    margin-top: 0;
+}
+
+#symbolpicker .symbol-btn {
+    margin-left: 10px;
+}

@@ -68,6 +68,34 @@ dbkjs.modules.edit = {
     layer: null,
     buttons: [],
 
+    symbols: [
+        {
+            "id": "symbol1",
+            "image": "images/nen1414/Tb01.png",
+            "name": "Brandblusser",
+            "category": "categorie 1",
+            "nen1414id": "nen1414_1"
+        },
+        {
+            "id": "symbol2",
+            "image": "images/nen1414/Tb02.png",
+            "name": "Brandslang",
+            "category": "categorie 2",
+            "nen1414id": "nen1414_2"
+        },
+        {
+            "id": "symbol3",
+            "image": "images/nen1414/Tb1.008.png",
+            "name": "Opstelplaats eerste blusvoertuig",
+            "category": "categorie 2",
+            "nen1414id": "nen1414_3"
+        }
+    ],
+
+    mode: "",
+    symbolpicker: null,
+    activeSymbol: null,
+
     register: function() {
         var me = this;
 
@@ -110,6 +138,9 @@ dbkjs.modules.edit = {
                 oldOnClick(e);
             }
         };
+
+        this.symbolpicker = this.createSymbolPicker();
+        $("#edit-symbol-buttons").on("click", ".symbol-btn", this.setActiveSymbol.bind(this));
     },
 
     activate: function() {
@@ -129,10 +160,12 @@ dbkjs.modules.edit = {
 
     mapClick: function(lonLat) {
         var me = this;
-        var feature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(lonLat.lon, lonLat.lat), {
-            graphic: $("#edit-symbol-buttons .btn-primary img").attr("src")
-        });
-        me.layer.addFeatures(feature);
+        if(this.mode === "add") {
+            var feature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(lonLat.lon, lonLat.lat), {
+                graphic: me.activeSymbol.image
+            });
+            me.layer.addFeatures(feature);
+        }
     },
 
     loadStylesheet: function() {
@@ -147,6 +180,74 @@ dbkjs.modules.edit = {
             link.media = 'all';
             head.appendChild(link);
         }
+    },
+
+    symbolsToCategories: function() {
+        var categories = {};
+        var symbol;
+        for(var i = 0; i < this.symbols.length; i++) {
+            symbol = this.symbols[i];
+            if(!categories.hasOwnProperty(symbol.category)) {
+                categories[symbol.category] = [];
+            }
+            categories[symbol.category].push(symbol);
+        }
+        return categories;
+    },
+
+    createSymbolPicker: function() {
+        var symbolpicker = dbkjs.util.createDialog(
+            'symbolpicker',
+            'Symbolenkiezer'
+        );
+        var categories = this.symbolsToCategories();
+        var html = [];
+        for(var category in categories) if(categories.hasOwnProperty(category)) {
+            html.push('<h3>', category, '</h3>');
+            for(var i = 0; i < categories[category].length; i++) {
+                html.push(this.createSymbol(categories[category][i]));
+            }
+        }
+        symbolpicker.find(".panel-body")
+            .on("click", ".symbol-btn", this.setActiveSymbol.bind(this))
+            .html(html.join(''));
+        $("body").append(symbolpicker);
+        return symbolpicker;
+    },
+
+    createSymbol: function(symbol) {
+        return [
+            '<button class="btn symbol-btn" data-symbolid="', symbol.id, '">',
+                '<img width="24" src="', symbol.image,'">',
+            '</button>'
+        ].join("");
+    },
+
+    getSymbol: function(id) {
+        for(var i = 0; i < this.symbols.length; i++) {
+            if("" + this.symbols[i].id === "" + id) {
+                return this.symbols[i];
+            }
+        }
+        return null;
+    },
+
+    setActiveSymbol: function(e) {
+        this.symbolpicker.hide();
+        var symbolid = e.currentTarget.getAttribute("data-symbolid");
+        var symbol = this.getSymbol(symbolid);
+        if(!symbol) {
+            return;
+        }
+        this.activeSymbol = symbol;
+        var quickBtnsContainer = $("#edit-symbol-buttons");
+        var quickBtn = quickBtnsContainer.find("[data-symbolid='" + symbolid + "']");
+        if(quickBtn.length === 0) {
+            quickBtn = $(this.createSymbol(symbol));
+            quickBtnsContainer.prepend(quickBtn)
+        }
+        quickBtnsContainer.find(".btn-primary").removeClass("btn-primary");
+        quickBtn.addClass("btn-primary");
     },
 
     deactivateButtons: function(btn) {
@@ -207,11 +308,13 @@ dbkjs.modules.edit = {
                 me.properties.show();
                 $("#mapc1map1").css("cursor", "crosshair");
                 me.catchClick = true;
+                me.mode = "add";
             })
             .on("deactivate", function() {
                 me.properties.hide();
                 $("#mapc1map1").css("cursor", "auto");
                 me.catchClick = false;
+                me.mode = "";
             });
 
         me.selectButton = new dbkjs.modules.EditButton("select", "Selecteer", me.editBox, "fa-mouse-pointer")
@@ -274,19 +377,14 @@ dbkjs.modules.edit = {
 
         $("<div class='container-fluid'>" +
 //                "<div class='row'> <div class='col-md-3'>Huidig:</div> <div class='col-md-9'>(Notitie)</div> </div>" +
-                "<div class='row'> <div class='col-md-3'>Symbool:</div> <div id='edit-symbol-buttons' class='col-md-9' btn-group' role='group'> " +
-                "  <button class='btn btn-primary'> <img width='24' src='images/nen1414/Tb01.png'> </button> " +
-                "  <button class='btn'> <img width='24' src='images/nen1414/Tb02.png'> </button> " +
-                "  <button class='btn'> <img width='24' src='images/nen1414/Tb1.008.png'> </button> " +
-                "</div> </div>" +
-                "<div class='row'> <div class='col-md-12' style='margin-top: 5px'> <button class='btn'>Symbolenkiezer...</button> </div> </div>" +
+                "<div class='row'> <div class='col-md-3'>Symbool:</div> <div id='edit-symbol-buttons' class='col-md-9' btn-group' role='group'></div></div> " +
+                "<div class='row'> <div class='col-md-12' style='margin-top: 5px'> <button class='btn' id='symbol-picker-button'>Symbolenkiezer...</button> </div> </div>" +
           "</div>")
           .appendTo("#symbol-props-left");
-
-        $("#edit-symbol-buttons").on("click", "button", function(e) {
-            $("#edit-symbol-buttons").find("button").removeClass("btn-primary");
-            $(e.currentTarget).addClass("btn-primary");
+        $("#symbol-picker-button").on("click", function() {
+            me.symbolpicker.show();
         });
+
         $("<div class='container-fluid'>" +
                 "<div class='row'> <div class='col-md-3'>Grootte:</div> <div class='col-md-9'>(Slider)</div> </div>" +
                 "<div class='row'> <div class='col-md-3'>Label:</div> <div class='col-md-9'> <input type='text' class='form-control'> </div> </div>" +
