@@ -107,22 +107,32 @@ dbkjs.modules.measure = {
             _obj.toggleMeasureArea();
         });
     },
-    toggleMeasureDistance: function() {
+    setMeasureActive: function(distanceOrArea, toggle, active) {
         var me = this;
         $('#measure').html('');
         if(dbkjs.viewmode === "fullscreen") {
             $('#measure').hide();
         }
-        if(me.distance_control.active) {
+
+        var control = distanceOrArea === "distance" ? me.distance_control : me.area_control;
+        var otherControl = control === me.distance_control ? me.area_control : me.distance_control;
+
+        var newStateActive = toggle ? !control.active : active;
+
+        if(newStateActive) {
+        }
+
+    },
+    toggleMeasureDistance: function(activate) {
+        var newStateIsActive = typeof activate === "undefined" ? !me.distance_control.active : activate;
+        if(newStateIsActive) {
+            $('#btn_measure_distance').addClass('active');
+            me.toggleMeasureArea(false);
+            me.distance_control.activate();
+        } else {
             me.area_control.deactivate();
             me.distance_control.deactivate();
             $('#btn_measure_distance').removeClass("active");
-        } else {
-            $('#btn_measure_distance').addClass('active');
-            if(me.area_control.active) {
-                me.toggleMeasureArea();
-            }
-            me.distance_control.activate();
         }
     },
     toggleMeasureArea: function() {
