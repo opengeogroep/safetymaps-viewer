@@ -124,7 +124,9 @@ dbkjs.modules.measure = {
 
     },
     toggleMeasureDistance: function(activate) {
+        var me = this;
         var newStateIsActive = typeof activate === "undefined" ? !me.distance_control.active : activate;
+        this.clearMeasure();
         if(newStateIsActive) {
             $('#btn_measure_distance').addClass('active');
             me.toggleMeasureArea(false);
@@ -135,22 +137,24 @@ dbkjs.modules.measure = {
             $('#btn_measure_distance').removeClass("active");
         }
     },
-    toggleMeasureArea: function() {
+    toggleMeasureArea: function(activate) {
         var me = this;
-        $('#measure').html('');
-        if(dbkjs.viewmode === "fullscreen") {
-            $('#measure').hide();
-        }
-        if(me.area_control.active) {
+        var newStateIsActive = typeof activate === "undefined" ? !me.area_control.active : activate;
+        this.clearMeasure();
+        if(newStateIsActive) {
+            $('#btn_measure_area').addClass('active');
+            me.toggleMeasureDistance(false);
+            me.area_control.activate();
+        } else {
             me.area_control.deactivate();
             me.distance_control.deactivate();
             $('#btn_measure_area').removeClass("active");
-        } else {
-            $('#btn_measure_area').addClass('active');
-            if(me.distance_control.active) {
-                me.toggleMeasureDistance();
-            }
-            me.area_control.activate();
+        }
+    },
+    clearMeasure: function() {
+        $('#measure').html('');
+        if(dbkjs.viewmode === "fullscreen") {
+            $('#measure').hide();
         }
     },
     handleMeasurements: function(event) {
