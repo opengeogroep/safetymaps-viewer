@@ -112,96 +112,102 @@ global.pool = anyDB.createPool(dbURL, {min: 2, max: 20});
 
 var organisationsDone = false, featuresDone = false, objectsToBeWritten = null;
 
-dbk.getOrganisation(
-        {params: {id: 0}, query: {srid: 28992}},
-{
-    status: function() { return this; },
-    json: function(json) {
-        var legendsToBeDownloaded = null;
-        if(json.organisation) {
-
-            // cache legends locally
-            if(json.organisation.wms) {
-                legendsToBeDownloaded = 0;
-                for(var i in json.organisation.wms) {
-                    var wms = json.organisation.wms[i];
-
-                    if(typeof wms.legend === "string") {
-                        try {
-	                       fs.mkdirSync(outDir + "/legend");
-	            		} catch(e) {
-                            if(e.code !== 'EEXIST') {
-                                throw e;
-                            }
-                        }
-                        legendsToBeDownloaded++;
-
-                        (function downloadLegend(wms) {
-                            var ext = wms.legend.split(".").pop();
-                            var filename = outDir + "/legend/" + wms.gid + "." + ext;
-                            var file = fs.createWriteStream(filename);
-                            console.log("Caching legend for WMS %s from URL %s to %s...", wms.name, wms.legend, "legend/" + wms.gid + "." + ext);
-
-                            function downloadError(msg) {
-                                file.close(function() {
-                                    fs.unlink(filename);
-                                });
-                                console.log("Error loading legend from %s: %s", wms.legend, msg);
-                                legendsToBeDownloaded--;
-                            }
-
-                            http.get(wms.legend, function(response) {
-                                if(response.statusCode === 200) {
-                                    response.pipe(file);
-                                    file.on('finish', function() {
-                                        file.close(function() {
-                                            legendsToBeDownloaded--;
-                                            // assume relative URL works in offline viewer
-                                            wms.legend = "legend/" + wms.gid + "." + ext;
-                                        });
-                                    });
-                                } else {
-                                    downloadError("HTTP status: " + response.statusCode);
-                                }
-                            }).on('error', function(err) {
-                                downloadError(err.message);
-                            });
-                        })(wms);
-                    }
-                }
-            }
-        } else {
-            console.log('An error occured, could not get organisation.json', json);
-        }
-        (function checkLegends(fn) {
-            if(legendsToBeDownloaded !== null) {
-                if(legendsToBeDownloaded !== 0) {
-                    setTimeout(function() { checkLegends(fn); }, 50);
-                } else {
-                    fn();
-                }
-            } else {
-                fn();
-            }
-        })(function() {
-            fs.writeFileSync(outDir + '/api/organisation.json', JSON.stringify(json));
-            organisationsDone = true;
-        });
-    }
-}
-);
-
-var totalVerdiepingen = 0;
-
-var skipObjects = false;
+var skipDB = false;
 
 process.argv.slice(2).forEach(function(val, index, array) {
-    if(val === "--skip-objects") {
-        skipObjects = true;
+    if(val === "--skip-db") {
+        skipDB = true;
     }
 });
 
-if(!skipObjects) {
+if(!skipDB) {
+    dbk.getOrganisation(
+            {params: {id: 0}, query: {srid: 28992}},
+    {
+        status: function() { return this; },
+        json: function(json) {
+            var legendsToBeDownloaded = null;
+            if(json.organisation) {
+
+                // cache legends locally
+                if(json.organisation.wms) {
+                    legendsToBeDownloaded = 0;
+                    for(var i in json.organisation.wms) {
+                        var wms = json.organisation.wms[i];
+
+                        if(typeof wms.legend === "string") {
+                            try {
+    	                       fs.mkdirSync(outDir + "/legend");
+    	            		} catch(e) {
+                                if(e.code !== 'EEXIST') {
+                                    throw e;
+                                }
+                            }
+                            legendsToBeDownloaded++;
+
+                            (function downloadLegend(wms) {
+                                var ext = wms.legend.split(".").pop();
+                                var filename = outDir + "/legend/" + wms.gid + "." + ext;
+                                var file = fs.createWriteStream(filename);
+                                console.log("Caching legend for WMS %s from URL %s to %s...", wms.name, wms.legend, "legend/" + wms.gid + "." + ext);
+
+                                function downloadError(msg) {
+                                    file.close(function() {
+                                        fs.unlink(filename);
+                                    });
+                                    console.log("Error loading legend from %s: %s", wms.legend, msg);
+                                    legendsToBeDownloaded--;
+                                }
+
+                                http.get(wms.legend, function(response) {
+                                    if(response.statusCode === 200) {
+                                        response.pipe(file);
+                                        file.on('finish', function() {
+                                            file.close(function() {
+                                                legendsToBeDownloaded--;
+                                                // assume relative URL works in offline viewer
+                                                wms.legend = "legend/" + wms.gid + "." + ext;
+                                            });
+                                        });
+                                    } else {
+                                        downloadError("HTTP status: " + response.statusCode);
+                                    }
+                                }).on('error', function(err) {
+                                    downloadError(err.message);
+                                });
+                            })(wms);
+                        }
+                    }
+                }
+            } else {
+                console.log('An error occured, could not get organisation.json', json);
+            }
+            (function checkLegends(fn) {
+                if(legendsToBeDownloaded !== null) {
+                    if(legendsToBeDownloaded !== 0) {
+                        setTimeout(function() { checkLegends(fn); }, 50);
+                    } else {
+                        fn();
+                    }
+                } else {
+                    fn();
+                }
+            })(function() {
+                fs.writeFileSync(outDir + '/api/organisation.json', JSON.stringify(json));
+                organisationsDone = true;
+            });
+        }
+    }
+    );
+} else {
+    organisationsDone = true;
+}
+
+var totalVerdiepingen = 0;
+
+
+
+if(!skipDB) {
     console.log("Create api/features.json...");
     fs.mkdirSync(outDir + '/api/object');
     fs.mkdirSync(outDir + '/api/gebied');
