@@ -124,6 +124,8 @@ function IncidentMonitorController(incidents) {
 
     me.failedUpdateTries = 0;
 
+    me.archivedIncidents = [];
+
     $(this.service).on('initialized', function() {
         me.addAGSLayers();
         me.getIncidentList();
@@ -144,13 +146,6 @@ IncidentMonitorController.prototype.ghorFilterStandardClick = function() {
     $("a#btn_standardfilter").toggleClass("active", me.ghorFilterStandard).blur();
 
     me.updateInterface();
-};
-
-IncidentMonitorController.prototype.ghorFilterIncidents = function(incidents) {
-    var me = this;
-    return $.grep(incidents, function(incident) {
-        return me.ghorFilterStandard ? !incident.inzetEenhedenStats.standard : true;
-    });
 };
 
 IncidentMonitorController.prototype.setAllIncidentsRead = function() {
@@ -252,17 +247,17 @@ IncidentMonitorController.prototype.selectIncident = function(obj) {
     }
 
     me.incident = obj.incident;
-    me.archief = !!obj.archief;
+    console.log("Select incident " + me.incident.INCIDENT_ID + ", archief=" + me.incident.archief);
     if(obj.addMarker) {
-        me.selectedIncidentMarker = me.markerLayer.addIncident(me.incident, true);
+        me.selectedIncidentMarker = me.markerLayer.addIncident(me.incident, me.incident.archief);
     }
     me.incidentId = obj.incident.INCIDENT_ID;
     me.incidentDetailsWindow.data("Ophalen incidentgegevens...");
-    me.updateIncident(me.incidentId, me.archief);
+    me.updateIncident(me.incidentId, me.incident.archief);
     me.incidentDetailsWindow.show();
     me.incidentRead(me.incidentId);
     me.zoomToIncident();
-    if(!me.archief) {
+    if(!me.incident.archief) {
         me.enableIncidentUpdates();
     } else {
         me.disableIncidentUpdates();
@@ -278,19 +273,59 @@ IncidentMonitorController.prototype.checkIncidentListOutdated = function() {
     }
 };
 
+IncidentMonitorController.prototype.incidentFilter = function(incident) {
+    var me = dbkjs.modules.incidents.controller;
+    if(me.ghor) {
+        if(incident.inzetEenhedenStats.B.total === 0 && incident.inzetEenhedenStats.A.total === 0) {
+            return false;
+        }
+        if(me.ghorFilterStandard) {
+            return !incident.inzetEenhedenStats.standard;
+        } else {
+            return true;
+        }
+    } else {
+        return incident.inzetEenhedenStats.B.total !== 0;
+    }
+};
+
 IncidentMonitorController.prototype.updateInterface = function() {
     var me = this;
     if(!me.currentIncidents) {
         return;
     }
 
-    var currentFiltered = me.ghor ? me.ghorFilterIncidents(me.currentIncidents) : me.currentIncidents;
-    var archivedFiltered =  me.ghor ? me.ghorFilterIncidents(me.archivedIncidents) : me.archivedIncidents;
-    me.incidentListWindow.data(currentFiltered, archivedFiltered, true);
-    // TODO: only me.incidentListWindow.actueleIncidentIds ?
-    me.updateMarkerLayer(currentFiltered);
+    // Filter current and archived with criteria for both
+    var currentFiltered = $.grep(me.currentIncidents, me.incidentFilter);
+    var archivedFiltered = $.grep(me.archivedIncidents, me.incidentFilter);
 
-    me.updateVehiclePositionLayer(currentFiltered);
+    // Active incident: current and actueleInzet
+    // Inactive incident: (current and !actueleInzet) or archived
+    var active = [];
+    var inactive = [];
+    $.each(currentFiltered, function(i, incident) {
+        if(incident.actueleInzet) {
+            active.push(incident);
+        } else {
+            inactive.push(incident);
+        }
+    });
+    inactive = inactive.concat(archivedFiltered);
+
+    me.actueleIncidentIds = $.map(active, function(incident) { return incident.INCIDENT_ID; });
+
+    // Remove duplicate incidents
+    inactive = $.grep(inactive, function(incident) {
+        return me.actueleIncidentIds.indexOf(incident.INCIDENT_ID) === -1;
+    });
+
+    inactive.sort(function(lhs, rhs) {
+        return rhs.DTG_START_INCIDENT - lhs.DTG_START_INCIDENT;
+    });
+
+    me.incidentListWindow.data(active, inactive, true);
+    me.updateMarkerLayer(active);
+    me.updateVehiclePositionLayer(active);
 };
 
 IncidentMonitorController.prototype.getIncidentList = function() {
@@ -300,7 +335,7 @@ IncidentMonitorController.prototype.getIncidentList = function() {
     me.lastGetIncidentList = new Date().getTime();
 
     var dCurrent = me.service.getCurrentIncidents();
-    var dArchived = me.service.getArchivedIncidents(me.highestArchiveIncidentId);
+    var dArchived = me.service.getArchivedIncidents(me.archivedIncidents);
 
     $.when(dCurrent, dArchived)
     .fail(function(e) {
@@ -334,30 +369,24 @@ IncidentMonitorController.prototype.getIncidentList = function() {
         me.currentIncidents = currentIncidents;
         me.updateInterface();
         me.updateVehiclePositionLayer(currentIncidents);
-        me.checkUnreadIncidents(me.incidentListWindow.actueleIncidentIds);
+        me.checkUnreadIncidents(me.actueleIncidentIds);
     });
 };
 
 IncidentMonitorController.prototype.processNewArchivedIncidents = function(archivedIncidents) {
     var me = this;
-
-    // Save highest ID to request only new archived incidents with higher ID
-    // next time
-    me.highestArchiveIncidentId = archivedIncidents.highestIncidentId;
-
-    // Update archived incident list
-    me.archivedIncidents = archivedIncidents.incidents.concat(me.archivedIncidents ? me.archivedIncidents : []);
+    console.log("Huidig aantal gearchiveerde incidenten: " + me.archivedIncidents.length + ", nieuw ontvangen: " + archivedIncidents.length);
+    me.archivedIncidents = archivedIncidents.concat(me.archivedIncidents);
 
     // Remove old archived incidents (start incident more than 24 hours ago)
     var cutoff = new moment().subtract(24, 'hours');
-    var list = [];
-    $.each(me.archivedIncidents, function(i, incident) {
+    me.archivedIncidents = $.grep(me.archivedIncidents, function(incident) {
         var incidentStart = me.service.getAGSMoment(incident.DTG_START_INCIDENT);
-        if(!incidentStart.isBefore(cutoff)) {
-            list.push(incident);
+        if(incidentStart.isBefore(cutoff)) {
+            console.log("Verwijder oud incident begonnen op " + incidentStart.format("D-M-YYYY HH:mm") + " voor 24u cutoff van " + cutoff.format("D-M-YYYY HH:mm"));
         }
+        return !incidentStart.isBefore(cutoff);
     });
-    me.archivedIncidents = list;
 };
 
 IncidentMonitorController.prototype.updateMarkerLayer = function(incidents) {
@@ -413,7 +442,7 @@ IncidentMonitorController.prototype.enableIncidentUpdates = function() {
     }
 
     this.updateIncidentInterval = window.setInterval(function() {
-        me.updateIncident(me.incidentId, me.archief);
+        me.updateIncident(me.incidentId, me.incident.archief);
     }, 15000);
 };
 
@@ -431,6 +460,7 @@ IncidentMonitorController.prototype.updateIncident = function(incidentId, archie
         return;
     }
 
+    console.log("Get incident info for " + incidentId + ", archief=" + archief);
     me.service.getAllIncidentInfo(incidentId, archief, false, !me.kb)
     .fail(function(e) {
         var msg = "Kan incidentinfo niet updaten: " + e;

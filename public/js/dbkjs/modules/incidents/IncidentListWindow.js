@@ -94,12 +94,12 @@ IncidentListWindow.prototype.showError = function(e) {
 
 /**
  * Render incidents in the window view.
- * @param {object} currentIncidents Array of current incidents
- * @param {object} archivedIncidents Array of archived incidents
+ * @param {object} activeIncidents Array of active incidents
+ * @param {object} inactiveIncidents Array of inactive incidents
  * @param {boolean} restoreScrollTop
  * @returns {undefined}
  */
-IncidentListWindow.prototype.data = function(currentIncidents, archivedIncidents, restoreScrollTop) {
+IncidentListWindow.prototype.data = function(activeIncidents, inactiveIncidents, restoreScrollTop) {
     var me = this;
 
     var v = this.getView();
@@ -107,38 +107,24 @@ IncidentListWindow.prototype.data = function(currentIncidents, archivedIncidents
 
     v.html("");
 
-    var actueleInzet = [];
-    var beeindigdeInzet = [];
-    var actueleIncidentIds = [];
-    $.each(currentIncidents, function(i, incident) {
-        if(incident.actueleInzet) {
-            actueleInzet.push(incident);
-            actueleIncidentIds.push(incident.INCIDENT_ID);
-        } else {
-            beeindigdeInzet.push(incident);
-        }
-    });
-    // Usable by IncidentMonitorController for new incident alerts
-    me.actueleIncidentIds = actueleIncidentIds.slice();
-
     var d = $("<div class='incidentList'/>");
     var h = $("<div class='header actueleInzet'/>")
-            .html(actueleInzet.length === 0 ? "Geen actieve incidenten" :
-                (actueleInzet.length === 1 ? "&Eacute;&eacute;n actief incident" : actueleInzet.length + " actieve incidenten") +
+            .html(activeIncidents.length === 0 ? "Geen actieve incidenten" :
+                (activeIncidents.length === 1 ? "&Eacute;&eacute;n actief incident" : activeIncidents.length + " actieve incidenten") +
                 " met actuele inzet " + (me.ghor ? "" : "brandweer") + "eenheden");
 
     h.appendTo(d);
-    me.listIncidents(d, actueleInzet, null, true, function(r, incident) {
+    me.listIncidents(d, activeIncidents, true, function(r, incident) {
         $(r).on('click', function() {
-            $(me).trigger('click', { incident: incident, addMarker: false, archief: false });
+            $(me).trigger('click', { incident: incident, addMarker: false });
         });
     });
 
     var h = $("<div class='header archief'/>").html("Gearchiveerde/inzet be&euml;indigde incidenten");
     h.appendTo(d);
-    me.listIncidents(d, beeindigdeInzet.concat(archivedIncidents), actueleIncidentIds, false, function(r, incident) {
+    me.listIncidents(d, inactiveIncidents, false, function(r, incident) {
         $(r).on('click', function() {
-            $(me).trigger('click', { incident: incident, addMarker: true, archief: archivedIncidents.indexOf(incident) !== -1 });
+            $(me).trigger('click', { incident: incident, addMarker: true });
         });
     });
     d.appendTo(v);
@@ -148,7 +134,7 @@ IncidentListWindow.prototype.data = function(currentIncidents, archivedIncidents
     }
 };
 
-IncidentListWindow.prototype.listIncidents = function(el, incidents, incidentIdsToSkip, showInzetInTitle, incidentDivFunction) {
+IncidentListWindow.prototype.listIncidents = function(el, incidents, showInzetInTitle, incidentDivFunction) {
     var me = this;
 
     incidents.sort(function(lhs, rhs) {
@@ -157,16 +143,8 @@ IncidentListWindow.prototype.listIncidents = function(el, incidents, incidentIds
     });
 
     var d = $("<div class='list'/>");
-    if(!incidentIdsToSkip) {
-        incidentIdsToSkip = [];
-    }
     var odd = true;
     $.each(incidents, function(i, incident) {
-        if(incidentIdsToSkip.indexOf(incident.INCIDENT_ID) !== -1) {
-            return;
-        }
-        incidentIdsToSkip.push(incident.INCIDENT_ID);
-
         var start = dbkjs.modules.incidents.controller.service.getAGSMoment(incident.DTG_START_INCIDENT);
         var actueleInzet = [];
         $.each(incident.inzetEenheden, function(j, eenheid) {
@@ -266,7 +244,7 @@ IncidentListWindow.prototype.getIncidentEenhedenIcons = function(incident) {
             html = "<span style='color: grey'>" + html + "</span>";
         }
         if(incident.inzetEenhedenStats.B.total !== 0) {
-            html += "<span style='color: red'>" + htmlB /*multiIcon("fire-extinguisher",incident.inzetEenhedenStats.B.total)*/ + "</span>";
+            html += "<span style='color: red'>" + multiIcon("fire-extinguisher",incident.inzetEenhedenStats.B.total) + "</span>";
         }
         if(incident.inzetEenhedenStats.P.total !== 0) {
             html += "<span style='color: blue'>" + multiIcon("cab",incident.inzetEenhedenStats.P.total) + "</span>";
