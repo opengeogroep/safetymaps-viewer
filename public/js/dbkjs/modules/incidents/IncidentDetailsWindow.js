@@ -243,23 +243,20 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
     return html;
 };
 
+IncidentDetailsWindow.prototype.getPrioriteitColor = function(prio) {
+    prio = Number(prio);
+    switch(prio) {
+        case 1: return 'red';
+        case 2: return 'orange';
+        default: return 'green';
+    }
+}
+
 IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showInzet, compareMode) {
     var me = this;
 
     var html = '<div style="width: 100%" class="table-responsive incidentDetails">';
     html += '<table class="table table-hover">';
-
-    var d;
-    d = new moment(incident.BrwDisciplineGegevens.StartDTG);
-
-    html += '<tr><td>Start incident: </td><td>' + d.format("dddd, D-M-YYYY HH:mm:ss")  + (compareMode ? "" : " (" + d.fromNow() + ")") + '</td></tr>';
-    var a = incident.IncidentLocatie;
-    html += '<tr><td>Adres/locatie: </td><td>' + me.getIncidentAdres(incident, false) + '</td></tr>';
-    if(a.NaamLocatie2) {
-        html += '<tr><td></td><td>' + dbkjs.util.htmlEncode(a.NaamLocatie2) + '</td></tr>';
-    }
-    html += '<tr><td>Postcode: </td><td>' + (a.Postcode ? a.Postcode : "-") + '</td></tr>';
-    html += '<tr><td>Woonplaats: </td><td>' + (a.Plaatsnaam ? a.Plaatsnaam : "-") + '</td></tr>';
 
     var c = [];
     var m = incident.BrwDisciplineGegevens;
@@ -273,7 +270,20 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
         c.push(m.Meldingsclassificatie3);
     }
 
-    html += '<tr><td>Prioriteit:</td><td>' + m.Prioriteit + '</td></tr>';
+    var d;
+    d = new moment(incident.BrwDisciplineGegevens.StartDTG);
+
+    html += '<tr><td colspan="2" style="font-weight: bold; text-align: center; color: ' + me.getPrioriteitColor(m.Prioriteit) + '">PRIO ' + m.Prioriteit + '</td></tr>';
+    html += '<tr><td>Start incident: </td><td>' + d.format("dddd, D-M-YYYY HH:mm:ss")  + (compareMode ? "" : " (" + d.fromNow() + ")") + '</td></tr>';
+    var a = incident.IncidentLocatie;
+    html += '<tr><td>Adres/locatie: </td><td>' + me.getIncidentAdres(incident, false) + '</td></tr>';
+    if(a.NaamLocatie2) {
+        html += '<tr><td></td><td>' + dbkjs.util.htmlEncode(a.NaamLocatie2) + '</td></tr>';
+    }
+    html += '<tr><td>Postcode: </td><td>' + (a.Postcode ? a.Postcode : "-") + '</td></tr>';
+    html += '<tr><td>Woonplaats: </td><td>' + (a.Plaatsnaam ? a.Plaatsnaam : "-") + '</td></tr>';
+
+
     html += '<tr><td>Melding classificatie:</td><td>' + c.join(", ") + '</td></tr>';
 
     if(!incident.Karakteristieken || incident.Karakteristieken.length === 0) {
