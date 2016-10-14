@@ -296,7 +296,7 @@ FalckIncidentsController.prototype.updateBalkrechtsonder = function() {
             c.push(m.Meldingsclassificatie3);
         }
 
-        var title = "<i class='fa fa-bell'/> P " + me.incident.BrwDisciplineGegevens.Prioriteit + " " + c.join(", ") + " - " +
+        var title = "<i class='fa fa-bell'/> <span style='font-weight: bold; color: " + me.incidentDetailsWindow.getPrioriteitColor(m.Prioriteit) + "'>P " + me.incident.BrwDisciplineGegevens.Prioriteit + "</span> " + c.join(", ") + " - " +
                 dbkjs.util.htmlEncode(me.incidentDetailsWindow.getIncidentAdres(me.incident, false)) +
                 " " + dbkjs.util.htmlEncode(me.incident.IncidentLocatie.Plaatsnaam);
 
