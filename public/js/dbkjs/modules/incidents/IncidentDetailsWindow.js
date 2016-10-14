@@ -274,7 +274,6 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
     d = new moment(incident.BrwDisciplineGegevens.StartDTG);
 
     html += '<tr><td colspan="2" style="font-weight: bold; text-align: center; color: ' + me.getPrioriteitColor(m.Prioriteit) + '">PRIO ' + m.Prioriteit + '</td></tr>';
-    html += '<tr><td>Start incident: </td><td>' + d.format("dddd, D-M-YYYY HH:mm:ss")  + (compareMode ? "" : " (" + d.fromNow() + ")") + '</td></tr>';
     var a = incident.IncidentLocatie;
     html += '<tr><td>Adres/locatie: </td><td>' + me.getIncidentAdres(incident, false) + '</td></tr>';
     if(a.NaamLocatie2) {
@@ -312,6 +311,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
         });
         html += '</td></tr>';
     }
+    html += '<tr><td>Start incident: </td><td>' + d.format("dddd, D-M-YYYY HH:mm:ss")  + (compareMode ? "" : " (" + d.fromNow() + ")") + '</td></tr>';
 
     if(incident.Kladblokregels && incident.Kladblokregels.length !== 0) {
         html += '<tr><td id="kladblok" colspan="2">';
