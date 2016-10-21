@@ -26,7 +26,11 @@ dbkjs.editStyles = {
     symbol: new OpenLayers.StyleMap({
         "default": new OpenLayers.Style({
             pointRadius: "${radius}",
-            externalGraphic: "${graphic}"
+            externalGraphic: "${graphic}",
+            label: "${label}",
+            labelYOffset: -20,
+            labelOutlineWidth: 2,
+            labelOutlineColor: 'white'
         }, {
             context: {
                 graphic: function(feature) {
@@ -181,6 +185,7 @@ dbkjs.modules.edit = {
         propGrid.on("change", function(e) {
             if(this.getAttribute("name") === "label") {
                 me.selectedFeature.attributes.label = this.value;
+                me.layer.redraw();
             }
         });
     },
