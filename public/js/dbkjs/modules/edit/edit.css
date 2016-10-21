@@ -1,3 +1,10 @@
+.disable-selection, .disable-selection * {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
 .triangle-left {
     border-color: transparent rgb(104, 104, 104) transparent transparent;
     border-style: solid;
@@ -38,7 +45,7 @@
 }
 
 .edit-box.with-measure-buttons {
-    height: 280px;
+    height: 230px;
 }
 
 .edit-button-container {
@@ -63,7 +70,7 @@
 
 #edit-properties, #edit-features-list {
     margin-bottom: 0;
-    border: 1px solid gray;
+    border: 1px solid rgb(104,104,104);
     bottom: 0;
     position: absolute;
     z-index: 3000;
@@ -71,15 +78,6 @@
     display: none;
     left: 144px;
     right: 2px;
-}
-
-#edit-features-list {
-    left: auto;
-    right: 0;
-    bottom: 0;
-    top: 0;
-    width: 300px;
-    height: auto;
 }
 
 .edit-type-buttons {
@@ -129,11 +127,6 @@
     margin-right: 5px;
     margin-bottom: 5px;
 }
-
-#edit-symbol-buttons #symbol-picker-button {
-
-}
-
 .symbol-btn img {
     width: 24px;
 }
@@ -147,4 +140,79 @@
     display: block;
     overflow: hidden;
     padding-left: 2px;
+}
+
+#edit-features-list {
+    padding: 20px 10px 0 10px;
+    left: auto;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    width: 35vw;
+    height: auto;
+}
+
+#edit-features-list h3 {
+    margin-top: 0;
+}
+
+.features-table thead {
+    font-size: 14px;
+}
+
+.features-table img {
+    width: 40px;
+}
+
+.features-table .symbol {
+    width: 60px;
+}
+
+.features-table .lbl {
+    vertical-align: middle;
+}
+
+.features-table .lbl span {
+    display: block;
+    -ms-text-overflow: ellipsis;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.features-table .remove {
+    width: 44px;
+    text-align: center;
+    padding: 0 !important;
+}
+
+.features-table .remove a {
+    display: block;
+    width: 44px;
+    height: 44px;
+    padding-top: 10px;
+}
+
+.features-container {
+    position: absolute;
+    top: 50px;
+    bottom: 100px;
+    overflow: auto;
+    left: 10px;
+    right: 10px;
+}
+
+#edit-symbol-properties {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-top: 1px solid rgb(104,104,104);
+    padding: 10px;
+}
+
+@media screen and (max-width: 1000px) {
+    .features-container {
+        bottom: 130px;
+    }
 }

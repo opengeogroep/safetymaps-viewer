@@ -24,40 +24,60 @@ dbkjs.modules = dbkjs.modules || {};
 
 dbkjs.editStyles = {
     symbol: new OpenLayers.StyleMap({
-        "default": new OpenLayers.Style({
-            pointRadius: "${radius}",
-            externalGraphic: "${graphic}",
-            label: "${label}",
-            labelYOffset: -20,
-            labelOutlineWidth: 2,
-            labelOutlineColor: 'white'
-        }, {
-            context: {
-                graphic: function(feature) {
-                    var img = feature.attributes.graphic;
-                    return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + img : imagesBase64[img];
-                },
-                radius: function(feature) {
-                    return dbkjs.scaleStyleValue(12, feature.attributes.radius);
+        "default": new OpenLayers.Style(
+            {
+                pointRadius: "${radius}",
+                externalGraphic: "${graphic}",
+                label: "${label}",
+                labelYOffset: "${labelYOffset}",
+                labelOutlineWidth: 2,
+                labelOutlineColor: 'white'
+            },
+            {
+                context: {
+                    graphic: function(feature) {
+                        var img = feature.attributes.graphic;
+                        return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + img : imagesBase64[img];
+                    },
+                    radius: function(feature) {
+                        return dbkjs.scaleStyleValue(12, feature.attributes.radius);
+                    },
+                    labelYOffset: function(feature) {
+                        return dbkjs.scaleStyleValue(12, feature.attributes.radius) * -1.4;
+                    },
+                    label: function(feature) {
+                        return feature.attributes.label || "";
+                    }
                 }
             }
-        }), 'select': new OpenLayers.Style({
-            pointRadius: "${radius}"
-        }, {
-            context: {
-                radius: function(feature) {
-                    return dbkjs.scaleStyleValue(20, feature.attributes.radius, 1.66);
+        ),
+        "select": new OpenLayers.Style(
+            {
+                pointRadius: "${radius}",
+                strokeColor: "#357ebd"/*,
+                labelOutlineColor: "#357ebd",
+                labelOutlineWidth: 2*/
+            },
+            {
+                context: {
+                    radius: function(feature) {
+                        return dbkjs.scaleStyleValue(20, feature.attributes.radius, 1.66);
+                    }
                 }
             }
-        }), 'temporary': new OpenLayers.Style({
-            pointRadius: "${radius}"
-        }, {
-            context: {
-                radius: function(feature) {
-                    return dbkjs.scaleStyleValue(24, feature.attributes.radius, 2);
+        ),
+        "hover": new OpenLayers.Style(
+            {
+                pointRadius: "${radius}"
+            },
+            {
+                context: {
+                    radius: function(feature) {
+                        return dbkjs.scaleStyleValue(24, feature.attributes.radius, 2);
+                    }
                 }
             }
-        })
+        )
     })
 };
 
@@ -108,13 +128,19 @@ dbkjs.modules.edit = {
     catchClick: null,
     layer: null,
 
+    debounceUpdateLayer: null,
+
     mode: "",
     /** @var dbkjs.modules.EditButton[] buttons */
     buttons: [],
     /** @var dbkjs.modules.SymbolManager symbolmanager */
     symbolmanager: null,
+    /** @var dbkjs.modules.FeaturesManager featuresManager */
+    featuresManager: null,
     /** @var OpenLayers.Feature.Vector selectedFeature */
     selectedFeature: null,
+    /** @var OpenLayers.Control.DrawFeature drawFeatureControl */
+    drawFeatureControl: null,
 
     register: function() {
         var me = this;
@@ -138,7 +164,6 @@ dbkjs.modules.edit = {
             }
         });
         dbkjs.map.addControl(me.drag);
-//        me.drag.deactivate();
 
         var oldOnClick = dbkjs.util.onClick;
         dbkjs.util.onClick = function(e) {
@@ -158,9 +183,23 @@ dbkjs.modules.edit = {
             }
         };
 
+        var drawOptions = {
+            handlerOptions: {
+                freehand: true,
+                freehandToggle: null
+            }
+        };
+        me.drawFeatureControl = new OpenLayers.Control.DrawFeature(me.layer, OpenLayers.Handler.Path, drawOptions);
+        dbkjs.map.addControl(me.drawFeatureControl);
+        me.drawFeatureControl.deactivate();
+
         this.symbolmanager = new dbkjs.modules.SymbolManager(dbkjs.modules.EditSymbols, "#edit-symbol-buttons", "#symbol-picker-button");
 
+        this.initFeaturesManager();
+
         this.watchPropertiesChange();
+
+        this.enableSymbolMode();
     },
 
     activate: function() {
@@ -168,6 +207,7 @@ dbkjs.modules.edit = {
         me.editTriangle.show();
         me.editBox.show();
         $(me).triggerHandler("activate");
+        me.plusButton.activate();
     },
 
     deactivate: function() {
@@ -179,31 +219,122 @@ dbkjs.modules.edit = {
         this.clearSelectedFeature();
     },
 
+    initFeaturesManager: function() {
+        this.featuresManager = new dbkjs.modules.FeaturesManager();
+        this.featuresManager
+            .on("removeFeature", function(featureid) {
+                var feature = this.layer.getFeatureById(featureid);
+                if(feature) {
+                    if(this.selectedFeature === feature) {
+                        this.selectedFeature = null;
+                    }
+                    this.layer.removeFeatures([feature]);
+                }
+            }, this)
+            .on("removeAllFeatures", function() {
+                this.layer.removeAllFeatures();
+                this.selectedFeature = null;
+            }, this)
+            .on("featureSelected", function(featureid) {
+                var feature = this.layer.getFeatureById(featureid);
+                if(feature) {
+                    this.setSelectedFeature(feature);
+                }
+            }, this)
+            .on("featureOver", function(featureid) {
+                var feature = this.layer.getFeatureById(featureid);
+                if(feature) {
+                    this.layer.drawFeature(feature, "hover");
+                }
+            }, this)
+            .on("featureOut", function(featureid) {
+                var feature = this.layer.getFeatureById(featureid);
+                if(feature) {
+                    var styleIntent = "default";
+                    if(feature === this.selectedFeature) {
+                        styleIntent = "select";
+                    }
+                    this.layer.drawFeature(feature, styleIntent);
+                }
+            }, this);
+    },
+
+    setPropertiesGrid: function(feature) {
+        var propGrid = $("#edit-symbol-properties");
+        propGrid.find("[name='label']").val(feature.attributes.label);
+        propGrid.find("#symbolRadiusSlider").slider('setValue', parseInt(feature.attributes.radius, 10));
+    },
+
     watchPropertiesChange: function() {
         var propGrid = $("#edit-symbol-properties").find("input");
         var me = this;
-        propGrid.on("change", function(e) {
+        propGrid.on("keyup change", function(e) {
+            if(!me.selectedFeature) {
+                return;
+            }
             if(this.getAttribute("name") === "label") {
                 me.selectedFeature.attributes.label = this.value;
-                me.layer.redraw();
+                me.updateLayer(true);
             }
+            if(this.getAttribute("name") === "radius") {
+                me.selectedFeature.attributes.radius = this.value;
+                me.updateLayer();
+            }
+            me.featuresManager.updateFeature(me.selectedFeature);
         });
+    },
+
+    updateLayer: function(useTimeout) {
+        if(!useTimeout) {
+            this.layer.redraw();
+            return;
+        }
+        if(this.debounceUpdateLayer) window.clearTimeout(this.debounceUpdateLayer);
+        this.debounceUpdateLayer = window.setTimeout((function() { this.layer.redraw() }).bind(this), 250);
     },
 
     setSelectedFeature: function(feature) {
         this.clearSelectedFeature();
-        dbkjs.selectControl.select(feature);
+        this.layer.drawFeature(feature, "select");
         this.selectedFeature = feature;
-        $("#edit-symbol-properties").find("[name='label']").val(feature.attributes.label);
+        this.setPropertiesGrid(this.selectedFeature);
+        this.featuresManager.setSelectedFeature(this.selectedFeature);
     },
 
     clearSelectedFeature: function() {
-        if(this.selectedFeature) dbkjs.selectControl.unselect(this.selectedFeature);
+        // Check if we have selectedFeature and if selectedFeature has layer (=not removed)
+        if(!this.selectedFeature || !this.selectedFeature.layer) return;
+        this.layer.drawFeature(this.selectedFeature, "default");
+        this.featuresManager.unsetSelectedFeature(this.selectedFeature);
+    },
+
+    enableSymbolMode: function() {
+        this.mode = "add-symbol";
+        this.buttonSymbol.addClass("btn-primary");
+        this.disableLineMode();
+    },
+
+    disableSymbolMode: function() {
+        this.buttonSymbol.removeClass("btn-primary");
+    },
+
+    enableLineMode: function() {
+        this.mode = "add-line";
+        $("body").addClass("disable-selection");
+        this.buttonLine.addClass("btn-primary");
+        this.drawFeatureControl.activate();
+        this.disableSymbolMode();
+    },
+
+    disableLineMode: function() {
+        $("body").removeClass("disable-selection");
+        this.buttonLine.removeClass("btn-primary");
+        this.drawFeatureControl.deactivate();
     },
 
     mapClick: function(lonLat) {
         var me = this;
-        if(this.mode === "add") {
+        if(this.mode === "add-symbol") {
             var symbol = me.symbolmanager.getActiveSymbol();
             if(!symbol) {
                 alert("Selecteer eerst een symbool");
@@ -211,25 +342,13 @@ dbkjs.modules.edit = {
             }
             var feature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(lonLat.lon, lonLat.lat), {
                 graphic: symbol.image,
+                radius: 12,
                 symbol: symbol.id,
                 label: ""
             });
             me.layer.addFeatures(feature);
             this.setSelectedFeature(feature);
-        }
-    },
-
-    loadStylesheet: function() {
-        var cssId = 'editcss';
-        if (!document.getElementById(cssId)) {
-            var head  = document.head || document.getElementsByTagName('head')[0];
-            var link  = document.createElement('link');
-            link.id   = cssId;
-            link.rel  = 'stylesheet';
-            link.type = 'text/css';
-            link.href = 'js/dbkjs/modules/edit/edit.css';
-            link.media = 'all';
-            head.appendChild(link);
+            me.featuresManager.addFeature(feature);
         }
     },
 
@@ -241,15 +360,10 @@ dbkjs.modules.edit = {
         }
     },
 
-    showFeaturesList: function() {
-        this.featureslist.show();
-
-    },
-
     createElements: function() {
         var me = this;
 
-        me.loadStylesheet();
+        // me.loadStylesheet();
 
         var mainEditButton = new dbkjs.modules.EditButton("edit", "Tekenen", "#mapc1map1", "fa-pencil-square-o", {
             divClass: "edit-button"
@@ -296,36 +410,29 @@ dbkjs.modules.edit = {
                 me.properties.show();
                 $("#mapc1map1").css("cursor", "crosshair");
                 me.catchClick = true;
-                me.mode = "add";
+                me.enableSymbolMode();
             })
             .on("deactivate", function() {
                 me.properties.hide();
                 $("#mapc1map1").css("cursor", "auto");
                 me.catchClick = false;
                 me.mode = "";
+                me.disableSymbolMode();
+                me.disableLineMode();
             });
 
         me.selectButton = new dbkjs.modules.EditButton("select", "Selecteer", me.editBox, "fa-mouse-pointer")
             .on("activate", function(btn) {
                 me.deactivateButtons(btn);
-                me.properties.show();
+                me.featuresManager.showFeaturesList();
                 me.drag.activate();
             })
             .on("deactivate", function() {
-                me.properties.hide();
+                me.featuresManager.hideFeaturesList();
                 me.drag.deactivate();
             });
 
-        me.minusButton = new dbkjs.modules.EditButton("minus", "Verwijder", me.editBox, "fa-minus")
-            .on("activate", function(btn) {
-                me.deactivateButtons(btn);
-                me.showFeaturesList();
-            })
-            .on("deactivate", function() {
-                me.featureslist.hide();
-            });
-
-        me.buttons.push(me.plusButton, me.selectButton, me.minusButton);
+        me.buttons.push(me.plusButton, me.selectButton);
 
         // Create symbol properties window
         me.properties = $("<div/>")
@@ -342,12 +449,17 @@ dbkjs.modules.edit = {
                 .attr("id", "edit-button-symbol")
                 .addClass("btn btn-secondary")
                 .text("Symbool")
+                .on("click", function() {
+                    me.enableSymbolMode();
+                })
                 .appendTo(group);
         me.buttonLine = $("<button/>")
                 .attr("id", "edit-button-line")
                 .addClass("btn btn-secondary")
-                .attr("disabled", "disabled")
                 .text("Lijn")
+                .on("click", function() {
+                    me.enableLineMode();
+                })
                 .appendTo(group);
         me.buttonArea = $("<button/>")
                 .attr("id", "edit-button-line")
@@ -358,8 +470,7 @@ dbkjs.modules.edit = {
 
         $("<div class='container properties-container'>" +
                 "<div class='row'>" +
-                    "<div id='symbol-props-left' class='col-md-6'/>" +
-                    "<div id='symbol-props-right' class='col-md-6'/>" +
+                    "<div id='symbol-picker-bar' class='col-md-12'/>" +
                 "</div>" +
             "</div>")
             .appendTo("#edit-properties");
@@ -371,228 +482,6 @@ dbkjs.modules.edit = {
                 "</div></div> " +
                 "<div class='row'> <div class='col-md-12' style='margin-top: 5px'>  </div> </div>" +
           "</div>")
-          .appendTo("#symbol-props-left");
-
-        $("<div class='container-fluid' id='edit-symbol-properties'>" +
-                "<div class='row'> <div class='col-md-3'>Grootte:</div> <div class='col-md-9'>(Slider)</div> </div>" +
-                "<div class='row'> <div class='col-md-3'><label for='label'>Label:</label></div> <div class='col-md-9'> <input type='text' name='label' id='label' class='form-control'> </div> </div>" +
-          "</div>")
-          .appendTo("#symbol-props-right");
-
-
-        me.featureslist = $("<div><h1>List of features here</h1></div>")
-            .attr("id", "edit-features-list")
-            .addClass("panel");
-        me.featureslist.appendTo("body");
-
+          .appendTo("#symbol-picker-bar");
     }
 };
-
-dbkjs.modules.SymbolManager = function(symbols, quickSelectContainer, symbolPickerBtn) {
-    this.symbolTree = symbols;
-    this.symbols = {};
-    this.recentlyUsed = [];
-    this.activeSymbol = null;
-    this.quickSelectContainer = $(quickSelectContainer);
-
-    this.createSymbolsIndex();
-    this.symbolpicker = this.createSymbolPicker();
-    this.loadRecentlyUsedSymbols();
-
-    // Listeners
-    $(symbolPickerBtn).on("click", (function() { this.symbolpicker.show() }).bind(this));
-    this.quickSelectContainer.add(this.symbolpicker.find(".panel-body"))
-        .on("click", ".symbol-btn", this.setActiveSymbol.bind(this));
-};
-dbkjs.modules.SymbolManager.prototype = Object.create({
-
-    createSymbolsIndex: function() {
-        for(var i = 0; i < this.symbolTree.length; i++) {
-            this.addSymbolsToIndex(this.symbolTree[i]);
-        }
-    },
-
-    addSymbolsToIndex: function(category) {
-        if(category.hasOwnProperty("symbols")) {
-            for(var i = 0; i < category.symbols.length; i++) {
-                this.symbols[category.symbols[i].id] = category.symbols[i];
-            }
-        }
-        if(category.hasOwnProperty("children")) {
-            for(var j = 0; j < category.children.length; j++) {
-                this.addSymbolsToIndex(category.children[j]);
-            }
-        }
-    },
-
-    createSymbolPicker: function() {
-        var symbolpicker = dbkjs.util.createDialog(
-            'symbolpicker',
-            'Symbolenkiezer'
-        );
-        var html = [];
-        for(var i = 0; i < this.symbolTree.length; i++) {
-            html.push(this.createCategory(this.symbolTree[i], true));
-        }
-        symbolpicker.find(".panel-body").html(html.join(''));
-        $("body").append(symbolpicker);
-        return symbolpicker;
-    },
-
-    createCategory: function(category, rootLevel) {
-        var html = [];
-        if(category.hasOwnProperty("name")) {
-            if(rootLevel) {
-                html.push("<h3>", category.name, "</h3>");
-            } else {
-                html.push("<h4>", category.name, "</h4>");
-            }
-        }
-        if(category.hasOwnProperty("symbols")) {
-            for(var i = 0; i < category.symbols.length; i++) {
-                html.push(this.createSymbolLarge(category.symbols[i]));
-            }
-        }
-        if(category.hasOwnProperty("children")) {
-            for(var j = 0; j < category.children.length; j++) {
-                html.push(this.createCategory(category.children[j]));
-            }
-        }
-        return html.join("");
-    },
-
-    createSymbolLarge: function(symbol) {
-        return ['<a href="#" class="symbol-btn symbol-large" data-symbolid="', symbol.id, '">',
-            '<img src="', symbol.image,'">',
-            '<span>', symbol.label,'</span>',
-        '</a>'].join("");
-    },
-
-    createSymbolButton: function(symbol) {
-        return [
-            '<button class="btn symbol-btn" data-symbolid="', symbol.id, '">',
-            '<img src="', symbol.image,'">',
-            '</button>'
-        ].join("");
-    },
-
-    getSymbol: function(id) {
-        if(this.symbols.hasOwnProperty(id)) {
-            return this.symbols[id];
-        }
-        return null;
-    },
-
-    loadRecentlyUsedSymbols: function() {
-        var recentlyUsed = window.localStorage.getItem("edit.recentlyused");
-        if(recentlyUsed) {
-            this.recentlyUsed = JSON.parse(recentlyUsed);
-        }
-        var symbol;
-        // Reverse order because buttons are prepended
-        for(var i = this.recentlyUsed.length - 1; i >= 0; i--) {
-            symbol = this.getSymbol(this.recentlyUsed[i]);
-            if(symbol) {
-                this.addToQuickSelect(symbol);
-            }
-        }
-        if(this.activeSymbol === null) {
-            this.activeSymbol = symbol;
-        }
-    },
-
-    saveRecentlyUsedSymbols: function() {
-        window.localStorage.setItem("edit.recentlyused", JSON.stringify(this.recentlyUsed));
-    },
-
-    addToRecentlyUsed: function(symbol) {
-        if(this.recentlyUsed.indexOf(symbol.id) === -1) {
-            this.recentlyUsed.unshift(symbol.id);
-        }
-        if(this.recentlyUsed.length > 10) {
-            this.recentlyUsed.splice(10);
-        }
-        this.saveRecentlyUsedSymbols();
-    },
-
-    addToQuickSelect: function(symbol) {
-        var quickBtn = this.quickSelectContainer.find("[data-symbolid='" + symbol.id + "']");
-        if(quickBtn.length === 0) {
-            quickBtn = $(this.createSymbolButton(symbol));
-            this.quickSelectContainer.prepend(quickBtn);
-            this.addToRecentlyUsed(symbol);
-        }
-        this.quickSelectContainer.find(".btn-primary").removeClass("btn-primary");
-        quickBtn.addClass("btn-primary");
-    },
-
-    setActiveSymbol: function(e) {
-        this.symbolpicker.hide();
-        var symbolid = e.currentTarget.getAttribute("data-symbolid");
-        var symbol = this.getSymbol(symbolid);
-        if(!symbol) {
-            return;
-        }
-        this.activeSymbol = symbol;
-        this.addToQuickSelect(this.activeSymbol);
-    },
-
-    getActiveSymbol: function() {
-        return this.activeSymbol;
-    }
-
-});
-dbkjs.modules.SymbolManager.prototype.constructor = dbkjs.modules.SymbolManager;
-
-
-dbkjs.modules.EditButton = function(id, title, parent, iclass, conf) {
-    this.active = false;
-    this.id = id;
-    this.listeners = {};
-    conf = conf || {};
-    this.div = $("<div></div>")
-        .attr("id", id || "")
-        .addClass("edit-button-container");
-    this.a = $("<a/>")
-        .attr("title", title || "")
-        .addClass("btn btn-default olButton")
-        .on("click", this.click.bind(this));
-    $("<i/>").addClass("fa " + iclass || "").appendTo(this.a);
-    this.a.appendTo(this.div);
-    this.div.appendTo(parent);
-    if(conf.divClass) {
-        this.div.addClass(conf.divClass);
-    }
-    return this;
-};
-dbkjs.modules.EditButton.prototype = Object.create({
-    on: function(eventKey, callback, scope) {
-        this.listeners[eventKey] = { callback: callback, scope: scope };
-        return this;
-    },
-    trigger: function(evt, data) {
-        if(!this.listeners.hasOwnProperty(evt)) {
-            return;
-        }
-        this.listeners[evt].callback.apply(this.listeners[evt].scope || this, data || []);
-    },
-    click: function() {
-        if(this.active) {
-            this.deactivate();
-        } else {
-            this.activate();
-        }
-        this.trigger("click");
-    },
-    activate: function() {
-        this.active = true;
-        this.a.addClass("btn-primary");
-        this.trigger("activate", [ this ]);
-    },
-    deactivate: function() {
-        this.active = false;
-        this.a.removeClass("btn-primary");
-        this.trigger("deactivate", [ this ]);
-    }
-});
-dbkjs.modules.EditButton.prototype.con = dbkjs.modules.EditButton;
