@@ -575,9 +575,25 @@ input[type="radio"], input[type="checkbox"] {
     width: 90px;
     height: 55px;
 }
+
 .modal-popup-close:hover {
     text-decoration: none;
 }
+
+.modal-popup-switch {
+    float: right;
+    color: #428bca; /*#007AFF;*/
+    font-size: 16px;
+    padding: 15px;
+    display: block;
+    /*width: 230px;*/
+    height: 55px;
+}
+
+.modal-popup-switch:hover {
+    text-decoration: none;
+}
+
 .modal-popup-title {
     height: 55px;
     padding: 15px;

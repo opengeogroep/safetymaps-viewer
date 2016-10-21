@@ -152,12 +152,24 @@ SplitScreenWindow.prototype = Object.create(ModalWindow.prototype);
 SplitScreenWindow.prototype.constructor = SplitScreenWindow;
 
 SplitScreenWindow.prototype.createElements = function(title) {
+    var me = this;
     ModalWindow.prototype.createElements.call(this, title);
     $(this.popup).find("a.modal-popup-close").html('<i class="fa fa-arrow-left"/> Kaart');
+
+    function switchContents() {
+        return me.splitScreen ? "<i class='fa fa-expand'/> Volledig scherm" : "<i class='fa fa-columns'/> Half scherm";
+    };
+
+    var a = $("<a class='modal-popup-switch'>" + switchContents() + "</a>");
+    a.prependTo(this.popup);
+    $(a).on("click", function() {
+        me.setSplitScreen(!me.splitScreen);
+        $(me.popup).find("a.modal-popup-switch").html(switchContents());
+    });
 };
 
 SplitScreenWindow.prototype.isSplitScreen = function() {
-    return this.isSplitScreen;
+    return this.splitScreen;
 };
 
 SplitScreenWindow.prototype.setSplitScreen = function(splitScreen) {
