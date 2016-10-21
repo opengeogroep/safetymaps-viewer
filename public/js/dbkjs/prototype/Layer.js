@@ -251,6 +251,11 @@ dbkjs.Layer = dbkjs.Class({
     },
     panel: function (response) {
         _obj = this;
+
+        if(dbkjs.options.featureInfoMaxScale && dbkjs.map.getScale() > dbkjs.options.featureInfoMaxScale) {
+            return;
+        }
+
         //verwerk de featureinformatie
         g = new OpenLayers.Format.WMSGetFeatureInfo();
 
@@ -277,7 +282,8 @@ dbkjs.Layer = dbkjs.Class({
             }
         } else {
             if(dbkjs.viewmode === "fullscreen") {
-                $('#vectorclickpanel').hide();
+                // XXX use tabs like normal mode...
+                //$('#vectorclickpanel').hide();
             } else {
                 dbkjs.util.removeTab(dbkjs.wms_panel.attr("id"), _obj.id + '_pn');
             }
