@@ -44,9 +44,6 @@ dbkjs.editStyles = {
             },
             {
                 context: {
-                    radius: function(feature) {
-                        return dbkjs.scaleStyleValue(12, feature.attributes.radius);
-                    },
                     labelYOffset: function(feature) {
                         return dbkjs.scaleStyleValue(12, feature.attributes.radius) * -1.4;
                     },
@@ -79,7 +76,7 @@ dbkjs.editStyles = {
             {
                 context: {
                     radius: function(feature) {
-                        return dbkjs.scaleStyleValue(20, feature.attributes.radius, 1.66);
+                        return feature.attributes.radius * 1.66;
                     },
                     strokeWidth: function(feature) {
                         return feature.attributes.strokeWidth ? feature.attributes.strokeWidth + 2 : 14;
@@ -95,7 +92,7 @@ dbkjs.editStyles = {
             {
                 context: {
                     radius: function(feature) {
-                        return dbkjs.scaleStyleValue(24, feature.attributes.radius, 2);
+                        return feature.attributes.radius * 2;
                     },
                     strokeWidth: function(feature) {
                         return feature.attributes.strokeWidth ? feature.attributes.strokeWidth + 3 : 18;
