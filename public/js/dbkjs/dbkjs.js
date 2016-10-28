@@ -447,7 +447,6 @@ dbkjs.documentReady = function () {
                 view.find(".tab-content").css("height", tabContentHeight);
 
                 view.find(".pdf-embed").css("height", tabContentHeight - 28);
-                view.find(".img-full").css("height", tabContentHeight);
             };
             $(window).resize(updateContentHeight);
 

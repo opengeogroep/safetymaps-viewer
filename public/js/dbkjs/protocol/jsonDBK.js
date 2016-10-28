@@ -893,7 +893,7 @@ dbkjs.protocol.jsonDBK = {
                             i18n.t('app.hyperlink') + '</h2></a></div></div>'
                             );
                 } else if (waarde.filetype === 'afbeelding') {
-                    image_carousel_inner.append('<div class="item ' + active + '"><img class="img-full" src="' + realpath +
+                    image_carousel_inner.append('<div class="item ' + active + '"><img class="img-full" style="width: 100%" src="' + realpath +
                             '" onerror="dbkjs.util.mediaError(this);"><div class="carousel-caption"><h3>' +
                             waarde.naam + '</h3></div></div>');
                     feature.images.push(realpath);
