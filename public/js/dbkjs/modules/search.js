@@ -104,7 +104,6 @@ dbkjs.modules.search = {
             _obj.initSearchPopup();
         }
         _obj.searchPopup.show();
-        $('#search_input').focus();
     },
     initSearchPopup: function() {
         var _obj = dbkjs.modules.search;
