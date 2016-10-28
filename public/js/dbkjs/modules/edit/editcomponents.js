@@ -53,7 +53,9 @@ dbkjs.modules.FeaturesManager = function() {
         .addClass("panel");
     var featurescontainer = $("<div class='features-container'><table class='table table-striped features-table'>" +
         "<thead>" +
-        "<tr><td colspan='3'><a href='#' class='remove-all'>Verwijder alle</a></td></tr>" +
+        "<tr><td colspan='3'><a href='#' class='remove-all'>Verwijder alle</a>" +
+            "<div style='float: right;'><a href='#' class='save-all'><i class='fa fa-save'></i> Opslaan</a> &nbsp; <a href='#' class='load-all'><i class='fa fa-upload'></i> Laden</a></div>" +
+        "</td></tr>" +
         "<tr><td>Symb.</td><td colspan='2'>Label</td></tr>" +
         "</thead>" +
         "<tbody></tbody>" +
@@ -62,15 +64,23 @@ dbkjs.modules.FeaturesManager = function() {
     this.featureslist.appendTo("body");
 
     $("<div class='container-fluid' id='edit-symbol-properties'>" +
-        "<div class='row'>" +
+        "<div class='row prop-radius' style=\"display: none;\">" +
             "<div class='col-md-3'>" +
                 "<label for='symbolRadiusSlider'>Grootte:</label>" +
             "</div>" +
-            "<div class='col-md-9'>" +
+            "<div class='col-md-9' style=\"padding-left: 25px;\">" +
                 '<input id="symbolRadiusSlider" name="radius" type="text" />' +
             "</div>" +
         "</div>" +
-        "<div class='row'>" +
+        "<div class='row prop-rotation' style=\"display: none;\">" +
+            "<div class='col-md-3'>" +
+                "<label for='symbolRotationSlider'>Rotatie:</label>" +
+            "</div>" +
+            "<div class='col-md-9' style=\"padding-left: 25px;\">" +
+                '<input id="symbolRotationSlider" name="rotation" type="text" />' +
+            "</div>" +
+        "</div>" +
+        "<div class='row prop-label' style=\"display: none;\">" +
             "<div class='col-md-3'>" +
                 "<label for='label'>Label:</label>" +
             "</div>" +
@@ -81,6 +91,9 @@ dbkjs.modules.FeaturesManager = function() {
     "</div>").appendTo(this.featureslist);
 
     $("#symbolRadiusSlider").slider({ tooltip: "show", min: 2, max: 20, value: 12 });
+    $("#symbolRotationSlider").slider({ tooltip: "show", min: -180, max: 180, value: 0 });
+
+    this.preventEvent = false;
 
     this.featurestable = featurescontainer.find("tbody");
     this.featureslist.on("click", ".remove-feature, .remove-all", (function(e) {
@@ -92,6 +105,16 @@ dbkjs.modules.FeaturesManager = function() {
             return;
         }
         this.removeFeatureByRow(removeBtn.closest("tr"));
+    }).bind(this));
+    this.featureslist.on("click", ".load-all", (function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.trigger("loadFeatures");
+    }).bind(this));
+    this.featureslist.on("click", ".save-all", (function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.trigger("saveFeatures");
     }).bind(this));
     this.featureslist.on("click mouseenter mouseout", ".feature-row", (function(e) {
         e.preventDefault();
@@ -105,6 +128,7 @@ dbkjs.modules.FeaturesManager = function() {
             this.trigger("featureOut", [ featureid ]);
         }
     }).bind(this));
+    this.watchPropertiesChange();
 };
 dbkjs.modules.FeaturesManager.prototype = Object.create(dbkjs.modules.Observable.prototype);
 $.extend(dbkjs.modules.FeaturesManager.prototype, {
@@ -118,7 +142,7 @@ $.extend(dbkjs.modules.FeaturesManager.prototype, {
         this.featurestable.append(
             ['<tr class="feature-row" data-featureid="', feature.id,'">',
                 "<td class='symbol'>",
-                '<img src="', dbkjs.basePath, feature.attributes.graphic, '" />',
+                '<img src="', dbkjs.basePath, feature.attributes.image, '" />',
                 "</td>",
                 "<td class='lbl'>",
                 "<span>", feature.attributes.label, "</span>",
@@ -151,12 +175,48 @@ $.extend(dbkjs.modules.FeaturesManager.prototype, {
     setSelectedFeature: function(feature) {
         this.featurestable.find(".info").removeClass("info");
         this.findRowByFeatureId(feature.id).addClass("info");
+        this.preventEvent = true;
+        this.setPropertiesGrid(feature);
+        this.preventEvent = false;
     },
     unsetSelectedFeature: function(feature) {
         this.findRowByFeatureId(feature.id).removeClass("info");
     },
     findRowByFeatureId: function(featureid) {
         return this.featurestable.find(["[data-featureid=", featureid, "]"].join(""));
+    },
+    setPropertiesGrid: function(feature) {
+        var propGrid = $("#edit-symbol-properties");
+        propGrid.find("[name='label']").val(feature.attributes.label);
+        propGrid.find(".prop-label").show();
+        if(feature.attributes.hasOwnProperty("radius")) {
+            propGrid.find(".prop-radius").show();
+            propGrid.find("#symbolRadiusSlider").slider('setValue', parseInt(feature.attributes.radius, 10));
+        } else {
+            propGrid.find(".prop-radius").hide();
+        }
+        if(feature.attributes.hasOwnProperty("rotation")) {
+            propGrid.find(".prop-rotation").show();
+            propGrid.find("#symbolRotationSlider").slider('setValue', parseInt(feature.attributes.rotation, 10));
+        } else {
+            propGrid.find(".prop-rotation").hide();
+        }
+    },
+    watchPropertiesChange: function() {
+        var propGrid = $("#edit-symbol-properties").find("input");
+        var me = this;
+        propGrid.on("keyup change", function(e) {
+            if(me.preventEvent) {
+                return;
+            }
+            var name = this.getAttribute("name");
+            if(["label", "radius", "rotation"].indexOf(name) === -1) {
+                return;
+            }
+            var prop = {};
+            prop[name] = this.value;
+            me.trigger("propertyUpdated", [ prop ]);
+        });
     }
 });
 dbkjs.modules.FeaturesManager.prototype.constructor = dbkjs.modules.FeaturesManager;
@@ -169,10 +229,12 @@ dbkjs.modules.FeaturesManager.prototype.constructor = dbkjs.modules.FeaturesMana
  * @constructor
  */
 dbkjs.modules.SymbolManager = function(symbols, quickSelectContainer, symbolPickerBtn) {
+    dbkjs.modules.Observable.call(this);
     this.symbolTree = symbols;
     this.symbols = {};
-    this.recentlyUsed = [];
-    this.activeSymbol = null;
+    this.symbolFilter = "";
+    this.recentlyUsed = { point: [], line: [], area: [] };
+    this.activeSymbol = { point: null, line: null, area: null };
     this.quickSelectContainer = $(quickSelectContainer);
 
     this.createSymbolsIndex();
@@ -182,10 +244,36 @@ dbkjs.modules.SymbolManager = function(symbols, quickSelectContainer, symbolPick
     // Listeners
     $(symbolPickerBtn).on("click", (function() { this.symbolpicker.show() }).bind(this));
     this.quickSelectContainer.add(this.symbolpicker.find(".panel-body"))
-        .on("click", ".symbol-btn", this.setActiveSymbol.bind(this));
+        .on("click", ".symbol-btn", this.handleSymbolButtonClick.bind(this));
 };
-dbkjs.modules.SymbolManager.prototype = Object.create({
+dbkjs.modules.SymbolManager.prototype = Object.create(dbkjs.modules.Observable.prototype);
+$.extend(dbkjs.modules.SymbolManager.prototype, {
 
+    setFilter: function(filter) {
+        this.symbolFilter = filter;
+        var containers = this.quickSelectContainer.add(this.symbolpicker.find(".panel-body"));
+        containers.find(".maincategory, .subcategory, .symbol-btn").addClass("hidden").removeClass("visible");
+        containers.find(".type-" + this.symbolFilter).removeClass("hidden").addClass("visible");
+        containers.find(".subcategory").each(function() {
+            if($(this).children(".visible").length > 0) {
+                $(this).removeClass("hidden").addClass("visible");
+            }
+        });
+        containers.find(".maincategory").each(function() {
+            if($(this).children(".visible").length > 0) {
+                $(this).removeClass("hidden").addClass("visible");
+            }
+        });
+
+        var selected = this.quickSelectContainer.find(".symbol-btn").not(".hidden").first();
+        if(selected.length) {
+            this.setActiveSymbol(selected.data("symbolid"));
+        }
+    },
+
+    /**
+     * Create indexed list of all symbols for easy lookup
+     */
     createSymbolsIndex: function() {
         for(var i = 0; i < this.symbolTree.length; i++) {
             this.addSymbolsToIndex(this.symbolTree[i]);
@@ -221,6 +309,7 @@ dbkjs.modules.SymbolManager.prototype = Object.create({
 
     createCategory: function(category, rootLevel) {
         var html = [];
+        html.push("<div class=\"", (rootLevel ? "maincategory" : "subcategory") ,"\">");
         if(category.hasOwnProperty("name")) {
             if(rootLevel) {
                 html.push("<h3>", category.name, "</h3>");
@@ -238,11 +327,12 @@ dbkjs.modules.SymbolManager.prototype = Object.create({
                 html.push(this.createCategory(category.children[j]));
             }
         }
+        html.push("</div>");
         return html.join("");
     },
 
     createSymbolLarge: function(symbol) {
-        return ['<a href="#" class="symbol-btn symbol-large" data-symbolid="', symbol.id, '">',
+        return ['<a href="#" class="symbol-btn symbol-large type-', symbol.type, '" data-symbolid="', symbol.id, '">',
             '<img src="', symbol.image,'">',
             '<span>', symbol.label,'</span>',
             '</a>'].join("");
@@ -250,7 +340,7 @@ dbkjs.modules.SymbolManager.prototype = Object.create({
 
     createSymbolButton: function(symbol) {
         return [
-            '<button class="btn symbol-btn" data-symbolid="', symbol.id, '">',
+            '<button class="btn symbol-btn type-', symbol.type, '" data-symbolid="', symbol.id, '">',
             '<img src="', symbol.image,'">',
             '</button>'
         ].join("");
@@ -267,17 +357,30 @@ dbkjs.modules.SymbolManager.prototype = Object.create({
         var recentlyUsed = window.localStorage.getItem("edit.recentlyused");
         if(recentlyUsed) {
             this.recentlyUsed = JSON.parse(recentlyUsed);
+            if($.isArray(this.recentlyUsed)) { // legacy fallback, remove asap
+                this.recentlyUsed = { point: [], line: [], area: [] };
+                this.saveRecentlyUsedSymbols();
+            }
         }
+        this.loadRecentlyUsedType("point");
+        this.loadRecentlyUsedType("line");
+        this.loadRecentlyUsedType("area");
+    },
+
+    loadRecentlyUsedType: function(type) {
         var symbol;
         // Reverse order because buttons are prepended
-        for(var i = this.recentlyUsed.length - 1; i >= 0; i--) {
-            symbol = this.getSymbol(this.recentlyUsed[i]);
+        for(var i = this.recentlyUsed[type].length - 1; i >= 0; i--) {
+            symbol = this.getSymbol(this.recentlyUsed[type][i]);
             if(symbol) {
                 this.addToQuickSelect(symbol);
             }
         }
-        if(this.activeSymbol === null) {
-            this.activeSymbol = symbol;
+        if(!symbol) {
+            return;
+        }
+        if(this.activeSymbol[type] === null) {
+            this.activeSymbol[type] = symbol;
         }
     },
 
@@ -286,11 +389,12 @@ dbkjs.modules.SymbolManager.prototype = Object.create({
     },
 
     addToRecentlyUsed: function(symbol) {
-        if(this.recentlyUsed.indexOf(symbol.id) === -1) {
-            this.recentlyUsed.unshift(symbol.id);
+        var type = symbol.type;
+        if(this.recentlyUsed[type].indexOf(symbol.id) === -1) {
+            this.recentlyUsed[type].unshift(symbol.id);
         }
-        if(this.recentlyUsed.length > 10) {
-            this.recentlyUsed.splice(10);
+        if(this.recentlyUsed[type].length > 10) {
+            this.recentlyUsed[type].splice(10);
         }
         this.saveRecentlyUsedSymbols();
     },
@@ -302,23 +406,27 @@ dbkjs.modules.SymbolManager.prototype = Object.create({
             this.quickSelectContainer.prepend(quickBtn);
             this.addToRecentlyUsed(symbol);
         }
-        this.quickSelectContainer.find(".btn-primary").removeClass("btn-primary");
-        quickBtn.addClass("btn-primary");
     },
 
-    setActiveSymbol: function(e) {
+    handleSymbolButtonClick: function(e) {
         this.symbolpicker.hide();
-        var symbolid = e.currentTarget.getAttribute("data-symbolid");
+        this.setActiveSymbol(e.currentTarget.getAttribute("data-symbolid"));
+    },
+
+    setActiveSymbol: function(symbolid) {
         var symbol = this.getSymbol(symbolid);
         if(!symbol) {
             return;
         }
-        this.activeSymbol = symbol;
-        this.addToQuickSelect(this.activeSymbol);
+        this.activeSymbol[symbol.type] = symbol;
+        this.addToQuickSelect(symbol);
+        this.quickSelectContainer.find(".btn-primary").removeClass("btn-primary");
+        this.quickSelectContainer.find("[data-symbolid='" + symbol.id + "']").addClass("btn-primary");
+        this.trigger("activeSymbolChanged", [ symbol ]);
     },
 
     getActiveSymbol: function() {
-        return this.activeSymbol;
+        return this.activeSymbol[this.symbolFilter] || this.activeSymbol["point"];
     }
 
 });

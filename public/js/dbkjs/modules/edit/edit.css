@@ -73,11 +73,14 @@
     border: 1px solid rgb(104,104,104);
     bottom: 0;
     position: absolute;
-    z-index: 3000;
     height: 120px;
     display: none;
     left: 144px;
     right: 2px;
+}
+
+#edit-properties {
+    z-index: 3000;
 }
 
 .edit-type-buttons {
@@ -149,6 +152,7 @@
     bottom: 0;
     top: 0;
     width: 35vw;
+    min-width: 275px;
     height: auto;
 }
 

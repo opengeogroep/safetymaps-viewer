@@ -26,19 +26,24 @@ dbkjs.editStyles = {
     symbol: new OpenLayers.StyleMap({
         "default": new OpenLayers.Style(
             {
+                // points
                 pointRadius: "${radius}",
-                externalGraphic: "${graphic}",
+                externalGraphic: "${image}",
                 label: "${label}",
                 labelYOffset: "${labelYOffset}",
                 labelOutlineWidth: 2,
-                labelOutlineColor: 'white'
+                labelOutlineColor: 'white',
+                // lines and areas
+                strokeColor: "${strokeColor}",
+                strokeWidth: "${strokeWidth}",
+                strokeDashstyle: "${strokeDashstyle}",
+                strokeLinecap: "${strokeLinecap}",
+                // Area
+                fillColor: "${fillColor}",
+                fillOpacity: "${fillOpacity}"
             },
             {
                 context: {
-                    graphic: function(feature) {
-                        var img = feature.attributes.graphic;
-                        return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + img : imagesBase64[img];
-                    },
                     radius: function(feature) {
                         return dbkjs.scaleStyleValue(12, feature.attributes.radius);
                     },
@@ -47,6 +52,21 @@ dbkjs.editStyles = {
                     },
                     label: function(feature) {
                         return feature.attributes.label || "";
+                    },
+                    strokeDashstyle: function(feature) {
+                        return feature.attributes.strokeDashstyle || "solid"
+                    },
+                    strokeLinecap: function(feature) {
+                        return feature.attributes.strokeLinecap || "round";
+                    },
+                    fillColor: function(feature) {
+                        return feature.attributes.fillColor || "transparent";
+                    },
+                    fillOpacity: function(feature) {
+                        if(feature.attributes.type === "point") {
+                            return 1;
+                        }
+                        return feature.attributes.fillOpacity || 0.5;
                     }
                 }
             }
@@ -54,26 +74,31 @@ dbkjs.editStyles = {
         "select": new OpenLayers.Style(
             {
                 pointRadius: "${radius}",
-                strokeColor: "#357ebd"/*,
-                labelOutlineColor: "#357ebd",
-                labelOutlineWidth: 2*/
+                strokeWidth: "${strokeWidth}"
             },
             {
                 context: {
                     radius: function(feature) {
                         return dbkjs.scaleStyleValue(20, feature.attributes.radius, 1.66);
+                    },
+                    strokeWidth: function(feature) {
+                        return feature.attributes.strokeWidth ? feature.attributes.strokeWidth + 2 : 14;
                     }
                 }
             }
         ),
         "hover": new OpenLayers.Style(
             {
-                pointRadius: "${radius}"
+                pointRadius: "${radius}",
+                strokeWidth: "${strokeWidth}"
             },
             {
                 context: {
                     radius: function(feature) {
                         return dbkjs.scaleStyleValue(24, feature.attributes.radius, 2);
+                    },
+                    strokeWidth: function(feature) {
+                        return feature.attributes.strokeWidth ? feature.attributes.strokeWidth + 3 : 18;
                     }
                 }
             }
@@ -81,25 +106,40 @@ dbkjs.editStyles = {
     })
 };
 
-
 dbkjs.modules.EditSymbols = [
+    {
+        "name": "REALITEIT -- RAMPEN / ONGEVALLEN",
+        "children": [
+            {
+                "name": "RAMPZONES",
+                "symbols": [
+                    { "id": "s0070", "type": "area", "image": "images/imoov/s0070---g.png", "label": "Brongebied", "rotation": 0, "strokeWidth": 2, "strokeColor": "#000000", "fillColor": "#808284" },
+                    { "id": "s0080", "type": "area", "image": "images/imoov/s0080---g.png", "label": "Effectgebied, huidige situatie", "rotation": 0, "strokeWidth": 2, "strokeColor": "#000000", "fillColor": "#1FA2FF" },
+                    { "id": "s0090", "type": "area", "image": "images/imoov/s0090---g.png", "label": "Effectgebied, prognose", "rotation": 0, "strokeWidth": 3, "strokeColor": "#1FA2FF", "strokeDashstyle": "1,6" }
+                ]
+            }
+        ]
+    },
     {
         "name": "REPRESSIE / RAMPENBESTRIJDING",
         "children": [
             {
                 "name": "MAATREGELEN EN INZET",
                 "symbols": [
-                    { "id": "s0590_B03", "image": "images/imoov/s0590_B03---g.png", "label": "Brandweer Voertuig" },
-                    { "id": "s0600_B04", "image": "images/imoov/s0600_B04---g.png", "label": "Brandweer Blusboot" },
-                    { "id": "s0610_B05", "image": "images/imoov/s0610_B05---g.png", "label": "Brandweer Meetploeg" },
-                    { "id": "s0620_B12", "image": "images/imoov/s0620_B12---g.png", "label": "Brandweer Ontsmettingssluis voertuigen" },
-                    { "id": "s0630_B13", "image": "images/imoov/s0630_B13---g.png", "label": "Brandweer Decontaminatie (personen)" }
+                    { "id": "s0590_B03", "type": "point", "image": "images/imoov/s0590_B03---g.png", "label": "Brandweer Voertuig" },
+                    { "id": "s0600_B04", "type": "point", "image": "images/imoov/s0600_B04---g.png", "label": "Brandweer Blusboot" },
+                    { "id": "s0610_B05", "type": "point", "image": "images/imoov/s0610_B05---g.png", "label": "Brandweer Meetploeg" },
+                    { "id": "s0620_B12", "type": "point", "image": "images/imoov/s0620_B12---g.png", "label": "Brandweer Ontsmettingssluis voertuigen" },
+                    { "id": "s0630_B13", "type": "point", "image": "images/imoov/s0630_B13---g.png", "label": "Brandweer Decontaminatie (personen)" }
                 ]
             },
             {
                 "name": "EVACUATIE EN LOGISTIEK",
                 "symbols": [
-                    { "id": "s0740_B14", "image": "images/imoov/s0740_B14---g.png", "label": "Brandstofvoorziening voor hulpverleningsvoertuigen" }
+                    { "id": "s0690", "type": "line", "image": "images/imoov/s0690---g.png", "label": "Evacuatiegebied, grens", "strokeWidth": 6, "strokeColor": "#A41926", "strokeDashstyle": "1,9", "strokeLinecap": "square" },
+                    { "id": "s0700", "type": "line", "image": "images/imoov/s0700---g.png", "label": "Evacuatieroute", "strokeWidth": 6, "strokeColor": "#51B848" },
+                    { "id": "s0720", "type": "line", "image": "images/imoov/s0720---g.png", "label": "Extra aanvoerroutes hulpdiensten", "strokeWidth": 3, "strokeColor": "#51B848" },
+                    { "id": "s0740_B14", "type": "point", "image": "images/imoov/s0740_B14---g.png", "label": "Brandstofvoorziening voor hulpverleningsvoertuigen" }
                 ]
             }
         ]
@@ -110,9 +150,9 @@ dbkjs.modules.EditSymbols = [
             {
                 "name": "COMMANDOCENTRA EN UITGANGSSTELLINGEN",
                 "symbols": [
-                    { "id": "s0850_B01-A", "image": "images/imoov/s0850_B01-A---g.png", "label": "Brandweer OVD, Officier van Dienst" },
-                    { "id": "s0870_B03", "image": "images/imoov/s0870_B03---g.png", "label": "Brandweer Uitgangsstelling" },
-                    { "id": "s0880_B06", "image": "images/imoov/s0880_B06---g.png", "label": "Brandweer Bluswatervoorziening (algemeen) brandkraan, geboorde put of open water" }
+                    { "id": "s0850_B01-A", "type": "point", "image": "images/imoov/s0850_B01-A---g.png", "label": "Brandweer OVD, Officier van Dienst" },
+                    { "id": "s0870_B03", "type": "point", "image": "images/imoov/s0870_B03---g.png", "label": "Brandweer Uitgangsstelling" },
+                    { "id": "s0880_B06", "type": "point", "image": "images/imoov/s0880_B06---g.png", "label": "Brandweer Bluswatervoorziening (algemeen) brandkraan, geboorde put of open water" }
                 ]
             }
         ]
@@ -139,8 +179,10 @@ dbkjs.modules.edit = {
     featuresManager: null,
     /** @var OpenLayers.Feature.Vector selectedFeature */
     selectedFeature: null,
-    /** @var OpenLayers.Control.DrawFeature drawFeatureControl */
-    drawFeatureControl: null,
+    /** @var OpenLayers.Control.DrawFeature drawLineControl */
+    drawLineControl: null,
+    /** @var OpenLayers.Control.DrawFeature drawAreaControl */
+    drawAreaControl: null,
 
     register: function() {
         var me = this;
@@ -184,22 +226,42 @@ dbkjs.modules.edit = {
         };
 
         var drawOptions = {
+            eventListeners: {
+                "featureadded": function(evt) {
+                    me.createFeature(evt.feature);
+                }
+            },
             handlerOptions: {
                 freehand: true,
                 freehandToggle: null
             }
         };
-        me.drawFeatureControl = new OpenLayers.Control.DrawFeature(me.layer, OpenLayers.Handler.Path, drawOptions);
-        dbkjs.map.addControl(me.drawFeatureControl);
-        me.drawFeatureControl.deactivate();
+
+        me.drawLineControl = new OpenLayers.Control.DrawFeature(me.layer, OpenLayers.Handler.Path, drawOptions);
+        dbkjs.map.addControl(me.drawLineControl);
+        me.drawLineControl.deactivate();
+
+        var areaDrawOptions = {
+            eventListeners: {
+                "featureadded": function(evt) {
+                    me.createFeature(evt.feature);
+                }
+            },
+            handlerOptions: {
+                sides: 40,
+                multi: true,
+                irregular: true
+            }
+        };
+        me.drawAreaControl = new OpenLayers.Control.DrawFeature(me.layer, OpenLayers.Handler.RegularPolygon, areaDrawOptions);
+        dbkjs.map.addControl(me.drawAreaControl);
+        me.drawAreaControl.deactivate();
 
         this.symbolmanager = new dbkjs.modules.SymbolManager(dbkjs.modules.EditSymbols, "#edit-symbol-buttons", "#symbol-picker-button");
+        this.symbolmanager.on("activeSymbolChanged", this.activeSymbolChanged, this);
 
         this.initFeaturesManager();
-
-        this.watchPropertiesChange();
-
-        this.enableSymbolMode();
+        this.setFilter("point");
     },
 
     activate: function() {
@@ -241,6 +303,20 @@ dbkjs.modules.edit = {
                     this.setSelectedFeature(feature);
                 }
             }, this)
+            .on("propertyUpdated", function(property) {
+                if(!this.selectedFeature) {
+                    return;
+                }
+                if(property.hasOwnProperty("rotation")) {
+                    var origin = this.selectedFeature.geometry.getCentroid();
+                    var rotate = parseInt(property.rotation, 10);
+                    var delta = rotate - parseInt(this.selectedFeature.attributes.rotation, 10);
+                    this.selectedFeature.geometry.rotate(delta, origin);
+                }
+                this.selectedFeature.attributes = $.extend({}, this.selectedFeature.attributes, property);
+                this.updateLayer();
+                this.featuresManager.updateFeature(this.selectedFeature);
+            }, this)
             .on("featureOver", function(featureid) {
                 var feature = this.layer.getFeatureById(featureid);
                 if(feature) {
@@ -256,32 +332,32 @@ dbkjs.modules.edit = {
                     }
                     this.layer.drawFeature(feature, styleIntent);
                 }
-            }, this);
+            }, this)
+            .on("saveFeatures", this.saveFeatures, this)
+            .on("loadFeatures", this.readSavedFeatures, this);
     },
 
-    setPropertiesGrid: function(feature) {
-        var propGrid = $("#edit-symbol-properties");
-        propGrid.find("[name='label']").val(feature.attributes.label);
-        propGrid.find("#symbolRadiusSlider").slider('setValue', parseInt(feature.attributes.radius, 10));
+    readSavedFeatures: function() {
+        // Read GeoJSON
+        var saved = window.localStorage.getItem("edit.drawedFeatures");
+        if(!saved) {
+            return;
+        }
+        var json = JSON.parse(saved);
+        var geoJsonFormatter = new OpenLayers.Format.GeoJSON();
+        this.featuresManager.removeAllFeatures();
+        this.layer.features = geoJsonFormatter.read(json);
+        this.layer.redraw();
+        var feature;
+        for(var i = 0; i < this.layer.features.length; i++) {
+            feature = this.layer.features[i];
+            this.featuresManager.addFeature(feature);
+        }
+        this.setSelectedFeature(feature);
     },
 
-    watchPropertiesChange: function() {
-        var propGrid = $("#edit-symbol-properties").find("input");
-        var me = this;
-        propGrid.on("keyup change", function(e) {
-            if(!me.selectedFeature) {
-                return;
-            }
-            if(this.getAttribute("name") === "label") {
-                me.selectedFeature.attributes.label = this.value;
-                me.updateLayer(true);
-            }
-            if(this.getAttribute("name") === "radius") {
-                me.selectedFeature.attributes.radius = this.value;
-                me.updateLayer();
-            }
-            me.featuresManager.updateFeature(me.selectedFeature);
-        });
+    saveFeatures: function() {
+        window.localStorage.setItem("edit.drawedFeatures", JSON.stringify((new OpenLayers.Format.GeoJSON()).write(this.layer.features)));
     },
 
     updateLayer: function(useTimeout) {
@@ -297,7 +373,6 @@ dbkjs.modules.edit = {
         this.clearSelectedFeature();
         this.layer.drawFeature(feature, "select");
         this.selectedFeature = feature;
-        this.setPropertiesGrid(this.selectedFeature);
         this.featuresManager.setSelectedFeature(this.selectedFeature);
     },
 
@@ -308,48 +383,96 @@ dbkjs.modules.edit = {
         this.featuresManager.unsetSelectedFeature(this.selectedFeature);
     },
 
-    enableSymbolMode: function() {
-        this.mode = "add-symbol";
-        this.buttonSymbol.addClass("btn-primary");
-        this.disableLineMode();
+    setFilter: function(filter) {
+        $(".filter-buttons").removeClass("btn-primary");
+        $(".filter-" + filter).addClass("btn-primary");
+        this.symbolmanager.setFilter(filter);
     },
 
-    disableSymbolMode: function() {
-        this.buttonSymbol.removeClass("btn-primary");
+    activeSymbolChanged: function(activeSymbol) {
+        if(!activeSymbol) {
+            return;
+        }
+        if(this.mode === activeSymbol.type) {
+            return;
+        }
+
+        // Disable previous mode
+        if(this.mode === "point") {
+            this.disablePointMode();
+        } else if(this.mode === "line") {
+            this.disableLineMode();
+        } else if(this.mode === "area") {
+            this.disableAreaMode();
+        }
+
+        // Enable new mode
+        if(activeSymbol.type === "point") {
+            this.enablePointMode();
+        } else if(activeSymbol.type === "line") {
+            this.enableLineMode();
+        } else if(activeSymbol.type === "area") {
+            this.enableAreaMode();
+        } else {
+            this.mode = "";
+        }
+    },
+
+    enablePointMode: function() {
+        this.mode = "point";
+    },
+
+    disablePointMode: function() {
+
     },
 
     enableLineMode: function() {
-        this.mode = "add-line";
+        this.mode = "line";
         $("body").addClass("disable-selection");
-        this.buttonLine.addClass("btn-primary");
-        this.drawFeatureControl.activate();
-        this.disableSymbolMode();
+        this.drawLineControl.activate();
     },
 
     disableLineMode: function() {
         $("body").removeClass("disable-selection");
-        this.buttonLine.removeClass("btn-primary");
-        this.drawFeatureControl.deactivate();
+        this.drawLineControl.deactivate();
+    },
+
+    enableAreaMode: function() {
+        this.mode = "area";
+        $("body").addClass("disable-selection");
+        this.drawAreaControl.activate();
+    },
+
+    disableAreaMode: function() {
+        $("body").removeClass("disable-selection");
+        this.drawAreaControl.deactivate();
     },
 
     mapClick: function(lonLat) {
         var me = this;
-        if(this.mode === "add-symbol") {
+        if(this.mode === "point") {
             var symbol = me.symbolmanager.getActiveSymbol();
             if(!symbol) {
                 alert("Selecteer eerst een symbool");
                 return;
             }
-            var feature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(lonLat.lon, lonLat.lat), {
-                graphic: symbol.image,
-                radius: 12,
-                symbol: symbol.id,
-                label: ""
-            });
+            var feature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(lonLat.lon, lonLat.lat));
             me.layer.addFeatures(feature);
-            this.setSelectedFeature(feature);
-            me.featuresManager.addFeature(feature);
+            this.createFeature(feature, symbol);
         }
+    },
+
+    createFeature: function(feature) {
+        var symbol = this.symbolmanager.getActiveSymbol();
+        var attributes = $.extend({}, symbol, {
+            label: ""
+        });
+        if(symbol.type === "point") {
+            attributes.radius = 12;
+        }
+        feature.attributes = attributes;
+        this.featuresManager.addFeature(feature);
+        this.setSelectedFeature(feature);
     },
 
     deactivateButtons: function(btn) {
@@ -358,6 +481,15 @@ dbkjs.modules.edit = {
                 this.buttons[i].deactivate();
             }
         }
+    },
+
+    createFilterButton: function(label, filter) {
+        return $("<button/>")
+            .addClass("btn btn-secondary filter-buttons filter-" + filter)
+            .text(label)
+            .on("click", (function(e) {
+                this.setFilter(filter);
+            }).bind(this));
     },
 
     createElements: function() {
@@ -410,15 +542,15 @@ dbkjs.modules.edit = {
                 me.properties.show();
                 $("#mapc1map1").css("cursor", "crosshair");
                 me.catchClick = true;
-                me.enableSymbolMode();
             })
             .on("deactivate", function() {
                 me.properties.hide();
                 $("#mapc1map1").css("cursor", "auto");
                 me.catchClick = false;
                 me.mode = "";
-                me.disableSymbolMode();
+                me.disablePointMode();
                 me.disableLineMode();
+                me.disableAreaMode();
             });
 
         me.selectButton = new dbkjs.modules.EditButton("select", "Selecteer", me.editBox, "fa-mouse-pointer")
@@ -445,28 +577,9 @@ dbkjs.modules.edit = {
                 .attr("role", "group")
                 .appendTo("#edit-properties");
 
-        me.buttonSymbol = $("<button/>")
-                .attr("id", "edit-button-symbol")
-                .addClass("btn btn-secondary")
-                .text("Symbool")
-                .on("click", function() {
-                    me.enableSymbolMode();
-                })
-                .appendTo(group);
-        me.buttonLine = $("<button/>")
-                .attr("id", "edit-button-line")
-                .addClass("btn btn-secondary")
-                .text("Lijn")
-                .on("click", function() {
-                    me.enableLineMode();
-                })
-                .appendTo(group);
-        me.buttonArea = $("<button/>")
-                .attr("id", "edit-button-line")
-                .addClass("btn btn-secondary ")
-                .attr("disabled", "disabled")
-                .text("Gebied")
-                .appendTo(group);
+        group.append(this.createFilterButton("Symbool", "point"));
+        group.append(this.createFilterButton("Lijn", "line"));
+        group.append(this.createFilterButton("Gebied", "area"));
 
         $("<div class='container properties-container'>" +
                 "<div class='row'>" +
