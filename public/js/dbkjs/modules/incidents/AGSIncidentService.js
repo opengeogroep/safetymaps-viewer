@@ -948,12 +948,16 @@ AGSIncidentService.prototype.getVehiclePositions = function(vehicles) {
         } else {
             var features = [];
 
+            var cutoff = new moment().subtract(2, 'hours');
             $.each(data.features, function(i, f) {
-                var p = new Proj4js.Point(f.geometry.x, f.geometry. y);
-                var t = Proj4js.transform(new Proj4js.Proj("EPSG:4326"), new Proj4js.Proj(dbkjs.options.projection.code), p);
-                var p = new OpenLayers.Geometry.Point(t.x, t.y);
-                var feature = new OpenLayers.Feature.Vector(p, f.attributes);
-                features.push(feature);
+                var dateTime = moment(f.attributes.PosDate + " " + f.attributes.PosTime, "DD-MM-YYYY HH:mm:ss");
+                if(dateTime.isAfter(cutoff)) {
+                    var p = new Proj4js.Point(f.geometry.x, f.geometry. y);
+                    var t = Proj4js.transform(new Proj4js.Proj("EPSG:4326"), new Proj4js.Proj(dbkjs.options.projection.code), p);
+                    var p = new OpenLayers.Geometry.Point(t.x, t.y);
+                    var feature = new OpenLayers.Feature.Vector(p, f.attributes);
+                    features.push(feature);
+                }
             });
             d.resolve(features);
         }
