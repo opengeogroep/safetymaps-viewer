@@ -228,7 +228,9 @@
         "coordinates": "Coordinaten",
         "coordplaceholder": "Lon,lat of X,Y punt voor decimaal",
         "infrastructure": "Hectometer",
-        "infraplaceholder": "Naam en hectometer"
+        "infraplaceholder": "Naam en hectometer",
+        "library": "Boeken &amp; Kaarten",
+        "libraryplaceholder": "Naam van boek of kaart"
     },
     "gms":{
         "gms": "Melding"

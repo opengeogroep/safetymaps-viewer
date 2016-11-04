@@ -53,6 +53,9 @@ dbkjs.modules.search = {
         } else {
             this.inlineLayout();
         }
+
+        this.initLibrarySearch();
+
         // Layer name starts with _ to hide in support module layer list
         this.layer = new OpenLayers.Layer.Vector('_search');
         dbkjs.map.addLayer(this.layer);
@@ -219,7 +222,7 @@ dbkjs.modules.search = {
             };
 
         if(dbkjs.options.searchTabs) {
-            $("#s_dbk, #s_address, #s_oms").on('click', function(e) {
+            $("#s_dbk, #s_address, #s_oms, #s_library").on('click', function(e) {
                 var searchId = $(e.target).attr("id");
                 if(searchId && searchId.indexOf("s_") === 0) {
                     currentSearch = searchId.substring(2);
@@ -239,6 +242,12 @@ dbkjs.modules.search = {
             }
 
             var searchText = searchField.val();
+
+            if(currentSearch === 'library') {
+                _obj.handleLibrarySearch(searchText);
+                return;
+            }
+
             if(searchText.length === 0) {
                 $('.search_result').html('');
                 return;
@@ -259,6 +268,7 @@ dbkjs.modules.search = {
             if(currentSearch === 'address') {
                 _obj.handleAddressSearch(searchText);
             }
+
         });
         $('#search_dropdown a').click(function(e) {
             var searchType = $(this).attr('id'),
@@ -358,6 +368,79 @@ dbkjs.modules.search = {
             });
         }
         return dataset;
+    },
+    initLibrarySearch: function() {
+        var me = this;
+        me.library = [];
+        $.ajax("api/library.json", {
+            dataType: "json",
+            ifModified: true,
+        })
+        .done(function(data) {
+            me.library = data.items;
+            console.log("Got " + me.library.length + " library items");
+        });
+    },
+    initLibraryPopup: function() {
+        var me = this;
+
+        if(me.libraryPopup) {
+            return;
+        }
+        me.libraryPopup = dbkjs.util.createModalPopup({
+            name: 'library',
+            title: 'Zoeken | Boeken &amp; Kaarten',
+            hideCallback: function() {
+                //me.libraryPopup.getView().html("");
+            }
+        });
+
+        var updateContentHeight = function() {
+            var view = me.libraryPopup.getView();
+            if(view) {
+                console.log("updating library pdf div height to " +  view.height() - view.find(".pdf-heading").height());
+                me.libraryPopup.getView().find(".pdf-embed").css("height", view.height() - view.find(".pdf-heading").height());
+            }
+        };
+
+        $(window).resize(updateContentHeight);
+
+        var event = dbkjs.util.getTransitionEvent();
+        if(event) {
+            me.libraryPopup.getView().parent().on(event, updateContentHeight);
+        } else {
+            updateContentHeight();
+        }
+    },
+    handleLibrarySearch: function(searchText) {
+        var me = this;
+        var regExp = new RegExp(searchText, 'ig');
+        var searchResultContainer = $('.search_result');
+        var item_ul = $('<ul class="nav nav-pills nav-stacked"></ul>');
+        searchResultContainer.html('');
+        $.each(me.library, function(i, item) {
+            if(searchText.trim() === "" || regExp.test(item.Omschrijving)) {
+                item_ul.append($('<li><a href="#">' + item.Omschrijving + '</a></li>').on('click', function(e) {
+                    e.preventDefault();
+                    me.showLibraryItem(item);
+                }));
+            }
+        });
+        searchResultContainer.append(item_ul);
+    },
+    showLibraryItem: function(item) {
+        var me = this;
+        me.initLibraryPopup();
+
+        var realpath = dbkjs.mediaPath + "bibliotheek/" + item.Documentnaam;
+        me.libraryPopup.getView().html("");
+        me.libraryPopup.getView().append('<h3 class="pdf-heading" style="margin: 0; text-align: center; height: 28px"><a href="' + realpath + '" target="_blank">' + item.Omschrijving + ' (' + item.Documentnaam + ')</a></h3>' +
+                                '<div class="pdf-embed" id="pdf_embed_library"/>');
+        me.libraryPopup.show();
+
+        PDFObject.embed(realpath, $("#pdf_embed_library"), {
+            PDFJS_URL: "js/libs/pdfjs-1.5.188-minified/web/viewer.html"
+        });
     },
     activate: function() {
         var _obj = dbkjs.modules.search;

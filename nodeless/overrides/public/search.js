@@ -11,6 +11,7 @@ dbkjs.modules.search.createSearchGroup = function() {
                     '<li class="active"><a data-toggle="tab" href="#" id="s_dbk"><i class="fa fa-building"></i> ' + i18n.t("search.dbk") + '</a></li>' +
                     '<li><a  data-toggle="tab" href="#" id="s_address"><i class="fa fa-home"></i> ' + i18n.t("search.address") + '</a></li>' +
                     '<li><a  data-toggle="tab" href="#" id="s_oms"><i class="fa fa-bell"></i> ' + i18n.t("search.oms") + '</a></li>' +
+                    '<li><a  data-toggle="tab" href="#" id="s_library"><i class="fa fa-book"></i> ' + i18n.t("search.library") + '</a></li>' +
                 '</ul>'
         );
 
