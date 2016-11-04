@@ -389,7 +389,7 @@ dbkjs.modules.search = {
         }
         me.libraryPopup = dbkjs.util.createModalPopup({
             name: 'library',
-            title: 'Zoeken | Boeken &amp; Kaarten',
+            title: i18n.t("search.search") + ' | ' + i18n.t("search.library"),
             hideCallback: function() {
                 //me.libraryPopup.getView().html("");
             }
