@@ -116,6 +116,10 @@ dbkjs.modules.search = {
         _obj.searchPopup.getView().append(_obj.createSearchGroup());
         _obj.searchPopup.getView().append('<div class="row"><div class="col-lg-12 search_result"></div></div>');
         _obj.activateFullscreen();
+
+        if(_obj.library && _obj.library.length > 0) {
+            $("#search_li_library").show();
+        }
     },
     createSearchGroup: function() {
         var search_group = $('<div></div>').addClass('input-group input-group-lg');
@@ -379,6 +383,9 @@ dbkjs.modules.search = {
         .done(function(data) {
             me.library = data.items;
             console.log("Got " + me.library.length + " library items");
+            if(me.library.length > 0) {
+                $("#search_li_library").show();
+            }
         });
     },
     initLibraryPopup: function() {
