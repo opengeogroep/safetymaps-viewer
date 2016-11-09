@@ -335,26 +335,31 @@ dbkjs.modules.edit = {
     },
 
     readSavedFeatures: function() {
+        var me = this;
         // Read GeoJSON
-        var saved = window.localStorage.getItem("edit.drawedFeatures");
-        if(!saved) {
-            return;
-        }
-        var json = JSON.parse(saved);
-        var geoJsonFormatter = new OpenLayers.Format.GeoJSON();
-        this.featuresManager.removeAllFeatures();
-        this.layer.features = geoJsonFormatter.read(json);
-        this.layer.redraw();
-        var feature;
-        for(var i = 0; i < this.layer.features.length; i++) {
-            feature = this.layer.features[i];
-            this.featuresManager.addFeature(feature);
-        }
-        this.setSelectedFeature(feature);
+        $.ajax("api/edit", { data: { load: "true" } })
+        .done(function(saved) {
+            var geoJsonFormatter = new OpenLayers.Format.GeoJSON();
+            me.featuresManager.removeAllFeatures();
+            me.layer.features = geoJsonFormatter.read(saved);
+            me.layer.redraw();
+            var feature;
+            for(var i = 0; i < me.layer.features.length; i++) {
+                feature = me.layer.features[i];
+                this.featuresManager.addFeature(feature);
+            }
+            me.setSelectedFeature(feature);
+        });
     },
 
     saveFeatures: function() {
-        window.localStorage.setItem("edit.drawedFeatures", JSON.stringify((new OpenLayers.Format.GeoJSON()).write(this.layer.features)));
+        //window.localStorage.setItem("edit.drawedFeatures", JSON.stringify((new OpenLayers.Format.GeoJSON()).write(this.layer.features)));
+        $.ajax("api/edit", {
+            method: "POST",
+            data: { save: "true", features: JSON.stringify((new OpenLayers.Format.GeoJSON()).write(this.layer.features)) }
+        })
+        .done(function(result) {
+        });
     },
 
     updateLayer: function(useTimeout) {
