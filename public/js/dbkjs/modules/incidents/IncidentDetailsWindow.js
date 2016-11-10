@@ -33,6 +33,7 @@ function IncidentDetailsWindow() {
     $(this).on('elements_created', function() {
         var v = ModalWindow.prototype.getView.call(this);
         v.html("Bezig...");
+        this.renderDetailsScreen();
     });
 }
 
@@ -48,14 +49,14 @@ IncidentDetailsWindow.prototype.createStyle = function() {
     var css = '#eenheden div { margin: 3px; float: left } \
 #eenheden div { border-left: 1px solid #ddd; padding-left: 8px; } \
 #eenheden span.einde { color: gray } \
-#kladblok { clear: both; padding-top: 10px; white-space: pre; } \
-#kladblok span.brw { font-weight: bold; color: red } \
-#kladblok span.pol { color: blue; } \
+#tab_kladblok { clear: both; padding-top: 10px; white-space: pre; } \
+#tab_kladblok span.brw { font-weight: bold; color: red } \
+#tab_kladblok span.pol { color: blue; } \
 #pol span { color: blue; } \
-#kladblok span.ambu { color: orange; ' + (me.ghor ? '' : 'display: none;') + ' } \
+#tab_kladblok span.ambu { color: orange; ' + (me.ghor ? '' : 'display: none;') + ' } \
 table td { padding: 3px !important; } \
 ';
-        head = document.getElementsByTagName('head')[0],
+    head = document.getElementsByTagName('head')[0],
         style = document.createElement('style');
 
     style.type = 'text/css';
@@ -65,6 +66,61 @@ table td { padding: 3px !important; } \
         style.appendChild(document.createTextNode(css));
     }
     head.appendChild(style);
+};
+
+IncidentDetailsWindow.prototype.renderDetailsScreen = function() {
+    var v = this.getView();
+    var renderKladblok = true;
+    var renderTwitter = true;
+    var html = '<div style="width: 100%" class="table-responsive incidentDetails"></div>';
+    html += this.renderKladblokTwitter(renderKladblok, renderTwitter);
+    v.html(html);
+    this.addTabClickListener();
+    this.loadTwitterFeed("tab_twitter");
+};
+
+IncidentDetailsWindow.prototype.renderKladblokTwitter = function(showKladblok, showTwitter) {
+    if(!showKladblok && !showTwitter) {
+        return "";
+    }
+    var tabsHTML = '<div class="incident_tabs">';
+    tabsHTML += '<ul id="incident_details_tabs" class="nav nav-pills" style="margin-bottom: 10px">';
+    if(showKladblok) tabsHTML += '<li class="active"><a data-toggle="tab" href="#" id="t_kladblok" class="tab-button"><i class="fa fa-comment"></i> Kladblok</a></li>';
+    if(showTwitter) tabsHTML += '<li' + (!showKladblok ? ' class="active"' : '') + '><a data-toggle="tab" href="#" id="t_twitter" class="tab-button"><i class="fa fa-twitter"></i> Twitter</a></li>';
+    tabsHTML += '</ul>';
+    if(showKladblok) tabsHTML += '<div id="tab_kladblok" class="incident_tab" style="display: block;"></div>';
+    if(showTwitter) tabsHTML += '<div id="tab_twitter" class="incident_tab" style=" display: ' + (!showTwitter ? 'block' : 'none') + ';"></div>';
+    tabsHTML += "</div>";
+
+    return tabsHTML;
+};
+
+IncidentDetailsWindow.prototype.addTabClickListener = function() {
+    var v = this.getView();
+    // Init tabs
+    v.on("click", ".tab-button", function() {
+        var tabbutton = $(this);
+        var tab = tabbutton.attr("id");
+        if(tab) {
+            tab = tab.replace("t_", "");
+        }
+        var tabsContainer = $(this).closest(".incident_tabs");
+        tabsContainer.find(".active").removeClass("active");
+        tabsContainer.find(".incident_tab").hide();
+        tabsContainer.find("#tab_" + tab).show();
+        tabbutton.parent().addClass("active");
+    });
+};
+
+IncidentDetailsWindow.prototype.loadTwitterFeed = function(container) {
+    twttr.ready(function(twttr) {
+        twttr.widgets.createTimeline({
+                sourceType: "collection",
+                id: "539487832448843776"
+            },
+            document.getElementById(container)
+        );
+    });
 };
 
 /**
@@ -78,13 +134,40 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
     var scrollTop = v.scrollTop();
 
     v.css("-webkit-overflow-scrolling", "touch");
-    v.html("");
+
+    var format = "";
     if(typeof incident === "string") {
-        v.text(incident);
-        return;
+        format = "string";
+    } else if(isXml) {
+        format = "xml";
+    } else if(incident.IncidentNummer) {
+        format = "falck";
+    } else {
+        format = "vrh";
+    }
+    // v.html(isXml ? this.getXmlIncidentHtml(incident, showInzet, false) : this.getIncidentHtml(incident, showInzet, false));
+
+    var table = "";
+    var kladblok = "";
+    switch(format) {
+        case "string":
+            table = "<table><tr><td>" + incident + "</td></tr></table>";
+            break;
+        case "xml":
+            table = this.getXmlIncidentHtml(incident, showInzet, false);
+            kladblok = this.getIncidentKladblokHtml(format, $(incident).find("Kladblok"));
+            break;
+        case "falk":
+            table = this.getIncidentHtmlFalck(incident, showInzet, compareMode);
+            kladblok = this.getIncidentKladblokHtml(format, incident.Kladblokregels);
+            break;
+        default:
+            table = this.getIncidentHtml(incident, showInzet, false);
+            kladblok = this.getIncidentKladblokHtml(format, incident.kladblok);
     }
 
-    v.html(isXml ? this.getXmlIncidentHtml(incident, showInzet, false) : this.getIncidentHtml(incident, showInzet, false));
+    v.find(".incidentDetails").html(table);
+    v.find("#tab_kladblok").html(kladblok);
 
     if(restoreScrollTop) {
         v.scrollTop(scrollTop);
@@ -124,13 +207,7 @@ IncidentDetailsWindow.prototype.getIncidentAdres = function(incident, isXml) {
  */
 IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, compareMode) {
     var me = this;
-
-    if(incident.IncidentNummer) {
-        return me.getIncidentHtmlFalck(incident, showInzet, compareMode);
-    }
-
-    var html = '<div style="width: 100%" class="table-responsive incidentDetails">';
-    html += '<table class="table table-hover">';
+    html = '<table class="table table-hover">';
 
     var columns = [
         { property: 'DTG_START_INCIDENT', date: true, label: 'Start incident' },
@@ -211,36 +288,55 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
         html += '</td></tr>';
     }
 
-    if(incident.kladblok && incident.kladblok.length !== 0) {
-        html += '<tr><td id="kladblok" colspan="2">';
-        var pre = "";
-        $.each(incident.kladblok, function(i, k) {
-            var c = "";
-            var ind = k.T_IND_DISC_KLADBLOK_REGEL;
-            if(ind.indexOf("B") !== -1) {
-                c += "brw ";
-            } else {
-                if(typeof dbkjs.options.incidents.kladblokP === "undefined" || !dbkjs.options.incidents.kladblokP) {
-                    return;
-                }
-            }
-            if(ind.indexOf("P") !== -1) {
-                c += "pol ";
-            }
-            if(ind.indexOf("A") !== -1) {
-                c += "ambu ";
-            }
-            pre += "<span class='" + c + "'>" + AGSIncidentService.prototype.getAGSMoment(k.DTG_KLADBLOK_REGEL).format("HH:mm ") +
-                    dbkjs.util.htmlEncode(k.INHOUD_KLADBLOK_REGEL) + "\n</span>";
-
-        });
-        html += "Kladblok:<br/>" + pre + "</pre>";
-        html += '</td></tr>';
-    }
-
     html += '</table>';
 
     return html;
+};
+
+IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, kladblok) {
+    if(!kladblok.length) {
+        return "";
+    }
+    var kladblokHTML = "";
+    switch(format) {
+        case "xml":
+            $.each(kladblok, function(i, k) {
+                kladblokHTML += "<span class='brw'>" + dbkjs.util.htmlEncode($(k).text()) + "\n</span>";
+            });
+            break;
+        case "falck":
+            $.each(kladblok, function(i, k) {
+                kladblokHTML += "<span class='brw'>" + new moment(k.DTG).format("HH:mm ") + dbkjs.util.htmlEncode(k.Inhoud) + "\n</span>";
+            });
+            break;
+        default:
+            kladblokHTML = this.getIncidentKladblokDefaultHtml(kladblok);
+    }
+    return kladblokHTML;
+};
+
+IncidentDetailsWindow.prototype.getIncidentKladblokDefaultHtml = function(kladblok) {
+    var kladblokHTML = "";
+    $.each(kladblok, function(i, k) {
+        var c = "";
+        var ind = k.T_IND_DISC_KLADBLOK_REGEL;
+        if(ind.indexOf("B") !== -1) {
+            c += "brw ";
+        } else {
+            if(typeof dbkjs.options.incidents.kladblokP === "undefined" || !dbkjs.options.incidents.kladblokP) {
+                return;
+            }
+        }
+        if(ind.indexOf("P") !== -1) {
+            c += "pol ";
+        }
+        if(ind.indexOf("A") !== -1) {
+            c += "ambu ";
+        }
+        kladblokHTML += "<span class='" + c + "'>" + AGSIncidentService.prototype.getAGSMoment(k.DTG_KLADBLOK_REGEL).format("HH:mm ") +
+            dbkjs.util.htmlEncode(k.INHOUD_KLADBLOK_REGEL) + "\n</span>";
+    });
+    return kladblokHTML;
 };
 
 IncidentDetailsWindow.prototype.getPrioriteitColor = function(prio) {
@@ -255,8 +351,7 @@ IncidentDetailsWindow.prototype.getPrioriteitColor = function(prio) {
 IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showInzet, compareMode) {
     var me = this;
 
-    var html = '<div style="width: 100%" class="table-responsive incidentDetails">';
-    html += '<table class="table table-hover">';
+    html = '<table class="table table-hover">';
 
     var c = [];
     var m = incident.BrwDisciplineGegevens;
@@ -313,18 +408,6 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
     }
     html += '<tr><td>Start incident: </td><td>' + d.format("dddd, D-M-YYYY HH:mm:ss")  + (compareMode ? "" : " (" + d.fromNow() + ")") + '</td></tr>';
 
-    if(incident.Kladblokregels && incident.Kladblokregels.length !== 0) {
-        html += '<tr><td id="kladblok" colspan="2">';
-        var pre = "";
-        $.each(incident.Kladblokregels, function(i, k) {
-            pre += "<span class='brw'>" + new moment(k.DTG).format("HH:mm ") +
-                    dbkjs.util.htmlEncode(k.Inhoud) + "\n</span>";
-
-        });
-        html += "Kladblok:<br/>" + pre + "</pre>";
-        html += '</td></tr>';
-    }
-
     html += '</table>';
 
     return html;
@@ -340,8 +423,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
  * @returns {undefined}
  */
 IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInzet, compareMode) {
-    var html = '<div style="width: 100%" class="table-responsive incidentDetails">';
-    html += '<table class="table table-hover">';
+    html = '<table class="table table-hover">';
 
     var template = "{{#separator}}<tr><td>&nbsp;</td><td></td></tr>{{/separator}}<tr><td><span>{{label}}</span>: </td><td>{{value}}</td></tr>";
 
@@ -424,18 +506,6 @@ IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInze
     var afspraak = $(incident).find("AfspraakOpLocatie").text();
     if(afspraak) {
         html += Mustache.render("<tr><td>Afspraak op locatie:</td><td>{{v}}</td></tr>", {v: afspraak});
-    }
-
-    var kladblok = $(incident).find("Kladblok");
-
-    if(kladblok.length !== 0) {
-        html += '<tr><td id="kladblok" colspan="2">';
-        var pre = "";
-        $.each(kladblok, function(i, k) {
-            pre += "<span class='brw'>" + dbkjs.util.htmlEncode($(k).text()) + "\n</span>";
-        });
-        html += "Kladblok:<br/>" + pre + "</pre>";
-        html += '</td></tr>';
     }
 
     html += '</table>';
