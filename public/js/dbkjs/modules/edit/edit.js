@@ -346,7 +346,7 @@ dbkjs.modules.edit = {
             var feature;
             for(var i = 0; i < me.layer.features.length; i++) {
                 feature = me.layer.features[i];
-                this.featuresManager.addFeature(feature);
+                me.featuresManager.addFeature(feature);
             }
             me.setSelectedFeature(feature);
         });
