@@ -112,7 +112,8 @@ dbkjs.modules.EditSymbols = [
                 "symbols": [
                     { "id": "s0070", "type": "area", "image": "images/imoov/s0070---g.png", "label": "Brongebied", "rotation": 0, "strokeWidth": 2, "strokeColor": "#000000", "fillColor": "#808284" },
                     { "id": "s0080", "type": "area", "image": "images/imoov/s0080---g.png", "label": "Effectgebied, huidige situatie", "rotation": 0, "strokeWidth": 2, "strokeColor": "#000000", "fillColor": "#1FA2FF" },
-                    { "id": "s0090", "type": "area", "image": "images/imoov/s0090---g.png", "label": "Effectgebied, prognose", "rotation": 0, "strokeWidth": 3, "strokeColor": "#1FA2FF", "strokeDashstyle": "1,6" }
+                    { "id": "s0090", "type": "area", "image": "images/imoov/s0090---g.png", "label": "Effectgebied, prognose", "rotation": 0, "strokeWidth": 3, "strokeColor": "#1FA2FF", "strokeDashstyle": "1,6" },
+                    { "id": "s0091", "type": "area", "subtype": "triangle", "image": "images/imoov/s0090---g.png", "label": "Rookpluim, prognose", "rotation": 0, "strokeWidth": 3, "strokeColor": "#1FA2FF", "strokeDashstyle": "1,6" }
                 ]
             }
         ]
@@ -180,6 +181,8 @@ dbkjs.modules.edit = {
     drawLineControl: null,
     /** @var OpenLayers.Control.DrawFeature drawAreaControl */
     drawAreaControl: null,
+    /** @var OpenLayers.Control.DrawFeature drawLineControl */
+    drawTriangleControl: null,
 
     register: function() {
         var me = this;
@@ -197,12 +200,7 @@ dbkjs.modules.edit = {
         });
         dbkjs.map.addLayer(me.layer);
 
-        me.drag = new OpenLayers.Control.DragFeature(me.layer, {
-            'onStart': function (feature, pixel) {
-                me.setSelectedFeature(feature);
-            }
-        });
-        dbkjs.map.addControl(me.drag);
+        this.initDrag();
 
         var oldOnClick = dbkjs.util.onClick;
         dbkjs.util.onClick = function(e) {
@@ -225,7 +223,8 @@ dbkjs.modules.edit = {
         var drawOptions = {
             eventListeners: {
                 "featureadded": function(evt) {
-                    me.createFeature(evt.feature);
+                    evt.feature.attributes = me.getFeatureAttributes();
+                    me.addFeatureToFeatureManager(evt.feature);
                 }
             },
             handlerOptions: {
@@ -241,7 +240,8 @@ dbkjs.modules.edit = {
         var areaDrawOptions = {
             eventListeners: {
                 "featureadded": function(evt) {
-                    me.createFeature(evt.feature);
+                    evt.feature.attributes = me.getFeatureAttributes();
+                    me.addFeatureToFeatureManager(evt.feature);
                 }
             },
             handlerOptions: {
@@ -253,6 +253,24 @@ dbkjs.modules.edit = {
         me.drawAreaControl = new OpenLayers.Control.DrawFeature(me.layer, OpenLayers.Handler.RegularPolygon, areaDrawOptions);
         dbkjs.map.addControl(me.drawAreaControl);
         me.drawAreaControl.deactivate();
+
+        var drawTriangleOptions = {
+            eventListeners: {
+                "featureadded": function(evt) {
+                    evt.feature.attributes = me.getFeatureAttributes();
+                    me.createTriangleFromFeature(evt.feature);
+                    // me.addFeatureToFeatureManager(evt.feature);
+                }
+            },
+            handlerOptions: {
+                maxVertices: 2
+            }
+        };
+
+        me.drawTriangleControl = new OpenLayers.Control.DrawFeature(me.layer, OpenLayers.Handler.Path, drawTriangleOptions);
+        dbkjs.map.addControl(me.drawTriangleControl);
+        me.drawTriangleControl.deactivate();
+
 
         this.symbolmanager = new dbkjs.modules.SymbolManager(dbkjs.modules.EditSymbols, "#edit-symbol-buttons", "#symbol-picker-button");
         this.symbolmanager.on("activeSymbolChanged", this.activeSymbolChanged, this);
@@ -276,6 +294,19 @@ dbkjs.modules.edit = {
         me.deactivateButtons();
         $(me).triggerHandler("deactivate");
         this.clearSelectedFeature();
+    },
+
+    initDrag: function() {
+        var me = this;
+        if(typeof me.drag !== "undefined") {
+            me.drag.destroy();
+        }
+        me.drag = new OpenLayers.Control.DragFeature(me.layer, {
+            'onStart': function (feature, pixel) {
+                me.setSelectedFeature(feature);
+            }
+        });
+        dbkjs.map.addControl(me.drag);
     },
 
     initFeaturesManager: function() {
@@ -337,11 +368,11 @@ dbkjs.modules.edit = {
     readSavedFeatures: function() {
         var me = this;
         // Read GeoJSON
-        $.ajax("api/edit", { data: { load: "true" } })
+        $.ajax("http://demo.safetymaps.nl/voertuigviewer/api/edit", { data: { load: "true" } })
         .done(function(saved) {
             var geoJsonFormatter = new OpenLayers.Format.GeoJSON();
             me.featuresManager.removeAllFeatures();
-            me.layer.features = geoJsonFormatter.read(saved);
+            me.layer.addFeatures(geoJsonFormatter.read(saved));
             me.layer.redraw();
             var feature;
             for(var i = 0; i < me.layer.features.length; i++) {
@@ -354,7 +385,7 @@ dbkjs.modules.edit = {
 
     saveFeatures: function() {
         //window.localStorage.setItem("edit.drawedFeatures", JSON.stringify((new OpenLayers.Format.GeoJSON()).write(this.layer.features)));
-        $.ajax("api/edit", {
+        $.ajax("http://demo.safetymaps.nl/voertuigviewer/api/edit", {
             method: "POST",
             data: { save: "true", features: JSON.stringify((new OpenLayers.Format.GeoJSON()).write(this.layer.features)) }
         })
@@ -406,6 +437,8 @@ dbkjs.modules.edit = {
             this.disableLineMode();
         } else if(this.mode === "area") {
             this.disableAreaMode();
+        } else if(this.mode === "triangle") {
+            this.disableTriangleMode();
         }
 
         // Enable new mode
@@ -414,7 +447,11 @@ dbkjs.modules.edit = {
         } else if(activeSymbol.type === "line") {
             this.enableLineMode();
         } else if(activeSymbol.type === "area") {
-            this.enableAreaMode();
+            if(activeSymbol.subtype && activeSymbol.subtype === "triangle") {
+                this.enableTriangleMode();
+            } else {
+                this.enableAreaMode();
+            }
         } else {
             this.mode = "";
         }
@@ -445,9 +482,20 @@ dbkjs.modules.edit = {
         this.drawAreaControl.activate();
     },
 
+    enableTriangleMode: function() {
+        this.mode = "triangle";
+        $("body").addClass("disable-selection");
+        this.drawTriangleControl.activate();
+    },
+
     disableAreaMode: function() {
         $("body").removeClass("disable-selection");
         this.drawAreaControl.deactivate();
+    },
+
+    disableTriangleMode: function() {
+        $("body").removeClass("disable-selection");
+        this.drawTriangleControl.deactivate();
     },
 
     mapClick: function(lonLat) {
@@ -458,13 +506,13 @@ dbkjs.modules.edit = {
                 alert("Selecteer eerst een symbool");
                 return;
             }
-            var feature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(lonLat.lon, lonLat.lat));
+            var feature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(lonLat.lon, lonLat.lat), this.getFeatureAttributes());
             me.layer.addFeatures(feature);
-            this.createFeature(feature, symbol);
+            this.addFeatureToFeatureManager(feature, symbol);
         }
     },
 
-    createFeature: function(feature) {
+    getFeatureAttributes: function() {
         var symbol = this.symbolmanager.getActiveSymbol();
         var attributes = $.extend({}, symbol, {
             label: ""
@@ -472,7 +520,24 @@ dbkjs.modules.edit = {
         if(symbol.type === "point") {
             attributes.radius = 12;
         }
-        feature.attributes = attributes;
+        return attributes;
+    },
+
+    createTriangleFromFeature: function(feature) {
+        var geom = feature.geometry;
+        var vertices = geom.getVertices();
+        var a = vertices[0];
+        var b = vertices[1];
+        // TODO: Create triangle points
+        var points = [a, b];
+        var ring = new OpenLayers.Geometry.LinearRing(points);
+        var triangle = new OpenLayers.Geometry.Polygon([ring]);
+        var triangleFeature = new OpenLayers.Feature.Vector(triangle, this.getFeatureAttributes());
+        this.layer.addFeatures(triangleFeature);
+        this.addFeatureToFeatureManager(triangleFeature, this.symbolmanager.getActiveSymbol());
+    },
+
+    addFeatureToFeatureManager: function(feature) {
         this.featuresManager.addFeature(feature);
         this.setSelectedFeature(feature);
     },
@@ -544,6 +609,8 @@ dbkjs.modules.edit = {
                 me.properties.show();
                 $("#mapc1map1").css("cursor", "crosshair");
                 me.catchClick = true;
+                me.enablePointMode();
+                me.featuresManager.showPropertiesGrid();
             })
             .on("deactivate", function() {
                 me.properties.hide();
@@ -553,16 +620,20 @@ dbkjs.modules.edit = {
                 me.disablePointMode();
                 me.disableLineMode();
                 me.disableAreaMode();
+                me.disableTriangleMode();
+                me.featuresManager.hidePropertiesGrid();
             });
 
         me.selectButton = new dbkjs.modules.EditButton("select", "Selecteer", me.editBox, "fa-mouse-pointer")
             .on("activate", function(btn) {
                 me.deactivateButtons(btn);
                 me.featuresManager.showFeaturesList();
+                me.featuresManager.showPropertiesGrid();
                 me.drag.activate();
             })
             .on("deactivate", function() {
                 me.featuresManager.hideFeaturesList();
+                me.featuresManager.hidePropertiesGrid();
                 me.drag.deactivate();
             });
 
@@ -570,14 +641,14 @@ dbkjs.modules.edit = {
 
         // Create symbol properties window
         me.properties = $("<div/>")
-                .attr("id", "edit-properties")
+                .attr("id", "edit-symbol-container")
                 .addClass("panel");
         me.properties.appendTo("#mapc1map1");
 
         var group = $("<div/>")
                 .addClass("btn-group-vertical edit-type-buttons")
                 .attr("role", "group")
-                .appendTo("#edit-properties");
+                .appendTo("#edit-symbol-container");
 
         group.append(this.createFilterButton("Symbool", "point"));
         group.append(this.createFilterButton("Lijn", "line"));
@@ -588,7 +659,7 @@ dbkjs.modules.edit = {
                     "<div id='symbol-picker-bar' class='col-md-12'/>" +
                 "</div>" +
             "</div>")
-            .appendTo("#edit-properties");
+            .appendTo("#edit-symbol-container");
 
         $("<div class='container-fluid'>" +
 //                "<div class='row'> <div class='col-md-3'>Huidig:</div> <div class='col-md-9'>(Notitie)</div> </div>" +

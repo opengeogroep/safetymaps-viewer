@@ -68,21 +68,6 @@
     margin-bottom: 5px;
 }
 
-#edit-properties, #edit-features-list {
-    margin-bottom: 0;
-    border: 1px solid rgb(104,104,104);
-    bottom: 0;
-    position: absolute;
-    height: 120px;
-    display: none;
-    left: 144px;
-    right: 2px;
-}
-
-#edit-properties {
-    z-index: 3000;
-}
-
 .edit-type-buttons {
     margin: 5px;
     float: left;
@@ -145,15 +130,62 @@
     padding-left: 2px;
 }
 
-#edit-features-list {
+.empty-message {
+    margin-right: 15px;
+}
+
+#edit-symbol-container, #edit-features-list, #edit-symbol-properties {
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
+    position: absolute;
+    margin: 0;
+    bottom: 0;
+    border: 1px solid rgb(104,104,104);
+}
+
+#edit-symbol-container {
+    height: 120px;
+    display: none;
+    left: 144px;
+    right: 0;
+    z-index: 3000;
+    -webkit-border-top-left-radius: 4px;
+    -moz-border-radius-topleft: 4px;
+    border-top-left-radius: 4px;
+    border-bottom: 0;
+}
+
+#edit-features-list, #edit-symbol-properties {
     padding: 20px 10px 0 10px;
     left: auto;
     right: 0;
-    bottom: 0;
     top: 0;
     width: 35vw;
     min-width: 275px;
     height: auto;
+    display: none;
+    bottom: 100px;
+}
+
+#edit-symbol-properties {
+    top: auto;
+    bottom: 120px;
+    padding: 10px;
+    height: 101px;
+    z-index: 303;
+}
+
+#edit-features-list.visible, #edit-symbol-properties.visible.has-selected-feature {
+    display: block;
+}
+
+#edit-features-list.visible + #edit-symbol-properties.visible {
+    bottom: 0;
+}
+
+#edit-features-list.hidden + #edit-symbol-properties.visible {
+    border-bottom: 0;
 }
 
 #edit-features-list h3 {
@@ -200,23 +232,17 @@
 .features-container {
     position: absolute;
     top: 50px;
-    bottom: 100px;
+    bottom: 0;
     overflow: auto;
     left: 10px;
     right: 10px;
 }
 
-#edit-symbol-properties {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    border-top: 1px solid rgb(104,104,104);
-    padding: 10px;
-}
-
 @media screen and (max-width: 1000px) {
-    .features-container {
+    #edit-features-list {
         bottom: 130px;
+    }
+    #edit-symbol-properties {
+        height: 131px; /* has to overlap border, so +1px */
     }
 }

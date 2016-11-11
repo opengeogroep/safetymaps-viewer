@@ -63,7 +63,7 @@ dbkjs.modules.FeaturesManager = function() {
     this.featureslist.append(featurescontainer);
     this.featureslist.appendTo("body");
 
-    $("<div class='container-fluid' id='edit-symbol-properties'>" +
+    this.propertiesGrid = $("<div class='panel sub-panel' id='edit-symbol-properties'>" +
         "<div class='row prop-radius' style=\"display: none;\">" +
             "<div class='col-md-3'>" +
                 "<label for='symbolRadiusSlider'>Grootte:</label>" +
@@ -88,7 +88,8 @@ dbkjs.modules.FeaturesManager = function() {
                 "<input type='text' name='label' id='label' class='form-control'>" +
             "</div>" +
         "</div>" +
-    "</div>").appendTo(this.featureslist);
+    "</div>");
+    this.propertiesGrid.appendTo("body");
 
     $("#symbolRadiusSlider").slider({ tooltip: "show", min: 2, max: 20, value: 12 });
     $("#symbolRotationSlider").slider({ tooltip: "show", min: -180, max: 180, value: 0 });
@@ -133,10 +134,16 @@ dbkjs.modules.FeaturesManager = function() {
 dbkjs.modules.FeaturesManager.prototype = Object.create(dbkjs.modules.Observable.prototype);
 $.extend(dbkjs.modules.FeaturesManager.prototype, {
     showFeaturesList: function() {
-        this.featureslist.show();
+        this.featureslist.removeClass("hidden").addClass("visible");
     },
     hideFeaturesList: function() {
-        this.featureslist.hide();
+        this.featureslist.removeClass("visible").addClass("hidden");
+    },
+    showPropertiesGrid: function() {
+        this.propertiesGrid.removeClass("hidden").addClass("visible");
+    },
+    hidePropertiesGrid: function() {
+        this.propertiesGrid.removeClass("visible").addClass("hidden");
     },
     addFeature: function(feature) {
         this.featurestable.append(
@@ -181,29 +188,30 @@ $.extend(dbkjs.modules.FeaturesManager.prototype, {
     },
     unsetSelectedFeature: function(feature) {
         this.findRowByFeatureId(feature.id).removeClass("info");
+        this.propertiesGrid.removeClass("has-selected-feature");
     },
     findRowByFeatureId: function(featureid) {
         return this.featurestable.find(["[data-featureid=", featureid, "]"].join(""));
     },
     setPropertiesGrid: function(feature) {
-        var propGrid = $("#edit-symbol-properties");
-        propGrid.find("[name='label']").val(feature.attributes.label);
-        propGrid.find(".prop-label").show();
+        this.propertiesGrid.addClass("has-selected-feature");
+        this.propertiesGrid.find("[name='label']").val(feature.attributes.label);
+        this.propertiesGrid.find(".prop-label").show();
         if(feature.attributes.hasOwnProperty("radius")) {
-            propGrid.find(".prop-radius").show();
-            propGrid.find("#symbolRadiusSlider").slider('setValue', parseInt(feature.attributes.radius, 10));
+            this.propertiesGrid.find(".prop-radius").show();
+            this.propertiesGrid.find("#symbolRadiusSlider").slider('setValue', parseInt(feature.attributes.radius, 10));
         } else {
-            propGrid.find(".prop-radius").hide();
+            this.propertiesGrid.find(".prop-radius").hide();
         }
         if(feature.attributes.hasOwnProperty("rotation")) {
-            propGrid.find(".prop-rotation").show();
-            propGrid.find("#symbolRotationSlider").slider('setValue', parseInt(feature.attributes.rotation, 10));
+            this.propertiesGrid.find(".prop-rotation").show();
+            this.propertiesGrid.find("#symbolRotationSlider").slider('setValue', parseInt(feature.attributes.rotation, 10));
         } else {
-            propGrid.find(".prop-rotation").hide();
+            this.propertiesGrid.find(".prop-rotation").hide();
         }
     },
     watchPropertiesChange: function() {
-        var propGrid = $("#edit-symbol-properties").find("input");
+        var propGrid = this.propertiesGrid.find("input");
         var me = this;
         propGrid.on("keyup change", function(e) {
             if(me.preventEvent) {
@@ -252,7 +260,7 @@ $.extend(dbkjs.modules.SymbolManager.prototype, {
     setFilter: function(filter) {
         this.symbolFilter = filter;
         var containers = this.quickSelectContainer.add(this.symbolpicker.find(".panel-body"));
-        containers.find(".maincategory, .subcategory, .symbol-btn").addClass("hidden").removeClass("visible");
+        containers.find(".maincategory, .subcategory, .symbol-btn, .empty-message").addClass("hidden").removeClass("visible");
         containers.find(".type-" + this.symbolFilter).removeClass("hidden").addClass("visible");
         containers.find(".subcategory").each(function() {
             if($(this).children(".visible").length > 0) {
@@ -357,10 +365,6 @@ $.extend(dbkjs.modules.SymbolManager.prototype, {
         var recentlyUsed = window.localStorage.getItem("edit.recentlyused");
         if(recentlyUsed) {
             this.recentlyUsed = JSON.parse(recentlyUsed);
-            if($.isArray(this.recentlyUsed)) { // legacy fallback, remove asap
-                this.recentlyUsed = { point: [], line: [], area: [] };
-                this.saveRecentlyUsedSymbols();
-            }
         }
         this.loadRecentlyUsedType("point");
         this.loadRecentlyUsedType("line");
@@ -370,6 +374,9 @@ $.extend(dbkjs.modules.SymbolManager.prototype, {
     loadRecentlyUsedType: function(type) {
         var symbol;
         // Reverse order because buttons are prepended
+        if(this.recentlyUsed[type].length === 0) {
+            this.quickSelectContainer.prepend("<span class='empty-message type-" + type + "'>Selecteer eerst een symbool door op de + te klikken</span>");
+        }
         for(var i = this.recentlyUsed[type].length - 1; i >= 0; i--) {
             symbol = this.getSymbol(this.recentlyUsed[type][i]);
             if(symbol) {
@@ -401,6 +408,7 @@ $.extend(dbkjs.modules.SymbolManager.prototype, {
 
     addToQuickSelect: function(symbol) {
         var quickBtn = this.quickSelectContainer.find("[data-symbolid='" + symbol.id + "']");
+        this.quickSelectContainer.find(".empty-message.type-" + symbol.type).remove();
         if(quickBtn.length === 0) {
             quickBtn = $(this.createSymbolButton(symbol));
             this.quickSelectContainer.prepend(quickBtn);
