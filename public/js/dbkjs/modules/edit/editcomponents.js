@@ -80,6 +80,14 @@ dbkjs.modules.FeaturesManager = function() {
                 '<input id="symbolRotationSlider" name="rotation" type="text" />' +
             "</div>" +
         "</div>" +
+        "<div class='row prop-triangleFactor' style=\"display: none;\">" +
+            "<div class='col-md-3'>" +
+                "<label for='triangleFactor'>Breedte:</label>" +
+            "</div>" +
+            "<div class='col-md-9' style=\"padding-left: 25px;\">" +
+                '<input id="triangleFactor" name="triangleFactor" type="text" />' +
+            "</div>" +
+        "</div>" +
         "<div class='row prop-label' style=\"display: none;\">" +
             "<div class='col-md-3'>" +
                 "<label for='label'>Label:</label>" +
@@ -93,6 +101,7 @@ dbkjs.modules.FeaturesManager = function() {
 
     $("#symbolRadiusSlider").slider({ tooltip: "show", min: 2, max: 20, value: 12 });
     $("#symbolRotationSlider").slider({ tooltip: "show", min: -180, max: 180, value: 0 });
+    $("#triangleFactor").slider({ tooltip: "show", min: 0, max: 15, value: 1 });
 
     this.preventEvent = false;
 
@@ -209,6 +218,12 @@ $.extend(dbkjs.modules.FeaturesManager.prototype, {
         } else {
             this.propertiesGrid.find(".prop-rotation").hide();
         }
+        if(feature.attributes.hasOwnProperty("triangleFactor")) {
+            this.propertiesGrid.find(".prop-triangleFactor").show();
+            this.propertiesGrid.find("#triangleFactor").slider('setValue', parseInt(feature.attributes.triangleFactor, 10));
+        } else {
+            this.propertiesGrid.find(".prop-triangleFactor").hide();
+        }
     },
     watchPropertiesChange: function() {
         var propGrid = this.propertiesGrid.find("input");
@@ -218,7 +233,7 @@ $.extend(dbkjs.modules.FeaturesManager.prototype, {
                 return;
             }
             var name = this.getAttribute("name");
-            if(["label", "radius", "rotation"].indexOf(name) === -1) {
+            if(["label", "radius", "rotation", "triangleFactor"].indexOf(name) === -1) {
                 return;
             }
             var prop = {};

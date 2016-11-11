@@ -113,7 +113,7 @@ dbkjs.modules.EditSymbols = [
                     { "id": "s0070", "type": "area", "image": "images/imoov/s0070---g.png", "label": "Brongebied", "rotation": 0, "strokeWidth": 2, "strokeColor": "#000000", "fillColor": "#808284" },
                     { "id": "s0080", "type": "area", "image": "images/imoov/s0080---g.png", "label": "Effectgebied, huidige situatie", "rotation": 0, "strokeWidth": 2, "strokeColor": "#000000", "fillColor": "#1FA2FF" },
                     { "id": "s0090", "type": "area", "image": "images/imoov/s0090---g.png", "label": "Effectgebied, prognose", "rotation": 0, "strokeWidth": 3, "strokeColor": "#1FA2FF", "strokeDashstyle": "1,6" },
-                    { "id": "s0091", "type": "area", "subtype": "triangle", "image": "images/imoov/s0090---g.png", "label": "Rookpluim, prognose", "rotation": 0, "strokeWidth": 3, "strokeColor": "#1FA2FF", "strokeDashstyle": "1,6" }
+                    { "id": "s0081", "type": "area", "image": "images/imoov/s0080---g.png", "label": "Rookpluim, prognose", "strokeWidth": 1, "strokeColor": "#000000", "fillColor": "#1FA2FF", "triangleFactor": 1 }
                 ]
             }
         ]
@@ -257,16 +257,16 @@ dbkjs.modules.edit = {
         var drawTriangleOptions = {
             eventListeners: {
                 "featureadded": function(evt) {
-                    evt.feature.attributes = me.getFeatureAttributes();
-                    me.createTriangleFromFeature(evt.feature);
-                    // me.addFeatureToFeatureManager(evt.feature);
+                    var attributes = me.getFeatureAttributes();
+                    var vertices = evt.feature.geometry.getVertices();
+                    me.createTriangleFromPoints(vertices[0], vertices[1], attributes);
+                    me.layer.removeFeatures(evt.feature);
                 }
             },
             handlerOptions: {
                 maxVertices: 2
             }
         };
-
         me.drawTriangleControl = new OpenLayers.Control.DrawFeature(me.layer, OpenLayers.Handler.Path, drawTriangleOptions);
         dbkjs.map.addControl(me.drawTriangleControl);
         me.drawTriangleControl.deactivate();
@@ -342,6 +342,12 @@ dbkjs.modules.edit = {
                     this.selectedFeature.geometry.rotate(delta, origin);
                 }
                 this.selectedFeature.attributes = $.extend({}, this.selectedFeature.attributes, property);
+                if(property.hasOwnProperty("triangleFactor")) {
+                    var vertices = this.selectedFeature.geometry.getVertices();
+                    var attributes = $.extend({}, this.selectedFeature.attributes);
+                    this.featuresManager.removeFeature(this.selectedFeature.id);
+                    this.createTriangleFromPoints(vertices[0], this.lineCenter(vertices[1], vertices[vertices.length - 1]), attributes);
+                }
                 this.updateLayer();
                 this.featuresManager.updateFeature(this.selectedFeature);
             }, this)
@@ -447,11 +453,29 @@ dbkjs.modules.edit = {
         } else if(activeSymbol.type === "line") {
             this.enableLineMode();
         } else if(activeSymbol.type === "area") {
-            if(activeSymbol.subtype && activeSymbol.subtype === "triangle") {
+            if(activeSymbol.hasOwnProperty("triangleFactor")) {
                 this.enableTriangleMode();
             } else {
                 this.enableAreaMode();
             }
+        } else {
+            this.mode = "";
+        }
+    },
+
+    reenableCurrentMode: function() {
+        var currentMode = this.mode;
+        if(!currentMode) {
+            currentMode = "point";
+        }
+        if(currentMode === "point") {
+            this.enablePointMode();
+        } else if(currentMode === "line") {
+            this.enableLineMode();
+        } else if(currentMode === "area") {
+            this.enableAreaMode();
+        } else if(currentMode === "triangle") {
+            this.enableTriangleMode();
         } else {
             this.mode = "";
         }
@@ -508,7 +532,7 @@ dbkjs.modules.edit = {
             }
             var feature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(lonLat.lon, lonLat.lat), this.getFeatureAttributes());
             me.layer.addFeatures(feature);
-            this.addFeatureToFeatureManager(feature, symbol);
+            this.addFeatureToFeatureManager(feature);
         }
     },
 
@@ -523,18 +547,70 @@ dbkjs.modules.edit = {
         return attributes;
     },
 
-    createTriangleFromFeature: function(feature) {
-        var geom = feature.geometry;
-        var vertices = geom.getVertices();
-        var a = vertices[0];
-        var b = vertices[1];
-        // TODO: Create triangle points
-        var points = [a, b];
-        var ring = new OpenLayers.Geometry.LinearRing(points);
-        var triangle = new OpenLayers.Geometry.Polygon([ring]);
-        var triangleFeature = new OpenLayers.Feature.Vector(triangle, this.getFeatureAttributes());
+    createTriangleFromPoints: function(a, b, attributes) {
+        var triangleFactor = attributes.triangleFactor / 10;
+        if(triangleFactor <= 0) {
+            triangleFactor = 0.001;
+        }
+        var c = this.calcTriangleCoord(a, b, triangleFactor);
+        var d = this.calcTriangleCoord(a, b, -1 * triangleFactor);
+
+        // Create half circle
+        var bcx = b.x - c.x;
+        var bcy = b.y - c.y;
+        var points = [a, new OpenLayers.Geometry.Point(c.x, c.y)];
+        var sides = 50;
+        var radius = Math.sqrt(Math.pow(bcx, 2) + Math.pow(bcy, 2));
+        var rotation = 180 - (Math.atan(bcx / bcy) * (180/Math.PI));
+
+        // Code below adapted from OpenLayers.Geometry.Polygon.createRegularPolygon()
+        var angle = Math.PI * ((1/sides) - (1/2)) + (rotation / 180) * Math.PI;
+        var rotatedAngle, x, y;
+        // create first half of circle
+        var i = 0;
+        var len = sides/2;
+        if(a.x < b.x) {
+            // create second half of circle
+            i = sides/2;
+            len = sides;
+        }
+        for(; i<len; ++i) {
+            rotatedAngle = angle + (i * 2 * Math.PI / sides);
+            x = b.x + (radius * Math.cos(rotatedAngle));
+            y = b.y + (radius * Math.sin(rotatedAngle));
+            points.push(new OpenLayers.Geometry.Point(x, y));
+        }
+
+        // Add last point
+        points.push(new OpenLayers.Geometry.Point(d.x, d.y));
+
+        var geom = new OpenLayers.Geometry.Polygon([new OpenLayers.Geometry.LinearRing(points)]);
+        var triangleFeature = new OpenLayers.Feature.Vector(geom, attributes);
         this.layer.addFeatures(triangleFeature);
-        this.addFeatureToFeatureManager(triangleFeature, this.symbolmanager.getActiveSymbol());
+        this.addFeatureToFeatureManager(triangleFeature);
+        return triangleFeature;
+    },
+
+    calcTriangleCoord: function(a, b, factor) {
+        var c = {};
+        c.x = b.x + factor * (b.y - a.y);
+        c.y = b.y + factor * (a.x - b.x);
+        return c;
+    },
+
+    lineCenter: function(c, d) {
+        var b = {};
+        if(d.x > c.x) {
+            b.x = d.x - ((d.x - c.x) / 2);
+        } else {
+            b.x = c.x - ((c.x - d.x) / 2);
+        }
+        if(d.y > c.y) {
+            b.y = d.y - ((d.y - c.y) / 2);
+        } else {
+            b.y = c.y - ((c.y - d.y) / 2);
+        }
+        return b;
     },
 
     addFeatureToFeatureManager: function(feature) {
@@ -609,14 +685,13 @@ dbkjs.modules.edit = {
                 me.properties.show();
                 $("#mapc1map1").css("cursor", "crosshair");
                 me.catchClick = true;
-                me.enablePointMode();
+                me.reenableCurrentMode();
                 me.featuresManager.showPropertiesGrid();
             })
             .on("deactivate", function() {
                 me.properties.hide();
                 $("#mapc1map1").css("cursor", "auto");
                 me.catchClick = false;
-                me.mode = "";
                 me.disablePointMode();
                 me.disableLineMode();
                 me.disableAreaMode();
