@@ -154,7 +154,7 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
         format = "string";
     } else if(isXml) {
         format = "xml";
-    } else if(incident.IncidentNummer) {
+    } else if(typeof incident.IncidentNummer !== 'undefined') {
         format = "falck";
     } else {
         format = "vrh";
