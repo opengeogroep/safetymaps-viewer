@@ -224,7 +224,7 @@ FalckIncidentsController.prototype.geenInzet = function(triggerEvent) {
     this.incidentDetailsWindow.data("Er is momenteel geen incident waavoor dit voertuig is ingezet.");
     this.incidentDetailsWindow.hide();
     this.markerLayer.clear();
-
+    this.updateBalkrechtsonder();
     this.button.setAlerted(false);
     this.button.setIcon("bell-o");
 
