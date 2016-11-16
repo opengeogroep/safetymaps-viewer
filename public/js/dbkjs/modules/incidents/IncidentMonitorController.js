@@ -37,6 +37,7 @@ function IncidentMonitorController(incidents) {
         if(jqXHR.status === 404) {
             console.log("KB access!");
             me.kb = true;
+            incidents.options.hideKladblok = true;
         } else if(jqXHR.status !== 403) {
             console.log("Unexpected status: " + jqXHR + " " + jqXHR.statusText, jqXHR.responseText);
         } else {
