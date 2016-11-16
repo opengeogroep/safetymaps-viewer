@@ -70,18 +70,23 @@ table td { padding: 3px !important; } \
 
 IncidentDetailsWindow.prototype.renderDetailsScreen = function() {
     var v = this.getView();
-    var renderKladblok = true;
-    var renderTwitter = true;
+    var renderKladblok = !dbkjs.modules.incidents.options.hideKladblok;
+    var renderTwitter = !!dbkjs.modules.incidents.options.showTwitter;
     var html = '<div style="width: 100%" class="table-responsive incidentDetails"></div>';
     html += this.renderKladblokTwitter(renderKladblok, renderTwitter);
     v.html(html);
     this.addTabClickListener();
-    this.loadTwitterFeed("tab_twitter");
+    if(renderTwitter) {
+        this.loadTwitterFeed("tab_twitter");
+    }
 };
 
 IncidentDetailsWindow.prototype.renderKladblokTwitter = function(showKladblok, showTwitter) {
     if(!showKladblok && !showTwitter) {
         return "";
+    }
+    if(showKladblok && !showTwitter) {
+        return '<div id="tab_kladblok" class="incident_tab" style="display: block;"></div>';
     }
     var tabsHTML = '<div class="incident_tabs">';
     tabsHTML += '<ul id="incident_details_tabs" class="nav nav-pills" style="margin-bottom: 10px">';
@@ -171,8 +176,8 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
             table = this.getXmlIncidentHtml(incident, showInzet, false);
             kladblok = this.getIncidentKladblokHtml(format, $(incident).find("Kladblok"));
             break;
-        case "falk":
-            table = this.getIncidentHtmlFalck(incident, showInzet, compareMode);
+        case "falck":
+            table = this.getIncidentHtmlFalck(incident, showInzet, false);
             kladblok = this.getIncidentKladblokHtml(format, incident.Kladblokregels);
             break;
         default:
