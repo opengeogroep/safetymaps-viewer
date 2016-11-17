@@ -174,6 +174,8 @@ FalckIncidentsController.prototype.getInzetInfo = function() {
         return;
     }
 
+    var requestVoertuignummer = me.voertuignummer;
+
     $.ajax(me.options.incidentsUrl + "/eenheid/" + me.voertuignummer, {
         dataType: "json"
     })
@@ -189,6 +191,10 @@ FalckIncidentsController.prototype.getInzetInfo = function() {
         me.incidentDetailsWindow.showError(msg);
     })
     .done(function(data, textStatus, jqXHR) {
+        if(me.voertuignummer !== requestVoertuignummer) {
+            console.log("Ignoring results for old voertuignummer " + requestVoertuignummer);
+            return;
+        }
         $('#systeem_meldingen').hide();
         me.button.setIcon("bell-o");
 
@@ -229,7 +235,7 @@ FalckIncidentsController.prototype.geenInzet = function(triggerEvent) {
     this.button.setIcon("bell-o");
 
     if(triggerEvent) {
-        $(me).triggerHandler("end_incident");
+        $(this).triggerHandler("end_incident");
     }
 };
 
@@ -385,8 +391,8 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
         me.incidentDetailsWindow.data(incident, true, true);
 
         // Check if updated, enable alert state if true
-        var oldIncidentHtml = me.incidentDetailsWindow.getIncidentHtml(oldIncident, true, true);
-        if(oldIncidentHtml !== me.incidentDetailsWindow.getIncidentHtml(incident, true, true)) {
+        var oldIncidentHtml = me.incidentDetailsWindow.getIncidentHtmlFalck(oldIncident, true, true);
+        if(oldIncidentHtml !== me.incidentDetailsWindow.getIncidentHtmlFalck(incident, true, true)) {
             if(!me.incidentDetailsWindow.isVisible()) {
                 me.button.setAlerted(true);
             }
