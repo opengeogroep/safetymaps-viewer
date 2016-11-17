@@ -41,7 +41,7 @@ IncidentDetailsWindow.prototype = Object.create(SplitScreenWindow.prototype);
 IncidentDetailsWindow.prototype.constructor = IncidentDetailsWindow;
 
 IncidentDetailsWindow.prototype.showError = function(e) {
-    this.getView().text(e);
+    this.data(e);
 };
 
 IncidentDetailsWindow.prototype.createStyle = function() {
