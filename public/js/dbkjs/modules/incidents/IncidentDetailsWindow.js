@@ -174,15 +174,15 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
             break;
         case "xml":
             table = this.getXmlIncidentHtml(incident, showInzet, false);
-            kladblok = this.getIncidentKladblokHtml(format, $(incident).find("Kladblok"));
+            kladblok = this.getIncidentKladblokHtml(format, incident);
             break;
         case "falck":
             table = this.getIncidentHtmlFalck(incident, showInzet, false);
-            kladblok = this.getIncidentKladblokHtml(format, incident.Kladblokregels);
+            kladblok = this.getIncidentKladblokHtml(format, incident);
             break;
         default:
             table = this.getIncidentHtml(incident, showInzet, false);
-            kladblok = this.getIncidentKladblokHtml(format, incident.kladblok);
+            kladblok = this.getIncidentKladblokHtml(format, incident);
     }
 
     v.find(".incidentDetails").html(table);
@@ -307,34 +307,38 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
         html += '</td></tr>';
     }
 
+    if(compareMode) {
+        html += me.getIncidentKladblokHtml("vrh", incident);
+    }
+
     html += '</table>';
 
     return html;
 };
 
-IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, kladblok) {
-    if(!kladblok.length) {
-        return "";
-    }
+IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incident) {
     var kladblokHTML = "";
     switch(format) {
         case "xml":
-            $.each(kladblok, function(i, k) {
+            $.each($(incident).find("Kladblok"), function(i, k) {
                 kladblokHTML += "<span class='brw'>" + dbkjs.util.htmlEncode($(k).text()) + "\n</span>";
             });
             break;
         case "falck":
-            $.each(kladblok, function(i, k) {
+            $.each(incident.Kladblokregels, function(i, k) {
                 kladblokHTML += "<span class='brw'>" + new moment(k.DTG).format("HH:mm ") + dbkjs.util.htmlEncode(k.Inhoud) + "\n</span>";
             });
             break;
         default:
-            kladblokHTML = this.getIncidentKladblokDefaultHtml(kladblok);
+            kladblokHTML = this.getIncidentKladblokDefaultHtml(incident.kladblok);
     }
     return kladblokHTML;
 };
 
 IncidentDetailsWindow.prototype.getIncidentKladblokDefaultHtml = function(kladblok) {
+    if(!kladblok) {
+        return "";
+    }
     var kladblokHTML = "";
     $.each(kladblok, function(i, k) {
         var c = "";
@@ -365,7 +369,7 @@ IncidentDetailsWindow.prototype.getPrioriteitColor = function(prio) {
         case 2: return 'orange';
         default: return 'green';
     }
-}
+};
 
 IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showInzet, compareMode) {
     var me = this;
@@ -426,6 +430,10 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
         html += '</td></tr>';
     }
     html += '<tr><td>Start incident: </td><td>' + d.format("dddd, D-M-YYYY HH:mm:ss")  + (compareMode ? "" : " (" + d.fromNow() + ")") + '</td></tr>';
+
+    if(compareMode) {
+        html += me.getIncidentKladblokHtml("falck", incident);
+    }
 
     html += '</table>';
 
@@ -525,6 +533,10 @@ IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInze
     var afspraak = $(incident).find("AfspraakOpLocatie").text();
     if(afspraak) {
         html += Mustache.render("<tr><td>Afspraak op locatie:</td><td>{{v}}</td></tr>", {v: afspraak});
+    }
+
+    if(compareMode) {
+        html += me.getIncidentKladblokHtml("xml", incident);
     }
 
     html += '</table>';
