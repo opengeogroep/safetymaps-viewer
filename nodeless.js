@@ -85,24 +85,6 @@ fsutil.copyRecursiveSync('./locales', outDir + '/locales', copyOptions);
 console.log("Copy html...");
 fsutil.copyRecursiveSync('./nodeless/html', outDir , copyOptions);
 
-// Process index.html to add cachebuster param
-var cheerio = require("cheerio");
-
-var html = cheerio.load(fs.readFileSync(outDir + "/index.html", "utf-8"));
-
-var time = new Date().getTime();
-html("link, script").map(function(i, el) {
-    var $ = cheerio(el);
-    var href = $.attr("href");
-    var src = $.attr("src");
-    var url = href ? href : src;
-
-    if(url && url.indexOf("?", url.length - 1) !== -1) {
-        $.attr(href ? "href" : "src", url + "_=" + time);
-    }
-});
-fs.writeFileSync(outDir + "/index.html", html.html());
-
 console.log("Create api/organisation.json...");
 fs.mkdirSync(outDir + '/api');
 var dbk = require('./controllers/dbk.js');
@@ -325,12 +307,34 @@ function copyDeploy() {
         fsutil.copyRecursiveSync(deploy, outDir, copyOptions);
     }
 }
+
+function cachebuster() {
+    // Process index.html to add cachebuster param
+    var cheerio = require("cheerio");
+
+    var html = cheerio.load(fs.readFileSync(outDir + "/index.html", "utf-8"));
+
+    var time = new Date().getTime();
+    html("link, script").map(function(i, el) {
+        var $ = cheerio(el);
+        var href = $.attr("href");
+        var src = $.attr("src");
+        var url = href ? href : src;
+
+        if(url && url.indexOf("?", url.length - 1) !== -1) {
+            $.attr(href ? "href" : "src", url + "_=" + time);
+        }
+    });
+    fs.writeFileSync(outDir + "/index.html", html.html());
+}
+
 function check() {
     if (organisationsDone && featuresDone && (objectsToBeWritten !== null && objectsToBeWritten === 0)) {
         if(totalVerdiepingen !== 0) {
             console.log("Verdiepingen: " + totalVerdiepingen);
         }
         copyDeploy();
+        cachebuster();
         console.log("Done");
         process.exit(0);
     } else {
