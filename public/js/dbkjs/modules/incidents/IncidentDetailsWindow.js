@@ -76,9 +76,6 @@ IncidentDetailsWindow.prototype.renderDetailsScreen = function() {
     html += this.renderKladblokTwitter(renderKladblok, renderTwitter);
     v.html(html);
     this.addTabClickListener();
-    if(renderTwitter) {
-        this.loadTwitterFeed("tab_twitter");
-    }
 };
 
 IncidentDetailsWindow.prototype.renderKladblokTwitter = function(showKladblok, showTwitter) {
@@ -91,7 +88,7 @@ IncidentDetailsWindow.prototype.renderKladblokTwitter = function(showKladblok, s
     var tabsHTML = '<div class="incident_tabs">';
     tabsHTML += '<ul id="incident_details_tabs" class="nav nav-pills" style="margin-bottom: 10px">';
     if(showKladblok) tabsHTML += '<li class="active"><a data-toggle="tab" href="#" id="t_kladblok" class="tab-button"><i class="fa fa-comment"></i> Kladblok</a></li>';
-    if(showTwitter) tabsHTML += '<li' + (!showKladblok ? ' class="active"' : '') + '><a data-toggle="tab" href="#" id="t_twitter" class="tab-button"><i class="fa fa-twitter"></i> Twitter</a></li>';
+    if(showTwitter) tabsHTML += '<li' + (!showKladblok ? ' class="active"' : '') + '><a data-toggle="tab" href="#" id="t_twitter" class="tab-button"><i class="fa fa-twitter"></i> <span id="t_twitter_title">Twitter</span></a></li>';
     tabsHTML += '</ul>';
     if(showKladblok) tabsHTML += '<div id="tab_kladblok" class="incident_tab" style="display: block;"></div>';
     if(showTwitter) tabsHTML += '<div id="tab_twitter" class="incident_tab" style=" display: ' + (!showTwitter ? 'block' : 'none') + ';"></div>';
@@ -114,31 +111,6 @@ IncidentDetailsWindow.prototype.addTabClickListener = function() {
         tabsContainer.find(".incident_tab").hide();
         tabsContainer.find("#tab_" + tab).show();
         tabbutton.parent().addClass("active");
-    });
-};
-
-IncidentDetailsWindow.prototype.loadTwitterFeed = function(container) {
-    window.twttr = (function(d, s, id) {
-        var js, fjs = d.getElementsByTagName(s)[0],
-            t = window.twttr || {};
-        if (d.getElementById(id)) return t;
-        js = d.createElement(s);
-        js.id = id;
-        js.src = "https://platform.twitter.com/widgets.js";
-        fjs.parentNode.insertBefore(js, fjs);
-        t._e = [];
-        t.ready = function(f) {
-            t._e.push(f);
-        };
-        return t;
-    }(document, "script", "twitter-wjs"));
-    twttr.ready(function(twttr) {
-        twttr.widgets.createTimeline({
-                sourceType: "collection",
-                id: "539487832448843776"
-            },
-            document.getElementById(container)
-        );
     });
 };
 
@@ -184,6 +156,8 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
             table = this.getIncidentHtml(incident, showInzet, false);
             kladblok = this.getIncidentKladblokHtml(format, incident);
     }
+
+    $(".incident_tabs").toggle(format !== "string");
 
     v.find(".incidentDetails").html(table);
     v.find("#tab_kladblok").html(kladblok);

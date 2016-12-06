@@ -255,6 +255,8 @@ IncidentMonitorController.prototype.selectIncident = function(obj) {
     me.incidentId = obj.incident.INCIDENT_ID;
     me.incidentDetailsWindow.data("Ophalen incidentgegevens...");
     me.updateIncident(me.incidentId, me.incident.archief);
+    $("#t_twitter_title").text("Twitter");
+    $("#tab_twitter").html("");
     me.incidentDetailsWindow.show();
     me.incidentRead(me.incidentId);
     me.zoomToIncident();
@@ -476,5 +478,202 @@ IncidentMonitorController.prototype.updateIncident = function(incidentId, archie
 
         // Always update window, updates moment.fromNow() times
         me.incidentDetailsWindow.data(incident, true, true);
+
+        if(!!dbkjs.modules.incidents.options.showTwitter) {
+            me.loadTweets(incidentId, incident);
+        }
+    });
+};
+
+IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) {
+    var me = this;
+
+    if(typeof window.twttr === 'undefined') {
+        window.twttr = (function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0],
+                t = window.twttr || {};
+            if (d.getElementById(id)) return t;
+            js = d.createElement(s);
+            js.id = id;
+            js.src = "https://platform.twitter.com/widgets.js";
+            fjs.parentNode.insertBefore(js, fjs);
+            t._e = [];
+            t.ready = function(f) {
+                t._e.push(f);
+            };
+            return t;
+        }(document, "script", "twitter-wjs"));
+        twttr.ready(function(twttr) {
+            me.loadTweets(incidentId, incident);
+        });
+    }
+
+    // TODO research when updated, tweet search timeout
+    if(me.twitterIncident === incidentId) {
+        return;
+    }
+    me.twitterIncident = incidentId;
+
+    var pos = me.markerLayer.getIncidentXY(incident);
+
+    var p = new Proj4js.Point(pos.x, pos.y);
+    var t = Proj4js.transform(new Proj4js.Proj(dbkjs.options.projection.code), new Proj4js.Proj("EPSG:4326"), p);
+
+    console.log("Loading tweets for incident, geo=", t);
+
+    $("#t_twitter_title").text("Twitter (...)");
+
+    var terms = [];
+
+    var address = incident.NAAM_LOCATIE1;
+    if(incident.NAAM_LOCATIE2 && incident.NAAM_LOCATIE1 !== incident.NAAM_LOCATIE2) {
+        address += " " + incident.NAAM_LOCATIE2;
+    }
+
+    if(incident.classificatie) {
+        var classificaties = incident.classificatie.split(", ");
+        $.each(classificaties, function(i, c) {
+            var classificatieTerms = {
+                "Alarm": true,
+                "Brandgerucht": "brand brandweer rook",
+                "Stormschade": "Storm",
+                "Onweer": true,
+                "Windstoten": true,
+                "Brand": "brand brandweer rook",
+                "Heidebrand": true,
+                "Liftopsluiting": "lift",
+                "Vuurwerk": true,
+                "Veenbrand": true,
+                "Dier in problemen": true,
+                "Bosbrand": true,
+                "Nacontrole": true,
+                "Nablussen": true,
+                "Brandweer": true,
+                "Wateroverlast": true,
+                "Gladheid/Sneeuw": true,
+                "Persoon te water": true,
+                "Vervuild wegdek": true,
+                "Rookmelder": true,
+                "Duinbrand": true,
+                "Stank": true,
+                "Verontreiniging": true,
+                "Ongeval": true,
+                "Loslopende dieren": true,
+                "Gladheid": true,
+                "Voertuig te water": true,
+                "Reanimatie": true
+            };
+            var v = classificatieTerms[c];
+            if(typeof v !== "undefined") {
+                if(typeof v === "string") {
+                    terms = terms.concat(v.split(" "));
+                } else {
+                    terms.push(c);
+                }
+            }
+        });
+    }
+    if(incident.karakteristiek) {
+        $.each(incident.karakteristiek, function(i, k) {
+            var karakteristiekenTerms = [
+                "Soort dier",
+                "Soort voertuig",
+                "OMS oorzaak",
+                "Soort bedrijf/Inst.",
+                "Onderdeel gebouw",
+                "Soort stormschade",
+                "Soort ongeval",
+                "Soort vaartuig",
+                "Soort lucht",
+                "Inzet brw",
+                "Soort persoon.",
+                "Soort brandstof"
+            ];
+            if(karakteristiekenTerms.indexOf(k.NAAM_KARAKTERISTIEK) !== -1) {
+                terms = terms.concat(k.ACTUELE_KAR_WAARDE.split("/"));
+            }
+            if(k.NAAM_KARAKTERISTIEK === "GRIP") {
+                terms.push("GRIP");
+            }
+        });
+    }
+
+    $.each(incident.inzetEenheden, function(i, e) {
+        if(e.CODE_VOERTUIGSOORT && e.CODE_VOERTUIGSOORT.indexOf("MMT") !== -1) {
+            terms.push("MMT");
+            terms.push("heli");
+            return false;
+        }
+    });
+
+    var params = {
+        incidentId: incidentId,
+        location: t.y + "," + t.x,
+        startTime: AGSIncidentService.prototype.getAGSMoment(incident.DTG_START_INCIDENT).format("X"),
+        terms: JSON.stringify(terms),
+        address: address
+    };
+    if(incident.DTG_EINDE_INCIDENT) {
+        params.endTime = AGSIncidentService.prototype.getAGSMoment(incident.DTG_EINDE_INCIDENT).format("X");
+    }
+
+    $.ajax("action/twitter", {
+        dataType: "json",
+        data: params
+    }).done(function(data) {
+        console.log("Twitter search response", data);
+
+        if(data.response.errors) {
+            //...
+        } else {
+            var statuses = data.response.statuses;
+
+            var tweets = 0;
+
+            var startCutoff = AGSIncidentService.prototype.getAGSMoment(incident.DTG_START_INCIDENT);
+
+            var endCutoff = null;
+            if(incident.DTG_EINDE_INCIDENT) {
+                endCutoff = AGSIncidentService.prototype.getAGSMoment(incident.DTG_EINDE_INCIDENT);
+            }
+
+            var displayedTweets = [];
+
+            $.each(statuses, function(i, status) {
+                var createdAt = new moment(status.created_at);
+                if(createdAt.isAfter(startCutoff) && (!endCutoff || createdAt.isBefore(endCutoff))) {
+                    if(status.geo && displayedTweets.indexOf(status.text) === -1) {
+                        displayedTweets.push(status.text);
+                        var p2 = new Proj4js.Point(status.geo.coordinates[1], status.geo.coordinates[0]);
+                        var t2 = Proj4js.transform(new Proj4js.Proj("EPSG:4326"), new Proj4js.Proj(dbkjs.options.projection.code), p2);
+                        var distance = Math.sqrt(Math.pow(t2.x - pos.x, 2) + Math.pow(t2.y - pos.y, 2))
+                        console.log("Tweet " + status.text + " at " + t2.x + "," + t2.y + ", distance " + distance + "m");
+                        var el = $("<div id='tweet_" + status.id + "'>Afstand: " + Math.round(distance) + " meter</div>");
+                        el.appendTo("#tab_twitter");
+                        twttr.widgets.createTweet(status.id_str, document.getElementById("tweet_" + status.id),  { conversation: "none", width: 530, lang: "nl" } );
+                        tweets++;
+                    }
+                }
+            });
+            if(data.responseTerms && data.responseTerms.statuses.length > 0) {
+                $("<div id='tweet_" + status.id + "'>Tweets tijdens incident op basis van zoektermen <i>" + address + ", " + terms.join(", ") + "</i></div>").appendTo("#tab_twitter");
+                $.each(data.responseTerms.statuses, function(i, status) {
+                    var createdAt = new moment(status.created_at);
+                    if(createdAt.isAfter(startCutoff) && (!endCutoff || createdAt.isBefore(endCutoff))) {
+                        if(displayedTweets.indexOf(status.text) === -1) {
+                            displayedTweets.push(status.text);
+                            console.log("Tweet matching terms: " + status.text);
+                            twttr.widgets.createTweet(status.id_str, document.getElementById("tab_twitter"),  { conversation: "none", width: 530, lang: "nl" } );
+                            tweets++;
+                        }
+                    }
+                });
+            } else {
+                $("<div id='tweet_" + status.id + "'>Geen tweets tijdens incident gevonden op basis van zoektermen <i>" + terms.join(", ") + "</i></div>").appendTo("#tab_twitter");
+            }
+
+            $("#t_twitter_title").text("Twitter (" + tweets + ")");
+
+        }
     });
 };

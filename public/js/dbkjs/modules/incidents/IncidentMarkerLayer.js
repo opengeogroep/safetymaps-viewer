@@ -31,10 +31,8 @@ function IncidentMarkerLayer() {
     this.offset = new OpenLayers.Pixel(-(this.size.w/2), -this.size.h);
 }
 
-IncidentMarkerLayer.prototype.addIncident = function(incident, archief, singleMarker) {
-    var me = this;
+IncidentMarkerLayer.prototype.getIncidentXY = function(incident) {
     var x, y;
-
     if(incident.T_X_COORD_LOC && incident.T_Y_COORD_LOC) {
         x = incident.T_X_COORD_LOC;
         y = incident.T_Y_COORD_LOC;
@@ -45,6 +43,13 @@ IncidentMarkerLayer.prototype.addIncident = function(incident, archief, singleMa
         x = $(incident).find("IncidentLocatie XYCoordinaten XCoordinaat").text();
         y = $(incident).find("IncidentLocatie XYCoordinaten YCoordinaat").text();
     }
+    return {x: x, y: y};
+};
+
+IncidentMarkerLayer.prototype.addIncident = function(incident, archief, singleMarker) {
+    var me = this;
+    var xy= me.getIncidentXY(incident);
+    var x = xy.x, y = xy.y;
 
     if(singleMarker) {
         if(x === me.x && y === me.y) {
