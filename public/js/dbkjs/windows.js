@@ -156,16 +156,18 @@ SplitScreenWindow.prototype.createElements = function(title) {
     ModalWindow.prototype.createElements.call(this, title);
     $(this.popup).find("a.modal-popup-close").html('<i class="fa fa-arrow-left"/> Kaart');
 
-    function switchContents() {
-        return me.splitScreen ? "<i class='fa fa-expand'/> Volledig scherm" : "<i class='fa fa-columns'/> Half scherm";
-    };
+    if(dbkjs.options.splitScreenSwitch) {
+        function switchContents() {
+            return me.splitScreen ? "<i class='fa fa-expand'/> Volledig scherm" : "<i class='fa fa-columns'/> Half scherm";
+        };
 
-    var a = $("<a class='modal-popup-switch'>" + switchContents() + "</a>");
-    a.prependTo(this.popup);
-    $(a).on("click", function() {
-        me.setSplitScreen(!me.splitScreen);
-        $(me.popup).find("a.modal-popup-switch").html(switchContents());
-    });
+        var a = $("<a class='modal-popup-switch'>" + switchContents() + "</a>");
+        a.prependTo(this.popup);
+        $(a).on("click", function() {
+            me.setSplitScreen(!me.splitScreen);
+            $(me.popup).find("a.modal-popup-switch").html(switchContents());
+        });
+    }
 };
 
 SplitScreenWindow.prototype.isSplitScreen = function() {
