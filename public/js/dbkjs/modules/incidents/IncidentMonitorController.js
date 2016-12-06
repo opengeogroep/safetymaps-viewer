@@ -508,12 +508,6 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
         });
     }
 
-    // TODO research when updated, tweet search timeout
-    if(me.twitterIncident === incidentId) {
-        return;
-    }
-    me.twitterIncident = incidentId;
-
     var pos = me.markerLayer.getIncidentXY(incident);
 
     var p = new Proj4js.Point(pos.x, pos.y);
@@ -620,11 +614,16 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
     $.ajax("action/twitter", {
         dataType: "json",
         data: params
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+        $("#t_twitter_title").text("Twitter (!)")
+        $("#tab_twitter").text(me.service.getAjaxError(jqXHR, textStatus, errorThrown));
     }).done(function(data) {
         console.log("Twitter search response", data);
 
+        $("#tab_twitter").html("");
+
         if(data.response.errors) {
-            //...
+            $("#tab_twitter").html(JSON.stringify(data.response.errors));
         } else {
             var statuses = data.response.statuses;
 
