@@ -611,7 +611,7 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
         params.endTime = AGSIncidentService.prototype.getAGSMoment(incident.DTG_EINDE_INCIDENT).format("X");
     }
 
-    $.ajax("action/twitter", {
+    $.ajax((dbkjs.options.incidents.twitterUrlPrefix ? dbkjs.options.incidents.twitterUrlPrefix : "") + "action/twitter", {
         dataType: "json",
         data: params
     }).fail(function(jqXHR, textStatus, errorThrown) {
