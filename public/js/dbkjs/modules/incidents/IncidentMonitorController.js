@@ -338,7 +338,7 @@ IncidentMonitorController.prototype.getIncidentList = function() {
     me.lastGetIncidentList = new Date().getTime();
 
     var dCurrent = me.service.getCurrentIncidents();
-    var dArchived = me.service.getArchivedIncidents(me.archivedIncidents);
+    var dArchived = me.service.getArchivedIncidents(dbkjs.options.incidents.cacheArchivedIncidents ? me.archivedIncidents : null);
 
     $.when(dCurrent, dArchived)
     .fail(function(e) {
@@ -378,6 +378,12 @@ IncidentMonitorController.prototype.getIncidentList = function() {
 
 IncidentMonitorController.prototype.processNewArchivedIncidents = function(archivedIncidents) {
     var me = this;
+
+    if(!dbkjs.options.incidents.cacheArchivedIncidents) {
+        me.archivedIncidents = archivedIncidents;
+        return;
+    }
+
     console.log("Huidig aantal gearchiveerde incidenten: " + me.archivedIncidents.length + ", nieuw ontvangen: " + archivedIncidents.length);
     me.archivedIncidents = archivedIncidents.concat(me.archivedIncidents);
 
