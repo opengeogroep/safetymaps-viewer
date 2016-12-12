@@ -875,7 +875,7 @@ dbkjs.protocol.jsonDBK = {
                     if(dbkjs.util.endsWith(waarde.URL.toLowerCase(), '.pdf')) {
                         image_carousel_inner.append(
                             '<div class="item ' + active + '">' +
-                                '<h3 class="pdf-heading" style="margin: 0; text-align: center; height: 28px"><a href="' + realpath + '" target="_blank">' + waarde.naam + '</a></h3>' +
+                                '<h3 class="pdf-heading" style="margin: 0; text-align: center; height: 28px">' + waarde.naam + '</h3>' +
                                 '<div class="pdf-embed" id="pdf_embed_' + foto_index + '" data-url="' + realpath + '"/>' +
                             '</div>'
                         );
