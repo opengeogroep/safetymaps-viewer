@@ -129,23 +129,25 @@ IncidentMarkerLayer.prototype.addIncident = function(incident, archief, singleMa
     });
     this.layer.addMarker(marker);
 
-    var classificatie = incident.classificaties;
-    if(classificatie && classificatie.indexOf(",") !== -1) {
-        classificatie = classificatie.split(",")[0];
-    }
-    var popup = new OpenLayers.Popup.FramedCloud(null, pos, null, "P" + incident.PRIORITEIT_INCIDENT_BRANDWEER + " " + dbkjs.util.htmlEncode(classificatie) + ", " +
-            dbkjs.util.htmlEncode(IncidentDetailsWindow.prototype.getIncidentAdres(incident, false)) +
-            " " + dbkjs.util.htmlEncode(incident.PLAATS_NAAM), null, false, null);
-    popup.panMapIfOutOfView = false;
-    this.popups.push(popup);
+    if(incident.PLAATS_NAAM) {
+        var classificatie = incident.classificaties;
+        if(classificatie && classificatie.indexOf(",") !== -1) {
+            classificatie = classificatie.split(",")[0];
+        }
+        var popup = new OpenLayers.Popup.FramedCloud(null, pos, null, "P" + incident.PRIORITEIT_INCIDENT_BRANDWEER + " " + dbkjs.util.htmlEncode(classificatie) + ", " +
+                dbkjs.util.htmlEncode(IncidentDetailsWindow.prototype.getIncidentAdres(incident, false)) +
+                " " + dbkjs.util.htmlEncode(incident.PLAATS_NAAM), null, false, null);
+        popup.panMapIfOutOfView = false;
+        this.popups.push(popup);
 
-    if(this.showPopups) {
-        dbkjs.map.addPopup(popup);
-    }
+        if(this.showPopups) {
+            dbkjs.map.addPopup(popup);
+        }
 
-    $(dbkjs.modules.incidents.controller.incidentDetailsWindow).on("show", function() {
-        me.hideMarkerHover();
-    });
+        $(dbkjs.modules.incidents.controller.incidentDetailsWindow).on("show", function() {
+            me.hideMarkerHover();
+        });
+    }
 
     return marker;
 };

@@ -162,6 +162,7 @@ dbkjs.modules.feature = {
                     _obj.layer.addFeatures(_obj.features);
                 }
             }
+            $(_obj).triggerHandler("loaded");
             dbkjs.util.loadingEnd(_obj.layer);
             $('#btn_refresh > i').removeClass('fa-spin');
             _obj.search_dbk();
@@ -172,13 +173,23 @@ dbkjs.modules.feature = {
         });
     },
     featureInfohtml: function(feature) {
-        var ret_title = $('<li></li>');
-        var link = '<a id="' + feature.attributes.identificatie + '" href="#">' + feature.attributes.formeleNaam;
-        if(!dbkjs.util.isJsonNull(feature.attributes.informeleNaam)) {
-                link += ' (' + feature.attributes.informeleNaam + ')';
+        var v = {};
+        if(feature.attributes.typeFeature === "WO") {
+            v.id = feature.attributes.id;
+            v.name = feature.attributes.locatie;
+        } else {
+            v.id = feature.attributes.identificatie;
+            v.name = feature.attributes.formeleNaam;
+            v.extraName = feature.attributes.informeleNaam;
         }
-        ret_title.append(link + '</a>');
-        return ret_title;
+        var link = $(Mustache.render('<li><a id="{{id}}" href="#">{{name}}{{#extraName}} ({{extraName}}){{/extraName}}</a></li>', v));
+        $(link).click(function() {
+            dbkjs.protocol.jsonDBK.process(feature, function() {
+                dbkjs.modules.feature.zoomToFeature(feature)
+            });
+            return false;
+        });
+        return $(link);
     },
     search_dbk: function() {
         var _obj = dbkjs.modules.feature;
@@ -279,14 +290,7 @@ dbkjs.modules.feature = {
 
         var bounds = dbkjs.protocol.jsonDBK.layerPandgeometrie.getDataExtent();
         if(bounds) {
-            var margin = dbkjs.options.zoomToPandgeometrieMargin || 50;
-            var boundCoords = bounds.toArray();
-            var extendedBounds = OpenLayers.Bounds.fromArray([
-                boundCoords[0] - margin,
-                boundCoords[1] - margin,
-                boundCoords[2] + margin,
-                boundCoords[3] + margin]);
-            dbkjs.map.zoomToExtent(extendedBounds);
+            dbkjs.map.zoomToExtent(dbkjs.util.extendBounds(bounds, dbkjs.options.zoomToPandgeometrieMargin));
         }
     },
     getfeatureinfo: function(e) {
@@ -319,7 +323,7 @@ dbkjs.modules.feature = {
                                 dbkjs.selectControl.unselect(_obj.layer.features[i]);
                             }
                         });
-                        $("#dbklist").on("click", "a", _obj.handleFeatureTitleClick);
+                        //$("#dbklist").on("click", "a", _obj.handleFeatureTitleClick);
                         dbkjs.util.getModalPopup('infopanel').show();
                     } else {
                         dbkjs.gui.infoPanelUpdateTitle('<i class="fa fa-info-circle"></i> ' + i18n.t('app.results'));

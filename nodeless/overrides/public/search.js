@@ -8,10 +8,10 @@ dbkjs.modules.search.createSearchGroup = function() {
     if(dbkjs.options.searchTabs) {
         var search_tabs = $(
             '<ul id="search_tabs" class="nav nav-pills" style="margin-bottom: 10px">' +
-                    '<li class="active"><a data-toggle="tab" href="#" id="s_dbk"><i class="fa fa-building"></i> ' + i18n.t("search.dbk") + '</a></li>' +
-                    '<li><a  data-toggle="tab" href="#" id="s_address"><i class="fa fa-home"></i> ' + i18n.t("search.address") + '</a></li>' +
-                    '<li><a  data-toggle="tab" href="#" id="s_oms"><i class="fa fa-bell"></i> ' + i18n.t("search.oms") + '</a></li>' +
+                    '<li id="search_li_dbk" class="active"><a data-toggle="tab" href="#" id="s_dbk"><i class="fa fa-building"></i> ' + i18n.t("search.dbk") + '</a></li>' +
+                    '<li id="search_li_oms"><a  data-toggle="tab" href="#" id="s_oms"><i class="fa fa-bell"></i> ' + i18n.t("search.oms") + '</a></li>' +
                     '<li id="search_li_library" style="display: none"><a  data-toggle="tab" href="#" id="s_library"><i class="fa fa-book"></i> ' + i18n.t("search.library") + '</a></li>' +
+                    '<li id="search_li_wo" style="display: ' + (dbkjs.modules.waterongevallen.features && dbkjs.modules.waterongevallen.features.length > 0 ? "block" : "none") + '"><a data-toggle="tab" href="#" id="s_wo"><i class="fa fa-life-buoy"></i> ' + i18n.t("search.wo") + '</a></li>' +                     '<li id="search_li_address"><a  data-toggle="tab" href="#" id="s_address"><i class="fa fa-home"></i> ' + i18n.t("search.address") + '</a></li>' +
                 '</ul>'
         );
 

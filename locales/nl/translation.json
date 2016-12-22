@@ -230,7 +230,9 @@
         "infrastructure": "Hectometer",
         "infraplaceholder": "Naam en hectometer",
         "library": "Bibliotheek",
-        "libraryplaceholder": "Naam van document"
+        "libraryplaceholder": "Naam van document",
+        "wo": "Waterongevallen",
+        "woplaceholder": "WO-kaartnaam"
     },
     "gms":{
         "gms": "Melding"

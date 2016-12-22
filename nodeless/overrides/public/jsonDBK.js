@@ -243,6 +243,8 @@ dbkjs.protocol.jsonDBK.getObject = function(feature, activetab, noZoom, onSucces
 dbkjs.protocol.jsonDBK.process =  function(feature, onSuccess, noZoom) {
     var _obj = dbkjs.protocol.jsonDBK;
 
+    dbkjs.modules.waterongevallen.deselect();
+
     if (!(feature && feature.attributes && feature.attributes.typeFeature)) {
 
         $('#dbkinfopanel_b').html('Geen DBK geselecteerd.');
@@ -252,6 +254,7 @@ dbkjs.protocol.jsonDBK.process =  function(feature, onSuccess, noZoom) {
         $.each(_obj.layers, function(idx, lyr){
            lyr.destroyFeatures();
         });
+
         dbkjs.options.feature = null;
 
         if(onSuccess) {
@@ -304,6 +307,8 @@ dbkjs.protocol.jsonDBK.process =  function(feature, onSuccess, noZoom) {
                 dbkjs.protocol.jsonDBK.getObject(feature, 'algemeen', !!noZoom, mySuccess);
             } else if (feature.attributes.typeFeature === 'Gebied') {
                 dbkjs.protocol.jsonDBK.getGebied(feature, 'algemeen', mySuccess);
+            } else if(feature.attributes.typeFeature === 'WO') {
+                dbkjs.modules.waterongevallen.selected(feature, mySuccess);
             }
         }
     } else {

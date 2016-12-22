@@ -226,7 +226,7 @@ dbkjs.modules.search = {
             };
 
         if(dbkjs.options.searchTabs) {
-            $("#s_dbk, #s_address, #s_oms, #s_library").on('click', function(e) {
+            $("#s_dbk, #s_address, #s_oms, #s_library, #s_wo").on('click', function(e) {
                 var searchId = $(e.target).attr("id");
                 if(searchId && searchId.indexOf("s_") === 0) {
                     currentSearch = searchId.substring(2);
@@ -249,6 +249,11 @@ dbkjs.modules.search = {
 
             if(currentSearch === 'library') {
                 _obj.handleLibrarySearch(searchText);
+                return;
+            }
+
+            if(currentSearch === "wo") {
+                _obj.handleWoSearch(searchText);
                 return;
             }
 
@@ -447,6 +452,24 @@ dbkjs.modules.search = {
 
         PDFObject.embed(realpath, $("#pdf_embed_library"), {
             PDFJS_URL: "js/libs/pdfjs-1.5.188-minified/web/viewer.html"
+        });
+    },
+    handleWoSearch: function(searchText) {
+        var me = this;
+        var regExp = new RegExp(searchText, 'ig');
+        var results = [];
+        $.each(dbkjs.modules.waterongevallen.features, function(i, f) {
+            if(searchText.trim() === "" || regExp.test(f.attributes.label)) {
+                results.push({
+                    value: f.attributes.label,
+                    feature: f
+                });
+            }
+        });
+        this.showSearchResult(results, function(f) {
+            dbkjs.protocol.jsonDBK.process(f.feature);
+            me.searchPopup.hide();
+            dbkjs.modules.feature.zoomToFeature(f.feature);
         });
     },
     activate: function() {

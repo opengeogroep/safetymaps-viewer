@@ -101,7 +101,7 @@ dbkjs.config.styles = {
                                 // en feature om display van te bepalen niet het hoofdobject
                                 // is van de actieve DBK. Zo ja, dan niet tonen
                                 // Gebied heeft geen verdiepingen
-                                if (dbkjs.options.feature && dbkjs.options.feature.verdiepingen && dbkjs.options.feature.verdiepingen.length > 1) {
+                                if (feature.attributes.typeFeature === 'Object' && dbkjs.options.feature && dbkjs.options.feature.verdiepingen && dbkjs.options.feature.verdiepingen.length > 1) {
                                     // Het ID van de dbk waarvan we de display property
                                     // bepalen
                                     var verdiepingCheckDbkId = feature.attributes.identificatie;
@@ -129,6 +129,8 @@ dbkjs.config.styles = {
                     } else {
                         if (feature.attributes.typeFeature === 'Object') {
                             return 38;
+                        } else if(feature.attributes.typeFeature === "WO") {
+                            return 40;
                         } else {
                             return 65;
                         }
@@ -141,6 +143,8 @@ dbkjs.config.styles = {
                     } else {
                         if (feature.attributes.typeFeature === 'Object') {
                             return 24;
+                        } else if(feature.attributes.typeFeature === "WO") {
+                            return 40;
                         } else {
                             return 85;
                         }
@@ -160,28 +164,44 @@ dbkjs.config.styles = {
                     if (feature.cluster) {
                         return "cc";
                     } else {
-                        return "rb";
+                         if(feature.attributes.typeFeature === "WO") {
+                            return "cb";
+                         } else {
+                            return "rb";
+                        }
                     }
                 },
                 mylabelxoffset: function (feature) {
                     if (feature.cluster) {
                         return 0;
                     } else {
-                        return -16;
+                         if(feature.attributes.typeFeature === "WO") {
+                            return 0;
+                         } else {
+                            return -16;
+                        }
                     }
                 },
                 mylabelyoffset: function (feature) {
                     if (feature.cluster) {
                         return -4;
                     } else {
-                        return -9;
+                         if(feature.attributes.typeFeature === "WO") {
+                            return -32;
+                         } else {
+                            return -9;
+                        }
                     }
                 },
                 myfontcolor: function (feature) {
                     if (feature.cluster) {
                         return "#ffffff";
                     } else {
-                        return "#000000";
+                        if(feature.attributes.typeFeature === "WO") {
+                            return "white";
+                        } else {
+                            return "#000000";
+                        }
                     }
                 },
                 myicon: function (feature) {
@@ -196,6 +216,8 @@ dbkjs.config.styles = {
                                 img = "images/jcartier_building_2.png";
                             }
                             return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + img : imagesBase64[img];
+                        } else if(feature.attributes.typeFeature === 'WO') {
+                            return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + "images/snorkel-256.png" : imagesBase64["images/snorkel-256.png"];
                         } else {
                             return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + "images/jcartier_event_1.png" : imagesBase64["images/jcartier_event_1.png"];
                         }
@@ -213,7 +235,11 @@ dbkjs.config.styles = {
                             }
                             return lbl_txt;
                         } else {
-                            return "";
+                            if(feature.attributes.typeFeature === "WO" && dbkjs.map.getResolution() <= dbkjs.options.featureLabelResolution) {
+                                return feature.attributes.locatie;
+                            } else {
+                                return "";
+                            }
                         }
                     } else {
                         return "";
@@ -226,7 +252,7 @@ dbkjs.config.styles = {
         }, {
             context: {
                 myfontcolor: function(feature) {
-                    if (feature.cluster) {
+                    if (feature.cluster || feature.attributes.typeFeature === "WO") {
                         return "#fff722";
                     } else {
                         return "#000000";

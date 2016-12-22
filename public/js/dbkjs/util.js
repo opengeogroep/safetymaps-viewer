@@ -966,6 +966,15 @@ dbkjs.util = {
             return angle;
         }
     },
+    extendBounds: function(bounds, margin) {
+        margin = margin || 50;
+        var boundCoords = bounds.toArray();
+        return OpenLayers.Bounds.fromArray([
+            boundCoords[0] - margin,
+            boundCoords[1] - margin,
+            boundCoords[2] + margin,
+            boundCoords[3] + margin]);
+    },
     createModalPopup: function (options) {
         // Init default options
         if (options === undefined) {

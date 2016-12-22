@@ -1,20 +1,4 @@
 
-dbkjs.modules.feature.featureInfohtml = function(feature) {
-    var _obj = dbkjs.modules.feature;
-    var ret_title = $('<li></li>');
-    var link = '<a href="#">' + feature.attributes.formeleNaam;
-    if(!dbkjs.util.isJsonNull(feature.attributes.informeleNaam)) {
-            link += ' (' + feature.attributes.informeleNaam + ')';
-    }
-    ret_title.append(link + '</a>');
-    $(ret_title).click(function() {
-        dbkjs.protocol.jsonDBK.process(feature, function() {
-            _obj.zoomToFeature(feature);
-        });
-        return false;
-    });
-    return ret_title;
-};
 
 dbkjs.modules.feature.handleDbkOmsSearch = function(object) {
     var _obj = dbkjs.modules.feature;
@@ -57,7 +41,10 @@ dbkjs.modules.feature.zoomToFeature = function(feature) {
     dbkjs.options.dbk = feature === null ? null : feature.attributes.identificatie;
     dbkjs.modules.updateFilter(dbkjs.options.dbk);
     if(dbkjs.options.dbk) {
-        if(!dbkjs.options.zoomToPandgeometrie) {
+
+        if(feature.attributes.typeFeature === "WO") {
+            dbkjs.map.zoomToExtent(dbkjs.util.extendBounds(OpenLayers.Bounds.fromString(feature.attributes.bounds)));
+        } else if(!dbkjs.options.zoomToPandgeometrie) {
             if (dbkjs.map.zoom < dbkjs.options.zoom) {
                 dbkjs.map.setCenter(feature.geometry.getBounds().getCenterLonLat(), dbkjs.options.zoom);
             } else {

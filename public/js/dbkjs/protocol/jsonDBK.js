@@ -166,6 +166,7 @@ dbkjs.protocol.jsonDBK = {
         var _obj = dbkjs.protocol.jsonDBK;
         _obj.active_tab = 'algemeen';
         dbkjs.gui.infoPanelUpdateFooterHtml('');
+        dbkjs.modules.waterongevallen.deselect();
         if (feature && feature.attributes && feature.attributes.typeFeature) {
             if (feature.data && feature.data.hasOwnProperty('formeleNaam') && feature.data.hasOwnProperty('informeleNaam')) {
                 $('.dbk-title')
@@ -189,6 +190,8 @@ dbkjs.protocol.jsonDBK = {
                         dbkjs.protocol.jsonDBK.getObject(feature);
                     } else if (feature.attributes.typeFeature === 'Gebied') {
                         dbkjs.protocol.jsonDBK.getGebied(feature);
+                    } else if(feature.attributes.typeFeature === 'WO') {
+                        dbkjs.modules.waterongevallen.selected(feature);
                     }
                 }
             } else {
@@ -218,6 +221,7 @@ dbkjs.protocol.jsonDBK = {
             $('#dbkinfopanel_b').text(i18n.t("dialogs.noinfo"));
         }
         dbkjs.modules.updateFilter(0);
+        dbkjs.modules.waterongevallen.deselect();
     },
     activateSelect: function (layer) {
         var _obj = dbkjs.protocol.jsonDBK;
