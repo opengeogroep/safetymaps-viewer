@@ -510,7 +510,7 @@ IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInze
     }
 
     if(compareMode) {
-        html += me.getIncidentKladblokHtml("xml", incident);
+        html += this.getIncidentKladblokHtml("xml", incident);
     }
 
     html += '</table>';
