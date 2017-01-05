@@ -262,7 +262,7 @@ dbkjs.Layer = dbkjs.Class({
         features = g.read($.parseXML(response.responseText));
         console.log("Feature info for layer "+ _obj.layer.name + ": "+ features.length + " features returned", response.responseText);
         if (features.length > 0) {
-            html = '<div class="table-responsive"><table class="table table-hover">';
+            var html = '<div class="table-responsive"><table class="table table-hover">';
             for (var feat in features) {
                 for (var j in features[feat].attributes) {
                     if ($.inArray(j, ['Name', 'No', 'Latitude', 'Longitude']) === -1) {
@@ -274,10 +274,11 @@ dbkjs.Layer = dbkjs.Class({
             }
             html += '</table></div>';
             if(dbkjs.viewmode === "fullscreen") {
-                $('#vectorclickpanel_b').html(html);
-                $('#vectorclickpanel_b').on('click', function() {
-                    $('#vectorclickpanel_b').hide();
+                $("#vectorclickpanel").css({'max-height': '90%', 'overflow': 'auto'});
+                $('#vectorclickpanel').on('click', function() {
+                    $('#vectorclickpanel').hide();
                 });
+                $('#vectorclickpanel_b').html(html);
                 $('#vectorclickpanel').show();
             } else {
                 dbkjs.util.appendTab(dbkjs.wms_panel.attr("id"), _obj.layer.name, html, true, _obj.id + '_pn');
