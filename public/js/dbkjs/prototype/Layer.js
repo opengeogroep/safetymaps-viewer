@@ -275,6 +275,9 @@ dbkjs.Layer = dbkjs.Class({
             html += '</table></div>';
             if(dbkjs.viewmode === "fullscreen") {
                 $('#vectorclickpanel_b').html(html);
+                $('#vectorclickpanel_b').on('click', function() {
+                    $('#vectorclickpanel_b').hide();
+                });
                 $('#vectorclickpanel').show();
             } else {
                 dbkjs.util.appendTab(dbkjs.wms_panel.attr("id"), _obj.layer.name, html, true, _obj.id + '_pn');
