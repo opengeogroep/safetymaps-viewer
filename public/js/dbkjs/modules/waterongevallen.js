@@ -275,9 +275,11 @@ dbkjs.modules.waterongevallen = {
         dbkjs.protocol.jsonDBK.panel_tabs.append('<li class="' + (active ? "active" : "") + '"><a data-toggle="tab" href="#' + id + '">' + label + '</a></li>');
     },
     deselect: function() {
-        this.vlakken.removeAllFeatures();
-        this.lijnen.removeAllFeatures();
-        this.symbolen.removeAllFeatures();
+        if(this.vlakken) {
+            this.vlakken.removeAllFeatures();
+            this.lijnen.removeAllFeatures();
+            this.symbolen.removeAllFeatures();
+        }
     }
 };
 
