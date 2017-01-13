@@ -216,6 +216,11 @@ dbkjs.Layer = dbkjs.Class({
     },
     getfeatureinfo: function (e) {
         _obj = this;
+
+        if(typeof e.xy === 'undefined') {
+            return;
+        }
+
         if (!this.layer.options.hidefeatureinfo) {
             if (this.layer.visibility) {
                 var params = {
