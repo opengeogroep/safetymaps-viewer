@@ -50,15 +50,11 @@ dbkjs.modules.connectionmonitor = {
             }
         });
 
-        OpenLayers.IMAGE_RELOAD_ATTEMPTS = 10;
-
-        OpenLayers.Util.onImageLoadError = function() {
-            dbkjs.modules.connectionmonitor.onConnectionError();
-        };
+        me.interval = options.interval ? options.interval * 1000 : 5000;
 
         me.connectionCheckTimer = setTimeout(function() {
             me.checkConnectivity();
-        }, 5000);
+        }, me.interval);
     },
     onConnectionError: function() {
         this.connected = false;
@@ -115,7 +111,7 @@ dbkjs.modules.connectionmonitor = {
 
                 me.connectionCheckTimer = setTimeout(function() {
                     me.checkConnectivity();
-                }, 5000);
+                }, me.interval);
             }
         });
     }
