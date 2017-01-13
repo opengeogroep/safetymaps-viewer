@@ -93,7 +93,30 @@ dbkjs.setDbkCategoryVisibility = function (category, visible) {
 
 dbkjs.activateClick = function () {
     dbkjs.map.events.register('click', dbkjs.map, dbkjs.util.onClick);
-    dbkjs.map.events.register('touchend', dbkjs.map, dbkjs.util.onClick);
+
+    if(!dbkjs.options.minTouchMoveEndDistance || dbkjs.options.minTouchMoveEndDistance > 0) {
+        dbkjs.map.events.register('touchend', dbkjs.map, dbkjs.util.onClick);
+    } else {
+        var touchmove = null;
+
+        dbkjs.map.events.register('touchend', dbkjs.map, function(e) {
+            var closeTouch = false;
+            if(touchmove !== null && touchmove.xy && e.xy) {
+                closeTouch = Math.abs(touchmove.xy.x - e.xy.x) < dbkjs.options.minTouchMoveEndDistance &&
+                        Math.abs(touchmove.xy.y - e.xy.y) < dbkjs.options.minTouchMoveEndDistance;
+            }
+            if(touchmove === null || closeTouch) {
+                dbkjs.util.onClick(e);
+            }
+            touchmove = null;
+        });
+
+        dbkjs.map.events.register('touchmove', dbkjs.map, function(e) {
+            if(touchmove === null) {
+                touchmove = e;
+            }
+        });
+    }
 };
 
 dbkjs.challengeAuth = function () {
