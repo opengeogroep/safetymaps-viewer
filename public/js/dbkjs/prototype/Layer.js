@@ -221,6 +221,10 @@ dbkjs.Layer = dbkjs.Class({
             return;
         }
 
+        if(this.layer.options.maxResolution && dbkjs.map.getResolution() > this.layer.options.maxResolution) {
+            return;
+        }
+
         if (!this.layer.options.hidefeatureinfo) {
             if (this.layer.visibility) {
                 var params = {
