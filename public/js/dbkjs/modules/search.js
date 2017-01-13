@@ -451,7 +451,8 @@ dbkjs.modules.search = {
         me.libraryPopup.show();
 
         PDFObject.embed(realpath, $("#pdf_embed_library"), {
-            PDFJS_URL: "js/libs/pdfjs-1.5.188-minified/web/viewer.html"
+            PDFJS_URL: "js/libs/pdfjs-1.5.188-minified/web/viewer.html",
+            forcePDFJS: !!dbkjs.options.forcePDFJS
         });
     },
     handleWoSearch: function(searchText) {

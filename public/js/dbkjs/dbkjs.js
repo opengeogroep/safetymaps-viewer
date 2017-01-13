@@ -462,7 +462,8 @@ dbkjs.documentReady = function () {
                     if(pdf.children.length === 0) {
                         console.log("embedding PDF " + $(pdf).attr("data-url"));
                         PDFObject.embed($(pdf).attr("data-url"), pdf, {
-                            PDFJS_URL: "js/libs/pdfjs-1.5.188-minified/web/viewer.html"
+                            PDFJS_URL: "js/libs/pdfjs-1.5.188-minified/web/viewer.html",
+                            forcePDFJS: !!dbkjs.options.forcePDFJS
                         });
                     }
                 });
