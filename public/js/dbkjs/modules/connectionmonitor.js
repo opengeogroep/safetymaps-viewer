@@ -24,7 +24,6 @@ dbkjs.modules = dbkjs.modules || {};
 dbkjs.modules.connectionmonitor = {
     id: "dbk.module.connectionmonitor",
     connected: null,
-    debug: null,
     okTimer: null,
     connectionCheckTimer: null,
     register: function(options) {
@@ -33,7 +32,10 @@ dbkjs.modules.connectionmonitor = {
             return;
         }
 
-        this.debug = !!dbkjs.options.connectionmonitorDebug;
+        this.options = $.extend({
+            interval: 5
+        }, this.options);
+        this.options.interval = this.options.interval * 1000;
 
         this.connected = true;
 
@@ -50,11 +52,9 @@ dbkjs.modules.connectionmonitor = {
             }
         });
 
-        me.interval = options.interval ? options.interval * 1000 : 5000;
-
         me.connectionCheckTimer = setTimeout(function() {
             me.checkConnectivity();
-        }, me.interval);
+        }, me.options.interval);
     },
     onConnectionError: function() {
         this.connected = false;
@@ -111,7 +111,7 @@ dbkjs.modules.connectionmonitor = {
 
                 me.connectionCheckTimer = setTimeout(function() {
                     me.checkConnectivity();
-                }, me.interval);
+                }, me.options.interval);
             }
         });
     }
