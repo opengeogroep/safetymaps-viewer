@@ -37,7 +37,7 @@ function IncidentMarkerLayer() {
 //    $("#baselayerpanel_b").append('<hr/><label><input type="checkbox" ' + (this.showHover ? 'checked' : '') + ' onclick="dbkjs.modules.incidents.controller.markerLayer.setShowHover(event.target.checked)">Toon informatie over incident rechtsonderin het scherm bij muis over</label>');
 
     this.showPopups = window.localStorage.getItem("IncidentMarkerLayer.showPopups") === "true";
-    $("#baselayerpanel_b").append('<hr/><label><input type="checkbox" ' + (this.showPopups ? 'checked' : '') + ' onclick="dbkjs.modules.incidents.controller.markerLayer.setShowPopups(event.target.checked)">Toon popups bij incidenten</label>');
+    //$("#baselayerpanel_b").append('<hr/><label><input type="checkbox" ' + (this.showPopups ? 'checked' : '') + ' onclick="dbkjs.modules.incidents.controller.markerLayer.setShowPopups(event.target.checked)">Toon popups bij incidenten</label>');
 
 };
 
