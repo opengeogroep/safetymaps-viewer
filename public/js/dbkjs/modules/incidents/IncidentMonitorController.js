@@ -288,7 +288,7 @@ IncidentMonitorController.prototype.incidentFilter = function(incident) {
             return true;
         }
     } else {
-        return incident.inzetEenhedenStats.B.total !== 0;
+        return incident.actueleInzet || incident.beeindigdeInzet || incident.inzetEenhedenStats.B.total !== 0;
     }
 };
 
@@ -299,8 +299,9 @@ IncidentMonitorController.prototype.updateInterface = function() {
     }
 
     // Filter current and archived with criteria for both
-    var currentFiltered = $.grep(me.currentIncidents, me.incidentFilter);
     var archivedFiltered = $.grep(me.archivedIncidents, me.incidentFilter);
+
+    var currentFiltered = $.grep(me.currentIncidents, me.incidentFilter);
 
     // Active incident: current and actueleInzet
     // Inactive incident: (current and !actueleInzet) or archived
@@ -309,11 +310,25 @@ IncidentMonitorController.prototype.updateInterface = function() {
     $.each(currentFiltered, function(i, incident) {
         if(incident.actueleInzet) {
             active.push(incident);
-        } else {
+        } else if(incident.beeindigdeInzet) {
+            incident.inzetEenhedenStats = me.service.getInzetEenhedenStats(incident, true);
             inactive.push(incident);
         }
     });
-    inactive = inactive.concat(archivedFiltered);
+    // Voeg gearchiveerde incidenten toe aan inactive indien niet al vanuit
+    // current incidents met beeindigde inzet
+    $.each(archivedFiltered, function(i, incident) {
+        var duplicate = false;
+        $.each(inactive, function(j, iIncident) {
+            if(iIncident.INCIDENT_ID === incident.INCIDENT_ID) {
+                duplicate = true;
+                return false;
+            }
+        });
+        if(!duplicate) {
+            inactive.push(incident);
+        }
+    });
 
     me.actueleIncidentIds = $.map(active, function(incident) { return incident.INCIDENT_ID; });
 

@@ -747,6 +747,7 @@ AGSIncidentService.prototype.getCurrentIncidents = function() {
             $.each(incidents, function(i, incident) {
                 incident.inzetEenheden = [];
                 incident.actueleInzet = false;
+                incident.beeindigdeInzet = false;
             });
 
             $.each(inzet, function(i, inzetEenheid) {
@@ -754,8 +755,13 @@ AGSIncidentService.prototype.getCurrentIncidents = function() {
                 $.each(incidents, function(j, incident) {
                     if(inzetEenheid.INCIDENT_ID === incident.INCIDENT_ID) {
                         incident.inzetEenheden.push(inzetEenheid);
-                        if(!inzetEenheid.DTG_EIND_ACTIE) {
-                            incident.actueleInzet = true;
+
+                        if(inzetEenheid.T_IND_DISC_EENHEID === 'B' || (me.ghor && inzetEenheid.T_IND_DISC_EENHEID === 'A')) {
+                            if(!inzetEenheid.DTG_EIND_ACTIE) {
+                                incident.actueleInzet = true;
+                            } else {
+                                incident.beeindigdeInzet = true;
+                            }
                         }
                         return false;
                     }
@@ -858,7 +864,7 @@ AGSIncidentService.prototype.getArchivedIncidents = function(incidentsToFilter) 
 /**
  * Tel aantal actuele inzet eenheden per discipline en soort voertuig
  */
-AGSIncidentService.prototype.getInzetEenhedenStats = function(incident) {
+AGSIncidentService.prototype.getInzetEenhedenStats = function(incident, ookBeeindigd) {
     var eenheidStats = {
         "B": {
             "total": 0
@@ -872,7 +878,7 @@ AGSIncidentService.prototype.getInzetEenhedenStats = function(incident) {
     };
     if(incident.inzetEenheden) {
         $.each(incident.inzetEenheden, function(j, eenheid) {
-            if(!eenheid.DTG_EIND_ACTIE) {
+            if(ookBeeindigd || !eenheid.DTG_EIND_ACTIE) {
                 eenheidStats[eenheid.T_IND_DISC_EENHEID].total++;
                 var soort = eenheid.CODE_VOERTUIGSOORT;
                 if(soort !== null) {
