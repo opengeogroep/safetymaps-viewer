@@ -242,6 +242,9 @@ dbkjs.Layer = dbkjs.Class({
                     styles: this.layer.params.STYLES,
                     srs: this.layer.params.SRS
                 };
+                if(this.layer.options.featureInfoRadius) {
+                    params.radius = this.layer.options.featureInfoRadius;
+                }
 
                 // handle the wms 1.3 vs wms 1.1 madness
                 if (this.layer.params.VERSION === "1.3.0") {
