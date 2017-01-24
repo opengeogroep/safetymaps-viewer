@@ -3,7 +3,7 @@ dbkjs.modules.search.viewmode = 'fullscreen';
 
 dbkjs.modules.search.createSearchGroup = function() {
     var search_group = $('<div></div>').addClass('input-group input-group-lg');
-    var search_input = $('<input id="search_input" name="search_input" type="text" class="form-control" placeholder="' + i18n.t("search.dbkplaceholder") + '">');
+    var search_input = $('<input id="search_input" name="search_input" autocomplete="off" type="text" class="form-control" placeholder="' + i18n.t("search.dbkplaceholder") + '">');
 
     if(dbkjs.options.searchTabs) {
         var search_tabs = $(

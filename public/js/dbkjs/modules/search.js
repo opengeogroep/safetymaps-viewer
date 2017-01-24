@@ -300,13 +300,21 @@ dbkjs.modules.search = {
     searchDbkOms: function(searchValues, searchText) {
         var _obj = dbkjs.modules.search,
             regExp = new RegExp(searchText, 'ig');
-        _obj.showSearchResult(searchValues.filter(function(elem, pos) {
-            return regExp.test(elem.value);
-        }), function(value) {
+        console.time('searchDbkOms');
+        var results = [];
+		for(var i = 0; i < searchValues.length && results.length < 13; i++) {
+			if(regExp.test(searchValues[i].value)) {
+				results.push(searchValues[i]);
+			}
+		}
+        console.timeEnd('searchDbkOms');
+
+        _obj.showSearchResult(results, function(value) {
             dbkjs.modules.feature.handleDbkOmsSearch(value);
         });
     },
     showSearchResult: function(searchResult, clickCallback) {
+        console.time('showSearchResult');
         var _obj = dbkjs.modules.search,
             searchResultContainer = $('.search_result'),
             item_ul = $('<ul class="nav nav-pills nav-stacked"></ul>');
@@ -321,6 +329,7 @@ dbkjs.modules.search = {
             }));
         });
         searchResultContainer.append(item_ul);
+        console.timeEnd('showSearchResult');
     },
     handleCoordinatesSearch: function() {
         var _obj = dbkjs.modules.search;
