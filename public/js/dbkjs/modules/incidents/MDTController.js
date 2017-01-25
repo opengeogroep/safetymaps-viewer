@@ -204,6 +204,7 @@ MDTController.prototype.newIncident = function() {
             dbkjs.protocol.jsonDBK.process(dbk, null, true);
         }
     }
+    me.incidentDetailsWindow.show();
 
     $(me).triggerHandler("new_incident", null);
 };
