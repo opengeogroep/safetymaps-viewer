@@ -165,7 +165,8 @@ dbkjs.modules.feature = {
             $(_obj).triggerHandler("loaded");
             dbkjs.util.loadingEnd(_obj.layer);
             $('#btn_refresh > i').removeClass('fa-spin');
-            _obj.search_dbk();
+
+            _obj.clearSearchCaches();
         }).fail(function( jqxhr, textStatus, error ) {
             $('#btn_refresh > i').removeClass('fa-spin');
             dbkjs.options.feature = null;
@@ -190,16 +191,6 @@ dbkjs.modules.feature = {
             return false;
         });
         return $(link);
-    },
-    search_dbk: function() {
-        var _obj = dbkjs.modules.feature;
-        var dbk_naam_array = _obj.getDbkSearchValues();
-        dbkjs.gui.updateSearchInput(_obj, 'dbk', dbk_naam_array);
-    },
-    search_oms: function() {
-        var _obj = dbkjs.modules.feature;
-        var oms_naam_array = _obj.getOmsSearchValues();
-        dbkjs.gui.updateSearchInput(_obj, 'oms', oms_naam_array);
     },
     /* Override this function to customize the search (and display) string of DBK's,
      * for example to include address:
@@ -257,6 +248,10 @@ dbkjs.modules.feature = {
         });
         _obj.caches.oms = oms_naam_array;
         return _obj.caches.oms;
+    },
+    clearSearchCaches: function() {
+        delete this.caches.dbk;
+        delete this.caches.oms;
     },
     handleDbkOmsSearch: function(object) {
         var _obj = dbkjs.modules.feature;

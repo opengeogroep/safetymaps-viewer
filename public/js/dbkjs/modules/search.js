@@ -302,7 +302,7 @@ dbkjs.modules.search = {
             regExp = new RegExp(searchText, 'ig');
         console.time('searchDbkOms');
         var results = [];
-		for(var i = 0; i < searchValues.length && results.length < 13; i++) {
+		for(var i = 0; i < searchValues.length && results.length < 20; i++) {
 			if(regExp.test(searchValues[i].value)) {
 				results.push(searchValues[i]);
 			}
@@ -483,6 +483,9 @@ dbkjs.modules.search = {
         });
     },
     activate: function() {
+        if(dbkjs.viewmode === "fullscreen") {
+            return;
+        }
         var _obj = dbkjs.modules.search;
         $('#search_input').typeahead({
             name: 'address',
@@ -543,6 +546,9 @@ dbkjs.modules.search = {
         });
     },
     activateinfra: function() {
+        if(dbkjs.viewmode === "fullscreen") {
+            return;
+        }
         var _obj = dbkjs.modules.search;
         $('#search_input').typeahead({
             name: 'infra',

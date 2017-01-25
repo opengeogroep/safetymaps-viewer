@@ -21,19 +21,6 @@ dbkjs.gui = {
             obj.get();
         });
     },
-    // feature.js
-    updateSearchInput: function(obj,name, dbk_naam_array) {
-        $('#search_input').typeahead('destroy');
-        $('#search_input').val('');
-        $('#search_input').typeahead({
-            name: name,
-            local: dbk_naam_array,
-            limit: 10
-        });
-        $('#search_input').bind('typeahead:selected', function(obj, datum) {
-            dbkjs.modules.feature.handleDbkOmsSearch(datum);
-        });
-    },
     // jsonDBK.js
     infoPanelUpdateTitle: function(text) {
         dbkjs.util.changeDialogTitle(text);
