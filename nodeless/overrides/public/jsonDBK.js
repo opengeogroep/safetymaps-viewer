@@ -155,10 +155,7 @@ dbkjs.protocol.jsonDBK.getfeatureinfo = function(e){
         html.append(table);
         $('#vectorclickpanel_b').html('').append(html);
         if(dbkjs.viewmode === 'fullscreen') {
-            $('#vectorclickpanel').show().on('click', function() {
-                dbkjs.selectControl.unselectAll();
-                $('#vectorclickpanel').hide();
-            });
+            $('#vectorclickpanel').show();
         }
     } else {
         // Generic attribute table
