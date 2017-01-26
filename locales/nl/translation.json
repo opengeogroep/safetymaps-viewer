@@ -280,5 +280,13 @@
         "impossible": "Geen",
         "alternative": "Alternatief",
         "information": "Opmerkingen"
+    },
+    "waterongevallen": {
+        "Gevaar": "Gevaar",
+        "Twa01": "Trailerhelling",
+        "Twa02": "Zwemplaats",
+        "Twa03": "Gemaal/loosplaats",
+        "Twa04": "Vaste brug",
+        "Twa05": "Beweegbare brug"
     }
 }

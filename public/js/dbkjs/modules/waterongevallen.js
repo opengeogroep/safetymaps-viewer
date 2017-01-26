@@ -99,6 +99,7 @@ dbkjs.modules.waterongevallen = {
                 dbkjs.gui.showError("Fout bij inladen waterongevallenkaart: " + data.error);
                 return;
             }
+            dbkjs.selectControl.unselectAll();
             me.loadLayers(data);
             dbkjs.modules.feature.zoomToFeature(feature)
             if(typeof successFunction === "function") {
@@ -106,6 +107,25 @@ dbkjs.modules.waterongevallen = {
             }
         });
 
+    },
+    symbolSelected: function(e) {
+        $('#vectorclickpanel_h').html('<span class="h4"><i class="fa fa-info-circle">&nbsp;Waterongevallen</span>');
+        var html = $('<div class="table-responsive"></div>');
+
+        var table = $('<table class="table table-hover"></table>');
+        table.append(Mustache.render('<tr><th>{{#t}}waterongevallen.' + e.feature.attributes.symboolcod + '{{/t}}</th><th>Informatie</th></tr>',  dbkjs.util.mustachei18n()));
+        var img = e.object.styleMap.styles.default.context.myicon(e.feature);
+        table.append($(Mustache.render(
+        '<tr>' +
+            '<td><img class="thumb" src="{{img}}" alt="{{f.symboolcod}}" title="{{f.symboolcod}}"></td>' +
+            '<td>{{f.bijzonderh}}</td>' +
+        '</tr>', {img: img, f: e.feature.attributes})));
+        html.append(table);
+        $('#vectorclickpanel_b').html('').append(html);
+        $('#vectorclickpanel').show();
+    },
+    symbolUnselected: function(e) {
+        $('#vectorclickpanel').hide();
     },
     init: function() {
         this.createLayers();
@@ -197,11 +217,19 @@ dbkjs.modules.waterongevallen = {
                         }
                     }
                 }),
-                'select': new OpenLayers.Style({pointRadius: 18}),
-                'temporary': new OpenLayers.Style({pointRadius: 20})
+                'select': new OpenLayers.Style({pointRadius: 20}),
+                'temporary': new OpenLayers.Style({pointRadius: 24})
             })
         });
+        this.symbolen.events.register("featureselected", this, this.symbolSelected);
+        this.symbolen.events.register("featureunselected", this, this.symbolUnselected);
         dbkjs.map.addLayer(this.symbolen);
+        dbkjs.hoverControl.deactivate();
+        dbkjs.hoverControl.layers.push(this.symbolen);
+        dbkjs.hoverControl.activate();
+        dbkjs.selectControl.deactivate();
+        dbkjs.selectControl.layers.push(this.symbolen);
+        dbkjs.selectControl.activate();
     },
     loadLayers: function(data) {
         this.vlakken.removeAllFeatures();
@@ -236,19 +264,26 @@ dbkjs.modules.waterongevallen = {
         );
 
         this.createInfoTabDiv("duikinstructie", "Duikinstructie", false, data,
-            ["duikongeva", "dmc", "klpd"],
-            ["Duikongeval", "Duikmedisch centrum", "KLPD"]
+            ["duikongeva", "dmc", "klpd", "waterbehee", "havendiens"],
+            ["Duikongeval", "Duikmedisch centrum", "KLPD", "Waterbeheerder", "Havendienst"]
         );
         $("#collapse_duikinstructie table").append("<tr><td colspan='2'>" +
-                "<table><tr><td>Werktijd (Normaal gebruik)</td><td>30</td><td>27</td><td>25</td><td>23</td><td>21</td><td>19</td><td>18</td><td>17</td><td>16</td><td>etc.</td></tr>" +
-                "<tr><td>Werktijd (Hoog verbruik)</td><td>15</td><td>14</td><td>11</td><td>11</td><td>10</td><td>9</td><td>9</td><td>8</td><td>7</td><td>etc.</td></tr>" +
-                "<tr><td>Diepte</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>etc.</td></tr>" +
-                "</table></td></tr>");
+                "<table border='1' cellpadding='2'><tr><td><i>VN</i></td><td>30</td><td>27</td><td>25</td><td>23</td><td>21</td><td>19</td><td>18</td><td>17</td><td>16</td><td>15</td><td>14</td><td>13</td><td>12</td><td>11</td><td>11</td></tr>" +
+                "<tr><td><i>VH</i></td><td>15</td><td>14</td><td>12</td><td>11</td><td>10</td><td>9</td><td>9</td><td>8</td><td>7</td><td>7</td><td>6</td><td>5</td><td>5</td><td>5</td><td>4</td></tr>" +
+                "<tr><td><i>D</i></td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td></tr>" +
+                "</table><br>" +
+                "<table><tr><td><i>VN:</i></td><td>Normaal verbruik</td></tr>" +
+                "<tr><td><i>VH:</i><td>Hoog verbruik</td></tr>" +
+                "<tr><td><i>D:</i><td>Diepte</td></tr></table>" +
+                "</td></tr>"
+                );
 
-        this.createInfoTabDiv("bijzonderheden", "Bijzonderheden", false, data,
-            ["waterbehee", "havendiens", "bijzonde_2"],
-            ["Waterbeheerder", "Havendienst", "Bijzonderheden"]
-        );
+        if(data.attributes["bijzonde_2"]) {
+            this.createInfoTabDiv("bijzonderheden", "Bijzonderheden", false, data,
+                ["bijzonde_2"],
+                ["Bijzonderheden"]
+            );
+        }
 
         // Fire handler to put tabs at bottom
         $(window).resize();
