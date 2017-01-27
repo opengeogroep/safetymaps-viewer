@@ -540,9 +540,12 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
 
     var terms = [];
 
-    var address = incident.NAAM_LOCATIE1;
+    var address = '"' + incident.NAAM_LOCATIE1 + '"';
+    if(incident.PLAATS_NAAM) {
+        terms.push(incident.PLAATS_NAAM === "'s-Gravenhage" ? "Den Haag" : incident.PLAATS_NAAM);
+    }
     if(incident.NAAM_LOCATIE2 && incident.NAAM_LOCATIE1 !== incident.NAAM_LOCATIE2) {
-        address += " " + incident.NAAM_LOCATIE2;
+        terms = terms.concat(incident.NAAM_LOCATIE2.split(" "));
     }
 
     if(incident.classificatie) {
@@ -551,7 +554,7 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
             var classificatieTerms = {
                 "Alarm": true,
                 "Brandgerucht": "brand brandweer rook",
-                "Stormschade": "Storm",
+                "Stormschade": "storm",
                 "Onweer": true,
                 "Windstoten": true,
                 "Brand": "brand brandweer rook",
@@ -632,6 +635,9 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
         params.endTime = AGSIncidentService.prototype.getAGSMoment(incident.DTG_EINDE_INCIDENT).format("X");
     }
 
+    // Remove fixed height used for keeping previous scrollTop
+    $("#tab_twitter").css("height", "");
+
     $.ajax((dbkjs.options.incidents.twitterUrlPrefix ? dbkjs.options.incidents.twitterUrlPrefix : "") + "action/twitter", {
         dataType: "json",
         data: params
@@ -641,6 +647,8 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
     }).done(function(data) {
         console.log("Twitter search response", data);
 
+        // Fix height to scrollTop does not get reset when clearing div
+        $("#tab_twitter").css("height", $("#tab_twitter").height());
         $("#tab_twitter").html("");
 
         if(data.response.errors) {
@@ -658,20 +666,28 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
             }
 
             var displayedTweets = [];
+            var ignoredAccounts = dbkjs.options.incidents.twitterIgnoredAccounts || [];
 
+            function filterTweet(status) {
+                return ignoredAccounts.indexOf(status.user.screen_name) !== -1 || status.user.screen_name.toLowerCase().indexOf("p2000") !== -1;
+            }
             $.each(statuses, function(i, status) {
                 var createdAt = new moment(status.created_at);
                 if(createdAt.isAfter(startCutoff) && (!endCutoff || createdAt.isBefore(endCutoff))) {
                     if(status.geo && displayedTweets.indexOf(status.text) === -1) {
-                        displayedTweets.push(status.text);
-                        var p2 = new Proj4js.Point(status.geo.coordinates[1], status.geo.coordinates[0]);
-                        var t2 = Proj4js.transform(new Proj4js.Proj("EPSG:4326"), new Proj4js.Proj(dbkjs.options.projection.code), p2);
-                        var distance = Math.sqrt(Math.pow(t2.x - pos.x, 2) + Math.pow(t2.y - pos.y, 2))
-                        console.log("Tweet " + status.text + " at " + t2.x + "," + t2.y + ", distance " + distance + "m");
-                        var el = $("<div id='tweet_" + status.id + "'>Afstand: " + Math.round(distance) + " meter</div>");
-                        el.appendTo("#tab_twitter");
-                        twttr.widgets.createTweet(status.id_str, document.getElementById("tweet_" + status.id),  { conversation: "none", width: 530, lang: "nl" } );
-                        tweets++;
+                        if(!filterTweet(status)) {
+                            displayedTweets.push(status.text);
+                            var p2 = new Proj4js.Point(status.geo.coordinates[1], status.geo.coordinates[0]);
+                            var t2 = Proj4js.transform(new Proj4js.Proj("EPSG:4326"), new Proj4js.Proj(dbkjs.options.projection.code), p2);
+                            var distance = Math.sqrt(Math.pow(t2.x - pos.x, 2) + Math.pow(t2.y - pos.y, 2))
+                            console.log("Tweet " + status.text + " at " + t2.x + "," + t2.y + ", distance " + distance + "m");
+                            var el = $("<div id='tweet_" + status.id + "'>Afstand: " + Math.round(distance) + " meter</div>");
+                            el.appendTo("#tab_twitter");
+                            twttr.widgets.createTweet(status.id_str, document.getElementById("tweet_" + status.id),  { conversation: "none", width: 530, lang: "nl" } );
+                            tweets++;
+                        } else {
+                            console.log("Filtering geo tweet user: " + status.user.screen_name, status);
+                        }
                     }
                 }
             });
@@ -681,19 +697,24 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
                     var createdAt = new moment(status.created_at);
                     if(createdAt.isAfter(startCutoff) && (!endCutoff || createdAt.isBefore(endCutoff))) {
                         if(displayedTweets.indexOf(status.text) === -1) {
-                            displayedTweets.push(status.text);
-                            console.log("Tweet matching terms: " + status.text);
-                            twttr.widgets.createTweet(status.id_str, document.getElementById("tab_twitter"),  { conversation: "none", width: 530, lang: "nl" } );
-                            tweets++;
+                            if(!filterTweet(status)) {
+                                displayedTweets.push(status.text);
+                                console.log("Tweet matching terms: " + status.text);
+                                twttr.widgets.createTweet(status.id_str, document.getElementById("tab_twitter"),  { conversation: "none", width: 530, lang: "nl" } );
+                                tweets++;
+                            } else {
+                                console.log("Filtering search term tweet user: " + status.user.screen_name, status);
+                            }
                         }
                     }
                 });
             } else {
-                $("<div id='tweet_" + status.id + "'>Geen tweets tijdens incident gevonden op basis van zoektermen <i>" + terms.join(", ") + "</i></div>").appendTo("#tab_twitter");
+                $("<div id='tweet_" + status.id + "'>Geen tweets tijdens incident gevonden op basis van zoektermen <i>" + address + ", " + terms.join(", ") + "</i></div>").appendTo("#tab_twitter");
             }
 
             $("#t_twitter_title").text("Twitter (" + tweets + ")");
 
         }
+
     });
 };
