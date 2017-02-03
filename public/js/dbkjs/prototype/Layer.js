@@ -158,10 +158,6 @@ dbkjs.Layer = dbkjs.Class({
                 parent = "#" + dbkjs.tabIds[newparent];
             }
 
-            if (dbkjs.viewmode === 'fullscreen') {
-                dv_panel_content.append('<img src="' + (metadata.legend ? metadata.legend : legend) + '"/>');
-            }
-
             this.div.append(dv_panel_content);
             $(parent).append(this.div);
             $(parent).sortable({handle: '.panel'});
