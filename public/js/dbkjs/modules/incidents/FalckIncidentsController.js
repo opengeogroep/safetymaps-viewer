@@ -174,53 +174,93 @@ FalckIncidentsController.prototype.getInzetInfo = function() {
         return;
     }
 
-    var requestVoertuignummer = me.voertuignummer;
+    var nummers = me.voertuignummer.split(/[,\s]+/);
+    var i = 0;
+    function check() {
+        if(i < nummers.length) {
+            var nummer = nummers[i++];
+            me.getVoertuigIncidenten(nummer)
+            .fail(function(msg) {
+                me.handleInzetInfo(msg);
+            })
+            .done(function(inzetInfo) {
+                if(inzetInfo === null) {
+                    // should use promises somehow
+                    check();
+                } else {
+                    me.handleInzetInfo(inzetInfo);
+                }
+            });
+        } else {
+            // all nummers checked, no inzet
+            me.handleInzetInfo(null);
+        }
+    }
+    check();
+};
 
-    $.ajax(me.options.incidentsUrl + "/eenheid/" + me.voertuignummer, {
-        dataType: "json"
-    })
-    .always(function() {
-        me.getInzetTimeout = window.setTimeout(function() {
-            me.getInzetInfo();
-        }, 30000);
-    })
-    .fail(function(e) {
-        var msg = "Kan meldkamerinfo niet ophalen: " + e;
+FalckIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
+    var me = this;
+
+    me.getInzetTimeout = window.setTimeout(function() {
+        me.getInzetInfo();
+    }, 30000);
+
+    if(typeof inzetInfo === "string") {
+        var msg = "Kan meldkamerinfo niet ophalen: " + inzetInfo;
         dbkjs.gui.showError(msg);
         me.button.setIcon("bell-slash");
         me.incidentDetailsWindow.showError(msg);
-    })
-    .done(function(data, textStatus, jqXHR) {
-        if(me.voertuignummer !== requestVoertuignummer) {
-            console.log("Ignoring results for old voertuignummer " + requestVoertuignummer);
-            return;
+    } else if(inzetInfo === null || inzetInfo.length === 0) {
+        me.incidentDetailsWindow.showError("Geen actief incident voor voertuig(en) " + me.voertuignummer + ". Laatst informatie opgehaald op " + new moment().format("LLL") + ".");
+
+        if(me.incidentId) {
+            $("#zoom_extent").click();
+
+            // Wait for layer loading messages to clear...
+            window.setTimeout(function() {
+                dbkjs.util.alert('Melding', 'Inzet beeindigd');
+                window.setTimeout(function() {
+                    $('#systeem_meldingen').hide();
+                }, 10000);
+            }, 3000);
+            me.geenInzet(true);
         }
+    } else {
         $('#systeem_meldingen').hide();
         me.button.setIcon("bell-o");
+        var incidenten = inzetInfo;
+        me.inzetIncident(incidenten[incidenten.length-1]);
+    }
+};
 
+/**
+ *
+ * @param {type} nummer voertuignummer
+ * @returns null if no incidents from service, string if Ajax error, or array of incidents for eenheid
+ */
+FalckIncidentsController.prototype.getVoertuigIncidenten = function(nummer) {
+    var me = this;
+
+    var p = $.Deferred();
+    $.ajax(me.options.incidentsUrl + "/eenheid/" + nummer, {
+        dataType: "json"
+    })
+    .fail(function(jqXHR, textStatus, errorThrown) {
+        p.reject(AGSIncidentService.getAjaxError(jqXHR, textStatus, errorThrown));
+    })
+    .done(function(data) {
         data = data[0];
-        var incidenten = data && data.Incidenten ? data.Incidenten : null;
+        var incidenten = data && data.Incidenten && data.Incidenten.length > 0 ? data.Incidenten : null;
+
         if(incidenten && incidenten.length > 0) {
-            console.log("Got incidents for voertuig " + me.voertuignummer + ": " + incidenten);
-            me.inzetIncident(incidenten[incidenten.length-1]);
+            console.log("Got incidents for voertuig " + nummer + ": " + incidenten);
         } else {
-            console.log("No incidents for voertuig " + me.voertuignummer);
-            me.incidentDetailsWindow.showError("Geen actief incident voor voertuig " + me.voertuignummer + ". Laatst informatie opgehaald op " + new moment().format("LLL") + ".");
-
-            if(me.incidentId) {
-                $("#zoom_extent").click();
-
-                // Wait for layer loading messages to clear...
-                window.setTimeout(function() {
-                    dbkjs.util.alert('Melding', 'Inzet beeindigd');
-                    window.setTimeout(function() {
-                        $('#systeem_meldingen').hide();
-                    }, 10000);
-                }, 3000);
-                me.geenInzet(true);
-            }
+            console.log("No incidents for voertuig " + nummer);
         }
+        p.resolve(incidenten);
     });
+    return p;
 };
 
 FalckIncidentsController.prototype.geenInzet = function(triggerEvent) {
