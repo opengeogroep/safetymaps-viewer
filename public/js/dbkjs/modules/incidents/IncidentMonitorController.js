@@ -671,8 +671,13 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
             function filterTweet(status) {
                 return ignoredAccounts.indexOf(status.user.screen_name) !== -1 || status.user.screen_name.toLowerCase().indexOf("p2000") !== -1;
             }
+
+            function twitterMoment(date) {
+                return new moment(date, "ddd MMM DD HH:mm:ss ZZ YYYY", "en");
+            }
+
             $.each(statuses, function(i, status) {
-                var createdAt = new moment(status.created_at);
+                var createdAt = twitterMoment(status.created_at);
                 if(createdAt.isAfter(startCutoff) && (!endCutoff || createdAt.isBefore(endCutoff))) {
                     if(status.geo && displayedTweets.indexOf(status.text) === -1) {
                         if(!filterTweet(status)) {
@@ -694,12 +699,12 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
             if(data.responseTerms && data.responseTerms.statuses.length > 0) {
                 $("<div id='tweet_" + status.id + "'>Tweets tijdens incident op basis van zoektermen <i>" + address + ", " + terms.join(", ") + "</i></div>").appendTo("#tab_twitter");
                 $.each(data.responseTerms.statuses, function(i, status) {
-                    var createdAt = new moment(status.created_at);
+                    var createdAt = twitterMoment(status.created_at);
                     if(createdAt.isAfter(startCutoff) && (!endCutoff || createdAt.isBefore(endCutoff))) {
                         if(displayedTweets.indexOf(status.text) === -1) {
-                            if(!filterTweet(status)) {
+                            if(!filterTweet(status) && (!status.retweeted_status || !filterTweet(status.retweeted_status))) {
                                 displayedTweets.push(status.text);
-                                console.log("Tweet matching terms: " + status.text);
+                                console.log("Tweet matching terms: " + status.text, status);
                                 twttr.widgets.createTweet(status.id_str, document.getElementById("tab_twitter"),  { conversation: "none", width: 530, lang: "nl" } );
                                 tweets++;
                             } else {
