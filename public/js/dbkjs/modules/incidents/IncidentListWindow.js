@@ -154,7 +154,7 @@ IncidentListWindow.prototype.listIncidents = function(el, incidents, showInzetIn
         });
         var r = $("<div class='incident'/>")
                 .addClass(odd ? "odd" : "even")
-                .attr("title", incident.T_GUI_LOCATIE + (showInzetInTitle && actueleInzet.length > 0 ? ", " + actueleInzet.join(", ") : ""));
+                .attr("title", incident.locatie + (showInzetInTitle && actueleInzet.length > 0 ? ", " + actueleInzet.join(", ") : ""));
         odd = !odd;
 
         if(dbkjs.options.incidents.incidentListFunction) {
@@ -167,8 +167,8 @@ IncidentListWindow.prototype.listIncidents = function(el, incidents, showInzetIn
         } else {
             $("<span class='prio'/>").html(incident.PRIORITEIT_INCIDENT_BRANDWEER ? incident.PRIORITEIT_INCIDENT_BRANDWEER + " " : "&nbsp;&nbsp;").appendTo(r);
         }
-        $("<span class='locatie'/>").text(incident.T_GUI_LOCATIE).appendTo(r);
-        $("<span class='plaats'/>").text(incident.PLAATS_NAAM).appendTo(r);
+        $("<span class='locatie'/>").text(incident.locatie).appendTo(r);
+        $("<span class='plaats'/>").text(incident.PLAATS_NAAM_NEN ? incident.PLAATS_NAAM_NEN : incident.PLAATS_NAAM).appendTo(r);
 
         var classificaties = incident.classificaties || "";
         var icons = me.getIncidentEenhedenIcons(incident);
@@ -259,9 +259,4 @@ IncidentListWindow.prototype.getIncidentEenhedenIcons = function(incident) {
         }
     }
     return html;
-};
-
-IncidentListWindow.prototype.getIncidentTitle = function(incident) {
-    var getAGSMoment = dbkjs.modules.incidents.controller.service.getAGSMoment;
-    return getAGSMoment(incident.DTG_START_INCIDENT).format("D-M-YYYY HH:mm:ss") + " " + (incident.PRIORITEIT_INCIDENT_BRANDWEER ? " PRIO " + incident.PRIORITEIT_INCIDENT_BRANDWEER : "") + " " + incident.T_GUI_LOCATIE + ", " + incident.PLAATS_NAAM;
 };

@@ -306,6 +306,25 @@ AGSIncidentService.prototype.loadServiceInfo = function() {
     return d.promise();
 };
 
+AGSIncidentService.prototype.getIncidentLocatie = function(incident) {
+    var locatie;
+    if(incident.T_GUI_LOCATIE) {
+        locatie = incident.T_GUI_LOCATIE;
+    } else {
+        locatie = incident.NAAM_LOCATIE1;
+        if(incident.HUIS_PAAL_NR) {
+            locatie += " " + incident.HUIS_PAAL_NR;
+        }
+        if(incident.HUISLETTER) {
+            locatie += incident.HUISLETTER;
+        }
+        if(incident.HUIS_NR_TOEV) {
+            locatie += " " + incident.HUIS_NR_TOEV;
+        }
+    }
+    return locatie;
+};
+
 /**
  * Static utility function: get display string for incident object
  * @param {Object} incident as received from AGS
@@ -315,7 +334,7 @@ AGSIncidentService.prototype.getIncidentTitle = function(incident) {
     return this.getAGSMoment(incident.DTG_START_INCIDENT).format("D-M-YYYY HH:mm:ss") + " "
             + dbkjs.util.htmlEncode((incident.PRIORITEIT_INCIDENT_BRANDWEER ? " PRIO "
             + incident.PRIORITEIT_INCIDENT_BRANDWEER : "") + " "
-            + incident.T_GUI_LOCATIE + ", "
+            + incident.locatie + ", "
             + dbkjs.util.htmlEncode(incident.PLAATS_NAAM));
 };
 
@@ -459,6 +478,8 @@ AGSIncidentService.prototype.getAllIncidentInfo = function(incidentId, archief, 
                     incident.kladblok = kladblok;
                     incident.inzetEenheden = inzetEenheden;
 
+                    incident.locatie = me.getIncidentLocatie(incident)
+
                     incident.getTitle = function() {
                         return me.getIncidentTitle(incident);
                     };
@@ -486,7 +507,7 @@ AGSIncidentService.prototype.getIncident = function(incidentId, archief) {
         return d.resolve(null);
     }
 
-    var table = archief ? "GMSARC_INCIDENT" : "GMS_INCIDENT";
+    var table = archief ? "V_B_ARC_INCIDENT" : "V_B_ACT_INCIDENT";
     me.doAGSAjax({
         url: me.tableUrls[table] + "/query",
         dataType: "json",
@@ -550,7 +571,7 @@ AGSIncidentService.prototype.getClassificaties = function(incidenten) {
         return d;
     }
 
-    var table = "GMS_MLD_CLASS_NIVO_VIEW";
+    var table = "V_B_BEH_MC";
     me.doAGSAjax({
         url: me.tableUrls[table] + "/query",
         dataType: "json",
@@ -559,7 +580,7 @@ AGSIncidentService.prototype.getClassificaties = function(incidenten) {
             f: "json",
             token: me.token,
             where: "MELDING_CL_ID IN (" + meldingClIds.join(",") + ")",
-            outFields: "MELDING_CL_ID,NIVO1,NIVO2,NIVO3"
+            outFields: "MELDING_CL_ID,MC,PRESENTATIE_ALRMTXT_BRW"
         }
     })
     .fail(function(e) {
@@ -569,17 +590,9 @@ AGSIncidentService.prototype.getClassificaties = function(incidenten) {
         var classificaties = {};
         me.resolveAGSFeatures(d, data, jqXHR, function(c) {
             // processFunction
-            var vals = [];
-            if(c.NIVO1) {
-                vals.push(c.NIVO1);
+            if(c.MC) {
+                classificaties[c.MELDING_CL_ID] = c.MC.split("\\").join(", ");
             }
-            if(c.NIVO2) {
-                vals.push(c.NIVO2);
-            }
-            if(c.NIVO3) {
-                vals.push(c.NIVO3);
-            }
-            classificaties[c.MELDING_CL_ID] = vals.join(", ");
         },
         function() {
             // noResultFunction
@@ -621,7 +634,7 @@ AGSIncidentService.prototype.getKarakteristiek = function(incidentId) {
         return d.resolve([]);
     }
 
-    var table = "GMSARC_KARAKTERISTIEK";
+    var table = "V_B_ACT_KAR_WAARDEN";
     me.doAGSAjax({
         url: me.tableUrls[table] + "/query",
         dataType: "json",
@@ -649,15 +662,15 @@ AGSIncidentService.prototype.getKladblok = function(incidentId, archief) {
         return d.resolve([]);
     }
 
-    var table = archief ? "GMSARC_KLADBLOK" : "GMS_KLADBLOK";
+    var table = archief ? "V_B_ARC_KLADBLOK_LOG" : "V_B_ACT_KLADBLOK";
     me.doAGSAjax({
         url: me.tableUrls[table] + "/query",
         dataType: "json",
         data: {
             f: "json",
             token: me.token,
-            where: "INCIDENT_ID = " + incidentId + " AND TYPE_KLADBLOK_REGEL = 'KB' AND WIJZIGING_ID IS NULL",
-            orderByFields: "DTG_KLADBLOK_REGEL,KLADBLOK_REGEL_ID,VOLG_NR_KLADBLOK_REGEL",
+            where: "INCIDENT_ID = " + incidentId + " AND TYPE_KLADBLOK_REGEL = 'KB' AND T_IND_DISC_KLADBLOK_REGEL LIKE '_B_'", // AND WIJZIGING_ID IS NULL",
+            orderByFields: "DTG_KLADBLOK_REGEL,KLADBLOK_REGEL_ID" + (archief ? ",VOLG_NR_KLADBLOK_REGEL" : ""),
             outFields: "*"
         }
     })
@@ -679,7 +692,7 @@ AGSIncidentService.prototype.getInzetEenheden = function(incidentIds, archief) {
     }
     incidentIds = incidentIds instanceof Array ? incidentIds : [incidentIds];
 
-    var table = archief ? "GMSARC_INZET_EENHEID" : "GMS_INZET_EENHEID";
+    var table = archief ? "V_B_ARC_INZET_EENHEID" : "V_B_ACT_INZET_EENHEID";
     me.doAGSAjax({
         url: me.tableUrls[table] + "/query",
         dataType: "json",
@@ -710,7 +723,7 @@ AGSIncidentService.prototype.getCurrentIncidents = function() {
     var d = $.Deferred();
 
     var dIncidents = $.Deferred();
-    var table = "GMS_INCIDENT";
+    var table = "V_B_ACT_INCIDENT";
     me.doAGSAjax({
         url: me.tableUrls[table] + "/query",
         dataType: "json",
@@ -719,7 +732,7 @@ AGSIncidentService.prototype.getCurrentIncidents = function() {
             token: me.token,
             where: me.ghor ? "(IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3) OR IND_DISC_INCIDENT LIKE '__A'" : "IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3",
             orderByFields: "DTG_START_INCIDENT DESC",
-            outFields: "INCIDENT_ID,T_X_COORD_LOC,T_Y_COORD_LOC,DTG_START_INCIDENT,PRIORITEIT_INCIDENT_BRANDWEER,PRIORITEIT_INCIDENT_POLITIE,T_GUI_LOCATIE,PLAATS_NAAM,NAAM_LOCATIE1,NAAM_LOCATIE2,BRW_MELDING_CL_ID"
+            outFields: "INCIDENT_ID,T_X_COORD_LOC,T_Y_COORD_LOC,DTG_START_INCIDENT,PRIORITEIT_INCIDENT_BRANDWEER,NAAM_LOCATIE1,HUIS_PAAL_NR,HUIS_NR_TOEV,HUISLETTER,NAAM_LOCATIE2,PLAATS_NAAM_NEN,BRW_MELDING_CL_ID"
         },
         cache: false
     })
@@ -768,6 +781,8 @@ AGSIncidentService.prototype.getCurrentIncidents = function() {
                 });
             });
             $.each(incidents, function(i, incident) {
+                incident.locatie = me.getIncidentLocatie(incident);
+
                 // To later determine between current and archived incidents
                 incident.archief = false;
 
@@ -794,7 +809,7 @@ AGSIncidentService.prototype.getArchivedIncidents = function(incidentsToFilter) 
     }
 
     var dIncidents = $.Deferred();
-    var table = "GMSARC_INCIDENT";
+    var table = "V_B_ARC_INCIDENT";
     var filterPart1 = me.ghor ? "IND_DISC_INCIDENT LIKE '__A' " : "IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3 ";
     me.doAGSAjax({
         url: me.tableUrls[table] + "/query",
@@ -807,7 +822,7 @@ AGSIncidentService.prototype.getArchivedIncidents = function(incidentsToFilter) 
                 "AND DTG_START_INCIDENT > timestamp '" + new moment().subtract(24, 'hours').format("YYYY-MM-DD HH:mm:ss") + "' " +
                 filterQueryPart,
             orderByFields: "DTG_START_INCIDENT DESC",
-            outFields: "INCIDENT_ID,T_X_COORD_LOC,T_Y_COORD_LOC,DTG_START_INCIDENT,DTG_EINDE_INCIDENT,PRIORITEIT_INCIDENT_BRANDWEER,PRIORITEIT_INCIDENT_POLITIE,T_GUI_LOCATIE,PLAATS_NAAM,NAAM_LOCATIE1,NAAM_LOCATIE2,BRW_MELDING_CL,BRW_MELDING_CL1,BRW_MELDING_CL2"
+            outFields: "INCIDENT_ID,T_X_COORD_LOC,T_Y_COORD_LOC,DTG_START_INCIDENT,DTG_EINDE_INCIDENT,PRIORITEIT_INCIDENT_BRANDWEER,T_GUI_LOCATIE,PLAATS_NAAM,NAAM_LOCATIE1,NAAM_LOCATIE2,BRW_MELDING_CL,BRW_MELDING_CL1,BRW_MELDING_CL2"
         },
         cache: false
     })
@@ -843,6 +858,8 @@ AGSIncidentService.prototype.getArchivedIncidents = function(incidentsToFilter) 
                 });
             });
             $.each(incidents, function(i, incident) {
+                incident.locatie = me.getIncidentLocatie(incident);
+
                 // To later determine between current and archived incidents
                 incident.archief = true;
 

@@ -49,12 +49,13 @@ IncidentDetailsWindow.prototype.createStyle = function() {
     var css = '#eenheden div { margin: 3px; float: left } \
 #eenheden div { border-left: 1px solid #ddd; padding-left: 8px; } \
 #eenheden span.einde { color: gray } \
-#tab_kladblok { clear: both; padding-top: 10px; white-space: pre; } \
+#tab_kladblok { clear: both; padding-top: 10px; white-space: pre-wrap; } \
 #tab_kladblok span.brw { font-weight: bold; color: red } \
 #tab_kladblok span.pol { color: blue; } \
+table td { padding: 3px !important; } \
+#tab_kladblok table td { vertical-align: top; padding: 0px 0px 0px 3px !important; } \
 #pol span { color: blue; } \
 #tab_kladblok span.ambu { color: orange; ' + (me.ghor ? '' : 'display: none;') + ' } \
-table td { padding: 3px !important; } \
 ';
     head = document.getElementsByTagName('head')[0],
         style = document.createElement('style');
@@ -204,9 +205,10 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
 
     var columns = [
         { property: 'DTG_START_INCIDENT', date: true, label: 'Start incident' },
-        { property: 'T_GUI_LOCATIE', date: false, label: 'Adres' },
+        { property: 'locatie', date: false, label: 'Adres' },
         { property: 'POSTCODE', date: false, label: 'Postcode' },
         { property: 'PLAATS_NAAM', date: false, label: 'Woonplaats' },
+        { property: 'PLAATS_NAAM_NEN', date: false, label: 'Woonplaats' },
         { property: 'PRIORITEIT_INCIDENT_BRANDWEER', date: false, label: me.ghor ? 'Prioriteit brandweer' : 'Prioriteit', separate: true }
     ];
     if(me.ghor) {
@@ -275,9 +277,9 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
                 eenhAmbu += span;
             }
         });
-        html += '<div id="brw"><b>Brandweer</b><br/>' + eenhBrw + '</div>';
-        html += '<div id="pol"><b>Politie</b><br/>' + eenhPol + '</div>';
-        html += '<div id="ambu"><b>Ambu</b><br/>' + eenhAmbu + '</div>';
+        html += '<div id="brw"><b>Brandweereenheden</b><br/>' + eenhBrw + '</div>';
+        //html += '<div id="pol"><b>Politie</b><br/>' + eenhPol + '</div>';
+        //html += '<div id="ambu"><b>Ambu</b><br/>' + eenhAmbu + '</div>';
         html += '</td></tr>';
     }
 
@@ -313,7 +315,7 @@ IncidentDetailsWindow.prototype.getIncidentKladblokDefaultHtml = function(kladbl
     if(!kladblok) {
         return "";
     }
-    var kladblokHTML = "";
+    var kladblokHTML = "<table>";
     $.each(kladblok, function(i, k) {
         var c = "";
         var ind = k.T_IND_DISC_KLADBLOK_REGEL;
@@ -330,10 +332,12 @@ IncidentDetailsWindow.prototype.getIncidentKladblokDefaultHtml = function(kladbl
         if(ind.indexOf("A") !== -1) {
             c += "ambu ";
         }
-        kladblokHTML += "<span class='" + c + "'>" + AGSIncidentService.prototype.getAGSMoment(k.DTG_KLADBLOK_REGEL).format("HH:mm ") +
-            dbkjs.util.htmlEncode(k.INHOUD_KLADBLOK_REGEL) + "\n</span>";
+//        kladblokHTML += "<span class='" + c + "'>" + AGSIncidentService.prototype.getAGSMoment(k.DTG_KLADBLOK_REGEL).format("HH:mm ") +
+//            dbkjs.util.htmlEncode(k.INHOUD_KLADBLOK_REGEL) + "</span><br>";
+        kladblokHTML += "<tr><td>" + AGSIncidentService.prototype.getAGSMoment(k.DTG_KLADBLOK_REGEL).format("HH:mm") + "</td><td>" +
+            dbkjs.util.htmlEncode(k.INHOUD_KLADBLOK_REGEL) + "</td></tr>";
     });
-    return kladblokHTML;
+    return kladblokHTML;// + "</table>";
 };
 
 IncidentDetailsWindow.prototype.getPrioriteitColor = function(prio) {
