@@ -928,7 +928,7 @@ AGSIncidentService.prototype.getArchiefIncidentClassificaties = function(inciden
     return classificaties.length === 0 ? "" : classificaties.join(", ");
 };
 
-AGSIncidentService.prototype.getVehiclePositions = function(vehicles) {
+AGSIncidentService.prototype.getVehiclePositions = function(incidentIds) {
 
     var me = this;
 
@@ -936,28 +936,24 @@ AGSIncidentService.prototype.getVehiclePositions = function(vehicles) {
         return $.Deferred().resolveWith([]);
     }
 
-/*
-    var where = "";
-
-    $.each(vehicles, function(i, v) {
-        if(where !== "") {
-            where += " OR ";
-        }
-        where += "(Voertuigsoort = '" + v.CODE_VOERTUIGSOORT + "' AND Roepnummer = '" + v.ROEPNAAM_EENHEID + "')";
-    });
-
-    if(where === "") {
-        return $.Deferred().resolve({});
-    }
-*/
     var d = $.Deferred();
+
+    var where = "(IncidentID <> '' or Speed > 5)"; // Any vehicle on incident or no incident but moving
+    if(incidentIds) {
+        if(incidentIds.length === 0) {
+            where = "(IncidentID = '' and Speed > 5)"; // Only moving vehicles not on incident
+        } else {
+            where = "(IncidentID in (" + incidentIds.join(",") + ") or (IncidentID = '' and Speed > 5)"; // Only vehicles on given incident id or not on incident and moving
+        }
+    }
+
     me.doAGSAjax({
         url: me.vehiclePosLayerUrls["Brandweer_Eenheden"] + "/query",
         dataType: "json",
         data: {
             f: "json",
             token: me.token,
-            where: "Discipline='B' and (IncidentID <> '' or Speed > 5)",
+            where: "Discipline='B' and " + where,
             outFields: "*"
         },
         cache: false

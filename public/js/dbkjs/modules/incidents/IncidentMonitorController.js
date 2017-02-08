@@ -386,7 +386,6 @@ IncidentMonitorController.prototype.getIncidentList = function() {
         me.processNewArchivedIncidents(archivedIncidents);
         me.currentIncidents = currentIncidents;
         me.updateInterface();
-        me.updateVehiclePositionLayer(currentIncidents);
         me.checkUnreadIncidents(me.actueleIncidentIds);
     });
 };
@@ -433,27 +432,12 @@ IncidentMonitorController.prototype.updateVehiclePositionLayer = function(incide
         return;
     }
 
-    var vehicles = {};
-    var haveInzet = false;
-    $.each(incidents, function(i, incident) {
-        if(incident.actueleInzet) {
-            $.each(incident.inzetEenheden, function(j, inzet) {
-                if(inzet.DTG_EIND_ACTIE === null) {
-                    vehicles[inzet.CODE_VOERTUIGSOORT + " " + inzet.ROEPNAAM_EENHEID] = inzet;
-                    haveInzet = true;
-                }
-            });
-        }
-    });
+    var incidentIds = $.map(incidents, function(i) { return i.INCIDENT_ID; });
 
-    //if(haveInzet) {
-        me.service.getVehiclePositions()
-        .done(function(features) {
-            me.vehiclePositionLayer.features(features);
-        });
-    //} else {
-    //    me.vehiclePositionLayer.features([]);
-    //}
+    me.service.getVehiclePositions(incidentIds)
+    .done(function(features) {
+        me.vehiclePositionLayer.features(features);
+    });
 };
 
 IncidentMonitorController.prototype.enableIncidentUpdates = function() {
