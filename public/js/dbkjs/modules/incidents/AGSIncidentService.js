@@ -810,6 +810,7 @@ AGSIncidentService.prototype.getArchivedIncidents = function(incidentsToFilter) 
 
     var dIncidents = $.Deferred();
     var table = "V_B_ARC_INCIDENT";
+    var startIncidentCutoff = new moment().subtract(24, 'hours');
     var filterPart1 = me.ghor ? "IND_DISC_INCIDENT LIKE '__A' " : "IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3 ";
     me.doAGSAjax({
         url: me.tableUrls[table] + "/query",
@@ -819,7 +820,7 @@ AGSIncidentService.prototype.getArchivedIncidents = function(incidentsToFilter) 
             f: "json",
             token: me.token,
             where: filterPart1 +
-                "AND DTG_START_INCIDENT > timestamp '" + new moment().subtract(24, 'hours').format("YYYY-MM-DD HH:mm:ss") + "' " +
+                "AND DTG_START_INCIDENT > timestamp '" + startIncidentCutoff.format("YYYY-MM-DD HH:mm:ss") + "' " +
                 filterQueryPart,
             orderByFields: "DTG_START_INCIDENT DESC",
             outFields: "INCIDENT_ID,T_X_COORD_LOC,T_Y_COORD_LOC,DTG_START_INCIDENT,DTG_EINDE_INCIDENT,PRIORITEIT_INCIDENT_BRANDWEER,T_GUI_LOCATIE,PLAATS_NAAM,NAAM_LOCATIE1,NAAM_LOCATIE2,BRW_MELDING_CL,BRW_MELDING_CL1,BRW_MELDING_CL2"
@@ -838,6 +839,12 @@ AGSIncidentService.prototype.getArchivedIncidents = function(incidentsToFilter) 
         d.reject(e);
     })
     .done(function(incidents) {
+        // Apply DTG_START_INCIDENT > [24 hours ago] client side, sometimes
+        // not filtered correctly by server
+        incidents = $.grep(incidents, function(incident) {
+            return me.getAGSMoment(incident.DTG_START_INCIDENT).isAfter(startIncidentCutoff);
+        });
+
         // Filter on active inzet
         var incidentIds = $.map(incidents, function(incident) { return incident.INCIDENT_ID; });
         me.getInzetEenheden(incidentIds, true)
