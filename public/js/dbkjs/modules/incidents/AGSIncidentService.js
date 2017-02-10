@@ -385,7 +385,7 @@ AGSIncidentService.prototype.getVoertuigInzet = function(voertuignummer) {
     if(!voertuignummer) {
         d.reject("Null voertuignummer");
     } else {
-        var table = "GMS_INZET_EENHEID";
+        var table = "V_B_ACT_INZET_EENHEID";
         me.doAGSAjax({
             url: me.tableUrls[table] + "/query",
             dataType: "json",
@@ -580,7 +580,7 @@ AGSIncidentService.prototype.getClassificaties = function(incidenten) {
             f: "json",
             token: me.token,
             where: "MELDING_CL_ID IN (" + meldingClIds.join(",") + ")",
-            outFields: "MELDING_CL_ID,MC,PRESENTATIE_ALRMTXT_BRW"
+            outFields: "MELDING_CL_ID,MC"
         }
     })
     .fail(function(e) {
@@ -950,7 +950,7 @@ AGSIncidentService.prototype.getVehiclePositions = function(incidentIds) {
         if(incidentIds.length === 0) {
             where = "(IncidentID = '' and Speed > 5)"; // Only moving vehicles not on incident
         } else {
-            where = "(IncidentID in (" + incidentIds.join(",") + ") or (IncidentID = '' and Speed > 5)"; // Only vehicles on given incident id or not on incident and moving
+            where = "(IncidentID in (" + incidentIds.join(",") + ") or (IncidentID = '' and Speed > 5))"; // Only vehicles on given incident id or not on incident and moving
         }
     }
 

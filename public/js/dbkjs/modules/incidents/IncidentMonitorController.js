@@ -528,6 +528,9 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
     if(incident.PLAATS_NAAM) {
         terms.push(incident.PLAATS_NAAM === "'s-Gravenhage" ? "Den Haag" : incident.PLAATS_NAAM);
     }
+    if(incident.PLAATS_NAAM_NEN) {
+        terms.push(incident.PLAATS_NAAM_NEN === "'s-Gravenhage" ? "Den Haag" : incident.PLAATS_NAAM_NEN);
+    }
     if(incident.NAAM_LOCATIE2 && incident.NAAM_LOCATIE1 !== incident.NAAM_LOCATIE2) {
         terms = terms.concat(incident.NAAM_LOCATIE2.split(" "));
     }

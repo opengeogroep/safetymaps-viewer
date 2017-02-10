@@ -265,7 +265,7 @@ VoertuigInzetController.prototype.selectIncidentDBK = function(incident) {
     }
 
     var postcode = incident.POSTCODE;
-    var woonplaats = incident.PLAATS_NAAM;
+    var woonplaats = incident.PLAATS_NAAM_NEN;
     var huisnummer = Number(incident.HUIS_PAAL_NR);
     var huisletter = incident.HUISLETTER;
     var toevoeging = incident.HUIS_NR_TOEV;
