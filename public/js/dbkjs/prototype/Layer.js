@@ -213,7 +213,7 @@ dbkjs.Layer = dbkjs.Class({
     getfeatureinfo: function (e) {
         _obj = this;
 
-        if(typeof e.xy === 'undefined') {
+        if(!e.xy) {
             return;
         }
 
@@ -245,12 +245,12 @@ dbkjs.Layer = dbkjs.Class({
                 // handle the wms 1.3 vs wms 1.1 madness
                 if (this.layer.params.VERSION === "1.3.0") {
                     params.version = "1.3.0";
-                    params.j = e.xy.x;
-                    params.i = e.xy.y;
+                    params.j = Math.round(e.xy.x); // Rounding for high res devices with fractional position in event
+                    params.i = Math.round(e.xy.y);
                 } else {
                     params.version = "1.1.1";
-                    params.x = e.xy.x;
-                    params.y = e.xy.y;
+                    params.x = Math.round(e.xy.x);
+                    params.y = Math.round(e.xy.y);
                 }
                 OpenLayers.Request.GET({url: this.layer.url, "params": params, callback: this.panel, scope: _obj});
                 //OpenLayers.Event.stop(e);
@@ -268,7 +268,7 @@ dbkjs.Layer = dbkjs.Class({
         g = new OpenLayers.Format.WMSGetFeatureInfo();
 
         features = g.read($.parseXML(response.responseText));
-        console.log("Feature info for layer "+ _obj.layer.name + ": "+ features.length + " features returned", response.responseText);
+        console.log("Feature info for layer "+ _obj.layer.name + ": "+ features.length + " features returned");//, response.responseText);
         if (features.length > 0) {
             var html = '<div class="table-responsive"><table class="table table-hover">';
             for (var feat in features) {

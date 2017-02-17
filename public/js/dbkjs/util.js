@@ -450,6 +450,7 @@ dbkjs.util = {
     },
     onClick: function (e) {
         $('#wmsclickpanel').hide();
+        console.log("onclick ", e.type, e.xy);
         //Check to see if a layer is required by a module and has getfeatureinfo set
         $.each(dbkjs.map.layers, function (lay_index, lay) {
             if (lay.visibility && lay.dbkjsParent && lay.dbkjsParent.getfeatureinfo) {

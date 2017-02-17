@@ -96,7 +96,8 @@ dbkjs.setDbkCategoryVisibility = function (category, visible) {
 dbkjs.activateClick = function () {
     dbkjs.map.events.register('click', dbkjs.map, dbkjs.util.onClick);
 
-    if(!dbkjs.options.minTouchMoveEndDistance || dbkjs.options.minTouchMoveEndDistance > 0) {
+    // TODO: OpenLayers.Handler.Click with pixelTolerance instead of this?
+    if(!dbkjs.options.minTouchMoveEndDistance || dbkjs.options.minTouchMoveEndDistance === 0) {
         dbkjs.map.events.register('touchend', dbkjs.map, dbkjs.util.onClick);
     } else {
         var touchmove = null;
