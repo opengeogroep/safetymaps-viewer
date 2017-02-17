@@ -325,6 +325,21 @@ AGSIncidentService.prototype.getIncidentLocatie = function(incident) {
     return locatie;
 };
 
+AGSIncidentService.prototype.getIncidentXY = function(incident) {
+    var x, y;
+    if(incident.T_X_COORD_LOC && incident.T_Y_COORD_LOC) {
+        x = incident.T_X_COORD_LOC;
+        y = incident.T_Y_COORD_LOC;
+    } else if(incident.IncidentLocatie) {
+        x = incident.IncidentLocatie.XCoordinaat;
+        y = incident.IncidentLocatie.YCoordinaat;
+    } else {
+        x = $(incident).find("IncidentLocatie XYCoordinaten XCoordinaat").text();
+        y = $(incident).find("IncidentLocatie XYCoordinaten YCoordinaat").text();
+    }
+    return {x: x, y: y};
+};
+
 /**
  * Static utility function: get display string for incident object
  * @param {Object} incident as received from AGS

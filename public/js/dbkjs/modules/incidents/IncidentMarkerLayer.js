@@ -59,25 +59,9 @@ IncidentMarkerLayer.prototype.setShowPopups = function(showPopups) {
     window.localStorage.setItem("IncidentMarkerLayer.showPopups", showPopups);
 };
 
-
-IncidentMarkerLayer.prototype.getIncidentXY = function(incident) {
-    var x, y;
-    if(incident.T_X_COORD_LOC && incident.T_Y_COORD_LOC) {
-        x = incident.T_X_COORD_LOC;
-        y = incident.T_Y_COORD_LOC;
-    } else if(incident.IncidentLocatie) {
-        x = incident.IncidentLocatie.XCoordinaat;
-        y = incident.IncidentLocatie.YCoordinaat;
-    } else {
-        x = $(incident).find("IncidentLocatie XYCoordinaten XCoordinaat").text();
-        y = $(incident).find("IncidentLocatie XYCoordinaten YCoordinaat").text();
-    }
-    return {x: x, y: y};
-};
-
 IncidentMarkerLayer.prototype.addIncident = function(incident, archief, singleMarker) {
     var me = this;
-    var xy= me.getIncidentXY(incident);
+    var xy = AGSIncidentService.prototype.getIncidentXY(incident);
     var x = xy.x, y = xy.y;
 
     if(singleMarker) {

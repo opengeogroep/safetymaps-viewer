@@ -513,7 +513,7 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
         });
     }
 
-    var pos = me.markerLayer.getIncidentXY(incident);
+    var pos = AGSIncidentService.prototype.getIncidentXY(incident);
 
     var p = new Proj4js.Point(pos.x, pos.y);
     var t = Proj4js.transform(new Proj4js.Proj(dbkjs.options.projection.code), new Proj4js.Proj("EPSG:4326"), p);
