@@ -94,6 +94,10 @@ function VehiclePositionLayer() {
 
     var me = this;
 
+    this.layer.events.register("featureselected", me, me.selectFeature);
+    this.layer.events.register("featureunselected", me, me.unselectFeature);
+//    dbkjs.selectControl.layers.push(this.layer);
+/*
     this.selectControl = new OpenLayers.Control.SelectFeature(this.layer, {
             onSelect: function(f) {
                 me.selectFeature(f);
@@ -104,7 +108,7 @@ function VehiclePositionLayer() {
     });
     dbkjs.map.addControl(this.selectControl);
     this.selectControl.activate();
-
+*/
     $("#baselayerpanel_b").append('<hr/><label><input type="checkbox" ' + (this.visibility ? 'checked' : '') + ' onclick="dbkjs.modules.incidents.controller.vehiclePositionLayer.setVisibility(event.target.checked)">Toon voertuigposities</label>');
 
     if(dbkjs.options.incidents.enableOngekoppeldeEenheden) {
@@ -121,8 +125,10 @@ VehiclePositionLayer.prototype.setShowMoving = function(showMoving) {
     window.localStorage.setItem("VehiclePositionLayer.showMoving", showMoving);
 };
 
-VehiclePositionLayer.prototype.selectFeature = function(f) {
+VehiclePositionLayer.prototype.selectFeature = function(e) {
+    console.log("vehicle select", arguments);
     var me = this;
+    var f = e.feature;
     me.selectedFeature = f;
     me.removePopup();
 
@@ -140,11 +146,13 @@ VehiclePositionLayer.prototype.selectFeature = function(f) {
     dbkjs.map.addPopup(me.popup);
 };
 
-VehiclePositionLayer.prototype.unselectFeature = function(f) {
+VehiclePositionLayer.prototype.unselectFeature = function(e) {
+    console.log("vehicle unselect", arguments);
+
     var me = this;
     me.selectedFeature = null;
     me.removePopup();
-    f.popup = null;
+    e.feature.popup = null;
 };
 
 VehiclePositionLayer.prototype.removePopup = function() {

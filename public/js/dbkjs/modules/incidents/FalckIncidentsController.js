@@ -46,8 +46,8 @@ function FalckIncidentsController(incidents) {
     });
 
     me.markerLayer = new IncidentMarkerLayer();
-    $(me.markerLayer).on('click', function(incident, marker) {
-        me.markerClick(incident, marker);
+    $(me.markerLayer).on('click', function(incident) {
+        me.markerClick();
     });
     me.marker = null;
 
@@ -371,7 +371,7 @@ FalckIncidentsController.prototype.updateBalkrechtsonder = function() {
     }
 };
 
-FalckIncidentsController.prototype.markerClick = function(incident, marker) {
+FalckIncidentsController.prototype.markerClick = function() {
     this.incidentDetailsWindow.show();
     this.zoomToIncident();
 };

@@ -45,8 +45,8 @@ function MDTController(incidents) {
     });
 
     me.markerLayer = new IncidentMarkerLayer();
-    $(me.markerLayer).on('click', function(incident, marker) {
-        me.markerClick(incident, marker);
+    $(me.markerLayer).on('click', function() {
+        me.markerClick();
     });
     me.marker = null;
 
@@ -215,7 +215,7 @@ MDTController.prototype.updateBalkrechtsonder = function(title) {
         .css('visibility', 'visible');
 };
 
-MDTController.prototype.markerClick = function(incident, marker) {
+MDTController.prototype.markerClick = function() {
     this.incidentDetailsWindow.show();
     this.zoomToIncident();
 };

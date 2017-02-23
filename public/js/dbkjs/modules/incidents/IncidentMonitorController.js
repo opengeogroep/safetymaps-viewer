@@ -97,14 +97,11 @@ function IncidentMonitorController(incidents) {
         me.incidentDetailsWindow.hide();
     });
 
-    me.markerLayer = new IncidentMarkerLayer();
-    $(me.markerLayer).on('click', function(e, obj) {
-        me.selectIncident(obj);
-    });
-    me.marker = null;
+    var selectLayers = [];
 
     if(!me.ghor) {
         me.vehiclePositionLayer = new VehiclePositionLayer();
+        selectLayers.push(me.vehiclePositionLayer.layer);
     } else {
         me.ghorFilterStandard = false;
 
@@ -123,6 +120,15 @@ function IncidentMonitorController(incidents) {
         .appendTo('#btngrp_3');
     }
 
+    me.markerLayer = new IncidentVectorLayer(true);
+    selectLayers.push(me.markerLayer.layer);
+    $(me.markerLayer).on('click', function(e, obj) {
+        me.selectIncident(obj);
+    });
+    me.marker = null;
+
+    me.addSelectLayers(selectLayers);
+
     me.failedUpdateTries = 0;
 
     me.archivedIncidents = [];
@@ -140,6 +146,12 @@ function IncidentMonitorController(incidents) {
 IncidentMonitorController.prototype.UPDATE_INTERVAL_MS = 30000;
 IncidentMonitorController.prototype.UPDATE_INTERVAL_ERROR_MS = 5000;
 IncidentMonitorController.prototype.UPDATE_TRIES = 3;
+
+IncidentMonitorController.prototype.addSelectLayers = function(layers) {
+    dbkjs.selectControl.deactivate();
+    dbkjs.selectControl.setLayer(layers);
+    dbkjs.selectControl.activate();
+};
 
 IncidentMonitorController.prototype.ghorFilterStandardClick = function() {
     var me = this;
@@ -476,6 +488,9 @@ IncidentMonitorController.prototype.updateIncident = function(incidentId, archie
         // Leave incidentDetailsWindow contents with old info
     })
     .done(function(incident) {
+        if(incident === null) {
+            me.endIncident();
+        }
         if(me.incidentId !== incidentId) {
             // Incident cancelled or changed since request was fired off, ignore
             return;
@@ -488,6 +503,15 @@ IncidentMonitorController.prototype.updateIncident = function(incidentId, archie
             me.loadTweets(incidentId, incident);
         }
     });
+};
+
+IncidentMonitorController.prototype.endIncident = function() {
+    var me = this;
+    me.disableIncidentUpdates();
+    me.incidentId = null;
+    me.incident = null;
+    me.incidentDetailsWindow.hide();
+    $("#zoom_extent").click();
 };
 
 IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) {
