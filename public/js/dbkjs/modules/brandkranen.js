@@ -118,6 +118,8 @@ dbkjs.modules.brandkranen = {
     },
     brandkraanUnselected: function(e) {
         $('#vectorclickpanel').hide();
+        this.streng = null;
+        this.brandkranen.redraw();
     },
     init: function() {
         this.createLayers();
