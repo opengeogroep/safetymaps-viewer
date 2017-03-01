@@ -459,8 +459,12 @@ dbkjs.modules.search = {
                                 '<div class="pdf-embed" id="pdf_embed_library"/>');
         me.libraryPopup.show();
 
-        PDFObject.embed(realpath, $("#pdf_embed_library"), {
-            PDFJS_URL: "js/libs/pdfjs-1.5.188-minified/web/viewer.html",
+        // Add cache buster to avoid unexpected server response (206) on iOS 10 safari webapp
+        PDFObject.embed(realpath + "?t=" + new Date().getTime(), $("#pdf_embed_library"), {
+            // Use custom built pdf.js with src/core/network.js function
+            // PDFNetworkStreamFullRequestReader_validateRangeRequestCapabilities
+            // always returning false to also avoid 206 error
+            PDFJS_URL: "js/libs/pdfjs-1.6.210-disablerange-minified/web/viewer.html",
             forcePDFJS: !!dbkjs.options.forcePDFJS
         });
     },
