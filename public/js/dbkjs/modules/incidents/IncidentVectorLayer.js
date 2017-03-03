@@ -110,7 +110,7 @@ IncidentVectorLayer.prototype.addIncident = function(incident, archief, singleMa
     if(classificatie && classificatie.indexOf(",") !== -1) {
         classificatie = classificatie.split(",")[0];
     }
-    var label = "P" + incident.PRIORITEIT_INCIDENT_BRANDWEER + " " + dbkjs.util.htmlEncode(classificatie);
+    var label = "P" + incident.PRIORITEIT_INCIDENT_BRANDWEER + " " + dbkjs.util.htmlEncode(classificatie) + " " + incident.locatie + " " + incident.PLAATS_NAAM_NEN;
     var feature = new OpenLayers.Feature.Vector(
             new OpenLayers.Geometry.Point(x, y),
             {
