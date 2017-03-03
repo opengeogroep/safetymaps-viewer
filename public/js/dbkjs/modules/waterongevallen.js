@@ -213,6 +213,9 @@ dbkjs.modules.waterongevallen = {
                     context: {
                         myicon: function(feature) {
                             var type = feature.attributes.symboolcod;
+                            if(feature.attributes.bijzonderh && feature.attributes.bijzonderh.trim().length > 0) {
+                                type += "_i";
+                            }
                             return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + "images/wo/" + type + ".png" : imagesBase64["images/wo/" + type + ".png"];
                         }
                     }
@@ -249,9 +252,36 @@ dbkjs.modules.waterongevallen = {
         $('#dbkinfopanel_b').html(div);
 
         this.createInfoTabDiv("algemeen", "Algemeen", true, data,
-            [ "locatie", "adres", "plaatsnaam", "gebruik_bo", "bijzondere"],
-            [ "Locatie", "Adres", "Plaatsnaam", "Gebruik boot", "Bijzonderheden" ]
+            [ "locatie", "adres", "plaatsnaam", "gebruik_bo"],
+            [ "Locatie", "Adres", "Plaatsnaam", "Gebruik boot" ]
         );
+
+        var symb_table = $('<table class="table table-hover"></table>');
+        symb_table.append('<tr><th></th><th>Symbool</th><th>Informatie</th></tr>');
+
+        $.each(this.symbolen.features, function(i, symbool) {
+
+            var img = "images/wo/" + symbool.attributes.symboolcod + '.png';
+            img = typeof imagesBase64 === 'undefined'  ? dbkjs.basePath + img : imagesBase64[img];
+
+            var row = $(Mustache.render(
+                    '<tr>' +
+                        '<td style="width: 65px; min-height: 65px"><img class="thumb" style="width: 65%" src="{{img}}" alt="{{a.symboolcod}}" title="{{#i18n.t}}waterongevallen.' + symbool.attributes.symboolcod + '{{/i18n.t}}"></td>' +
+                        '<td>{{#i18n.t}}waterongevallen.' + symbool.attributes.symboolcod + '{{/i18n.t}}</td>' +
+                        '<td>{{a.bijzonderh}}</td>' +
+                    '</tr>', { img: img, i18n: dbkjs.util.mustachei18n(), a: symbool.attributes }));
+
+            row.mouseover(function(){
+                dbkjs.selectControl.select(symbool);
+            });
+            row.mouseout(function(){
+                dbkjs.selectControl.unselect(symbool);
+            });
+            symb_table.append(row);
+        });
+        if(this.symbolen.features.length > 0) {
+            this.createHtmlTabDiv("symbolen", "Symbolen", false, symb_table);
+        }
 
         this.createInfoTabDiv("gebruikwater", "Gebruik water", false, data,
             [ "beroepsvaa", "recreatiev", "zeilboten", "roeiers", "zwemmers", "bijzonde_1"],
@@ -259,29 +289,30 @@ dbkjs.modules.waterongevallen = {
         );
 
         this.createInfoTabDiv("risicogegevens", "Risicogegevens", false, data,
-            ["stroming", "soortwalka", "hoogte_wal", "diepte_wat", "diepte_max", "bodemgeste", "zicht", "soort_wate", "verkeer", "gemalen", "bijzonde_2"],
+            ["stroming", "soortwalka", "hoogte_wal", "diepte_wat", "diepte_max", "bodemgeste", "zicht", "soort_wate", "verkeer", "gemalen", "bijzondere"],
             ["Stroming", "Soort Walkant", "Hoogte Walkant", "Diepte water aan de kant", "Diepte maximaal", "Bodemgesteldheid", "Zicht", "Soort water", "Verkeer", "Gemalen", "Bijzondere gevaren" ]
         );
 
-        this.createInfoTabDiv("duikinstructie", "Duikinstructie", false, data,
+        this.createInfoTabDiv("noodprocedure", "Noodprocedure", false, data,
             ["duikongeva", "dmc", "klpd", "waterbehee", "havendiens"],
             ["Duikongeval", "Duikmedisch centrum", "KLPD", "Waterbeheerder", "Havendienst"]
         );
-        $("#collapse_duikinstructie table").append("<tr><td colspan='2'>" +
-                "<table border='1' cellpadding='2'><tr><td><i>VN</i></td><td>30</td><td>27</td><td>25</td><td>23</td><td>21</td><td>19</td><td>18</td><td>17</td><td>16</td><td>15</td><td>14</td><td>13</td><td>12</td><td>11</td><td>11</td></tr>" +
-                "<tr><td><i>VH</i></td><td>15</td><td>14</td><td>12</td><td>11</td><td>10</td><td>9</td><td>9</td><td>8</td><td>7</td><td>7</td><td>6</td><td>5</td><td>5</td><td>5</td><td>4</td></tr>" +
-                "<tr><td><i>D</i></td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td></tr>" +
-                "</table><br>" +
-                "<table><tr><td><i>VN:</i></td><td>Normaal verbruik</td></tr>" +
-                "<tr><td><i>VH:</i><td>Hoog verbruik</td></tr>" +
-                "<tr><td><i>D:</i><td>Diepte</td></tr></table>" +
-                "</td></tr>"
+
+        this.createHtmlTabDiv("duikinstructie", "Duikinstructie", false, "" +
+                "<table border='1' cellpadding='2' style='width: 100%'><tr><td>Werktijd (Normaal verbruik)</td><td>30</td><td>27</td><td>25</td><td>23</td><td>21</td><td>19</td><td>18</td><td>17</td><td>16</td><td>15</td><td>14</td><td>13</td><td>12</td><td>11</td><td>11</td></tr>" +
+                "<tr><td>Werktijd (hoog verbruik)</td><td>15</td><td>14</td><td>12</td><td>11</td><td>10</td><td>9</td><td>9</td><td>8</td><td>7</td><td>7</td><td>6</td><td>5</td><td>5</td><td>5</td><td>4</td></tr>" +
+                "<tr><td>Diepte</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td></tr>" +
+                "</table><br>"// +
+//                "<table><tr><td><i>VN:</i></td><td>Normaal verbruik</td></tr>" +
+//                "<tr><td><i>VH:</i><td>Hoog verbruik</td></tr>" +
+//                "<tr><td><i>D:</i><td>Diepte</td></tr></table>"
+
                 );
 
-        if(data.attributes["bijzonde_2"]) {
+        if(data.attributes["bijzonderh"] || data.attributes["bijzonde_2"]) {
             this.createInfoTabDiv("bijzonderheden", "Bijzonderheden", false, data,
-                ["bijzonde_2"],
-                ["Bijzonderheden"]
+                ["bijzonderh", "bijzonde_2"],
+                ["Bijzonderheden", "Bijzonderheden"]
             );
         }
 
@@ -291,9 +322,14 @@ dbkjs.modules.waterongevallen = {
         dbkjs.protocol.jsonDBK.processing = false;
         $('#systeem_meldingen').hide();
     },
-    createInfoTabDiv: function(id, label, active, data, props, labels) {
+    createHtmlTabDiv: function(id, label, active, content) {
         id = 'collapse_' + id;
         var bv_div = $('<div class="tab-pane ' + (active ? "active" : "") + '" id="' + id + '"></div>');
+        bv_div.append(content);
+        dbkjs.protocol.jsonDBK.panel_group.append(bv_div);
+        dbkjs.protocol.jsonDBK.panel_tabs.append('<li class="' + (active ? "active" : "") + '"><a data-toggle="tab" href="#' + id + '">' + label + '</a></li>');
+    },
+    createInfoTabDiv: function(id, label, active, data, props, labels) {
         var bv_table_div = $('<div class="table-responsive"></div>');
         var bv_table = $('<table class="table table-hover"></table>');
 
@@ -304,10 +340,7 @@ dbkjs.modules.waterongevallen = {
         });
 
         bv_table_div.append(bv_table);
-        bv_div.append(bv_table_div);
-
-        dbkjs.protocol.jsonDBK.panel_group.append(bv_div);
-        dbkjs.protocol.jsonDBK.panel_tabs.append('<li class="' + (active ? "active" : "") + '"><a data-toggle="tab" href="#' + id + '">' + label + '</a></li>');
+        this.createHtmlTabDiv(id, label, active, bv_table_div);
     },
     deselect: function() {
         if(this.vlakken) {

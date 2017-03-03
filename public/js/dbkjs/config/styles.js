@@ -217,7 +217,7 @@ dbkjs.config.styles = {
                             }
                             return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + img : imagesBase64[img];
                         } else if(feature.attributes.typeFeature === 'WO') {
-                            return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + "images/snorkel-256.png" : imagesBase64["images/snorkel-256.png"];
+                            return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + "images/wo/wo.png" : imagesBase64["images/wo/wo.png"];
                         } else {
                             return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + "images/jcartier_event_1.png" : imagesBase64["images/jcartier_event_1.png"];
                         }
