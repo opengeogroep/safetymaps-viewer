@@ -713,11 +713,12 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
                 $("<div id='tweet_" + status.id + "'>Tweets tijdens incident op basis van zoektermen <i>" + address + ", " + terms.join(", ") + "</i></div>").appendTo("#tab_twitter");
                 $.each(data.responseTerms.statuses, function(i, status) {
                     var createdAt = twitterMoment(status.created_at);
-                    if(createdAt.isAfter(startCutoff) && (!endCutoff || createdAt.isBefore(endCutoff))) {
-                        if(displayedTweets.indexOf(status.text) === -1) {
+                    if(createdAt.isAfter(startCutoff) /*&& (!endCutoff || createdAt.isBefore(endCutoff))*/) {
+                        var text = status.retweeted_status ? status.retweeted_status.text : status.text;
+                        if(displayedTweets.indexOf(text) === -1) {
                             if(!filterTweet(status) && (!status.retweeted_status || !filterTweet(status.retweeted_status))) {
-                                displayedTweets.push(status.text);
-                                console.log("Tweet matching terms: " + status.text, status);
+                                displayedTweets.push(text);
+                                console.log("Tweet matching terms: " + text, status);
                                 twttr.widgets.createTweet(status.id_str, document.getElementById("tab_twitter"),  { conversation: "none", width: 530, lang: "nl" } );
                                 tweets++;
                             } else {
