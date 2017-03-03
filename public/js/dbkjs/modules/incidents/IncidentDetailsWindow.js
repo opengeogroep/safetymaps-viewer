@@ -49,13 +49,9 @@ IncidentDetailsWindow.prototype.createStyle = function() {
     var css = '#eenheden div { margin: 3px; float: left } \
 #eenheden div { border-left: 1px solid #ddd; padding-left: 8px; } \
 #eenheden span.einde { color: gray } \
-#tab_kladblok { clear: both; padding-top: 10px; white-space: pre-wrap; } \
-#tab_kladblok span.brw { font-weight: bold; color: red } \
-#tab_kladblok span.pol { color: blue; } \
+#tab_kladblok { clear: both; padding-top: 10px; white-space: pre-wrap; font-size: 16px; } \
 table td { padding: 3px !important; } \
 #tab_kladblok table td { vertical-align: top; padding: 0px 0px 0px 3px !important; } \
-#pol span { color: blue; } \
-#tab_kladblok span.ambu { color: orange; ' + (me.ghor ? '' : 'display: none;') + ' } \
 ';
     head = document.getElementsByTagName('head')[0],
         style = document.createElement('style');
@@ -293,16 +289,16 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
 };
 
 IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incident) {
-    var kladblokHTML = "";
+    var kladblokHTML = "<table>";
     switch(format) {
         case "xml":
             $.each($(incident).find("Kladblok"), function(i, k) {
-                kladblokHTML += "<span class='brw'>" + dbkjs.util.htmlEncode($(k).text()) + "\n</span>";
+                kladblokHTML += "<tr><td>" + dbkjs.util.htmlEncode($(k).text()) + "</td></tr>";
             });
             break;
         case "falck":
             $.each(incident.Kladblokregels, function(i, k) {
-                kladblokHTML += "<span class='brw'>" + new moment(k.DTG).format("HH:mm ") + dbkjs.util.htmlEncode(k.Inhoud) + "\n</span>";
+                kladblokHTML += "<tr><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + dbkjs.util.htmlEncode(k.Inhoud) + "</td></tr>";
             });
             break;
         default:
@@ -337,7 +333,7 @@ IncidentDetailsWindow.prototype.getIncidentKladblokDefaultHtml = function(kladbl
         kladblokHTML += "<tr><td>" + AGSIncidentService.prototype.getAGSMoment(k.DTG_KLADBLOK_REGEL).format("HH:mm") + "</td><td>" +
             dbkjs.util.htmlEncode(k.INHOUD_KLADBLOK_REGEL) + "</td></tr>";
     });
-    return kladblokHTML;// + "</table>";
+    return kladblokHTML + "</table>";
 };
 
 IncidentDetailsWindow.prototype.getPrioriteitColor = function(prio) {
