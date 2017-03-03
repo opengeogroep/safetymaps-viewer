@@ -662,7 +662,9 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
         $("#tab_twitter").css("height", $("#tab_twitter").height());
         $("#tab_twitter").html("");
 
-        if(data.response.errors) {
+        if(!data.result) {
+            $("#tab_twitter").html("Fout in server-component bij ophalen tweets");
+        } else if(data.response.errors) {
             $("#tab_twitter").html(JSON.stringify(data.response.errors));
         } else {
             var statuses = data.response.statuses;
