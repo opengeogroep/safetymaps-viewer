@@ -49,7 +49,7 @@ IncidentDetailsWindow.prototype.createStyle = function() {
     var css = '#eenheden div { margin: 3px; float: left } \
 #eenheden div { border-left: 1px solid #ddd; padding-left: 8px; } \
 #eenheden span.einde { color: gray } \
-#tab_kladblok { clear: both; padding-top: 10px; white-space: pre-wrap; font-size: 16px; } \
+#tab_kladblok { clear: both; padding-top: 10px; white-space: pre-wrap; font-size: 16px; font-weight: bold; color: red } \
 table td { padding: 3px !important; } \
 #tab_kladblok table td { vertical-align: top; padding: 0px 0px 0px 3px !important; } \
 ';
