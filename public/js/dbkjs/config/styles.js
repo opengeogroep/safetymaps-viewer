@@ -58,10 +58,13 @@ dbkjs.redrawScaledLayers = function () {
  * @param {type} attributeScaleFactor
  * @returns {Number|dbkjs.options.originalScaledbkjs.options.originalScale|
  */
-dbkjs.scaleStyleValue = function (value, featureAttributeValue, attributeScaleFactor) {
+dbkjs.scaleStyleValue = function (value, featureAttributeValue, attributeScaleFactor, lineScale) {
     if (featureAttributeValue) {
         attributeScaleFactor = attributeScaleFactor ? attributeScaleFactor : 1;
         value = featureAttributeValue * attributeScaleFactor;
+    }
+    if(lineScale && dbkjs.options.noLineScaling) {
+        return value;
     }
     value = value + (dbkjs.options.styleSizeAdjust ? dbkjs.options.styleSizeAdjust : 0);
     return value * dbkjs.getStyleScaleFactor();
@@ -320,25 +323,25 @@ dbkjs.config.styles = {
                         case "60 minuten brandwerende scheiding":
                         case "> 60 minuten brandwerende scheiding":
                         case "> 120 minuten brandwerende scheiding":
-                            return dbkjs.scaleStyleValue(4);
+                            return dbkjs.scaleStyleValue(4,null,null,true);
                         default:
-                            return dbkjs.scaleStyleValue(2);
+                            return dbkjs.scaleStyleValue(2,null,null,true);
                     }
 
                 },
                 mystrokedashstyle: function (feature) {
                     switch (feature.attributes.type) {
                         case "30 minuten brandwerende scheiding":
-                            return dbkjs.scaleStyleValue(8) + " " + dbkjs.scaleStyleValue(4);
+                            return dbkjs.scaleStyleValue(8,null,null,true) + " " + dbkjs.scaleStyleValue(4,null,null,true);
                         case "60 minuten brandwerende scheiding":
-                            return dbkjs.scaleStyleValue(4) + " " + dbkjs.scaleStyleValue(4);
+                            return dbkjs.scaleStyleValue(4,null,null,true) + " " + dbkjs.scaleStyleValue(4,null,null,true);
                         case "> 60 minuten brandwerende scheiding":
                         case "> 120 minuten brandwerende scheiding":
                             return "solid";
                         case "Rookwerende scheiding":
-                            return dbkjs.scaleStyleValue(8) + " " + dbkjs.scaleStyleValue(4);
+                            return dbkjs.scaleStyleValue(8,null,null,true) + " " + dbkjs.scaleStyleValue(4,null,null,true);
                         default:
-                            return dbkjs.scaleStyleValue(10) + " " + dbkjs.scaleStyleValue(10);
+                            return dbkjs.scaleStyleValue(10,null,null,true) + " " + dbkjs.scaleStyleValue(10,null,null,true);
                     }
                 }
             }
@@ -424,29 +427,29 @@ dbkjs.config.styles = {
                     case "Gate":
                     case "Fence":
                     case "Fence_O":
-                        return dbkjs.scaleStyleValue(8);
+                        return dbkjs.scaleStyleValue(8,null,null,true);
                      case "HEAT":
-                        return dbkjs.scaleStyleValue(3);
+                        return dbkjs.scaleStyleValue(3,null,null,true);
                     case "Broken":
-                        return dbkjs.scaleStyleValue(1);
+                        return dbkjs.scaleStyleValue(1,null,null,true);
                     case "Arrow":
-                        return dbkjs.scaleStyleValue(2);
+                        return dbkjs.scaleStyleValue(2,null,null,true);
                     default:
-                        return dbkjs.scaleStyleValue(2);
+                        return dbkjs.scaleStyleValue(2,null,null,true);
                }
             },
             mydash: function (feature) {
                 switch (feature.attributes.type) {
                     case "Cable":
                     case "Bbarrier":
-                        return dbkjs.scaleStyleValue(10) + " " + dbkjs.scaleStyleValue(10);
+                        return dbkjs.scaleStyleValue(10,null,null,true) + " " + dbkjs.scaleStyleValue(10,null,null,true);
                     case "Conduit":
                     case "Gate":
                     case "Fence":
                     case "Fence_O":
-                        return dbkjs.scaleStyleValue(1) + " " + dbkjs.scaleStyleValue(20);
+                        return dbkjs.scaleStyleValue(1,null,null,true) + " " + dbkjs.scaleStyleValue(20,null,null,true);
                     case "Broken":
-                        return dbkjs.scaleStyleValue(3) + " " + dbkjs.scaleStyleValue(2);
+                        return dbkjs.scaleStyleValue(3,null,null,true) + " " + dbkjs.scaleStyleValue(2,null,null,true);
                     default:
                         return "solid";
                 }
@@ -498,14 +501,14 @@ dbkjs.config.styles = {
                 switch (feature.attributes.type) {
                     case "Cable":
                     case "Bbarrier":
-                        return dbkjs.scaleStyleValue(4);
+                        return dbkjs.scaleStyleValue(4,null,null,true);
                     case "Conduit":
                     case "Gate":
                     case "Fence":
                     case "Fence_O":
-                        return dbkjs.scaleStyleValue(2);
+                        return dbkjs.scaleStyleValue(2,null,null,true);
                     default:
-                        return dbkjs.scaleStyleValue(2);
+                        return dbkjs.scaleStyleValue(2,null,null,true);
                 }
             },
             mydash: function (feature) {
@@ -542,9 +545,9 @@ dbkjs.config.styles = {
             mywidth: function (feature) {
                 switch (feature.attributes.type) {
                      case "Gate":
-                        return dbkjs.scaleStyleValue(5);
+                        return dbkjs.scaleStyleValue(5,null,null,true);
                     default:
-                        return dbkjs.scaleStyleValue(2);
+                        return dbkjs.scaleStyleValue(2,null,null,true);
                 }
             },
             mydash: function (feature) {
@@ -597,7 +600,7 @@ dbkjs.config.styles = {
                 return "triangle";
              },
             mywidth: function (feature) {
-                return dbkjs.scaleStyleValue(1);
+                return dbkjs.scaleStyleValue(1,null,null,true);
             }
         }
     }),
