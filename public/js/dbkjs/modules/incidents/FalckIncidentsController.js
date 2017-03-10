@@ -477,13 +477,16 @@ FalckIncidentsController.prototype.selectIncidentDBK = function(incident) {
     var postcode = l.Postcode;
     var woonplaats = l.Plaatsnaam;
     var huisnummer = l.Huisnummer;
-//    var huisletter = l.HnAanduiding;
-//    var toevoeging = l.HnToevoeging;
+    var huisletter = l.Letter;
+    if(huisletter) {
+        huisletter = huisletter.toLowerCase();
+    }
+    var toevoeging = l.HnToevoeging;
     var straat = l.NaamLocatie1;
 
     if(postcode && huisnummer) {
         console.log("Zoeken naar DBK voor incident postcode=" + postcode + ", plaatsnaam=" + woonplaats +
-                ", huisnummer=" + huisnummer + /*", aanduiding/letter=" + huisletter + ", toevoeging=" + toevoeging +*/
+                ", huisnummer=" + huisnummer + ", letter=" + huisletter + ", toevoeging=" + toevoeging +
                 ", naam locatie=" + straat);
 
         var dbk = null;
@@ -499,8 +502,15 @@ FalckIncidentsController.prototype.selectIncidentDBK = function(incident) {
 
                     if(matchHuisnummer) {
                         if(matchPostcode) {
-                            dbk = f;
-                            return false;
+                            var aHuisletter = fa.huisletter === "" ? null : fa.huisletter.toLowerCase();
+                            var aToevoeging = fa.huisnummertoevoeging === "" ? null : fa.huisnummertoevoeging;
+                            var matchHuisletter = huisletter === aHuisletter;
+                            var matchToevoeging = toevoeging === aToevoeging;
+                            console.log("Match huisnummer voor DBK adres " + f.attributes.formeleNaam + ", match letter=" + matchHuisletter + ", toevoeging=" + matchToevoeging);
+                            if(matchHuisletter/* && matchToevoeging*/) {
+                                dbk = f;
+                                return false;
+                            }
                         }
                     }
                 }
@@ -516,14 +526,20 @@ FalckIncidentsController.prototype.selectIncidentDBK = function(incident) {
                     var matchWoonplaats = a.woonplaats && a.woonplaats === woonplaats;
                     var matchStraat = a.straatnaam && a.straatnaam === straat;
                     if(matchPostcode || (matchWoonplaats && matchStraat) && a.nummers) {
-                        console.log("Checking nummers for match DBK " + f.attributes.formeleNaam + ", "  + a.straatnaam + ", " + a.postcode + " " + a.woonplaats);
+                        console.log("Checking nummers for match DBK nevenadressen " + f.attributes.formeleNaam + ", "  + a.straatnaam + ", " + a.postcode + " " + a.woonplaats);
                         $.each(a.nummers, function(j, n) {
                             var parts = n.split("|");
                             var matchHuisnummer = Number(parts[0]) === huisnummer;
                             if(matchHuisnummer) {
-                                console.log("Matched DBK with nummer " + n /*+ ", matchHuisletter=" + matchHuisletter + ",matchToevoeging=" + matchToevoeging*/);
-                                dbk = f;
-                                return false;
+                                var aHuisletter = parts.length === 3 ? (parts[1] === '' ? null : parts[1].toLowerCase()) : null;
+//                                var aToevoeging = parts.length === 3 ? (parts[2] === '' ? null : parts[2])  : null;
+                                var matchHuisletter = huisletter === aHuisletter;
+//                                var matchToevoeging = toevoeging === aToevoeging;
+                                console.log("Matched DBK with nummer " + n + ", matchHuisletter (GMS=DBK:result): " + huisletter + "=" + aHuisletter + ":" + matchHuisletter + ",matchToevoeging (GMS=DBK:result): " + toevoeging + "=" + aToevoeging + ":" + matchToevoeging);
+                                if(matchHuisletter/* && matchToevoeging*/) {
+                                    dbk = f;
+                                    return false;
+                                }
                             }
                         });
                         if(dbk) {
