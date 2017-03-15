@@ -37,8 +37,8 @@ function IncidentVectorLayer(enableLabels) {
                 fontSize: "12px",
                 fontWeight: "bold",
                 labelYOffset: -20,
-                labelOutlineColor: "white",
-                labelOutlineWidth: 3,
+                labelOutlineColor: "yellow",
+                labelOutlineWidth: 7,
                 opacity: "${opacity}"
             }, {
                 context: {
@@ -110,7 +110,7 @@ IncidentVectorLayer.prototype.addIncident = function(incident, archief, singleMa
     if(classificatie && classificatie.indexOf(",") !== -1) {
         classificatie = classificatie.split(",")[0];
     }
-    var label = "P" + incident.PRIORITEIT_INCIDENT_BRANDWEER + " " + dbkjs.util.htmlEncode(classificatie) + " " + incident.locatie + " " + incident.PLAATS_NAAM_NEN;
+    var label = "P" + incident.PRIORITEIT_INCIDENT_BRANDWEER + " " + dbkjs.util.htmlEncode(classificatie) + " " + incident.locatie + " " + (incident.PLAATS_NAAM_NEN || incident.PLAATS_NAAM);
     var feature = new OpenLayers.Feature.Vector(
             new OpenLayers.Geometry.Point(x, y),
             {
