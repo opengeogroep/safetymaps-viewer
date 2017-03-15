@@ -266,7 +266,7 @@ IncidentMonitorController.prototype.selectIncident = function(obj) {
     }
     me.incidentId = obj.incident.INCIDENT_ID;
     me.incidentDetailsWindow.data("Ophalen incidentgegevens...");
-    me.updateIncident(me.incidentId, me.incident.archief);
+    me.updateIncident(me.incidentId, me.incident.archief, false);
     $("#t_twitter_title").text("Twitter");
     $("#tab_twitter").html("");
     me.incidentDetailsWindow.show();
@@ -462,7 +462,7 @@ IncidentMonitorController.prototype.enableIncidentUpdates = function() {
     }
 
     this.updateIncidentInterval = window.setInterval(function() {
-        me.updateIncident(me.incidentId, me.incident.archief);
+        me.updateIncident(me.incidentId, me.incident.archief, true);
     }, 15000);
 };
 
@@ -473,7 +473,7 @@ IncidentMonitorController.prototype.disableIncidentUpdates = function() {
     }
 };
 
-IncidentMonitorController.prototype.updateIncident = function(incidentId, archief) {
+IncidentMonitorController.prototype.updateIncident = function(incidentId, archief, isUpdate) {
     var me = this;
     if(this.incidentId !== incidentId) {
         // Incident cancelled or changed since timeout was set, ignore
@@ -499,7 +499,9 @@ IncidentMonitorController.prototype.updateIncident = function(incidentId, archie
         // Always update window, updates moment.fromNow() times
         me.incidentDetailsWindow.data(incident, true, true);
 
-        if(!!dbkjs.modules.incidents.options.showTwitter) {
+        // Do not update tweets every time incident data updated, reduce number
+        // of API calls to avoid API limits
+        if(!isUpdate && !!dbkjs.modules.incidents.options.showTwitter) {
             me.loadTweets(incidentId, incident);
         }
     });
