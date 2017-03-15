@@ -308,9 +308,12 @@ AGSIncidentService.prototype.loadServiceInfo = function() {
 
 AGSIncidentService.prototype.getIncidentLocatie = function(incident) {
     var locatie;
+    // Bij V_B_ARC_INCIDENT aanwezig
     if(incident.T_GUI_LOCATIE) {
         locatie = incident.T_GUI_LOCATIE;
     } else {
+        // Bij V_B_ACT_INCIDENT niet is T_GUI_LOCATIE niet aanwezig, stel deze
+        // ongeveer hetzelfde samen uit overige kolommen
         locatie = incident.NAAM_LOCATIE1;
         if(incident.HUIS_PAAL_NR) {
             locatie += " " + incident.HUIS_PAAL_NR;
@@ -320,6 +323,15 @@ AGSIncidentService.prototype.getIncidentLocatie = function(incident) {
         }
         if(incident.HUIS_NR_TOEV) {
             locatie += " " + incident.HUIS_NR_TOEV;
+        }
+
+        if(incident.TYPE_LOCATIE2 === "S") {
+            // Twee straten, voeg tweede straat na eerste toe
+            locatie = locatie + "/" + incident.NAAM_LOCATIE2;
+        }
+        if(incident.TYPE_LOCATIE2 === "O") {
+            // Omschrijving locatie voor adres
+            locatie = incident.NAAM_LOCATIE2 + " " + locatie;
         }
     }
     return locatie;
