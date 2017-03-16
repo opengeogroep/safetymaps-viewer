@@ -43,7 +43,7 @@ dbkjs.modules.waterongevallen = {
     },
     load: function() {
         var me = this;
-        $.ajax((dbkjs.options.serverUrlPrefix ? dbkjs.options.serverUrlPrefix : "") + "action/vrh", {
+        $.ajax("api/wbbks.json", {
             dataType: "json"
         }).fail(function(jqXHR, textStatus, errorThrown) {
             dbkjs.gui.showError("Fout bij inladen waterongevallenkaarten: " + errorThrown);
@@ -86,12 +86,8 @@ dbkjs.modules.waterongevallen = {
     },
     selected: function(feature, successFunction) {
         var me = this;
-        $.ajax((dbkjs.options.serverUrlPrefix ? dbkjs.options.serverUrlPrefix : "") + "action/vrh", {
-            dataType: "json",
-            data: {
-                wbbk: true,
-                id: feature.attributes.id
-            }
+        $.ajax("api/wbbk/" + feature.attributes.id + ".json", {
+            dataType: "json"
         }).fail(function(jqXHR, textStatus, errorThrown) {
             dbkjs.gui.showError("Fout bij inladen waterongevallenkaart: " + errorThrown);
         }).done(function(data) {
