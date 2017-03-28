@@ -491,36 +491,33 @@ FalckIncidentsController.prototype.selectIncidentDBK = function(incident) {
 
         var dbk = null;
         $.each(dbkjs.modules.feature.features, function(index, f) {
-            var fas = f.attributes.adres;
-            if(!fas) {
-                return true;
-            }
-            $.each(fas, function(index, fa) {
-                if(fa) {
-                    var matchPostcode = fa.postcode && postcode === fa.postcode;
-                    var matchHuisnummer = fa.huisnummer && huisnummer === fa.huisnummer;
+            if(typeof f.attributes.adres === "object") {
+                $.each(f.attributes.adres, function(index, fa) {
+                    if(fa) {
+                        var matchPostcode = fa.postcode && postcode === fa.postcode;
+                        var matchHuisnummer = fa.huisnummer && huisnummer === fa.huisnummer;
 
-                    if(matchHuisnummer) {
-                        if(matchPostcode) {
-                            var aHuisletter = fa.huisletter === "" ? null : fa.huisletter.toLowerCase();
-                            var aToevoeging = fa.huisnummertoevoeging === "" ? null : fa.huisnummertoevoeging;
-                            var matchHuisletter = huisletter === aHuisletter;
-                            var matchToevoeging = toevoeging === aToevoeging;
-                            console.log("Match huisnummer voor DBK adres " + f.attributes.formeleNaam + ", match letter=" + matchHuisletter + ", toevoeging=" + matchToevoeging);
-                            if(matchHuisletter/* && matchToevoeging*/) {
-                                dbk = f;
-                                return false;
+                        if(matchHuisnummer) {
+                            if(matchPostcode) {
+                                var aHuisletter = fa.huisletter === "" ? null : fa.huisletter.toLowerCase();
+                                var aToevoeging = fa.huisnummertoevoeging === "" ? null : fa.huisnummertoevoeging;
+                                var matchHuisletter = huisletter === aHuisletter;
+                                var matchToevoeging = toevoeging === aToevoeging;
+                                console.log("Match huisnummer voor DBK adres " + f.attributes.formeleNaam + ", match letter=" + matchHuisletter + ", toevoeging=" + matchToevoeging);
+                                if(matchHuisletter/* && matchToevoeging*/) {
+                                    dbk = f;
+                                    return false;
+                                }
                             }
                         }
                     }
-                }
-            });
-
+                });
+            }
             if(dbk) {
                 return false;
             }
 
-            if(f.attributes.adressen) {
+            if(typeof f.attributes.adressen === "object") {
                 $.each(f.attributes.adressen, function(i, a) {
                     var matchPostcode = a.postcode && a.postcode === postcode;
                     var matchWoonplaats = a.woonplaats && a.woonplaats === woonplaats;

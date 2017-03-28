@@ -149,29 +149,26 @@ MDTController.prototype.newIncident = function() {
 
         var dbk = null;
         $.each(dbkjs.modules.feature.features, function(index, f) {
-            var fas = f.attributes.adres;
-            if(!fas) {
-                return true;
-            }
-            $.each(fas, function(index, fa) {
-                if(fa) {
-                    var matchPostcode = fa.postcode && postcode === fa.postcode;
-                    var matchHuisnummer = fa.huisnummer && huisnummer === fa.huisnummer;
+            if(typeof f.attributes.adres === "object") {
+                $.each(f.attributes.adres, function(index, fa) {
+                    if(fa) {
+                        var matchPostcode = fa.postcode && postcode === fa.postcode;
+                        var matchHuisnummer = fa.huisnummer && huisnummer === fa.huisnummer;
 
-                    if(matchHuisnummer) {
-                        if(matchPostcode) {
-                            dbk = f;
-                            return false;
+                        if(matchHuisnummer) {
+                            if(matchPostcode) {
+                                dbk = f;
+                                return false;
+                            }
                         }
                     }
-                }
-            });
-
+                });
+            }
             if(dbk) {
                 return false;
             }
 
-            if(f.attributes.adressen) {
+            if(typeof f.attributes.adressen === "object") {
                 $.each(f.attributes.adressen, function(i, a) {
                     var matchPostcode = a.postcode && a.postcode === postcode;
                     var matchWoonplaats = a.woonplaats && a.woonplaats === woonplaats;
