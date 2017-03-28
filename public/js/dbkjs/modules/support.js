@@ -27,6 +27,13 @@ dbkjs.modules.support = {
     id: "dbk.modules.support",
     register: function () {
         var _obj = dbkjs.modules.support;
+
+        _obj.options = $.extend({
+            hideGeneralSubject: false,
+            hideTel: false,
+            subjectSplit: ","
+        }, _obj.options);
+
         _obj.layer = new OpenLayers.Layer.Vector("Support");
         dbkjs.map.addLayer(_obj.layer);
 
@@ -89,9 +96,11 @@ dbkjs.modules.support = {
                 $("#supportpanel_b").prepend('<p id="email_help"><i>' + i18n.t('email.help') +'</i></p>');
                 var laag_input = $('<div class="form-group"></div>');
                 var select = $('<select name="subject" class="form-control"></select>');
-                select.append('<option selected>' + i18n.t('email.generalmessage') + '</option>');
+                if(!_obj.options.hideGeneralSubject) {
+                    select.append('<option selected>' + i18n.t('email.generalmessage') + '</option>');
+                }
                 if(dbkjs.options.organisation.support.subjects) {
-                    var subjects = dbkjs.options.organisation.support.subjects.split(",");
+                    var subjects = dbkjs.options.organisation.support.subjects.split(_obj.options.subjectSplit);
                     for(var i = 0; i < subjects.length; i++) {
                         select.append('<option>' + subjects[i] + '</option>');
                     }
@@ -122,7 +131,9 @@ dbkjs.modules.support = {
                         i18n.t('email.phone') +
                         '</label><div class="col-sm-8"><input id="phone" name="phone" type="tel" class="form-control" placeholder="' +
                         i18n.t('email.phone') + '"></div></div>');
-                p.append(tel_input);
+                if(!_obj.options.hideTel) {
+                    p.append(tel_input);
+                }
                 var remarks_input = $('<div class="form-group"><label class="col-sm-2 control-label" for="remarks">' +
                         i18n.t('email.remarks') +
                         ' *</label><div class="col-sm-8"><textarea id="remarks" name="remarks" class="form-control required" placeholder="' +
