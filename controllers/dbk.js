@@ -34,7 +34,7 @@ exports.getOrganisation = function(req, res) {
         if(!srid){
             srid = 4326;
         }
-        var query_str = 'select "organisation" from organisation.organisation_json($1)';
+        var query_str = 'select "organisation" from organisation.organisation_nieuw_json($1)';
         global.pool.query(query_str, [srid],
             function(err, result){
                 if(err) {
