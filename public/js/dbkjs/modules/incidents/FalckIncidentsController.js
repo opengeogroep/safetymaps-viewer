@@ -491,7 +491,7 @@ FalckIncidentsController.prototype.selectIncidentDBK = function(incident) {
 
         var dbk = null;
         $.each(dbkjs.modules.feature.features, function(index, f) {
-            if(typeof f.attributes.adres === "object") {
+            if($.isArray(f.attributes.adres)) {
                 $.each(f.attributes.adres, function(index, fa) {
                     if(fa) {
                         var matchPostcode = fa.postcode && postcode === fa.postcode;
@@ -517,7 +517,7 @@ FalckIncidentsController.prototype.selectIncidentDBK = function(incident) {
                 return false;
             }
 
-            if(typeof f.attributes.adressen === "object") {
+            if($.isArray(f.attributes.adressen)) {
                 $.each(f.attributes.adressen, function(i, a) {
                     var matchPostcode = a.postcode && a.postcode === postcode;
                     var matchWoonplaats = a.woonplaats && a.woonplaats === woonplaats;
