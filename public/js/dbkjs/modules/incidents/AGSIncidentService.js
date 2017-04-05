@@ -689,7 +689,7 @@ AGSIncidentService.prototype.getKladblok = function(incidentId, archief) {
         return d.resolve([]);
     }
 
-    var table = archief ? "V_B_ARC_KLADBLOK_LOG" : "V_B_ACT_KLADBLOK";
+    var table = archief ? "V_B_ARC_KLADBLOK_LOG" : "V_B_ACT_KLADBLOK_LOG";
     me.doAGSAjax({
         url: me.tableUrls[table] + "/query",
         dataType: "json",
@@ -697,7 +697,7 @@ AGSIncidentService.prototype.getKladblok = function(incidentId, archief) {
             f: "json",
             token: me.token,
             where: "INCIDENT_ID = " + incidentId + " AND TYPE_KLADBLOK_REGEL = 'KB' AND T_IND_DISC_KLADBLOK_REGEL LIKE '_B_'", // AND WIJZIGING_ID IS NULL",
-            orderByFields: "DTG_KLADBLOK_REGEL,KLADBLOK_REGEL_ID" + (archief ? ",VOLG_NR_KLADBLOK_REGEL" : ""),
+            orderByFields: "DTG_KLADBLOK_REGEL,KLADBLOK_REGEL_ID,VOLG_NR_KLADBLOK_REGEL",
             outFields: "*"
         }
     })
