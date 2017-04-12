@@ -302,33 +302,6 @@ dbkjs.modules.waterongevallen = {
             [ "Locatie", "Adres", "Plaatsnaam", "Gebruik boot" ]
         );
 
-        var symb_table = $('<table class="table table-hover"></table>');
-        symb_table.append('<tr><th></th><th>Symbool</th><th>Informatie</th></tr>');
-
-        $.each(this.symbolen.features, function(i, symbool) {
-
-            var img = "images/wo/" + symbool.attributes.symboolcod + '.png';
-            img = typeof imagesBase64 === 'undefined'  ? dbkjs.basePath + img : imagesBase64[img];
-
-            var row = $(Mustache.render(
-                    '<tr>' +
-                        '<td style="width: 65px; min-height: 65px"><img class="thumb" style="width: 65%" src="{{img}}" alt="{{a.symboolcod}}" title="{{#i18n.t}}waterongevallen.' + symbool.attributes.symboolcod + '{{/i18n.t}}"></td>' +
-                        '<td>{{#i18n.t}}waterongevallen.' + symbool.attributes.symboolcod + '{{/i18n.t}}</td>' +
-                        '<td>{{a.bijzonderh}}</td>' +
-                    '</tr>', { img: img, i18n: dbkjs.util.mustachei18n(), a: symbool.attributes }));
-
-            row.mouseover(function(){
-                dbkjs.selectControl.select(symbool);
-            });
-            row.mouseout(function(){
-                dbkjs.selectControl.unselect(symbool);
-            });
-            symb_table.append(row);
-        });
-        if(this.symbolen.features.length > 0) {
-            this.createHtmlTabDiv("symbolen", "Symbolen", false, symb_table);
-        }
-
         this.createInfoTabDiv("gebruikwater", "Gebruik water", false, data,
             [ "beroepsvaa", "recreatiev", "zeilboten", "roeiers", "zwemmers", "bijzonde_1"],
             [ "Beroepsvaart", "Recreatievaart", "Zeilboten", "Roeiers", "Zwemmers", "Bijzonderheden" ]
@@ -360,6 +333,33 @@ dbkjs.modules.waterongevallen = {
                 ["bijzonderh", "bijzonde_2"],
                 ["Bijzonderheden", "Bijzonderheden"]
             );
+        }
+
+        var symb_table = $('<table class="table table-hover"></table>');
+        symb_table.append('<tr><th></th><th>Symbool</th><th>Informatie</th></tr>');
+
+        $.each(this.symbolen.features, function(i, symbool) {
+
+            var img = "images/wo/" + symbool.attributes.symboolcod + '.png';
+            img = typeof imagesBase64 === 'undefined'  ? dbkjs.basePath + img : imagesBase64[img];
+
+            var row = $(Mustache.render(
+                    '<tr>' +
+                        '<td style="width: 65px; min-height: 65px"><img class="thumb" style="width: 65%" src="{{img}}" alt="{{a.symboolcod}}" title="{{#i18n.t}}waterongevallen.' + symbool.attributes.symboolcod + '{{/i18n.t}}"></td>' +
+                        '<td>{{#i18n.t}}waterongevallen.' + symbool.attributes.symboolcod + '{{/i18n.t}}</td>' +
+                        '<td>{{a.bijzonderh}}</td>' +
+                    '</tr>', { img: img, i18n: dbkjs.util.mustachei18n(), a: symbool.attributes }));
+
+            row.mouseover(function(){
+                dbkjs.selectControl.select(symbool);
+            });
+            row.mouseout(function(){
+                dbkjs.selectControl.unselect(symbool);
+            });
+            symb_table.append(row);
+        });
+        if(this.symbolen.features.length > 0) {
+            this.createHtmlTabDiv("symbolen", "Symbolen", false, symb_table);
         }
 
         // Fire handler to put tabs at bottom
