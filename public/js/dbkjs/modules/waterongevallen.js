@@ -105,6 +105,11 @@ dbkjs.modules.waterongevallen = {
 
     },
     symbolSelected: function(e) {
+        if(!e.feature.attributes.symboolcod) {
+            // Alleen tekst
+            dbkjs.selectControl.unselect(e.feature);
+            return;
+        }
         $('#vectorclickpanel_h').html('<span class="h4"><i class="fa fa-info-circle">&nbsp;Waterongevallen</span>');
         var html = $('<div class="table-responsive"></div>');
 
@@ -204,20 +209,63 @@ dbkjs.modules.waterongevallen = {
                 'default': new OpenLayers.Style({
                     cursor: "pointer",
                     externalGraphic: "${myicon}",
-                    pointRadius: 16
+                    pointRadius: "${radius}",
+                    label: "${label}",
+                    labelAlign: "lc",
+                    fontColor: "black",
+                    fontSize: "12px",
+                    fontWeight: "normal",
+                    labelOutlineColor: "white",
+                    labelOutlineWidth: 1,
+                    rotation: "${rotation}"
+
                 }, {
                     context: {
+                        radius: function(feature) {
+                            return feature.attributes.symboolcod ? 16 : 0;
+                        },
                         myicon: function(feature) {
                             var type = feature.attributes.symboolcod;
+                            if(!type) {
+                                // Alleen tekst
+                                return "";
+                            }
                             if(feature.attributes.bijzonderh && feature.attributes.bijzonderh.trim().length > 0) {
                                 type += "_i";
                             }
                             return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + "images/wo/" + type + ".png" : imagesBase64["images/wo/" + type + ".png"];
+                        },
+                        label: function(feature) {
+                            var tekst = feature.attributes.tekst;
+                            if(!tekst) {
+                                // Alleen symbool
+                                return "";
+                            }
+                            return tekst;
+                        },
+                        rotation: function(feature) {
+                            var hoek = feature.attributes.hoek;
+                            if(!hoek) {
+                                return 0;
+                            }
+                            return -hoek;
                         }
                     }
                 }),
-                'select': new OpenLayers.Style({pointRadius: 20}),
-                'temporary': new OpenLayers.Style({pointRadius: 24})
+                'select': new OpenLayers.Style({}, {
+                    context: {
+                        radius: function(feature) {
+                            return feature.attributes.symboolcod ? 20 : 0;
+                        }
+                    }
+                }),
+                'temporary': new OpenLayers.Style({
+                    context: {
+                        radius: function(feature) {
+                            return feature.attributes.symboolcod ? 24 : 0;
+                        }
+                    }
+                })
             })
         });
         this.symbolen.events.register("featureselected", this, this.symbolSelected);
@@ -237,6 +285,8 @@ dbkjs.modules.waterongevallen = {
         features = new OpenLayers.Format.GeoJSON().read(data.lijnen);
         this.lijnen.addFeatures(features);
         features = new OpenLayers.Format.GeoJSON().read(data.symbolen);
+        this.symbolen.addFeatures(features);
+        features = new OpenLayers.Format.GeoJSON().read(data.teksten);
         this.symbolen.addFeatures(features);
 
         var j = dbkjs.protocol.jsonDBK;
