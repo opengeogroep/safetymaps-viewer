@@ -128,10 +128,47 @@ dbkjs.modules.waterongevallen = {
     symbolUnselected: function(e) {
         $('#vectorclickpanel').hide();
     },
+    vlakSelected: function(e) {
+        // Direct unselecteren en redraw voor juiste z-order en geen selected
+        // style
+        dbkjs.selectControl.unselect(e.feature);
+        this.vlakken.redraw();
+
+        $('#vectorclickpanel_h').html('<span class="h4"><i class="fa fa-info-circle">&nbsp;Waterongevallen</span>');
+        var html = $('<div class="table-responsive"></div>');
+
+        var table = $('<table class="table table-hover"></table>');
+        table.append($(Mustache.render(
+        '<tr>' +
+            '<td style="width: 100px; background-color: ' + this.getDiepteVlakColor(e.feature.attributes.type) + '"></td>' +
+            '<td>{{f.type}}</td>' +
+        '</tr>', { f: e.feature.attributes})));
+        html.append(table);
+        $('#vectorclickpanel_b').html('').append(html);
+        $('#vectorclickpanel').show();
+
+    },
     init: function() {
         this.createLayers();
     },
+    getDiepteVlakColor: function(type) {
+        if(type === "Dieptevlak 15 meter en dieper") {
+            return "#0000a0";
+        } else if(type === "Dieptevlak 9 tot 15 meter") {
+            return "#0000de";
+        } else if(type === "Dieptevlak 4 tot 9 meter") {
+            return "#0f80ff";
+        } else if(type == "Dieptevlak tot 4 meter") {
+            return "#7ddafb";
+        } else if(type === "Gevaarlijk, overhangende grond") {
+            return "red";
+        } else if(type === "Ponton") {
+            return "black";
+        }
+        return "";
+    },
     createLayers: function() {
+        var me = this;
         this.vlakken = new OpenLayers.Layer.Vector("_WO_symbolen", {
             rendererOptions: {
                 zIndexing: true
@@ -147,17 +184,7 @@ dbkjs.modules.waterongevallen = {
                         fill: function (feature) {
                             var type = feature.attributes.type;
 
-                            if(type === "Dieptevlak 15 meter en dieper") {
-                                return "#0000a0";
-                            } else if(type === "Dieptevlak 9 tot 15 meter") {
-                                return "#0000de";
-                            } else if(type === "Dieptevlak 4 tot 9 meter") {
-                                return "#0f80ff";
-                            } else if(type == "Dieptevlak tot 4 meter") {
-                                return "#7ddafb";
-                            } else if(type === "Gevaarlijk, overhangende grond") {
-                                return "red";
-                            }
+                            return me.getDiepteVlakColor(type);
                         },
                         stroke: function(feature) {
                             var type = feature.attributes.type;
@@ -274,12 +301,15 @@ dbkjs.modules.waterongevallen = {
         });
         this.symbolen.events.register("featureselected", this, this.symbolSelected);
         this.symbolen.events.register("featureunselected", this, this.symbolUnselected);
+        this.vlakken.events.register("featureselected", this, this.vlakSelected);
         dbkjs.map.addLayer(this.symbolen);
         dbkjs.hoverControl.deactivate();
         dbkjs.hoverControl.layers.push(this.symbolen);
         dbkjs.hoverControl.activate();
         dbkjs.selectControl.deactivate();
         dbkjs.selectControl.layers.push(this.symbolen);
+        dbkjs.selectControl.layers.push(this.lijnen);
+        dbkjs.selectControl.layers.push(this.vlakken);
         dbkjs.selectControl.activate();
     },
     loadLayers: function(data) {
