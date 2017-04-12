@@ -252,7 +252,9 @@ dbkjs.modules.waterongevallen = {
                         }
                     }
                 }),
-                'select': new OpenLayers.Style({}, {
+                'select': new OpenLayers.Style({
+                    pointRadius: "${radius}",
+                }, {
                     context: {
                         radius: function(feature) {
                             return feature.attributes.symboolcod ? 20 : 0;
@@ -260,6 +262,8 @@ dbkjs.modules.waterongevallen = {
                     }
                 }),
                 'temporary': new OpenLayers.Style({
+                    pointRadius: "${radius}",
+                }, {
                     context: {
                         radius: function(feature) {
                             return feature.attributes.symboolcod ? 24 : 0;
