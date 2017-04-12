@@ -307,18 +307,18 @@ dbkjs.modules.waterongevallen = {
         );
 
         this.createInfoTabDiv("gebruikwater", "Gebruik water", false, data,
-            [ "beroepsvaa", "recreatiev", "zeilboten", "roeiers", "zwemmers", "bijzonde_1"],
-            [ "Beroepsvaart", "Recreatievaart", "Zeilboten", "Roeiers", "Zwemmers", "Bijzonderheden" ]
+            [ "beroepsvaa", "recreatiev", "zeilboten", "roeiers", "zwemmers", "bijzonde_1", "bijzonde_4"],
+            [ "Beroepsvaart", "Recreatievaart", "Zeilboten", "Roeiers", "Zwemmers", "Bijzonderheden", ""]
         );
 
         this.createInfoTabDiv("risicogegevens", "Risicogegevens", false, data,
-            ["stroming", "soortwalka", "hoogte_wal", "diepte_wat", "diepte_max", "bodemgeste", "zicht", "soort_wate", "verkeer", "gemalen", "bijzondere"],
-            ["Stroming", "Soort Walkant", "Hoogte Walkant", "Diepte water aan de kant", "Diepte maximaal", "Bodemgesteldheid", "Zicht", "Soort water", "Verkeer", "Gemalen", "Bijzondere gevaren" ]
+            ["stroming", "soortwalka", "hoogte_wal", "diepte_wat", "diepte_max", "bodemgeste", "zicht", "soort_wate", "verkeer", "gemalen", "bijzondere", "bijzonde_5"],
+            ["Stroming", "Soort Walkant", "Hoogte Walkant", "Diepte water aan de kant", "Diepte maximaal", "Bodemgesteldheid", "Zicht", "Soort water", "Verkeer", "Gemalen", "Bijzondere gevaren", "" ]
         );
 
         this.createInfoTabDiv("noodprocedure", "Noodprocedure", false, data,
-            ["duikongeva", "dmc", "klpd", "waterbehee", "havendiens"],
-            ["Duikongeval", "Duikmedisch centrum", "KLPD", "Waterbeheerder", "Havendienst"]
+            ["duikongeva", "dmc", "klpd", "waterbehee", "havendiens", "bijzonde_2", "bijzonde_6"],
+            ["Duikongeval", "Duikmedisch centrum", "KLPD", "Waterbeheerder", "Havendienst", "Bijzonderheden"]
         );
 
         this.createHtmlTabDiv("duikinstructie", "Duikinstructie", false, "" +
@@ -334,8 +334,8 @@ dbkjs.modules.waterongevallen = {
 
         if(data.attributes["bijzonderh"] || data.attributes["bijzonde_2"]) {
             this.createInfoTabDiv("bijzonderheden", "Bijzonderheden", false, data,
-                ["bijzonderh", "bijzonde_2"],
-                ["Bijzonderheden", "Bijzonderheden"]
+                ["bijzonderh", "bijzonde_3"],
+                ["Bijzonderheden", ""]
             );
         }
 
@@ -343,6 +343,9 @@ dbkjs.modules.waterongevallen = {
         symb_table.append('<tr><th></th><th>Symbool</th><th>Informatie</th></tr>');
 
         $.each(this.symbolen.features, function(i, symbool) {
+            if(!symbool.attributes.symboolcod) {
+                return true;
+            }
 
             var img = "images/wo/" + symbool.attributes.symboolcod + '.png';
             img = typeof imagesBase64 === 'undefined'  ? dbkjs.basePath + img : imagesBase64[img];
