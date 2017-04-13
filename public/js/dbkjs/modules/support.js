@@ -121,7 +121,9 @@ dbkjs.modules.support = {
                         i18n.t('email.name') +
                         ' *</label><div class="col-sm-8"><input id="name" name="name" type="text" class="form-control required" placeholder="' +
                         i18n.t('email.name') + '"></div></div>');
-                p.append(user_input);
+                if(!_obj.options.hideUser) {
+                    p.append(user_input);
+                }
                 var mail_input = $('<div class="form-group"><label class="col-sm-2 control-label" for="email">' +
                         i18n.t('email.email') +
                         ' *</label><div class="col-sm-8"><input id="email" name="email" type="email" class="form-control required" placeholder="' +
