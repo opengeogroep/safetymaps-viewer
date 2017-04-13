@@ -348,7 +348,7 @@ dbkjs.modules.waterongevallen = {
 
         this.createInfoTabDiv("noodprocedure", "Noodprocedure", false, data,
             ["duikongeva", "dmc", "klpd", "waterbehee", "havendiens", "bijzonde_2", "bijzonde_6"],
-            ["Duikongeval", "Duikmedisch centrum", "KLPD", "Waterbeheerder", "Havendienst", "Bijzonderheden"]
+            ["Duikongeval", "Duikmedisch centrum", "KLPD", "Waterbeheerder", "Havendienst", "Bijzonderheden", ""]
         );
 
         this.createHtmlTabDiv("duikinstructie", "Duikinstructie", false, "" +
