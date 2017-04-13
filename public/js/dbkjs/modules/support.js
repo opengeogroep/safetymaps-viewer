@@ -174,6 +174,9 @@ dbkjs.modules.support = {
                         var geoJSON = new OpenLayers.Format.GeoJSON();
                         data.geometry = JSON.parse(geoJSON.write(_obj.feature.geometry));
                         data.srid = dbkjs.options.projection.srid;
+                        if(_obj.options.hideUser) {
+                            data.name = 'Voertuigviewer';
+                        }
                         var url = (dbkjs.options.urls && dbkjs.options.urls.annotation ? dbkjs.options.urls.annotation
                                 : dbkjs.basePath + 'api/annotation/');
                         jQuery.ajax({
