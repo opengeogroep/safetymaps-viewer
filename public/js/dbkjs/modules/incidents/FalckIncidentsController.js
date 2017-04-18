@@ -532,7 +532,7 @@ FalckIncidentsController.prototype.selectIncidentDBK = function(incident) {
 //                                var aToevoeging = parts.length === 3 ? (parts[2] === '' ? null : parts[2])  : null;
                                 var matchHuisletter = huisletter === aHuisletter;
 //                                var matchToevoeging = toevoeging === aToevoeging;
-                                console.log("Matched DBK with nummer " + n + ", matchHuisletter (GMS=DBK:result): " + huisletter + "=" + aHuisletter + ":" + matchHuisletter + ",matchToevoeging (GMS=DBK:result): " + toevoeging + "=" + aToevoeging + ":" + matchToevoeging);
+                                console.log("Matched DBK with nummer " + n + ", matchHuisletter (GMS=DBK:result): " + huisletter + "=" + aHuisletter + ":" + matchHuisletter/* + ",matchToevoeging (GMS=DBK:result): " + toevoeging + "=" + aToevoeging + ":" + matchToevoeging*/);
                                 if(matchHuisletter/* && matchToevoeging*/) {
                                     dbk = f;
                                     return false;
