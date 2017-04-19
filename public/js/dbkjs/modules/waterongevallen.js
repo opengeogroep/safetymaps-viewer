@@ -114,7 +114,7 @@ dbkjs.modules.waterongevallen = {
         var html = $('<div class="table-responsive"></div>');
 
         var table = $('<table class="table table-hover"></table>');
-        table.append(Mustache.render('<tr><th>{{#t}}waterongevallen.' + e.feature.attributes.symboolcod + '{{/t}}</th><th>Informatie</th></tr>',  dbkjs.util.mustachei18n()));
+        table.append(Mustache.render('<tr><th style="width: 30%">{{#t}}waterongevallen.' + e.feature.attributes.symboolcod + '{{/t}}</th><th>Informatie</th></tr>',  dbkjs.util.mustachei18n()));
         var img = e.object.styleMap.styles.default.context.myicon(e.feature);
         table.append($(Mustache.render(
         '<tr>' +
@@ -342,8 +342,8 @@ dbkjs.modules.waterongevallen = {
         );
 
         this.createInfoTabDiv("risicogegevens", "Risicogegevens", false, data,
-            ["stroming", "soortwalka", "hoogte_wal", "diepte_wat", "diepte_max", "bodemgeste", "zicht", "soort_wate", "verkeer", "gemalen", "bijzondere", "bijzonde_5"],
-            ["Stroming", "Soort Walkant", "Hoogte Walkant", "Diepte water aan de kant", "Diepte maximaal", "Bodemgesteldheid", "Zicht", "Soort water", "Verkeer", "Gemalen", "Bijzondere gevaren", "" ]
+            ["stroming", "soortwalka", "hoogte_wal", "diepte_wat", "diepte_max", "bodemgeste", "zicht", "soort_wate", "waterkwali", "verkeer", "gemalen", "bijzondere", "bijzonde_5"],
+            ["Stroming", "Soort Walkant", "Hoogte Walkant", "Diepte water aan de kant", "Diepte maximaal", "Bodemgesteldheid", "Zicht", "Soort water", "Waterkwaliteit", "Verkeer", "Gemalen", "Bijzondere gevaren", "" ]
         );
 
         this.createInfoTabDiv("noodprocedure", "Noodprocedure", false, data,
