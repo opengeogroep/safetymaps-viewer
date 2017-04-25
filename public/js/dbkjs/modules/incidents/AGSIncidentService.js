@@ -653,7 +653,7 @@ AGSIncidentService.prototype.getClassificaties = function(incidenten) {
  * @returns {Promise} Resolved with array with karakteristieken when succesful
  *   or rejected on error
  */
-AGSIncidentService.prototype.getKarakteristiek = function(incidentId) {
+AGSIncidentService.prototype.getKarakteristiek = function(incidentId, archief) {
     var me = this;
     var d = $.Deferred();
 
@@ -661,7 +661,7 @@ AGSIncidentService.prototype.getKarakteristiek = function(incidentId) {
         return d.resolve([]);
     }
 
-    var table = "V_B_ACT_KAR_WAARDEN";
+    var table = archief ? "V_B_ARC_INZET_KAR" : "V_B_ACT_KAR_WAARDEN";
     me.doAGSAjax({
         url: me.tableUrls[table] + "/query",
         dataType: "json",
