@@ -46,7 +46,9 @@ dbkjs.modules.brandkranen = {
         $.ajax((dbkjs.options.serverUrlPrefix ? dbkjs.options.serverUrlPrefix : "") + "action/vrln", {
             method: "GET",
             data: {
-                bounds: "POLYGON ((205023 371652, 205023 378577, 212870 378577, 212870 371652, 205023 371652))"
+//                bounds: "POLYGON ((205023 371652, 205023 378577, 212870 378577, 212870 371652, 205023 371652))" // Venlo
+                bounds: "POLYGON ((197890 371652, 197890 378577, 205737 378577, 205737 371652, 197890 371652))" // Maasbree
+//                bounds: "POLYGON ((197890 371652, 197890 380003, 212320 380003, 212320 371652, 197890 371652))" // Venlo en Maasbree
             },
             dataType: "json"
         }).fail(function(jqXHR, textStatus, errorThrown) {
