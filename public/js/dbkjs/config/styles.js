@@ -473,6 +473,14 @@ dbkjs.config.styles = {
                         return "#ff00ff";
                     case "HEAT":
                         return "#ff0000";
+                    case "Diepte 15":
+                        return "#0000a0";
+                    case "Diepte 9 m":
+                        return "#0000de";
+                    case "Diepte 3 m":
+                        return "#0f80ff";
+                    case "Waterkant":
+                        return "black";
                     default:
                         return "#000000";
                 }
@@ -780,5 +788,45 @@ dbkjs.config.styles = {
                  }
              }
          })
+     }),
+     /**
+      *
+      * @param {type} soort
+      * @param {type} which either "fill" or "stroke"
+      * @returns {String}
+      */
+    getCustomPolygonColor: function(soort,which) {
+        var fill = which === "fill";
+        if(soort === ">15 meter") {
+            return fill ? "#0000a0" : "#8e92ff";
+        } else if(soort === "10-15 meter") {
+            return fill ? "#0000de" : "#667eff";
+        } else if(soort === "5-10 meter") {
+            return fill ? "#0f80ff" : "#7bbeff";
+        } else if(soort === "0-5 meter") {
+            return fill ? "#7ddafb" : "#97b9d4";
+        } else if(soort === "Eiland") {
+            return "green";
+        } else if(soort === "Ponton") {
+            return "black";
+        }
+        return "";
+    },
+    customPolygon: new OpenLayers.StyleMap({
+        'default': new OpenLayers.Style({
+            fillColor: "${fill}",
+           // fillOpacity: 0.2,
+            strokeColor: "${stroke}",
+            strokeWidth: 1
+        }, {
+            context: {
+                fill: function (feature) {
+                    return dbkjs.config.styles.getCustomPolygonColor(feature.attributes["Soort"], "fill");
+                },
+                stroke: function(feature) {
+                    return dbkjs.config.styles.getCustomPolygonColor(feature.attributes["Soort"], "stroke");
+                }
+            }
+        })
      })
 };

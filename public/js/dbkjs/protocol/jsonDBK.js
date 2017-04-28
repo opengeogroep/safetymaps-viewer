@@ -75,6 +75,9 @@ dbkjs.protocol.jsonDBK = {
         _obj.layerTekstobject = new OpenLayers.Layer.Vector("Tekst objecten", {
             styleMap: dbkjs.config.styles.tekstobject
         });
+        _obj.layerCustomPolygon = new OpenLayers.Layer.Vector("Custom polygon", {
+            styleMap: dbkjs.config.styles.customPolygon
+        });
         _obj.layers = [
             _obj.layerPandgeometrie,
             _obj.layerBrandcompartiment,
@@ -86,14 +89,16 @@ dbkjs.protocol.jsonDBK = {
             _obj.layerBrandweervoorziening,
             _obj.layerComm,
             _obj.layerGevaarlijkestof,
-            _obj.layerTekstobject
+            _obj.layerTekstobject,
+            _obj.layerCustomPolygon
         ];
         _obj.selectlayers = [
             _obj.layerBrandweervoorziening,
             _obj.layerComm,
             _obj.layerBrandcompartiment,
             _obj.layerGevaarlijkestof,
-            _obj.layerToegangterrein
+            _obj.layerToegangterrein,
+            _obj.layerCustomPolygon
         ];
         _obj.hoverlayers = [
             _obj.layerBrandweervoorziening,
@@ -237,6 +242,7 @@ dbkjs.protocol.jsonDBK = {
     constructInfoDiv: function(feature, objecttype) {
         var _obj = dbkjs.protocol.jsonDBK;
         _obj.constructAlgemeen(dbkjs.options.feature, objecttype);
+        _obj.constructCustomBijzonderheid(dbkjs.options.feature);
         _obj.constructContact(dbkjs.options.feature);
         _obj.constructOmsdetail(dbkjs.options.feature);
         _obj.constructBijzonderheid(dbkjs.options.feature);
@@ -286,7 +292,7 @@ dbkjs.protocol.jsonDBK = {
             _obj.constructToegangterrein(dbkjs.options.feature);
             _obj.constructBrandcompartiment(dbkjs.options.feature);
             _obj.constructTekstobject(dbkjs.options.feature);
-
+            _obj.constructCustomPolygon(dbkjs.options.feature);
 
             if (!noZoom && dbkjs.options.zoomToPandgeometrie) {
                 dbkjs.modules.feature.zoomToPandgeometrie();
@@ -496,6 +502,44 @@ dbkjs.protocol.jsonDBK = {
             _obj.panel_tabs.html('<li><a data-toggle="tab" href="#collapse_algemeen_' + DBKObject.identificatie + '">' + i18n.t('dbk.general') + '</a></li>');
         }
         _obj.panel_tabs.html();
+    },
+    constructCustomBijzonderheid: function(feature) {
+        var _obj = dbkjs.protocol.jsonDBK;
+
+        if(!feature.custom_bijzonderheid) {
+            return;
+        }
+        var tabs = {};
+        $.each(feature.custom_bijzonderheid, function(i, b) {
+            if(tabs[b["Tabblad"]]) {
+                tabs[b["Tabblad"]].push(b);
+            } else {
+                tabs[b["Tabblad"]] = [b];
+            }
+        });
+        console.log("tabs bijzonderheid", tabs);
+
+        var i = 0;
+        $.each(tabs, function(tab, fields) {
+            var id = 'collapse_custom_bijzonderheid' + (i++) + '_' + feature.identificatie;
+            var bijzonderheid_div = $('<div class="tab-pane" id="' + id + '"></div>');
+            var bijzonderheid_table_div = $('<div class="table-responsive"></div>');
+            var bijzonderheid_table = $('<table class="table table-hover"></table>');
+            $.each(fields, function (i, f) {
+                if(!dbkjs.util.isJsonNull(f["Tekst"])) {
+                    bijzonderheid_table.append(
+                            '<tr>' +
+                            '<td>' + f["Soort"] + '</td>' +
+                            '<td>' + f["Tekst"] + '</td>' +
+                            '</tr>'
+                            );
+                }
+            });
+            bijzonderheid_table_div.append(bijzonderheid_table);
+            bijzonderheid_div.append(bijzonderheid_table_div);
+            _obj.panel_group.append(bijzonderheid_div);
+            _obj.panel_tabs.append('<li><a data-toggle="tab" href="#' + id + '">' + tab + '</a></li>');
+        });
     },
     constructBrandweervoorziening: function (feature) {
         var _obj = dbkjs.protocol.jsonDBK;
@@ -1131,6 +1175,23 @@ dbkjs.protocol.jsonDBK = {
             });
             _obj.layerTekstobject.addFeatures(features);
             _obj.activateSelect(_obj.layerTekstobject);
+        }
+    },
+    constructCustomPolygon: function(feature) {
+        var _obj = dbkjs.protocol.jsonDBK;
+        if(feature.custom_polygon) {
+            var features = [];
+            $.each(feature.custom_polygon, function(i, custom_polygon) {
+                var myFeature = new OpenLayers.Feature.Vector(new OpenLayers.Format.GeoJSON().read(custom_polygon.geometry, "Geometry"));
+                $.each(custom_polygon, function(a, v) {
+                    if(custom_polygon.hasOwnProperty(a) && a !== "geometry") {
+                        myFeature.attributes[a] = v;
+                    }
+                });
+                features.push(myFeature);
+            });
+            _obj.layerCustomPolygon.addFeatures(features);
+            _obj.activateSelect(_obj.layerCustomPolygon);
         }
     },
     getObject: function (feature, activetab, noZoom) {
