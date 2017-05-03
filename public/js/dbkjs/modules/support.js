@@ -112,10 +112,11 @@ dbkjs.modules.support = {
                 laag_input.append('<label class="col-sm-2 control-label" for="subject">' + i18n.t('email.subject') + '</label>');
                 laag_input.append($('<div class="col-sm-8"></div>').append(select));
                 p.append(laag_input);
+                var placeholder = i18n.t("email.address.placeholder") === "email.address.placeholder" ? i18n.t("email.address") : i18n.t("email.address.placeholder");
                 var adres_input = $('<div class="form-group"><label class="col-sm-2 control-label" for="address">' +
                         i18n.t('email.address') +
                         '</label><div class="col-sm-8"><input id="address" name="address" type="text" class="form-control" placeholder="' +
-                        i18n.t('email.address') + '"></div></div>');
+                        placeholder + '"></div></div>');
                 p.append(adres_input);
                 var user_input = $('<div class="form-group"><label class="col-sm-2 control-label" for="name">' +
                         i18n.t('email.name') +
