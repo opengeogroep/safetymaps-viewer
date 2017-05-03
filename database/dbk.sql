@@ -437,6 +437,13 @@ SELECT t.identificatie,
         select "seq","soort","tekst" from dbk."Bijzonderheid" where siteid = d.identificatie order by soort asc, "seq" asc
       ) a 
     ) as bijzonderheid,
+            ( SELECT array_to_json(array_agg(row_to_json(b.*))) AS array_to_json
+                   FROM ( SELECT "AfwijkendeBinnendekking"."alternatieveCommInfrastructuur",
+                            "AfwijkendeBinnendekking".dekking,
+                            "AfwijkendeBinnendekking"."aanvullendeInformatie",
+                            st_asgeojson(st_transform("AfwijkendeBinnendekking".locatie,$2), 15, 2)::json AS geometry
+                           FROM dbk."AfwijkendeBinnendekking"
+                          WHERE "AfwijkendeBinnendekking".siteid = d.identificatie) b) AS afwijkendebinnendekking,    
     (
       select array_to_json(array_agg(row_to_json(b)))
       from (
@@ -643,7 +650,28 @@ SELECT t.identificatie,
                             "ToegangTerrein"."aanvullendeInformatie",
                             st_asgeojson(st_transform("ToegangTerrein".geometrie,$2), 15, 2)::json AS geometry
                            FROM dbk."ToegangTerrein"
-                          WHERE "ToegangTerrein".siteid = d.identificatie) b) AS toegangterrein
+                          WHERE "ToegangTerrein".siteid = d.identificatie) b) AS toegangterrein,
+                          
+/* wfs */	(select array_to_json(array_agg(row_to_json(b.*))) as array_to_json
+		from	(select "Soort","Omschrijving",st_asgeojson(st_transform(the_geom, 28992))::json AS geometry
+			from wfs."Custom_Polygon" where "DBK_ID" = d.identificatie
+			order by case "Soort"
+				when '>15 meter' then -3
+				when '10-15 meter' then -2
+				when '5-10 meter' then -1
+				when '0-5 meter' then 0
+				else gid end asc
+			) b) as custom_polygon,
+			
+/* wfs */	(select array_to_json(array_agg(row_to_json(b.*))) as array_to_json
+		from 	(select "Soort","Tekst","Tabblad","Seq"
+			from wfs."Bijzonderheid" where "DBK_ID" = d.identificatie
+			order by "Seq" asc
+			) b) as custom_bijzonderheid,
+
+/* wfs */	(select st_asgeojson(st_collect(st_transform("Gebied".the_geom, 28992)))::json 
+		from wfs."Gebied" where "DBK_ID" = $1 group by "DBK_ID") as gebied
+			
            FROM dbk."DBKObject_Feature" d WHERE d.identificatie = $1) t;
 '
 LANGUAGE SQL;

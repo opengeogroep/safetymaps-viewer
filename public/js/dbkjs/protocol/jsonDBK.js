@@ -287,7 +287,7 @@ dbkjs.protocol.jsonDBK = {
 
             // Construct additional geometries.
             _obj.constructPandGeometrie(dbkjs.options.feature);
-            _obj.constructGeometrie(dbkjs.options.feature);
+            _obj.constructGebied(dbkjs.options.feature);
             _obj.constructHulplijn(dbkjs.options.feature);
             _obj.constructToegangterrein(dbkjs.options.feature);
             _obj.constructBrandcompartiment(dbkjs.options.feature);
@@ -1018,15 +1018,20 @@ dbkjs.protocol.jsonDBK = {
             _obj.activateSelect(_obj.layerPandgeometrie);
         }
     },
-    constructGeometrie: function (feature) {
+    constructGebied: function (feature) {
         var _obj = dbkjs.protocol.jsonDBK;
-        if (feature.geometry) {
-            //gebied!
-            var features = [];
-            var myFeature = new OpenLayers.Feature.Vector(new OpenLayers.Format.GeoJSON().read(dbkjs.options.feature.geometry, "Geometry"));
-            myFeature.attributes = {"id": feature.identificatie, "type": "gebied"};
-            features.push(myFeature);
-            _obj.layerPandgeometrie.addFeatures(features);
+        var geom = null;
+
+        if(feature.geometry) { // DBKGebied
+            geom = feature.geometry;
+        } else if(feature.gebied) { // DBKObject met nieuw gebied property uit wfs.Gebied
+            geom = feature.gebied;
+        }
+
+        if(geom) {
+            var f = new OpenLayers.Feature.Vector(new OpenLayers.Format.GeoJSON().read(geom, "Geometry"));
+            f.attributes = {"id": feature.identificatie, "type": "gebied"};
+            _obj.layerPandgeometrie.addFeatures(f);
             _obj.activateSelect(_obj.layerPandgeometrie);
         }
     },
