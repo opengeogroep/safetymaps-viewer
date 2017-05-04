@@ -18,7 +18,7 @@
  *
  */
 
-/* global OpenLayers, moment */
+/* global OpenLayers, moment, i18n, Mustache */
 
 var dbkjs = dbkjs || {};
 window.dbkjs = dbkjs;
@@ -80,6 +80,7 @@ dbkjs.protocol.jsonDBK = {
         });
         _obj.layers = [
             _obj.layerPandgeometrie,
+            _obj.layerCustomPolygon,
             _obj.layerBrandcompartiment,
             _obj.layerBrandcompartimentLabels,
             _obj.layerHulplijn2,
@@ -89,8 +90,7 @@ dbkjs.protocol.jsonDBK = {
             _obj.layerBrandweervoorziening,
             _obj.layerComm,
             _obj.layerGevaarlijkestof,
-            _obj.layerTekstobject,
-            _obj.layerCustomPolygon
+            _obj.layerTekstobject
         ];
         _obj.selectlayers = [
             _obj.layerBrandweervoorziening,
@@ -101,6 +101,7 @@ dbkjs.protocol.jsonDBK = {
             _obj.layerCustomPolygon
         ];
         _obj.hoverlayers = [
+            _obj.layerCustomPolygon,
             _obj.layerBrandweervoorziening,
             _obj.layerComm,
             _obj.layerBrandcompartiment,
@@ -249,7 +250,11 @@ dbkjs.protocol.jsonDBK = {
         _obj.constructVerblijf(dbkjs.options.feature);
         _obj.constructMedia(dbkjs.options.feature);
         _obj.constructFloors(dbkjs.options.feature);
-        _obj.constructBrandweervoorziening(dbkjs.options.feature);
+        if(dbkjs.options.feature.brandweervoorziening2) {
+            _obj.constructBrandweervoorziening2(dbkjs.options.feature);
+        } else {
+            _obj.constructBrandweervoorziening(dbkjs.options.feature);
+        }
         _obj.constructAfwijkendebinnendekking(dbkjs.options.feature);
         _obj.constructGevaarlijkestof(dbkjs.options.feature);
     },
@@ -288,11 +293,11 @@ dbkjs.protocol.jsonDBK = {
             // Construct additional geometries.
             _obj.constructPandGeometrie(dbkjs.options.feature);
             _obj.constructGebied(dbkjs.options.feature);
+            _obj.constructCustomPolygon(dbkjs.options.feature);
             _obj.constructHulplijn(dbkjs.options.feature);
             _obj.constructToegangterrein(dbkjs.options.feature);
             _obj.constructBrandcompartiment(dbkjs.options.feature);
             _obj.constructTekstobject(dbkjs.options.feature);
-            _obj.constructCustomPolygon(dbkjs.options.feature);
 
             if (!noZoom && dbkjs.options.zoomToPandgeometrie) {
                 dbkjs.modules.feature.zoomToPandgeometrie();
@@ -589,6 +594,182 @@ dbkjs.protocol.jsonDBK = {
             _obj.panel_tabs.append('<li><a data-toggle="tab" href="#' + id + '">' + i18n.t('dbk.prevention') + '</a></li>');
 
         }
+    },
+    getBrandweervoorzieningInfo: function(code) {
+        var info = {};
+        searchDirs = ["nen1414", "eughs", "other", "wo", "imoov"];
+
+        info.iconBase = "images/i32";
+
+        $.each(searchDirs, function(i, dir) {
+            if(imagesBase64["images/" + dir + "/" + code + ".png"]) {
+                info.iconBase = "images/" + dir + "/" + code;
+                return false;
+            }
+        });
+
+        info.size = 12;
+        info.code = code;
+        info.name = code;
+
+        switch(code) {
+            case "Tb1001"      : info.name = "Brandweeringang"; break;
+            case "Tb1002"      : info.name = "Overige ingangen"; break;
+            case "Tb1003"      : info.name = "Sleutelkluis"; break;
+            case "Tb1004"      : info.name = "Brandweerpaneel"; break;
+            case "Tb1004a"     : info.name = "Brandmeldcentrale"; break;
+            case "Tb1005"      : info.name = "Nevenbrandweerpaneel"; break;
+            case "Tb1006"      : info.name = "Ontruimingspaneel"; break;
+            case "Tb1007"      : info.name = "Droge blusleiding"; break;
+            case "Tb1007a"     : info.name = "Afname Droge Buisleiding"; break;
+            case "Tb1007a_HD"  : info.name = "Afname Droge Buisleiding HD"; info.size = 14; break;
+            case "Tb1007_HD"   : info.name = "Droge Buisleiding HD"; info.size = 14; break;
+            case "Tb1008"      : info.name = "Opstelplaats eerste blusvoertuig"; info.size = 14; break;
+            case "Tb1009"      : info.name = "Opstelplaats overige blusvoertuigen"; info.size = 14; break;
+            case "Tb1010"      : info.name = "Opstelplaats Redvoertuig"; break;
+            case "Tb1012"      : info.name = "Opstelplaats Hulpverleningsvoertuig"; info.size = 16; break;
+
+            case "Tb1013": info.name = "Bootje"; info.size = 16; break;
+            case "Tb1014": info.name = "Opstelplaats WO"; info.size = 16; break;
+            case "Falck42": info.size = 18; info.name = "Tewaterlaatplaats boot"; break;
+            case "Falck43": info.size = 18; info.name = "Zwemplaats"; break;
+            case "Falck44": info.size = 18; info.name = "Gemaal/loosplaats"; break;
+            case "Falck45": info.size = 18; info.name = "Beweegbare brug"; break;
+            case "Falck46": info.size = 18; info.name = "Vaste brug"; break;
+
+            case "Tb2001": info.name = "Noodschakelaar neon"; break;
+            case "Tb2002": info.name = "Noodschakelaar CV"; break;
+            case "Tb2003": info.name = "Schakelaar elektriciteit"; break;
+            case "Tb2004": info.name = "Schakelaar luchtbehandeling"; break;
+            case "Tb2005": info.name = "Schakelaar rook-/warmteafvoer"; break;
+            case "Tb2021": info.name = "Afsluiter gas"; break;
+            case "Tb2022": info.name = "Afsluiter water"; break;
+            case "Tb2023": info.name = "Afsluiter sprinkler"; break;
+            case "Tb2026": info.name = "Afsluiter schuimvormend middel"; break;
+            case "Tb2041": info.name = "Activering blussysteem"; break;
+            case "Tb2042": info.name = "Schakelkast elektriciteit"; break;
+            case "Tb2043": info.name = "Noodstop"; break;
+
+            case "Tb4001"      : info.name = "Hydrant"; break;
+            case "Tb4001blau"  : info.name = "Hydrant (blauw)"; break;
+            case "Tb4002"      : info.name = "Ondergrondse brandkraan"; break;
+            case "Tb4002blau"  : info.name = "Ondergrondse brandkraan (blauw)"; break;
+            case "Tb4003"      : info.name = "Geboorde put"; break;
+            case "Tb4021"      : info.name = "Blussysteem AFFF"; break;
+            case "Tb4022"      : info.name = "Blussysteem schuim"; break;
+            case "Tb4023"      : info.name = "Blussysteem water"; break;
+            case "Tb4024"      : info.name = "Blussysteem kooldioxide"; break;
+            case "Tb4025"      : info.name = "Blussysteem Hi Fog"; break;
+
+            case "Tbk5001" : info.name = "Brandweerlift"; break;
+            case "Tbk7004" : info.name = "Lift"; break;
+            case "Tn06"     : info.name = "Verzamelplaats"; break;
+            case "Tw01"     : info.name = "Gevaar"; break;
+            case "Tw02"     : info.name = "Electrische Spanning"; break;
+            case "Tn06"     : info.name = "Verzamelplaats"; break;
+            case "CAI"      : info.name = "Aansluiting CAI"; break;
+
+            case "Falck11": info.size = 12; info.name = "Schacht of kanaal"; break;
+            case "Falck12": info.size = 18; info.name = "Rook Warmte Afvoerluiken"; break;
+            case "Falck13": info.size = 12; info.name = "Flitslicht"; break;
+            case "Falck14": info.size = 12; info.name = "Brandweervoorziening"; break;
+            case "Falck15": info.size = 18; info.name = "PGS 15 Kluis"; break;
+            case "Falck16": info.size = 16; info.name = "Trap standaard"; break;
+            case "Falck17": info.size = 16; info.name = "Trap wokkel"; break;
+            case "Falck18": info.size = 12; info.name = "???"; break;
+            case "Falck19": info.size = 12; info.name = "Bluswaterriool"; break;
+            case "Falck20": info.size = 12; info.name = "Openwater blauw"; break;
+            case "Falck21": info.size = 12; info.name = "Verplaatsbare Sleutelpaal"; break;
+            case "Falck22": info.size = 12; info.name = "Poller"; break;
+            case "Falck23": info.size = 12; info.name = "Berijdbaar"; break;
+            case "Falck24": info.size = 12; info.name = "Gasdetectiepaneel"; break;
+            case "Falck25": info.size = 12; info.name = "Afsluiter omloop"; break;
+            case "Falck26": info.size = 12; info.name = "Afsluiter Stadsverwarming"; break;
+            case "Falck27": info.size = 12; info.name = "Afsluiter divers"; break;
+            case "Falck28": info.size = 12; info.name = "Afsluiter LPG"; break;
+            case "Falck29": info.size = 12; info.name = "Brandbluspomp"; break;
+            case "Falck30": info.size = 12; info.name = "Waterkanon"; break;
+            case "Falck31": info.size = 12; info.name = "Blussysteem divers"; break;
+            case "Falck32": info.size = 12; info.name = "???"; break;
+            case "Falck33": info.size = 12; info.name = "Vulpunt"; break;
+            case "Falck34": info.size = 12; info.name = "Niet blussen met Water"; break;
+            case "Falck35": info.size = 12; info.name = "Trap rond"; break;
+            case "Falck36": info.size = 12; info.name = "???"; break;
+            case "Falck40": info.size = 12; info.name = "Brandweerinfokast"; break;
+            case "Falck41": info.size = 12; info.name = "Parkeerplaats"; break;
+
+
+            case "Openwater": info.name = "Open water"; break;
+            case "Sewer"    : info.name = "Toegang riool"; break;
+            case "Signal"   : info.name = "Signaal"; break;
+            case "Trap2"    : info.name = "Trap"; break;
+        }
+        return info;
+    },
+    constructBrandweervoorziening2: function (feature) {
+        var _obj = dbkjs.protocol.jsonDBK;
+        if(!feature.brandweervoorziening2) {
+            return;
+        }
+
+        var id = 'collapse_brandweervoorziening_' + feature.identificatie;
+        var bv_div = $('<div class="tab-pane" id="' + id + '"></div>');
+        var bv_table_div = $('<div class="table-responsive"></div>');
+        var bv_table = _obj.constructBrandweervoorzieningHeader2();
+
+        var features = [];
+        $.each(feature.brandweervoorziening2, function (idx, b) {
+            var info = _obj.getBrandweervoorzieningInfo(b.Code);
+
+            var icon = imagesBase64[info.iconBase + ".png"];
+            if(b.Omschrijving && b.Omschrijving.trim().length > 0) {
+                if(imagesBase64[info.iconBase + "_i.png"]) {
+                    icon = imagesBase64[info.iconBase + "_i.png"];
+                }
+            }
+            var f = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(b.X, b.Y), {
+                "icon": icon,
+                "iconBase": info.iconBase,
+                "code": info.code,
+                "name": info.name,
+                "information": b.Omschrijving || '',
+                "rotation": b.Rotatie,
+                "radius": info.size,
+                "fid": "brandweervoorziening_ft_" + idx
+            });
+
+            var row = _obj.constructBrandweervoorzieningRow2(f.attributes);
+            row.mouseover(function(){
+                dbkjs.selectControl.select(f);
+            });
+            row.mouseout(function(){
+                dbkjs.selectControl.unselect(f);
+            });
+            bv_table.append(row);
+            features.push(f);
+        });
+        _obj.layerBrandweervoorziening.addFeatures(features);
+        _obj.activateSelect(_obj.layerBrandweervoorziening);
+        bv_table_div.append(bv_table);
+        bv_div.append(bv_table_div);
+        _obj.panel_group.append(bv_div);
+        _obj.panel_tabs.append('<li><a data-toggle="tab" href="#' + id + '">' + i18n.t('dbk.prevention') + '</a></li>');
+    },
+    constructBrandweervoorzieningHeader2: function() {
+        var bv_table = $('<table class="table table-hover"></table>');
+            bv_table.append(Mustache.render(
+                '<tr><th>{{#t}}prevention.type{{/t}}</th>' +
+                '<th>{{#t}}prevention.name{{/t}}</th>' +
+                '<th>{{#t}}prevention.comment{{/t}}</th></tr>', dbkjs.util.mustachei18n()));
+        return bv_table;
+    },
+    constructBrandweervoorzieningRow2: function(brandweervoorziening) {
+        return $(Mustache.render(
+                '<tr>' +
+                    '<td><img class="thumb" src="{{iconBase}}.png" alt="{{code}}" title="{{code}}"></td>' +
+                    '<td>{{name}}</td>' +
+                    '<td>{{information}}</td>' +
+                '</tr>', brandweervoorziening));
     },
     constructAfwijkendebinnendekkingHeader: function() {
         var comm_table = $('<table id="commlist" class="table table-hover"></table>');
@@ -1196,8 +1377,27 @@ dbkjs.protocol.jsonDBK = {
                 features.push(myFeature);
             });
             _obj.layerCustomPolygon.addFeatures(features);
-            _obj.activateSelect(_obj.layerCustomPolygon);
+            _obj.layerCustomPolygon.events.register("featureselected", _obj, _obj.customPolygonSelected);
         }
+    },
+    customPolygonSelected: function(e) {
+        // Direct unselecteren en redraw voor juiste z-order en geen selected
+        // style
+        dbkjs.selectControl.unselect(e.feature);
+        this.layerCustomPolygon.redraw();
+
+        $('#vectorclickpanel_h').html('<span class="h4"><i class="fa fa-info-circle">&nbsp;Waterongevallen</span>');
+        var html = $('<div class="table-responsive"></div>');
+
+        var table = $('<table class="table table-hover"></table>');
+        table.append($(Mustache.render(
+        '<tr>' +
+            '<td style="width: 100px; background-color: ' + dbkjs.config.styles.getCustomPolygonColor(e.feature.attributes["Soort"]) + '"></td>' +
+            '<td>{{f.Soort}}</td>' +
+        '</tr>', { f: e.feature.attributes})));
+        html.append(table);
+        $('#vectorclickpanel_b').html('').append(html);
+        $('#vectorclickpanel').show();
     },
     getObject: function (feature, activetab, noZoom) {
         var _obj = dbkjs.protocol.jsonDBK;

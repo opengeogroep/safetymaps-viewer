@@ -103,6 +103,7 @@ dbkjs.editStyles = {
     })
 };
 
+// Geen gebruik imagesBase64, "imoov" dir wordt ook geignored in /images2base64.js
 dbkjs.modules.EditSymbols = [
     {
         "name": "REALITEIT -- RAMPEN / ONGEVALLEN",

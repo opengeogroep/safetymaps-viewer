@@ -651,7 +651,12 @@ SELECT t.identificatie,
                             st_asgeojson(st_transform("ToegangTerrein".geometrie,$2), 15, 2)::json AS geometry
                            FROM dbk."ToegangTerrein"
                           WHERE "ToegangTerrein".siteid = d.identificatie) b) AS toegangterrein,
-                          
+
+/* wfs */	(select array_to_json(array_agg(row_to_json(b.*))) as array_to_json
+		from	(select "Code","X","Y","Rotatie","Omschrijving","Picturename"
+			from wfs."Brandweervoorziening" where "DBK_ID" = d.identificatie
+			) b) as brandweervoorziening2,
+			                          
 /* wfs */	(select array_to_json(array_agg(row_to_json(b.*))) as array_to_json
 		from	(select "Soort","Omschrijving",st_asgeojson(st_transform(the_geom, 28992))::json AS geometry
 			from wfs."Custom_Polygon" where "DBK_ID" = d.identificatie

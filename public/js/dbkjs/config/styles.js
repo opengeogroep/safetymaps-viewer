@@ -442,6 +442,7 @@ dbkjs.config.styles = {
                 switch (feature.attributes.type) {
                     case "Cable":
                     case "Bbarrier":
+                    case "Depth9m":
                         return dbkjs.scaleStyleValue(10,null,null,true) + " " + dbkjs.scaleStyleValue(10,null,null,true);
                     case "Conduit":
                     case "Gate":
@@ -449,6 +450,7 @@ dbkjs.config.styles = {
                     case "Fence_O":
                         return dbkjs.scaleStyleValue(1,null,null,true) + " " + dbkjs.scaleStyleValue(20,null,null,true);
                     case "Broken":
+                    case "Depth3m":
                         return dbkjs.scaleStyleValue(3,null,null,true) + " " + dbkjs.scaleStyleValue(2,null,null,true);
                     default:
                         return "solid";
@@ -481,6 +483,16 @@ dbkjs.config.styles = {
                         return "#0f80ff";
                     case "Waterkant":
                         return "black";
+                    case "Depth3m":
+                        return "#527dfd";
+                    case "Depth9m":
+                        return "#2b00fd";
+                    case "Depth15m":
+                        return "#4723fd";
+                    case "WS_OK":
+                        return "#41ff1b";
+                    case "WS_NOK":
+                        return "#f7001d";
                     default:
                         return "#000000";
                 }
@@ -639,6 +651,11 @@ dbkjs.config.styles = {
         }, {
             context: {
                 myicon: function(feature) {
+                    // feature.brandweervoorziening2
+                    if(feature.attributes.icon) {
+                        return feature.attributes.icon;
+                    }
+
                     var icon = feature.attributes.type;
                     if(feature.attributes.information && feature.attributes.information !== "") {
                         if(typeof imagesBase64 !== 'undefined') {
@@ -789,44 +806,29 @@ dbkjs.config.styles = {
              }
          })
      }),
-     /**
-      *
-      * @param {type} soort
-      * @param {type} which either "fill" or "stroke"
-      * @returns {String}
-      */
-    getCustomPolygonColor: function(soort,which) {
-        var fill = which === "fill";
-        if(soort === ">15 meter") {
-            return fill ? "#0000a0" : "#8e92ff";
-        } else if(soort === "10-15 meter") {
-            return fill ? "#0000de" : "#667eff";
-        } else if(soort === "5-10 meter") {
-            return fill ? "#0f80ff" : "#7bbeff";
-        } else if(soort === "0-5 meter") {
-            return fill ? "#7ddafb" : "#97b9d4";
-        } else if(soort === "Eiland") {
-            return "green";
-        } else if(soort === "Ponton") {
-            return "black";
+    getCustomPolygonColor: function(soort) {
+        switch(soort) {
+            case ">15 meter": return "#f72e3a";
+            case "10-15 meter": return "#4729fd";
+            case "5-10 meter": return "#6c92fe";
+            case "0-5 meter": return "#c9ffff";
+            case "Eiland": return "#55ff40";
+            case "Ponton": return "#3c3b3c";
         }
         return "";
     },
     customPolygon: new OpenLayers.StyleMap({
         'default': new OpenLayers.Style({
             fillColor: "${fill}",
-           // fillOpacity: 0.2,
-            strokeColor: "${stroke}",
-            strokeWidth: 1
+            strokeWidth: 0
         }, {
             context: {
                 fill: function (feature) {
                     return dbkjs.config.styles.getCustomPolygonColor(feature.attributes["Soort"], "fill");
-                },
-                stroke: function(feature) {
-                    return dbkjs.config.styles.getCustomPolygonColor(feature.attributes["Soort"], "stroke");
                 }
             }
-        })
+        }),
+        'select': new OpenLayers.Style({}),
+        'temporary': new OpenLayers.Style({})
      })
 };

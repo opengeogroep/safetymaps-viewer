@@ -39,6 +39,8 @@ var imagesDir = path.resolve(__dirname, startDir + "/images");
 var ignore = ["brandweer-nederland_alpha_shaded.png", "brandweer-nederland_alpha_shaded-s.png", "doiv_logo_def.png", "missing.gif",
     "MNarrow.png", "overview_replacement.gif"];
 
+var ignoreDirs = ["imoov"];
+
 function convertRecursive(dir, id) {
 	var files = fs.readdirSync(dir);
 
@@ -46,12 +48,14 @@ function convertRecursive(dir, id) {
 		var fn = files[f];
 		var stats = fs.statSync(dir + '/' + fn);
 		if(stats.isFile()) {
-		    if(ignore.indexOf(fn) == -1) {
+		    if(ignore.indexOf(fn) === -1) {
                 console.log(id + fn);
     		    imagesBase64[id + fn] = "data:image/png;base64," + new Buffer(fs.readFileSync(dir + '/' + fn)).toString('base64');
     		}
 		} else if(stats.isDirectory()) {
-			convertRecursive(dir + '/' + fn , id + fn + '/');
+            if(ignoreDirs.indexOf(fn) === -1) {
+                convertRecursive(dir + '/' + fn , id + fn + '/');
+            }
 		}
 	}
 }

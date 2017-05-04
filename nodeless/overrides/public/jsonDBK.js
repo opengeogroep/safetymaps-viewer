@@ -5,7 +5,7 @@ dbkjs.protocol.jsonDBK.constructBrandweervoorziening = function(feature){
         var id = 'collapse_brandweervoorziening_' + feature.identificatie;
         var bv_div = $('<div class="tab-pane" id="' + id + '"></div>');
         var bv_table_div = $('<div class="table-responsive"></div>');
-        var bv_table = _obj.constructBrandweervoorzieningHeader();
+        var bv_table = _obj.constructBrandweervoorzieningHeader1();
         var features = [];
         $.each(feature.brandweervoorziening, function(idx, myGeometry){
             var myFeature = new OpenLayers.Feature.Vector(new OpenLayers.Format.GeoJSON().read(myGeometry.geometry, "Geometry"));
@@ -19,7 +19,7 @@ dbkjs.protocol.jsonDBK.constructBrandweervoorziening = function(feature){
                 "radius": myGeometry.radius,
                 "fid": "brandweervoorziening_ft_" + idx
             };
-            var myrow = _obj.constructBrandweervoorzieningRow(myFeature.attributes);
+            var myrow = _obj.constructBrandweervoorzieningRow1(myFeature.attributes);
             myrow.mouseover(function(){
                 dbkjs.selectControl.select(myFeature);
             });
@@ -39,7 +39,7 @@ dbkjs.protocol.jsonDBK.constructBrandweervoorziening = function(feature){
     }
 };
 
-dbkjs.protocol.jsonDBK.constructBrandweervoorzieningHeader = function() {
+dbkjs.protocol.jsonDBK.constructBrandweervoorzieningHeader1 = function() {
     var bv_table = $('<table class="table table-hover"></table>');
         bv_table.append(Mustache.render(
             '<tr><th>{{#t}}prevention.type{{/t}}</th>' +
@@ -48,7 +48,7 @@ dbkjs.protocol.jsonDBK.constructBrandweervoorzieningHeader = function() {
     return bv_table;
 };
 
-dbkjs.protocol.jsonDBK.constructBrandweervoorzieningRow = function(brandweervoorziening) {
+dbkjs.protocol.jsonDBK.constructBrandweervoorzieningRow1 = function(brandweervoorziening) {
     var img = "images/" + brandweervoorziening.namespace.toLowerCase() + '/' +  brandweervoorziening.type + '.png';
     img = typeof imagesBase64 === 'undefined'  ? dbkjs.basePath + img : imagesBase64[img];
     return $(Mustache.render(
@@ -136,7 +136,7 @@ dbkjs.protocol.jsonDBK.getfeatureinfo = function(e){
         return;
     }
     $('#vectorclickpanel_h').html('<span class="h4"><i class="fa fa-info-circle">&nbsp;' + e.feature.layer.name + '</span>');
-    if(e.feature.layer.name === 'Gevaarlijke stoffen' || e.feature.layer.name === 'Brandweervoorziening' || e.feature.layer.name === 'Comm') {
+    if(e.feature.layer.name === 'Gevaarlijke stoffen' || e.feature.layer.name === 'Brandweervoorziening' || e.feature.layer.name === 'Comm' || e.feature.layer.name === 'Custom polygon') {
         var html = $('<div class="table-responsive"></div>'),
             table = '';
         if(e.feature.layer.name === 'Gevaarlijke stoffen') {
@@ -145,12 +145,20 @@ dbkjs.protocol.jsonDBK.getfeatureinfo = function(e){
             html.append(table);
         };
         if(e.feature.layer.name === 'Brandweervoorziening') {
-            table = dbkjs.protocol.jsonDBK.constructBrandweervoorzieningHeader();
-            table.append(dbkjs.protocol.jsonDBK.constructBrandweervoorzieningRow(e.feature.attributes));
+            if(dbkjs.options.feature.brandweervoorziening2) {
+                table = dbkjs.protocol.jsonDBK.constructBrandweervoorzieningHeader2();
+                table.append(dbkjs.protocol.jsonDBK.constructBrandweervoorzieningRow2(e.feature.attributes));
+            } else {
+                table = dbkjs.protocol.jsonDBK.constructBrandweervoorzieningHeader1();
+                table.append(dbkjs.protocol.jsonDBK.constructBrandweervoorzieningRow1(e.feature.attributes));
+            }
         };
         if(e.feature.layer.name === 'Comm') {
             table = dbkjs.protocol.jsonDBK.constructAfwijkendebinnendekkingHeader();
             table.append(dbkjs.protocol.jsonDBK.constructAfwijkendebinnendekkingRow(e.feature.attributes));
+        }
+        if(e.feature.layer.name === 'Custom polygon') {
+            console.log("Custom polygon feature info", e.feature);
         }
         html.append(table);
         $('#vectorclickpanel_b').html('').append(html);

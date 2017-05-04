@@ -178,7 +178,7 @@ dbkjs.modules.brandkranen = {
                             if(me.streng && me.streng.attributes.streng_id === feature.attributes.streng_id) {
                                 gray = "_g";
                             };
-                            var img = feature.attributes.soort === "Bovengronds" ? "Tb4.001" : "Tb4.002";
+                            var img = feature.attributes.soort === "Bovengronds" ? "Tb4001" : "Tb4002";
                             return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + "images/nen1414/" + img + gray + ".png" : imagesBase64["images/nen1414/" + img + gray + ".png"];
                         },
                         label: function(feature) {
@@ -193,7 +193,7 @@ dbkjs.modules.brandkranen = {
                 'select': new OpenLayers.Style({pointRadius: 20, externalGraphic: "${myicon}"}, {
                     context: {
                         myicon: function(feature) {
-                            var img = feature.attributes.soort === "Bovengronds" ? "Tb4.001" : "Tb4.002";
+                            var img = feature.attributes.soort === "Bovengronds" ? "Tb4001" : "Tb4002";
                             return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + "images/nen1414/" + img + "_s.png" : imagesBase64["images/nen1414/" + img + "_s.png"];
                         }
                     }
