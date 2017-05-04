@@ -669,6 +669,7 @@ dbkjs.protocol.jsonDBK = {
             case "Tn06"     : info.name = "Verzamelplaats"; break;
             case "CAI"      : info.name = "Aansluiting CAI"; break;
 
+            case "Falck1" : info.size = 12; info.name = "Trap"; break;
             case "Falck11": info.size = 12; info.name = "Schacht of kanaal"; break;
             case "Falck12": info.size = 18; info.name = "Rook Warmte Afvoerluiken"; break;
             case "Falck13": info.size = 12; info.name = "Flitslicht"; break;
@@ -702,7 +703,6 @@ dbkjs.protocol.jsonDBK = {
             case "Openwater": info.name = "Open water"; break;
             case "Sewer"    : info.name = "Toegang riool"; break;
             case "Signal"   : info.name = "Signaal"; break;
-            case "Trap2"    : info.name = "Trap"; break;
         }
         return info;
     },
