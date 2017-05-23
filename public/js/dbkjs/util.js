@@ -251,6 +251,7 @@ dbkjs.Permalink =
  * http://acuriousanimal.com/blog/2013/02/08/animatedcluster-pan-related-bug-fixed/
  */
 OpenLayers.Strategy.Cluster.prototype.cluster = function(event) {
+    var gf;
     if ((!event || event.zoomChanged || (event.type === "moveend" && !event.zoomChanged)) && this.features) {
         this.resolution = this.layer.map.getResolution();
         var clusters = [];
@@ -261,9 +262,40 @@ OpenLayers.Strategy.Cluster.prototype.cluster = function(event) {
         }
         for (var i = 0; i < this.features.length; ++i) {
             feature = this.features[i];
+            if(feature.originalGeometry) {
+                feature.geometry = feature.originalGeometry;
+                delete feature.originalGeometry;
+            }
             if(feature.geometry) {
                 if(!screenBounds.intersectsBounds(feature.geometry.getBounds())) {
-                    continue;
+
+                    if(feature.attributes.selectiekader && screenBounds.intersectsBounds(feature.attributes.selectiekader.getBounds())) {
+                        console.log("feature point outside screen but selectiekader inside", feature);
+
+                        if(!gf) gf = new jsts.geom.GeometryFactory();
+
+                        var buf = 50 * dbkjs.map.getResolution(); 
+                        var smallerScreenBounds = gf.createLinearRing([
+                            new jsts.geom.Coordinate(screenBounds.left + buf, screenBounds.bottom + buf),
+                            new jsts.geom.Coordinate(screenBounds.left + buf, screenBounds.top - buf),
+                            new jsts.geom.Coordinate(screenBounds.right - buf, screenBounds.top - buf),
+                            new jsts.geom.Coordinate(screenBounds.right - buf, screenBounds.bottom + buf),
+                            new jsts.geom.Coordinate(screenBounds.left + buf, screenBounds.bottom + buf)
+                        ]);
+                        var line = gf.createLineString([
+                            new jsts.geom.Coordinate(dbkjs.map.getCenter().lon, dbkjs.map.getCenter().lat),
+                            new jsts.geom.Coordinate(feature.geometry.x, feature.geometry.y)
+                        ]);
+                        var newLocation = line.intersection(smallerScreenBounds);
+                        var w = new jsts.io.WKTWriter();
+                        console.log("smallerScreenBounds", w.write(smallerScreenBounds), "line", w.write(line), "newLocation",w.write(newLocation), newLocation);
+
+                        feature.originalGeometry = feature.geometry;
+                        feature.geometry = new OpenLayers.Geometry.Point(newLocation.getX(), newLocation.getY());
+
+                    } else {
+                        continue;
+                    }
                 }
                 clustered = false;
                 for (var j = clusters.length-1; j >= 0; --j) {

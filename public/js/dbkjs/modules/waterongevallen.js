@@ -72,6 +72,10 @@ dbkjs.modules.waterongevallen = {
                         label += ")";
                     }
                     feature.attributes.label = label;
+
+                    if(feature.attributes.selectiekader) {
+                        feature.attributes.selectiekader = new OpenLayers.Format.GeoJSON().read(feature.attributes.selectiekader, "Geometry");
+                    }
                 });
                 console.log("Aantal waterongevallenkaarten: " + me.features.length);
 
