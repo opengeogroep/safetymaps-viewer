@@ -195,6 +195,27 @@ MDTController.prototype.newIncident = function() {
             }
         });
 
+        // Zoek naar WO DBK's op basis van selectiepolygoon
+        if(dbk === null) {
+            var x = $(this.xml).find("IncidentLocatie XYCoordinaten XCoordinaat").text();
+            var y = $(this.xml).find("IncidentLocatie XYCoordinaten YCoordinaat").text();
+            var point = new OpenLayers.Geometry.Point(x, y);
+
+            $.each(dbkjs.modules.feature.features, function(index, f) {
+                if(f.attributes.selectiekader) {
+                    $.each(f.attributes.selectiekader.components, function(j, c) {
+                        console.log("checking " + f.attributes.label + " contains: " + c.toString() + ", " + point);
+                        if(c.containsPoint(point)) {
+                            console.log("Incident XY inside feature selectiekader ", f);
+                            dbk = f;
+                            return false;
+                        }
+                    });
+                }
+                return dbk === null;
+            });
+        }
+
         this.selectedDbkFeature = dbk;
 
         if(dbk) {
