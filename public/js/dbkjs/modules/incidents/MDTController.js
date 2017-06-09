@@ -53,7 +53,7 @@ function MDTController(incidents) {
     me.xml = null;
 
     $('.dbk-title').on('click', function() {
-        if(me.selectedDbkFeature) {
+        if(me.selectedDbkFeature && dbkjs.options.feature) { // geen dbkjs.options.feature bij geselecteerde WO
             if(dbkjs.options.feature.identificatie !== me.selectedDbkFeature.attributes.identificatie) {
                 dbkjs.modules.feature.handleDbkOmsSearch(me.selectedDbkFeature);
             } else {
@@ -196,6 +196,8 @@ MDTController.prototype.newIncident = function() {
         });
 
         // Zoek naar WO DBK's op basis van selectiepolygoon
+        var selectieKaderMatches = [];
+
         if(dbk === null) {
             var x = $(this.xml).find("IncidentLocatie XYCoordinaten XCoordinaat").text();
             var y = $(this.xml).find("IncidentLocatie XYCoordinaten YCoordinaat").text();
@@ -204,16 +206,20 @@ MDTController.prototype.newIncident = function() {
             $.each(dbkjs.modules.feature.features, function(index, f) {
                 if(f.attributes.selectiekader) {
                     $.each(f.attributes.selectiekader.components, function(j, c) {
-                        console.log("checking " + f.attributes.label + " contains: " + c.toString() + ", " + point);
+                        //console.log("checking " + f.attributes.label + " contains: " + c.toString() + ", " + point);
                         if(c.containsPoint(point)) {
                             console.log("Incident XY inside feature selectiekader ", f);
-                            dbk = f;
-                            return false;
+                            selectieKaderMatches.push(f);
                         }
                     });
                 }
-                return dbk === null;
             });
+        }
+        if(selectieKaderMatches.length === 1) {
+            dbk = selectieKaderMatches[0];
+            console.log("Selecting single selectiekader match", dbk);
+        } else if(selectieKaderMatches.length > 1) {
+            console.log("Multiple selectiekader matches", selectieKaderMatches);
         }
 
         this.selectedDbkFeature = dbk;
