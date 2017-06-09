@@ -80,6 +80,7 @@ dbkjs.modules.brandkranen = {
         var table = $('<table class="table table-hover"></table>');
         var img = e.object.styleMap.styles.default.context.myicon(e.feature);
         var cap = a.capaciteit ? a.capaciteit.toLocaleString("nl", { useGrouping: true}) : "";
+        var nummer = a.nummer ? a.nummer : "";
         var strengd = "";
         var currentStreng = null;
         if(a.streng_id) {
@@ -96,9 +97,10 @@ dbkjs.modules.brandkranen = {
         table.append($(Mustache.render(
         '<tr>' +
             '<td><img class="thumb" src="{{img}}" alt="{{f.symboolcod}}" title="{{f.symboolcod}}"></td>' +
-            '<td>Capaciteit: {{capaciteit}}</td>' +
-            '<td>{{f.streng_id}}{{streng_d}}</td>' +
-        '</tr>', {img: img, f: e.feature.attributes, capaciteit: cap, streng_d: strengd})));
+            '<td>Capaciteit: {{capaciteit}} m<sup>3</sup>/uur</td>' +
+            '<td>Nummer:{{nummer}}</td>' +
+            
+        '</tr>', {img: img, f: e.feature.attributes, capaciteit: cap, nummer: nummer})));
         if(currentStreng) {
             var andere = [];
             $.each(me.brandkranen.features, function(i, brandkraan) {
