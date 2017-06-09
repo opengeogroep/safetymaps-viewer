@@ -274,7 +274,7 @@ OpenLayers.Strategy.Cluster.prototype.cluster = function(event) {
 
                         if(!gf) gf = new jsts.geom.GeometryFactory();
 
-                        var buf = 50 * dbkjs.map.getResolution(); 
+                        var buf = 50 * dbkjs.map.getResolution();
                         var smallerScreenBounds = gf.createLinearRing([
                             new jsts.geom.Coordinate(screenBounds.left + buf, screenBounds.bottom + buf),
                             new jsts.geom.Coordinate(screenBounds.left + buf, screenBounds.top - buf),
@@ -298,12 +298,22 @@ OpenLayers.Strategy.Cluster.prototype.cluster = function(event) {
                     }
                 }
                 clustered = false;
-                for (var j = clusters.length-1; j >= 0; --j) {
-                    cluster = clusters[j];
-                    if(this.shouldCluster(cluster, feature)) {
-                        this.addToCluster(cluster, feature);
-                        clustered = true;
-                        break;
+
+                function dontCluster(feature) {
+                    return dbkjs.map.getScale() < 6275 && feature.attributes.typeFeature == "WO";
+                }
+                if(!dontCluster(feature)) {
+                    for (var j = clusters.length-1; j >= 0; --j) {
+                        cluster = clusters[j];
+                        if(cluster.cluster.length === 1 && dontCluster(cluster.cluster[0])) {
+                            // Don't cluster WO features
+                            continue;
+                        }
+                        if(this.shouldCluster(cluster, feature)) {
+                            this.addToCluster(cluster, feature);
+                            clustered = true;
+                            break;
+                        }
                     }
                 }
                 if(!clustered) {
