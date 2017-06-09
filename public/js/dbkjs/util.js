@@ -451,6 +451,31 @@ OpenLayers.Renderer.SVG.prototype.drawText = function(featureId, style, location
         this.textRoot.appendChild(label);
     }
 };
+/**
+ * Override to allow the selectfeature to differentiate the multiple select functionality between layers.
+ * There is an array in the selectcontrol: multiselectlayers, which contain layer which should allow multiselection.
+ * @returns {Boolean}
+ */
+OpenLayers.Control.SelectFeature.prototype.multipleSelect = function() {
+    // check from upstream
+    if( this.multiple || (this.handlers.feature.evt && this.handlers.feature.evt[this.multipleKey])){
+        return true;
+    }else{
+        // create an quick opt out.
+        if(!this.multiselectlayers || this.multiselectlayers.length === 0){
+            return false;
+        }else{
+            // Retrieve feature from current event, and take the layer from that. Check the configured multiselectlayers against that.
+            var currentLayer = this.handlers.feature.feature.layer;
+            for(var i = 0 ; i < this.multiselectlayers.length; i++){
+                if(currentLayer.id === this.multiselectlayers[i].id){
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+};
 
 dbkjs.util = {
     layersLoading: [],

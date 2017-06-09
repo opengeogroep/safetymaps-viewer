@@ -26,9 +26,10 @@ dbkjs.modules.brandkranen = {
     options: null,
     brandkranen: null,
     leidingen: null,
+    strengen:null,
     register: function() {
         var me = this;
-
+        me.strengen = [];
         this.options = $.extend({
             // add default options here
         }, this.options);
@@ -80,11 +81,12 @@ dbkjs.modules.brandkranen = {
         var img = e.object.styleMap.styles.default.context.myicon(e.feature);
         var cap = a.capaciteit ? a.capaciteit.toLocaleString("nl", { useGrouping: true}) : "";
         var strengd = "";
-        me.streng = null;
+        var currentStreng = null;
         if(a.streng_id) {
             $.each(me.leidingen.features, function(i, leiding) {
                 if(leiding.attributes.streng_id === a.streng_id) {
-                    me.streng = leiding;
+                    me.strengen.push(leiding);
+                    currentStreng = leiding;
                     strengd = ", nominale druk: " + leiding.attributes.nominale_d.toLocaleString("nl", { useGrouping: true});
                     return false;
                 }
@@ -97,10 +99,10 @@ dbkjs.modules.brandkranen = {
             '<td>Capaciteit: {{capaciteit}}</td>' +
             '<td>{{f.streng_id}}{{streng_d}}</td>' +
         '</tr>', {img: img, f: e.feature.attributes, capaciteit: cap, streng_d: strengd})));
-        if(me.streng) {
+        if(currentStreng) {
             var andere = [];
             $.each(me.brandkranen.features, function(i, brandkraan) {
-                if(brandkraan !== e.feature && brandkraan.attributes.streng_id === me.streng.attributes.streng_id) {
+                if(brandkraan !== e.feature && brandkraan.attributes.streng_id === currentStreng.attributes.streng_id) {
                     andere.push(brandkraan);
                 }
             });
@@ -113,14 +115,22 @@ dbkjs.modules.brandkranen = {
             }
         }
         var andere = [];
-        console.log("streng", me.streng, "andere", andere);
+        console.log("streng", me.strengen, "andere", andere);
         html.append(table);
         $('#vectorclickpanel_b').html('').append(html);
         $('#vectorclickpanel').show();
     },
     brandkraanUnselected: function(e) {
         $('#vectorclickpanel').hide();
-        this.streng = null;
+        var feature = e.feature;
+        var me = this;
+        var newStrengen = [];
+        $.each(me.strengen, function (i, streng) {
+            if (streng.attributes.streng_id !== feature.attributes.streng_id) {
+                newStrengen.push(streng);
+            }
+        });
+        this.strengen = newStrengen;
         this.brandkranen.redraw();
     },
     init: function() {
@@ -175,9 +185,12 @@ dbkjs.modules.brandkranen = {
                     context: {
                         myicon: function(feature) {
                             var gray = "";
-                            if(me.streng && me.streng.attributes.streng_id === feature.attributes.streng_id) {
-                                gray = "_g";
-                            };
+                            $.each(me.strengen, function (i, streng) {
+                                if (streng && streng.attributes.streng_id === feature.attributes.streng_id) {
+                                    gray = "_g";
+                                    return false;
+                                }
+                            });
                             var img = feature.attributes.soort === "Bovengronds" ? "Tb4001" : "Tb4002";
                             return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + "images/nen1414/" + img + gray + ".png" : imagesBase64["images/nen1414/" + img + gray + ".png"];
                         },
@@ -209,6 +222,10 @@ dbkjs.modules.brandkranen = {
         dbkjs.hoverControl.activate();
         dbkjs.selectControl.deactivate();
         dbkjs.selectControl.layers.push(this.brandkranen);
+        if(!dbkjs.selectControl.multiselectlayers){
+            dbkjs.selectControl.multiselectlayers = [];
+        }
+        dbkjs.selectControl.multiselectlayers.push(this.brandkranen);
         dbkjs.selectControl.activate();
     }
 };
