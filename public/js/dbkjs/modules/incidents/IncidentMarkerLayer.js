@@ -29,34 +29,6 @@ function IncidentMarkerLayer() {
 
     this.size = new OpenLayers.Size(24,26);
     this.offset = new OpenLayers.Pixel(-(this.size.w/2), -this.size.h);
-
-    this.popups = [];
-
-    this.showHover = false; // window.localStorage.getItem("IncidentMarkerLayer.showHover");
-//    this.showHover = this.showHover === "true" || this.showHover === null; // Default value checked
-//    $("#baselayerpanel_b").append('<hr/><label><input type="checkbox" ' + (this.showHover ? 'checked' : '') + ' onclick="dbkjs.modules.incidents.controller.markerLayer.setShowHover(event.target.checked)">Toon informatie over incident rechtsonderin het scherm bij muis over</label>');
-
-    this.showPopups = false;// window.localStorage.getItem("IncidentMarkerLayer.showPopups") === "true";
-    //$("#baselayerpanel_b").append('<hr/><label><input type="checkbox" ' + (this.showPopups ? 'checked' : '') + ' onclick="dbkjs.modules.incidents.controller.markerLayer.setShowPopups(event.target.checked)">Toon popups bij incidenten</label>');
-
-};
-
-IncidentMarkerLayer.prototype.setShowHover = function(showHover) {
-    this.showHover = showHover;
-    window.localStorage.setItem("IncidentMarkerLayer.showHover", showHover);
-};
-
-IncidentMarkerLayer.prototype.setShowPopups = function(showPopups) {
-    var wasShown = this.showPopups;
-    $.each(this.popups, function(i, p) {
-        if(wasShown) {
-            dbkjs.map.removePopup(p);
-        } else {
-            dbkjs.map.addPopup(p);
-        }
-    });
-    this.showPopups = showPopups;
-    window.localStorage.setItem("IncidentMarkerLayer.showPopups", showPopups);
 };
 
 IncidentMarkerLayer.prototype.addIncident = function(incident, archief, singleMarker) {
@@ -105,76 +77,9 @@ IncidentMarkerLayer.prototype.addIncident = function(incident, archief, singleMa
     var handler = function() { me.markerClick(marker, incident, archief); };
     marker.events.register("click", marker, handler);
     marker.events.register("touchstart", marker, handler);
-    marker.events.register("mouseover", marker, function() {
-        me.showMarkerHover(marker, incident);
-    });
-    marker.events.register("mouseout", marker, function() {
-        me.hideMarkerHover(marker, incident);
-    });
     this.layer.addMarker(marker);
 
-    if(incident.PLAATS_NAAM) {
-        var classificatie = incident.classificaties;
-        if(classificatie && classificatie.indexOf(",") !== -1) {
-            classificatie = classificatie.split(",")[0];
-        }
-        var popup = new OpenLayers.Popup.FramedCloud(null, pos, null, "P" + incident.PRIORITEIT_INCIDENT_BRANDWEER + " " + dbkjs.util.htmlEncode(classificatie) + ", " +
-                dbkjs.util.htmlEncode(IncidentDetailsWindow.prototype.getIncidentAdres(incident, false)) +
-                " " + dbkjs.util.htmlEncode(incident.PLAATS_NAAM), null, false, null);
-        popup.panMapIfOutOfView = false;
-        this.popups.push(popup);
-
-        if(this.showPopups) {
-            dbkjs.map.addPopup(popup);
-        }
-
-        $(dbkjs.modules.incidents.controller.incidentDetailsWindow).on("show", function() {
-            me.hideMarkerHover();
-        });
-    }
-
     return marker;
-};
-
-IncidentMarkerLayer.prototype.showMarkerHover = function(marker, incident) {
-    var me = this;
-
-    if(dbkjs.modules.incidents.controller.incidentDetailsWindow.visible || !me.showHover) {
-        return;
-    }
-
-    var title = "<i class='fa fa-bell'/> <span style='font-weight: bold; color: " + IncidentDetailsWindow.prototype.getPrioriteitColor(incident.PRIORITEIT_INCIDENT_BRANDWEER) + "'>P " + incident.PRIORITEIT_INCIDENT_BRANDWEER + "</span> " + dbkjs.util.htmlEncode(incident.classificaties) + "<br>" +
-            dbkjs.util.htmlEncode(IncidentDetailsWindow.prototype.getIncidentAdres(incident, false)) +
-            " " + dbkjs.util.htmlEncode(incident.PLAATS_NAAM);
-
-    var displayEenheden = [];
-    var extraCount = 0;
-    $.each(incident.inzetEenheden, function(i, inzet) {
-        if(!inzet.DTG_EIND_ACTIE && inzet.T_IND_DISC_EENHEID === "B") {
-            var eenheid = (inzet.CODE_VOERTUIGSOORT ? inzet.CODE_VOERTUIGSOORT : "") + " " + inzet.ROEPNAAM_EENHEID;
-
-            if(displayEenheden.length === 4) {
-                extraCount++;
-            } else {
-                displayEenheden.push(eenheid);
-            }
-        }
-    });
-    if(displayEenheden.length > 0) {
-        title += "<br>" + displayEenheden.join(" ");
-        if(extraCount > 0) {
-            title += " <b>+" + extraCount + "</b>";
-        }
-    }
-
-    $('.dbk-title')
-        .html(title)
-        .css('visibility', 'visible')
-        .css("line-height", "inherit");
-};
-
-IncidentMarkerLayer.prototype.hideMarkerHover = function() {
-    $(".dbk-title").css('visibility', 'hidden');
 };
 
 IncidentMarkerLayer.prototype.setZIndexFix = function() {
@@ -187,10 +92,6 @@ IncidentMarkerLayer.prototype.removeMarker = function(marker) {
 
 IncidentMarkerLayer.prototype.clear = function() {
     this.layer.clearMarkers();
-    $.each(this.popups, function(i, p) {
-        dbkjs.map.removePopup(p);
-    });
-    this.popups = [];
 };
 
 IncidentMarkerLayer.prototype.markerClick = function(marker, incident, archief) {

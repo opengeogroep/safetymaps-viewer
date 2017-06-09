@@ -108,9 +108,10 @@ IncidentVectorLayer.prototype.addIncident = function(incident, archief, singleMa
 
     var classificatie = incident.classificaties;
     if(classificatie && classificatie.indexOf(",") !== -1) {
-        classificatie = classificatie.split(",")[0];
+        var classificaties = classificatie.split(",");
+        classificatie = classificaties[0] + ", " + classificaties[1];
     }
-    var label = "P" + incident.PRIORITEIT_INCIDENT_BRANDWEER + " " + dbkjs.util.htmlEncode(classificatie) + " " + incident.locatie + " " + (incident.PLAATS_NAAM_NEN || incident.PLAATS_NAAM);
+    var label = "P" + incident.PRIORITEIT_INCIDENT_BRANDWEER + " " + dbkjs.util.htmlEncode(classificatie) + " – " + incident.locatie + " " + (incident.PLAATS_NAAM_NEN || incident.PLAATS_NAAM);
     var feature = new OpenLayers.Feature.Vector(
             new OpenLayers.Geometry.Point(x, y),
             {
