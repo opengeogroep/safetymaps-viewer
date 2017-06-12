@@ -37,6 +37,7 @@ module.exports = function (grunt) {
                                     'proj4js-compressed.js',
                                     'OpenLayers-2.13.1/OpenLayers.js',
                                     'moment/moment.min.js',
+                                    'rtree.min.js',
                                     'moment/lang/nl.js'
                                 ],
                                 dest: 'build/js/libs',
