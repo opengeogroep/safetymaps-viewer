@@ -24,6 +24,7 @@ dbkjs.modules = dbkjs.modules || {};
 dbkjs.modules.brandkranen = {
     id: "dbk.module.brandkranen",
     options: null,
+    rt:null,
     brandkranen: null,
     leidingen: null,
     strengen:null,
@@ -33,7 +34,6 @@ dbkjs.modules.brandkranen = {
         this.options = $.extend({
             // add default options here
         }, this.options);
-
         this.init();
 
         // wait to load brandkranen until after dbk features loaded
@@ -48,7 +48,7 @@ dbkjs.modules.brandkranen = {
             method: "GET",
             data: {
 //                bounds: "POLYGON ((205023 371652, 205023 378577, 212870 378577, 212870 371652, 205023 371652))" // Venlo
-                bounds: "POLYGON ((197890 371652, 197890 378577, 205737 378577, 205737 371652, 197890 371652))" // Maasbree
+       //         bounds: "POLYGON ((197890 371652, 197890 378577, 205737 378577, 205737 371652, 197890 371652))" // Maasbree
 //                bounds: "POLYGON ((197890 371652, 197890 380003, 212320 380003, 212320 371652, 197890 371652))" // Venlo en Maasbree
             },
             dataType: "json"
@@ -61,12 +61,11 @@ dbkjs.modules.brandkranen = {
                 dbkjs.gui.showError("Fout bij inladen brandkranen: " + data.error);
                 return;
             }
-            var features = new OpenLayers.Format.GeoJSON().read(data.brandkranen_wml);
-            console.log("Aantal brandkranen: " + features.length);
-            me.brandkranen.addFeatures(features);
-            var features = new OpenLayers.Format.GeoJSON().read(data.leidingen_wml);
-            console.log("Aantal leidingen: " + features.length);
-            me.leidingen.addFeatures(features);
+            var features = data.brandkranen_wml;
+           //var features = new OpenLayers.Format.GeoJSON().read(data.leidingen_wml);
+            me.rt = RTree();
+            dbkjs.map.events.register ("moveend",me, me.update);
+            me.initTree(features);
         });
     },
     brandkraanSelected: function(e) {
@@ -168,7 +167,7 @@ dbkjs.modules.brandkranen = {
             rendererOptions: {
             },
             options: {
-                minScale: 5000
+                minScale: 3000
             },
             styleMap: new OpenLayers.StyleMap({
                 'default': new OpenLayers.Style({
@@ -229,6 +228,41 @@ dbkjs.modules.brandkranen = {
         }
         dbkjs.selectControl.multiselectlayers.push(this.brandkranen);
         dbkjs.selectControl.activate();
+        
+    },
+    initTree: function(features) {
+        if (this.rt.getTree().nodes.length > 0) {
+            // Purge old data from RTree, prevents double points in vectorlayers
+            this.rt = RTree();
+        }
+        this.rt.geoJSON(features);
+        this.update();
+    },
+    update: function(object,bbox) {
+        if(!bbox){
+            bbox = dbkjs.map.getExtent().toArray();
+        }
+        var left = [bbox[0],bbox[1]];
+        var right = [bbox[2],bbox[3]];
+        var features =  this.rt.bbox(left,right);
+        var currentResolution = dbkjs.map.getResolution();
+        this.removeAllBrandkranen();
+        if(!this.pause && dbkjs.modules.brandkranen.brandkranen.maxResolution > currentResolution){
+            this.insertIntoVectorlayer(features);
+        }
+    },
+    insertIntoVectorlayer:function(features){
+        var featureCollection = {
+            type: "FeatureCollection",
+            features: features
+        };
+        this.addBrandkranenGeoJson(featureCollection);
+    },
+    removeAllBrandkranen:function(){
+        this.brandkranen.removeAllFeatures();
+    },
+    addBrandkranenGeoJson(featureCollection){
+        this.brandkranen.addFeatures(new OpenLayers.Format.GeoJSON().read(featureCollection));
     }
 };
 
