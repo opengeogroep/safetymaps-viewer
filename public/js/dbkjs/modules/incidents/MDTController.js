@@ -52,6 +52,8 @@ function MDTController(incidents) {
 
     me.xml = null;
 
+    me.selectieKaderMatches = null;
+
     $('.dbk-title').on('click', function() {
         if(me.selectedDbkFeature && dbkjs.options.feature) { // geen dbkjs.options.feature bij geselecteerde WO
             if(dbkjs.options.feature.identificatie !== me.selectedDbkFeature.attributes.identificatie) {
@@ -61,6 +63,11 @@ function MDTController(incidents) {
             }
         } else {
             me.zoomToIncident();
+
+            if(me.selectieKaderMatches) {
+                me.showSelectieKaderMatches();
+                dbkjs.dbkInfoPanel.toggle();
+            }
         }
     });
 
@@ -120,6 +127,7 @@ MDTController.prototype.newIncident = function() {
     var me = this;
 
     dbkjs.protocol.jsonDBK.deselect();
+    this.selectieKaderMatches = null;
 
     me.zoomToIncident();
 
@@ -220,6 +228,10 @@ MDTController.prototype.newIncident = function() {
             console.log("Selecting single selectiekader match", dbk);
         } else if(selectieKaderMatches.length > 1) {
             console.log("Multiple selectiekader matches", selectieKaderMatches);
+
+            this.selectieKaderMatches = selectieKaderMatches;
+
+            this.showSelectieKaderMatches();
         }
 
         this.selectedDbkFeature = dbk;
@@ -233,6 +245,21 @@ MDTController.prototype.newIncident = function() {
     $(me).triggerHandler("new_incident", null);
 };
 
+MDTController.prototype.showSelectieKaderMatches = function() {
+    var me = this;
+
+    var div  = $("#dbkinfopanel_b");
+    var item_ul = $('<ul class="nav nav-pills nav-stacked"></ul>');
+    div.html("<h3>Meerdere waterongevallenkaarten gevonden op de locatie van het incident:</h3><p>");
+    $.each(me.selectieKaderMatches, function(i, m) {
+        item_ul.append($('<li><a href="#">' + m.attributes.locatie + '</a></li>').on('click', function(e) {
+            e.preventDefault();
+            dbkjs.protocol.jsonDBK.process(m, null, true);
+        }));
+    });
+    div.append(item_ul);
+
+};
 MDTController.prototype.updateBalkrechtsonder = function(title) {
     $('.dbk-title')
         .text(title)
