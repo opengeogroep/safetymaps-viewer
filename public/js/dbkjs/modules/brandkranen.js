@@ -24,15 +24,16 @@ dbkjs.modules = dbkjs.modules || {};
 dbkjs.modules.brandkranen = {
     id: "dbk.module.brandkranen",
     options: null,
+    rt:null,
     brandkranen: null,
     leidingen: null,
+    strengen:null,
     register: function() {
         var me = this;
-
+        me.strengen = [];
         this.options = $.extend({
             // add default options here
         }, this.options);
-
         this.init();
 
         // wait to load brandkranen until after dbk features loaded
@@ -47,7 +48,7 @@ dbkjs.modules.brandkranen = {
             method: "GET",
             data: {
 //                bounds: "POLYGON ((205023 371652, 205023 378577, 212870 378577, 212870 371652, 205023 371652))" // Venlo
-                bounds: "POLYGON ((197890 371652, 197890 378577, 205737 378577, 205737 371652, 197890 371652))" // Maasbree
+       //         bounds: "POLYGON ((197890 371652, 197890 378577, 205737 378577, 205737 371652, 197890 371652))" // Maasbree
 //                bounds: "POLYGON ((197890 371652, 197890 380003, 212320 380003, 212320 371652, 197890 371652))" // Venlo en Maasbree
             },
             dataType: "json"
@@ -60,12 +61,11 @@ dbkjs.modules.brandkranen = {
                 dbkjs.gui.showError("Fout bij inladen brandkranen: " + data.error);
                 return;
             }
-            var features = new OpenLayers.Format.GeoJSON().read(data.brandkranen_wml);
-            console.log("Aantal brandkranen: " + features.length);
-            me.brandkranen.addFeatures(features);
-            var features = new OpenLayers.Format.GeoJSON().read(data.leidingen_wml);
-            console.log("Aantal leidingen: " + features.length);
-            me.leidingen.addFeatures(features);
+            var features = data.brandkranen_wml;
+           //var features = new OpenLayers.Format.GeoJSON().read(data.leidingen_wml);
+            me.rt = RTree();
+            dbkjs.map.events.register ("moveend",me, me.update);
+            me.initTree(features);
         });
     },
     brandkraanSelected: function(e) {
@@ -79,12 +79,14 @@ dbkjs.modules.brandkranen = {
         var table = $('<table class="table table-hover"></table>');
         var img = e.object.styleMap.styles.default.context.myicon(e.feature);
         var cap = a.capaciteit ? a.capaciteit.toLocaleString("nl", { useGrouping: true}) : "";
+        var nummer = a.nummer ? a.nummer : "";
         var strengd = "";
-        me.streng = null;
+        var currentStreng = null;
         if(a.streng_id) {
             $.each(me.leidingen.features, function(i, leiding) {
                 if(leiding.attributes.streng_id === a.streng_id) {
-                    me.streng = leiding;
+                    me.strengen.push(leiding);
+                    currentStreng = leiding;
                     strengd = ", nominale druk: " + leiding.attributes.nominale_d.toLocaleString("nl", { useGrouping: true});
                     return false;
                 }
@@ -94,13 +96,14 @@ dbkjs.modules.brandkranen = {
         table.append($(Mustache.render(
         '<tr>' +
             '<td><img class="thumb" src="{{img}}" alt="{{f.symboolcod}}" title="{{f.symboolcod}}"></td>' +
-            '<td>Capaciteit: {{capaciteit}}</td>' +
-            '<td>{{f.streng_id}}{{streng_d}}</td>' +
-        '</tr>', {img: img, f: e.feature.attributes, capaciteit: cap, streng_d: strengd})));
-        if(me.streng) {
+            '<td>Capaciteit: {{capaciteit}} m<sup>3</sup>/uur</td>' +
+            '<td>Nummer:{{nummer}}</td>' +
+            
+        '</tr>', {img: img, f: e.feature.attributes, capaciteit: cap, nummer: nummer})));
+        if(currentStreng) {
             var andere = [];
             $.each(me.brandkranen.features, function(i, brandkraan) {
-                if(brandkraan !== e.feature && brandkraan.attributes.streng_id === me.streng.attributes.streng_id) {
+                if(brandkraan !== e.feature && brandkraan.attributes.streng_id === currentStreng.attributes.streng_id) {
                     andere.push(brandkraan);
                 }
             });
@@ -113,14 +116,22 @@ dbkjs.modules.brandkranen = {
             }
         }
         var andere = [];
-        console.log("streng", me.streng, "andere", andere);
+        console.log("streng", me.strengen, "andere", andere);
         html.append(table);
         $('#vectorclickpanel_b').html('').append(html);
         $('#vectorclickpanel').show();
     },
     brandkraanUnselected: function(e) {
         $('#vectorclickpanel').hide();
-        this.streng = null;
+        var feature = e.feature;
+        var me = this;
+        var newStrengen = [];
+        $.each(me.strengen, function (i, streng) {
+            if (streng.attributes.streng_id !== feature.attributes.streng_id) {
+                newStrengen.push(streng);
+            }
+        });
+        this.strengen = newStrengen;
         this.brandkranen.redraw();
     },
     init: function() {
@@ -156,7 +167,7 @@ dbkjs.modules.brandkranen = {
             rendererOptions: {
             },
             options: {
-                minScale: 5000
+                minScale: 3000
             },
             styleMap: new OpenLayers.StyleMap({
                 'default': new OpenLayers.Style({
@@ -175,9 +186,12 @@ dbkjs.modules.brandkranen = {
                     context: {
                         myicon: function(feature) {
                             var gray = "";
-                            if(me.streng && me.streng.attributes.streng_id === feature.attributes.streng_id) {
-                                gray = "_g";
-                            };
+                            $.each(me.strengen, function (i, streng) {
+                                if (streng && streng.attributes.streng_id === feature.attributes.streng_id) {
+                                    gray = "_g";
+                                    return false;
+                                }
+                            });
                             var img = feature.attributes.soort === "Bovengronds" ? "Tb4001" : "Tb4002";
                             return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + "images/nen1414/" + img + gray + ".png" : imagesBase64["images/nen1414/" + img + gray + ".png"];
                         },
@@ -209,7 +223,46 @@ dbkjs.modules.brandkranen = {
         dbkjs.hoverControl.activate();
         dbkjs.selectControl.deactivate();
         dbkjs.selectControl.layers.push(this.brandkranen);
+        if(!dbkjs.selectControl.multiselectlayers){
+            dbkjs.selectControl.multiselectlayers = [];
+        }
+        dbkjs.selectControl.multiselectlayers.push(this.brandkranen);
         dbkjs.selectControl.activate();
+        
+    },
+    initTree: function(features) {
+        if (this.rt.getTree().nodes.length > 0) {
+            // Purge old data from RTree, prevents double points in vectorlayers
+            this.rt = RTree();
+        }
+        this.rt.geoJSON(features);
+        this.update();
+    },
+    update: function(object,bbox) {
+        if(!bbox){
+            bbox = dbkjs.map.getExtent().toArray();
+        }
+        var left = [bbox[0],bbox[1]];
+        var right = [bbox[2],bbox[3]];
+        var features =  this.rt.bbox(left,right);
+        var currentResolution = dbkjs.map.getResolution();
+        this.removeAllBrandkranen();
+        if(!this.pause && dbkjs.modules.brandkranen.brandkranen.maxResolution > currentResolution){
+            this.insertIntoVectorlayer(features);
+        }
+    },
+    insertIntoVectorlayer:function(features){
+        var featureCollection = {
+            type: "FeatureCollection",
+            features: features
+        };
+        this.addBrandkranenGeoJson(featureCollection);
+    },
+    removeAllBrandkranen:function(){
+        this.brandkranen.removeAllFeatures();
+    },
+    addBrandkranenGeoJson(featureCollection){
+        this.brandkranen.addFeatures(new OpenLayers.Format.GeoJSON().read(featureCollection));
     }
 };
 
