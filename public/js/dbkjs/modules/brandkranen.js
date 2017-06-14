@@ -44,7 +44,9 @@ dbkjs.modules.brandkranen = {
     load: function() {
         var me = this;
         console.time("brandkranen_ajax");
-        $.ajax((dbkjs.options.serverUrlPrefix ? dbkjs.options.serverUrlPrefix : "") + "action/vrln", {
+       
+        var url = dbkjs.options.onboard ? "api/brandkranen.json" : (dbkjs.options.serverUrlPrefix ? dbkjs.options.serverUrlPrefix : "") + "action/vrln";
+        $.ajax(url, {
             method: "GET",
             data: {
 //                bounds: "POLYGON ((205023 371652, 205023 378577, 212870 378577, 212870 371652, 205023 371652))" // Venlo
@@ -80,6 +82,8 @@ dbkjs.modules.brandkranen = {
         var img = e.object.styleMap.styles.default.context.myicon(e.feature);
         var cap = a.capaciteit ? a.capaciteit.toLocaleString("nl", { useGrouping: true}) : "";
         var nummer = a.nummer ? a.nummer : "";
+        var huisnummer = a.huisnummer ? a.huisnummer : "";
+        var postcode = a.postcode ? a.postcode : "";
         var strengd = "";
         var currentStreng = null;
         if(a.streng_id) {
@@ -98,8 +102,9 @@ dbkjs.modules.brandkranen = {
             '<td><img class="thumb" src="{{img}}" alt="{{f.symboolcod}}" title="{{f.symboolcod}}"></td>' +
             '<td>Capaciteit: {{capaciteit}} m<sup>3</sup>/uur</td>' +
             '<td>Nummer:{{nummer}}</td>' +
+            '<td>Postcode, huisnummer:{{postcode}},{{huisnummer}}</td>' +
             
-        '</tr>', {img: img, f: e.feature.attributes, capaciteit: cap, nummer: nummer})));
+        '</tr>', {img: img, f: e.feature.attributes, capaciteit: cap, nummer: nummer, postcode:postcode, huisnummer:huisnummer})));
         if(currentStreng) {
             var andere = [];
             $.each(me.brandkranen.features, function(i, brandkraan) {
@@ -215,6 +220,7 @@ dbkjs.modules.brandkranen = {
                 'temporary': new OpenLayers.Style({pointRadius: 20})
             })
         });
+        dbkjs.protocol.jsonDBK.layers.push(this.brandkranen);
         this.brandkranen.events.register("featureselected", this, this.brandkraanSelected);
         this.brandkranen.events.register("featureunselected", this, this.brandkraanUnselected);
         dbkjs.map.addLayer(this.brandkranen);
