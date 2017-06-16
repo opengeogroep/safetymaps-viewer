@@ -24,56 +24,69 @@ dbkjs.modules = dbkjs.modules || {};
 dbkjs.modules.brandkranen = {
     id: "dbk.module.brandkranen",
     options: null,
-    rt:null,
+    rtBrandkranen:null,
     brandkranen: null,
-    leidingen: null,
+    selectedBrandkranen:null,
     strengen:null,
     register: function() {
         var me = this;
         me.strengen = [];
+        me.selectedBrandkranen = [];
         this.options = $.extend({
             // add default options here
         }, this.options);
         this.init();
 
         // wait to load brandkranen until after dbk features loaded
-        $(dbkjs.modules.feature).on("loaded", function() {
-            me.load();
-        });
+         $(dbkjs).one("dbkjs_init_complete", function() {
+            me.loadBrandkranen();
+         });
     },
-    load: function() {
+    loadBrandkranen: function() {
         var me = this;
-        console.time("brandkranen_ajax");
-       
         var url = dbkjs.options.onboard ? "api/brandkranen.json" : (dbkjs.options.serverUrlPrefix ? dbkjs.options.serverUrlPrefix : "") + "action/vrln";
         $.ajax(url, {
             method: "GET",
-            data: {
-//                bounds: "POLYGON ((205023 371652, 205023 378577, 212870 378577, 212870 371652, 205023 371652))" // Venlo
-       //         bounds: "POLYGON ((197890 371652, 197890 378577, 205737 378577, 205737 371652, 197890 371652))" // Maasbree
-//                bounds: "POLYGON ((197890 371652, 197890 380003, 212320 380003, 212320 371652, 197890 371652))" // Venlo en Maasbree
-            },
+            data: {},
             dataType: "json"
         }).fail(function(jqXHR, textStatus, errorThrown) {
-            console.timeEnd("brandkranen_ajax");
             dbkjs.gui.showError("Fout bij inladen brandkranen: " + errorThrown);
         }).done(function(data) {
-            console.timeEnd("brandkranen_ajax");
             if(!data.success) {
                 dbkjs.gui.showError("Fout bij inladen brandkranen: " + data.error);
                 return;
             }
             var features = data.brandkranen_wml;
-           //var features = new OpenLayers.Format.GeoJSON().read(data.leidingen_wml);
-            me.rt = RTree();
+            me.rtBrandkranen = RTree();
+            me.initTree(features,me.rtBrandkranen);
             dbkjs.map.events.register ("moveend",me, me.update);
-            me.initTree(features);
         });
+    },
+    beforeBrandkraanSelected: function(e){
+        var a = e.feature.attributes;
+        var me = this;
+        for(var i = 0 ; i< me.selectedBrandkranen.length;i++){
+            if(a.nummer === me.selectedBrandkranen[i]){
+                return true;
+            }
+        }
+        for (var i = 0 ; i < me.strengen.length ;i++){
+            if (me.strengen[i] === a.streng_id) {
+                return false;
+            }
+        }
+        return true;
+        
     },
     brandkraanSelected: function(e) {
         var me = this;
-        console.log("brandkraan selected", arguments);
         var a = e.feature.attributes;
+        if(me.selectedBrandkranen.indexOf(a.nummer) !== -1){
+            var feature = e.feature;
+            dbkjs.selectControl.unselect(feature);
+            return;
+        }
+        me.selectedBrandkranen.push(a.nummer);
 
         $('#vectorclickpanel_h').html('<span class="h4"><i class="fa fa-info-circle">&nbsp;Brandkraan WML #' + a.nummer + '</span>');
         var html = $('<div class="table-responsive"></div>');
@@ -84,17 +97,10 @@ dbkjs.modules.brandkranen = {
         var nummer = a.nummer ? a.nummer : "";
         var huisnummer = a.huisnummer ? a.huisnummer : "";
         var postcode = a.postcode ? a.postcode : "";
-        var strengd = "";
         var currentStreng = null;
-        if(a.streng_id) {
-            $.each(me.leidingen.features, function(i, leiding) {
-                if(leiding.attributes.streng_id === a.streng_id) {
-                    me.strengen.push(leiding);
-                    currentStreng = leiding;
-                    strengd = ", nominale druk: " + leiding.attributes.nominale_d.toLocaleString("nl", { useGrouping: true});
-                    return false;
-                }
-            });
+        if (a.streng_id) {
+            me.strengen.push(a.streng_id);
+            currentStreng = a.streng_id;
         }
         me.brandkranen.redraw();
         table.append($(Mustache.render(
@@ -108,7 +114,7 @@ dbkjs.modules.brandkranen = {
         if(currentStreng) {
             var andere = [];
             $.each(me.brandkranen.features, function(i, brandkraan) {
-                if(brandkraan !== e.feature && brandkraan.attributes.streng_id === currentStreng.attributes.streng_id) {
+                if(brandkraan !== e.feature && brandkraan.attributes.streng_id === currentStreng) {
                     andere.push(brandkraan);
                 }
             });
@@ -129,14 +135,22 @@ dbkjs.modules.brandkranen = {
     brandkraanUnselected: function(e) {
         $('#vectorclickpanel').hide();
         var feature = e.feature;
+        
         var me = this;
         var newStrengen = [];
         $.each(me.strengen, function (i, streng) {
-            if (streng.attributes.streng_id !== feature.attributes.streng_id) {
+            if (streng !== feature.attributes.streng_id) {
                 newStrengen.push(streng);
             }
         });
         this.strengen = newStrengen;
+        var newBrandkranenSelected = [];
+        $.each(me.selectedBrandkranen, function (i, brandkraan) {
+            if (brandkraan !== feature.attributes.nummer) {
+                newBrandkranenSelected.push(brandkraan);
+            }
+        });
+        this.selectedBrandkranen = newBrandkranenSelected;
         this.brandkranen.redraw();
     },
     init: function() {
@@ -144,30 +158,7 @@ dbkjs.modules.brandkranen = {
     },
     createLayers: function() {
         var me = this;
-        this.leidingen = new OpenLayers.Layer.Vector("Leidingen WML", {
-            rendererOptions: {
-                zIndexing: true
-            },
-            options: {
-                minScale: 5000
-            },
-            styleMap: new OpenLayers.StyleMap({
-                'default': new OpenLayers.Style({
-                    strokeColor: "blue",
-                    strokeWidth: "${width}"
-                }, {
-                    context: {
-                        stroke: function(feature) {
-                            return "blue";
-                        },
-                        width: function(feature) {
-                            return feature.attributes.streng_id ? 1 : 2;
-                        }
-                    }
-                })
-            })
-        });
-        dbkjs.map.addLayer(this.leidingen);
+      
         this.brandkranen = new OpenLayers.Layer.Vector("Brandkranen WML", {
             rendererOptions: {
             },
@@ -185,20 +176,30 @@ dbkjs.modules.brandkranen = {
                     fontWeight: "bold",
                     labelYOffset: -20,
                     labelOutlineColor: "white",
-                    labelOutlineWidth: 3,
-
+                    labelOutlineWidth: 3
                 }, {
                     context: {
                         myicon: function(feature) {
-                            var gray = "";
-                            $.each(me.strengen, function (i, streng) {
-                                if (streng && streng.attributes.streng_id === feature.attributes.streng_id) {
-                                    gray = "_g";
-                                    return false;
+                            var postfix = "";
+                            var currentlySelected = false;
+                            for(var i = 0 ; i< me.selectedBrandkranen.length;i++){
+                                if(feature.attributes.nummer === me.selectedBrandkranen[i]){
+                                    currentlySelected =  true;
+                                    break;
                                 }
-                            });
+                            }
+                            if(!currentlySelected){
+                                $.each(me.strengen, function (i, streng) {
+                                    if (streng && streng === feature.attributes.streng_id) {
+                                        postfix = "_g";
+                                        return false;
+                                    }
+                                });
+                            }else{
+                                postfix = "_s";
+                            }
                             var img = feature.attributes.soort === "Bovengronds" ? "Tb4001" : "Tb4002";
-                            return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + "images/nen1414/" + img + gray + ".png" : imagesBase64["images/nen1414/" + img + gray + ".png"];
+                            return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + "images/nen1414/" + img + postfix + ".png" : imagesBase64["images/nen1414/" + img + postfix + ".png"];
                         },
                         label: function(feature) {
                             if(dbkjs.map.getScale() > 4000) {
@@ -222,6 +223,7 @@ dbkjs.modules.brandkranen = {
         });
         dbkjs.protocol.jsonDBK.layers.push(this.brandkranen);
         this.brandkranen.events.register("featureselected", this, this.brandkraanSelected);
+        this.brandkranen.events.register("beforefeatureselected", this, this.beforeBrandkraanSelected);
         this.brandkranen.events.register("featureunselected", this, this.brandkraanUnselected);
         dbkjs.map.addLayer(this.brandkranen);
         dbkjs.hoverControl.deactivate();
@@ -236,39 +238,46 @@ dbkjs.modules.brandkranen = {
         dbkjs.selectControl.activate();
         
     },
-    initTree: function(features) {
-        if (this.rt.getTree().nodes.length > 0) {
+    initTree: function(features, rtree) {
+        if (rtree.getTree().nodes.length > 0) {
             // Purge old data from RTree, prevents double points in vectorlayers
-            this.rt = RTree();
+            rtree = RTree();
         }
-        this.rt.geoJSON(features);
+        rtree.geoJSON(features);
         this.update();
     },
     update: function(object,bbox) {
+        if(!dbkjs.map.getExtent()){
+            setTimeout(this.update.bind(null, object, bbox), 100);
+            return;
+        }
         if(!bbox){
             bbox = dbkjs.map.getExtent().toArray();
         }
         var left = [bbox[0],bbox[1]];
         var right = [bbox[2],bbox[3]];
-        var features =  this.rt.bbox(left,right);
         var currentResolution = dbkjs.map.getResolution();
-        this.removeAllBrandkranen();
-        if(!this.pause && dbkjs.modules.brandkranen.brandkranen.maxResolution > currentResolution){
-            this.insertIntoVectorlayer(features);
+        
+        if(this.rtBrandkranen){
+            var brandkraanFeatures =  this.rtBrandkranen.bbox(left,right);
+            this.removeAllBrandkranen();
+
+            if(!this.pause && this.brandkranen.maxResolution > currentResolution){
+                this.insertIntoVectorlayer(brandkraanFeatures, this.brandkranen);
+            }
         }
     },
-    insertIntoVectorlayer:function(features){
+    insertIntoVectorlayer:function(features, layer){
         var featureCollection = {
             type: "FeatureCollection",
             features: features
         };
-        this.addBrandkranenGeoJson(featureCollection);
+        var geojson = new OpenLayers.Format.GeoJSON().read(featureCollection);
+        layer.addFeatures(geojson);
+        layer.redraw();
     },
     removeAllBrandkranen:function(){
         this.brandkranen.removeAllFeatures();
-    },
-    addBrandkranenGeoJson(featureCollection){
-        this.brandkranen.addFeatures(new OpenLayers.Format.GeoJSON().read(featureCollection));
     }
 };
 

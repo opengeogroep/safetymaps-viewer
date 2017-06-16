@@ -486,6 +486,14 @@ OpenLayers.Control.SelectFeature.prototype.multipleSelect = function() {
         }
     }
 };
+OpenLayers.Control.SelectFeature.prototype.clickoutFeature = function(feature) {
+    if(!this.hover && this.clickout) {
+        var l = feature.layer;
+        if(!this.multiselectlayers || this.multiselectlayers.indexOf(l) === -1){
+            this.unselectAll();
+        }
+    }
+}
 
 dbkjs.util = {
     layersLoading: [],
