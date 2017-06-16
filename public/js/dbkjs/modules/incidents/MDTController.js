@@ -52,7 +52,7 @@ function MDTController(incidents) {
 
     me.xml = null;
 
-    me.selectieKaderMatches = null;
+    me.matches = null;
 
     $('.dbk-title').on('click', function() {
         if(me.selectedDbkFeature && dbkjs.options.feature) { // geen dbkjs.options.feature bij geselecteerde WO
@@ -62,10 +62,11 @@ function MDTController(incidents) {
                 dbkjs.modules.feature.zoomToFeature(me.selectedDbkFeature);
             }
         } else {
+            dbkjs.protocol.jsonDBK.deselect();
             me.zoomToIncident();
 
-            if(me.selectieKaderMatches) {
-                me.showSelectieKaderMatches();
+            if(me.matches) {
+                me.renderMatches();
                 dbkjs.dbkInfoPanel.toggle();
             }
         }
@@ -127,7 +128,7 @@ MDTController.prototype.newIncident = function() {
     var me = this;
 
     dbkjs.protocol.jsonDBK.deselect();
-    this.selectieKaderMatches = null;
+    this.matches = null;
 
     me.zoomToIncident();
 
@@ -187,7 +188,7 @@ MDTController.prototype.newIncident = function() {
                             var parts = n.split("|");
                             var matchHuisnummer = Number(parts[0]) === huisnummer;
                             if(matchHuisnummer) {
-                                console.log("Matched DBK with nummer " + n);
+                                console.log("Matched DBK with nummer " + n, f);
                                 dbk = f;
                                 return false;
                             }
@@ -203,41 +204,32 @@ MDTController.prototype.newIncident = function() {
             }
         });
 
+        var matches = dbk ? [dbk] : [];
+
         // Zoek naar WO DBK's op basis van selectiepolygoon
-        var selectieKaderMatches = [];
+        var x = $(this.xml).find("IncidentLocatie XYCoordinaten XCoordinaat").text();
+        var y = $(this.xml).find("IncidentLocatie XYCoordinaten YCoordinaat").text();
+        var point = new OpenLayers.Geometry.Point(x, y);
 
-        if(dbk === null) {
-            var x = $(this.xml).find("IncidentLocatie XYCoordinaten XCoordinaat").text();
-            var y = $(this.xml).find("IncidentLocatie XYCoordinaten YCoordinaat").text();
-            var point = new OpenLayers.Geometry.Point(x, y);
-
-            $.each(dbkjs.modules.feature.features, function(index, f) {
-                if(f.attributes.selectiekader) {
-                    $.each(f.attributes.selectiekader.components, function(j, c) {
-                        //console.log("checking " + f.attributes.label + " contains: " + c.toString() + ", " + point);
-                        if(c.containsPoint(point)) {
-                            console.log("Incident XY inside feature selectiekader ", f);
-                            selectieKaderMatches.push(f);
-                        }
-                    });
-                }
-            });
-        }
-        if(selectieKaderMatches.length === 1) {
-            dbk = selectieKaderMatches[0];
-            console.log("Selecting single selectiekader match", dbk);
-        } else if(selectieKaderMatches.length > 1) {
-            console.log("Multiple selectiekader matches", selectieKaderMatches);
-
-            this.selectieKaderMatches = selectieKaderMatches;
-
-            this.showSelectieKaderMatches();
-        }
-
-        this.selectedDbkFeature = dbk;
-
-        if(dbk) {
-            dbkjs.protocol.jsonDBK.process(dbk, null, true);
+        $.each(dbkjs.modules.feature.features, function(index, f) {
+            if(f.attributes.selectiekader) {
+                $.each(f.attributes.selectiekader.components, function(j, c) {
+                    //console.log("checking " + f.attributes.label + " contains: " + c.toString() + ", " + point);
+                    if(c.containsPoint(point)) {
+                        console.log("Incident XY inside feature selectiekader ", f);
+                        matches.push(f);
+                    }
+                });
+            }
+        });
+        if(matches.length === 1) {
+            console.log("Selecting match", dbk);
+            this.selectedDbkFeature = matches[0];
+            dbkjs.protocol.jsonDBK.process(matches[0], null, true);
+        } else if(matches.length > 1) {
+            console.log("Multiple matches", matches);
+            this.matches = matches;
+            this.renderMatches();
         }
     }
     me.incidentDetailsWindow.show();
@@ -245,21 +237,23 @@ MDTController.prototype.newIncident = function() {
     $(me).triggerHandler("new_incident", null);
 };
 
-MDTController.prototype.showSelectieKaderMatches = function() {
+MDTController.prototype.renderMatches = function() {
     var me = this;
-
+    if(!me.matches) {
+        return;
+    }
     var div  = $("#dbkinfopanel_b");
     var item_ul = $('<ul class="nav nav-pills nav-stacked"></ul>');
-    div.html("<h3>Meerdere waterongevallenkaarten gevonden op de locatie van het incident:</h3><p>");
-    $.each(me.selectieKaderMatches, function(i, m) {
-        item_ul.append($('<li><a href="#">' + m.attributes.locatie + '</a></li>').on('click', function(e) {
+    div.html("<h3>Meerdere informatiekaarten gevonden op de locatie van het incident:</h3><p>");
+    $.each(me.matches, function(i, m) {
+        item_ul.append($('<li><a href="#">' + (m.attributes.locatie || m.attributes.formeleNaam) + '</a></li>').on('click', function(e) {
             e.preventDefault();
             dbkjs.protocol.jsonDBK.process(m, null, true);
         }));
     });
     div.append(item_ul);
-
 };
+
 MDTController.prototype.updateBalkrechtsonder = function(title) {
     $('.dbk-title')
         .text(title)
