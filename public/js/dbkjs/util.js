@@ -486,13 +486,39 @@ OpenLayers.Control.SelectFeature.prototype.multipleSelect = function() {
         }
     }
 };
-OpenLayers.Control.SelectFeature.prototype.clickoutFeature = function(feature) {
-    if(!this.hover && this.clickout) {
-        var l = feature.layer;
-        if(!this.multiselectlayers || this.multiselectlayers.indexOf(l) === -1){
-            this.unselectAll();
-        }
-    }
+
+/**
+* Method: unselectAll
+* Unselect all selected features.  To unselect all except for a single
+*     feature, set the options.except property to the feature.
+*
+* Parameters:
+* options - {Object} Optional configuration object.
+*/
+OpenLayers.Control.SelectFeature.prototype.unselectAll = function(options) {
+   // we'll want an option to supress notification here
+   var layers = this.layers || [this.layer],
+       layer, feature, l, numExcept;
+   for(l=0; l<layers.length; ++l) {
+       layer = layers[l];
+       if(this.multiselectlayers && this.multiselectlayers.indexOf(layer) !== -1){
+           continue;
+       }
+       numExcept = 0;
+       //layer.selectedFeatures is null when layer is destroyed and 
+       //one of it's preremovelayer listener calls setLayer 
+       //with another layer on this control
+       if(layer.selectedFeatures != null) {
+           while(layer.selectedFeatures.length > numExcept) {
+               feature = layer.selectedFeatures[numExcept];
+               if(!options || options.except != feature) {
+                   this.unselect(feature);
+               } else {
+                   ++numExcept;
+               }
+           }
+       }
+   }
 }
 
 dbkjs.util = {
