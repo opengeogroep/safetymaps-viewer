@@ -100,7 +100,6 @@ dbkjs.modules.brandkranen = {
         var currentStreng = null;
         if (a.streng_id) {
             me.strengen.push(a.streng_id);
-            currentStreng = a.streng_id;
         }
         me.brandkranen.redraw();
         table.append($(Mustache.render(
@@ -108,26 +107,10 @@ dbkjs.modules.brandkranen = {
             '<td><img class="thumb" src="{{img}}" alt="{{f.symboolcod}}" title="{{f.symboolcod}}"></td>' +
             '<td>Capaciteit: {{capaciteit}} m<sup>3</sup>/uur</td>' +
             '<td>Nummer:{{nummer}}</td>' +
-            '<td>Postcode, huisnummer:{{postcode}},{{huisnummer}}</td>' +
+            '<td>Postcode:{{postcode}}, huisnummer: {{huisnummer}}</td>' +
             
         '</tr>', {img: img, f: e.feature.attributes, capaciteit: cap, nummer: nummer, postcode:postcode, huisnummer:huisnummer})));
-        if(currentStreng) {
-            var andere = [];
-            $.each(me.brandkranen.features, function(i, brandkraan) {
-                if(brandkraan !== e.feature && brandkraan.attributes.streng_id === currentStreng) {
-                    andere.push(brandkraan);
-                }
-            });
-            if(andere.length === 1) {
-                table.append($("<td colspan='3'>Er is &eacute;&eacute;n andere brandkraan op deze streng (grijs)</td>"));
-            } else if(andere.length > 0) {
-                table.append($("<td colspan='3'>Er zijn " + andere.length + " andere brandkranen op deze streng (grijs)</td>"));
-            } else {
-                table.append($("<td colspan='3'>Er zijn geen andere brandkranen op deze streng</td>"));
-            }
-        }
-        var andere = [];
-        console.log("streng", me.strengen, "andere", andere);
+        
         html.append(table);
         $('#vectorclickpanel_b').html('').append(html);
         $('#vectorclickpanel').show();
