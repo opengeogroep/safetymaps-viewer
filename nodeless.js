@@ -95,16 +95,20 @@ global.pool = anyDB.createPool(dbURL, {min: 2, max: 20});
 var organisationsDone = false, featuresDone = false, objectsToBeWritten = null;
 
 var skipDB = false;
+var testOrganisation = false;
 
 process.argv.slice(2).forEach(function(val, index, array) {
     if(val === "--skip-db") {
         skipDB = true;
     }
+    if(val === "--test-organisation") {
+        testOrganisation = true;
+    }
 });
 
 if(!skipDB) {
     dbk.getOrganisation(
-            {params: {id: 0}, query: {srid: 28992}},
+            {params: {id: 0}, query: {srid: 28992}, testOrganisation: testOrganisation},
     {
         status: function() { return this; },
         json: function(json) {

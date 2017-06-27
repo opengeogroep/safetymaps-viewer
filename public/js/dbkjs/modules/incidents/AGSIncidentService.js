@@ -374,7 +374,7 @@ AGSIncidentService.prototype.getIncidentTitle = function(incident) {
 AGSIncidentService.prototype.getVoertuignummerTypeahead = function() {
     var me = this;
     var d = $.Deferred();
-    $.ajax(me.tableUrls.GMSARC_INZET_EENHEID + "/query", {
+    $.ajax(me.tableUrls.V_B_ARC_INZET_EENHEID + "/query", {
         dataType: "json",
         data: {
             f: "json",

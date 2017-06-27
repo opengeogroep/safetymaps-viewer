@@ -29,11 +29,21 @@ dbkjs.modules.incidents = {
     register: function() {
         this.options = dbkjs.options.incidents;
 
+        var params = OpenLayers.Util.getParameters();
+        if(params.mdt && "true" !== params.mdt) {
+            this.options.mdt = false;
+        }
+
         if(this.options.falck) {
             this.controller = new FalckIncidentsController(this);
-        } else if(this.options.incidentMonitor) {
+        } else if(this.options.incidentMonitor || !this.options.mdt) {
             this.service = new AGSIncidentService(this.options.ags.incidentsUrl, this.options.ags.vehiclePosUrl);
-            this.controller = new IncidentMonitorController(this);
+
+            if(this.options.incidentMonitor) {
+                this.controller = new IncidentMonitorController(this);
+            } else {
+                this.controller = new VoertuigInzetController(this);
+            }
 
             this.service.initialize(this.options.ags.tokenUrl, this.options.ags.user, this.options.ags.password)
             .fail(function(e) {
@@ -42,6 +52,8 @@ dbkjs.modules.incidents = {
                     dbkjs.util.alert("Fout bij initialiseren meldingenservice", e, "alert-danger");
                 }, 3000);
             });
+        } else if(!this.options.mdt) {
+            this.controller = new VoertuigInzetController(this);
         } else {
             this.controller = new MDTController(this);
         }
