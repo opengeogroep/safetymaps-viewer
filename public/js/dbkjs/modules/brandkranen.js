@@ -88,9 +88,14 @@ dbkjs.modules.brandkranen = {
         }
         me.selectedBrandkranen.push(a.nummer);
 
-        $('#vectorclickpanel_h').html('<span class="h4"><i class="fa fa-info-circle">&nbsp;Brandkraan WML #' + a.nummer + '</span>');
+        $('#vectorclickpanel_h').html('<span class="h4"><i class="fa fa-info-circle">&nbsp;Brandkraan WML #' + a.nummer + ' </span><div style="float: right;"><a href="#" id="deselect_all">Deselecteer alles</a> </div>');
         var html = $('<div class="table-responsive"></div>');
-
+        $("#deselect_all").on("click", (function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.deselectAllBrandkranen();
+        }).bind(this));
+        
         var table = $('<table class="table table-hover"></table>');
         var img = e.object.styleMap.styles.default.context.myicon(e.feature);
         var cap = a.capaciteit ? a.capaciteit.toLocaleString("nl", { useGrouping: true}) : "";
@@ -106,7 +111,6 @@ dbkjs.modules.brandkranen = {
         '<tr>' +
             '<td><img class="thumb" src="{{img}}" alt="{{f.symboolcod}}" title="{{f.symboolcod}}"></td>' +
             '<td>Capaciteit: {{capaciteit}} m<sup>3</sup>/uur</td>' +
-            '<td>Nummer:{{nummer}}</td>' +
             '<td>Postcode:{{postcode}}, huisnummer: {{huisnummer}}</td>' +
             
         '</tr>', {img: img, f: e.feature.attributes, capaciteit: cap, nummer: nummer, postcode:postcode, huisnummer:huisnummer})));
@@ -261,6 +265,12 @@ dbkjs.modules.brandkranen = {
     },
     removeAllBrandkranen:function(){
         this.brandkranen.removeAllFeatures();
+    },
+    deselectAllBrandkranen:function(){
+        this.selectedBrandkranen = [];
+        this.strengen = [];
+        this.update();
+        $('#vectorclickpanel').hide();
     }
 };
 
