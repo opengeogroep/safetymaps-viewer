@@ -98,7 +98,7 @@ dbkjs.modules.brandkranen = {
         
         var table = $('<table class="table table-hover"></table>');
         var img = e.object.styleMap.styles.default.context.myicon(e.feature);
-        var cap = a.capaciteit ? a.capaciteit.toLocaleString("nl", { useGrouping: true}) : "";
+        var cap = a.capaciteit ? (a.capaciteit/1000).toLocaleString("nl", { useGrouping: true}) + "m<sup>3</sup>/uur" : "nb";
         var nummer = a.nummer ? a.nummer : "";
         var huisnummer = a.huisnummer ? a.huisnummer : "";
         var postcode = a.postcode ? a.postcode : "";
@@ -110,10 +110,10 @@ dbkjs.modules.brandkranen = {
         table.append($(Mustache.render(
         '<tr>' +
             '<td><img class="thumb" src="{{img}}" alt="{{f.symboolcod}}" title="{{f.symboolcod}}"></td>' +
-            '<td>Capaciteit: {{capaciteit}} m<sup>3</sup>/uur</td>' +
+            '<td>Capaciteit: ' + cap + ' </td>' +
             '<td>Postcode:{{postcode}}, huisnummer: {{huisnummer}}</td>' +
             
-        '</tr>', {img: img, f: e.feature.attributes, capaciteit: cap, nummer: nummer, postcode:postcode, huisnummer:huisnummer})));
+        '</tr>', {img: img, f: e.feature.attributes,  nummer: nummer, postcode:postcode, huisnummer:huisnummer})));
         
         html.append(table);
         $('#vectorclickpanel_b').html('').append(html);
