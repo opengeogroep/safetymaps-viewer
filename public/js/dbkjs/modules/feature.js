@@ -284,6 +284,16 @@ dbkjs.modules.feature = {
         // Pandgeometrie layer must be loaded
 
         var bounds = dbkjs.protocol.jsonDBK.layerPandgeometrie.getDataExtent();
+
+        // Also zoom to include custom polygons if they exist
+        var customPolyBounds = dbkjs.protocol.jsonDBK.layerCustomPolygon.getDataExtent();
+        if(customPolyBounds) {
+            if(!bounds) {
+                bounds = customPolyBounds;
+            } else {
+                bounds.extend(customPolyBounds);
+            }
+        }
         if(bounds) {
             dbkjs.map.zoomToExtent(dbkjs.util.extendBounds(bounds, dbkjs.options.zoomToPandgeometrieMargin));
         }

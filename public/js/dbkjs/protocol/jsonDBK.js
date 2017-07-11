@@ -38,7 +38,8 @@ dbkjs.protocol.jsonDBK = {
             styleMap: dbkjs.config.styles.dbkpand
         });
         dbkjs.map.events.register("moveend", null, function () {
-            if (dbkjs.map.zoom < 12) {
+            var min = dbkjs.options.dbkLayersMinResolution || 12;
+            if (dbkjs.map.zoom < min) {
                 _obj.hideLayers();
             } else {
                 _obj.showLayers();
@@ -629,7 +630,7 @@ dbkjs.protocol.jsonDBK = {
             case "Tb1010"      : info.name = "Opstelplaats Redvoertuig"; break;
             case "Tb1012"      : info.name = "Opstelplaats Hulpverleningsvoertuig"; info.size = 16; break;
 
-            case "Tb1013": info.name = "Bootje"; info.size = 16; break;
+            case "Tb1013": info.name = "Boot"; info.size = 16; break;
             case "Tb1014": info.name = "Opstelplaats WO"; info.size = 16; break;
             case "Falck42": info.size = 18; info.name = "Tewaterlaatplaats boot"; break;
             case "Falck43": info.size = 18; info.name = "Zwemplaats"; break;

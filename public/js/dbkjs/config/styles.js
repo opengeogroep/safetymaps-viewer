@@ -434,6 +434,16 @@ dbkjs.config.styles = {
                         return dbkjs.scaleStyleValue(1,null,null,true);
                     case "Arrow":
                         return dbkjs.scaleStyleValue(2,null,null,true);
+                    case "Diepte 15":
+                    case "Diepte 9 m":
+                    case "Diepte 3 m":
+                    case "Waterkant":
+                    case "Depth3m":
+                    case "Depth9m":
+                    case "Depth15m":
+                    case "WS_OK":
+                    case "WS_NOK":
+                        return dbkjs.scaleStyleValue(3,null,null,true);
                     default:
                         return dbkjs.scaleStyleValue(2,null,null,true);
                }
@@ -820,7 +830,8 @@ dbkjs.config.styles = {
     customPolygon: new OpenLayers.StyleMap({
         'default': new OpenLayers.Style({
             fillColor: "${fill}",
-            strokeWidth: 0
+            strokeWidth: 0,
+            fillOpacity: 0.6
         }, {
             context: {
                 fill: function (feature) {
