@@ -98,7 +98,7 @@ dbkjs.modules.brandkranen = {
         
         var table = $('<table class="table table-hover"></table>');
         var img = e.object.styleMap.styles.default.context.myicon(e.feature);
-        var cap = a.capaciteit ? (a.capaciteit/1000).toLocaleString("nl", { useGrouping: true}) + "m<sup>3</sup>/uur" : "nb";
+        var cap = a.capaciteit ? (a.capaciteit/1000).toLocaleString("nl", { useGrouping: true}) + "m<sup>3</sup>/uur" : "N.B.";
         var nummer = a.nummer ? a.nummer : "";
         var huisnummer = a.huisnummer ? a.huisnummer : "";
         var postcode = a.postcode ? a.postcode : "";
