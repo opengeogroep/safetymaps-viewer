@@ -247,19 +247,12 @@ if(!skipDB) {
                                 });
                             };
 
-                            var getFunction;
-                            if(feature.properties.typeFeature === "Object") {
-                                getFunction = dbk.getObject;
-                            } else {
-                                getFunction = dbk.getGebied;
-                            }
-
-                            getFunction(req(identificatie), {
+                            dbk.getObjectNew(req(identificatie), {
                                 status: function() { return this; },
                                 json: function(json) {
 
                                     if(!json) {
-                                        console.log("Geen JSON voor id  " + id);
+                                        console.log("Geen JSON voor id  " + identificatie);
                                         objectsToBeWritten--;
                                         return;
                                     }

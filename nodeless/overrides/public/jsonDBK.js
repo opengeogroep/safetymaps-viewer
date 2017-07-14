@@ -308,12 +308,10 @@ dbkjs.protocol.jsonDBK.process =  function(feature, onSuccess, noZoom) {
             };
             dbkjs.protocol.jsonDBK.processing = true;
             dbkjs.util.alert('<i class="fa fa-spinner fa-spin"></i>', i18n.t('dialogs.running'), 'alert-info');
-            if(feature.attributes.typeFeature === 'Object'){
-                dbkjs.protocol.jsonDBK.getObject(feature, 'algemeen', !!noZoom, mySuccess);
-            } else if (feature.attributes.typeFeature === 'Gebied') {
-                dbkjs.protocol.jsonDBK.getGebied(feature, 'algemeen', mySuccess);
-            } else if(feature.attributes.typeFeature === 'WO') {
+            if(feature.attributes.typeFeature === 'WO') {
                 dbkjs.modules.waterongevallen.selected(feature, mySuccess);
+            } else {
+                dbkjs.protocol.jsonDBK.getObject(feature, 'algemeen', !!noZoom, mySuccess);
             }
         }
     } else {

@@ -132,7 +132,7 @@ dbkjs.config.styles = {
                     } else {
                         if (feature.attributes.typeFeature === 'Object') {
                             return 38;
-                        } else if(feature.attributes.typeFeature === "WO") {
+                        } else if(feature.attributes.typeFeature === "WO" || feature.attributes.typeFeature === "Waterongevallen") {
                             return 40;
                         } else {
                             return 65;
@@ -146,7 +146,7 @@ dbkjs.config.styles = {
                     } else {
                         if (feature.attributes.typeFeature === 'Object') {
                             return 24;
-                        } else if(feature.attributes.typeFeature === "WO") {
+                        } else if(feature.attributes.typeFeature === "WO" || feature.attributes.typeFeature === "Waterongevallen") {
                             return 40;
                         } else {
                             return 85;
@@ -167,7 +167,7 @@ dbkjs.config.styles = {
                     if (feature.cluster) {
                         return "cc";
                     } else {
-                         if(feature.attributes.typeFeature === "WO") {
+                         if(feature.attributes.typeFeature === "WO" || feature.attributes.typeFeature === "Waterongevallen") {
                             return "cb";
                          } else {
                             return "rb";
@@ -178,7 +178,7 @@ dbkjs.config.styles = {
                     if (feature.cluster) {
                         return 0;
                     } else {
-                         if(feature.attributes.typeFeature === "WO") {
+                         if(feature.attributes.typeFeature === "WO" || feature.attributes.typeFeature === "Waterongevallen") {
                             return 0;
                          } else {
                             return -16;
@@ -189,7 +189,7 @@ dbkjs.config.styles = {
                     if (feature.cluster) {
                         return -4;
                     } else {
-                         if(feature.attributes.typeFeature === "WO") {
+                         if(feature.attributes.typeFeature === "WO" || feature.attributes.typeFeature === "Waterongevallen") {
                             return -32;
                          } else {
                             return -9;
@@ -200,7 +200,7 @@ dbkjs.config.styles = {
                     if (feature.cluster) {
                         return "#ffffff";
                     } else {
-                        if(feature.attributes.typeFeature === "WO") {
+                        if(feature.attributes.typeFeature === "WO" || feature.attributes.typeFeature === "Waterongevallen") {
                             return "white";
                         } else {
                             return "#000000";
@@ -219,7 +219,7 @@ dbkjs.config.styles = {
                                 img = "images/jcartier_building_2.png";
                             }
                             return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + img : imagesBase64[img];
-                        } else if(feature.attributes.typeFeature === 'WO') {
+                        } else if(feature.attributes.typeFeature === 'WO' || feature.attributes.typeFeature === "Waterongevallen") {
                             return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + "images/wo/wo.png" : imagesBase64["images/wo/wo.png"];
                         } else {
                             return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + "images/jcartier_event_1.png" : imagesBase64["images/jcartier_event_1.png"];
@@ -238,8 +238,8 @@ dbkjs.config.styles = {
                             }
                             return lbl_txt;
                         } else {
-                            if(feature.attributes.typeFeature === "WO" && dbkjs.map.getResolution() <= dbkjs.options.featureLabelResolution) {
-                                return feature.attributes.locatie;
+                            if((feature.attributes.typeFeature === "WO" || feature.attributes.typeFeature === "Waterongevallen") && dbkjs.map.getResolution() <= dbkjs.options.featureLabelResolution) {
+                                return feature.attributes.locatie || feature.attributes.formeleNaam;
                             } else {
                                 return "";
                             }
@@ -255,7 +255,7 @@ dbkjs.config.styles = {
         }, {
             context: {
                 myfontcolor: function(feature) {
-                    if (feature.cluster || feature.attributes.typeFeature === "WO") {
+                    if (feature.cluster || feature.attributes.typeFeature === "WO" || feature.attributes.typeFeature === "Waterongevallen") {
                         return "#fff722";
                     } else {
                         return "#000000";

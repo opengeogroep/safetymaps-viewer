@@ -77,6 +77,28 @@ exports.getObject = function(req, res) {
     }
 };
 
+/* No difference in object types */
+exports.getObjectNew = function(req, res) {
+    if (req.query) {
+        var id = req.params.id;
+        var srid = req.query.srid;
+        if(!srid){
+            srid = 4326;
+        }
+        var query_str = 'select "DBKObject" from dbk.dbkobject_new_json($1,$2)';
+        global.pool.query(query_str, [id, srid],
+            function(err, result){
+                if(err) {
+                    res.status(400).json(err);
+                } else {
+                    res.json(removeNulls(result.rows[0]));
+                }
+                return;
+            }
+        );
+    }
+};
+
 exports.getGebied = function(req, res) {
     if (req.query) {
         var id = req.params.id;

@@ -300,7 +300,7 @@ OpenLayers.Strategy.Cluster.prototype.cluster = function(event) {
                 clustered = false;
 
                 function dontCluster(feature) {
-                    return dbkjs.map.getScale() < 6275 && feature.attributes.typeFeature == "WO";
+                    return dbkjs.map.getScale() < 6275 && feature.attributes.typeFeature !== "Object";
                 }
                 if(!dontCluster(feature)) {
                     for (var j = clusters.length-1; j >= 0; --j) {
@@ -505,8 +505,8 @@ OpenLayers.Control.SelectFeature.prototype.unselectAll = function(options) {
            continue;
        }
        numExcept = 0;
-       //layer.selectedFeatures is null when layer is destroyed and 
-       //one of it's preremovelayer listener calls setLayer 
+       //layer.selectedFeatures is null when layer is destroyed and
+       //one of it's preremovelayer listener calls setLayer
        //with another layer on this control
        if(layer.selectedFeatures != null) {
            while(layer.selectedFeatures.length > numExcept) {

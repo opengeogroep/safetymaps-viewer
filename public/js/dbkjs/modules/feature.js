@@ -146,6 +146,15 @@ dbkjs.modules.feature = {
         $.getJSON(dbkjs.dataPath + 'features.json', params).done(function(data) {
             var geojson_format = new OpenLayers.Format.GeoJSON();
                 _obj.features = geojson_format.read(data);
+
+            if(_obj.features.length > 0) {
+                $.each(_obj.features, function(i, feature) {
+                    if(feature.attributes.selectiekader) {
+                        feature.attributes.selectiekader = new OpenLayers.Format.GeoJSON().read(feature.attributes.selectiekader, "Geometry");
+                    }
+                });
+            }
+
             if(dbkjs.modules.filter && dbkjs.modules.filter.selectie.length > 0 ) {
                 var selfeat = [];
                 $.each(_obj.features, function(fix,feat){
