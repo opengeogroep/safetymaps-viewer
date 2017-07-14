@@ -96,8 +96,8 @@ create view dbk."DBKFeature" as (
     	d2."Bouwlaag" as bouwlaag,
 	d2."Status" as status,
         d2."RisicoKlasse" as risicoklasse,
-        CASE WHEN not b.geometrie is null then 'Object' ELSE 
-		CASE WHEN not g.geometrie is null then 'Gebied' ELSE 'Feature' END END as "typeFeature",
+        CASE WHEN d2."soortDBK" in ('Evenement', 'Waterongevallen') then d2."soortDBK"::text else 'Object'::text
+        END AS "typeFeature",
         CASE WHEN not b.geometrie is null then b.geometrie ELSE 
 		CASE WHEN not g.geometrie is null then g.geometrie ELSE null END END as geometrie,
 		d.verwerkt as verwerkt,
@@ -415,7 +415,7 @@ CREATE OR REPLACE VIEW dbk."DBKObject_Feature" AS
  SELECT df.gid, df.identificatie, df."BHVaanwezig", df."controleDatum", df."formeleNaam", df."informeleNaam", df.inzetprocedure, dob."laagsteBouwlaag", dob."hoogsteBouwlaag", dob."OMSnummer", 
  dob.gebouwconstructie, dob.adres_id, dob.gebruikstype, df.verwerkt, df.hoofdobject, df.bouwlaag, df.risicoklasse,df.status
    FROM dbk."DBKFeature" df
-   JOIN dbk."DBKObject" dob ON df.identificatie = dob.siteid  where df."typeFeature" = 'Object';
+   JOIN dbk."DBKObject" dob ON df.identificatie = dob.siteid;
 
 GRANT SELECT ON TABLE dbk."DBKObject_Feature" TO public;
 
@@ -680,6 +680,182 @@ SELECT t.identificatie,
            FROM dbk."DBKObject_Feature" d WHERE d.identificatie = $1) t;
 '
 LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION dbk.dbkobject_new_json(IN id integer, IN srid integer DEFAULT 28992)
+  RETURNS TABLE(identificatie integer, "DBKObject" json) AS
+$BODY$
+SELECT t.identificatie,
+    row_to_json(t.*) AS "DBKObject"
+   FROM ( SELECT d.identificatie,
+            d."BHVaanwezig",
+            d."controleDatum",
+            d."formeleNaam",
+            d."informeleNaam",
+            dob."OMSnummer",
+            d.inzetprocedure,
+            dob."laagsteBouwlaag",
+            dob."hoogsteBouwlaag",
+	    d.bouwlaag,
+            d.risicoklasse,
+            dob.gebouwconstructie,
+            dob.gebruikstype,
+            d.verwerkt,
+            ( SELECT array_to_json(array_agg(row_to_json(a.*))) AS array_to_json
+                   FROM ( SELECT "AantalPersonen"."typeAanwezigheidsgroep",
+                            "AantalPersonen".aantal,
+                            "AantalPersonen"."aantalNietZelfredzaam",
+                            "AantalPersonen"."tijdvakBegintijd",
+                            "AantalPersonen"."tijdvakEindtijd",
+                            "AantalPersonen".maandag,
+                            "AantalPersonen".dinsdag,
+                            "AantalPersonen".woensdag,
+                            "AantalPersonen".donderdag,
+                            "AantalPersonen".vrijdag,
+                            "AantalPersonen".zaterdag,
+                            "AantalPersonen".zondag
+                           FROM dbk."AantalPersonen"
+                          WHERE "AantalPersonen".dbkfeature_id = d.identificatie) a) AS verblijf,
+            ( SELECT array_to_json(array_agg(row_to_json(a.*))) AS array_to_json
+                   FROM ( SELECT "Adres"."bagId",
+                            "Adres"."openbareRuimteNaam",
+                            "Adres".huisnummer,
+                            "Adres".huisletter,
+                            "Adres"."woonplaatsNaam",
+                            "Adres"."gemeenteNaam",
+                            "Adres"."adresseerbaarObject",
+                            "Adres"."typeAdresseerbaarObject",
+                            "Adres".huisnummertoevoeging,
+                            "Adres".postcode
+                           FROM dbk."Adres"
+                          WHERE "Adres"."bagId" = dob.adres_id) a) AS adres,
+            ( SELECT array_to_json(array_agg(row_to_json(b.*))) AS array_to_json
+                   FROM ( SELECT "AfwijkendeBinnendekking"."alternatieveCommInfrastructuur",
+                            "AfwijkendeBinnendekking".dekking,
+                            "AfwijkendeBinnendekking"."aanvullendeInformatie",
+                            st_asgeojson(st_transform("AfwijkendeBinnendekking".locatie,$2), 15, 2)::json AS geometry
+                           FROM dbk."AfwijkendeBinnendekking"
+                          WHERE "AfwijkendeBinnendekking".dbkfeature_id = d.identificatie) b) AS afwijkendebinnendekking,
+            ( SELECT array_to_json(array_agg(row_to_json(a.*))) AS array_to_json
+                   FROM ( SELECT "Bijzonderheid".seq,
+                            "Bijzonderheid".soort,
+                            "Bijzonderheid".tekst
+                           FROM dbk."Bijzonderheid"
+                          WHERE "Bijzonderheid".dbkfeature_id = d.identificatie
+                          ORDER BY "Bijzonderheid".soort, "Bijzonderheid".seq) a) AS bijzonderheid,
+            ( SELECT array_to_json(array_agg(row_to_json(b.*))) AS array_to_json
+                   FROM ( SELECT "Brandcompartiment"."typeScheiding","Label", "aanvullendeInformatie", 
+                            st_asgeojson(st_transform("Brandcompartiment".geometrie,$2), 15, 2)::json AS geometry
+                           FROM dbk."Brandcompartiment"
+                          WHERE "Brandcompartiment".dbkfeature_id = d.identificatie) b) AS brandcompartiment,
+            ( SELECT array_to_json(array_agg(row_to_json(b.*))) AS array_to_json
+                   FROM ( SELECT "Brandweervoorziening"."typeVoorziening",
+                            "Brandweervoorziening"."naamVoorziening",
+			    lower("namespace") as namespace,
+                            "Brandweervoorziening"."aanvullendeInformatie",
+                            "Brandweervoorziening".hoek,
+                            categorie,
+                            radius,
+                            st_asgeojson(st_transform("Brandweervoorziening".locatie,$2), 15, 2)::json AS geometry
+                           FROM dbk."Brandweervoorziening"
+                          WHERE "Brandweervoorziening".dbkfeature_id = d.identificatie) b) AS brandweervoorziening,
+      ( SELECT array_to_json(array_agg(row_to_json(b.*))) AS array_to_json
+                   FROM ( SELECT identificatie,
+                            bouwlaag,
+                            case when hoofdobject is null then 'hoofdobject' else 'verdieping' end as "type",
+                            "informeleNaam",
+                             "formeleNaam"                            
+                           FROM dbk."DBKFeature"
+                          WHERE (dbk."DBKFeature".hoofdobject = d.identificatie OR dbk."DBKFeature".identificatie = d.identificatie OR dbk."DBKFeature".hoofdobject = d.hoofdobject OR 
+                          dbk."DBKFeature".identificatie = d.hoofdobject) AND
+                          (viewer = true) AND ((now() > datumtijdviewerbegin and now() <= datumtijdviewereind) OR 
+(datumtijdviewerbegin is null and datumtijdviewereind is null) OR
+(now() > datumtijdviewerbegin and datumtijdviewereind is null) OR
+(datumtijdviewerbegin is null and now() <= datumtijdviewereind))
+                          ORDER BY bouwlaag) b) AS verdiepingen,
+            ( SELECT array_to_json(array_agg(row_to_json(b.*))) AS array_to_json
+                   FROM ( SELECT "Contact".functie,
+                            "Contact".naam,
+                            "Contact".telefoonnummer
+                           FROM dbk."Contact"
+                          WHERE "Contact".dbkfeature_id = d.identificatie
+                          ORDER BY "Contact".naam) b) AS contact,
+            ( SELECT array_to_json(array_agg(row_to_json(b.*))) AS array_to_json
+                   FROM ( SELECT "Foto".naam,
+                            "Foto"."URL",
+                            "Foto".filetype
+                           FROM dbk."Foto"
+                          WHERE "Foto".dbkfeature_id = d.identificatie
+                          ORDER BY "Foto".bron, "Foto".pos, "Foto"."URL") b) AS foto,
+            ( SELECT array_to_json(array_agg(row_to_json(b.*))) AS array_to_json
+                   FROM ( SELECT "GevaarlijkeStof"."naamStof",
+                            "GevaarlijkeStof".gevaarsindicatienummer,
+                            "GevaarlijkeStof"."UNnummer",
+                            "GevaarlijkeStof".hoeveelheid,
+                            "GevaarlijkeStof".namespace,
+                            "GevaarlijkeStof"."symboolCode",
+                            "GevaarlijkeStof"."aanvullendeInformatie",
+                            st_asgeojson(st_transform("GevaarlijkeStof".locatie,$2), 15, 2)::json AS geometry
+                           FROM dbk."GevaarlijkeStof"
+                          WHERE "GevaarlijkeStof".dbkfeature_id = d.identificatie) b) AS gevaarlijkestof,
+            ( SELECT array_to_json(array_agg(row_to_json(b.*))) AS array_to_json
+                   FROM ( SELECT "Hulplijn"."typeHulplijn", "aanvullendeInformatie",
+                            st_asgeojson(st_transform("Hulplijn".geometrie, $2), 15, 2)::json AS geometry
+                           FROM dbk."Hulplijn"
+                          WHERE "Hulplijn".dbkfeature_id = d.identificatie) b) AS hulplijn,
+            ( SELECT array_to_json(array_agg(row_to_json(b.*))) AS array_to_json
+                   FROM ( SELECT "Pandgeometrie"."bagId",
+                            "Pandgeometrie"."bagStatus",
+                            st_asgeojson(st_transform("Pandgeometrie".geometrie,$2), 15, 2)::json AS geometry
+                           FROM dbk."Pandgeometrie"
+                          WHERE "Pandgeometrie".dbkfeature_id = d.identificatie) b) AS pandgeometrie,
+            ( SELECT array_to_json(array_agg(row_to_json(b.*))) AS array_to_json
+                   FROM ( SELECT "TekstObject".tekst,
+                            "TekstObject".hoek,
+                            "TekstObject".schaal,
+                            st_asgeojson(st_transform("TekstObject".absolutepositie, $2), 15, 2)::json AS geometry
+                           FROM dbk."TekstObject"
+                          WHERE "TekstObject".dbkfeature_id = d.identificatie) b) AS tekstobject,
+            ( SELECT array_to_json(array_agg(row_to_json(b.*))) AS array_to_json
+                   FROM ( SELECT "ToegangTerrein".primair,
+                            "ToegangTerrein"."naamRoute",
+                            "ToegangTerrein"."aanvullendeInformatie",
+                            st_asgeojson(st_transform("ToegangTerrein".geometrie,$2), 15, 2)::json AS geometry
+                           FROM dbk."ToegangTerrein"
+                          WHERE "ToegangTerrein".dbkfeature_id = d.identificatie) b) AS toegangterrein,
+/* wfs */	(select array_to_json(array_agg(row_to_json(b.*))) as array_to_json
+		from	(select "Code","X","Y","Rotatie","Omschrijving","Picturename"
+			from wfs."Brandweervoorziening" where "DBK_ID" = d.identificatie
+			) b) as brandweervoorziening2,
+
+/* wfs */	(select array_to_json(array_agg(row_to_json(b.*))) as array_to_json
+		from	(select "Soort","Omschrijving",st_asgeojson(st_transform(the_geom, 28992))::json AS geometry
+			from wfs."Custom_Polygon" where "DBK_ID" = d.identificatie
+			order by case "Soort"
+				when '>15 meter' then -3
+				when '10-15 meter' then -2
+				when '5-10 meter' then -1
+				when '0-5 meter' then 0
+				else gid end asc
+			) b) as custom_polygon,
+			
+/* wfs */	(select array_to_json(array_agg(row_to_json(b.*))) as array_to_json
+		from 	(select "Soort","Tekst","Tabblad","Seq"
+			from wfs."Bijzonderheid" where "DBK_ID" = d.identificatie
+			order by "Seq" asc
+			) b) as custom_bijzonderheid,
+
+/* wfs */	(select st_asgeojson(st_collect(st_transform("Gebied".the_geom, 28992)))::json 
+		from wfs."Gebied" where "DBK_ID" = $1 group by "DBK_ID") as gebied
+			
+           FROM dbk."DBKFeature" d 
+           join dbk."DBKObject" dob on d.identificatie = dob.dbkfeature_id
+           WHERE d.identificatie = $1) t;
+
+$BODY$
+  LANGUAGE sql VOLATILE
+  COST 100
+  ROWS 1000;
+  
 --todo; deze aanpassen aan viewer en dataumtijd voorwaarden.
 CREATE FUNCTION dbk.dbkfeatures_json(srid integer = 28992) RETURNS TABLE (identificatie integer, "feature" json) AS 
 '
@@ -709,6 +885,7 @@ SELECT t.identificatie,
 	gid, identificatie, "BHVaanwezig", "controleDatum", "formeleNaam", 
         "informeleNaam", "OMSNummer", inzetprocedure, "typeFeature", 
         st_asgeojson(st_transform(geometrie,$1),15,2)::json as geometry, verwerkt, hoofdobject, bouwlaag, risicoklasse,
+        (select st_asgeojson(st_transform(g.the_geom,$1),15,2)::json from wfs."Gebied" g where g."DBK_ID" = d.identificatie) as selectiekader,        
 -- XXX deleted checken       (select count(*) from wfs."DBK2" d2 where d2."Hoofdobject_ID" = d.identificatie) as verdiepingen,
         (select count(*) from dbk."DBKFeature" d2 where d2.hoofdobject = d.identificatie) as verdiepingen,
    ( SELECT array_to_json(array_agg(row_to_json(b.*))) AS array_to_json
