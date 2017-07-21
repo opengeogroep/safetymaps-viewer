@@ -242,7 +242,7 @@ VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
         me.incidentId = incidentId;
         var responseIncidentId = incidentId;
 
-        me.service.getAllIncidentInfo(responseIncidentId, false, true)
+        me.service.getAllIncidentInfo(responseIncidentId, false, false)
         .fail(function(e) {
             var msg = "Kan incidentinfo niet ophalen: " + e;
             dbkjs.gui.showError(msg);
@@ -255,7 +255,7 @@ VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
                 return;
             }
             me.incident = incident;
-            me.incidentDetailsWindow.data(incident, false);
+            me.incidentDetailsWindow.data(incident, true);
             me.markerLayer.addIncident(incident, false, true);
             me.markerLayer.setZIndexFix();
 
@@ -427,7 +427,7 @@ VoertuigInzetController.prototype.updateIncident = function(incidentId) {
         return;
     }
 
-    me.service.getAllIncidentInfo(incidentId, false, true)
+    me.service.getAllIncidentInfo(incidentId, false, false)
     .fail(function(e) {
         var msg = "Kan incidentinfo niet updaten: " + e;
         dbkjs.gui.showError(msg);
@@ -440,7 +440,7 @@ VoertuigInzetController.prototype.updateIncident = function(incidentId) {
         }
 
         // Always update window, updates moment.fromNow() times
-        me.incidentDetailsWindow.data(incident, false, true);
+        me.incidentDetailsWindow.data(incident, true, true);
 
         // Check if updated, enable alert state if true
         var oldIncidentHtml = me.incidentDetailsWindow.getIncidentHtml(me.incident, false, true);
