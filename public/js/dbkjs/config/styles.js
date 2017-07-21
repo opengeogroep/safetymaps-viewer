@@ -239,7 +239,7 @@ dbkjs.config.styles = {
                             return lbl_txt;
                         } else {
                             if((feature.attributes.typeFeature === "WO" || feature.attributes.typeFeature === "Waterongevallen") && dbkjs.map.getResolution() <= dbkjs.options.featureLabelResolution) {
-                                return feature.attributes.locatie || feature.attributes.formeleNaam;
+                                return feature.attributes.locatie || feature.attributes.informeleNaam;
                             } else {
                                 return "";
                             }
