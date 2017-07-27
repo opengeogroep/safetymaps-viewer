@@ -975,6 +975,7 @@ dbkjs.protocol.jsonDBK = {
         }
     },
     constructOmsdetail: function (feature) {
+        /* Niet gebruikt
         var _obj = dbkjs.protocol.jsonDBK;
         var id = 'collapse_omsdetail_' + feature.identificatie;
         if (feature.oms_details) {
@@ -1043,6 +1044,7 @@ dbkjs.protocol.jsonDBK = {
             _obj.panel_group.append(omsdetail_div);
             _obj.panel_tabs.append('<li><a data-toggle="tab" href="#' + id + '">' + i18n.t('dbk.omsdetail') + '</a></li>');
         }
+        */
     },
     constructBijzonderheid: function (feature) {
         var _obj = dbkjs.protocol.jsonDBK;
