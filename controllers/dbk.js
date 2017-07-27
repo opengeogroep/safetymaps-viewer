@@ -85,7 +85,7 @@ exports.getObjectNew = function(req, res) {
         if(!srid){
             srid = 4326;
         }
-        var query_str = 'select "DBKObject" from dbk.dbkobject_new_json($1,$2)';
+        var query_str = 'select "DBKObject" from dbk2.dbkobject_json($1,$2)';
         global.pool.query(query_str, [id, srid],
             function(err, result){
                 if(err) {
@@ -126,7 +126,7 @@ exports.getFeatures = function(req, res) {
         if(!srid){
             srid = 4326;
         }
-        var query_str = 'select "feature" from dbk.dbkfeatures_adres_json($1)';
+        var query_str = 'select "feature" from dbk2.dbkfeatures_json($1)';
         global.pool.query(query_str, [srid],
             function(err, result){
                 if(err) {
