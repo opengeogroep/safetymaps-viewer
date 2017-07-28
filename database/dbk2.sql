@@ -1,4 +1,4 @@
---﻿drop schema if exists dbk2 cascade;
+﻿drop schema if exists dbk2 cascade;
 create schema dbk2;
 
 CREATE OR REPLACE VIEW dbk2."DBKFeature" AS 
@@ -376,7 +376,7 @@ CREATE OR REPLACE VIEW dbk2."ToegangTerrein" AS
      JOIN dbk.type_toegangterrein tt ON "ToegangTerrein"."Primair" = tt.gid; -- XXX dbk. schema, verwijder type_ tabel
 GRANT SELECT ON TABLE dbk2."ToegangTerrein" TO public;
 
-CREATE OR REPLACE FUNCTION dbk2.dbkfeatures_adres_json(IN srid integer DEFAULT 28992)
+CREATE OR REPLACE FUNCTION dbk2.dbkfeatures_json(IN srid integer DEFAULT 28992)
   RETURNS TABLE(identificatie integer, feature json) AS
 $BODY$
 SELECT t.identificatie,
