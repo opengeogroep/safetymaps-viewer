@@ -52,6 +52,8 @@ exports.getOrganisation = function(req, res) {
  * Select an object from the database by id. takes srid as parameter.
  * If srid is undefined, falls back to WGS84
  *
+ * No difference in object types (Object, Gebied, WO, etc.)
+ *
  * @param {type} req
  * @param {type} res
  * @returns object
@@ -63,50 +65,7 @@ exports.getObject = function(req, res) {
         if(!srid){
             srid = 4326;
         }
-        var query_str = 'select "DBKObject" from dbk.dbkobject_json($1,$2)';
-        global.pool.query(query_str, [id, srid],
-            function(err, result){
-                if(err) {
-                    res.status(400).json(err);
-                } else {
-                    res.json(removeNulls(result.rows[0]));
-                }
-                return;
-            }
-        );
-    }
-};
-
-/* No difference in object types */
-exports.getObjectNew = function(req, res) {
-    if (req.query) {
-        var id = req.params.id;
-        var srid = req.query.srid;
-        if(!srid){
-            srid = 4326;
-        }
         var query_str = 'select "DBKObject" from dbk2.dbkobject_json($1,$2)';
-        global.pool.query(query_str, [id, srid],
-            function(err, result){
-                if(err) {
-                    res.status(400).json(err);
-                } else {
-                    res.json(removeNulls(result.rows[0]));
-                }
-                return;
-            }
-        );
-    }
-};
-
-exports.getGebied = function(req, res) {
-    if (req.query) {
-        var id = req.params.id;
-        var srid = req.query.srid;
-        if(!srid){
-            srid = 4326;
-        }
-        var query_str = 'select "DBKGebied" from dbk.dbkgebied_json($1,$2)';
         global.pool.query(query_str, [id, srid],
             function(err, result){
                 if(err) {
