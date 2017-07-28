@@ -55,8 +55,6 @@ function VoertuigInzetController(incidents) {
 
     me.voertuignummer = window.localStorage.getItem("voertuignummer");
 
-    me.dbkSelectMaxDistance = incidents.options.dbkSelectMaxDistance || 250;
-
     me.addConfigControls();
 
     me.matches = null;
