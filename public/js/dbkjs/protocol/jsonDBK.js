@@ -1413,7 +1413,8 @@ dbkjs.protocol.jsonDBK = {
         });
         var params = {
             srid: dbkjs.options.projection.srid,
-            timestamp: new Date().getTime()
+            timestamp: new Date().getTime(),
+            version: "2"
         };
         var fid;
         if (feature.attributes) {
