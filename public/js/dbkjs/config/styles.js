@@ -130,13 +130,7 @@ dbkjs.config.styles = {
                     if (feature.cluster) {
                         return 65;
                     } else {
-                        if (feature.attributes.typeFeature === 'Object') {
-                            return 38;
-                        } else if(feature.attributes.typeFeature === "WO" || feature.attributes.typeFeature === "Waterongevallen") {
-                            return 40;
-                        } else {
-                            return 65;
-                        }
+                        return dbkjs.config.styles.getFeatureStylingInfo(feature).iconHeight;
                     }
 
                 },
@@ -144,13 +138,7 @@ dbkjs.config.styles = {
                     if (feature.cluster) {
                         return 85;
                     } else {
-                        if (feature.attributes.typeFeature === 'Object') {
-                            return 24;
-                        } else if(feature.attributes.typeFeature === "WO" || feature.attributes.typeFeature === "Waterongevallen") {
-                            return 40;
-                        } else {
-                            return 85;
-                        }
+                        return dbkjs.config.styles.getFeatureStylingInfo(feature).iconWidth;
                     }
                 },
                 myfontweight: function (feature) {
@@ -167,7 +155,7 @@ dbkjs.config.styles = {
                     if (feature.cluster) {
                         return "cc";
                     } else {
-                         if(feature.attributes.typeFeature === "WO" || feature.attributes.typeFeature === "Waterongevallen") {
+                         if(feature.attributes.typeFeature !== "Object") {
                             return "cb";
                          } else {
                             return "rb";
@@ -178,7 +166,7 @@ dbkjs.config.styles = {
                     if (feature.cluster) {
                         return 0;
                     } else {
-                         if(feature.attributes.typeFeature === "WO" || feature.attributes.typeFeature === "Waterongevallen") {
+                         if(feature.attributes.typeFeature !== "Object") {
                             return 0;
                          } else {
                             return -16;
@@ -189,7 +177,7 @@ dbkjs.config.styles = {
                     if (feature.cluster) {
                         return -4;
                     } else {
-                         if(feature.attributes.typeFeature === "WO" || feature.attributes.typeFeature === "Waterongevallen") {
+                         if(feature.attributes.typeFeature !== "Object") {
                             return -32;
                          } else {
                             return -9;
@@ -200,7 +188,7 @@ dbkjs.config.styles = {
                     if (feature.cluster) {
                         return "#ffffff";
                     } else {
-                        if(feature.attributes.typeFeature === "WO" || feature.attributes.typeFeature === "Waterongevallen") {
+                        if(feature.attributes.typeFeature !== "Object") {
                             return "white";
                         } else {
                             return "#000000";
@@ -211,19 +199,7 @@ dbkjs.config.styles = {
                     if (feature.cluster) {
                         return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + "images/jcartier_city_3.png" : imagesBase64["images/jcartier_city_3.png"];
                     } else {
-                        if (feature.attributes.typeFeature === 'Object') {
-                            var img;
-                            if (feature.attributes.verdiepingen || feature.attributes.verdiepingen !== 0) {
-                                img = "images/jcartier_building_1.png";
-                            } else {
-                                img = "images/jcartier_building_2.png";
-                            }
-                            return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + img : imagesBase64[img];
-                        } else if(feature.attributes.typeFeature === 'WO' || feature.attributes.typeFeature === "Waterongevallen") {
-                            return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + "images/wo/wo.png" : imagesBase64["images/wo/wo.png"];
-                        } else {
-                            return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + "images/jcartier_event_1.png" : imagesBase64["images/jcartier_event_1.png"];
-                        }
+                        return dbkjs.config.styles.getFeatureStylingInfo(feature).icon;
                     }
                 },
                 labeltext: function (feature) {
@@ -238,7 +214,7 @@ dbkjs.config.styles = {
                             }
                             return lbl_txt;
                         } else {
-                            if((feature.attributes.typeFeature === "WO" || feature.attributes.typeFeature === "Waterongevallen") && dbkjs.map.getResolution() <= dbkjs.options.featureLabelResolution) {
+                            if(feature.attributes.typeFeature !== "Object" && dbkjs.map.getResolution() <= dbkjs.options.featureLabelResolution) {
                                 return feature.attributes.locatie || feature.attributes.informeleNaam;
                             } else {
                                 return "";
@@ -816,6 +792,29 @@ dbkjs.config.styles = {
              }
          })
      }),
+    getFeatureStylingInfo: function(feature) {
+        var info = {};
+        if (feature.attributes.typeFeature === 'Object') {
+            var img;
+            if (feature.attributes.verdiepingen || feature.attributes.verdiepingen !== 0) {
+                img = "images/jcartier_building_1.png";
+            } else {
+                img = "images/jcartier_building_2.png";
+            }
+            info.icon = typeof imagesBase64 === 'undefined' ? dbkjs.basePath + img : imagesBase64[img];
+            info.iconWidth = 24;
+            info.iconHeight = 38;
+        } else if(feature.attributes.typeFeature === 'WO' || feature.attributes.typeFeature === "Waterongevallen") {
+            info.icon = typeof imagesBase64 === 'undefined' ? dbkjs.basePath + "images/wo/wo.png" : imagesBase64["images/wo/wo.png"];
+            info.iconWidth = 40;
+            info.iconHeight = 40;
+        } else {
+            info.icon = typeof imagesBase64 === 'undefined' ? dbkjs.basePath + "images/jcartier_event_1.png" : imagesBase64["images/jcartier_event_1.png"];
+            info.iconWidth = 85;
+            info.iconHeight = 65;
+        }
+        return info;
+    },
     getCustomPolygonColor: function(soort) {
         switch(soort) {
             case ">15 meter": return "#f72e3a";

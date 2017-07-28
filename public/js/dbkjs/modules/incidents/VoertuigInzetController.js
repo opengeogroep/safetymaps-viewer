@@ -57,23 +57,14 @@ function VoertuigInzetController(incidents) {
 
     me.addConfigControls();
 
-    me.matches = null;
-
     $('.dbk-title').on('click', function() {
-        if(me.selectedDbkFeature && dbkjs.options.feature) { // geen dbkjs.options.feature bij geselecteerde WO
-            if(dbkjs.options.feature.identificatie !== me.selectedDbkFeature.attributes.identificatie) {
-                dbkjs.modules.feature.handleDbkOmsSearch(me.selectedDbkFeature);
-            } else {
-                dbkjs.modules.feature.zoomToFeature(me.selectedDbkFeature);
-            }
+        me.zoomToIncident();
+        me.incidentDetailsWindow.show();
+        if(me.featureSelector.matches.length === 1) {
+            dbkjs.protocol.jsonDBK.process(me.featureSelector.matches[0], null, true);
         } else {
             dbkjs.protocol.jsonDBK.deselect();
-            me.zoomToIncident();
-
-            if(me.matches) {
-                me.renderMatches();
-                dbkjs.dbkInfoPanel.toggle();
-            }
+            me.incidentDetailsWindow.showMultipleFeatureMatches();
         }
     });
 
@@ -258,131 +249,32 @@ VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
             me.markerLayer.setZIndexFix();
 
             dbkjs.protocol.jsonDBK.deselect();
-            me.selectIncidentDBK(incident);
             me.zoomToIncident();
+
+            var x = incident.T_X_COORD_LOC;
+            var y = incident.T_Y_COORD_LOC;
+            me.featureSelector = new IncidentFeatureSelector(incident, {
+                postcode: incident.POSTCODE,
+                woonplaats: incident.PLAATS_NAAM_NEN,
+                huisnummer: Number(incident.HUIS_PAAL_NR),
+                huisletter: incident.HUISLETTER,
+                toevoeging: incident.HUIS_NR_TOEV,
+                straat: incident.NAAM_LOCATIE1,
+                x: x,
+                y: y
+            }, false, false);
+
+            me.featureSelector.updateBalkRechtsonder();
+            me.featureSelector.findAndSelectMatches(me.incidentDetailsWindow);
+
             me.incidentDetailsWindow.show();
+
             me.enableIncidentUpdates();
 
             me.button.setIcon("bell");
 
             $(me).triggerHandler("new_incident", incident);
         });
-    }
-};
-
-/**
- * Find and select DBK for the incident.
- * @param {object} incident
- */
-VoertuigInzetController.prototype.selectIncidentDBK = function(incident) {
-    var me = this;
-
-    this.matches = null;
-
-    if(!dbkjs.modules.feature.features || dbkjs.modules.feature.features.length === 0) {
-        console.log("Waiting for features to be loaded before selecting incident DBK");
-        window.setTimeout(function() {
-            me.selectIncidentDBK(incident);
-        }, 1000);
-        return;
-    }
-
-    var postcode = incident.POSTCODE;
-    var woonplaats = incident.PLAATS_NAAM_NEN;
-    var huisnummer = Number(incident.HUIS_PAAL_NR);
-    var huisletter = incident.HUISLETTER;
-    var toevoeging = incident.HUIS_NR_TOEV;
-    var straat =  incident.NAAM_LOCATIE1;
-
-    var title = Mustache.render("{{Straat}} {{Huisnummer}}{{#Toevoeging}} {{Toevoeging}}{{/Toevoeging}}, {{Woonplaats}}", {
-        "Straat": straat,
-        "Huisnummer": huisnummer + (huisletter || ""),
-        "Toevoeging": toevoeging,
-        "Woonplaats": woonplaats
-    });
-    me.updateBalkrechtsonder(title);
-
-    this.selectedDbkFeature = null;
-
-    if(postcode && huisnummer) {
-        console.log("Zoeken naar DBK voor incident POSTCODE=" + postcode + ", WOONPLAATS=" + woonplaats +
-                ", HUIS_PAAL_NR=" + huisnummer + ", HUISLETTER=" + huisletter + ", HUIS_NR_TOEV=" + toevoeging +
-                ", NAAM_LOCATIE1=" + straat);
-
-        var dbk = null;
-        $.each(dbkjs.modules.feature.features, function(index, f) {
-            if($.isArray(f.attributes.adres)) {
-                $.each(f.attributes.adres, function(index, fa) {
-                    if(fa) {
-                        var matchPostcode = fa.postcode && postcode === fa.postcode;
-                        var matchHuisnummer = fa.huisnummer && huisnummer === fa.huisnummer;
-
-                        if(matchHuisnummer) {
-                            if(matchPostcode) {
-                                dbk = f;
-                                return false;
-                            }
-                        }
-                    }
-                });
-            }
-            if(dbk) {
-                return false;
-            }
-
-            if($.isArray(f.attributes.adressen)) {
-                $.each(f.attributes.adressen, function(i, a) {
-                    var matchPostcode = a.postcode && a.postcode === postcode;
-                    var matchWoonplaats = a.woonplaats && a.woonplaats === woonplaats;
-                    var matchStraat = a.straatnaam && a.straatnaam === straat;
-                    if(matchPostcode || (matchWoonplaats && matchStraat) && a.nummers) {
-                        console.log("Checking nummers for match DBK " + f.attributes.formeleNaam + ", "  + a.straatnaam + ", " + a.postcode + " " + a.woonplaats);
-                        $.each(a.nummers, function(j, n) {
-                            var parts = n.split("|");
-                            var matchHuisnummer = Number(parts[0]) === huisnummer;
-                            if(matchHuisnummer) {
-                                console.log("Matched DBK with nummer " + n, f);
-                                dbk = f;
-                                return false;
-                            }
-                        });
-                        if(dbk) {
-                            return false;
-                        }
-                    }
-                });
-            }
-            if(dbk) {
-                return false;
-            }
-        });
-
-        var matches = dbk ? [dbk] : [];
-
-        // Zoek naar WO DBK's op basis van selectiepolygoon
-        var x = incident.T_X_COORD_LOC;
-        var y = incident.T_Y_COORD_LOC;
-        var point = new OpenLayers.Geometry.Point(x, y);
-
-        $.each(dbkjs.modules.feature.features, function(index, f) {
-            if(f.attributes.selectiekader) {
-                $.each(f.attributes.selectiekader.components, function(j, c) {
-                    //console.log("checking " + f.attributes.label + " contains: " + c.toString() + ", " + point);
-                    if(c.containsPoint(point)) {
-                        console.log("Incident XY inside feature selectiekader ", f);
-                        matches.push(f);
-                    }
-                });
-            }
-        });
-        if(matches.length === 1) {
-            console.log("Selecting match", dbk);
-            dbkjs.protocol.jsonDBK.process(matches[0], null, true);
-        } else if(matches.length > 1) {
-            console.log("Multiple matches", matches);
-            this.matches = matches;
-            this.renderMatches();
-        }
     }
 };
 
@@ -454,27 +346,4 @@ VoertuigInzetController.prototype.updateIncident = function(incidentId) {
             me.markerLayer.setZIndexFix();
         }
     });
-};
-
-VoertuigInzetController.prototype.renderMatches = function() {
-    var me = this;
-    if(!me.matches) {
-        return;
-    }
-    var div  = $("#dbkinfopanel_b");
-    var item_ul = $('<ul class="nav nav-pills nav-stacked"></ul>');
-    div.html("<h3>Meerdere informatiekaarten gevonden op de locatie van het incident:</h3><p>");
-    $.each(me.matches, function(i, m) {
-        item_ul.append($('<li><a href="#">' + (m.attributes.locatie || m.attributes.formeleNaam) + '</a></li>').on('click', function(e) {
-            e.preventDefault();
-            dbkjs.protocol.jsonDBK.process(m, null, true);
-        }));
-    });
-    div.append(item_ul);
-};
-
-VoertuigInzetController.prototype.updateBalkrechtsonder = function(title) {
-    $('.dbk-title')
-        .text(title)
-        .css('visibility', 'visible');
 };

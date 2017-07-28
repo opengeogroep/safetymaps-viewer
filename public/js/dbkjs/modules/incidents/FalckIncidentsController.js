@@ -484,6 +484,16 @@ FalckIncidentsController.prototype.selectIncidentDBK = function(incident) {
     var toevoeging = l.HnToevoeging;
     var straat = l.NaamLocatie1;
 
+    var selector = new IncidentFeatureSelector(incident, {
+        postcode: l.Postcode,
+        woonplaats: l.Plaatsnaam,
+        huisnummer: l.Huisnummer,
+        huisletter: l.Letter,
+        toevoeging: l.HnToevoeging,
+        straat: l.NaamLocatie1
+    }, true, false);
+    selector.findMatches();
+
     if(postcode && huisnummer) {
         console.log("Zoeken naar DBK voor incident postcode=" + postcode + ", plaatsnaam=" + woonplaats +
                 ", huisnummer=" + huisnummer + ", letter=" + huisletter + ", toevoeging=" + toevoeging +

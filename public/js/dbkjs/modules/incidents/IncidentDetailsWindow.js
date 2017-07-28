@@ -18,6 +18,8 @@
  *
  */
 
+/* global dbkjs, Mustache, SplitScreenWindow, ModalWindow, AGSIncidentService */
+
 /**
  * Window which shows incident details. Subclass of SplitScreenWindow. Create
  * only one instance as it always uses modal popup name "incidentDetails".
@@ -159,9 +161,58 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
     v.find(".incidentDetails").html(table);
     v.find("#tab_kladblok").html(kladblok);
 
+    if(this.showFeatureMatches) {
+        this.showMultipleFeatureMatches();
+    }
+
     if(restoreScrollTop) {
         v.scrollTop(scrollTop);
     }
+};
+
+IncidentDetailsWindow.prototype.setMultipleFeatureMatches = function(matches, incidentLonLat) {
+    var me = this;
+
+    me.multipleFeatureMatches = matches;
+    me.incidentLonLat = incidentLonLat;
+
+    me.showMultipleFeatureMatches();
+};
+
+IncidentDetailsWindow.prototype.hideMultipleFeatureMatches = function() {
+    var me = this;
+
+    me.showFeatureMatches = false;
+
+    $(".incidentDetails .detailed").show();
+    $(".incident_tab").show();
+    $("#multiple_matches").hide();
+};
+
+IncidentDetailsWindow.prototype.showMultipleFeatureMatches = function() {
+    var me = this;
+    me.showFeatureMatches = true;
+
+    $(".incidentDetails .detailed").hide();
+    $(".incident_tab").hide();
+
+    var div = $("<div id='multiple_matches'/>");
+    div.append("<h3>Meerdere informatiekaarten gevonden op de locatie van het incident:</h3>");
+    var item_ul = $('<ul class="nav nav-pills nav-stacked"></ul>');
+    $.each(me.multipleFeatureMatches, function(i, m) {
+        var info = dbkjs.config.styles.getFeatureStylingInfo(m);
+
+        item_ul.append($('<li><a href="#"><img src="' + info.icon + '" style="width: 25px; margin-right: 10px">' + (m.attributes.locatie || m.attributes.formeleNaam) + '</a></li>').on('click', function(e) {
+            e.preventDefault();
+            me.hideMultipleFeatureMatches();
+            if(me.incidentLonLat) {
+                dbkjs.map.setCenter(me.incidentLonLat, dbkjs.options.zoom);
+            }
+            dbkjs.protocol.jsonDBK.process(m, null, true);
+        }));
+    });
+    div.append(item_ul);
+    $(".incidentDetails").append(div);
 };
 
 IncidentDetailsWindow.prototype.getIncidentAdres = function(incident, isXml) {
@@ -231,10 +282,10 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
     html += '<tr><td>Melding classificatie:</td><td>' + dbkjs.util.htmlEncode(incident.classificatie) + '</td></tr>';
 
     if(!incident.karakteristiek || incident.karakteristiek.length === 0) {
-        html += '<tr><td>Karakteristieken:</td><td>';
+        html += '<tr class="detailed"><td>Karakteristieken:</td><td>';
         html += "<h4>-</h4>";
     } else {
-        html += '<tr><td colspan="2">Karakteristieken:<br/>';
+        html += '<tr class="detailed"><td colspan="2">Karakteristieken:<br/>';
         html += '<div class="table-responsive" style="margin: 0px 10px 0px 10px">';
         html += '<table class="table table-hover" style="width: auto">';
         $.each(incident.karakteristiek, function(i, k) {
@@ -248,7 +299,7 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
     html += '</td></tr>';
 
     if(showInzet) {
-        html += '<tr><td colspan="2" id="eenheden">';
+        html += '<tr class="detailed"><td colspan="2" id="eenheden">';
         var eenhBrw = "", eenhPol = "", eenhAmbu = "";
         $.each(incident.inzetEenheden, function(i, inzet) {
             var eenheid = (inzet.CODE_VOERTUIGSOORT ? inzet.CODE_VOERTUIGSOORT : "") + " " + inzet.ROEPNAAM_EENHEID;
@@ -378,10 +429,10 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
     html += '<tr><td>Melding classificatie:</td><td>' + c.join(", ") + '</td></tr>';
 
     if(!incident.Karakteristieken || incident.Karakteristieken.length === 0) {
-        html += '<tr><td>Karakteristieken:</td><td>';
+        html += '<tr class="detailed"><td>Karakteristieken:</td><td>';
         html += "<h4>-</h4>";
     } else {
-        html += '<tr><td colspan="2">Karakteristieken:<br/>';
+        html += '<tr class="detailed"><td colspan="2">Karakteristieken:<br/>';
         html += '<div class="table-responsive" style="margin: 0px 10px 0px 10px">';
         html += '<table class="table table-hover" style="width: auto">';
         $.each(incident.Karakteristieken, function(i, k) {
@@ -392,7 +443,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
     html += '</td></tr>';
 
     if(showInzet) {
-        html += '<tr><td>Eenheden: </td><td>';
+        html += '<tr class="detailed"><td>Eenheden: </td><td>';
         $.each(incident.BetrokkenEenheden, function(i, inzet) {
             if(i > 0) {
                 html += ", ";
@@ -465,10 +516,10 @@ IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInze
     var karakteristiek = $(incident).find("Karakteristiek");
 
     if(karakteristiek.length === 0) {
-        html += '<tr><td>Karakteristieken:</td><td>';
+        html += '<tr class="detailed"><td>Karakteristieken:</td><td>';
         html += "<h4>-</h4>";
     } else {
-        html += '<tr><td colspan="2">Karakteristieken:<br/>';
+        html += '<tr class="detailed"><td colspan="2">Karakteristieken:<br/>';
         html += '<div class="table-responsive" style="margin: 0px 10px 0px 10px">';
         html += '<table class="table table-hover" style="width: auto">';
         $.each(karakteristiek, function(i, k) {
@@ -483,7 +534,7 @@ IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInze
     html += '</td></tr>';
 
     if(showInzet) {
-        html += '<tr><td colspan="2" id="eenheden">';
+        html += '<tr class="detailed"><td colspan="2" id="eenheden">';
         var eenhBrw = "", eenhPol = "", eenhAmbu = "";
         $.each($(incident).find("GekoppeldeEenheden Eenheid"), function(i, eenheid) {
             var naam = $(eenheid).find("Roepnaam").text();
