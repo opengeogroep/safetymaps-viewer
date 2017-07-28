@@ -247,7 +247,7 @@ if(!skipDB) {
                                 });
                             };
 
-                            dbk.getObjectNew(req(identificatie), {
+                            dbk.getObject(req(identificatie), {
                                 status: function() { return this; },
                                 json: function(json) {
 
