@@ -261,7 +261,7 @@ VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
                 straat: incident.NAAM_LOCATIE1,
                 x: x,
                 y: y
-            }, false, false);
+            }, true, false);
 
             me.featureSelector.updateBalkRechtsonder();
             me.featureSelector.findAndSelectMatches(me.incidentDetailsWindow);

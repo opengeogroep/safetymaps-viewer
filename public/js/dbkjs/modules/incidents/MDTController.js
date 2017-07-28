@@ -133,7 +133,7 @@ MDTController.prototype.newIncident = function() {
         straat: $(adres).find("Straat").text(),
         x: x,
         y: y
-    }, false, false);
+    }, true, false);
 
     me.featureSelector.updateBalkRechtsonder();
     me.featureSelector.findAndSelectMatches(me.incidentDetailsWindow);
