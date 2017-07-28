@@ -71,7 +71,7 @@ function FalckIncidentsController(incidents) {
             me.addConfigControls();
             me.getVoertuignummers();
             me.setVoertuignummer(me.voertuignummer, true);
-        }, 1000);
+        }, 2000);
     });
 };
 
