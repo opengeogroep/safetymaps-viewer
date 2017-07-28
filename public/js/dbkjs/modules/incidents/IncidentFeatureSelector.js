@@ -45,7 +45,7 @@ IncidentFeatureSelector.prototype.findAndSelectMatches = function(incidentDetail
     if(!me.findMatches()) {
         console.log("Waiting for features to be loaded before selecting incident DBK");
         window.setTimeout(function() {
-            me.findAndSelectMatches();
+            me.findAndSelectMatches(incidentDetailsWindow);
         }, 1000);
         return;
     }
@@ -79,6 +79,9 @@ IncidentFeatureSelector.prototype.findMatches = function() {
 
     if(!dbkjs.modules.feature.features || dbkjs.modules.feature.features.length === 0) {
         console.log("Features not loaded, can't search for feature matching incident");
+        return false;
+    } else if(dbkjs.modules.waterongevallen.enabled && !dbkjs.modules.waterongevallen.loaded) {
+        console.log("VRH Waterongevallen not loaded, waiting");
         return false;
     } else {
         console.log("Searching feature for incident address " + straat + " " + huisnummer + huisletter + " " + toevoeging + ", " + postcode + " " + woonplaats, me.matchInfo);
@@ -162,13 +165,22 @@ IncidentFeatureSelector.prototype.findMatches = function() {
     return true;
 };
 
-IncidentFeatureSelector.prototype.updateBalkRechtsonder = function() {
+IncidentFeatureSelector.prototype.updateBalkRechtsonder = function(titleOverride) {
     var me = this;
-    me.title = Mustache.render("{{straat}} {{huisnummer}}{{huisletter}}{{#toevoeging}} {{toevoeging}}{{/toevoeging}}, {{woonplaats}}",
-        me.matchInfo
-    );
+    if(titleOverride) {
+        me.title = titleOverride;
+    } else {
+        me.title = Mustache.render("{{straat}} {{huisnummer}}{{huisletter}}{{#toevoeging}} {{toevoeging}}{{/toevoeging}}, {{woonplaats}}",
+            me.matchInfo
+        );
+    }
     $('.dbk-title')
         .html(me.title)
         .css('visibility', 'visible');
 };
 
+IncidentFeatureSelector.prototype.hideBalkRechtsonder = function() {
+    $('.dbk-title')
+        .text("")
+        .css('visibility', 'hidden');
+};

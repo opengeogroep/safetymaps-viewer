@@ -211,10 +211,9 @@ VoertuigInzetController.prototype.geenInzet = function(triggerEvent) {
     this.incidentDetailsWindow.data("Er is momenteel geen incident waavoor dit voertuig is ingezet.");
     this.incidentDetailsWindow.hide();
     this.markerLayer.clear();
-    $('.dbk-title')
-        .text("Geen incident")
-        .css('visibility', 'hidden');
-
+    if(this.featureSelector) {
+        this.featureSelector.hideBalkRechtsonder();
+    }
     this.button.setAlerted(false);
     this.button.setIcon("bell-o");
 

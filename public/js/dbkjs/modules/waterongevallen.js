@@ -30,7 +30,8 @@ dbkjs.modules.waterongevallen = {
     lijnen: null,
     register: function() {
         var me = this;
-
+        me.enabled = true;
+        me.loaded = false;
         this.options = $.extend({
             vrh: false
         }, this.options);
@@ -45,6 +46,8 @@ dbkjs.modules.waterongevallen = {
         var me = this;
         $.ajax("api/wbbks.json", {
             dataType: "json"
+        }).always(function() {
+            me.loaded = true;
         }).fail(function(jqXHR, textStatus, errorThrown) {
             dbkjs.gui.showError("Fout bij inladen waterongevallenkaarten: " + errorThrown);
         }).done(function(data) {
