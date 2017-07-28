@@ -140,7 +140,8 @@ dbkjs.modules.feature = {
         }
         var params = {
             srid: dbkjs.options.projection.srid,
-            timestamp: new Date().getTime()
+            timestamp: new Date().getTime(),
+            version: "2"
         };
         dbkjs.util.loadingStart(_obj.layer);
         $.getJSON(dbkjs.dataPath + 'features.json', params).done(function(data) {
