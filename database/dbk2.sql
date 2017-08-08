@@ -385,6 +385,7 @@ SELECT t.identificatie,
 	gid, identificatie, "BHVaanwezig", "controleDatum", "formeleNaam", 
         "informeleNaam", "OMSNummer", inzetprocedure, "typeFeature", 
         st_asgeojson(st_transform(geometrie,$1),15,2)::json as geometry, verwerkt, hoofdobject, bouwlaag, risicoklasse,
+        (select st_asgeojson(st_transform(g.the_geom,$1),15,2)::json from wfs."Gebied" g where g."DBK_ID" = d.identificatie) as selectiekader,
         (select count(*) from wfs."DBK2" d2 where d2."Hoofdobject_ID" = d.identificatie) as verdiepingen,
             ( SELECT array_to_json(array_agg(row_to_json(a.*))) AS array_to_json
                    FROM ( SELECT "Adres"."bagId",
