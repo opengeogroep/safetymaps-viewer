@@ -226,18 +226,8 @@ dbkjs.config.styles = {
                 }
             }
         }),
-        "select": new OpenLayers.Style({
-            fontColor: "${myfontcolor}"
-        }, {
-            context: {
-                myfontcolor: function(feature) {
-                    if (feature.cluster || feature.attributes.typeFeature === "WO" || feature.attributes.typeFeature === "Waterongevallen") {
-                        return "#fff722";
-                    } else {
-                        return "#000000";
-                    }
-                }
-            }
+        "select": new OpenLayers.Style({ // need a style for select, default is transparent icon
+            fontColor: "white"
         })
     }),
     dbkpand: new OpenLayers.StyleMap({
