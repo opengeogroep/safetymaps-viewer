@@ -266,7 +266,7 @@ OpenLayers.Strategy.Cluster.prototype.cluster = function(event) {
                 feature.geometry = feature.originalGeometry;
                 delete feature.originalGeometry;
             }
-            if(feature.geometry) {
+            if(feature.geometry && !dbkjs.modules.feature.isFiltered(feature)) {
                 if(!screenBounds.intersectsBounds(feature.geometry.getBounds())) {
 
                     if(feature.attributes.selectiekader && screenBounds.intersectsBounds(feature.attributes.selectiekader.getBounds())) {

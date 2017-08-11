@@ -290,6 +290,19 @@ dbkjs.modules.feature = {
     updateFilter: function() {
         this.layer.redraw();
     },
+    /**
+     * Show only features with the typeFeature attribute in the specified array
+     */
+    setTypeFilter: function(types) {
+        this.typeFilter = types;
+        this.layer.redraw();
+    },
+    isFiltered: function(feature) {
+        return this.typeFilter && this.typeFilter.length > 0 && this.typeFilter.indexOf(feature.attributes.typeFeature) === -1;
+    },
+    setDisableClustering: function(disableClustering) {
+        this.disableClustering = disableClustering;
+    },
     zoomToPandgeometrie: function() {
         // Pandgeometrie layer must be loaded
 

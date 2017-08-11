@@ -91,6 +91,11 @@ dbkjs.config.styles = {
         }, {
             context: {
                 mydisplay: function (feature) {
+                    if(dbkjs.modules.feature.isFiltered(feature)) {
+                        console.log("hiding feature " + feature.attributes.typeFeature);
+                        return "none";
+                    }
+
                     if (dbkjs.map.getResolution() > 1) {
                         // pandgeometrie not visible above resolution 1, always show feature icon
                         return "true";
