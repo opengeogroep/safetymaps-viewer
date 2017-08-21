@@ -132,6 +132,8 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
         format = "xml";
     } else if(typeof incident.IncidentNummer !== 'undefined') {
         format = "falck";
+    } else if(typeof incident.Nummer !== 'undefined') {
+        format = "pharos";
     } else {
         format = "vrh";
     }
@@ -149,6 +151,10 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
             break;
         case "falck":
             table = this.getIncidentHtmlFalck(incident, showInzet, false);
+            kladblok = this.getIncidentKladblokHtml(format, incident);
+            break;
+        case "pharos":
+            table = this.getIncidentHtmlPharos(incident, showInzet, false);
             kladblok = this.getIncidentKladblokHtml(format, incident);
             break;
         default:
@@ -230,6 +236,10 @@ IncidentDetailsWindow.prototype.getIncidentAdres = function(incident, isXml) {
         // Falck JSON
         var a = incident.IncidentLocatie;
         return Mustache.render("{{NaamLocatie1}} {{Huisnummer}}{{Letter}} {{HnToevoeging}} {{HnAanduiding}} {{Paalnummer}}", a).trim();
+    } else if(incident.Nummer) {
+        // Pharos JSON
+        var a = incident.IncidentAdres.Adres;
+        return Mustache.render("{{Straat}} {{Huisnummer}} {{HuisnummerToevg}}", a).trim();
     } else {
         // Oracle GMS replica AGS JSON
         return incident.T_GUI_LOCATIE;
@@ -352,6 +362,9 @@ IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incid
                 kladblokHTML += "<tr><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + dbkjs.util.htmlEncode(k.Inhoud) + "</td></tr>";
             });
             break;
+        case "pharos":
+            kladblokHTML = dbkjs.util.nl2br(incident.Kladblok);
+            break;
         default:
             kladblokHTML = this.getIncidentKladblokDefaultHtml(incident.kladblok);
     }
@@ -458,6 +471,49 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
 
     if(compareMode) {
         html += me.getIncidentKladblokHtml("falck", incident);
+    }
+
+    html += '</table>';
+
+    return html;
+};
+
+IncidentDetailsWindow.prototype.getIncidentHtmlPharos = function(incident, showInzet, compareMode) {
+    var me = this;
+
+    html = '<table class="table table-hover">';
+
+    function row(val, caption) {
+        if(!dbkjs.util.isJsonNull(val)) {
+            html += '<tr><td>' + caption + ':</td><td>' + val + '</td></tr>';
+        }
+    }
+
+    var me = this;
+    var e = function(s) {
+        if(s) {
+            return dbkjs.util.htmlEncode(s);
+        } else {
+            return "";
+        }
+    };
+
+    row(e(incident.Nummer), "Nummer");
+    var m = moment(incident.Tijd);
+    row(m.format("DD MMMM YYYY HH:mm:ss") + (compareMode ? "" : " (" + m.fromNow() + ")"), "Tijd");
+    row(e(incident.Prioriteit), "Prioriteit");
+    row(e(incident.Classificatie ? incident.Classificatie.replace(/,/g, ", ") : null), "Classificatie");
+    row(e(incident.Karakterestiek), "Karakteristiek"); // sic
+    var a = incident.IncidentAdres;
+    if(a && a.Adres) {
+        var s = (e(a.Adres.Straat) + " " + e(a.Adres.Huisnummer) + e(a.Adres.HuisnummerToevg)).trim() + ", " +
+                e(a.Adres.Postcode) + " " + e(a.Adres.Plaats);
+        row(s, "Adres");
+    }
+    row(e(a.Aanduiding), "Aanduiding");
+
+    if(compareMode) {
+        html += me.getIncidentKladblokHtml("pharos", incident);
     }
 
     html += '</table>';

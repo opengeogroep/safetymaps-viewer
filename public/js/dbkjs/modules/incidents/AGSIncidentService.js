@@ -337,8 +337,12 @@ AGSIncidentService.prototype.getIncidentLocatie = function(incident) {
     return locatie;
 };
 
+/* XXX move, niet specifiek voor AGS incidenten */
 AGSIncidentService.prototype.getIncidentXY = function(incident) {
     var x, y;
+    if(incident.lon && incident.lat) {
+        return {x: incident.lon, y: incident.lat};
+    } 
     if(incident.T_X_COORD_LOC && incident.T_Y_COORD_LOC) {
         x = incident.T_X_COORD_LOC;
         y = incident.T_Y_COORD_LOC;

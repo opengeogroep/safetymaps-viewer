@@ -27,14 +27,18 @@ dbkjs.modules.incidents = {
     controller: null,
     options: null,
     register: function() {
-        this.options = dbkjs.options.incidents;
+        if(!this.options) {
+            this.options = dbkjs.options.incidents;
+        }
 
         var params = OpenLayers.Util.getParameters();
         if(params.mdt && "true" !== params.mdt) {
             this.options.mdt = false;
         }
 
-        if(this.options.falck) {
+        if(this.options.controller === "pharos") {
+            this.controller = new PharosIncidentsController(this);
+        } else if(this.options.falck) {
             this.controller = new FalckIncidentsController(this);
         } else if(this.options.incidentMonitor || !this.options.mdt) {
             this.service = new AGSIncidentService(this.options.ags.incidentsUrl, this.options.ags.vehiclePosUrl);
