@@ -148,7 +148,8 @@ PharosIncidentsController.prototype.newIncident = function() {
         postcode: adres.Postcode,
         woonplaats: adres.Plaats,
         huisnummer: Number(adres.Huisnummer),
-        toevoeging: adres.HuisnummerToevg,
+        huisletter: adres.HuisnummerToevg,
+        toevoeging: null,
         straat: adres.Straat,
         x: pos.lon,
         y: pos.lat
