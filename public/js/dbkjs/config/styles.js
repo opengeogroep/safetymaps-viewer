@@ -92,7 +92,6 @@ dbkjs.config.styles = {
             context: {
                 mydisplay: function (feature) {
                     if(dbkjs.modules.feature.isFiltered(feature)) {
-                        console.log("hiding feature " + feature.attributes.typeFeature);
                         return "none";
                     }
 
