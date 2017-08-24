@@ -246,7 +246,7 @@ FalckIncidentsController.prototype.getVoertuigIncidenten = function(nummer) {
         dataType: "json"
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
-        p.reject(AGSIncidentService.getAjaxError(jqXHR, textStatus, errorThrown));
+        p.reject(AGSIncidentService.prototype.getAjaxError(jqXHR, textStatus, errorThrown));
     })
     .done(function(data) {
         data = data[0];
