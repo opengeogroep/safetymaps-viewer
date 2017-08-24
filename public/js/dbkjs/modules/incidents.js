@@ -35,6 +35,9 @@ dbkjs.modules.incidents = {
         if(params.mdt && "true" !== params.mdt) {
             this.options.mdt = false;
         }
+        if(params.webservice === "true") {
+            this.options.falck = true;
+        }
 
         if(this.options.controller === "pharos") {
             this.controller = new PharosIncidentsController(this);
