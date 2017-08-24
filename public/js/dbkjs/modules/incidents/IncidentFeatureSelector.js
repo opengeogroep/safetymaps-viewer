@@ -50,6 +50,8 @@ IncidentFeatureSelector.prototype.findAndSelectMatches = function(incidentDetail
         return;
     }
 
+    incidentDetailsWindow.hideMultipleFeatureMatches();
+
     var matches = me.matches;
     if(matches.length === 1) {
         console.log("Selecting match", matches[0]);
@@ -64,8 +66,8 @@ IncidentFeatureSelector.prototype.findMatches = function() {
 
     var postcode = me.matchInfo.postcode;
     var huisnummer = me.matchInfo.huisnummer;
-    var huisletter = me.matchInfo.huisletter;
-    var toevoeging = me.matchInfo.toevoeging;
+    var huisletter = me.matchInfo.huisletter ? me.matchInfo.huisletter : "";
+    var toevoeging = me.matchInfo.toevoeging ? me.matchInfo.toevoeging : "";
     var woonplaats = me.matchInfo.woonplaats;
     var straat = me.matchInfo.straat;
 
@@ -119,8 +121,8 @@ IncidentFeatureSelector.prototype.findMatches = function() {
                         $.each(a.nummers, function(j, n) {
                             var parts = n.split("|");
                             var matchHuisnummer = Number(parts[0]) === huisnummer;
-                            var fHuisletter = parts.length > 1 ? parts[1] : null;
-                            var fToevoeging = parts.length > 2 ? parts[2] : null;
+                            var fHuisletter = parts.length > 1 ? parts[1] : "";
+                            var fToevoeging = parts.length > 2 ? parts[2] : "";
                             var matchHuisletter = !me.matchHuisletter || (fHuisletter === huisletter);
                             var matchToevoeging = !me.matchToevoeging || (fToevoeging === toevoeging);
 

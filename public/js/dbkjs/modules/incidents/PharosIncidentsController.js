@@ -91,7 +91,7 @@ PharosIncidentsController.prototype.getPharosInfo = function() {
         }
         // null -> geen incident
         me.incidentDetailsWindow.data(me.data.Gms, true, true);
-        var newHtml = me.incidentDetailsWindow.getXmlIncidentHtml(me.data.Gms, true, true);
+        var newHtml = me.incidentDetailsWindow.getIncidentHtmlPharos(me.data.Gms, true);
         var newId = me.data.Gms.Nummer;
         me.markerLayer.addIncident(me.getIncidentOpenLayersLonLat(), false, true);
         me.markerLayer.setZIndexFix();

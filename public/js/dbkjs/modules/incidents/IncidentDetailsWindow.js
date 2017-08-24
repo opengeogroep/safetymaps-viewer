@@ -154,7 +154,7 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
             kladblok = this.getIncidentKladblokHtml(format, incident);
             break;
         case "pharos":
-            table = this.getIncidentHtmlPharos(incident, showInzet, false);
+            table = this.getIncidentHtmlPharos(incident, false);
             kladblok = this.getIncidentKladblokHtml(format, incident);
             break;
         default:
@@ -208,7 +208,7 @@ IncidentDetailsWindow.prototype.showMultipleFeatureMatches = function() {
     $.each(me.multipleFeatureMatches, function(i, m) {
         var info = dbkjs.config.styles.getFeatureStylingInfo(m);
 
-        item_ul.append($('<li><a href="#"><img src="' + info.icon + '" style="width: 25px; margin-right: 10px">' + (m.attributes.locatie || m.attributes.formeleNaam) + '</a></li>').on('click', function(e) {
+        item_ul.append($('<li><a href="#"><img src="' + info.icon + '" style="width: 25px; margin-right: 10px">' + (m.attributes.locatie || m.attributes.formeleNaam) + (m.attributes.informeleNaam ? ' (' + m.attributes.informeleNaam + ')' : '') + '</a></li>').on('click', function(e) {
             e.preventDefault();
             me.hideMultipleFeatureMatches();
             if(me.incidentLonLat) {
@@ -478,7 +478,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
     return html;
 };
 
-IncidentDetailsWindow.prototype.getIncidentHtmlPharos = function(incident, showInzet, compareMode) {
+IncidentDetailsWindow.prototype.getIncidentHtmlPharos = function(incident, compareMode) {
     var me = this;
 
     html = '<table class="table table-hover">';
