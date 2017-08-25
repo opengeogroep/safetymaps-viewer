@@ -433,6 +433,7 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
             return;
         }
         incident = incident[0];
+        me.normalizeIncidentFields(incident);
         var oldIncident = me.incident;
         me.incident = incident;
         me.button.setIcon("bell");
@@ -469,4 +470,59 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
             me.zoomToIncident();
         }
     });
+};
+
+FalckIncidentsController.prototype.normalizeIncidentFields = function(incident) {
+    incident.id = incident.IncidentNummer;
+
+    incident.actueleInzet = false;
+    incident.inzetEenhedenStats = {
+        "B": {
+            "total": 0
+        },
+        "P": {
+            "total": 0
+        },
+        "A": {
+            "total": 0
+        }
+    };
+
+    incident.beeindigdeInzet = false;
+    $.each(incident.BetrokkenEenheden, function(j, eenheid) {
+        if(eenheid.Discipline === "B" && eenheid.IsActief) {
+            incident.actueleInzet = true;
+        }
+    });
+    $.each(incident.BetrokkenEenheden, function(j, eenheid) {
+        // Bij actuele inzet niet inactieve eenheden tellen, wel bij incidenten
+        // waarbij inzet beeindigd is (gearchiveerd)
+        if(incident.actueleInzet) {
+            if(!eenheid.IsActief) {
+                return;
+            }
+        }
+        incident.inzetEenhedenStats[eenheid.Discipline].total++;
+        var inzetRol = eenheid.InzetRol;
+        if(inzetRol) {
+            var soortCount = incident.inzetEenhedenStats[eenheid.Discipline][inzetRol];
+            if(typeof soortCount === "undefined") {
+                soortCount = 0;
+            }
+            incident.inzetEenhedenStats[eenheid.Discipline][inzetRol] = soortCount + 1;
+        }
+    });
+    incident.beeindigdeInzet = incident.inzetEenhedenStats.B.total > 0 && !incident.actueleInzet;
+
+    incident.locatie = IncidentDetailsWindow.prototype.getIncidentAdres(incident);
+    incident.start = new moment(incident.BrwDisciplineGegevens.StartDTG);
+    incident.prio = incident.BrwDisciplineGegevens.Prioriteit;
+    incident.plaats = incident.IncidentLocatie.Plaatsnaam;
+    incident.classificaties = IncidentDetailsWindow.prototype.getIncidentClassificatiesFalck(incident);
+
+    // TODO eenheden: roepnaam, discipline, soort(inzet), kazerne, actief, evt einde inzet, evt start inzet
+
+    // TODO karakteristieken
+
+    // TODO xy
 };

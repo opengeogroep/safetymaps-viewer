@@ -37,12 +37,14 @@ dbkjs.modules.incidents = {
         }
         if(params.webservice === "true") {
             this.options.falck = true;
+
+            if(params.toonZonderEenheden === "true") {
+                this.options.toonZonderEenheden = true;
+            }
         }
 
         if(this.options.controller === "pharos") {
             this.controller = new PharosIncidentsController(this);
-        } else if(this.options.falck) {
-            this.controller = new FalckIncidentsController(this);
         } else if(this.options.incidentMonitor || !this.options.mdt) {
             this.service = new AGSIncidentService(this.options.ags.incidentsUrl, this.options.ags.vehiclePosUrl);
 
@@ -59,6 +61,8 @@ dbkjs.modules.incidents = {
                     dbkjs.util.alert("Fout bij initialiseren meldingenservice", e, "alert-danger");
                 }, 3000);
             });
+        } else if(this.options.falck) {
+            this.controller = new FalckIncidentsController(this);
         } else if(!this.options.mdt) {
             this.controller = new VoertuigInzetController(this);
         } else {

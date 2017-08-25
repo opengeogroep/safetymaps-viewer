@@ -18,6 +18,8 @@
  *
  */
 
+/* global dbkjs, AGSIcidentService */
+
 /**
  * Controller for displaying all current incidents.
  *
@@ -30,6 +32,8 @@ function IncidentMonitorController(incidents) {
     var me = this;
     me.service = incidents.service;
     me.ghor = incidents.options.ghor;
+    me.falck = incidents.options.falck;
+    me.toonZonderEenheden = incidents.options.toonZonderEenheden;
 
     me.kb = false;
     $.ajax("kb", { cache: false } )
@@ -248,8 +252,22 @@ IncidentMonitorController.prototype.setAGSLayersVisibility = function(visible) {
 };
 
 IncidentMonitorController.prototype.zoomToIncident = function() {
-    if(this.incident && this.incident.T_X_COORD_LOC && this.incident.T_Y_COORD_LOC) {
-        dbkjs.map.setCenter(new OpenLayers.LonLat(this.incident.T_X_COORD_LOC, this.incident.T_Y_COORD_LOC), dbkjs.options.zoom);
+    var x, y;
+
+    if(!this.incident) {
+        return;
+    }
+
+    if(this.falck) {
+        x = this.incident.IncidentLocatie.XCoordinaat;
+        y = this.incident.IncidentLocatie.YCoordinaat;
+    } else {
+        var xy = AGSIncidentService.prototype.getIncidentXY(this.incident);
+        x = xy.x, y = xy.y;
+    }
+
+    if(x && y) {
+        dbkjs.map.setCenter(new OpenLayers.LonLat(x, y), dbkjs.options.zoom);
     }
 };
 
@@ -260,11 +278,11 @@ IncidentMonitorController.prototype.selectIncident = function(obj) {
     }
 
     me.incident = obj.incident;
-    console.log("Select incident " + me.incident.INCIDENT_ID + ", archief=" + me.incident.archief);
+    me.incidentId = me.incident.INCIDENT_ID || me.incident.IncidentNummer;
+    console.log("Select incident " + me.incidentId + ", addMarker=" + obj.addMarker);
     if(obj.addMarker) {
-        me.selectedIncidentMarker = me.markerLayer.addIncident(me.incident, me.incident.archief);
+        me.selectedIncidentMarker = me.markerLayer.addIncident(me.incident, true);
     }
-    me.incidentId = obj.incident.INCIDENT_ID;
     me.incidentDetailsWindow.data("Ophalen incidentgegevens...");
     me.updateIncident(me.incidentId, me.incident.archief, false);
     $("#t_twitter_title").text("Twitter");
@@ -272,7 +290,7 @@ IncidentMonitorController.prototype.selectIncident = function(obj) {
     me.incidentDetailsWindow.show();
     me.incidentRead(me.incidentId);
     me.zoomToIncident();
-    if(!me.incident.archief) {
+    if(!obj.addMarker) {
         me.enableIncidentUpdates();
     } else {
         me.disableIncidentUpdates();
@@ -300,7 +318,7 @@ IncidentMonitorController.prototype.incidentFilter = function(incident) {
             return true;
         }
     } else {
-        return incident.actueleInzet || incident.beeindigdeInzet || incident.inzetEenhedenStats.B.total !== 0;
+        return me.toonZonderEenheden || (incident.actueleInzet || incident.beeindigdeInzet || incident.inzetEenhedenStats.B.total !== 0);
     }
 };
 
@@ -322,36 +340,42 @@ IncidentMonitorController.prototype.updateInterface = function() {
     $.each(currentFiltered, function(i, incident) {
         if(incident.actueleInzet) {
             active.push(incident);
-        } else if(incident.beeindigdeInzet) {
-            incident.inzetEenhedenStats = me.service.getInzetEenhedenStats(incident, true);
+        } else if(incident.beeindigdeInzet || me.toonZonderEenheden) {
+            if(!me.falck) {
+                incident.inzetEenhedenStats = me.service.getInzetEenhedenStats(incident, true);
+            }
             inactive.push(incident);
         }
     });
-    // Voeg gearchiveerde incidenten toe aan inactive indien niet al vanuit
-    // current incidents met beeindigde inzet
-    $.each(archivedFiltered, function(i, incident) {
-        var duplicate = false;
-        $.each(inactive, function(j, iIncident) {
-            if(iIncident.INCIDENT_ID === incident.INCIDENT_ID) {
-                duplicate = true;
-                return false;
+    if(!me.falck) {
+        // Voeg gearchiveerde incidenten toe aan inactive indien niet al vanuit
+        // current incidents met beeindigde inzet
+        $.each(archivedFiltered, function(i, incident) {
+            var duplicate = false;
+            $.each(inactive, function(j, iIncident) {
+                if(iIncident.INCIDENT_ID === incident.INCIDENT_ID) {
+                    duplicate = true;
+                    return false;
+                }
+            });
+            if(!duplicate) {
+                inactive.push(incident);
             }
         });
-        if(!duplicate) {
-            inactive.push(incident);
-        }
-    });
+    }
 
-    me.actueleIncidentIds = $.map(active, function(incident) { return incident.INCIDENT_ID; });
+    me.actueleIncidentIds = $.map(active, function(incident) { return incident.INCIDENT_ID || incident.IncidentNummer; });
 
-    // Remove duplicate incidents
-    inactive = $.grep(inactive, function(incident) {
-        return me.actueleIncidentIds.indexOf(incident.INCIDENT_ID) === -1;
-    });
+    if(!me.falck) {
+        // Remove duplicate incidents
+        inactive = $.grep(inactive, function(incident) {
+            return me.actueleIncidentIds.indexOf(incident.INCIDENT_ID) === -1;
+        });
 
-    inactive.sort(function(lhs, rhs) {
-        return rhs.DTG_START_INCIDENT - lhs.DTG_START_INCIDENT;
-    });
+        inactive.sort(function(lhs, rhs) {
+            return rhs.DTG_START_INCIDENT - lhs.DTG_START_INCIDENT;
+        });
+    }
 
     me.incidentListWindow.data(active, inactive, true);
     me.updateMarkerLayer(active);
@@ -363,6 +387,16 @@ IncidentMonitorController.prototype.getIncidentList = function() {
 
     window.clearTimeout(me.getIncidentListTimeout);
     me.lastGetIncidentList = new Date().getTime();
+
+    if(me.falck) {
+        me.getIncidentListFalck();
+    } else {
+        me.getIncidentListAGS();
+    }
+}
+
+IncidentMonitorController.prototype.getIncidentListAGS = function() {
+    var me = this;
 
     var dCurrent = me.service.getCurrentIncidents();
     var dArchived = me.service.getArchivedIncidents(dbkjs.options.incidents.cacheArchivedIncidents ? me.archivedIncidents : null);
@@ -395,11 +429,83 @@ IncidentMonitorController.prototype.getIncidentList = function() {
         me.failedUpdateTries = 0;
         me.button.setIcon("bell-o");
         $('#systeem_meldingen').hide(); // XXX
+        $.each(currentIncidents.concat(archivedIncidents), function(i, incident) {
+            me.normalizeIncidentFields(incident);
+        });
         me.processNewArchivedIncidents(archivedIncidents);
         me.currentIncidents = currentIncidents;
         me.updateInterface();
         me.checkUnreadIncidents(me.actueleIncidentIds);
     });
+};
+
+IncidentMonitorController.prototype.getIncidentListFalck = function() {
+    var me = this;
+
+    $.ajax('/gms/incident', {
+        dataType: "json",
+        data: {
+            extended: true
+        }
+    })
+    .fail(function(jqXHR, textStatus, errorThrown) {
+        window.clearTimeout(me.getIncidentListTimeout);
+        me.getIncidentListTimeout = window.setTimeout(function() {
+            me.getIncidentList();
+        }, me.UPDATE_INTERVAL_ERROR_MS);
+
+        me.failedUpdateTries = me.failedUpdateTries + 1;
+
+        console.log("Error getting incident list, try: " + me.failedUpdateTries + ", error: " + AGSIcidentService.prototype.getAjaxError(jqXHR, textStatus, errorThrown));
+
+        // Only show error after number of failed tries
+        if(me.failedUpdateTries > me.UPDATE_TRIES) {
+            var msg = "Kan incidentenlijst niet ophalen na " + me.failedUpdateTries + " pogingen: " + e;
+            dbkjs.gui.showError(msg);
+            me.button.setIcon("bell-slash");
+            me.incidentListWindow.showError(msg);
+        }
+    })
+    .done(function(data) {
+        window.clearTimeout(me.getIncidentListTimeout);
+        me.getIncidentListTimeout = window.setTimeout(function() {
+            me.getIncidentList();
+        }, me.UPDATE_INTERVAL_MS);
+
+        me.failedUpdateTries = 0;
+        me.button.setIcon("bell-o");
+        $('#systeem_meldingen').hide(); // XXX
+
+        me.incidents = data;
+        me.processFalckIncidents();
+        me.updateInterface();
+        me.checkUnreadIncidents(me.actueleIncidentIds);
+    });
+};
+
+IncidentMonitorController.prototype.processFalckIncidents = function() {
+    var me = this;
+
+    me.currentIncidents = [];
+    me.archivedIncidents = [];
+
+    $.each(me.incidents, function(i, incident) {
+        me.normalizeIncidentFields(incident);
+
+        if(incident.Actueel) {
+            me.currentIncidents.push(incident);
+        } else {
+            me.archivedIncidents.push(incident);
+        }
+    });
+};
+
+IncidentMonitorController.prototype.normalizeIncidentFields = function(incident) {
+    if(this.falck) {
+        FalckIncidentsController.prototype.normalizeIncidentFields(incident);
+    } else {
+        AGSIncidentService.prototype.normalizeIncidentFields(incident);
+    }
 };
 
 IncidentMonitorController.prototype.processNewArchivedIncidents = function(archivedIncidents) {
@@ -444,7 +550,7 @@ IncidentMonitorController.prototype.updateVehiclePositionLayer = function(incide
         return;
     }
 
-    var incidentIds = $.map(incidents, function(i) { return i.INCIDENT_ID; });
+    var incidentIds = $.map(incidents, function(i) { return i.id; });
 
     me.service.getVehiclePositions(incidentIds)
     .done(function(features) {
@@ -481,6 +587,56 @@ IncidentMonitorController.prototype.updateIncident = function(incidentId, archie
     }
 
     console.log("Get incident info for " + incidentId + ", archief=" + archief);
+
+    if(me.falck) {
+        me.updateIncidentFalck(incidentId, isUpdate);
+    } else {
+        me.updateIncidentAGS(incidentId, archief, isUpdate);
+    }
+};
+
+IncidentMonitorController.prototype.updateIncidentFalck = function(incidentId, isUpdate) {
+    var me = this;
+
+    $.ajax('/gms/incident/' + incidentId, {
+        dataType: "json",
+        data: {
+            extended: true
+        }
+    })
+    .fail(function(jqXHR, textStatus, errorThrown) {
+        var msg = "Kan incidentinfo niet updaten: " + AGSIcidentService.prototype.getAjaxError(jqXHR, textStatus, errorThrown);
+        dbkjs.gui.showError(msg);
+        // Leave incidentDetailsWindow contents with old info
+
+    })
+    .done(function(data) {
+
+        if(me.incidentId !== data[0].IncidentNummer) {
+            return;
+        }
+
+        me.incident = data[0];
+        me.normalizeIncidentFields(me.incident);
+
+        if(!me.incident.Actueel) {
+            me.endIncident();
+            return;
+        }
+
+        me.incidentDetailsWindow.data(me.incident, true, true);
+
+        // Do not update tweets every time incident data updated, reduce number
+        // of API calls to avoid API limits
+        if(!isUpdate && !!dbkjs.modules.incidents.options.showTwitter) {
+            me.loadTweets(incidentId, me.incident);
+        }
+    });
+};
+
+IncidentMonitorController.prototype.updateIncidentAGS = function(incidentId, archief, isUpdate) {
+    var me = this;
+
     me.service.getAllIncidentInfo(incidentId, archief, false, !me.kb)
     .fail(function(e) {
         var msg = "Kan incidentinfo niet updaten: " + e;
@@ -490,11 +646,15 @@ IncidentMonitorController.prototype.updateIncident = function(incidentId, archie
     .done(function(incident) {
         if(incident === null) {
             me.endIncident();
+            return;
         }
         if(me.incidentId !== incidentId) {
             // Incident cancelled or changed since request was fired off, ignore
             return;
         }
+
+        me.incident = incident;
+        me.normalizeIncidentFields(me.incident);
 
         // Always update window, updates moment.fromNow() times
         me.incidentDetailsWindow.data(incident, true, true);
@@ -549,20 +709,31 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
     $("#t_twitter_title").text("Twitter (...)");
 
     var terms = [];
+    var address;
+    if(me.falck) {
+        var l = incident.IncidentLocatie;
+        address = '"' + l.NaamLocatie1 + '"';
+        if(l.Plaatsnaam) {
+            terms.push(l.Plaatsnaam === "'s-Gravenhage" ? "Den Haag" : l.Plaatsnaam);
+        }
+        if(l.NaamLocatie2 && l.NaamLocatie1 !== l.NaamLocatie2) {
+            terms = terms.concat(l.NaamLocatie2.split(" "));
+        }
+    } else {
+        address = '"' + incident.NAAM_LOCATIE1 + '"';
+        if(incident.PLAATS_NAAM) {
+            terms.push(incident.PLAATS_NAAM === "'s-Gravenhage" ? "Den Haag" : incident.PLAATS_NAAM);
+        }
+        if(incident.PLAATS_NAAM_NEN) {
+            terms.push(incident.PLAATS_NAAM_NEN === "'s-Gravenhage" ? "Den Haag" : incident.PLAATS_NAAM_NEN);
+            }
+        if(incident.NAAM_LOCATIE2 && incident.NAAM_LOCATIE1 !== incident.NAAM_LOCATIE2) {
+            terms = terms.concat(incident.NAAM_LOCATIE2.split(" "));
+        }
+    }
 
-    var address = '"' + incident.NAAM_LOCATIE1 + '"';
-    if(incident.PLAATS_NAAM) {
-        terms.push(incident.PLAATS_NAAM === "'s-Gravenhage" ? "Den Haag" : incident.PLAATS_NAAM);
-    }
-    if(incident.PLAATS_NAAM_NEN) {
-        terms.push(incident.PLAATS_NAAM_NEN === "'s-Gravenhage" ? "Den Haag" : incident.PLAATS_NAAM_NEN);
-    }
-    if(incident.NAAM_LOCATIE2 && incident.NAAM_LOCATIE1 !== incident.NAAM_LOCATIE2) {
-        terms = terms.concat(incident.NAAM_LOCATIE2.split(" "));
-    }
-
-    if(incident.classificatie) {
-        var classificaties = incident.classificatie.split(", ");
+    if(incident.classificaties) {
+        var classificaties = incident.classificaties.split(", ");
         $.each(classificaties, function(i, c) {
             var classificatieTerms = {
                 "Alarm": true,
@@ -604,43 +775,65 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
             }
         });
     }
+    var karakteristieken = [];
+
     if(incident.karakteristiek) {
         $.each(incident.karakteristiek, function(i, k) {
-            var karakteristiekenTerms = [
-                "Soort dier",
-                "Soort voertuig",
-                "OMS oorzaak",
-                "Soort bedrijf/Inst.",
-                "Onderdeel gebouw",
-                "Soort stormschade",
-                "Soort ongeval",
-                "Soort vaartuig",
-                "Soort lucht",
-                "Inzet brw",
-                "Soort persoon.",
-                "Soort brandstof"
-            ];
-            if(karakteristiekenTerms.indexOf(k.NAAM_KARAKTERISTIEK) !== -1) {
-                terms = terms.concat(k.ACTUELE_KAR_WAARDE.split("/"));
-            }
-            if(k.NAAM_KARAKTERISTIEK === "GRIP") {
-                terms.push("GRIP");
-            }
+            karakteristieken.push({ naam: k.NAAM_KARAKTERISTIEK, values: k.ACTUELE_KAR_WAARDE.split("/") });
+        });
+    }
+    if(incident.Karakteristieken) {
+        $.each(incident.Karakteristieken, function(i, k) {
+            karakteristieken.push({ naam: k.Naam, values: k.Waarden });
         });
     }
 
-    $.each(incident.inzetEenheden, function(i, e) {
-        if(e.CODE_VOERTUIGSOORT && e.CODE_VOERTUIGSOORT.indexOf("MMT") !== -1) {
+    $.each(karakteristieken, function(i, k) {
+        var karakteristiekenTerms = [
+            "Soort dier",
+            "Soort voertuig",
+            "OMS oorzaak",
+            "Soort bedrijf/Inst.",
+            "Onderdeel gebouw",
+            "Soort stormschade",
+            "Soort ongeval",
+            "Soort vaartuig",
+            "Soort lucht",
+            "Inzet brw",
+            "Soort persoon.",
+            "Soort brandstof"
+        ];
+        if(karakteristiekenTerms.indexOf(k.naam) !== -1) {
+            terms = terms.concat(k.values);
+        }
+        if(k.naam === "GRIP") {
+            terms.push("GRIP");
+        }
+    });
+
+    function checkSoort(soort) {
+        if(soort && soort.indexOf("MMT") !== -1) {
             terms.push("MMT");
             terms.push("heli");
             return false;
         }
-    });
+    }
+    if(incident.inzetEenheden) {
+        $.each(incident.inzetEenheden, function(i, e) {
+            return checkSoort(e.CODE_VOERTUIGSOORT);
+        });
+    }
+    if(incident.BetrokkenEenheden) {
+        $.each(incident.BetrokkenEenheden, function(i, e) {
+            return checkSoort(e.InzetRol);
+        });
+    }
 
+    var start = me.falck ? new moment(incident.BrwDisciplineGegevens.StartDTG) : AGSIncidentService.prototype.getAGSMoment(incident.DTG_START_INCIDENT);
     var params = {
         incidentId: incidentId,
         location: t.y + "," + t.x,
-        startTime: AGSIncidentService.prototype.getAGSMoment(incident.DTG_START_INCIDENT).format("X"),
+        startTime: start.format("X"),
         terms: JSON.stringify(terms),
         address: address
     };
@@ -673,8 +866,6 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
 
             var tweets = 0;
 
-            var startCutoff = AGSIncidentService.prototype.getAGSMoment(incident.DTG_START_INCIDENT);
-
             var endCutoff = null;
             if(incident.DTG_EINDE_INCIDENT) {
                 endCutoff = AGSIncidentService.prototype.getAGSMoment(incident.DTG_EINDE_INCIDENT);
@@ -693,7 +884,7 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
 
             $.each(statuses, function(i, status) {
                 var createdAt = twitterMoment(status.created_at);
-                if(createdAt.isAfter(startCutoff) && (!endCutoff || createdAt.isBefore(endCutoff))) {
+                if(createdAt.isAfter(start) && (!endCutoff || createdAt.isBefore(endCutoff))) {
                     if(status.geo && displayedTweets.indexOf(status.text) === -1) {
                         if(!filterTweet(status)) {
                             displayedTweets.push(status.text);
@@ -715,7 +906,7 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
                 $("<div id='tweet_" + status.id + "'>Tweets tijdens incident op basis van zoektermen <i>" + address + ", " + terms.join(", ") + "</i></div>").appendTo("#tab_twitter");
                 $.each(data.responseTerms.statuses, function(i, status) {
                     var createdAt = twitterMoment(status.created_at);
-                    if(createdAt.isAfter(startCutoff) /*&& (!endCutoff || createdAt.isBefore(endCutoff))*/) {
+                    if(createdAt.isAfter(start) /*&& (!endCutoff || createdAt.isBefore(endCutoff))*/) {
                         var text = status.retweeted_status ? status.retweeted_status.text : status.text;
                         if(displayedTweets.indexOf(text) === -1) {
                             if(!filterTweet(status) && (!status.retweeted_status || !filterTweet(status.retweeted_status))) {

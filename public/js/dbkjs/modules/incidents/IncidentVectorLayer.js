@@ -73,10 +73,22 @@ IncidentVectorLayer.prototype.setHideLabel = function(hideLabel) {
     window.localStorage.setItem("IncidentVectorLayer.hideLabel", hideLabel);
 };
 
-IncidentVectorLayer.prototype.addIncident = function(incident, archief, singleMarker) {
+IncidentVectorLayer.prototype.addIncident = function(incident, gray, singleMarker) {
     var me = this;
-    var xy = AGSIncidentService.prototype.getIncidentXY(incident);
-    var x = xy.x, y = xy.y;
+    var falck = incident.IncidentNummer;
+
+    var x, y;
+
+    if(falck) {
+        if(!incident.IncidentLocatie.XCoordinaat && incident.IncidentLocatie.YCoordinaat) {
+            return;
+        }
+        x = incident.IncidentLocatie.XCoordinaat;
+        y = incident.IncidentLocatie.YCoordinaat;
+    } else {
+        var xy = AGSIncidentService.prototype.getIncidentXY(incident);
+        x = xy.x, y = xy.y;
+    }
 
     if(singleMarker) {
         if(x === me.x && y === me.y) {
@@ -93,7 +105,7 @@ IncidentVectorLayer.prototype.addIncident = function(incident, archief, singleMa
     if(me.ghor) {
         var b = incident.inzetEenhedenStats.B.total;
         var a = incident.inzetEenhedenStats.A.total;
-        if(archief) {
+        if(gray) {
             icon = "images/bell-gray.png";
         } else if(b !== 0 && a !== 0) {
             icon = "images/bell-yellowred.png";
@@ -103,7 +115,7 @@ IncidentVectorLayer.prototype.addIncident = function(incident, archief, singleMa
             icon = "images/bell.png";
         }
     } else {
-        icon = !archief ? "images/bell.png" : "images/bell-gray.png";
+        icon = !gray ? "images/bell.png" : "images/bell-gray.png";
     }
 
     var classificatie = incident.classificaties;
@@ -111,15 +123,14 @@ IncidentVectorLayer.prototype.addIncident = function(incident, archief, singleMa
         var classificaties = classificatie.split(",");
         classificatie = classificaties[0] + ", " + classificaties[1];
     }
-    var label = "P" + incident.PRIORITEIT_INCIDENT_BRANDWEER + " " + dbkjs.util.htmlEncode(classificatie) + " – " + incident.locatie + " " + (incident.PLAATS_NAAM_NEN || incident.PLAATS_NAAM);
+    var label = "P" + incident.prio + " " + dbkjs.util.htmlEncode(classificatie) + " – " + incident.locatie + " " + incident.plaats;
     var feature = new OpenLayers.Feature.Vector(
             new OpenLayers.Geometry.Point(x, y),
             {
                 label: label,
                 incident: incident,
-                archief: archief,
                 icon: icon,
-                incident_id: incident.INCIDENT_ID,
+                incident_id: falck ? incident.IncidentNummer : incident.INCIDENT_ID,
                 opacity: me.ghor && incident.inzetEenhedenStats.standard ? 0.5 : 0
             });
 

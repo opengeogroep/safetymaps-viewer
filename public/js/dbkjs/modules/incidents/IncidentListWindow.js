@@ -137,21 +137,30 @@ IncidentListWindow.prototype.data = function(activeIncidents, inactiveIncidents,
 IncidentListWindow.prototype.listIncidents = function(el, incidents, showInzetInTitle, incidentDivFunction) {
     var me = this;
 
+    var falck = incidents.length > 0 && incidents[0].IncidentNummer;
+
     incidents.sort(function(lhs, rhs) {
-        return lhs.DTG_START_INCIDENT > rhs.DTG_START_INCIDENT ? -1 :
-                lhs.DTG_START_INCIDENT === rhs.DTG_START_INCIDENT ? 0 : 1;
+        return lhs.start > rhs.start ? -1 :
+                lhs.start === rhs.start ? 0 : 1;
     });
 
     var d = $("<div class='list'/>");
     var odd = true;
     $.each(incidents, function(i, incident) {
-        var start = dbkjs.modules.incidents.controller.service.getAGSMoment(incident.DTG_START_INCIDENT);
         var actueleInzet = [];
-        $.each(incident.inzetEenheden, function(j, eenheid) {
-            if(!eenheid.DTG_EIND_ACTIE) {
-                actueleInzet.push(eenheid.CODE_VOERTUIGSOORT + " " + eenheid.ROEPNAAM_EENHEID + (eenheid.KAZ_NAAM ? " (" + eenheid.KAZ_NAAM + ")" : ""));
-            }
-        });
+        if(falck) {
+            $.each(incident.BetrokkenEenheden, function(j, eenheid) {
+                if(!incident.Actief || eenheid.IsActief) {
+                    actueleInzet.push(eenheid.InzetRol + " " + eenheid.Roepnaam + (eenheid.BrwKazerne ? " (" + eenheid.BrwKazerne + ")" : ""));
+                }
+            });
+        } else {
+            $.each(incident.inzetEenheden, function(j, eenheid) {
+                if(!eenheid.DTG_EIND_ACTIE) {
+                    actueleInzet.push(eenheid.CODE_VOERTUIGSOORT + " " + eenheid.ROEPNAAM_EENHEID + (eenheid.KAZ_NAAM ? " (" + eenheid.KAZ_NAAM + ")" : ""));
+                }
+            });
+        }
         var r = $("<div class='incident'/>")
                 .addClass(odd ? "odd" : "even")
                 .attr("title", incident.locatie + (showInzetInTitle && actueleInzet.length > 0 ? ", " + actueleInzet.join(", ") : ""));
@@ -161,20 +170,20 @@ IncidentListWindow.prototype.listIncidents = function(el, incidents, showInzetIn
             dbkjs.options.incidents.incidentListFunction(r, incident);
         }
 
-        $("<span class='time'/>").text(start.format("D-M-YYYY HH:mm")).appendTo(r);
+        $("<span class='time'/>").text(incident.start.format("D-M-YYYY HH:mm")).appendTo(r);
         if(me.ghor) {
             $("<span class='prio'/>").html(incident.PRIORITEIT_INCIDENT_POLITIE ? incident.PRIORITEIT_INCIDENT_POLITIE + " " : "&nbsp;&nbsp;").appendTo(r);
         } else {
-            $("<span class='prio'/>").html(incident.PRIORITEIT_INCIDENT_BRANDWEER ? incident.PRIORITEIT_INCIDENT_BRANDWEER + " " : "&nbsp;&nbsp;").appendTo(r);
+            $("<span class='prio'/>").html(incident.prio ? incident.prio + " " : "&nbsp;&nbsp;").appendTo(r);
         }
         $("<span class='locatie'/>").text(incident.locatie).appendTo(r);
-        $("<span class='plaats'/>").text(incident.PLAATS_NAAM_NEN ? incident.PLAATS_NAAM_NEN : incident.PLAATS_NAAM).appendTo(r);
+        $("<span class='plaats'/>").text(incident.plaats || "-").appendTo(r);
 
         var classificaties = incident.classificaties || "";
         var icons = me.getIncidentEenhedenIcons(incident);
 
         $("<span class='classificatie'/>").html(icons + classificaties).appendTo(r);
-        $("<span class='fromNow'/>").text(start.fromNow()).appendTo(r);
+        $("<span class='fromNow'/>").text(incident.start.fromNow()).appendTo(r);
 
         if(incidentDivFunction) {
             incidentDivFunction(r, incident);
@@ -221,7 +230,8 @@ IncidentListWindow.prototype.getIncidentEenhedenIcons = function(incident) {
     var iconsB = {
         "bus": 0,
         "cab": 0,
-        "motorcycle": 0
+        "motorcycle": 0,
+        "ship": 0
     };
     $.each(incident.inzetEenhedenStats.B, function(soort, count) {
         if(soort !== "total") {
@@ -229,6 +239,8 @@ IncidentListWindow.prototype.getIncidentEenhedenIcons = function(incident) {
                 iconsB.cab += count;
             } else if(soort === "BMM") {
                 iconsB.motorcycle += count;
+            } else if(soort === "WO") {
+                iconsB.ship += count;
             } else {
                 iconsB.bus += count;
             }
@@ -236,7 +248,7 @@ IncidentListWindow.prototype.getIncidentEenhedenIcons = function(incident) {
     });
 
     var htmlA = multiIcon("ambulance",iconsA.ambulance) + multiIcon("motorcycle",iconsA.motorcycle) + multiIcon("stethoscope",iconsA.stethoscope) + multiIcon("medkit",iconsA.medkit) ;
-    var htmlB = multiIcon("bus",iconsB.bus) + multiIcon("cab",iconsB.cab) + multiIcon("motorcycle",iconsB.motorcycle);
+    var htmlB = multiIcon("ship",iconsB.ship) + multiIcon("bus",iconsB.bus) + multiIcon("cab",iconsB.cab) + multiIcon("motorcycle",iconsB.motorcycle);
 
     if(me.ghor) {
         html = htmlA;

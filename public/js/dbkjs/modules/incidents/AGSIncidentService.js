@@ -342,7 +342,7 @@ AGSIncidentService.prototype.getIncidentXY = function(incident) {
     var x, y;
     if(incident.lon && incident.lat) {
         return {x: incident.lon, y: incident.lat};
-    } 
+    }
     if(incident.T_X_COORD_LOC && incident.T_Y_COORD_LOC) {
         x = incident.T_X_COORD_LOC;
         y = incident.T_Y_COORD_LOC;
@@ -509,7 +509,7 @@ AGSIncidentService.prototype.getAllIncidentInfo = function(incidentId, archief, 
                     incident.kladblok = kladblok;
                     incident.inzetEenheden = inzetEenheden;
 
-                    incident.locatie = me.getIncidentLocatie(incident)
+                    me.normalizeIncidentFields(incident);
 
                     incident.getTitle = function() {
                         return me.getIncidentTitle(incident);
@@ -745,6 +745,22 @@ AGSIncidentService.prototype.getInzetEenheden = function(incidentIds, archief) {
     return d.promise();
 };
 
+AGSIncidentService.prototype.normalizeIncidentFields = function(incident) {
+    incident.id = incident.INCIDENT_ID;
+
+    // eenheden stats al in AGSIncidentService
+
+    incident.locatie = this.getIncidentLocatie(incident)
+    incident.start = this.getAGSMoment(incident.DTG_START_INCIDENT);
+    incident.prio = incident.PRIORITEIT_INCIDENT_BRANDWEER;
+    incident.plaats = incident.PLAATS_NAAM_NEN ? incident.PLAATS_NAAM_NEN : incident.PLAATS_NAAM;
+    // classificaties al in AGSIncidentService
+
+    // TODO karakteristieken
+
+    // TODO xy
+};
+
 /**
  * Get list of current events with inzet
  * @returns {undefined}
@@ -812,7 +828,7 @@ AGSIncidentService.prototype.getCurrentIncidents = function() {
                 });
             });
             $.each(incidents, function(i, incident) {
-                incident.locatie = me.getIncidentLocatie(incident);
+                me.normalizeIncidentFields(incident);
 
                 // To later determine between current and archived incidents
                 incident.archief = false;
@@ -896,7 +912,7 @@ AGSIncidentService.prototype.getArchivedIncidents = function(incidentsToFilter) 
                 });
             });
             $.each(incidents, function(i, incident) {
-                incident.locatie = me.getIncidentLocatie(incident);
+                me.normalizeIncidentFields(incident);
 
                 // To later determine between current and archived incidents
                 incident.archief = true;
