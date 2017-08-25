@@ -544,6 +544,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlPharos = function(incident, compa
  * @returns {undefined}
  */
 IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInzet, compareMode) {
+    var me = this;
     html = '<table class="table table-hover">';
 
     var prio = $(incident).find("Prioriteit").text();
