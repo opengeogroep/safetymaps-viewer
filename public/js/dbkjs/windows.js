@@ -211,6 +211,8 @@ SplitScreenWindow.prototype.hide = function(noMapAdjust) {
             $("#vectorclickpanel").css({"width": "100%"});
 
             $("#mapc1map1").css({width: "100%"});
+            $("#footer").css({right: "default"}); // Move footer with distance measurement back
+
             // Needs OpenLayers 2.13.1 patch:
             // https://github.com/openlayers/openlayers/pull/1304
             dbkjs.map.updateSize();
@@ -238,6 +240,7 @@ SplitScreenWindow.prototype.show = function() {
         $("#vectorclickpanel").css({"width": "55%"});
 
         $("#mapc1map1").css({width: "55%"});
+        $("#footer").css({right: "45%"}); // Move footer with distance measurement
         this.popup.css({width: "45%"});
         // Needs OpenLayers 2.13.1 patch:
         // https://github.com/openlayers/openlayers/issues/669
