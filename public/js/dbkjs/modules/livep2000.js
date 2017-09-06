@@ -141,7 +141,13 @@ dbkjs.modules.livep2000 = {
             var div = $("<div class=\"melding\"></div>");
 
             var lat = $(this).find('lat').text();
+            if(lat === "") {
+                lat = $(this).find('geo\\:lat').text();
+            }
             var long = $(this).find('long').text();
+            if(long === "") {
+                long = $(this).find('geo\\:long').text();
+            }
 
             var titel = $(lat && long ? "<a/>" : "<div/>");
             titel.attr({class: "titel"});
