@@ -341,7 +341,7 @@ input[type="radio"], input[type="checkbox"] {
     font-size: 1px;
     filter: alpha(opacity=40);
 }
-#footer {
+#footer { /* only livep2000.js */
     /*background: none repeat scroll 0 0 rgba(53, 126, 189, 0.3);*/
     background: none repeat scroll 0 0 #ffffff;
     border-radius: 5px 0 0 0;
@@ -353,7 +353,17 @@ input[type="radio"], input[type="checkbox"] {
     width: 100%;
     padding-right: 1em;
 }
-#footer #measure {
+#measure {
+    background: white;
+    border-radius: 5px 0 0 0;
+    right: 8px;
+    bottom: 8px;
+    position: absolute;
+    text-align: right;
+    padding: 6px 12px;
+    margin-right: 8px;
+    border: 1px solid black;
+    border-radius: 4px;
     font-size: 18px !important;
     font-weight: bold !important;
 }
