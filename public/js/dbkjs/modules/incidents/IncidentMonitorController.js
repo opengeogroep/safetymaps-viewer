@@ -18,7 +18,7 @@
  *
  */
 
-/* global dbkjs, AGSIcidentService */
+/* global dbkjs, AGSInscidentService */
 
 /**
  * Controller for displaying all current incidents.
@@ -442,7 +442,7 @@ IncidentMonitorController.prototype.getIncidentListAGS = function() {
 IncidentMonitorController.prototype.getIncidentListFalck = function() {
     var me = this;
 
-    $.ajax('/gms/incident', {
+    $.ajax('gms/incident', {
         dataType: "json",
         data: {
             extended: true
@@ -456,7 +456,7 @@ IncidentMonitorController.prototype.getIncidentListFalck = function() {
 
         me.failedUpdateTries = me.failedUpdateTries + 1;
 
-        console.log("Error getting incident list, try: " + me.failedUpdateTries + ", error: " + AGSIcidentService.prototype.getAjaxError(jqXHR, textStatus, errorThrown));
+        console.log("Error getting incident list, try: " + me.failedUpdateTries + ", error: " + AGSIncidentService.prototype.getAjaxError(jqXHR, textStatus, errorThrown));
 
         // Only show error after number of failed tries
         if(me.failedUpdateTries > me.UPDATE_TRIES) {
@@ -598,7 +598,7 @@ IncidentMonitorController.prototype.updateIncident = function(incidentId, archie
 IncidentMonitorController.prototype.updateIncidentFalck = function(incidentId, isUpdate) {
     var me = this;
 
-    $.ajax('/gms/incident/' + incidentId, {
+    $.ajax('gms/incident/' + incidentId, {
         dataType: "json",
         data: {
             extended: true
@@ -869,6 +869,9 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
             var endCutoff = null;
             if(incident.DTG_EINDE_INCIDENT) {
                 endCutoff = AGSIncidentService.prototype.getAGSMoment(incident.DTG_EINDE_INCIDENT);
+            }
+            if(incident.EindeDTG) {
+                endCutoff = new moment(incident.EindeDTG);
             }
 
             var displayedTweets = [];
