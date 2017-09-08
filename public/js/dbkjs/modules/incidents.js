@@ -35,7 +35,7 @@ dbkjs.modules.incidents = {
         if(params.mdt && "true" !== params.mdt) {
             this.options.mdt = false;
         }
-        if(params.webservice === "true") {
+        if(params.webservice === "true" || window.location.pathname === "/opl/") {
             this.options.falck = true;
 
             if(params.toonZonderEenheden === "true") {
