@@ -685,6 +685,35 @@ AGSIncidentService.prototype.getKarakteristiek = function(incidentId, archief) {
     return d.promise();
 };
 
+AGSIncidentService.prototype.getKarakteristieken = function(incidentIds, archief){
+    var me = this;
+    var d = $.Deferred();
+
+    if(!incidentIds || incidentIds.length === 0) {
+        return d.resolve(incidentIds instanceof Array ? [] : null);
+    }
+    incidentIds = incidentIds instanceof Array ? incidentIds : [incidentIds];
+
+    var table = archief ? "V_B_ARC_INZET_KAR" : "V_B_ACT_KAR_WAARDEN";
+    me.doAGSAjax({
+        url: me.tableUrls[table] + "/query",
+        dataType: "json",
+        data: {
+            f: "json",
+            token: me.token,
+            where: "INCIDENT_ID IN (" + incidentIds.join(",") + ") ",
+            outFields: "NAAM_KARAKTERISTIEK,ACTUELE_KAR_WAARDE,INCIDENT_ID"
+        }
+    })
+    .fail(function(e) {
+        d.reject(table + ": " + e);
+    })
+    .done(function(data, textStatus, jqXHR) {
+        me.resolveAGSFeatures(d, data, jqXHR);
+    });
+    return d.promise();
+};
+
 AGSIncidentService.prototype.getKladblok = function(incidentId, archief) {
     var me = this;
     var d = $.Deferred();
@@ -750,7 +779,7 @@ AGSIncidentService.prototype.normalizeIncidentFields = function(incident) {
 
     // eenheden stats al in AGSIncidentService
 
-    incident.locatie = this.getIncidentLocatie(incident)
+    incident.locatie = this.getIncidentLocatie(incident);
     incident.start = this.getAGSMoment(incident.DTG_START_INCIDENT);
     incident.prio = incident.PRIORITEIT_INCIDENT_BRANDWEER;
     incident.plaats = incident.PLAATS_NAAM_NEN ? incident.PLAATS_NAAM_NEN : incident.PLAATS_NAAM;
@@ -798,14 +827,16 @@ AGSIncidentService.prototype.getCurrentIncidents = function() {
         var incidentIds = $.map(incidents, function(incident) { return incident.INCIDENT_ID; });
         var dInzetEenheden = me.getInzetEenheden(incidentIds, false);
         var dClassificaties = me.getClassificaties(incidents);
+        var dKarakteristieken = me.getKarakteristieken(incidentIds,false);
 
-        $.when(dInzetEenheden, dClassificaties)
+        $.when(dInzetEenheden, dClassificaties, dKarakteristieken)
         .fail(function(e) {
             d.reject(e);
         })
-        .done(function(inzet, classificaties) {
+        .done(function(inzet, classificaties, karakteristieken) {
             $.each(incidents, function(i, incident) {
                 incident.inzetEenheden = [];
+                incident.karakteristieken = [];
                 incident.actueleInzet = false;
                 incident.beeindigdeInzet = false;
             });
@@ -827,6 +858,15 @@ AGSIncidentService.prototype.getCurrentIncidents = function() {
                     }
                 });
             });
+            
+            $.each(karakteristieken, function(i, karak){
+                $.each(incidents, function(j, incident) {
+                    if(karak.INCIDENT_ID === incident.INCIDENT_ID){
+                        incident.karakteristieken.push(karak);
+                    }
+                });
+            });
+            
             $.each(incidents, function(i, incident) {
                 me.normalizeIncidentFields(incident);
 
@@ -894,11 +934,13 @@ AGSIncidentService.prototype.getArchivedIncidents = function(incidentsToFilter) 
 
         // Filter on active inzet
         var incidentIds = $.map(incidents, function(incident) { return incident.INCIDENT_ID; });
-        me.getInzetEenheden(incidentIds, true)
+        var dInzetEenheden = me.getInzetEenheden(incidentIds, true);
+        var dkarakteristieken = me.getKarakteristieken(incidentIds,true);
+        $.when(dInzetEenheden, dkarakteristieken)
         .fail(function(e) {
             d.reject(e);
         })
-        .done(function(inzet) {
+        .done(function(inzet, karakteristieken) {
             $.each(inzet, function(i, inzetEenheid) {
                 // Add inzet to incident
                 $.each(incidents, function(j, incident) {
@@ -911,6 +953,20 @@ AGSIncidentService.prototype.getArchivedIncidents = function(incidentsToFilter) 
                     }
                 });
             });
+            
+            $.each(karakteristieken, function(i, karak){
+                $.each(incidents, function(j, incident) {
+                    if(karak.INCIDENT_ID === incident.INCIDENT_ID){
+                        if(incident.karakteristieken){
+                            incident.karakteristieken.push(karak);
+                        } else {
+                            incident.karakteristieken = [karak];
+                        }
+                        
+                    }
+                });
+            });
+            
             $.each(incidents, function(i, incident) {
                 me.normalizeIncidentFields(incident);
 
