@@ -471,7 +471,14 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
                 if(inzet.BrwKazerne) {
                     eenheid += " (" + inzet.BrwKazerne + ")";
                 }
-                html += (!inzet.IsActief ? "<span class='einde'> " : "<span> ") + dbkjs.util.htmlEncode(eenheid) + "</span><br/>";
+
+                var tooltip = "";
+                if(inzet.EindeActieDTG) {
+                    var einde = new moment(inzet.EindeActieDTG);
+                    tooltip = "actie be&euml;indigd om " + einde.format("HH:mm") + ", " + einde.fromNow();
+                }
+
+                html += (!inzet.IsActief ? "<span class='einde' " : "<span ")  + " title='" + tooltip + "'>" + dbkjs.util.htmlEncode(eenheid) + "</span><br/>";
             }
         });
         html += '</div>';
