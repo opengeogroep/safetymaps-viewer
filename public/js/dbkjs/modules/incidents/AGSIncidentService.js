@@ -698,6 +698,7 @@ AGSIncidentService.prototype.getKarakteristieken = function(incidentIds, archief
     me.doAGSAjax({
         url: me.tableUrls[table] + "/query",
         dataType: "json",
+        method: "POST",
         data: {
             f: "json",
             token: me.token,
@@ -858,7 +859,7 @@ AGSIncidentService.prototype.getCurrentIncidents = function() {
                     }
                 });
             });
-            
+
             $.each(karakteristieken, function(i, karak){
                 $.each(incidents, function(j, incident) {
                     if(karak.INCIDENT_ID === incident.INCIDENT_ID){
@@ -866,7 +867,7 @@ AGSIncidentService.prototype.getCurrentIncidents = function() {
                     }
                 });
             });
-            
+
             $.each(incidents, function(i, incident) {
                 me.normalizeIncidentFields(incident);
 
@@ -953,7 +954,7 @@ AGSIncidentService.prototype.getArchivedIncidents = function(incidentsToFilter) 
                     }
                 });
             });
-            
+
             $.each(karakteristieken, function(i, karak){
                 $.each(incidents, function(j, incident) {
                     if(karak.INCIDENT_ID === incident.INCIDENT_ID){
@@ -962,11 +963,11 @@ AGSIncidentService.prototype.getArchivedIncidents = function(incidentsToFilter) 
                         } else {
                             incident.karakteristieken = [karak];
                         }
-                        
+
                     }
                 });
             });
-            
+
             $.each(incidents, function(i, incident) {
                 me.normalizeIncidentFields(incident);
 
