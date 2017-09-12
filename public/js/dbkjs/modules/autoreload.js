@@ -25,18 +25,80 @@ dbkjs.modules.autoreload = {
     id: "dbk.module.autoreload",
     options: null,
     timeout: null,
+    refreshPageInterval: null,
+    lastEventTime: null,
     register: function() {
         this.options = $.extend({
-            checkInterval: 60
+            checkInterval: 300,
+            refreshPageAt: false,
+            refreshPageIdleTime: 300 * 1000,
+            showIdleDimmer: true
         }, this.options);
 
         this.setTimer();
+
+        if(this.options.refreshPageAt) {
+            this.initPageRefresh();
+        }
     },
     setTimer: function() {
         var me = this;
         me.timeout = window.setTimeout(function() {
             me.checkReload();
         }, me.options.checkInterval * 1000);
+    },
+    initPageRefresh: function() {
+        var me = this;
+
+        me.refreshPageMoment = new moment(me.options.refreshPageAt, "HH:mm");
+        if(new moment().isAfter(me.refreshPageMoment)) {
+            me.refreshPageMoment = me.refreshPageMoment.add(1, "day");
+        }
+        console.log("Checking refresh page at " + me.refreshPageMoment.format("LLLL") + ", idle time " + me.options.refreshPageIdleTime / 1000 + "s");
+
+        var resetIdleTime = function() {
+            console.log("reset idle time");
+            me.lastEventTime = new Date().getTime();
+
+            $("#dimmer").toggle(false);
+            $("#dimmerText").toggle(false);
+
+            return true;
+        };
+        resetIdleTime();
+
+        $(window).on("mousemove mousedown click scroll touchstart keypress", resetIdleTime);
+        dbkjs.map.events.register("moveend", me, resetIdleTime);
+        dbkjs.map.events.register("zoomend", me, resetIdleTime);
+        dbkjs.map.events.register("mouseup", me, resetIdleTime);
+        dbkjs.map.events.register("mousedown", me, resetIdleTime);
+
+        $(dbkjs).on("reset_idle_timer", resetIdleTime);
+
+        $("body").append("<div id='dimmer' style='display: none; position: fixed; width: 100%; height: 100%; background-color: #000; opacity: 0.5; z-index: 99999; top: 0; left: 0;'/>");
+        $("body").append("<div id='dimmerText' style='display: none; font-size: 34pt; position: fixed; width: 100%; height: 100%; z-index: 999999; top: 0; left: 0; text-align: center; vertical-align: middle; color: white;'>Inactief</div>");
+
+        this.refreshPageInterval = window.setInterval(function() {
+            var idleTime = new Date().getTime() - me.lastEventTime;
+            var isIdle = idleTime > me.options.refreshPageIdleTime;
+            console.log("check refresh time reached, idle time " + (idleTime/1000).toFixed() + ", idle: " + isIdle);
+            if(new moment().isAfter(me.refreshPageMoment)) {
+                console.log("Refresh time reached, idle time: " + (idleTime/1000).toFixed());
+                if(isIdle) {
+                  window.location.reload(true); // forceReload=true
+                } else {
+                    console.log("Idle time to short");
+                }
+            }
+
+            if(me.options.showIdleDimmer) {
+                $("#dimmer").toggle(isIdle);
+                $("#dimmerText").toggle(isIdle);
+                $("#dimmerText").text("Inactief sinds " + new moment(me.lastEventTime).fromNow());
+            }
+
+        }, 60000);
+
     },
     checkReload: function() {
         var me = this;

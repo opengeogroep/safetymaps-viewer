@@ -329,6 +329,7 @@ FalckIncidentsController.prototype.inzetIncident = function(incidentId) {
 
             me.button.setIcon("bell");
 
+            $(dbkjs).trigger("reset_idle_timer");
             $(me).triggerHandler("new_incident", incident);
         });
     }
@@ -444,6 +445,7 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
         // Check if updated, enable alert state if true
         var oldIncidentHtml = me.incidentDetailsWindow.getIncidentHtmlFalck(oldIncident, true, true);
         if(oldIncidentHtml !== me.incidentDetailsWindow.getIncidentHtmlFalck(incident, true, true)) {
+            $(dbkjs).trigger("reset_idle_timer");
             if(!me.incidentDetailsWindow.isVisible()) {
                 me.button.setAlerted(true);
             }

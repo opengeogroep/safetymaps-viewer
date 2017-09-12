@@ -89,10 +89,12 @@ MDTController.prototype.getMDTInfo = function() {
         me.markerLayer.setZIndexFix();
         if(first) {
             me.newIncident();
+            $(dbkjs).trigger("reset_idle_timer");
             me.button.setAlerted(true);
         } else {
             if(me.html !== newHtml) {
                 me.button.setAlerted(true);
+                $(dbkjs).trigger("reset_idle_timer");
             }
             if(me.incidentId !== newId) {
                 me.newIncident();
