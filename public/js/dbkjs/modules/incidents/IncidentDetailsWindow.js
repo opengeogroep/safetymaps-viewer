@@ -197,6 +197,12 @@ IncidentDetailsWindow.prototype.hideMultipleFeatureMatches = function() {
 
 IncidentDetailsWindow.prototype.showMultipleFeatureMatches = function() {
     var me = this;
+
+    if(!me.multipleFeatureMatches || me.multipleFeatureMatches.length <= 1) {
+        me.hideMultipleFeatureMatches();
+        return;
+    }
+
     me.showFeatureMatches = true;
 
     $(".incidentDetails .detailed").hide();
