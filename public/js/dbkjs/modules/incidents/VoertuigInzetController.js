@@ -272,7 +272,6 @@ VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
 
             me.button.setIcon("bell");
 
-            $(dbkjs).trigger("reset_idle_timer");
             $(me).triggerHandler("new_incident", incident);
         });
     }
@@ -335,7 +334,7 @@ VoertuigInzetController.prototype.updateIncident = function(incidentId) {
         // Check if updated, enable alert state if true
         var oldIncidentHtml = me.incidentDetailsWindow.getIncidentHtml(me.incident, false, true);
         if(oldIncidentHtml !== me.incidentDetailsWindow.getIncidentHtml(incident, false, true)) {
-            $(dbkjs).trigger("reset_idle_timer");
+            $(dbkjs).trigger("incidents.updated");
             if(!me.incidentDetailsWindow.isVisible()) {
                 me.button.setAlerted(true);
             }

@@ -27,6 +27,7 @@ dbkjs.modules.autoreload = {
     timeout: null,
     refreshPageInterval: null,
     lastEventTime: null,
+    lastIncidentUpdate: null,
     register: function() {
         this.options = $.extend({
             checkInterval: 300,
@@ -57,7 +58,6 @@ dbkjs.modules.autoreload = {
         console.log("Checking refresh page at " + me.refreshPageMoment.format("LLLL") + ", idle time " + me.options.refreshPageIdleTime / 1000 + "s");
 
         var resetIdleTime = function() {
-            console.log("reset idle time");
             me.lastEventTime = new Date().getTime();
 
             $("#dimmer").toggle(false);
@@ -73,7 +73,13 @@ dbkjs.modules.autoreload = {
         dbkjs.map.events.register("mouseup", me, resetIdleTime);
         dbkjs.map.events.register("mousedown", me, resetIdleTime);
 
-        $(dbkjs).on("reset_idle_timer", resetIdleTime);
+        $(dbkjs).on("incidents.updated", function() {
+            console.log("Incident updated");
+            me.lastIncidentUpdate = new Date().getTime();
+
+            $("#dimmer").toggle(false);
+            $("#dimmerText").toggle(false);
+        });
 
         $("body").append("<div id='dimmer' style='display: none; position: fixed; width: 100%; height: 100%; background-color: #000; opacity: 0.5; z-index: 99999; top: 0; left: 0;'/>");
         $("body").append("<div id='dimmerText' style='display: none; font-size: 34pt; position: fixed; width: 100%; height: 100%; z-index: 999999; top: 0; left: 0; text-align: center; vertical-align: middle; color: white;'>Inactief</div>");
@@ -81,7 +87,11 @@ dbkjs.modules.autoreload = {
         this.refreshPageInterval = window.setInterval(function() {
             var idleTime = new Date().getTime() - me.lastEventTime;
             var isIdle = idleTime > me.options.refreshPageIdleTime;
-            console.log("check refresh time reached, idle time " + (idleTime/1000).toFixed() + ", idle: " + isIdle);
+            console.log("Check refresh time reached, idle time " + (idleTime/1000).toFixed() + ", idle: " + isIdle);
+            if(isIdle && me.lastIncidentUpdate && new Date().getTime() - me.lastIncidentUpdate < 30 * 60 * 1000) {
+                console.log("Idle but last incident update less than 30 minutes ago");
+                isIdle = false;
+            }
             if(new moment().isAfter(me.refreshPageMoment)) {
                 console.log("Refresh time reached, idle time: " + (idleTime/1000).toFixed());
                 if(isIdle) {
