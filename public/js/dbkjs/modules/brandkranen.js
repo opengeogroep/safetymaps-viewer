@@ -88,7 +88,7 @@ dbkjs.modules.brandkranen = {
         }
         me.selectedBrandkranen.push(a.nummer);
 
-        $('#vectorclickpanel_h').html('<span class="h4"><i class="fa fa-info-circle">&nbsp;Brandkraan WML #' + a.nummer + ' </span><div style="float: right;"><a href="#" id="deselect_all">Deselecteer alles</a> </div>');
+        $('#vectorclickpanel_h').css("position","relative").html('<span class="h4"><i class="fa fa-info-circle">&nbsp;Brandkraan WML #' + a.nummer + ' </span><div class="h4" style="position: absolute; left:0; right:0; top:0; text-align:center;"><a href="#" id="deselect_all">Deselecteer alles</a> </div>');
         var html = $('<div class="table-responsive"></div>');
         $("#deselect_all").on("click", (function (e) {
             e.preventDefault();
@@ -98,7 +98,7 @@ dbkjs.modules.brandkranen = {
         
         var table = $('<table class="table table-hover"></table>');
         var img = e.object.styleMap.styles.default.context.myicon(e.feature);
-        var cap = a.capaciteit ? (a.capaciteit/1000).toLocaleString("nl", { useGrouping: true}) + "m<sup>3</sup>/uur" : "N.B.";
+        var cap = a.capaciteit ? (a.capaciteit/1000).toLocaleString("nl", { useGrouping: true}) + "m<sup>3</sup>/uur" : "Niet bekend";
         var nummer = a.nummer ? a.nummer : "";
         var huisnummer = a.huisnummer ? a.huisnummer : "";
         var postcode = a.postcode ? a.postcode : "";
@@ -191,7 +191,9 @@ dbkjs.modules.brandkranen = {
                         label: function(feature) {
                             if(dbkjs.map.getScale() > 4000) {
                                 return "";
-                            } else {
+                            } else if(feature.attributes.capaciteit === 0){
+                                return "N.B.";
+                            }else{
                                 return (feature.attributes.capaciteit / 1000).toFixed();
                             }
                         }
