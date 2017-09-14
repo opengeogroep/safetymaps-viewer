@@ -125,10 +125,11 @@ dbkjs.modules.support = {
                 if(!_obj.options.hideUser) {
                     p.append(user_input);
                 }
+                placeholder = i18n.t("email.email.placeholder") === "email.email.placeholder" ? i18n.t("email.email") : i18n.t("email.email.placeholder");
                 var mail_input = $('<div class="form-group"><label class="col-sm-2 control-label" for="email">' +
                         i18n.t('email.email') +
                         ' *</label><div class="col-sm-8"><input id="email" name="email" type="email" class="form-control required" placeholder="' +
-                        i18n.t('email.email') + '"></div></div>');
+                        placeholder + '"></div></div>');
                 p.append(mail_input);
                 var tel_input = $('<div class="form-group"><label class="col-sm-2 control-label" for="phone">' +
                         i18n.t('email.phone') +
