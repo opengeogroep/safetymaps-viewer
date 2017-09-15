@@ -27,6 +27,7 @@ dbkjs.modules.brandkranen = {
     rtBrandkranen:null,
     brandkranen: null,
     selectedBrandkranen:null,
+    currentlySelectedBrandkraan:null,
     strengen:null,
     register: function() {
         var me = this;
@@ -66,7 +67,7 @@ dbkjs.modules.brandkranen = {
         var a = e.feature.attributes;
         var me = this;
         for(var i = 0 ; i< me.selectedBrandkranen.length;i++){
-            if(a.nummer === me.selectedBrandkranen[i]){
+            if(a.nummer === me.selectedBrandkranen[i].nummer){
                 return true;
             }
         }
@@ -78,15 +79,21 @@ dbkjs.modules.brandkranen = {
         return true;
         
     },
-    brandkraanSelected: function(e) {
+    brandkraanSelected: function(e, dontunselect) {
         var me = this;
         var a = e.feature.attributes;
-        if(me.selectedBrandkranen.indexOf(a.nummer) !== -1){
-            var feature = e.feature;
-            dbkjs.selectControl.unselect(feature);
-            return;
+        if(!dontunselect){
+            for(var i = 0 ; i< me.selectedBrandkranen.length;i++){
+                if(a.nummer === me.selectedBrandkranen[i].nummer){
+                    var feature = e.feature;
+                    dbkjs.selectControl.unselect(feature);
+                    return;
+                }
+            }
         }
-        me.selectedBrandkranen.push(a.nummer);
+
+        me.selectedBrandkranen.push(a);
+        this.currentlySelectedBrandkraan = a;
 
         $('#vectorclickpanel_h').css("position","relative").html('<span class="h4"><i class="fa fa-info-circle">&nbsp;Brandkraan WML #' + a.nummer + ' </span><div class="h4" style="position: absolute; left:0; right:0; top:0; text-align:center;"><a href="#" id="deselect_all">Deselecteer alles</a> </div>');
         var html = $('<div class="table-responsive"></div>');
@@ -120,7 +127,6 @@ dbkjs.modules.brandkranen = {
         $('#vectorclickpanel').show();
     },
     brandkraanUnselected: function(e) {
-        $('#vectorclickpanel').hide();
         var feature = e.feature;
         
         var me = this;
@@ -133,11 +139,33 @@ dbkjs.modules.brandkranen = {
         this.strengen = newStrengen;
         var newBrandkranenSelected = [];
         $.each(me.selectedBrandkranen, function (i, brandkraan) {
-            if (brandkraan !== feature.attributes.nummer) {
+            if (brandkraan.nummer !== feature.attributes.nummer) {
                 newBrandkranenSelected.push(brandkraan);
             }
         });
         this.selectedBrandkranen = newBrandkranenSelected;
+
+        if(this.selectedBrandkranen.length === 0){
+            $('#vectorclickpanel').hide();
+        }else{
+            if (this.currentlySelectedBrandkraan.nummer === feature.attributes.nummer){
+                // huidige bekeken brandkraan wordt gedeselecteerd
+                var f = this.selectedBrandkranen[0];
+                var feat;
+                for(var j = 0 ; j < this.brandkranen.features.length ; j++){
+                    if(this.brandkranen.features[j].attributes.nummer === f.nummer){
+                        feat = this.brandkranen.features[j];
+                        break;
+                    }
+                }
+
+                var evt = {
+                    feature: feat,
+                    object: this.brandkranen
+                };
+                this.brandkraanSelected(evt,true);
+            }
+        }
         this.brandkranen.redraw();
     },
     init: function() {
@@ -170,7 +198,7 @@ dbkjs.modules.brandkranen = {
                             var postfix = "";
                             var currentlySelected = false;
                             for(var i = 0 ; i< me.selectedBrandkranen.length;i++){
-                                if(feature.attributes.nummer === me.selectedBrandkranen[i]){
+                                if(feature.attributes.nummer === me.selectedBrandkranen[i].nummer){
                                     currentlySelected =  true;
                                     break;
                                 }
