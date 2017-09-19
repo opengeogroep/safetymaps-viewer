@@ -474,7 +474,7 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
 };
 
 FalckIncidentsController.prototype.normalizeIncidentFields = function(incident) {
-    incident.id = incident.IncidentNummer;
+    incident.id = incident.IncidentId; // Used for IncidentMonitorController.updateVehiclePositionLayer()
 
     incident.actueleInzet = false;
     incident.inzetEenhedenStats = {
