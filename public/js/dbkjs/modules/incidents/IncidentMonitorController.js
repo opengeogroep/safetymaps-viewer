@@ -32,7 +32,9 @@ function IncidentMonitorController(incidents) {
     var me = this;
     me.service = incidents.service;
     me.ghor = incidents.options.ghor;
-    me.falck = incidents.options.falck;
+    
+    var params = OpenLayers.Util.getParameters();
+    me.falck = params.webservice === "true" || window.location.pathname === "/opl/";
     me.toonZonderEenheden = incidents.options.toonZonderEenheden;
 
     me.kb = false;

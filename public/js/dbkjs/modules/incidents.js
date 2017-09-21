@@ -31,42 +31,50 @@ dbkjs.modules.incidents = {
             this.options = dbkjs.options.incidents;
         }
 
+        this.options = $.extend({
+            controller: "MDTController"
+        }, this.options);
+
+        // Controller can be changed using URL parameter
+
         var params = OpenLayers.Util.getParameters();
         if(params.mdt && "true" !== params.mdt) {
-            this.options.mdt = false;
+            this.options.controller = "VoertuigInzetController";
         }
-        if(params.webservice === "true" || window.location.pathname === "/opl/") {
-            this.options.falck = true;
-
-            if(params.toonZonderEenheden === "true") {
-                this.options.toonZonderEenheden = true;
-            }
+        if(params.webservice === "true") {
+            this.options.controller = "FalckIncidentsController";
         }
-
-        if(this.options.controller === "pharos") {
-            this.controller = new PharosIncidentsController(this);
-        } else if(this.options.incidentMonitor || !this.options.mdt) {
+        
+        // XXX unused, remove
+        if(params.toonZonderEenheden === "true") {
+            this.options.toonZonderEenheden = true;
+        }
+        
+        // Initialize AGS service if needed
+        if(this.options.controller === "VoertuigInzetController" || this.options.incidentMonitor) {
             this.service = new AGSIncidentService(this.options.ags.incidentsUrl, this.options.ags.vehiclePosUrl);
-
-            if(this.options.incidentMonitor) {
-                this.controller = new IncidentMonitorController(this);
-            } else {
-                this.controller = new VoertuigInzetController(this);
-            }
-
+            
             this.service.initialize(this.options.ags.tokenUrl, this.options.ags.user, this.options.ags.password)
             .fail(function(e) {
                 // Avoid map loading messages hiding our error message
                 window.setTimeout(function() {
                     dbkjs.util.alert("Fout bij initialiseren meldingenservice", e, "alert-danger");
                 }, 3000);
-            });
-        } else if(this.options.falck) {
-            this.controller = new FalckIncidentsController(this);
-        } else if(!this.options.mdt) {
+            });        
+        }
+       
+        if(this.options.incidentMonitor) {
+            this.controller = new IncidentMonitorController(this);
+        } else if(this.options.controller === "PharosIncidentsController") {
+            this.controller = new PharosIncidentsController(this);
+        } else if(this.options.controller === "VoertuigInzetController") {
             this.controller = new VoertuigInzetController(this);
-        } else {
+        } else if(this.options.controller === "MDTController") {
             this.controller = new MDTController(this);
+        } else if(this.options.controller === "FalckIncidentsController") {
+            this.controller = new FalckIncidentsController(this);
+        } else {
+            console.log("No incidents controller configured");
         }
     }
 };
