@@ -325,7 +325,7 @@ dbkjs.zoomToFixedMapResolutionForBounds = function(bounds) {
 dbkjs.finishMap = function () {
     //find the div that contains the baseLayer.name
     var listItems = $("#baselayerpanel_ul li");
-    var areaGeometry = dbkjs.options.area ? dbkjs.options.area : new OpenLayers.Format.GeoJSON().read(dbkjs.options.organisation.area.geometry, "Geometry");
+    var areaGeometry = dbkjs.options.mapExtent ? dbkjs.options.mapExtent : new OpenLayers.Format.GeoJSON().read(dbkjs.options.organisation.area.geometry, "Geometry");
     listItems.each(function (idx, li) {
         var test = $(li).children(':first').text();
         if (test === dbkjs.map.baseLayer.name) {
