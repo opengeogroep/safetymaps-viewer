@@ -103,6 +103,12 @@ dbkjs.activateClick = function () {
         var touchmove = null;
 
         dbkjs.map.events.register('touchend', dbkjs.map, function(e) {
+            // Set on featureselected/featureunselected, as this also fires a
+            // touchend, but a click event on feature (un)selected is swallowed
+            if(dbkjs.ignoreNextTouchend) {
+                dbkjs.ignoreNextTouchend = false;
+                return;
+            }
             var closeTouch = false;
             if(touchmove !== null && touchmove.xy && e.xy) {
                 closeTouch = Math.abs(touchmove.xy.x - e.xy.x) < dbkjs.options.minTouchMoveEndDistance &&

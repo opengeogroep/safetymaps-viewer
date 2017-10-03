@@ -233,10 +233,14 @@ dbkjs.protocol.jsonDBK = {
     activateSelect: function (layer) {
         var _obj = dbkjs.protocol.jsonDBK;
         layer.events.on({
-            "featureselected": _obj.getfeatureinfo,
+            "featureselected": function(e) {
+                dbkjs.ignoreNextTouchend = true;
+                _obj.getfeatureinfo(e);
+            },
             "featuresadded": function () {
             },
             "featureunselected": function (e) {
+                dbkjs.ignoreNextTouchend = true;
                 dbkjs.gui.detailsPanelHide();
             }
         });
