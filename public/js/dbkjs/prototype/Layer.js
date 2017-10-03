@@ -270,6 +270,8 @@ dbkjs.Layer = dbkjs.Class({
         features = g.read($.parseXML(response.responseText));
         console.log("Feature info for layer "+ _obj.layer.name + ": "+ features.length + " features returned");//, response.responseText);
         if (features.length > 0) {
+            var title = _obj.layer.name.split("\\");
+            dbkjs.gui.detailsPanelUpdateTitle(title[title.length-1]);
             var html = '<div class="table-responsive"><table class="table table-hover">';
             for (var feat in features) {
                 for (var j in features[feat].attributes) {
