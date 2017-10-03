@@ -375,7 +375,7 @@ dbkjs.modules.edit = {
     readSavedFeatures: function() {
         var me = this;
         // Read GeoJSON
-        $.ajax("http://demo.safetymaps.nl/voertuigviewer/api/edit", { data: { load: "true" } })
+        $.ajax(dbkjs.dataPath + "edit", { data: { load: "true" } })
         .done(function(saved) {
             var geoJsonFormatter = new OpenLayers.Format.GeoJSON();
             me.featuresManager.removeAllFeatures();
@@ -392,7 +392,7 @@ dbkjs.modules.edit = {
 
     saveFeatures: function() {
         //window.localStorage.setItem("edit.drawedFeatures", JSON.stringify((new OpenLayers.Format.GeoJSON()).write(this.layer.features)));
-        $.ajax("http://demo.safetymaps.nl/voertuigviewer/api/edit", {
+        $.ajax(dbkjs.dataPath + "edit", {
             method: "POST",
             data: { save: "true", features: JSON.stringify((new OpenLayers.Format.GeoJSON()).write(this.layer.features)) }
         })
