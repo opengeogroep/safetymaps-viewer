@@ -298,12 +298,11 @@ dbkjs.modules.search = {
         });
     },
     searchDbkOms: function(searchValues, searchText) {
-        var _obj = dbkjs.modules.search,
-            regExp = new RegExp(searchText, 'ig');
+        var _obj = dbkjs.modules.search;
         console.time('searchDbkOms');
         var results = [];
 		for(var i = 0; i < searchValues.length && results.length < 20; i++) {
-			if(regExp.test(searchValues[i].value)) {
+			if(new RegExp(searchText, 'i').test(searchValues[i].value)) {
 				results.push(searchValues[i]);
 			}
 		}
@@ -435,12 +434,11 @@ dbkjs.modules.search = {
     },
     handleLibrarySearch: function(searchText) {
         var me = this;
-        var regExp = new RegExp(searchText, 'ig');
         var searchResultContainer = $('.search_result');
         var item_ul = $('<ul class="nav nav-pills nav-stacked"></ul>');
         searchResultContainer.html('');
         $.each(me.library, function(i, item) {
-            if(searchText.trim() === "" || regExp.test(item.Omschrijving)) {
+            if(searchText.trim() === "" || new RegExp(searchText, 'i').test(item.Omschrijving)) {
                 item_ul.append($('<li><a href="#">' + item.Omschrijving + '</a></li>').on('click', function(e) {
                     e.preventDefault();
                     me.showLibraryItem(item);
@@ -470,10 +468,9 @@ dbkjs.modules.search = {
     },
     handleWoSearch: function(searchText) {
         var me = this;
-        var regExp = new RegExp(searchText, 'ig');
         var results = [];
         $.each(dbkjs.modules.waterongevallen.features, function(i, f) {
-            if(searchText.trim() === "" || regExp.test(f.attributes.label)) {
+            if(searchText.trim() === "" || new RegExp(searchText, 'i').test(f.attributes.label)) {
                 results.push({
                     value: f.attributes.label,
                     feature: f
