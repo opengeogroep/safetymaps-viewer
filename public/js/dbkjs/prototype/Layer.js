@@ -155,7 +155,11 @@ dbkjs.Layer = dbkjs.Class({
                             '<div id="' + parent + '_panel" class="panel-group"></div>' +
                             '</div>');
                 }
-                parent = "#" + dbkjs.tabIds[newparent];
+                parent = "#" + dbkjs.tabIds[newparent] + "_panel";
+            }
+            // Default "Systeem" tab in index.html overlay_tabdef
+            if(dbkjs.util.isJsonNull(parent)) {
+                parent = "#overlaypanel_b2";
             }
 
             this.div.append(dv_panel_content);
