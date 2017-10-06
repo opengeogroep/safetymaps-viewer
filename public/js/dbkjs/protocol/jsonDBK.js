@@ -38,7 +38,7 @@ dbkjs.protocol.jsonDBK = {
             styleMap: dbkjs.config.styles.dbkpand
         });
         dbkjs.map.events.register("moveend", null, function () {
-            var min = dbkjs.options.dbkLayersMinResolution || 12;
+            var min = typeof dbkjs.options.dbkLayersMinResolution === "undefined" ? 12 : dbkjs.options.dbkLayersMinResolution;
             if (dbkjs.map.zoom < min) {
                 _obj.hideLayers();
             } else {
