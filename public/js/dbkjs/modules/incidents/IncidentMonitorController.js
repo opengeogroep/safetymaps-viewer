@@ -366,6 +366,9 @@ IncidentMonitorController.prototype.updateInterface = function() {
         });
     } else {
         inactive = inactive.concat(archivedFiltered);
+        inactive.sort(function(lhs, rhs) {
+            return rhs.start.valueOf() - lhs.start.valueOf();
+        });
     }
 
     me.actueleIncidentIds = $.map(active, function(incident) { return incident.INCIDENT_ID || incident.IncidentNummer; });
