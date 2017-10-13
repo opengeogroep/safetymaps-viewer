@@ -500,7 +500,28 @@ dbkjs.documentReady = function () {
                             // always returning false to also avoid 206 error
                             PDFJS_URL: "js/libs/pdfjs-1.6.210-disablerange-minified/web/viewer.html",
                             forcePDFJS: !!dbkjs.options.forcePDFJS
-                        });
+                        });                      
+                        // Remove buttons from PDFJS toolbar
+                        // XXX hack, use PDFJS documentloaded event?
+                        function removeToolbar() {
+                            var iframe = $("iframe").contents();
+                            if(iframe.find("#download")[0] || iframe.find("#secondaryDownload")[0] ) {
+                                console.log("found PDFJS toolbar buttons, removing");
+                                iframe.find("#download").remove();
+                                iframe.find("#openFile").remove();
+                                iframe.find("#print").remove();
+                                iframe.find("#secondaryDownload").remove();
+                                iframe.find("#secondaryOpenFile").remove();
+                                iframe.find("#secondaryPrint").remove();
+                            } else {
+                                console.log("PDFJS toolbar not found, waiting")
+                                window.setTimeout(removeToolbar, 500);
+                            }
+                        }
+                            //this check is needed. If the program is not using PDFJS then we can't remove buttons.
+                            if(PDFObject.supportsPDFs || dbkjs.options.forcePDFJS ){
+                                removeToolbar();
+                            }
                     }
                 });
             });
