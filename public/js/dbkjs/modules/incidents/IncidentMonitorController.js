@@ -32,7 +32,7 @@ function IncidentMonitorController(incidents) {
     var me = this;
     me.service = incidents.service;
     me.ghor = incidents.options.ghor;
-    
+
     var params = OpenLayers.Util.getParameters();
     me.falck = params.webservice === "true" || window.location.pathname === "/opl/";
     me.toonZonderEenheden = incidents.options.toonZonderEenheden;
@@ -363,6 +363,11 @@ IncidentMonitorController.prototype.updateInterface = function() {
             if(!duplicate) {
                 inactive.push(incident);
             }
+        });
+    } else {
+        inactive = inactive.concat(archivedFiltered);
+        inactive.sort(function(lhs, rhs) {
+            return rhs.start.valueOf() - lhs.start.valueOf();
         });
     }
 
