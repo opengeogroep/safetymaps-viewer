@@ -502,6 +502,8 @@ IncidentMonitorController.prototype.processFalckIncidents = function() {
         if(incident.Actueel) {
             me.currentIncidents.push(incident);
         } else {
+            // Zorg dat niet direct 'endIncident' wordt afgevuurd bij bekijken niet-actueel incident
+            incident.archief = true;
             me.archivedIncidents.push(incident);
         }
     });
@@ -596,13 +598,13 @@ IncidentMonitorController.prototype.updateIncident = function(incidentId, archie
     console.log("Get incident info for " + incidentId + ", archief=" + archief);
 
     if(me.falck) {
-        me.updateIncidentFalck(incidentId, isUpdate);
+        me.updateIncidentFalck(incidentId, archief, isUpdate);
     } else {
         me.updateIncidentAGS(incidentId, archief, isUpdate);
     }
 };
 
-IncidentMonitorController.prototype.updateIncidentFalck = function(incidentId, isUpdate) {
+IncidentMonitorController.prototype.updateIncidentFalck = function(incidentId, archief, isUpdate) {
     var me = this;
 
     $.ajax('gms/incident/' + incidentId, {
@@ -626,7 +628,7 @@ IncidentMonitorController.prototype.updateIncidentFalck = function(incidentId, i
         me.incident = data[0];
         me.normalizeIncidentFields(me.incident);
 
-        if(!me.incident.Actueel) {
+        if(!archief && !me.incident.Actueel) {
             me.endIncident();
             return;
         }
