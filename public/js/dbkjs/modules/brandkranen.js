@@ -108,7 +108,8 @@ dbkjs.modules.brandkranen = {
         var cap = a.capaciteit ? (a.capaciteit/1000).toLocaleString("nl", { useGrouping: true}) + "m<sup>3</sup>/uur" : "Niet bekend";
         var nummer = a.nummer ? a.nummer : "";
         var huisnummer = a.huisnummer ? a.huisnummer : "";
-        var postcode = a.postcode ? a.postcode : "";
+        var straatnaam = a.straatnaam ? a.straatnaam : "";
+        var adres = straatnaam ? straatnaam + " " + huisnummer : "";
         var currentStreng = null;
         if (a.streng_id) {
             me.strengen.push(a.streng_id);
@@ -118,9 +119,9 @@ dbkjs.modules.brandkranen = {
         '<tr>' +
             '<td><img class="thumb" src="{{img}}" alt="{{f.symboolcod}}" title="{{f.symboolcod}}"></td>' +
             '<td>Capaciteit: ' + cap + ' </td>' +
-            '<td>Postcode:{{postcode}}, huisnummer: {{huisnummer}}</td>' +
+            '<td>Adres: {{adres}} </td>' +
             
-        '</tr>', {img: img, f: e.feature.attributes,  nummer: nummer, postcode:postcode, huisnummer:huisnummer})));
+        '</tr>', {img: img, f: e.feature.attributes,  nummer: nummer, adres:adres})));
         
         html.append(table);
         $('#vectorclickpanel_b').html('').append(html);
