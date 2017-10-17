@@ -453,7 +453,8 @@ IncidentMonitorController.prototype.getIncidentListFalck = function() {
         dataType: "json",
         data: {
             extended: true
-        }
+        },
+        cache: false
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         window.clearTimeout(me.getIncidentListTimeout);
@@ -611,7 +612,8 @@ IncidentMonitorController.prototype.updateIncidentFalck = function(incidentId, a
         dataType: "json",
         data: {
             extended: true
-        }
+        },
+        cache: false
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         var msg = "Kan incidentinfo niet updaten: " + AGSIcidentService.prototype.getAjaxError(jqXHR, textStatus, errorThrown);
