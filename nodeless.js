@@ -58,11 +58,15 @@ fs.mkdirSync(outDir);
 var mediaPath = global.conf.get('media:path');
 var symbolPath = global.conf.get('media:symbols');
 
-console.log("Copying media from %s...", mediaPath);
-var copyOptions = {}; //{ onFileCopy: function(from, to) { console.log("  " + to); } };
-fsutil.copyRecursiveSync(mediaPath, outDir + '/media', copyOptions);
-console.log("Copying symbols from %s...", symbolPath);
-fsutil.copyRecursiveSync(symbolPath, outDir + '/symbols', copyOptions);
+if(mediaPath) {
+    console.log("Copying media from %s...", mediaPath);
+    var copyOptions = {}; //{ onFileCopy: function(from, to) { console.log("  " + to); } };
+    fsutil.copyRecursiveSync(mediaPath, outDir + '/media', copyOptions);
+}
+if(symbolPath) {
+    console.log("Copying symbols from %s...", symbolPath);
+    fsutil.copyRecursiveSync(symbolPath, outDir + '/symbols', copyOptions);
+}
 
 console.log("Copy public...");
 fsutil.copyRecursiveSync('./public', outDir, copyOptions);
@@ -95,11 +99,15 @@ global.pool = anyDB.createPool(dbURL, {min: 2, max: 20});
 var organisationsDone = false, featuresDone = false, objectsToBeWritten = null;
 
 var skipDB = false;
+var skipObjects = false;
 var testOrganisation = false;
 
 process.argv.slice(2).forEach(function(val, index, array) {
     if(val === "--skip-db") {
         skipDB = true;
+    }
+    if(val === "--skip-objects") {
+        skipObjects = true;
     }
     if(val === "--test-organisation") {
         testOrganisation = true;
@@ -193,7 +201,7 @@ var totalVerdiepingen = 0;
 
 
 
-if(!skipDB) {
+if(!skipDB && !skipObjects) {
     console.log("Create api/features.json...");
     fs.mkdirSync(outDir + '/api/object');
     fs.mkdirSync(outDir + '/api/gebied');
