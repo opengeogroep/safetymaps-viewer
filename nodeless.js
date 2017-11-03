@@ -35,13 +35,6 @@ global.conf.argv().env();
 // Then load configuration from a designated file.
 global.conf.file({ file: 'config.json' });
 
-var dbURL = 'postgres://' +
-        global.conf.get('database:user') + ':' +
-        global.conf.get('database:password') + '@' +
-        global.conf.get('database:host') + ':' +
-        global.conf.get('database:port') + '/' +
-        global.conf.get('database:dbname');
-
 console.log("Removing output dir...");
 
 var outDir = path.resolve(__dirname, "nodeless_output");
@@ -89,13 +82,6 @@ fsutil.copyRecursiveSync('./locales', outDir + '/locales', copyOptions);
 console.log("Copy html...");
 fsutil.copyRecursiveSync('./nodeless/html', outDir , copyOptions);
 
-console.log("Create api/organisation.json...");
-fs.mkdirSync(outDir + '/api');
-var dbk = require('./controllers/dbk.js');
-
-var anyDB = require('any-db');
-global.pool = anyDB.createPool(dbURL, {min: 2, max: 20});
-
 var organisationsDone = false, featuresDone = false, objectsToBeWritten = null;
 
 var skipDB = false;
@@ -115,6 +101,19 @@ process.argv.slice(2).forEach(function(val, index, array) {
 });
 
 if(!skipDB) {
+    console.log("Create api/organisation.json...");
+    fs.mkdirSync(outDir + '/api');
+    var dbk = require('./controllers/dbk.js');
+    
+    var dbURL = 'postgres://' +
+            global.conf.get('database:user') + ':' +
+            global.conf.get('database:password') + '@' +
+            global.conf.get('database:host') + ':' +
+            global.conf.get('database:port') + '/' +
+            global.conf.get('database:dbname');
+    var anyDB = require('any-db');
+    global.pool = anyDB.createPool(dbURL, {min: 2, max: 20});
+
     dbk.getOrganisation(
             {params: {id: 0}, query: {srid: 28992}, testOrganisation: testOrganisation},
     {
@@ -198,8 +197,6 @@ if(!skipDB) {
 }
 
 var totalVerdiepingen = 0;
-
-
 
 if(!skipDB && !skipObjects) {
     console.log("Create api/features.json...");
@@ -301,8 +298,6 @@ if(!skipDB && !skipObjects) {
     featuresDone = true;
     objectsToBeWritten = 0;
 }
-
-// Ignore /api/gebied/ for now
 
 function copyDeploy() {
     var deploy = global.conf.get("nodeless:deploy");
