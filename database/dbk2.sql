@@ -399,8 +399,8 @@ SELECT t.identificatie,
                             "Adres".huisnummertoevoeging,
                             "Adres".postcode
                            FROM dbk2."Adres"
-                          WHERE "Adres"."bagId" = (select dob.adres_id from dbk2."DBKObject" dob where dob.dbkfeature_id = d.identificatie)) a) AS adres,
-        (select json from dbk2."Adressen" a where a.identificatie = d.identificatie) as adressen                          
+                          WHERE "Adres"."bagId" = (select dob.adres_id from dbk2."DBKObject" dob where dob.dbkfeature_id = d.identificatie limit 1)) a) AS adres,
+        (select json from dbk2."Adressen" a where a.identificatie = d.identificatie limit 1) as adressen                          
    FROM dbk2."DBKFeature" d where d.hoofdobject is null AND (not d.geometrie is null and not st_isempty(d.geometrie) and not d."typeFeature" is null) AND (viewer = true) AND ((now() > datumtijdviewerbegin and now() <= datumtijdviewereind) OR 
 (datumtijdviewerbegin is null and datumtijdviewereind is null) OR
 (now() > datumtijdviewerbegin and datumtijdviewereind is null) OR
