@@ -60,7 +60,7 @@ safetymaps.creator.api = {
     /**
      * Create OpenLayers features suitable for use in ClusteringLayer
      */
-    createViewerObjectFeatures: function(data) {
+    createViewerObjectFeatures: function(data, options) {
         var wktParser = new OpenLayers.Format.WKT();
         
         var features = new Array(data.length);
@@ -86,7 +86,7 @@ safetymaps.creator.api = {
                         break;
                 }
             }
-            feature.attributes.symbol = 'js/safetymaps/modules/creator/' + symbol;
+            feature.attributes.symbol = options.imagePath + '/' + symbol;
             feature.attributes.width = width;
             feature.attributes.height = height;
             if(apiObject.selectiekader) {

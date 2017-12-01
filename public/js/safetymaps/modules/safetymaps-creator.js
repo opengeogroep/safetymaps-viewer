@@ -32,7 +32,8 @@
         
         safetymaps.creator.api.getViewerObjectMapOverview()
         .done(function(data) {
-            var features = safetymaps.creator.api.createViewerObjectFeatures(data);
+            var options = {imagePath: 'js/safetymaps/modules/creator'};
+            var features = safetymaps.creator.api.createViewerObjectFeatures(data, options);
 
             me.clusteringLayer = new safetymaps.clusteringLayer();
             me.clusteringLayer.createLayer(dbkjs.map);
