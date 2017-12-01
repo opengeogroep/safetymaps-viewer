@@ -101,6 +101,11 @@ safetymaps.creator.api = {
             }
         });
         return features;
+    },
+
+    getStyleInfo: function() {
+        // TODO
+        // $.ajax('api/styles.json', {
     }
 };
 

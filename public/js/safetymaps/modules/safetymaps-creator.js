@@ -48,6 +48,8 @@
             dbkjs.selectControl.activate();            
             
             me.clusteringLayer.addFeaturesToCluster(features);
+
+            // TODO: register for cluster_selected or object_selected events
         });
     }
 };

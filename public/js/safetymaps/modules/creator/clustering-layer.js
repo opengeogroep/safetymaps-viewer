@@ -83,6 +83,8 @@ safetymaps.clusteringLayer.prototype.addFeaturesToCluster = function(features) {
 };
 
 safetymaps.clusteringLayer.prototype.selected = function() {
+
+    // TODO: fire cluster_selected or object_selected event
     console.log("clusteringLayer.selected()", arguments);
 };
 
