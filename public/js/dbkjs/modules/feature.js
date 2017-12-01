@@ -325,7 +325,6 @@ dbkjs.modules.feature = {
     getfeatureinfo: function(e) {
         var _obj = dbkjs.modules.feature;
         if (typeof(e.feature) !== "undefined") {
-            dbkjs.gui.infoPanelUpdateHtml('');
             if (e.feature.cluster) {
                 if (e.feature.cluster.length === 1) {
                     // XXX should never come here because feature.cluster should be false, only do else part here

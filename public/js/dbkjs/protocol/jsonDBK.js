@@ -338,7 +338,6 @@ dbkjs.protocol.jsonDBK = {
             div.append(_obj.panel_group);
             div.append(_obj.panel_tabs);
             $('#dbkinfopanel_b').html(div);
-            dbkjs.gui.infoPanelUpdateTitle('<i class="fa fa-building"></i> ' + dbkjs.options.feature.formeleNaam);
             $('#systeem_meldingen').hide();
 
             // Construct additional geometries.

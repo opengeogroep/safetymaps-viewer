@@ -25,9 +25,6 @@ window.dbkjs = dbkjs;
 dbkjs.modules = dbkjs.modules || [];
 dbkjs.overlays = dbkjs.overlays || [];
 dbkjs.map = dbkjs.map || null;
-dbkjs.dataPath = dbkjs.dataPath || null;
-dbkjs.mediaPath = dbkjs.mediaPath || null;
-dbkjs.basePath = dbkjs.basePath || null;
 
 dbkjs.init = function () {
 
@@ -42,7 +39,7 @@ dbkjs.init = function () {
     dbkjs.options.adres = dbkjs.util.getQueryVariable(i18n.t('app.queryAddress'));
     dbkjs.options.omsnummer = dbkjs.util.getQueryVariable(i18n.t('app.queryNumber'));
     dbkjs.options.dbk = dbkjs.util.getQueryVariable(i18n.t('app.queryDBK'));
-    dbkjs.challengeAuth();
+    dbkjs.getOrganisation();
 
     dbkjs.mapcontrols.createMapControls();
 
@@ -51,6 +48,34 @@ dbkjs.init = function () {
     dbkjs.showStatus = false;
 
 };
+
+dbkjs.setPaths = function() {
+
+    dbkjs.basePath = window.location.protocol + '//' + window.location.hostname;
+    var pathname = window.location.pathname;
+    // ensure basePath always ends with '/', remove 'index.html' if exists
+    if(pathname.charAt(pathname.length - 1) !== '/') {
+        pathname = pathname.substring(0, pathname.lastIndexOf('/')+1);
+    }
+    // ensure single '/' between hostname and path
+    dbkjs.basePath = dbkjs.basePath + (pathname.charAt(0) === "/" ? pathname : "/" + pathname);
+
+    // Wordt gebruikt in:
+    // - dbkjs.challengeAuth()
+    // - feature.js - get()
+    // - jsonDBK.js - getGebied()
+    // - jsonDBK.js - getObject()
+    if (!dbkjs.dataPath) {
+        dbkjs.dataPath = 'api/';
+    }
+
+    // Wordt gebruikt in:
+    // - jsonDBK.js - constructMedia()
+    if (!dbkjs.mediaPath) {
+        dbkjs.mediaPath = dbkjs.basePath + 'media/';
+    }
+};
+
 
 /**
  * Function to update the visibility for baseLayers
@@ -69,14 +94,6 @@ dbkjs.toggleBaseLayer = function (nr) {
             dbkjs.map.setBaseLayer(dbkjs.options.baselayers[nr]);
         }
     }
-};
-
-dbkjs.setDbkCategoryVisibility = function (category, visible) {
-    if (!dbkjs.options.visibleCategories) {
-        dbkjs.options.visibleCategories = {};
-    }
-    dbkjs.options.visibleCategories[category] = visible;
-    dbkjs.protocol.jsonDBK.layerBrandweervoorziening.redraw();
 };
 
 dbkjs.activateClick = function () {
@@ -114,8 +131,7 @@ dbkjs.activateClick = function () {
     }
 };
 
-dbkjs.challengeAuth = function() {
-    console.log("orgineel challege");
+dbkjs.getOrganisation = function() {
     var params = {srid: dbkjs.options.projection.srid};
     $.ajax({
         dataType: "json",
@@ -129,12 +145,12 @@ dbkjs.challengeAuth = function() {
             if (dbkjs.options.organisation.title) {
                 document.title = dbkjs.options.organisation.title;
             }
-            dbkjs.successAuth();
+            dbkjs.gotOrganisation();
         }
     });
 };
 
-dbkjs.successAuth = function () {
+dbkjs.gotOrganisation = function () {
     dbkjs.hoverControl = new OpenLayers.Control.SelectFeature(
             [],
             {
@@ -161,8 +177,6 @@ dbkjs.successAuth = function () {
     dbkjs.map.addControl(dbkjs.selectControl);
     dbkjs.protocol.jsonDBK.init();
 
-    dbkjs.gui.setLogo();
-
     //register modules
     $.each(dbkjs.modules, function (name, module) {
         var enabled = false;
@@ -180,103 +194,9 @@ dbkjs.successAuth = function () {
         }
     });
 
-    dbkjs.loadOrganisationCapabilities();
+    dbkjs.layers.loadFromWMSGetCapabilities();
+    dbkjs.finishMap();
     $(dbkjs).trigger('dbkjs_init_complete');
-};
-
-//@TODO: Deze goed controleren, er was een haakjes conflict na de resolve
-dbkjs.loadOrganisationCapabilities = function () {
-    if (dbkjs.options.organisation.wms) {
-        dbkjs.loadingcapabilities = 0;
-        $.each(dbkjs.options.organisation.wms, function (wms_k, wms_v) {
-          var options;
-          var params;
-          var parent;
-          var layertype;
-          var metadata;
-          var myLayer;
-          var index = wms_v.index || 0;
-          if (wms_v.getcapabilities === true) {
-              dbkjs.loadingcapabilities = dbkjs.loadingcapabilities + 1;
-              options = {
-                  url: wms_v.url,
-                  title: wms_v.name,
-                  proxy: wms_v.proxy,
-                  index: index,
-                  parent: wms_v.parent
-              };
-              /**
-               * Should extend options and params if they are
-               * passed from the organisation JSON (issue #413)
-               */
-              options.options = wms_v.options || {};
-              options.params = wms_v.params || {};
-              if (!dbkjs.util.isJsonNull(wms_v.pl)) {
-                  options.pl = wms_v.pl;
-              }
-              var myCapabilities = new dbkjs.Capabilities(options);
-          } else if (!wms_v.baselayer) {
-              params = wms_v.params || {};
-              options = wms_v.options || {};
-              parent = wms_v.parent || null;
-              metadata = {};
-              if (!dbkjs.util.isJsonNull(wms_v.abstract)) {
-                  metadata.abstract = wms_v.abstract;
-              }
-              if (!dbkjs.util.isJsonNull(wms_v.pl)) {
-                  metadata.pl = wms_v.pl;
-              }
-              if (!dbkjs.util.isJsonNull(wms_v.legend)) {
-                  metadata.legend = wms_v.legend;
-              }
-              layertype = wms_v.layertype || null;
-              myLayer = new dbkjs.Layer(
-                  wms_v.name,
-                  wms_v.url,
-                  params,
-                  options,
-                  parent,
-                  index,
-                  metadata,
-                  layertype,
-                  wms_v.gid
-              );
-          } else {
-              params = wms_v.params || {};
-              options = wms_v.options || {};
-              options = OpenLayers.Util.extend({isBaseLayer: true}, options);
-              parent = wms_v.parent || null;
-              metadata = {};
-              if (!dbkjs.util.isJsonNull(wms_v.abstract)) {
-                  metadata.abstract = wms_v.abstract;
-              }
-              if (!dbkjs.util.isJsonNull(wms_v.pl)) {
-                  metadata.pl = wms_v.pl;
-              }
-              if (!dbkjs.util.isJsonNull(wms_v.legend)) {
-                  metadata.legend = wms_v.legend;
-              }
-              layertype = wms_v.layertype || null;
-              myLayer = new dbkjs.Layer(
-                  wms_v.name,
-                  wms_v.url,
-                  params,
-                  options,
-                  parent,
-                  index,
-                  metadata,
-                  layertype
-              );
-          }
-        });
-        if (dbkjs.loadingcapabilities === 0) {
-            dbkjs.finishMap();
-        }
-    } else {
-        if (dbkjs.loadingcapabilities === 0) {
-            dbkjs.finishMap();
-        }
-    }
 };
 
 dbkjs.zoomToFixedMapResolutionForBounds = function(bounds) {
@@ -339,33 +259,6 @@ dbkjs.finishMap = function () {
         } else {
             dbkjs.map.zoomToMaxExtent();
         }
-    }
-};
-
-dbkjs.setPaths = function() {
-
-    dbkjs.basePath = window.location.protocol + '//' + window.location.hostname;
-    var pathname = window.location.pathname;
-    // ensure basePath always ends with '/', remove 'index.html' if exists
-    if(pathname.charAt(pathname.length - 1) !== '/') {
-        pathname = pathname.substring(0, pathname.lastIndexOf('/')+1);
-    }
-    // ensure single '/' between hostname and path
-    dbkjs.basePath = dbkjs.basePath + (pathname.charAt(0) === "/" ? pathname : "/" + pathname);
-
-    // Wordt gebruikt in:
-    // - dbkjs.challengeAuth()
-    // - feature.js - get()
-    // - jsonDBK.js - getGebied()
-    // - jsonDBK.js - getObject()
-    if (!dbkjs.dataPath) {
-        dbkjs.dataPath = 'api/';
-    }
-
-    // Wordt gebruikt in:
-    // - jsonDBK.js - constructMedia()
-    if (!dbkjs.mediaPath) {
-        dbkjs.mediaPath = dbkjs.basePath + 'media/';
     }
 };
 
@@ -549,9 +442,6 @@ $(document).ready(function () {
         $('#infopanel_b').html(dbkjs.options.info);
         $('#tb03').click(function () {
             dbkjs.dbkInfoPanel.toggle();
-        });
-        $("#c_minimap").click(function() {
-            $('#minimappanel').toggle();
         });
         // Added touchstart event to trigger click on. There was some weird behaviour combined with FastClick,
         // this seems to fix the issue
