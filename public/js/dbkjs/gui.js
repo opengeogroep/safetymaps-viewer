@@ -23,7 +23,7 @@ dbkjs.gui = {
     },
     // jsonDBK.js
     infoPanelUpdateTitle: function(text) {
-        dbkjs.util.changeDialogTitle(text);
+        //dbkjs.util.changeDialogTitle(text);
     },
     // feature.js
     infoPanelUpdateHtml: function(html) {

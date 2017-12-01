@@ -265,27 +265,29 @@ dbkjs.modules.feature = {
     },
     handleDbkOmsSearch: function(object) {
         var _obj = dbkjs.modules.feature;
-        dbkjs.modules.updateFilter(object.id);
-        dbkjs.protocol.jsonDBK.process(object);
-        _obj.zoomToFeature(object);
+        dbkjs.protocol.jsonDBK.process(object, function() {
+            _obj.zoomToFeature(object);
+        });
     },
     zoomToFeature: function(feature) {
-        if(feature.attributes && feature.attributes.identificatie){
-            dbkjs.options.dbk = feature.attributes.identificatie;
-        } else {
-            //Geen DBK (meer) geselecteerd, bijv. bij zoeken op adres.
-            dbkjs.options.dbk = 0;
-        }
+        dbkjs.options.dbk = feature === null ? null : feature.attributes.identificatie;
         dbkjs.modules.updateFilter(dbkjs.options.dbk);
-        if(!dbkjs.options.zoomToPandgeometrie) {
-            if (dbkjs.map.zoom < dbkjs.options.zoom) {
-                dbkjs.map.setCenter(feature.geometry.getBounds().getCenterLonLat(), dbkjs.options.zoom);
+        if(dbkjs.options.dbk) {
+
+            if(feature.attributes.typeFeature === "WO") {
+                dbkjs.map.zoomToExtent(dbkjs.util.extendBounds(OpenLayers.Bounds.fromString(feature.attributes.bounds)));
+            } else if(!dbkjs.options.zoomToPandgeometrie) {
+                if (dbkjs.map.zoom < dbkjs.options.zoom) {
+                    dbkjs.map.setCenter(feature.geometry.getBounds().getCenterLonLat(), dbkjs.options.zoom);
+                } else {
+                    dbkjs.map.setCenter(feature.geometry.getBounds().getCenterLonLat());
+                }
             } else {
-                dbkjs.map.setCenter(feature.geometry.getBounds().getCenterLonLat());
+                this.zoomToPandgeometrie();
             }
-        } else {
-            this.zoomToPandgeometrie();
-        }
+        };
+        // getActive() changed, hide it
+        this.layer.redraw();
     },
     updateFilter: function() {
         this.layer.redraw();

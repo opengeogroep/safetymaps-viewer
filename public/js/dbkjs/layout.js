@@ -29,17 +29,6 @@ dbkjs.layout = {
         _obj.settingsDialog('#settingspanel_b');
     },
     settingsDialog: function (parent) {
-        $(parent).append('<h4>' + i18n.t('app.contrast') + '</h4><p>' + i18n.t('app.selectContrast') + '</p>');
-        $(parent).append('<p><div class="row"><div class="col-xs-6">' +
-                '<div class="input-group">' +
-                '<input id="input_contrast" type="text" class="form-control">' +
-                '</div></div>' +
-                '<div class="col-xs-6"><span class="button-grp">' +
-                '<button id="click_contrast_down" class="btn btn-default" type="button"><i class="fa fa-adjust"></i>&nbsp;<i class="fa fa-minus"></i></button>' +
-                '<button id="click_contrast_up" class="btn btn-default" type="button"><i class="fa fa-plus">&nbsp;<i class="fa fa-adjust"></i></button>' +
-                '</span></div></div></p>'
-                );
-        $(parent).append('<hr>');
         $(parent).append("<h4>" + i18n.t('app.layout') + "</h4>");
         $(parent).append('<p><div class="row"><div class="col-xs-12">' +
                 '<label><input type="checkbox" id="checkbox_scaleStyle">' + i18n.t('app.scaleStyle') +
@@ -49,65 +38,31 @@ dbkjs.layout = {
                 '<input id="slider_styleSizeAdjust" style="width: 210px" data-slider-id="styleSizeAdjustSlider" type="text" ' +
                 ' data-slider-min="' + (dbkjs.options.styleSizeMin ? dbkjs.options.styleSizeMin : '-4') + '" ' +
                 ' data-slider-max="' + (dbkjs.options.styleSizeMax ? dbkjs.options.styleSizeMax : '10') + '" data-slider-step="1"/>' +
-                '</div></div></p>'
+                '</div></div></p><hr>'
                 );
 
         $("#slider_styleSizeAdjust").slider({
             value: dbkjs.options.styleSizeAdjust,
             tooltip: "always"
         });
-        $("#slider_styleSizeAdjust").on('slide', function (e) {
+        $("#slider_styleSizeAdjust").on('slide', function(e) {
             dbkjs.options.styleSizeAdjust = e.value;
             dbkjs.redrawScaledLayers();
         });
-        $("#slider_styleSizeAdjust").on('slideStop', function (e) {
-            dbkjs.options.styleSizeAdjust = e.value;
-            dbkjs.redrawScaledLayers();
-        });
+
         $("#checkbox_scaleStyle").prop("checked", dbkjs.options.styleScaleAdjust);
-        $("#checkbox_scaleStyle").on('change', function (e) {
+        $("#checkbox_scaleStyle").on('change', function(e) {
             dbkjs.options.styleScaleAdjust = e.target.checked;
             dbkjs.redrawScaledLayers();
         });
 
-        var _relversion = 'Development';
-        var _relapp = 'Opendispatcher';
-        var _reldate = 'N/A';
-        var _relremarks = 'The app is running in development mode';
-
-        if (window.dbkjsbuildinfo) {
-            _relversion = dbkjsbuildinfo.VERSION || 'Development';
-            _relapp = dbkjsbuildinfo.APPLICATION || 'Opendispatcher';
-            _reldate = dbkjsbuildinfo.RELEASEDATE || 'N/A';
-            _relremarks = dbkjsbuildinfo.REMARKS || 'The app is running in development mode';
-        }
-        $.getJSON(dbkjs.dataPath + 'bag/info').done(function(data) {
-            if(data[0].bag_update){
-                $(parent).append(
-                '<p><hr/><strong>' + i18n.t('bag.updated') + '</strong> ' + data[0].bag_update + '</p>'
-                );
-            }
-        });
-        $.getJSON(dbkjs.dataPath + 'infra/info').done(function(data) {
-            if(data[0].updated){
-                $(parent).append(
-                '<p><hr/><strong>' + i18n.t('infra.updated') + '</strong> ' + data[0].updated + '</p>'
-                );
-            } else {
-                //remove infra search
-                $( "#li_s_infra" ).remove();
-            }
-        }).fail(function(data){
-            $( "#li_s_infra" ).remove();
-        });
-
         $(parent).append(
-                '<p><hr/><strong>' + _relapp + '</strong> ' + _relversion + ' (' + _reldate + ')' + '</p>' +
-                '<p>' + _relremarks + '</p>'
+                '<p><strong>' + dbkjs.options.APPLICATION + '</strong> ' + dbkjs.options.VERSION + ' (' + dbkjs.options.RELEASEDATE + ')' + '</p>' +
+                '<p>' + dbkjs.options.REMARKS + '</p>'
                 );
 
         $('#input_contrast').val(parseFloat(dbkjs.map.baseLayer.opacity).toFixed(1));
-        $('#input_contrast').keypress(function (event) {
+        $('#input_contrast').keypress(function(event) {
             if (event.keyCode === 13) {
                 var newOpacity = parseFloat($('#input_contrast').val()).toFixed(1);
                 if (newOpacity > 1.0) {
@@ -122,7 +77,7 @@ dbkjs.layout = {
                 }
             }
         });
-        $('#click_contrast_up').click(function () {
+        $('#click_contrast_up').click(function() {
             var newOpacity = parseFloat(($('#input_contrast').val()) + 0.1).toFixed(1);
             if (newOpacity > 1.0) {
                 $('#input_contrast').val(1.0);
@@ -132,7 +87,7 @@ dbkjs.layout = {
                 dbkjs.map.baseLayer.setOpacity(newOpacity);
             }
         });
-        $('#click_contrast_down').click(function () {
+        $('#click_contrast_down').click(function() {
             var newOpacity = parseFloat(($('#input_contrast').val()) - 0.1).toFixed(1);
             if (newOpacity < 0.0) {
                 $('#input_contrast').val(0.0);

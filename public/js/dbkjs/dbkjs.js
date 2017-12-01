@@ -128,7 +128,8 @@ dbkjs.activateClick = function () {
     }
 };
 
-dbkjs.challengeAuth = function () {
+dbkjs.challengeAuth = function() {
+    console.log("orgineel challege");
     var params = {srid: dbkjs.options.projection.srid};
     $.ajax({
         dataType: "json",
@@ -143,28 +144,7 @@ dbkjs.challengeAuth = function () {
                 document.title = dbkjs.options.organisation.title;
             }
             dbkjs.successAuth();
-        } else {
-            //drop back to default
-            $.getJSON('data/organisation.sample.json', params).done(function (data) {
-                if (data.organisation) {
-                    dbkjs.options.organisation = data.organisation;
-                    if (dbkjs.options.organisation.title) {
-                        document.title = dbkjs.options.organisation.title;
-                    }
-                    dbkjs.successAuth();
-                }
-            });
         }
-    }).fail(function () {
-        $.getJSON('data/organisation.sample.json', params).done(function (data) {
-            if (data.organisation) {
-                dbkjs.options.organisation = data.organisation;
-                if (dbkjs.options.organisation.title) {
-                    document.title = dbkjs.options.organisation.title;
-                }
-                dbkjs.successAuth();
-            }
-        });
     });
 };
 
@@ -388,56 +368,57 @@ dbkjs.finishMap = function () {
     //get dbk!
 };
 
-dbkjs.setPaths = function () {
-    if (!dbkjs.basePath) {
-        dbkjs.basePath = window.location.protocol + '//' + window.location.hostname + ':' + window.location.port;
-        var pathname = window.location.pathname;
-        // ensure basePath always ends with '/', remove 'index.html' if exists
-        if (pathname.charAt(pathname.length - 1) !== '/') {
-            pathname = pathname.substring(0, pathname.lastIndexOf('/') + 1);
-        }
-        // ensure single '/' between hostname and path
-        dbkjs.basePath = dbkjs.basePath + (pathname.charAt(0) === "/" ? pathname : "/" + pathname);
-    }
+dbkjs.setPaths = function() {
 
+    dbkjs.basePath = window.location.protocol + '//' + window.location.hostname;
+    var pathname = window.location.pathname;
+    // ensure basePath always ends with '/', remove 'index.html' if exists
+    if(pathname.charAt(pathname.length - 1) !== '/') {
+        pathname = pathname.substring(0, pathname.lastIndexOf('/')+1);
+    }
+    // ensure single '/' between hostname and path
+    dbkjs.basePath = dbkjs.basePath + (pathname.charAt(0) === "/" ? pathname : "/" + pathname);
+
+    // Wordt gebruikt in:
+    // - dbkjs.challengeAuth()
+    // - feature.js - get()
+    // - jsonDBK.js - getGebied()
+    // - jsonDBK.js - getObject()
     if (!dbkjs.dataPath) {
         dbkjs.dataPath = 'api/';
     }
 
+    // Wordt gebruikt in:
+    // - jsonDBK.js - constructMedia()
     if (!dbkjs.mediaPath) {
         dbkjs.mediaPath = dbkjs.basePath + 'media/';
     }
-
 };
 
 dbkjs.bind_dbkjs_init_complete = function() {
 
     $(dbkjs).bind('dbkjs_init_complete', function() {
-
-         if(dbkjs.viewmode !== 'fullscreen') {
-            $('#zoom_prev').click(function() {
-                dbkjs.naviHis.previousTrigger();
-            });
-            $('#zoom_next').click(function () {
-                dbkjs.naviHis.nextTrigger();
-            });
-        } else {
-            FastClick.attach(document.body);
-        }
-        (function () {
+        FastClick.attach(document.body);
+        (function() {
+            var timer;
+            function throttleCalc() {
+                window.clearTimeout(timer);
+                timer = window.setTimeout(calcMaxWidth, 150);
+            }
             function calcMaxWidth() {
                 // Calculate the max width for dbk title so other buttons are never pushed down when name is too long
-                var childWidth = 0;
-                $('.main-button-group .btn-group').each(function () {
-                    childWidth += $(this).outerWidth();
-                });
-                var maxWidth = $('.main-button-group').outerWidth() - childWidth;
-                $('.dbk-title').css('max-width', (maxWidth - 25) + 'px');
+                var maxWidth = $('body').outerWidth();
+                $('.dbk-title').css('max-width', (maxWidth - 70) + 'px');
             }
-            // Listen for orientation changes
-            window.addEventListener("orientationchange", function () {
-                calcMaxWidth();
-            }, false);
+            if(window.addEventListener) {
+                // Listen for orientation changes
+                window.addEventListener("orientationchange", function() {
+                    calcMaxWidth();
+                }, false);
+                window.addEventListener("resize", function() {
+                    throttleCalc();
+                }, false);
+            }
             calcMaxWidth();
         }());
     });
