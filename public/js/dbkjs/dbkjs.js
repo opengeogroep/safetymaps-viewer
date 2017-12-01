@@ -20,12 +20,6 @@
 
 /* global OpenLayers, i18n, Proj4js, dbkjsLang, moment */
 
-OpenLayers.ProxyHost = "proxy/?q=";
-OpenLayers.IMAGE_RELOAD_ATTEMPTS = 3;
-Proj4js.defs["EPSG:28992"] = "+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.999908 +x_0=155000 +y_0=463000 +ellps=bessel +units=m +towgs84=565.2369,50.0087,465.658,-0.406857330322398,0.350732676542563,-1.8703473836068,4.0812 +no_defs <>";
-
-moment.locale("nl");
-
 var dbkjs = dbkjs || {};
 window.dbkjs = dbkjs;
 dbkjs.modules = dbkjs.modules || [];
@@ -35,17 +29,9 @@ dbkjs.dataPath = dbkjs.dataPath || null;
 dbkjs.mediaPath = dbkjs.mediaPath || null;
 dbkjs.basePath = dbkjs.basePath || null;
 
-dbkjs.viewmode = 'default';
-
 dbkjs.init = function () {
 
     dbkjs.setPaths();
-
-    if(dbkjs.viewmode === "fullscreen" && "ontouchstart" in window) {
-        // Later wordt TouchNavigation toegevoegd, verwijder standaard
-        // navigation control (anders gekke zoom / pan effecten op touchscreen)
-        dbkjs.options.map.options.controls = [];
-    }
 
     if (!dbkjs.map) {
         dbkjs.map = new OpenLayers.Map(dbkjs.options.map.options);
@@ -190,7 +176,7 @@ dbkjs.successAuth = function () {
         enabled = enabled || dbkjs.options.additionalModules && $.inArray(name, dbkjs.options.additionalModules) > -1;
 
         if(enabled && module.register) {
-            module.register({namespace: dbkjs.options.organisation.workspace, url: 'geoserver/', visible: true, viewmode: dbkjs.viewmode});
+            module.register();
         }
     });
 
@@ -348,24 +334,12 @@ dbkjs.finishMap = function () {
                         dbkjs.options.organisation.area.zoom
                         );
             } else if (dbkjs.options.organisation.area.geometry.type === "Polygon") {
-                if (dbkjs.viewmode === 'fullscreen') {
-                    dbkjs.zoomToFixedMapResolutionForBounds(areaGeometry.getBounds())
-                } else {
-                    //get the projection for the Polygon
-                    var crs = dbkjs.options.organisation.area.geometry.crs.properties.name || "EPSG:4326";
-                    dbkjs.map.zoomToExtent(areaGeometry.getBounds().transform(crs, dbkjs.map.getProjectionObject()));
-                }
+                dbkjs.zoomToFixedMapResolutionForBounds(areaGeometry.getBounds())
             }
         } else {
             dbkjs.map.zoomToMaxExtent();
         }
     }
-    dbkjs.permalink = new dbkjs.Permalink('permalink');
-    dbkjs.map.addControl(dbkjs.permalink);
-    if (dbkjs.viewmode !== 'fullscreen') {
-        dbkjs.util.configureLayers();
-    }
-    //get dbk!
 };
 
 dbkjs.setPaths = function() {
@@ -442,118 +416,100 @@ $(document).ready(function () {
             {'Scale = 1 : ${scaleDenom}': i18n.t("app.scale")}
         );
         OpenLayers.Lang.setCode(dbkjsLang);
-        if (dbkjs.viewmode !== 'fullscreen') {
-            $('body').append(dbkjs.util.createDialog('infopanel', '<i class="fa fa-info-circle"></i> ' + i18n.t("dialogs.info"), 'right:0;bottom:0;'));
-            $('body').append(dbkjs.util.createDialog('vectorclickpanel', '<i class="fa fa-info-circle"></i> ' + i18n.t("dialogs.clickinfo"), 'left:0;bottom:0;margin-bottom:0px;position:fixed'));
-        } else {
-            // Create the infopanel
-            dbkjs.util.createModalPopup({name: 'infopanel'}).getView().append($('<div></div>').attr({'id': 'infopanel_b'}));
+        // Create the infopanel
+        dbkjs.util.createModalPopup({name: 'infopanel'}).getView().append($('<div></div>').attr({'id': 'infopanel_b'}));
 
-            // Create the DBK infopanel
-            dbkjs.dbkInfoPanel = new SplitScreenWindow("dbkinfopanel");
-            dbkjs.dbkInfoPanel.createElements();
+        // Create the DBK infopanel
+        dbkjs.dbkInfoPanel = new SplitScreenWindow("dbkinfopanel");
+        dbkjs.dbkInfoPanel.createElements();
 
-            // Put tabs at the bottom after width transition has ended
-            var updateContentHeight = function() {
-                var view = dbkjs.dbkInfoPanel.getView();
-                var tabContentHeight = view.height() - view.find(".nav-pills").height();
-                view.find(".tab-content").css("height", tabContentHeight);
+        // Put tabs at the bottom after width transition has ended
+        var updateContentHeight = function() {
+            var view = dbkjs.dbkInfoPanel.getView();
+            var tabContentHeight = view.height() - view.find(".nav-pills").height();
+            view.find(".tab-content").css("height", tabContentHeight);
 
-                view.find(".pdf-embed").css("height", tabContentHeight - 28);
-            };
-            $(window).resize(updateContentHeight);
+            view.find(".pdf-embed").css("height", tabContentHeight - 28);
+        };
+        $(window).resize(updateContentHeight);
 
-            $(dbkjs.dbkInfoPanel).on("show", function() {
-                var event = dbkjs.util.getTransitionEvent();
-                if(event) {
-                    dbkjs.dbkInfoPanel.getView().parent().on(event, updateContentHeight);
-                } else {
-                    updateContentHeight();
-                }
+        $(dbkjs.dbkInfoPanel).on("show", function() {
+            var event = dbkjs.util.getTransitionEvent();
+            if(event) {
+                dbkjs.dbkInfoPanel.getView().parent().on(event, updateContentHeight);
+            } else {
+                updateContentHeight();
+            }
 
-                $.each(dbkjs.dbkInfoPanel.getView().find(".pdf-embed"), function(i, pdf) {
-                    if(pdf.children.length === 0) {
-                        console.log("embedding PDF " + $(pdf).attr("data-url"));
-                        // Add cache buster to avoid unexpected server response (206) on iOS 10 safari webapp
-                        PDFObject.embed($(pdf).attr("data-url") + "?t=" + new Date().getTime(), pdf, {
-                            // Use custom built pdf.js with src/core/network.js function
-                            // PDFNetworkStreamFullRequestReader_validateRangeRequestCapabilities
-                            // always returning false to also avoid 206 error
-                            PDFJS_URL: "js/libs/pdfjs-1.6.210-disablerange-minified/web/viewer.html",
-                            forcePDFJS: !!dbkjs.options.forcePDFJS
-                        });                      
-                        // Remove buttons from PDFJS toolbar
-                        // XXX hack, use PDFJS documentloaded event?
-                        function removeToolbar() {
-                            var iframe = $("iframe").contents();
-                            if(iframe.find("#download")[0] || iframe.find("#secondaryDownload")[0] ) {
-                                console.log("found PDFJS toolbar buttons, removing");
-                                iframe.find("#download").remove();
-                                iframe.find("#openFile").remove();
-                                iframe.find("#print").remove();
-                                iframe.find("#secondaryDownload").remove();
-                                iframe.find("#secondaryOpenFile").remove();
-                                iframe.find("#secondaryPrint").remove();
-                            } else {
-                                console.log("PDFJS toolbar not found, waiting")
-                                window.setTimeout(removeToolbar, 500);
-                            }
+            $.each(dbkjs.dbkInfoPanel.getView().find(".pdf-embed"), function(i, pdf) {
+                if(pdf.children.length === 0) {
+                    console.log("embedding PDF " + $(pdf).attr("data-url"));
+                    // Add cache buster to avoid unexpected server response (206) on iOS 10 safari webapp
+                    PDFObject.embed($(pdf).attr("data-url") + "?t=" + new Date().getTime(), pdf, {
+                        // Use custom built pdf.js with src/core/network.js function
+                        // PDFNetworkStreamFullRequestReader_validateRangeRequestCapabilities
+                        // always returning false to also avoid 206 error
+                        PDFJS_URL: "js/libs/pdfjs-1.6.210-disablerange-minified/web/viewer.html",
+                        forcePDFJS: !!dbkjs.options.forcePDFJS
+                    });
+                    // Remove buttons from PDFJS toolbar
+                    // XXX hack, use PDFJS documentloaded event?
+                    function removeToolbar() {
+                        var iframe = $("iframe").contents();
+                        if(iframe.find("#download")[0] || iframe.find("#secondaryDownload")[0] ) {
+                            console.log("found PDFJS toolbar buttons, removing");
+                            iframe.find("#download").remove();
+                            iframe.find("#openFile").remove();
+                            iframe.find("#print").remove();
+                            iframe.find("#secondaryDownload").remove();
+                            iframe.find("#secondaryOpenFile").remove();
+                            iframe.find("#secondaryPrint").remove();
+                        } else {
+                            console.log("PDFJS toolbar not found, waiting")
+                            window.setTimeout(removeToolbar, 500);
                         }
-                            //this check is needed. If the program is not using PDFJS then we can't remove buttons.
-                            if(PDFObject.supportsPDFs || dbkjs.options.forcePDFJS ){
-                                removeToolbar();
-                            }
+                    }
+                        //this check is needed. If the program is not using PDFJS then we can't remove buttons.
+                        if(PDFObject.supportsPDFs || dbkjs.options.forcePDFJS ){
+                            removeToolbar();
+                        }
+                }
+            });
+        });
+
+        dbkjs.dbkInfoPanel.getView().append(
+                $('<div></div>')
+                .attr({'id': 'dbkinfopanel_b'})
+                .text(i18n.t("dialogs.noinfo"))
+        );
+
+        // We are removing / moving some existing DIVS from HTML to convert prev. popups to fullscreen modal popups
+        $('#baselayerpanel').remove();
+        $('#overlaypanel').attr('id', 'tmp_overlaypanel');
+        var baseLayerPopup = dbkjs.util.createModalPopup({name: 'baselayerpanel'});
+        baseLayerPopup.getView().append($('<div></div>').attr({'id': 'baselayerpanel_b'}));
+        var overlaypanelPopup = dbkjs.util.createModalPopup({name: 'overlaypanel'});
+        overlaypanelPopup.getView().append($('#tmp_overlaypanel .tabbable'));
+        $('#tmp_overlaypanel').remove();
+
+        $('#tb01, #tb02').on('click', function (e) {
+            e.preventDefault();
+            var panelId = $(this).attr('href').replace('#', '');
+            if (panelId === 'baselayerpanel') {
+                $.each(dbkjs.options.baselayers, function (bl_index, bl) {
+                    if (bl.getVisibility()) {
+                        $('#bl' + bl_index).addClass('active');
                     }
                 });
-            });
+            }
+            dbkjs.util.getModalPopup(panelId).show();
+        });
 
-            dbkjs.dbkInfoPanel.getView().append(
-                    $('<div></div>')
-                    .attr({'id': 'dbkinfopanel_b'})
-                    .text(i18n.t("dialogs.noinfo"))
-            );
-
-            // We are removing / moving some existing DIVS from HTML to convert prev. popups to fullscreen modal popups
-            $('#baselayerpanel').remove();
-            $('#overlaypanel').attr('id', 'tmp_overlaypanel');
-            var baseLayerPopup = dbkjs.util.createModalPopup({name: 'baselayerpanel'});
-            baseLayerPopup.getView().append($('<div></div>').attr({'id': 'baselayerpanel_b'}));
-            var overlaypanelPopup = dbkjs.util.createModalPopup({name: 'overlaypanel'});
-            overlaypanelPopup.getView().append($('#tmp_overlaypanel .tabbable'));
-            $('#tmp_overlaypanel').remove();
-
-            $('#tb01, #tb02').on('click', function (e) {
-                e.preventDefault();
-                var panelId = $(this).attr('href').replace('#', '');
-                if (panelId === 'baselayerpanel') {
-                    $.each(dbkjs.options.baselayers, function (bl_index, bl) {
-                        if (bl.getVisibility()) {
-                            $('#bl' + bl_index).addClass('active');
-                        }
-                    });
-                }
-                dbkjs.util.getModalPopup(panelId).show();
-            });
-
-        }
-        if (dbkjs.viewmode !== 'fullscreen') {
-            $('body').append(dbkjs.util.createDialog('wmsclickpanel', '<i class="fa fa-info-circle"></i> ' + i18n.t("dialogs.clickinfo"), 'right:0;bottom:0;'));
-            $('body').append(dbkjs.util.createDialog('vectorclickpanel', '<i class="fa fa-info-circle"></i> ' + i18n.t("dialogs.clickinfo"), 'left:0;bottom:0;'));
-            $('body').append(dbkjs.util.createModal('printpanel', '<i class="fa fa-print"></i> ' + i18n.t("app.print"), ''));
-            dbkjs.wms_panel = dbkjs.util.createTabbable();
-            $('#wmsclickpanel_b').append(dbkjs.wms_panel);
-            $('body').append(dbkjs.util.createDialog('minimappanel', '<i class="fa fa-picture-o"></i> ' + i18n.t("dialogs.refmap"), 'bottom:0;'));
-            $('.dialog').drags({handle: '.panel-heading'});
-            $('.btn-group').drags({handle: '.drag-handle'});
-            dbkjs.util.setModalTitle('overlaypanel', i18n.t('map.overlays'));
-            dbkjs.util.setModalTitle('baselayerpanel', i18n.t('map.baselayers'));
-        } else {
-            $('body').append(dbkjs.util.createDialog('vectorclickpanel', '<i class="icon-info-sign"></i> ' + i18n.t("dialogs.clickinfo"), 'left:0;bottom:0;margin-bottom:0px;position:fixed'));
-            $("#vectorclickpanel").on('click', function() {
-                dbkjs.selectControl.unselectAll();
-                $('#vectorclickpanel').hide();
-            });
-        }
+        $('body').append(dbkjs.util.createDialog('vectorclickpanel', '<i class="icon-info-sign"></i> ' + i18n.t("dialogs.clickinfo"), 'left:0;bottom:0;margin-bottom:0px;position:fixed'));
+        $("#vectorclickpanel").on('click', function() {
+            dbkjs.selectControl.unselectAll();
+            $('#vectorclickpanel').hide();
+        });
         dbkjs.init();
 
         // dbkjs.options.enableSplitScreen: enable split screen setting
@@ -592,11 +548,7 @@ $(document).ready(function () {
 
         $('#infopanel_b').html(dbkjs.options.info);
         $('#tb03').click(function () {
-            if (dbkjs.viewmode !== 'fullscreen') {
-                $('#infopanel').toggle();
-            } else {
-                dbkjs.dbkInfoPanel.toggle();
-            }
+            dbkjs.dbkInfoPanel.toggle();
         });
         $("#c_minimap").click(function() {
             $('#minimappanel').toggle();
@@ -620,12 +572,7 @@ $(document).ready(function () {
                             dbkjs.options.organisation.area.zoom
                             );
                 } else if (dbkjs.options.organisation.area.geometry.type === "Polygon") {
-                    if (dbkjs.viewmode === 'fullscreen') {
-                        dbkjs.zoomToFixedMapResolutionForBounds(areaGeometry.getBounds());
-                    } else {
-                        var crs = dbkjs.options.organisation.area.geometry.crs.properties.name || "EPSG:4326";
-                        dbkjs.map.zoomToExtent(areaGeometry.getBounds().transform(crs, dbkjs.map.getProjectionObject()));
-                    }
+                    dbkjs.zoomToFixedMapResolutionForBounds(areaGeometry.getBounds());
                 }
             }
         });

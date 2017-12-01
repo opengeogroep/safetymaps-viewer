@@ -110,9 +110,7 @@ dbkjs.modules.measure = {
     setMeasureActive: function(distanceOrArea, toggle, active) {
         var me = this;
         $('#measure').html('');
-        if(dbkjs.viewmode === "fullscreen") {
-            $('#measure').hide();
-        }
+        $('#measure').hide();
 
         var control = distanceOrArea === "distance" ? me.distance_control : me.area_control;
         var otherControl = control === me.distance_control ? me.area_control : me.distance_control;
@@ -153,9 +151,7 @@ dbkjs.modules.measure = {
     },
     clearMeasure: function() {
         $('#measure').html('');
-        if(dbkjs.viewmode === "fullscreen") {
-            $('#measure').hide();
-        }
+        $('#measure').hide();
     },
     handleMeasurements: function(event) {
         //var geometry = event.geometry;

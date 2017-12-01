@@ -37,7 +37,7 @@ dbkjs.modules.livep2000 = {
     encodeIfNotEmpty: function(s) {
         return s === null ? "" : this.encode(s);
     },
-    register: function(options) {
+    register: function() {
         var me = this;
 
         this.createPopup();

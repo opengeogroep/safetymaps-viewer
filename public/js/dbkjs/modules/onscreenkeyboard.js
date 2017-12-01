@@ -37,7 +37,7 @@ window.dbkjs = dbkjs;
 dbkjs.modules = dbkjs.modules || {};
 dbkjs.modules.onscreenkeyboard = {
     id: "dbk.module.onscreenkeyboard",
-    register: function(options) {
+    register: function() {
 
         var opt;
         if(dbkjs.options.onscreenkeyboard) {

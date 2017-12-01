@@ -4,8 +4,6 @@ window.dbkjs = dbkjs;
 
 OpenLayers.IMAGE_RELOAD_ATTEMPTS = 3;
 
-dbkjs.viewmode = 'fullscreen';
-
 dbkjs.options = {
     VERSION: "_VERSION_",
     RELEASEDATE: "_DATE_",

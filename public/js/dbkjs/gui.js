@@ -8,19 +8,6 @@ dbkjs.gui = {
             $('#logo').css('background-image', 'url(' + dbkjs.options.organisation.logo + ')');
         }
     },
-    // feature.js
-    createRefreshButton: function(obj) {
-        $('#btngrp_navigation').append(
-            '<a id="btn_refresh" class="btn btn-default navbar-btn" href="#" title="'+
-            i18n.t('app.refresh') + '"><i class="fa fa-refresh"></i></a>'
-        );
-        $('#btn_refresh').click(function() {
-            if (dbkjs.viewmode !== 'fullscreen') {
-               $('#btn_refresh > i').addClass('fa-spin');
-            }
-            obj.get();
-        });
-    },
     // jsonDBK.js
     infoPanelUpdateTitle: function(text) {
         //dbkjs.util.changeDialogTitle(text);

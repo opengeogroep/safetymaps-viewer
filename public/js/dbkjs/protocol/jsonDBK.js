@@ -180,9 +180,7 @@ dbkjs.protocol.jsonDBK = {
             }
             html.append(table);
             $('#vectorclickpanel_b').html('').append(html);
-            if(dbkjs.viewmode === 'fullscreen') {
-                $('#vectorclickpanel').show();
-            }
+            $('#vectorclickpanel').show();
         } else {
             // Generic attribute table
             html = '<div class="table-responsive">';
@@ -253,12 +251,8 @@ dbkjs.protocol.jsonDBK = {
 
         if (!dbkjs.options.feature || feature.id !== dbkjs.options.feature.id) {
             if (!dbkjs.protocol.jsonDBK.processing) {
-                if(dbkjs.viewmode === 'fullscreen') {
-                    dbkjs.util.getModalPopup('infopanel').hide();
-                    dbkjs.util.getModalPopup('dbkinfopanel').hide();
-                } else {
-                    $('#infopanel').hide();
-                };
+                dbkjs.util.getModalPopup('infopanel').hide();
+                dbkjs.util.getModalPopup('dbkinfopanel').hide();
                 dbkjs.protocol.jsonDBK.processing = true;
                 dbkjs.util.alert('<i class="fa fa-spinner fa-spin"></i>', i18n.t('dialogs.running'), 'alert-info');
                 if(feature.attributes.typeFeature === 'WO') {
@@ -271,15 +265,9 @@ dbkjs.protocol.jsonDBK = {
             //Check if processing is finished
             if (!dbkjs.protocol.jsonDBK.processing) {
                 mySuccess();
-                if(dbkjs.viewmode === 'fullscreen') {
-                    $('#dbkinfopanel_b').html(dbkjs.options.feature.div);
-                } else {
-                    $('#infopanel_b').html(dbkjs.options.feature.div);
-                    $('#infopanel_f').html('');
-                    $('#infopanel').show();
-                }
+                $('#dbkinfopanel_b').html(dbkjs.options.feature.div);
             }
-        }        
+        }
     },
     /* Restore state to before any DBK was selected */
     deselect: function() {
@@ -289,9 +277,7 @@ dbkjs.protocol.jsonDBK = {
         });
         dbkjs.options.feature = null;
         dbkjs.options.dbk = null;
-        if(dbkjs.viewmode === 'fullscreen') {
-            $('#dbkinfopanel_b').text(i18n.t("dialogs.noinfo"));
-        }
+        $('#dbkinfopanel_b').text(i18n.t("dialogs.noinfo"));
         dbkjs.modules.updateFilter(0);
         dbkjs.modules.waterongevallen.deselect();
     },
@@ -351,12 +337,7 @@ dbkjs.protocol.jsonDBK = {
             var div = $('<div class="tabbable"></div>');
             div.append(_obj.panel_group);
             div.append(_obj.panel_tabs);
-            if (dbkjs.viewmode === 'fullscreen') {
-                $('#dbkinfopanel_b').html(div);
-            } else {
-                dbkjs.gui.infoPanelUpdateHtml('');
-                dbkjs.gui.infoPanelAddItems(div);
-            }
+            $('#dbkinfopanel_b').html(div);
             dbkjs.gui.infoPanelUpdateTitle('<i class="fa fa-building"></i> ' + dbkjs.options.feature.formeleNaam);
             $('#systeem_meldingen').hide();
 
@@ -371,20 +352,6 @@ dbkjs.protocol.jsonDBK = {
 
             if (!noZoom && dbkjs.options.zoomToPandgeometrie) {
                 dbkjs.modules.feature.zoomToPandgeometrie();
-            }
-
-            if (dbkjs.viewmode === 'fullscreen') {
-                //dbkjs.util.getModalPopup('infopanel').show();
-            } else {
-                dbkjs.gui.infoPanelShow();
-            }
-
-            if (dbkjs.viewmode !== 'fullscreen') {
-                _obj.addMouseoverHandler("#bwvlist", _obj.layerBrandweervoorziening);
-                _obj.addMouseoutHandler("#bwvlist", _obj.layerBrandweervoorziening);
-                _obj.addMouseoverHandler("#gvslist", _obj.layerGevaarlijkestof);
-                _obj.addMouseoutHandler("#gvslist", _obj.layerGevaarlijkestof);
-                _obj.addRowClickHandler("#floorslist", "verdiepingen");
             }
 
             dbkjs.modules.feature.layer.redraw();
@@ -455,12 +422,10 @@ dbkjs.protocol.jsonDBK = {
         }
         dbkjs.options.feature.bouwlaag = bouwlaag;
         if (dbktype === "object") {
-            if(dbkjs.viewmode === 'fullscreen') {
-                // In fullscreen mode is er geen window title met formele naam,
-                // toon deze als eerste regel
-                var formelenaam = dbkjs.util.isJsonNull(DBKObject.formeleNaam) ? '' : DBKObject.formeleNaam;
-                algemeen_table.append(_obj.constructRow(formelenaam, i18n.t('dbk.formalName')));
-            }
+            // In fullscreen mode is er geen window title met formele naam,
+            // toon deze als eerste regel
+            var formelenaam = dbkjs.util.isJsonNull(DBKObject.formeleNaam) ? '' : DBKObject.formeleNaam;
+            algemeen_table.append(_obj.constructRow(formelenaam, i18n.t('dbk.formalName')));
             algemeen_table.append(_obj.constructRow(informelenaam, i18n.t('dbk.alternativeName'), "informelenaam"));
 
             // Show the adres as normal table row, after formele/informelenaam
@@ -518,54 +483,7 @@ dbkjs.protocol.jsonDBK = {
                 adres_div.append(adresText);
                 adres_row.append(adres_div);
                 algemeen_table.append(adres_row);
-                if ($.inArray('bag', dbkjs.options.organisation.modules) > -1) {
-                    if (!dbkjs.util.isJsonNull(waarde.bagId)) {
-                        var bag_div = $('<td></td>');
-                        var bag_p = $('<p></p>');
-
-                        if (dbkjs.viewmode === 'fullscreen') {
-                            bag_button = $('<button type="button" class="btn btn-primary">' + i18n.t('dbk.tarryobjectid') + ' ' + waarde.bagId + '</button>');
-                        } else {
-                            bag_button = $('<button type="button" class="btn btn-primary">' + i18n.t('dbk.tarryobjectid') + ' ' + dbkjs.util.pad(waarde.bagId, 16) + '</button>');
-                        }
-
-                        bag_p.append(bag_button);
-                        bag_button.click(function () {
-                            if ($.inArray('bag', dbkjs.options.organisation.modules) > -1) {
-                                dbkjs.modules.bag.getVBO(waarde.bagId, function (result) {
-                                    if (result.length === 0) {
-                                        var waardeBagId;
-                                        if (dbkjs.viewmode === 'fullscreen') {
-                                            waardeBagId = waarde.bagId;
-                                        } else {
-                                            waardeBagId = dbkjs.util.pad(waarde.bagId,16);
-                                        }
-                                        $('#collapse_algemeen_' + _obj.feature.id).append(
-                                            '<div class="alert alert-warning alert-dismissable">' +
-                                            '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>' +
-                                            '<strong>' + i18n.t('app.fail') +
-                                            '</strong>' +
-                                            dbkjs.util.pad(waarde.bagId, 16) + ' ' + i18n.t('dialogs.infoNotFound') +
-                                            '</div>'
-                                        );
-                                    } else {
-                                        $('#bagpanel_b').html('');
-                                        $.each(result, function (result_index, waarde) {
-                                            dbkjs.modules.bag.vboInfo2(waarde);
-                                        });
-                                        $('#bagpanel').show();
-                                    }
-                                });
-                            }
-                        });
-                        bag_div.append(bag_p);
-                        adres_row.append(bag_div);
-                    } else {
-                        adres_row.append('<td></td>');
-                    }
-                } else {
-                    adres_row.append('<td></td>');
-                }
+                adres_row.append('<td></td>');
             });
         }
         algemeen_table_div.append(algemeen_table);
@@ -1010,9 +928,7 @@ dbkjs.protocol.jsonDBK = {
                         '</tr>');
                     myrow.click(function(){
                         _obj.getObject(waarde.identificatie, 'verdiepingen', true);
-                        if(dbkjs.viewmode === 'fullscreen') {
-                            dbkjs.util.getModalPopup('dbkinfopanel').hide();
-                        }
+                        dbkjs.util.getModalPopup('dbkinfopanel').hide();
                     });
                 } else {
                     //No hyperlink, current object
@@ -1580,9 +1496,7 @@ dbkjs.protocol.jsonDBK = {
             if (identificatie) {
                 _obj.getObject(identificatie, detailtype);
             }
-            if (dbkjs.viewmode === 'fullscreen') {
-                dbkjs.util.getModalPopup('dbkinfopanel').hide();
-            }
+            dbkjs.util.getModalPopup('dbkinfopanel').hide();
             return false;
         });
 

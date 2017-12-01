@@ -98,10 +98,9 @@ dbkjs.modules.feature = {
     },
     register: function(options) {
         var _obj = dbkjs.modules.feature;
-        dbkjs.gui.createRefreshButton(_obj);
-        _obj.namespace = options.namespace || _obj.namespace;
-        _obj.url = options.url || _obj.url;
-        _obj.visibility = options.visible || _obj.visibility;
+        _obj.namespace = dbkjs.options.organisation.workspace;
+        _obj.url = 'geoserver/';
+        _obj.visibility = true;
         _obj.layer = new OpenLayers.Layer.Vector(i18n.t('app.features'), {
             rendererOptions: {
                 zIndexing: true
@@ -339,52 +338,26 @@ dbkjs.modules.feature = {
                         }
                         return lhs.attributes.formeleNaam.localeCompare(rhs.attributes.formeleNaam);
                     });
-                    if(dbkjs.viewmode === 'fullscreen') {
-                        var item_ul = $('<ul id="dbklist" class="nav nav-pills nav-stacked"></ul>');
-                        for(var i = 0; i < _obj.currentCluster.length; i++) {
-                            item_ul.append(_obj.featureInfohtml(_obj.currentCluster[i]));
-                        }
-                        dbkjs.gui.infoPanelAddItems(item_ul);
-                        dbkjs.util.getModalPopup('infopanel').setHideCallback(function() {
-                            if(_obj.layer.selectedFeatures.length === 0) {
-                                return;
-                            }
-                            for(var i = 0; i < _obj.layer.features.length; i++) {
-                                dbkjs.selectControl.unselect(_obj.layer.features[i]);
-                            }
-                        });
-                        //$("#dbklist").on("click", "a", _obj.handleFeatureTitleClick);
-                        dbkjs.util.getModalPopup('infopanel').show();
-                    } else {
-                        dbkjs.gui.infoPanelUpdateTitle('<i class="fa fa-info-circle"></i> ' + i18n.t('app.results'));
-                        dbkjs.gui.infoPanelAddPagination();
-                        dbkjs.gui.infoPanelShowFooter();
-
-                        $("#Pagination").pagination(e.feature.cluster.length, {
-                            items_per_page: 10,
-                            callback: function(page_index, jq) {
-                                var items_per_page = 10;
-                                var max_elem = Math.min((page_index + 1) * items_per_page, _obj.currentCluster.length);
-                                var item_ul = $('<ul id="dbklist" class="nav nav-pills nav-stacked"></ul>');
-                                dbkjs.gui.infoPanelUpdateHtml('');
-                                for (var i = page_index * items_per_page; i < max_elem; i++) {
-                                    item_ul.append(_obj.featureInfohtml(_obj.currentCluster[i]));
-                                }
-                                dbkjs.gui.infoPanelAddItems(item_ul);
-                                $("#dbklist").on("click", "a", _obj.handleFeatureTitleClick);
-                            }
-                        });
-                        dbkjs.gui.infoPanelShow();
+                    var item_ul = $('<ul id="dbklist" class="nav nav-pills nav-stacked"></ul>');
+                    for(var i = 0; i < _obj.currentCluster.length; i++) {
+                        item_ul.append(_obj.featureInfohtml(_obj.currentCluster[i]));
                     }
+                    dbkjs.gui.infoPanelAddItems(item_ul);
+                    dbkjs.util.getModalPopup('infopanel').setHideCallback(function() {
+                        if(_obj.layer.selectedFeatures.length === 0) {
+                            return;
+                        }
+                        for(var i = 0; i < _obj.layer.features.length; i++) {
+                            dbkjs.selectControl.unselect(_obj.layer.features[i]);
+                        }
+                    });
+                    //$("#dbklist").on("click", "a", _obj.handleFeatureTitleClick);
+                    dbkjs.util.getModalPopup('infopanel').show();
                 }
             } else {
                 _obj.currentCluster = [];
                 dbkjs.protocol.jsonDBK.process(e.feature);
-                if(dbkjs.viewmode === 'fullscreen') {
-                    dbkjs.util.getModalPopup('infopanel').hide();
-                } else {
-                    dbkjs.gui.infoPanelHide();
-                }
+                dbkjs.util.getModalPopup('infopanel').hide();
             }
         }
     },

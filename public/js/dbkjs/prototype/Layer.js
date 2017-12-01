@@ -208,9 +208,7 @@ dbkjs.Layer = dbkjs.Class({
             $('#baselayerpanel_ul').append(_li);
             _li.click(function () {
                 dbkjs.toggleBaseLayer($(this).index());
-                if (dbkjs.viewmode === 'fullscreen') {
-                    dbkjs.util.getModalPopup('baselayerpanel').hide();
-                }
+                dbkjs.util.getModalPopup('baselayerpanel').hide();
             });
         }
     },
@@ -287,24 +285,12 @@ dbkjs.Layer = dbkjs.Class({
                 }
             }
             html += '</table></div>';
-            if(dbkjs.viewmode === "fullscreen") {
-                $("#vectorclickpanel").css({'max-height': '90%', 'overflow': 'auto'});
-                $('#vectorclickpanel').on('click', function() {
-                    $('#vectorclickpanel').hide();
-                });
-                $('#vectorclickpanel_b').html(html);
-                $('#vectorclickpanel').show();
-            } else {
-                dbkjs.util.appendTab(dbkjs.wms_panel.attr("id"), _obj.layer.name, html, true, _obj.id + '_pn');
-                $('#wmsclickpanel').show();
-            }
-        } else {
-            if(dbkjs.viewmode === "fullscreen") {
-                // XXX use tabs like normal mode...
-                //$('#vectorclickpanel').hide();
-            } else {
-                dbkjs.util.removeTab(dbkjs.wms_panel.attr("id"), _obj.id + '_pn');
-            }
-        }
+            $("#vectorclickpanel").css({'max-height': '90%', 'overflow': 'auto'});
+            $('#vectorclickpanel').on('click', function() {
+                $('#vectorclickpanel').hide();
+            });
+            $('#vectorclickpanel_b').html(html);
+            $('#vectorclickpanel').show();
+        } 
     }
 });

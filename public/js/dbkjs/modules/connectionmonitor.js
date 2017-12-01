@@ -26,11 +26,7 @@ dbkjs.modules.connectionmonitor = {
     connected: null,
     okTimer: null,
     connectionCheckTimer: null,
-    register: function(options) {
-
-        if(dbkjs.viewmode !== "fullscreen") {
-            return;
-        }
+    register: function() {
 
         this.options = $.extend({
             interval: 5

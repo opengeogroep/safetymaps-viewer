@@ -27,7 +27,7 @@ dbkjs.modules.ealgps = {
     markers: null,
     gpsMarker: null,
     debug: null,
-    register: function(options) {
+    register: function() {
         this.debug = !!dbkjs.options.ealgpsDebug;
 
         var _obj = dbkjs.modules.ealgps;
