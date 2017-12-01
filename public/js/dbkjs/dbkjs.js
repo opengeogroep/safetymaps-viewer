@@ -424,7 +424,7 @@ dbkjs.bind_dbkjs_init_complete = function() {
     });
 };
 
-dbkjs.documentReady = function () {
+$(document).ready(function () {
     // Make sure i18n is initialized
     i18n.init({
         lng: dbkjsLang, debug: false, postProcess: "doReplacements"
@@ -631,4 +631,5 @@ dbkjs.documentReady = function () {
         });
         dbkjs.bind_dbkjs_init_complete();
     });
-};
+});
+

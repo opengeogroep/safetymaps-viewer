@@ -1,6 +1,11 @@
 drop schema if exists viewer cascade;
 create schema viewer;
 
+-- Used in cache key for ETag to refresh cache when schema of JSON results change,
+-- increase value when doing schema updates!
+create table viewer.schema_version(value integer);
+insert into viewer.schema_version(value) values(1);
+
 create or replace view viewer.viewer_object as
     select d."DBK_ID" as id,
         d."Nummer" as oms_nummer,
