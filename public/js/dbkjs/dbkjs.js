@@ -189,7 +189,11 @@ dbkjs.gotOrganisation = function () {
         enabled = enabled || dbkjs.options.additionalModules && $.inArray(name, dbkjs.options.additionalModules) > -1;
 
         if(enabled && module.register) {
-            module.register();
+            try {
+                module.register();
+            } catch(e) {
+                console.log("Error initializing module " + name + ": " + e + ", options: ", module.options);
+            }
         }
     });
 
