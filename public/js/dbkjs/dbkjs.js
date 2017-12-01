@@ -175,7 +175,6 @@ dbkjs.gotOrganisation = function () {
     dbkjs.selectControl.handlers.feature.stopDown = false;
     dbkjs.selectControl.handlers.feature.stopUp = false;
     dbkjs.map.addControl(dbkjs.selectControl);
-    dbkjs.protocol.jsonDBK.init();
 
     //register modules
     $.each(dbkjs.modules, function (name, module) {
