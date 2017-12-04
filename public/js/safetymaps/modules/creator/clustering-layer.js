@@ -17,25 +17,25 @@
  *  along with safetymapDBK. If not, see <http://www.gnu.org/licenses/>.
  *
  */
- 
+
 /*
  * OpenLayers2 layer for clustering SafetyMaps Creator objects.
  *
  */
 
  /* global safetymaps */
- 
+
 var safetymaps = safetymaps || {};
- 
+
 safetymaps.clusteringLayer = function(options) {
     this.options = $.extend({
         name: 'Object cluster',
         clusteringSymbol: {
-            icon: 'js/safetymaps/modules/creator/cluster.png',
+            icon: 'js/safetymaps/modules/creator/assets/cluster.png',
             width: 51,
             height: 56
         }
-    }, options);        
+    }, options);
 };
 
 safetymaps.clusteringLayer.prototype.createLayer = function(ol) {
@@ -74,7 +74,7 @@ safetymaps.clusteringLayer.prototype.createLayer = function(ol) {
     });
     me.layer.events.register("featureselected", me, me.selected);
     me.layer.events.register("beforefeatureselected", me, me.beforeFeatureSelected);
-    me.layer.events.register("featureunselected", me, me.featureUnselected);    
+    me.layer.events.register("featureunselected", me, me.featureUnselected);
     ol.addLayer(me.layer);
 };
 
