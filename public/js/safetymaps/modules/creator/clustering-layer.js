@@ -43,7 +43,8 @@ safetymaps.ClusteringLayer = function(options) {
             icon: 'js/safetymaps/modules/creator/assets/object.png',
             width: 23,
             height: 40
-        }
+        },
+        minLabelScale: 4000
     }, options);
 };
 
@@ -70,10 +71,10 @@ safetymaps.ClusteringLayer.prototype.createLayer = function() {
             }, {
                 context: {
                     label: function(feature) {
-                        if(dbkjs.map.getScale() > 4000) {
+                        if(feature.layer.map.getScale() > me.options.minLabelScale) {
                             return "";
                         } else {
-                            return feature.attributes.label;
+                            return feature.attributes.label || "";
                         }
                     }
                 }

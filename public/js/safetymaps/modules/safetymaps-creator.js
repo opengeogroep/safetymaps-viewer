@@ -102,10 +102,20 @@
         if(this.selectedObject) {
             this.objectLayers.removeAllFeatures();
         }
+        this.selectedObject = null;
     },
 
     selectedObjectDetailsReceived: function(object) {
-        this.objectLayers.addFeaturesForObject(object);
+        try {
+            this.objectLayers.addFeaturesForObject(object);
+            this.selectedObject = object;
+        } catch(error) {
+            console.log("Error creating layers for object", object);
+            if(error.stack) {
+                console.log(error.stack);
+            }
+        }
+
     }
 
 };

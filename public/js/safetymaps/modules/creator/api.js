@@ -78,20 +78,19 @@ safetymaps.creator.api = {
                 minClusteringResolution: 0
             };
             var symbol = apiObject.heeft_verdiepingen ? "objectwithfloors.png" : "object.png";
-            var label = null;
             var width = 24;
             var height = 38;
             if(apiObject.symbol) {
                 switch(apiObject.symbol.toLowerCase()) {
                     case "waterongevallen":
                         symbol = "wo.png"; width = 40; height = 40;
-                        label = apiObject.informele_naam;
                         break;
                     case "evenement":
                         symbol = "event.png"; width = 85; height = 65;
                         break;
                 }
             }
+            feature.attributes.label = apiObject.informele_naam;
             feature.attributes.symbol = me.imagePath + '/' + symbol;
             feature.attributes.width = width;
             feature.attributes.height = height;
