@@ -297,7 +297,7 @@ dbkjs.bind_dbkjs_init_complete = function() {
 $(document).ready(function () {
     // Make sure i18n is initialized
     i18n.init({
-        lng: dbkjsLang, debug: false, postProcess: "doReplacements"
+        lng: dbkjsLang, fallbackLng: 'en', debug: false, postProcess: "doReplacements"
     }, function (err,t) {
         i18n.addPostProcessor("doReplacements", function (val, key, options) {
             if (dbkjs.options.i18nReplacements) {
