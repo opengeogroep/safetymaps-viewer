@@ -17,34 +17,37 @@
  *  along with safetymapDBK. If not, see <http://www.gnu.org/licenses/>.
  *
  */
- 
+
 /*
  * For common use by safetymaps-viewer and safetymaps-flamingo.
  *
  * Functionality for working with data returned by ViewerApiAction from safetymaps-server
  */
 
- /* global safetymaps */
- 
+ /* global safetymaps, OpenLayers */
+
 var safetymaps = safetymaps || {};
 safetymaps.creator = safetymaps.creator || {};
- 
+
 safetymaps.creator.api = {
+    basePath: "",
+    imagePath: "",
+
     /**
      * Get array of objects with overview info of SafetyMaps Creator objects
      */
     getViewerObjectMapOverview: function() {
         var d = $.Deferred();
 
-        var msg = "Error loading Creator objects from /api/features.json: ";
-        $.ajax('api/features.json', {
+        // TODO i18n
+        var msg = "Error loading Creator objects from " + this.basePath + "api/features.json: ";
+        $.ajax(this.basePath + "api/features.json", {
             dataType: "json",
             data: {
                 version: "3"
             }
-        })  
+        })
         .fail(function(jqXHR, textStatus, errorThrown) {
-            // TODO i18n
             d.reject(msg + safetymaps.utils.getAjaxError(jqXHR, textStatus, errorThrown));
         })
         .done(function(data, textStatus, jqXHR) {
@@ -53,23 +56,26 @@ safetymaps.creator.api = {
             } else {
                 d.reject(msg + data.error);
             }
-        });  
-        return d.promise();            
+        });
+        return d.promise();
     },
-    
+
     /**
      * Create OpenLayers features suitable for use in ClusteringLayer
      */
-    createViewerObjectFeatures: function(data, options) {
+    createViewerObjectFeatures: function(data) {
+        var me = this;
+
         var wktParser = new OpenLayers.Format.WKT();
-        
+
         var features = new Array(data.length);
         $.each(data, function(i, apiObject) {
             var wkt = apiObject.selectiekader_centroid || apiObject.pand_centroid;
             var feature = wktParser.read(wkt);
             feature.attributes = {
                 id: apiObject.id,
-                minClusteringResolution: 0 
+                apiObject: apiObject,
+                minClusteringResolution: 0
             };
             var symbol = apiObject.heeft_verdiepingen ? "objectwithfloors.png" : "object.png";
             var label = null;
@@ -86,7 +92,7 @@ safetymaps.creator.api = {
                         break;
                 }
             }
-            feature.attributes.symbol = options.imagePath + '/' + symbol;
+            feature.attributes.symbol = me.imagePath + '/' + symbol;
             feature.attributes.width = width;
             feature.attributes.height = height;
             if(apiObject.selectiekader) {
@@ -94,11 +100,8 @@ safetymaps.creator.api = {
                 feature.attributes.selectionPolygon = selectiekaderFeature.geometry;
                 feature.attributes.minClusteringResolution = 2.5833;
             }
-            
+
             features[i] = feature;
-            if(apiObject.id === 1317213368) {
-                console.log('createdg feature for ', apiObject, feature);
-            }
         });
         return features;
     },
@@ -106,6 +109,30 @@ safetymaps.creator.api = {
     getStyleInfo: function() {
         // TODO
         // $.ajax('api/styles.json', {
+    },
+
+    getObjectDetails: function(id) {
+        var me = this;
+
+        var d = $.Deferred();
+
+        // TODO i18n
+        var msg = "Error loading Creator object details from " + this.basePath + "api/object/" + id + ".json: ";
+        $.ajax(this.basePath + "api/object/" + id + ".json", {
+            dataType: "json",
+            data: {
+                version: "3"
+            },
+            cache: false
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            d.reject(msg + safetymaps.utils.getAjaxError(jqXHR, textStatus, errorThrown));
+        })
+        .done(function(data, textStatus, jqXHR) {
+            d.resolve(data);
+        });
+        return d.promise();
+
     }
 };
 

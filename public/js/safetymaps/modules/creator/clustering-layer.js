@@ -21,13 +21,17 @@
 /*
  * OpenLayers2 layer for clustering SafetyMaps Creator objects.
  *
+ * Events:
+ * - object_cluster_selected (argument: array of features in cluster) (TODO)
+ * - object_selected (argument: feature)
+ *
  */
 
- /* global safetymaps */
+ /* global safetymaps, OpenLayers */
 
 var safetymaps = safetymaps || {};
 
-safetymaps.clusteringLayer = function(options) {
+safetymaps.ClusteringLayer = function(options) {
     this.options = $.extend({
         name: 'Object cluster',
         clusteringSymbol: {
@@ -38,7 +42,7 @@ safetymaps.clusteringLayer = function(options) {
     }, options);
 };
 
-safetymaps.clusteringLayer.prototype.createLayer = function(ol) {
+safetymaps.ClusteringLayer.prototype.createLayer = function() {
     var me = this;
     me.layer = new OpenLayers.Layer.Vector(me.options.name, {
         rendererOptions: {
@@ -73,27 +77,15 @@ safetymaps.clusteringLayer.prototype.createLayer = function(ol) {
         })
     });
     me.layer.events.register("featureselected", me, me.selected);
-    me.layer.events.register("beforefeatureselected", me, me.beforeFeatureSelected);
-    me.layer.events.register("featureunselected", me, me.featureUnselected);
-    ol.addLayer(me.layer);
+    return me.layer;
 };
 
-safetymaps.clusteringLayer.prototype.addFeaturesToCluster = function(features) {
+safetymaps.ClusteringLayer.prototype.addFeaturesToCluster = function(features) {
     this.layer.addFeatures(features);
 };
 
-safetymaps.clusteringLayer.prototype.selected = function() {
+safetymaps.ClusteringLayer.prototype.selected = function(e) {
 
-    // TODO: fire cluster_selected or object_selected event
-    console.log("clusteringLayer.selected()", arguments);
+    console.log("object_selected", e.feature);
+    $(this).triggerHandler("object_selected", e.feature);
 };
-
-safetymaps.clusteringLayer.prototype.beforeFeatureSelected = function() {
-    console.log("clusteringLayer.beforeFeatureSelected()", arguments);
-};
-
-safetymaps.clusteringLayer.prototype.featureUnselected = function() {
-    console.log("clusteringLayer.featureUnselected()", arguments);
-};
-
-
