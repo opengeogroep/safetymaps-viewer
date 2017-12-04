@@ -193,6 +193,9 @@ dbkjs.gotOrganisation = function () {
                 module.register();
             } catch(e) {
                 console.log("Error initializing module " + name + ": " + e + ", options: ", module.options);
+                if(e.stack) {
+                    console.log(e.stack);
+                }
             }
         }
     });
