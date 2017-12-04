@@ -58,9 +58,8 @@
 
         // Setup object details layers
 
-        //me.objectLayers = new safetymaps.CreatorObjectLayers();
-        //var layers = me.objectLayers.createLayers();
-        // add all to map
+        me.objectLayers = new safetymaps.creator.CreatorObjectLayers();
+        dbkjs.map.addLayers(me.objectLayers.createLayers());
 
         safetymaps.creator.api.getViewerObjectMapOverview()
         .fail(function(msg) {
@@ -101,12 +100,12 @@
 
     unselectObject: function() {
         if(this.selectedObject) {
-
-        } else {
+            this.objectLayers.removeAllFeatures();
         }
     },
 
     selectedObjectDetailsReceived: function(object) {
+        this.objectLayers.addFeaturesForObject(object);
     }
 
 };

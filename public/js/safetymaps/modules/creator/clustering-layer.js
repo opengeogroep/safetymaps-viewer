@@ -38,6 +38,11 @@ safetymaps.ClusteringLayer = function(options) {
             icon: 'js/safetymaps/modules/creator/assets/cluster.png',
             width: 51,
             height: 56
+        },
+        objectSymbol: {
+            icon: 'js/safetymaps/modules/creator/assets/object.png',
+            width: 23,
+            height: 40
         }
     }, options);
 };
@@ -52,9 +57,9 @@ safetymaps.ClusteringLayer.prototype.createLayer = function() {
         styleMap: new OpenLayers.StyleMap({
             'default': new OpenLayers.Style({
                 cursor: "pointer",
-                externalGraphic: me.options.clusteringSymbol.icon,
-                graphicWidth: me.options.clusteringSymbol.width,
-                graphicHeight: me.options.clusteringSymbol.height,
+                externalGraphic: me.options.objectSymbol.icon,
+                graphicWidth: me.options.objectSymbol.width,
+                graphicHeight: me.options.objectSymbol.height,
                 label: "${label}",
                 fontColor: "black",
                 fontSize: "12px",
