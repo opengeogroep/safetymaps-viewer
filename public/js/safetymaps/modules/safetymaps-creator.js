@@ -33,6 +33,7 @@
         }, this.options);
 
         // Setup API
+
         safetymaps.creator.api.basePath = "";
         safetymaps.creator.api.imagePath = "js/safetymaps/modules/creator";
 
@@ -61,12 +62,14 @@
         me.objectLayers = new safetymaps.creator.CreatorObjectLayers();
         dbkjs.map.addLayers(me.objectLayers.createLayers());
 
-        safetymaps.creator.api.getViewerObjectMapOverview()
-        .fail(function(msg) {
-            // TODO
+        var pViewerObjects = safetymaps.creator.api.getViewerObjectMapOverview();
+        var pStyles = safetymaps.creator.api.getStyles();
+
+        $.when(pViewerObjects, pStyles).fail(function(msg) {
+            console.log("Error initializing SafetyMaps Creator module: " + msg);
         })
-        .done(function(data) {
-            me.viewerApiObjectsLoaded(data);
+        .done(function(viewerObjects) {
+            me.viewerApiObjectsLoaded(viewerObjects);
         });
     },
 
@@ -115,7 +118,6 @@
                 console.log(error.stack);
             }
         }
-
     }
 
 };

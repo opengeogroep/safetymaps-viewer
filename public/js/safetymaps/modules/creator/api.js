@@ -105,9 +105,29 @@ safetymaps.creator.api = {
         return features;
     },
 
-    getStyleInfo: function() {
-        // TODO
-        // $.ajax('api/styles.json', {
+    getStyles: function() {
+        var me = this;
+
+        var d = $.Deferred();
+
+        // TODO i18n
+        var msg = "Error loading styles from " + this.basePath + "api/styles.json: ";
+        $.ajax(this.basePath + "api/styles.json", {
+            dataType: "json",
+            data: {
+                version: "3"
+            },
+            cache: false
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            d.reject(msg + safetymaps.utils.getAjaxError(jqXHR, textStatus, errorThrown));
+        })
+        .done(function(data, textStatus, jqXHR) {
+            safetymaps.creator.api.styles = data;
+            d.resolve(data);
+        });
+        return d.promise();
+
     },
 
     getObjectDetails: function(id) {
