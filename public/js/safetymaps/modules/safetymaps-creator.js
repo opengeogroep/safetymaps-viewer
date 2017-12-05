@@ -18,12 +18,13 @@
  *
  */
 
- /* global safetymaps, dbkjs */
+ /* global safetymaps, dbkjs, OpenLayers */
 
  dbkjs.modules.safetymaps_creator = {
     id: "dbk.module.safetymaps_creator",
     viewerApiObjects: null,
     selectedObject: null,
+    selectedClusterFeature: null,
 
     register: function() {
         var me = this;
@@ -35,7 +36,7 @@
         // Setup API
 
         safetymaps.creator.api.basePath = "";
-        safetymaps.creator.api.imagePath = "js/safetymaps/modules/creator";
+        safetymaps.creator.api.imagePath = "js/safetymaps/modules/creator/assets/";
 
         // Setup clustering layer
 
@@ -91,6 +92,11 @@
         // Unselect current, if any
         me.unselectObject();
 
+        this.selectedClusterFeature = feature;
+
+        console.log("zooming to feature", feature.geometry);
+        dbkjs.map.setCenter(new OpenLayers.LonLat(feature.geometry.x, feature.geometry.y), dbkjs.options.zoom);
+
         // Get object details
         safetymaps.creator.api.getObjectDetails(feature.attributes.id)
         .fail(function(msg) {
@@ -104,8 +110,13 @@
     unselectObject: function() {
         if(this.selectedObject) {
             this.objectLayers.removeAllFeatures();
+
+            if(this.selectedClusterFeature) {
+                dbkjs.selectControl.unselect(this.selectedClusterFeature);
+            }
         }
         this.selectedObject = null;
+        this.selectedClusterFeature = null;
     },
 
     selectedObjectDetailsReceived: function(object) {

@@ -78,8 +78,24 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
         },
         styleMap: new OpenLayers.StyleMap({
             default: new OpenLayers.Style({
-                color: "{color}",
-                strokeWidth: "{strokeWidth}"
+                strokeColor: "${color}",
+                strokeWidth: "${width}",
+                strokeLinecap: "butt",
+                strokeDashstyle: "${dashstyle}"
+            }, {
+                context: {
+                    color: function(feature) {
+                        return feature.attributes.style.color;
+                    },
+                    width: function(feature) {
+                        // TODO: scaling
+                        return feature.attributes.style.thickness;
+                    },
+                    dashstyle: function(feature) {
+                        // TODO: scaling
+                        return feature.attributes.style.pattern;
+                    }
+                }
             })
         })
     });
@@ -139,8 +155,8 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
         },
         styleMap: new OpenLayers.StyleMap({
             default: new OpenLayers.Style({
-                color: "{color}",
-                strokeWidth: "{strokeWidth}"
+                color: "${color}",
+                strokeWidth: "${strokeWidth}"
             })
         })
     });
@@ -152,7 +168,14 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
         },
         styleMap: new OpenLayers.StyleMap({
             default: new OpenLayers.Style({
-                externalGraphic: "{symbol}"
+                externalGraphic: "${symbol}",
+                pointRadius: 14
+            }, {
+                context: {
+                    symbol: function(feature) {
+                        return safetymaps.creator.api.imagePath + (feature.attributes.coverage ? "" : "no_") + "coverage.png";
+                    }
+                }
             })
         })
     });
@@ -164,8 +187,19 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
         },
         styleMap: new OpenLayers.StyleMap({
             'default': new OpenLayers.Style({
-                externalGraphic: "{symbol}",
-                rotation: "{rotation}"
+                externalGraphic: "${symbol}",
+                pointRadius: 14,
+                rotation: "-${rotation}"
+            }, {
+                context: {
+                    symbol: function(feature) {
+                        var symbol = feature.attributes.code;
+                        if(feature.attributes.description.trim().length > 0) {
+                            symbol += "_i";
+                        }
+                        return safetymaps.creator.api.imagePath + 'symbols/' + symbol + '.png';
+                    }
+                }
             })
         })
     });
@@ -177,7 +211,8 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
         },
         styleMap: new OpenLayers.StyleMap({
             'default': new OpenLayers.Style({
-                externalGraphic: "{symbol}"
+                externalGraphic: safetymaps.creator.api.imagePath + "/danger_symbols/${symbol}.png",
+                pointRadius: 14
             })
         })
     });
@@ -189,9 +224,9 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
         },
         styleMap: new OpenLayers.StyleMap({
             'default': new OpenLayers.Style({
-                fontSize: "{size}",
-                label: "{label}",
-                rotation: "{rotation}",
+                fontSize: "${size}",
+                label: "${label}",
+                rotation: "-${rotation}",
                 labelOutlineColor: "#ffffff",
                 labelOutlineWidth: 1
             })
@@ -225,8 +260,6 @@ safetymaps.creator.CreatorObjectLayers.prototype.addFeaturesForObject = function
 safetymaps.creator.CreatorObjectLayers.prototype.addBuildingFeatures = function(object) {
     var wktParser = new OpenLayers.Format.WKT();
 
-    console.log("adding buildings", object);
-
     var features = [];
     $.each(object.buildings || [], function(i, buildingWkt) {
         var f = wktParser.read(buildingWkt);
@@ -234,12 +267,11 @@ safetymaps.creator.CreatorObjectLayers.prototype.addBuildingFeatures = function(
         features.push(f);
     });
     this.layerBuildings.addFeatures(features);
+    if(features.length > 0) console.log("added buildings", features);
 };
 
 safetymaps.creator.CreatorObjectLayers.prototype.addCustomPolygonFeatures = function(object) {
     var wktParser = new OpenLayers.Format.WKT();
-
-    console.log("adding custom polygons", object);
 
     var features = [];
     $.each(object.custom_polygons || [], function(i, detail) {
@@ -250,12 +282,11 @@ safetymaps.creator.CreatorObjectLayers.prototype.addCustomPolygonFeatures = func
         features.push(f);
     });
     this.layerCustomPolygon.addFeatures(features);
+    if(features.length > 0) console.log("added custom polygons", features);
 };
 
 safetymaps.creator.CreatorObjectLayers.prototype.addFireCompartmentationFeatures = function(object) {
     var wktParser = new OpenLayers.Format.WKT();
-
-    console.log("adding fire compartmentation", object);
 
     var features = [];
     $.each(object.fire_compartmentation || [], function(i, detail) {
@@ -267,13 +298,12 @@ safetymaps.creator.CreatorObjectLayers.prototype.addFireCompartmentationFeatures
 
         // TODO: create label features
     });
-    this.layerBuildings.addFeatures(features);
+    this.layerFireCompartmentation.addFeatures(features);
+    if(features.length > 0) console.log("added fire compartmentation", features);
 };
 
 safetymaps.creator.CreatorObjectLayers.prototype.addLineFeatures = function(object) {
     var wktParser = new OpenLayers.Format.WKT();
-
-    console.log("adding lines", object);
 
     var features = [];
     $.each(object.lines || [], function(i, detail) {
@@ -286,12 +316,11 @@ safetymaps.creator.CreatorObjectLayers.prototype.addLineFeatures = function(obje
     this.layerLines1.addFeatures(features);
     this.layerLines2.addFeatures(features);
     this.layerLines3.addFeatures(features);
+    if(features.length > 0) console.log("added lines", features);
 };
 
 safetymaps.creator.CreatorObjectLayers.prototype.addApproachRouteFeatures = function(object) {
     var wktParser = new OpenLayers.Format.WKT();
-
-    console.log("adding approach routes", object);
 
     var features = [];
     $.each(object.approach_routes || [], function(i, detail) {
@@ -303,12 +332,11 @@ safetymaps.creator.CreatorObjectLayers.prototype.addApproachRouteFeatures = func
         features.push(f);
     });
     this.layerApproachRoutes.addFeatures(features);
+    if(features.length > 0) console.log("added approach routes", features);
 };
 
 safetymaps.creator.CreatorObjectLayers.prototype.addCommunicationCoverageFeatures = function(object) {
     var wktParser = new OpenLayers.Format.WKT();
-
-    console.log("adding communication coverage", object);
 
     var features = [];
     $.each(object.communication_coverage || [], function(i, detail) {
@@ -320,12 +348,11 @@ safetymaps.creator.CreatorObjectLayers.prototype.addCommunicationCoverageFeature
         features.push(f);
     });
     this.layerCommunicationCoverage.addFeatures(features);
+    if(features.length > 0) console.log("added communication coverage", features);
 };
 
 safetymaps.creator.CreatorObjectLayers.prototype.addSymbolFeatures = function(object) {
     var wktParser = new OpenLayers.Format.WKT();
-
-    console.log("adding symbols", object);
 
     var features = [];
     $.each(object.symbols || [], function(i, detail) {
@@ -337,12 +364,11 @@ safetymaps.creator.CreatorObjectLayers.prototype.addSymbolFeatures = function(ob
         features.push(f);
     });
     this.layerSymbols.addFeatures(features);
+    if(features.length > 0) console.log("added symbols", features);
 };
 
 safetymaps.creator.CreatorObjectLayers.prototype.addDangerSymbolFeatures = function(object) {
     var wktParser = new OpenLayers.Format.WKT();
-
-    console.log("adding danger symbols", object);
 
     var features = [];
     $.each(object.danger_symbols || [], function(i, detail) {
@@ -357,12 +383,11 @@ safetymaps.creator.CreatorObjectLayers.prototype.addDangerSymbolFeatures = funct
         features.push(f);
     });
     this.layerDangerSymbols.addFeatures(features);
+    if(features.length > 0) console.log("added danger symbols", features);
 };
 
 safetymaps.creator.CreatorObjectLayers.prototype.addLabelFeatures = function(object) {
     var wktParser = new OpenLayers.Format.WKT();
-
-    console.log("adding labels", object);
 
     var features = [];
     $.each(object.labels || [], function(i, detail) {
@@ -374,5 +399,6 @@ safetymaps.creator.CreatorObjectLayers.prototype.addLabelFeatures = function(obj
         features.push(f);
     });
     this.layerLabels.addFeatures(features);
+    if(features.length > 0) console.log("added labels", features);
 };
 

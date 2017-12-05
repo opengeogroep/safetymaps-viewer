@@ -91,7 +91,7 @@ safetymaps.creator.api = {
                 }
             }
             feature.attributes.label = apiObject.informele_naam;
-            feature.attributes.symbol = me.imagePath + '/' + symbol;
+            feature.attributes.symbol = me.imagePath + symbol;
             feature.attributes.width = width;
             feature.attributes.height = height;
             if(apiObject.selectiekader) {

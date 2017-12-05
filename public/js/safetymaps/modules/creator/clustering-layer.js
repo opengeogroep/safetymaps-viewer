@@ -35,12 +35,12 @@ safetymaps.ClusteringLayer = function(options) {
     this.options = $.extend({
         name: 'Object cluster',
         clusteringSymbol: {
-            icon: 'js/safetymaps/modules/creator/assets/cluster.png',
+            icon: safetymaps.creator.api.imagePath + 'cluster.png',
             width: 51,
             height: 56
         },
         objectSymbol: {
-            icon: 'js/safetymaps/modules/creator/assets/object.png',
+            icon: safetymaps.creator.api.imagePath + 'object.png',
             width: 23,
             height: 40
         },
