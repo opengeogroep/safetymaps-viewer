@@ -68,7 +68,7 @@ safetymaps.creator.api = {
 
         var wktParser = new OpenLayers.Format.WKT();
 
-        var features = new Array(data.length);
+        var features = [];
         $.each(data, function(i, apiObject) {
             var wkt = apiObject.selectiekader_centroid || apiObject.pand_centroid;
             var feature = wktParser.read(wkt);
@@ -99,8 +99,8 @@ safetymaps.creator.api = {
                 feature.attributes.selectionPolygon = selectiekaderFeature.geometry;
                 feature.attributes.minClusteringResolution = 2.5833;
             }
-
-            features[i] = feature;
+            apiObject.clusterFeature = feature;
+            features.push(feature);
         });
         return features;
     },
