@@ -30,8 +30,20 @@ safetymaps.creator = safetymaps.creator || {};
 
 safetymaps.creator.CreatorObjectLayers = function(options) {
     this.options = $.extend({
-        // TODO move relevant dbkjs.options.* to here
+        compartmentLabelMinSegmentLength: 7.5,
+        compartmentLabelMinScale: 300
     }, options);
+};
+
+safetymaps.creator.CreatorObjectLayers.prototype.scalePattern = function(pattern, factor) {
+    if(!pattern || pattern.trim().length === 0) {
+        return "";
+    }
+    var values = pattern.replace(/\s+/g, " ").split(" ");
+    for(var i = 0; i < values.length; i++) {
+        values[i] *= factor;
+    }
+    return values.join(" ");
 };
 
 safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
@@ -65,8 +77,18 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
         },
         styleMap: new OpenLayers.StyleMap({
             default: new OpenLayers.Style({
-                fillColor: "{fillColor}",
-                fillOpacity: "{fillOpacity}"
+                fillColor: "${fillColor}",
+                fillOpacity: "${fillOpacity}",
+                strokeWidth: 0
+            }, {
+                context: {
+                    fillColor: function(feature) {
+                        return feature.attributes.style.color;
+                    },
+                    fillOpacity: function(feature) {
+                        return feature.attributes.style.opacity;
+                    }
+                }
             })
         })
     });
@@ -93,7 +115,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
                     },
                     dashstyle: function(feature) {
                         // TODO: scaling
-                        return feature.attributes.style.pattern;
+                        return me.scalePattern(feature.attributes.style.pattern, 3);
                     }
                 }
             })
@@ -101,12 +123,36 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
     });
     this.layers.push(this.layerFireCompartmentation);
     this.layerFireCompartmentationLabels = new OpenLayers.Layer.Vector("Creator fire compartmentation labels", {
+        minScale: me.options.compartmentLabelMinScale,
         rendererOptions: {
             zIndexing: true
         },
         styleMap: new OpenLayers.StyleMap({
             'default': new OpenLayers.Style({
-                // TODO
+                fontSize: "${size}",
+                label: "${label}",
+                labelSelect: false,
+                rotation: "${rotation}",
+                labelOutlineColor: "#ffffff",
+                labelOutlineWidth: 2,
+                labelAlign: "cb",
+                labelXOffset: "${labelXOffset}",
+                labelYOffset: "${labelYOffset}",
+            }, {
+                context: {
+                    size: function(feature) {
+                        return 16;
+                    },
+                    label: function(feature) {
+                        return feature.attributes.style[OpenLayers.Lang.getCode()];
+                    },
+                    labelYOffset: function(feature) {
+                        return Math.sin(feature.attributes.theta + Math.PI/2) * 5;
+                    },
+                    labelXOffset: function(feature) {
+                        return Math.cos(feature.attributes.theta + Math.PI/2) * 5;
+                    }
+                }
             })
         })
     });
@@ -118,8 +164,43 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
         },
         styleMap: new OpenLayers.StyleMap({
             default: new OpenLayers.Style({
-                color: "{color}",
-                strokeWidth: "{strokeWidth}"
+                strokeColor: "${color}",
+                strokeDashstyle: "${dashstyle}",
+                fillColor: "${color}",
+                strokeWidth: "${strokeWidth}",
+                graphicName: "${graphicName}",
+                rotation: "${rotation}",
+                pointRadius: 5,
+                label: "${description}"
+            }, {
+                context: {
+                    color: function(feature) {
+                        return feature.attributes.style.color1;
+                    },
+                    strokeWidth: function(feature) {
+                        var type = feature.attributes.style.type_viewer;
+                        if(type === "doubletrack" || type === "tube") {
+                            return feature.attributes.style.thickness + 2;
+                        }
+                    },
+                    dashstyle: function(feature) {
+                        return me.scalePattern(feature.attributes.style.pattern, 3);
+                    },
+                    graphicName: function(feature) {
+                        if(feature.attributes.style.type_viewer === "arrow") {
+                            return "triangle";
+                            console.log("triangle");
+                        }
+                    },
+                    rotation: function(feature) {
+                        if(feature.attributes.lineAngle) {
+                            // Subtract angle from 90 because triangle with 0 rotation is pointing north
+                            return 90 - feature.attributes.lineAngle;
+                        }
+                        return 0;
+                    }
+
+                }
             })
         })
     });
@@ -130,8 +211,25 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
         },
         styleMap: new OpenLayers.StyleMap({
             default: new OpenLayers.Style({
-                color: "{color}",
-                strokeWidth: "{strokeWidth}"
+                strokeColor: "${color}",
+                strokeLinecap: "butt",
+                strokeWidth: "${strokeWidth}",
+                strokeDashstyle: "${dashstyle}"
+            }, {
+                context: {
+                    color: function(feature) {
+                        return feature.attributes.style.color2;
+                    },
+                    strokeWidth: function(feature) {
+                        return feature.attributes.style.thickness;
+                    },
+                    dashstyle: function(feature) {
+                        if(feature.attributes.style.type_viewer === "tube") {
+                            return me.scalePattern("8 8", 1);
+                        }
+                        return "";
+                    }
+                }
             })
         })
     });
@@ -142,8 +240,22 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
         },
         styleMap: new OpenLayers.StyleMap({
             default: new OpenLayers.Style({
-                color: "{color}",
-                strokeWidth: "{strokeWidth}"
+                strokeColor: "${color}",
+                strokeWidth: "${strokeWidth}",
+                strokeDashstyle: "${dashstyle}",
+                strokeLinecap: "butt"
+            }, {
+                context: {
+                    color: function(feature) {
+                        return feature.attributes.style.color1;
+                    },
+                    strokeWidth: function(feature) {
+                        return feature.attributes.style.thickness + 4;
+                    },
+                    dashstyle: function(feature) {
+                        return me.scalePattern("1 20", 1);
+                    }
+                }
             })
         })
     });
@@ -155,8 +267,28 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
         },
         styleMap: new OpenLayers.StyleMap({
             default: new OpenLayers.Style({
-                color: "${color}",
-                strokeWidth: "${strokeWidth}"
+                strokeColor: "${color}",
+                fillColor: "${color}",
+                strokeWidth: "${strokeWidth}",
+                graphicName: "triangle",
+                rotation: "${rotation}",
+                pointRadius: 5
+            }, {
+                context: {
+                    color: function(feature) {
+                        return feature.attributes.primary ? "#ff0000" : "#00ff00";
+                    },
+                    strokeWidth: function(feature) {
+                        return 1;
+                    },
+                    rotation: function(feature) {
+                        if(feature.attributes.lineAngle) {
+                            // Subtract angle from 90 because triangle with 0 rotation is pointing north
+                            return 90 - feature.attributes.lineAngle;
+                        }
+                        return 0;
+                    }
+                }
             })
         })
     });
@@ -229,6 +361,12 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
                 rotation: "-${rotation}",
                 labelOutlineColor: "#ffffff",
                 labelOutlineWidth: 1
+            }, {
+                context: {
+                    size: function(feature) {
+                        return feature.attributes.size * 2;
+                    }
+                }
             })
         })
     });
@@ -286,9 +424,12 @@ safetymaps.creator.CreatorObjectLayers.prototype.addCustomPolygonFeatures = func
 };
 
 safetymaps.creator.CreatorObjectLayers.prototype.addFireCompartmentationFeatures = function(object) {
+    var me = this;
+
     var wktParser = new OpenLayers.Format.WKT();
 
     var features = [];
+    var labelFeatures = [];
     $.each(object.fire_compartmentation || [], function(i, detail) {
         var f = wktParser.read(detail.line);
         f.attributes.index = i;
@@ -296,27 +437,81 @@ safetymaps.creator.CreatorObjectLayers.prototype.addFireCompartmentationFeatures
         f.attributes.style = safetymaps.creator.api.styles.compartments[detail.style];
         features.push(f);
 
-        // TODO: create label features
+        var line = f.geometry;
+
+        // MultiLineString
+        for(var j = 0; j < line.components.length; j++) {
+            for(var k = 0; k < line.components[j].components.length-1; k++) {
+                var start = line.components[j].components[k];
+                var end = line.components[j].components[k+1];
+
+                console.log("segment length " + start.distanceTo(end) + ", min " + me.options.compartmentLabelMinSegmentLength);
+                if(start.distanceTo(end) < me.options.compartmentLabelMinSegmentLength) {
+                    continue;
+                }
+
+                var midx = start.x + (end.x - start.x)/2;
+                var midy = start.y + (end.y - start.y)/2;
+
+                var opposite = (end.y - start.y);
+                var adjacent = (end.x - start.x);
+                var theta = Math.atan2(opposite, adjacent);
+                var angle = -theta * (180/Math.PI);
+
+                var labelPoint = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(midx, midy), {
+                    index: i,
+                    style: f.attributes.style,
+                    rotation: angle,
+                    theta: theta
+                });
+                labelFeatures.push(labelPoint);
+            }
+        }
     });
     this.layerFireCompartmentation.addFeatures(features);
-    if(features.length > 0) console.log("added fire compartmentation", features);
+    this.layerFireCompartmentationLabels.addFeatures(labelFeatures);
+    if(features.length > 0) console.log("added fire compartmentation", features, labelFeatures);
 };
 
 safetymaps.creator.CreatorObjectLayers.prototype.addLineFeatures = function(object) {
     var wktParser = new OpenLayers.Format.WKT();
 
-    var features = [];
+    var features1 = [];
+    var features2 = [];
+    var features3 = [];
     $.each(object.lines || [], function(i, detail) {
         var f = wktParser.read(detail.line);
+
+        var style = safetymaps.creator.api.styles.custom_lines[detail.style];
+
+        if(style.type_viewer === "arrow") {
+            // Create two geometries: one line and a point at the end of the
+            // line to display the arrow
+            var vertices = f.geometry.getVertices();
+            var end = vertices[vertices.length - 1];
+
+            // Rotation for triangle graphic rendered at end of line
+            f.attributes.lineAngle = safetymaps.utils.geometry.getLastLineSegmentAngle(f.geometry);
+
+            f.geometry = new OpenLayers.Geometry.Collection([f.geometry, end]);
+        }
+
         f.attributes.index = i;
         f.attributes.description = detail.omschrijving;
-        f.attributes.style = safetymaps.creator.api.styles.custom_lines[detail.style];
-        features.push(f);
+        f.attributes.style = style;
+        features1.push(f);
+
+        if(style.type_viewer === "doubletrack" || style.type_viewer === "tube") {
+            features2.push(f.clone());
+        }
+        if(style.type_viewer === "track" || style.type_viewer === "doubletrack") {
+            features3.push(f.clone());
+        }
     });
-    this.layerLines1.addFeatures(features);
-    this.layerLines2.addFeatures(features);
-    this.layerLines3.addFeatures(features);
-    if(features.length > 0) console.log("added lines", features);
+    this.layerLines1.addFeatures(features1);
+    this.layerLines2.addFeatures(features2);
+    this.layerLines3.addFeatures(features3);
+    if(features1.length > 0) console.log("added lines", features1, features2, features3);
 };
 
 safetymaps.creator.CreatorObjectLayers.prototype.addApproachRouteFeatures = function(object) {
@@ -329,6 +524,16 @@ safetymaps.creator.CreatorObjectLayers.prototype.addApproachRouteFeatures = func
         f.attributes.description = detail.omschrijving;
         f.attributes.name = detail.naam;
         f.attributes.primary = detail.primair;
+
+        // Create two geometries: one line and a point at the end of the
+        // line to display the arrow
+        var vertices = f.geometry.getVertices();
+        var end = vertices[vertices.length - 1];
+
+        // Rotation for triangle graphic rendered at end of line
+        f.attributes.lineAngle = safetymaps.utils.geometry.getLastLineSegmentAngle(f.geometry);
+
+        f.geometry = new OpenLayers.Geometry.Collection([f.geometry, end]);
         features.push(f);
     });
     this.layerApproachRoutes.addFeatures(features);

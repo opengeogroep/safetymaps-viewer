@@ -17,13 +17,14 @@
  *  along with safetymapDBK. If not, see <http://www.gnu.org/licenses/>.
  *
  */
- 
+
  /*
   * For common use by safetymaps-viewer and safetymaps-flamingo
   */
- 
+
 var safetymaps = safetymaps || {};
 safetymaps.utils = {};
+safetymaps.utils.geometry = {};
 
 safetymaps.utils.getAjaxError = function(jqXHR, textStatus, errorThrown) {
     var msg = textStatus;
@@ -34,4 +35,40 @@ safetymaps.utils.getAjaxError = function(jqXHR, textStatus, errorThrown) {
         msg += ", " + errorThrown;
     }
     return msg;
-}
+};
+
+safetymaps.utils.geometry.getLastLineSegmentAngle = function(lineGeometry) {
+    var vertices = lineGeometry.getVertices();
+    var end = vertices[vertices.length - 1];
+
+    // Find last vertex before end vertex, but ignore identical vertices at end
+    // of line
+    var idx = vertices.length - 2;
+    while(vertices[idx].x === end.x && vertices[idx].y === end.y && idx > 0) {
+        idx--;
+    }
+    var beforeEnd = vertices[idx];
+
+    return safetymaps.utils.geometry.getAngle(beforeEnd, end);
+};
+
+safetymaps.utils.geometry.getAngle = function(p1, p2) {
+    // 0 degrees = pointing east
+    // use 90 -angle for rotating a triangle symbol pointing north with rotation=0
+
+    var angle = 0;
+
+    var dx = p2.x - p1.x;
+    var dy = p2.y - p1.y;
+    if(dx !== 0) {
+        var angle = Math.atan(dy / dx);
+        angle = angle * (180 / Math.PI);
+
+        if(dx < 0) {
+            // reverse angle for II and III quadrants
+            angle = angle + 180;
+        }
+    }
+
+    return angle;
+};
