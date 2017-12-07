@@ -52,6 +52,13 @@
         dbkjs.map.addLayer(layer);
         dbkjs.selectControl.deactivate();
         dbkjs.selectControl.layers.push(layer);
+
+        // multi select, otherwise cluster will be deselected when clicking anywhere
+        // on the map
+        if(!dbkjs.selectControl.multiselectlayers) {
+            dbkjs.selectControl.multiselectlayers = [];
+        }
+        dbkjs.selectControl.multiselectlayers.push(layer);
         dbkjs.selectControl.activate();
 
         // Setup object details layers
@@ -159,4 +166,6 @@
             }
         }
     }
+
 };
+

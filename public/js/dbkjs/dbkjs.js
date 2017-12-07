@@ -188,7 +188,7 @@ dbkjs.gotOrganisation = function () {
         });
         enabled = enabled || dbkjs.options.additionalModules && $.inArray(name, dbkjs.options.additionalModules) > -1;
 
-        if(enabled && module.register) {
+        if(enabled && module.register && name !== "ealgps") {
             try {
                 module.register();
             } catch(e) {
@@ -200,7 +200,7 @@ dbkjs.gotOrganisation = function () {
         }
     });
 
-    dbkjs.layers.loadFromWMSGetCapabilities();
+    //dbkjs.layers.loadFromWMSGetCapabilities();
     dbkjs.finishMap();
     $(dbkjs).trigger('dbkjs_init_complete');
 };
