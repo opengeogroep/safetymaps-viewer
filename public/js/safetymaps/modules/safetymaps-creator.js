@@ -18,7 +18,7 @@
  *
  */
 
- /* global safetymaps, dbkjs, OpenLayers */
+ /* global safetymaps, dbkjs, OpenLayers, i18n */
 
  dbkjs.modules.safetymaps_creator = {
     id: "dbk.module.safetymaps_creator",
@@ -52,10 +52,6 @@
         dbkjs.map.addLayer(layer);
         dbkjs.selectControl.deactivate();
         dbkjs.selectControl.layers.push(layer);
-        if(!dbkjs.selectControl.multiselectlayers){
-            dbkjs.selectControl.multiselectlayers = [];
-        }
-        dbkjs.selectControl.multiselectlayers.push(layer);
         dbkjs.selectControl.activate();
 
         // Setup object details layers
@@ -78,6 +74,39 @@
         this.viewerApiObjects = data;
         var features = safetymaps.creator.api.createViewerObjectFeatures(data);
         this.clusteringLayer.addFeaturesToCluster(features);
+
+        this.createSearchConfig();
+    },
+
+    createSearchConfig: function() {
+        var me = this;
+
+        if(dbkjs.modules.search) {
+            dbkjs.modules.search.addSearchConfig({
+                tabContents: "<i class='fa fa-building'></i> " + i18n.t("search.dbk"),
+                search: function(value) {
+                    console.log("search object " + value);
+                    var searchResults = [];
+                    $.each(me.viewerApiObjects, function(i, o) {
+                        if(o.formele_naam.toLowerCase().indexOf(value) !== -1 || (o.informele_naam && o.informele_naam.toLowerCase().indexOf(value) !== -1)) {
+                            searchResults.push(o);
+                        }
+                    });
+                    dbkjs.modules.search.showResults(searchResults, function(r) {
+                        var s = r.formele_naam;
+                        if(r.informele_naam && r.informele_naam !== r.formele_naam) {
+                            s += " (" + r.informele_naam + ")";
+                        }
+                        return s;
+                    });
+                },
+                resultSelected: function(result) {
+                    console.log("Search result selected", result);
+
+                    dbkjs.selectControl.select(result.clusterFeature);
+                }
+            });
+        }
     },
 
     clusterObjectClusterSelected: function(features) {
@@ -130,6 +159,4 @@
             }
         }
     }
-
 };
-
