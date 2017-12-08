@@ -172,7 +172,7 @@ dbkjs.modules.safetymaps_creator = {
         if(this.selectedObject) {
             this.objectLayers.removeAllFeatures();
 
-            if(this.selectedClusterFeature) {
+            if(this.selectedClusterFeature.layer) {
                 dbkjs.selectControl.unselect(this.selectedClusterFeature);
             }
         }
