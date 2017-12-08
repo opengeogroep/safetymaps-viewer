@@ -81,7 +81,7 @@
         var div = $("<div></div>").addClass("input-group input-group-lg");
 
         this.searchTabs = $("<ul id='search_tabs' class='nav nav-pills' style='margin-bottom: 10px'></ul>");
-        this.searchInput = $("<input id='search_input' autocomplete='off' class='form-control' placeholder='" + i18n.t("search.dbkplaceholder") + "'>");
+        this.searchInput = $("<input id='search_input' autocomplete='off' class='form-control' placeholder=''>");
 
         div.append(this.searchTabs);
         div.append(this.searchInput);
@@ -92,7 +92,7 @@
                 if(me.keyupTimeout) {
                     window.clearTimeout(me.keyupTimeout);
                 }
-                if(me.options.minSearchLength === 0 || e.target.value.length >= me.options.minSearchLength) {
+                if(me.options.minSearchLength === 0 || e.target.value.length >= me.options.minSearchLength || e.target.value.trim().length === 0) {
                     me.keyupTimeout = window.setTimeout(function() {
                         me.activeConfig.search(e.target.value);
                     }, me.options.keyupTimeout);
@@ -132,13 +132,10 @@
         this.activeConfig = this.searchConfigs[index];
 
         this.searchInput.val("");
+        $(this.searchInput).attr("placeholder", this.activeConfig.placeholder);
 
         this.searchInput.focus();
-        if(this.activeConfig.showDefaultResults) {
-            this.activeConfig.showDefaultResults();
-        } else {
-            this.showResults([]);
-        }
+        this.activeConfig.search("");
     },
 
     addSearchConfig: function(config) {
