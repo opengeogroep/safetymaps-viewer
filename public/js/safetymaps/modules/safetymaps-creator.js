@@ -79,7 +79,11 @@
 
     viewerApiObjectsLoaded: function(data) {
         this.viewerApiObjects = data;
-        var features = safetymaps.creator.api.createViewerObjectFeatures(data);
+
+        this.viewerApiObjects.sort(function(lhs, rhs) {
+            return lhs.formele_naam.localeCompare(rhs.formele_naam, dbkjsLang);
+        });
+        var features = safetymaps.creator.api.createViewerObjectFeatures(this.viewerApiObjects);
         this.clusteringLayer.addFeaturesToCluster(features);
 
         this.createSearchConfig();
@@ -90,12 +94,13 @@
 
         if(dbkjs.modules.search) {
             dbkjs.modules.search.addSearchConfig({
-                tabContents: "<i class='fa fa-building'></i> " + i18n.t("search.dbk"),
+                tabContents: "<i class='fa fa-building'></i> " + i18n.t("creator.search"),
+                placeholder: i18n.t("creator.search_placeholder"),
                 search: function(value) {
                     console.log("search object " + value);
                     var searchResults = [];
                     $.each(me.viewerApiObjects, function(i, o) {
-                        if(o.formele_naam.toLowerCase().indexOf(value) !== -1 || (o.informele_naam && o.informele_naam.toLowerCase().indexOf(value) !== -1)) {
+                        if(value === "" || o.formele_naam.toLowerCase().indexOf(value) !== -1 || (o.informele_naam && o.informele_naam.toLowerCase().indexOf(value) !== -1)) {
                             searchResults.push(o);
                         }
                     });
