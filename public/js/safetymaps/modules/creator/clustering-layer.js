@@ -73,7 +73,7 @@ safetymaps.ClusteringLayer.prototype.createLayer = function () {
                 fontColor: "black",
                 fontSize: "12px",
                 fontWeight: "bold",
-                labelYOffset: -20,
+                labelYOffset: "${myLabelYoffset}",
                 labelOutlineColor: "white",
                 labelOutlineWidth: 3
             }, {
@@ -84,7 +84,6 @@ safetymaps.ClusteringLayer.prototype.createLayer = function () {
                         } else {
                             return me.options.objectSymbol.icon;
                         }
-                        ;
                     },
                     width: function (feature) {
                         if (feature.cluster) {
@@ -92,7 +91,6 @@ safetymaps.ClusteringLayer.prototype.createLayer = function () {
                         } else {
                             return me.options.objectSymbol.width;
                         }
-                        ;
                     },
                     height: function (feature) {
                         if (feature.cluster) {
@@ -100,13 +98,21 @@ safetymaps.ClusteringLayer.prototype.createLayer = function () {
                         } else {
                             return me.options.objectSymbol.height;
                         }
-                        ;
                     },
                     label: function (feature) {
-                        if (feature.layer.map.getScale() > me.options.minLabelScale) {
+                        if (feature.attributes.count) {
+                            return feature.attributes.count;
+                        } else if (feature.layer.map.getScale() > me.options.minLabelScale) {
                             return "";
                         } else {
                             return feature.attributes.label || "";
+                        }
+                    },
+                    myLabelYoffset: function (feature) {
+                        if (feature.cluster) {
+                            return -4;
+                        } else {
+                            return -20;
                         }
                     }
                 }
@@ -124,6 +130,6 @@ safetymaps.ClusteringLayer.prototype.addFeaturesToCluster = function (features) 
 
 safetymaps.ClusteringLayer.prototype.selected = function (e) {
 
-    console.log("object_selected", e.feature);
-    $(this).triggerHandler("object_selected", e.feature);
+        console.log("object_selected", e.feature);
+        $(this).triggerHandler("object_selected", e.feature);
 };
