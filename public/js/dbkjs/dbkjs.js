@@ -208,22 +208,23 @@ dbkjs.gotOrganisation = function () {
 dbkjs.zoomToFixedMapResolutionForBounds = function(bounds) {
     dbkjs.map.zoomToExtent(bounds);
 
-    var res = dbkjs.map.getResolution();
-    var zoomIndex = 1;
-    for(; zoomIndex < dbkjs.map.options.resolutions.length; zoomIndex++) {
-        if(dbkjs.map.options.resolutions[zoomIndex] < res) {
-            break;
+    if(dbkjs.map.options.resolutions) {
+        var res = dbkjs.map.getResolution();
+        var zoomIndex = 1;
+        for(; zoomIndex < dbkjs.map.options.resolutions.length; zoomIndex++) {
+            if(dbkjs.map.options.resolutions[zoomIndex] < res) {
+                break;
+            }
         }
+        zoomIndex--;
+        console.log("orig res: " + res + ", higher map resolution at index " + zoomIndex + ", res " + dbkjs.map.options.resolutions[zoomIndex]);
+        dbkjs.map.setCenter(dbkjs.map.getCenter(), zoomIndex);
     }
-    zoomIndex--;
-    console.log("orig res: " + res + ", higher map resolution at index " + zoomIndex + ", res " + dbkjs.map.options.resolutions[zoomIndex]);
-    dbkjs.map.setCenter(dbkjs.map.getCenter(), zoomIndex);
 }
 
 dbkjs.finishMap = function () {
     //find the div that contains the baseLayer.name
     var listItems = $("#baselayerpanel_ul li");
-    var areaGeometry = dbkjs.options.mapExtent ? dbkjs.options.mapExtent : new OpenLayers.Format.GeoJSON().read(dbkjs.options.organisation.area.geometry, "Geometry");
     listItems.each(function (idx, li) {
         var test = $(li).children(':first').text();
         if (test === dbkjs.map.baseLayer.name) {
@@ -247,7 +248,12 @@ dbkjs.finishMap = function () {
             return;
         }
         dbkjs.options.initialZoomed = true;
-        if (dbkjs.options.organisation.area) {
+
+        if(dbkjs.options.organisation.extent) {
+            var wkt = new OpenLayers.Format.WKT();
+            var extent = wkt.read(dbkjs.options.organisation.extent);
+            dbkjs.zoomToFixedMapResolutionForBounds(extent.geometry.getBounds().scale(1.3));
+        } else if (dbkjs.options.organisation.area) {
             if (dbkjs.options.organisation.area.geometry.type === "Point") {
                 dbkjs.map.setCenter(
                         new OpenLayers.LonLat(
@@ -260,7 +266,7 @@ dbkjs.finishMap = function () {
                         dbkjs.options.organisation.area.zoom
                         );
             } else if (dbkjs.options.organisation.area.geometry.type === "Polygon") {
-                dbkjs.zoomToFixedMapResolutionForBounds(areaGeometry.getBounds())
+                dbkjs.zoomToFixedMapResolutionForBounds(dbkjs.options.organisation.area.geometry.getBounds())
             }
         } else {
             dbkjs.map.zoomToMaxExtent();
