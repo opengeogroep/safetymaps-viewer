@@ -250,6 +250,8 @@ dbkjs.Permalink =
  * http://acuriousanimal.com/blog/2012/10/09/improved-performance-on-the-animatedcluster-for-openlayers/
  * http://acuriousanimal.com/blog/2013/02/08/animatedcluster-pan-related-bug-fixed/
  */
+
+/*
 OpenLayers.Strategy.Cluster.prototype.cluster = function(event) {
     var gf;
     if ((!event || event.zoomChanged || (event.type === "moveend" && !event.zoomChanged)) && this.features) {
@@ -348,6 +350,7 @@ OpenLayers.Strategy.Cluster.prototype.cluster = function(event) {
         this.clusters = clusters;
     }
 };
+*/
 
 /**
  * Override drawText function on openlayers SVG.js
