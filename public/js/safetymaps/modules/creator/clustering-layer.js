@@ -45,22 +45,23 @@ safetymaps.ClusteringLayer = function(options) {
             height: 40
         },
         minLabelScale: 4000
-    }, options);
+    }, options); 
 };
 
 safetymaps.ClusteringLayer.prototype.createLayer = function() {
     var me = this;
     me.layer = new OpenLayers.Layer.Vector(me.options.name, {
         rendererOptions: {
+            zIndexing: true
         },
         options: {
         },
         styleMap: new OpenLayers.StyleMap({
             'default': new OpenLayers.Style({
                 cursor: "pointer",
-                externalGraphic: me.options.objectSymbol.icon,
-                graphicWidth: me.options.objectSymbol.width,
-                graphicHeight: me.options.objectSymbol.height,
+                externalGraphic: "${myIcon}",
+                graphicWidth: "${width}",
+                graphicHeight: "${height}",
                 label: "${label}",
                 fontColor: "black",
                 fontSize: "12px",
@@ -70,6 +71,27 @@ safetymaps.ClusteringLayer.prototype.createLayer = function() {
                 labelOutlineWidth: 3
             }, {
                 context: {
+                    myIcon: function(feature){
+                        if(feature.cluster){
+                            return me.options.clusteringSymbol.icon;
+                        }else{
+                            return me.options.objectSymbol.icon;
+                        };
+                    },
+                    width: function(feature){
+                        if(feature.cluster){
+                            return me.options.clusteringSymbol.width;
+                        }else{
+                            return me.options.objectSymbol.width;
+                        };
+                    },
+                    height: function(feature){
+                        if(feature.cluster){
+                            return me.options.clusteringSymbol.height;
+                        }else{
+                            return me.options.objectSymbol.height;
+                        };
+                    },
                     label: function(feature) {
                         if(feature.layer.map.getScale() > me.options.minLabelScale) {
                             return "";
