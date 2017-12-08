@@ -3,7 +3,8 @@
         "layout": "Layout instellingen",
         "scaleStyle": "Schaal iconen op basis van zoomniveau",
         "styleSizeAdjust": "Grootte van iconen aanpassen:",
-        "version": "Versie"
+        "version": "Versie",
+        "version_deploy": "Versie speciale aanpassingen"
     },
     "map": {
         "measureDistance": "Meet afstand",

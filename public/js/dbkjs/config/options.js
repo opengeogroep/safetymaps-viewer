@@ -6,8 +6,8 @@ OpenLayers.IMAGE_RELOAD_ATTEMPTS = 3;
 
 dbkjs.options = {
     VERSION: "_VERSION_",
-    RELEASEDATE: "_DATE_",
-    APPLICATION: "Falck voertuigviewer 3.5",
+    CONFIG: "_CONFIG_",
+    APPLICATION: "SafetyMaps Viewer 4.0 (beta)",
 
     zoom: 13,
 

@@ -3,7 +3,8 @@
         "layout": "Layout settings",
         "scaleStyle": "Scale icons based on zoom",
         "styleSizeAdjust": "Adjust icon size",
-        "version": "Version"
+        "version": "Version",
+        "version_deploy": "Customizations version"
     },
     "map": {
         "measureDistance": "Measure distance",

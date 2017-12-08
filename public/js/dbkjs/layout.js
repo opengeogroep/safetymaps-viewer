@@ -57,8 +57,11 @@ dbkjs.layout = {
             dbkjs.redrawScaledLayers();
         });
 */
-        $(parent).append("<hr><h4>" + i18n.t("settings.version") + "</h4>");
-        $(parent).append('<p><strong>' + dbkjs.options.APPLICATION + '</strong> ' + dbkjs.options.VERSION + ' (' + dbkjs.options.RELEASEDATE + ')' + '</p>');
+        $(parent).append("<hr><h4>" + i18n.t("settings.version") + "</h4><br>");
+        $(parent).append('<p><strong>' + dbkjs.options.APPLICATION + '</strong> ' + dbkjs.options.VERSION + '</p>');
+        if(dbkjs.options.CONFIG !== "_CONFIG_") {
+            $(parent).append('<p>' + i18n.t("settings.version_deploy") + ': <strong>' + dbkjs.options.CONFIG + '</p>');
+        }
     }
 };
 
