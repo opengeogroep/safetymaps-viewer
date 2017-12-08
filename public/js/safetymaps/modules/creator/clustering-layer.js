@@ -129,7 +129,11 @@ safetymaps.ClusteringLayer.prototype.addFeaturesToCluster = function (features) 
 };
 
 safetymaps.ClusteringLayer.prototype.selected = function (e) {
-
-        console.log("object_selected", e.feature);
-        $(this).triggerHandler("object_selected", e.feature);
+        if(e.feature.cluster){
+            console.log("object_cluster_selected", e.feature);
+            $(this).triggerHandler("object_cluster_selected", e.feature);
+        }else{
+            console.log("object_selected", e.feature);
+            $(this).triggerHandler("object_selected", e.feature);
+        }
 };

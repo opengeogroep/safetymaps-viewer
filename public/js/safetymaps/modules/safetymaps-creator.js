@@ -18,9 +18,9 @@
  *
  */
 
- /* global safetymaps, dbkjs, OpenLayers, i18n */
+/* global safetymaps, dbkjs, OpenLayers, i18n */
 
- dbkjs.modules.safetymaps_creator = {
+dbkjs.modules.safetymaps_creator = {
     id: "dbk.module.safetymaps_creator",
     viewerApiObjects: null,
     selectedObject: null,
@@ -73,8 +73,8 @@
             console.log("Error initializing SafetyMaps Creator module: " + msg);
         })
         .done(function(viewerObjects) {
-            me.viewerApiObjectsLoaded(viewerObjects);
-        });
+                    me.viewerApiObjectsLoaded(viewerObjects);
+                });
     },
 
     viewerApiObjectsLoaded: function(data) {
@@ -116,8 +116,28 @@
         }
     },
 
-    clusterObjectClusterSelected: function(features) {
-        console.log("TODO show selection list", features);
+    clusterObjectClusterSelected: function (feature) {
+        console.log("show selection list", feature);
+
+        var me = this;
+        me.currentCluster = feature.cluster.slice();
+
+        $('#infopanel_b').empty();
+        var item_ul = $('<ul id="dbklist" class="nav nav-pills nav-stacked"></ul>');
+        for (var i = 0; i < me.currentCluster.length; i++) {
+            item_ul.append(me.getClusterLink(me.currentCluster[i]));
+        }
+        dbkjs.gui.infoPanelAddItems(item_ul);
+
+        dbkjs.util.getModalPopup('infopanel').setHideCallback(function () {
+            if (me.clusteringLayer.layer.selectedFeatures.length === 0) {
+                return;
+            }
+            for (var i = 0; i < me.clusteringLayer.layer.features.length; i++) {
+                dbkjs.selectControl.unselect(me.clusteringLayer.layer.features[i]);
+            }
+        });
+        dbkjs.util.getModalPopup('infopanel').show();
     },
 
     clusterObjectSelected: function(feature) {
@@ -136,11 +156,11 @@
         // Get object details
         safetymaps.creator.api.getObjectDetails(feature.attributes.id)
         .fail(function(msg) {
-            // TODO
-        })
+                    // TODO
+                })
         .done(function(object) {
-            me.selectedObjectDetailsReceived(object);
-        });
+                    me.selectedObjectDetailsReceived(object);
+                });
     },
 
     unselectObject: function() {
@@ -165,7 +185,20 @@
                 console.log(error.stack);
             }
         }
-    }
+    },
 
+    getClusterLink: function (feature) {
+        var me = this;
+        var v = {
+            name: feature.attributes.apiObject.formele_naam,
+            id: feature.attributes.apiObject.id
+        };
+        var link = $(Mustache.render('<li><a id="{{id}}" href="#">{{name}}</a></li>', v));
+        $(link).click(function () {
+            dbkjs.util.getModalPopup('infopanel').hide();
+            me.clusterObjectSelected(feature);
+        });
+        return $(link);
+    }
 };
 
