@@ -18,7 +18,7 @@
  *
  */
 
-/* global safetymaps, dbkjs, OpenLayers, i18n */
+/* global safetymaps, dbkjs, OpenLayers, i18n, Mustache */
 
 dbkjs.modules.safetymaps_creator = {
     id: "dbk.module.safetymaps_creator",
