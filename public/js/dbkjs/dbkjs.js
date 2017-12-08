@@ -33,12 +33,7 @@ dbkjs.init = function () {
     if (!dbkjs.map) {
         dbkjs.map = new OpenLayers.Map(dbkjs.options.map.options);
     }
-    dbkjs.options.organisation = {
-        id: dbkjs.util.getQueryVariable(i18n.t('app.organisation'), 'demo')
-    };
-    dbkjs.options.adres = dbkjs.util.getQueryVariable(i18n.t('app.queryAddress'));
-    dbkjs.options.omsnummer = dbkjs.util.getQueryVariable(i18n.t('app.queryNumber'));
-    dbkjs.options.dbk = dbkjs.util.getQueryVariable(i18n.t('app.queryDBK'));
+
     dbkjs.getOrganisation();
 
     dbkjs.mapcontrols.createMapControls();
@@ -266,7 +261,8 @@ dbkjs.finishMap = function () {
                         dbkjs.options.organisation.area.zoom
                         );
             } else if (dbkjs.options.organisation.area.geometry.type === "Polygon") {
-                dbkjs.zoomToFixedMapResolutionForBounds(dbkjs.options.organisation.area.geometry.getBounds())
+                var geom = new OpenLayers.Format.GeoJSON().read(dbkjs.options.organisation.area.geometry, "Geometry");
+                dbkjs.zoomToFixedMapResolutionForBounds(geom.getBounds())
             }
         } else {
             dbkjs.map.zoomToMaxExtent();
@@ -317,9 +313,6 @@ $(document).ready(function () {
             }
             return val;
         });
-        OpenLayers.Lang[dbkjsLang] = OpenLayers.Util.applyDefaults(
-            {'Scale = 1 : ${scaleDenom}': i18n.t("app.scale")}
-        );
         OpenLayers.Lang.setCode(dbkjsLang);
         // Create the infopanel
         dbkjs.util.createModalPopup({name: 'infopanel'}).getView().append($('<div></div>').attr({'id': 'infopanel_b'}));
