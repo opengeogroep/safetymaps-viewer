@@ -27,13 +27,17 @@
  *
  */
 
- /* global safetymaps, OpenLayers */
+/* global safetymaps, OpenLayers */
 
 var safetymaps = safetymaps || {};
 
-safetymaps.ClusteringLayer = function(options) {
+safetymaps.ClusteringLayer = function (options) {
     this.options = $.extend({
         name: 'Object cluster',
+        clusterStrategy: {
+            distance: 80,
+            threshold: 3
+        },
         clusteringSymbol: {
             icon: safetymaps.creator.api.imagePath + 'cluster.png',
             width: 51,
@@ -45,15 +49,18 @@ safetymaps.ClusteringLayer = function(options) {
             height: 40
         },
         minLabelScale: 4000
-    }, options); 
+    }, options);
 };
 
-safetymaps.ClusteringLayer.prototype.createLayer = function() {
+safetymaps.ClusteringLayer.prototype.createLayer = function () {
     var me = this;
     me.layer = new OpenLayers.Layer.Vector(me.options.name, {
         rendererOptions: {
             zIndexing: true
         },
+        strategies: [
+            new OpenLayers.Strategy.Cluster(me.options.clusterStrategy)
+        ],
         options: {
         },
         styleMap: new OpenLayers.StyleMap({
@@ -71,29 +78,32 @@ safetymaps.ClusteringLayer.prototype.createLayer = function() {
                 labelOutlineWidth: 3
             }, {
                 context: {
-                    myIcon: function(feature){
-                        if(feature.cluster){
+                    myIcon: function (feature) {
+                        if (feature.cluster) {
                             return me.options.clusteringSymbol.icon;
-                        }else{
+                        } else {
                             return me.options.objectSymbol.icon;
-                        };
+                        }
+                        ;
                     },
-                    width: function(feature){
-                        if(feature.cluster){
+                    width: function (feature) {
+                        if (feature.cluster) {
                             return me.options.clusteringSymbol.width;
-                        }else{
+                        } else {
                             return me.options.objectSymbol.width;
-                        };
+                        }
+                        ;
                     },
-                    height: function(feature){
-                        if(feature.cluster){
+                    height: function (feature) {
+                        if (feature.cluster) {
                             return me.options.clusteringSymbol.height;
-                        }else{
+                        } else {
                             return me.options.objectSymbol.height;
-                        };
+                        }
+                        ;
                     },
-                    label: function(feature) {
-                        if(feature.layer.map.getScale() > me.options.minLabelScale) {
+                    label: function (feature) {
+                        if (feature.layer.map.getScale() > me.options.minLabelScale) {
                             return "";
                         } else {
                             return feature.attributes.label || "";
@@ -108,11 +118,11 @@ safetymaps.ClusteringLayer.prototype.createLayer = function() {
     return me.layer;
 };
 
-safetymaps.ClusteringLayer.prototype.addFeaturesToCluster = function(features) {
+safetymaps.ClusteringLayer.prototype.addFeaturesToCluster = function (features) {
     this.layer.addFeatures(features);
 };
 
-safetymaps.ClusteringLayer.prototype.selected = function(e) {
+safetymaps.ClusteringLayer.prototype.selected = function (e) {
 
     console.log("object_selected", e.feature);
     $(this).triggerHandler("object_selected", e.feature);
