@@ -36,7 +36,7 @@ dbkjs.modules.connectionmonitor = {
         this.connected = true;
 
         $(".main-button-group").append($("<div class=\"btn-group pull-left connection-btn-group\">" +
-            "<a id=\"connection\" href=\"#\" title=\"Verbindingsstatus\" class=\"btn navbar-btn btn-default\">" +
+            "<a id=\"connection\" href=\"#\" title=\"" + i18n.t("connectionmonitor.button") + "\" class=\"btn navbar-btn btn-default\">" +
             "<i id=\"connectionicon\" class=\"fa fa-signal\" style=\"color: green\"></i></a>"));
 
         var me = this;

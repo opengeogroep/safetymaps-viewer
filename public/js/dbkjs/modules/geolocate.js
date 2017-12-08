@@ -288,7 +288,7 @@ dbkjs.modules.geolocate = {
             };
         }
 
-        $('#btngrp_3').append('<a id="btn_geolocate" class="btn btn-default navbar-btn" href="#" title="' + i18n.t('map.zoomLocation') + '"><i class="fa fa-crosshairs"></i></a>');
+        $('#btngrp_3').append('<a id="btn_geolocate" class="btn btn-default navbar-btn" href="#" title="' + i18n.t('geolocate.button') + '"><i class="fa fa-crosshairs"></i></a>');
 
         if(_obj.options.activateOnStart) {
             $("#btn_geolocate").css("color", "gray");

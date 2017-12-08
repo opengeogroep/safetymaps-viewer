@@ -8,12 +8,8 @@ dbkjs.options = {
     VERSION: "_VERSION_",
     RELEASEDATE: "_DATE_",
     APPLICATION: "Falck voertuigviewer 3.5",
-    REMARKS: "",
-    INFO: "",
-    zoom: 13,
 
-    // If false labels are shown on select and temporary render intents
-    alwaysShowInformationLabels: false,
+    zoom: 13,
 
     // Set to true to enable style scaling according to map scale
     styleScaleAdjust: false,

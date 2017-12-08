@@ -154,11 +154,11 @@ SplitScreenWindow.prototype.constructor = SplitScreenWindow;
 SplitScreenWindow.prototype.createElements = function(title) {
     var me = this;
     ModalWindow.prototype.createElements.call(this, title);
-    $(this.popup).find("a.modal-popup-close").html('<i class="fa fa-arrow-left"/> Kaart');
+    $(this.popup).find("a.modal-popup-close").html('<i class="fa fa-arrow-left"/> ' + i18n.t("dialogs.showMap"));
 
     if(dbkjs.options.splitScreenSwitch) {
         function switchContents() {
-            return me.splitScreen ? "<i class='fa fa-expand'/> Volledig scherm" : "<i class='fa fa-columns'/> Half scherm";
+            return me.splitScreen ? "<i class='fa fa-expand'/> " + i18n.t("dialogs.fullscreen") : "<i class='fa fa-columns'/> " + i18n.t("dialogs.splitscreen");
         };
 
         var a = $("<a class='modal-popup-switch'>" + switchContents() + "</a>");
@@ -186,7 +186,7 @@ SplitScreenWindow.prototype.setSplitScreen = function(splitScreen) {
     if(wasVisible) {
         this.show();
     }
-    $(this.popup).find("a.modal-popup-close").html('<i class="fa fa-arrow-left"/> ' + (splitScreen ? 'Kaart' : 'Terug'));
+    $(this.popup).find("a.modal-popup-close").html('<i class="fa fa-arrow-left"/> ' + i18n.t(splitScreen ? 'dialogs.showMap' : 'dialogs.back'));
 
     $(this).triggerHandler('splitScreenChange', splitScreen, this.visible);
 };

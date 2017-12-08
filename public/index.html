@@ -20,21 +20,19 @@
     <div class="main-button-group">
         <div id="btngrp_navigation" class="btn-group pull-right">
             <a href="#" class="btn navbar-btn btn-default drag-handle"><i class="fa fa-ellipsis-v"></i></a>
-            <a id="zoom_prev" href="#" title="Vorige" class="btn navbar-btn btn-default disabled"><i class="fa fa-reply"></i></a>
-            <a id="zoom_next" href="#" title="Volgende" class="btn navbar-btn btn-default disabled"><i class="fa fa-share-alt"></i></a>
-            <a id="zoom_in" href="#" title="zoom in" class="btn navbar-btn btn-default"><i class="fa fa-search-plus"></i></a>
-            <a id="zoom_out" href="#" title="Zoom uit" class="btn navbar-btn btn-default"><i class="fa fa-search-minus"></i></a>
-            <a id="zoom_extent" href="#" title="Zoom naar regio" class="btn navbar-btn btn-default needsclick"><i class="fa fa-arrows-alt"></i></a>
+            <a id="zoom_in" href="#" class="btn navbar-btn btn-default"><i class="fa fa-search-plus"></i></a>
+            <a id="zoom_out" href="#" class="btn navbar-btn btn-default"><i class="fa fa-search-minus"></i></a>
+            <a id="zoom_extent" href="#" class="btn navbar-btn btn-default needsclick"><i class="fa fa-arrows-alt"></i></a>
         </div>
         <div id="btngrp_3" class="btn-group pull-right">
             <a href="#" class="btn navbar-btn btn-default drag-handle"><i class="fa fa-ellipsis-v"></i></a>
             <a id="c_minimap" href="#" title="Overzichtskaart" class="btn navbar-btn btn-default"><i class="fa fa-image"></i></a>
-            <a id="c_settings" href="#settingspanel" data-toggle="modal" title="Instellingen" class="btn navbar-btn btn-default"><i class="fa fa-cogs"></i></a>
-            <a id="tb01" href="#overlaypanel" data-toggle="modal" title="Lagen" class="btn navbar-btn btn-default"><i class="fa fa-map-marker"></i></a>
-            <a id="tb02" href="#baselayerpanel" data-toggle="modal" title="Basiskaarten" class="btn navbar-btn btn-default"><i class="fa fa-globe"></i></a>
+            <a id="c_settings" href="#settingspanel" data-toggle="modal" title="Settings" class="btn navbar-btn btn-default"><i class="fa fa-cogs"></i></a>
+            <a id="tb01" href="#overlaypanel" data-toggle="modal" title="Layers" class="btn navbar-btn btn-default"><i class="fa fa-map-marker"></i></a>
+            <a id="tb02" href="#baselayerpanel" data-toggle="modal" title="Base layers" class="btn navbar-btn btn-default"><i class="fa fa-globe"></i></a>
         </div>
         <div class="btn-group pull-right layertoggle-btn-group">
-            <a id="tb03" href="#" title="Informatie DBK" class="btn navbar-btn btn-default"><i class="fa fa-info-circle"></i></a>
+            <a id="tb03" href="#" title="Info" class="btn navbar-btn btn-default"><i class="fa fa-info-circle"></i></a>
         </div>
         <div id="btn-grp-search" style="display:none;" class="btn-group pull-right"></div>
     </div>
@@ -49,7 +47,7 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h4 class="modal-title">Instellingen</h4>
+            <h4 class="modal-title">Settings</h4>
           </div>
           <div id="settingspanel_b" class="modal-body"></div>
         </div>
@@ -71,7 +69,7 @@
             <div class="tabbable">
               <ul id="overlaypanel_ul" class="nav nav-tabs">
                 <!--li class="active"><a data-toggle="tab" href="#overlay_tab1">Bereikbaarheidskaart</a></li-->
-                <li class="active"><a data-toggle="tab" href="#overlay_tabdef">Systeem</a></li>
+                <li class="active"><a data-toggle="tab" href="#overlay_tabdef">Layers</a></li>
               </ul>
               <div id="overlaypanel_div" class="tab-content">
                 <!--div id="overlay_tab1" class="tab-pane active">

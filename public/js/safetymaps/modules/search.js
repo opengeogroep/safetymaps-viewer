@@ -52,7 +52,7 @@
             id: "btn_opensearch",
             class: "btn btn-default navbar-btn",
             href: "#",
-            title: i18n.t("search.search")
+            title: i18n.t("search.button")
         })
         .append("<i class='fa fa-search'></i>")
         .click(function(e) {
@@ -75,7 +75,7 @@
         var me = this;
 
         this.popup = dbkjs.util.createModalPopup({
-            title: i18n.t("search.search")
+            title: i18n.t("search.title")
         });
 
         var div = $("<div></div>").addClass("input-group input-group-lg");

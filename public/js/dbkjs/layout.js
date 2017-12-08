@@ -29,12 +29,13 @@ dbkjs.layout = {
         _obj.settingsDialog('#settingspanel_b');
     },
     settingsDialog: function (parent) {
-        $(parent).append("<h4>" + i18n.t('app.layout') + "</h4>");
+        $(parent).append("<h4>" + i18n.t("settings.layout") + "</h4>");
+/*
         $(parent).append('<p><div class="row"><div class="col-xs-12">' +
-                '<label><input type="checkbox" id="checkbox_scaleStyle">' + i18n.t('app.scaleStyle') +
+                '<label><input type="checkbox" id="checkbox_scaleStyle">' + i18n.t("settings.scaleStyle") +
                 '</label></div></div></p>' +
                 '<p><hr/><div class="row"><div class="col-xs-12">' +
-                '<p style="padding-bottom: 15px">' + i18n.t('app.styleSizeAdjust') + '</p>' +
+                '<p style="padding-bottom: 15px">' + i18n.t('settings.styleSizeAdjust') + '</p>' +
                 '<input id="slider_styleSizeAdjust" style="width: 210px" data-slider-id="styleSizeAdjustSlider" type="text" ' +
                 ' data-slider-min="' + (dbkjs.options.styleSizeMin ? dbkjs.options.styleSizeMin : '-4') + '" ' +
                 ' data-slider-max="' + (dbkjs.options.styleSizeMax ? dbkjs.options.styleSizeMax : '10') + '" data-slider-step="1"/>' +
@@ -55,11 +56,9 @@ dbkjs.layout = {
             dbkjs.options.styleScaleAdjust = e.target.checked;
             dbkjs.redrawScaledLayers();
         });
-
-        $(parent).append(
-                '<p><strong>' + dbkjs.options.APPLICATION + '</strong> ' + dbkjs.options.VERSION + ' (' + dbkjs.options.RELEASEDATE + ')' + '</p>' +
-                '<p>' + dbkjs.options.REMARKS + '</p>'
-                );
+*/
+        $(parent).append("<hr><h4>" + i18n.t("settings.version") + "</h4>");
+        $(parent).append('<p><strong>' + dbkjs.options.APPLICATION + '</strong> ' + dbkjs.options.VERSION + ' (' + dbkjs.options.RELEASEDATE + ')' + '</p>');
     }
 };
 
