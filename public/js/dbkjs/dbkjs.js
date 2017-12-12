@@ -378,10 +378,6 @@ $(document).ready(function () {
             $(dbkjs).bind('dbkjs_init_complete', check);
         }
 
-        $('#tb03').click(function () {
-            dbkjs.dbkInfoPanel.toggle();
-        });
-
         // Added touchstart event to trigger click on. There was some weird behaviour combined with FastClick,
         // this seems to fix the issue
         $('#zoom_extent').on('click touchstart', function () {

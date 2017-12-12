@@ -107,21 +107,14 @@ dbkjs.modules.safetymaps_creator = {
         );
 
         // Put tabs at the bottom after width transition has ended
-        var updateContentHeight = function() {
-            var view = me.infoWindow.getView();
-            var tabContentHeight = view.height() - view.find(".nav-pills").height();
-            view.find(".tab-content").css("height", tabContentHeight);
-
-            view.find(".pdf-embed").css("height", tabContentHeight - 28);
-        };
-        $(window).resize(updateContentHeight);
+        $(window).resize(me.infoWindowTabsResize);
 
         $(me.infoWindow).on("show", function() {
             var event = dbkjs.util.getTransitionEvent();
             if(event) {
-                me.infoWindow.getView().parent().on(event, updateContentHeight);
+                me.infoWindow.getView().parent().on(event, me.infoWindowTabsResize);
             } else {
-                updateContentHeight();
+                me.infoWindowTabsResize();
             }
 
             $.each(me.infoWindow.getView().find(".pdf-embed"), function(i, pdf) {
@@ -159,6 +152,14 @@ dbkjs.modules.safetymaps_creator = {
                 }
             });
         });
+    },
+
+    infoWindowTabsResize: function() {
+        var view = this.infoWindow.getView();
+        var tabContentHeight = view.height() - view.find(".nav-pills").height();
+        view.find(".tab-content").css("height", tabContentHeight);
+
+        view.find(".pdf-embed").css("height", tabContentHeight - 28);
     },
 
     viewerApiObjectsLoaded: function(data) {
@@ -257,9 +258,10 @@ dbkjs.modules.safetymaps_creator = {
         dbkjs.map.setCenter(new OpenLayers.LonLat(feature.geometry.x, feature.geometry.y), dbkjs.options.zoom);
 
         // Get object details
+        $("#creator_object_info").text(i18n.t("dialogs.busyloading") + "...");
         safetymaps.creator.api.getObjectDetails(feature.attributes.id)
         .fail(function(msg) {
-            // TODO
+            $("#creator_object_info").text("Error: " + msg);
         })
         .done(function(object) {
             me.selectedObjectDetailsReceived(object);
@@ -281,6 +283,7 @@ dbkjs.modules.safetymaps_creator = {
     selectedObjectDetailsReceived: function(object) {
         try {
             this.objectLayers.addFeaturesForObject(object);
+            this.updateInfoWindow(object);
             this.selectedObject = object;
         } catch(error) {
             console.log("Error creating layers for object", object);
@@ -288,6 +291,17 @@ dbkjs.modules.safetymaps_creator = {
                 console.log(error.stack);
             }
         }
+    },
+
+    updateInfoWindow: function(object) {
+        var div = $('<div class="tabbable"></div>');
+
+        safetymaps.creator.renderInfoTabs(object, div);
+
+        $("#creator_object_info").html(div);
+
+        this.infoWindow.show();
+        this.infoWindowTabsResize();
     }
 };
 
