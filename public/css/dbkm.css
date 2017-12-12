@@ -587,7 +587,6 @@ input[type="radio"], input[type="checkbox"] {
     font-size: 16px;
     padding: 15px;
     display: block;
-    width: 90px;
     height: 55px;
 }
 
@@ -601,7 +600,6 @@ input[type="radio"], input[type="checkbox"] {
     font-size: 16px;
     padding: 15px;
     display: block;
-    /*width: 230px;*/
     height: 55px;
 }
 
