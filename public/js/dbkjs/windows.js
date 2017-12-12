@@ -18,6 +18,8 @@
  *
  */
 
+/* global dbkjs */
+
 /**
  * Modal window which takes up the entire screen. Automatically closed when
  * another modal window is shown, or a modal popup is shown (dbkjs event
@@ -78,8 +80,8 @@ ModalWindow.prototype.createElements = function(title) {
 
 ModalWindow.prototype.modalPopupShowEvent = function(event, params) {
     // Hide ourselves when another popup is shown
-    if(me.name !== params.popupName) {
-        me.hide();
+    if(this.name !== params.popupName) {
+        this.hide();
     }
 };
 
