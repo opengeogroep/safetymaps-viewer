@@ -3,9 +3,6 @@ var dbkjs = dbkjs || {};
 window.dbkjs = dbkjs;
 
 dbkjs.gui = {
-    infoPanelAddItems: function(html) {
-        $('#infopanel_b').append(html);
-    },
     showError: function(errMsg) {
         dbkjs.util.alert('Fout', ' ' + errMsg, 'alert-danger');
     },

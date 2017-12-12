@@ -34,6 +34,7 @@
     },
     "creator": {
         "search": "Safety map",
-        "search_placeholder": "Type name here..."
+        "search_placeholder": "Type name here...",
+        "button": "Object information"
     }
 }

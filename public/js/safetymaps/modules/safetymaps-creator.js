@@ -18,13 +18,14 @@
  *
  */
 
-/* global safetymaps, dbkjs, OpenLayers, i18n, Mustache */
+/* global safetymaps, dbkjs, OpenLayers, i18n, Mustache, PDFObject */
 
 dbkjs.modules.safetymaps_creator = {
     id: "dbk.module.safetymaps_creator",
     viewerApiObjects: null,
     selectedObject: null,
     selectedClusterFeature: null,
+    infoWindow: null,
 
     register: function() {
         var me = this;
@@ -74,6 +75,89 @@ dbkjs.modules.safetymaps_creator = {
         })
         .done(function(viewerObjects) {
             me.viewerApiObjectsLoaded(viewerObjects);
+        });
+
+        // Setup user interface for object info window
+
+        me.setupInterface();
+    },
+
+    setupInterface: function() {
+        var me = this;
+
+        // Element for displaying list of Creator objects in a cluster
+        dbkjs.util.createModalPopup({name: "creator_cluster_list"}).getView().append($("<div></div>").attr({'id': 'creator_cluster_list'}));
+
+        // Button to open info window
+        $("#btngrp_object").append($('<a id="btn_object_info" href="#" class="btn navbar-btn btn-default"><i class="fa fa-info-circle"></i></a>'));
+        $("#btn_object_info")
+        .attr("title", i18n.t("creator.button"))
+        .click(function() {
+            me.infoWindow.toggle();
+        });
+
+        // Window for object info tabs
+        me.infoWindow = new SplitScreenWindow("Creator object info");
+        me.infoWindow.createElements();
+
+        me.infoWindow.getView().append(
+                $('<div></div>')
+                .attr({'id': 'creator_object_info'})
+                .text(i18n.t("dialogs.noinfo"))
+        );
+
+        // Put tabs at the bottom after width transition has ended
+        var updateContentHeight = function() {
+            var view = me.infoWindow.getView();
+            var tabContentHeight = view.height() - view.find(".nav-pills").height();
+            view.find(".tab-content").css("height", tabContentHeight);
+
+            view.find(".pdf-embed").css("height", tabContentHeight - 28);
+        };
+        $(window).resize(updateContentHeight);
+
+        $(me.infoWindow).on("show", function() {
+            var event = dbkjs.util.getTransitionEvent();
+            if(event) {
+                me.infoWindow.getView().parent().on(event, updateContentHeight);
+            } else {
+                updateContentHeight();
+            }
+
+            $.each(me.infoWindow.getView().find(".pdf-embed"), function(i, pdf) {
+                if(pdf.children.length === 0) {
+                    console.log("embedding PDF " + $(pdf).attr("data-url"));
+                    // Add cache buster to avoid unexpected server response (206) on iOS 10 safari webapp
+                    PDFObject.embed($(pdf).attr("data-url") + "?t=" + new Date().getTime(), pdf, {
+                        // Use custom built pdf.js with src/core/network.js function
+                        // PDFNetworkStreamFullRequestReader_validateRangeRequestCapabilities
+                        // always returning false to also avoid 206 error
+                        PDFJS_URL: "js/libs/pdfjs-1.6.210-disablerange-minified/web/viewer.html",
+                        forcePDFJS: !!dbkjs.options.forcePDFJS  /* XXX move to module options */
+                    });
+                    // Remove buttons from PDFJS toolbar
+                    // XXX hack, use PDFJS documentloaded event?
+                    function removeToolbar() {
+                        var iframe = $("iframe").contents();
+                        if(iframe.find("#download")[0] || iframe.find("#secondaryDownload")[0] ) {
+                            console.log("found PDFJS toolbar buttons, removing");
+                            iframe.find("#download").remove();
+                            iframe.find("#openFile").remove();
+                            iframe.find("#print").remove();
+                            iframe.find("#secondaryDownload").remove();
+                            iframe.find("#secondaryOpenFile").remove();
+                            iframe.find("#secondaryPrint").remove();
+                        } else {
+                            console.log("PDFJS toolbar not found, waiting")
+                            window.setTimeout(removeToolbar, 500);
+                        }
+                    }
+                    //this check is needed. If the program is not using PDFJS then we can't remove buttons.
+                    if(PDFObject.supportsPDFs || dbkjs.options.forcePDFJS ){
+                        removeToolbar();
+                    }
+                }
+            });
         });
     },
 
@@ -127,14 +211,14 @@ dbkjs.modules.safetymaps_creator = {
         var me = this;
         me.currentCluster = feature.cluster.slice();
 
-        $('#infopanel_b').empty();
-        var item_ul = $('<ul id="dbklist" class="nav nav-pills nav-stacked"></ul>');
+        $("#creator_cluster_list").empty();
+        var item_ul = $('<ul class="nav nav-pills nav-stacked"></ul>');
         for (var i = 0; i < me.currentCluster.length; i++) {
             item_ul.append(me.getClusterLink(me.currentCluster[i]));
         }
-        dbkjs.gui.infoPanelAddItems(item_ul);
+        $("#creator_cluster_list").append(item_ul);
 
-        dbkjs.util.getModalPopup('infopanel').setHideCallback(function () {
+        dbkjs.util.getModalPopup("creator_cluster_list").setHideCallback(function () {
             if (me.clusteringLayer.layer.selectedFeatures.length === 0) {
                 return;
             }
@@ -142,7 +226,7 @@ dbkjs.modules.safetymaps_creator = {
                 dbkjs.selectControl.unselect(me.clusteringLayer.layer.features[i]);
             }
         });
-        dbkjs.util.getModalPopup('infopanel').show();
+        dbkjs.util.getModalPopup("creator_cluster_list").show();
     },
 
     getClusterLink: function (feature) {
@@ -153,7 +237,7 @@ dbkjs.modules.safetymaps_creator = {
         };
         var link = $(Mustache.render('<li><a id="{{id}}" href="#">{{name}}</a></li>', v));
         $(link).click(function () {
-            dbkjs.util.getModalPopup('infopanel').hide();
+            dbkjs.util.getModalPopup("creator_cluster_list").hide();
             me.clusterObjectSelected(feature);
         });
         return $(link);

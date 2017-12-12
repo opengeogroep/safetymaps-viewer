@@ -34,6 +34,7 @@
     }, 
     "creator": {
         "search": "Safety map",
-        "search_placeholder": "Vul naam in..."        
+        "search_placeholder": "Vul naam in...",
+        "button": "Objectinformatie"
     }
 }
