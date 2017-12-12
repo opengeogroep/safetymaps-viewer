@@ -73,8 +73,8 @@ dbkjs.modules.safetymaps_creator = {
             console.log("Error initializing SafetyMaps Creator module: " + msg);
         })
         .done(function(viewerObjects) {
-                    me.viewerApiObjectsLoaded(viewerObjects);
-                });
+            me.viewerApiObjectsLoaded(viewerObjects);
+        });
     },
 
     viewerApiObjectsLoaded: function(data) {
@@ -145,6 +145,20 @@ dbkjs.modules.safetymaps_creator = {
         dbkjs.util.getModalPopup('infopanel').show();
     },
 
+    getClusterLink: function (feature) {
+        var me = this;
+        var v = {
+            name: feature.attributes.apiObject.formele_naam,
+            id: feature.attributes.apiObject.id
+        };
+        var link = $(Mustache.render('<li><a id="{{id}}" href="#">{{name}}</a></li>', v));
+        $(link).click(function () {
+            dbkjs.util.getModalPopup('infopanel').hide();
+            me.clusterObjectSelected(feature);
+        });
+        return $(link);
+    },
+
     clusterObjectSelected: function(feature) {
         console.log("Select feature", feature);
 
@@ -161,11 +175,11 @@ dbkjs.modules.safetymaps_creator = {
         // Get object details
         safetymaps.creator.api.getObjectDetails(feature.attributes.id)
         .fail(function(msg) {
-                    // TODO
-                })
+            // TODO
+        })
         .done(function(object) {
-                    me.selectedObjectDetailsReceived(object);
-                });
+            me.selectedObjectDetailsReceived(object);
+        });
     },
 
     unselectObject: function() {
@@ -190,20 +204,6 @@ dbkjs.modules.safetymaps_creator = {
                 console.log(error.stack);
             }
         }
-    },
-
-    getClusterLink: function (feature) {
-        var me = this;
-        var v = {
-            name: feature.attributes.apiObject.formele_naam,
-            id: feature.attributes.apiObject.id
-        };
-        var link = $(Mustache.render('<li><a id="{{id}}" href="#">{{name}}</a></li>', v));
-        $(link).click(function () {
-            dbkjs.util.getModalPopup('infopanel').hide();
-            me.clusterObjectSelected(feature);
-        });
-        return $(link);
     }
 };
 
