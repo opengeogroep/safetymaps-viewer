@@ -113,6 +113,8 @@ create or replace view viewer.viewer_object_details as
         a."Postcode" as postcode,
         a."Plaats" as plaats,
 
+        (select "Gebouwconstructie" from wfs."Object" where "DBK_ID" = vo.id limit 1) as gebouwconstructie,
+
         -- 0..n properties zonder geometrie
         
         -- Verdiepingen:        
