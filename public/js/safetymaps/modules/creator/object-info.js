@@ -35,14 +35,28 @@ safetymaps.creator.renderInfoTabs = function(object, div) {
     div.append(tabContent);
     div.append(tabs);
 
-    safetymaps.creator.renderGeneral(object, tabContent, tabs);
-    safetymaps.creator.renderDetails(object, tabContent, tabs);
+    var rows;
+
+    rows = safetymaps.creator.renderGeneral(object);
+    safetymaps.creator.createHtmlTabDiv("general", "General", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+
+    rows = safetymaps.creator.renderDetails(object);
+    safetymaps.creator.createHtmlTabDiv("details", "Details", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
 
 };
 
-safetymaps.creator.renderGeneral = function(object, tabContent, tabs) {
+safetymaps.creator.renderGeneral = function(object) {
 
-    var content = safetymaps.creator.createInfoTabDiv([
+    var lowestFloor = null, highestFloor = null;
+    if(object.bouwlaag_min !== "") {
+        var n = Number(object.bouwlaag_min);
+        lowestFloor = n === 0 ? 0 : (-n) + " (" + (-n) + ")";
+    }
+    if(object.bouwlaag_max !== "") {
+        var n = Number(object.bouwlaag_max);
+        highestFloor = n === 0 ? 0 : n + " (" + (n-1) + ")";
+    }
+    return [
         {l: i18n.t("creator.formal_name"), t: object.formele_naam},
         {l: i18n.t("creator.informal_name"), t: object.informele_naam},
         {l: i18n.t("creator.adress"), html: Mustache.render("{{straatnaam}} {{huisnummer}} {{huisletter}} {{toevoeging}}<br>{{postcode}} {{plaats}}", object)},
@@ -57,20 +71,16 @@ safetymaps.creator.renderGeneral = function(object, tabContent, tabs) {
         {l: i18n.t("creator.usage"), t: object.gebruikstype},
         {l: i18n.t("creator.riskClassification"), t: object.risicoklasse},
         {l: i18n.t("creator.level"), t: object.bouwlaag},
-        {l: i18n.t("creator.lowestLevel") + " (" + i18n.t("creator.floor") + ")", t: object.bouwlaag_min !== "0" ? (-Number(object.bouwlaag_min)) + " (" + (-Number(object.bouwlaag_min)) + ")" : null},
-        {l: i18n.t("creator.highestLevel") + " (" + i18n.t("creator.floor") + ")", t: object.bouwlaag_max !== "0" ? object.bouwlaag_max + " (" + (Number(object.bouwlaag_max)-1) + ")" : null}
-    ]);
-
-    safetymaps.creator.createHtmlTabDiv("general", "General", content, tabContent, tabs);
+        {l: i18n.t("creator.lowestLevel") + " (" + i18n.t("creator.floor") + ")", t: lowestFloor},
+        {l: i18n.t("creator.highestLevel") + " (" + i18n.t("creator.floor") + ")", t: highestFloor}
+    ];
 };
 
-safetymaps.creator.renderDetails = function(object, tabContent, tabs) {
+safetymaps.creator.renderDetails = function(object) {
 
-    var content = safetymaps.creator.createInfoTabDiv([
+    return [
         {l: "Detail", t: "Bla 2"}
-    ]);
-
-    safetymaps.creator.createHtmlTabDiv("details", "Details", content, tabContent, tabs);
+    ];
 };
 
 safetymaps.creator.renderObjectFeatureInfoTab = function(object, div) {
@@ -93,7 +103,7 @@ safetymaps.creator.createInfoTabDiv = function(rows) {
     var table = $('<table class="table table-hover"></table>');
 
     $.each(rows, function(i, row) {
-        if(row.t || row.html) {
+        if((row.hasOwnProperty("t") && row.t !== null && typeof row.t !== "undefined") || row.html) {
             table.append('<tr><td>' + row.l + '</td><td>' + (row.html ? row.html : Mustache.escape(row.t)) + '</td></tr>');
         }
     });
