@@ -47,8 +47,18 @@ safetymaps.creator.renderGeneral = function(object, tabContent, tabs) {
         {l: i18n.t("creator.informal_name"), t: object.informele_naam},
         {l: i18n.t("creator.adress"), html: Mustache.render("{{straatnaam}} {{huisnummer}} {{huisletter}} {{toevoeging}}<br>{{postcode}} {{plaats}}", object)},
         {l: i18n.t("creator.check_date"), t: new moment(object.datum_controle).format("LL")},
-        {l: i18n.t("creator.modified_date"), t: new moment(object.datum_actualisatie).format("LLLL")}
-
+        {l: i18n.t("creator.modified_date"), t: new moment(object.datum_actualisatie).format("LLLL")},
+        {l: i18n.t("creator.emergencyResponderPresent"), html:
+                '<span class="label label-' + (object.bhv_aanwezig ? 'success' : 'warning') + '">' +
+                i18n.t("creator.emergencyResponderPresent" + (object.bhv_aanwezig ? 'Yes' : 'No')) + '</span>'},
+        {l: i18n.t("creator.respondingProcedure"), t: object.inzetprocedure},
+        {l: i18n.t("creator.buildingConstruction"), t: object.gebouwconstructie},
+        {l: i18n.t("creator.fireAlarmCode"), t: object.oms_nummer},
+        {l: i18n.t("creator.usage"), t: object.gebruikstype},
+        {l: i18n.t("creator.riskClassification"), t: object.risicoklasse},
+        {l: i18n.t("creator.level"), t: object.bouwlaag},
+        {l: i18n.t("creator.lowestLevel") + " (" + i18n.t("creator.floor") + ")", t: object.bouwlaag_min !== "0" ? (-Number(object.bouwlaag_min)) + " (" + (-Number(object.bouwlaag_min)) + ")" : null},
+        {l: i18n.t("creator.highestLevel") + " (" + i18n.t("creator.floor") + ")", t: object.bouwlaag_max !== "0" ? object.bouwlaag_max + " (" + (Number(object.bouwlaag_max)-1) + ")" : null}
     ]);
 
     safetymaps.creator.createHtmlTabDiv("general", "General", content, tabContent, tabs);
