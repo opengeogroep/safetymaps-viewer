@@ -32,6 +32,7 @@ dbkjs.modules.safetymaps_creator = {
 
         this.options = $.extend({
             // default options here
+            maxSearchResults: 30
         }, this.options);
 
         // Setup API
@@ -190,6 +191,9 @@ dbkjs.modules.safetymaps_creator = {
                     $.each(me.viewerApiObjects, function(i, o) {
                         if(value === "" || o.formele_naam.toLowerCase().indexOf(value) !== -1 || (o.informele_naam && o.informele_naam.toLowerCase().indexOf(value) !== -1)) {
                             searchResults.push(o);
+                            if(searchResults.length === me.options.maxSearchResults) {
+                                return false;
+                            }
                         }
                     });
                     dbkjs.modules.search.showResults(searchResults, function(r) {
@@ -203,7 +207,7 @@ dbkjs.modules.safetymaps_creator = {
                 resultSelected: function(result) {
                     console.log("Search result selected", result);
 
-                    dbkjs.selectControl.select(result.clusterFeature);
+                    me.clusterObjectSelected(result.clusterFeature);
                 }
             });
         }
