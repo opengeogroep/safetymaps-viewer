@@ -1,3 +1,6 @@
+-- Warning: restart Tomcat after updating views if you change result type, otherwise this exception may occur:
+-- class java.sql.SQLException: ERROR: cached plan must not change result type Query: select * from viewer.viewer_object_details where id = ?
+
 drop schema if exists viewer cascade;
 create schema viewer;
 
@@ -25,6 +28,7 @@ create or replace view viewer.viewer_object as
         d."Adres_ID" as adres_id,
         nullif(d2."Hoofdobject_ID",0) as hoofdobject_id,
         d2."Bouwlaag" as bouwlaag,
+        d."Gebruikstype" as gebruikstype,
         
         -- Oude bijzonderheden...
         d."Bijzonderheden" as bijzonderheden,
