@@ -107,14 +107,17 @@ dbkjs.modules.safetymaps_creator = {
         );
 
         // Put tabs at the bottom after width transition has ended
-        $(window).resize(me.infoWindowTabsResize);
+        var resizeFunction = function() {
+            me.infoWindowTabsResize();
+        };
+        $(window).resize(resizeFunction);
 
         $(me.infoWindow).on("show", function() {
             var event = dbkjs.util.getTransitionEvent();
             if(event) {
-                me.infoWindow.getView().parent().on(event, me.infoWindowTabsResize);
+                me.infoWindow.getView().parent().on(event, resizeFunction);
             } else {
-                me.infoWindowTabsResize();
+                resizeFunction();
             }
 
             $.each(me.infoWindow.getView().find(".pdf-embed"), function(i, pdf) {
