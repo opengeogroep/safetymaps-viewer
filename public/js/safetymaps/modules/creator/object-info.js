@@ -40,19 +40,24 @@ safetymaps.creator.renderInfoTabs = function(object, div) {
     rows = safetymaps.creator.renderGeneral(object);
     safetymaps.creator.createHtmlTabDiv("general", "General", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
 
-    rows = safetymaps.creator.renderDetails(object);
-    safetymaps.creator.createHtmlTabDiv("details", "Details", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+    detailTabs = safetymaps.creator.renderDetails(object);
+    $.each(detailTabs, function(i, detailTab) {
+        // Skip tabs with only header as row
+        if(detailTab.rows.length > 1) {
+            safetymaps.creator.createHtmlTabDiv("details_" + i, detailTab.name, safetymaps.creator.createInfoTabDiv(detailTab.rows), tabContent, tabs);
+        }
+    });
 
 };
 
 safetymaps.creator.renderGeneral = function(object) {
 
     var lowestFloor = null, highestFloor = null;
-    if(object.bouwlaag_min !== "") {
+    if(object.bouwlaag_min && object.bouwlaag_min !== "") {
         var n = Number(object.bouwlaag_min);
         lowestFloor = n === 0 ? 0 : (-n) + " (" + (-n) + ")";
     }
-    if(object.bouwlaag_max !== "") {
+    if(object.bouwlaag_max && object.bouwlaag_max !== "") {
         var n = Number(object.bouwlaag_max);
         highestFloor = n === 0 ? 0 : n + " (" + (n-1) + ")";
     }
@@ -69,7 +74,6 @@ safetymaps.creator.renderGeneral = function(object) {
         {l: i18n.t("creator.buildingConstruction"), t: object.gebouwconstructie},
         {l: i18n.t("creator.fireAlarmCode"), t: object.oms_nummer},
         {l: i18n.t("creator.usage"), t: object.gebruikstype},
-        {l: i18n.t("creator.riskClassification"), t: object.risicoklasse},
         {l: i18n.t("creator.level"), t: object.bouwlaag},
         {l: i18n.t("creator.lowestLevel") + " (" + i18n.t("creator.floor") + ")", t: lowestFloor},
         {l: i18n.t("creator.highestLevel") + " (" + i18n.t("creator.floor") + ")", t: highestFloor}
@@ -78,9 +82,66 @@ safetymaps.creator.renderGeneral = function(object) {
 
 safetymaps.creator.renderDetails = function(object) {
 
-    return [
-        {l: "Detail", t: "Bla 2"}
-    ];
+    var tabs = [];
+
+    var header = {l: "<b>" + i18n.t("creator.details_type") + "</b>", html: "<b>" + i18n.t("creator.details_value") + "</b>"};
+    if(object.bijzonderhedenlijst) {
+        $.each(object.bijzonderhedenlijst, function(i, b) {
+            var tab = null;
+            $.each(tabs, function(j, t) {
+                if(t.name === b.tabblad) {
+                    tab = t;
+                    return false;
+                }
+            });
+            if(tab === null) {
+                tab = { name: b.tabblad, rows: [header] };
+                tabs.push(tab);
+            }
+            // If label is the same as the lastrow, add line to last row
+
+            var lastRow = tab.rows[tab.rows.length-1];
+            if(lastRow.l === b.soort) {
+                lastRow.html += "<br>" + Mustache.escape(b.tekst);
+            } else {
+                tab.rows.push({ l: b.soort, html: Mustache.escape(b.tekst)});
+            }
+        });
+    } else {
+        tabs = [{ name: i18n.t("creator.details"),
+              rows: [header]
+        }];
+        var rows = tabs[0].rows;
+        var objectDetails = [
+            {l: i18n.t("creator.details_general"), property: "bijzonderheden"},
+            {l: i18n.t("creator.details_general"), property: "bijzonderheden2"},
+            {l: i18n.t("creator.details_preparative"), property: "prep_bijz_1"},
+            {l: i18n.t("creator.details_preparative"), property: "prep_bijz_2"},
+            {l: i18n.t("creator.details_preventative"), property: "prev_bijz_1"},
+            {l: i18n.t("creator.details_preventative"), property: "prev_bijz_2"},
+            {l: i18n.t("creator.details_repressive"), property: "repr_bijz_1"},
+            {l: i18n.t("creator.details_repressive"), property: "repr_bijz_2"}
+        ];
+
+        $.each(objectDetails, function(i, od) {
+            if(object[od.property]) {
+
+                // If label is the same as the last row, add line to last row
+
+                var lastRow = rows[rows.length-1];
+                if(lastRow.l === od.l) {
+                    lastRow.html += "<br>" + Mustache.escape(object[od.property]);
+                } else {
+                    rows.push({
+                        l: od.l,
+                        html: Mustache.escape(object[od.property])
+                    });
+                }
+            }
+        });
+    }
+
+    return tabs;
 };
 
 safetymaps.creator.renderObjectFeatureInfoTab = function(object, div) {
