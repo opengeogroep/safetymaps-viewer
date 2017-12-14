@@ -41,16 +41,11 @@ safetymaps.creator.renderInfoTabs = function(object, div) {
     safetymaps.creator.createHtmlTabDiv("general", i18n.t("creator.general"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
 
     rows = safetymaps.creator.renderContacts(object);
-    if(rows.length > 0) {
-        safetymaps.creator.createHtmlTabDiv("contacts", i18n.t("creator.contacts"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
-    }
+    safetymaps.creator.createHtmlTabDiv("contacts", i18n.t("creator.contacts"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
 
     detailTabs = safetymaps.creator.renderDetails(object);
     $.each(detailTabs, function(i, detailTab) {
-        // Skip tabs with only header as row
-        if(detailTab.rows.length > 1) {
-            safetymaps.creator.createHtmlTabDiv("details_" + i, detailTab.name, safetymaps.creator.createInfoTabDiv(detailTab.rows), tabContent, tabs);
-        }
+        safetymaps.creator.createHtmlTabDiv("details_" + i, detailTab.name, safetymaps.creator.createInfoTabDiv(detailTab.rows), tabContent, tabs);
     });
 
 };
@@ -164,25 +159,35 @@ safetymaps.creator.renderDetails = function(object) {
         });
     }
 
-    return tabs;
+    return tabs.filter(function(tab) {
+        // Remove tabs with only header as row
+        return tab.rows.length > 1;
+    });
 };
 
 safetymaps.creator.renderObjectFeatureInfoTab = function(object, div) {
 };
 
 safetymaps.creator.createHtmlTabDiv = function(id, label, content, tabContent, tabs) {
-    id = 'tab_pane_' + id;
 
-    // Make tab active when no contents yet
-    var active = tabContent.find("div").length === 0;
+    if(content !== null) {
+        id = 'tab_pane_' + id;
 
-    var bv_div = $('<div class="tab-pane ' + (active ? "active" : "") + '" id="' + id + '"></div>');
-    bv_div.append(content);
-    tabContent.append(bv_div);
-    tabs.append('<li class="' + (active ? "active" : "") + '"><a data-toggle="tab" href="#' + id + '">' + label + '</a></li>');
+        // Make tab active when no contents yet
+        var active = tabContent.find("div").length === 0;
+
+        var bv_div = $('<div class="tab-pane ' + (active ? "active" : "") + '" id="' + id + '"></div>');
+        bv_div.append(content);
+        tabContent.append(bv_div);
+        tabs.append('<li class="' + (active ? "active" : "") + '"><a data-toggle="tab" href="#' + id + '">' + label + '</a></li>');
+    }
 };
 
 safetymaps.creator.createInfoTabDiv = function(rows) {
+    if(rows.length === 0) {
+        return null;
+    }
+
     var div = $('<div class="table-responsive"></div>');
     var table = $('<table class="table table-hover"></table>');
 
