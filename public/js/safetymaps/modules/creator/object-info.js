@@ -23,7 +23,7 @@
  *
  */
 
-/* global safetymaps, OpenLayers, Mustache, i18n */
+/* global safetymaps, OpenLayers, Mustache, i18n, moment */
 
 var safetymaps = safetymaps || {};
 safetymaps.creator = safetymaps.creator || {};
@@ -48,6 +48,18 @@ safetymaps.creator.renderInfoTabs = function(object, div) {
         safetymaps.creator.createHtmlTabDiv("details_" + i, detailTab.name, safetymaps.creator.createInfoTabDiv(detailTab.rows), tabContent, tabs);
     });
 
+    rows = safetymaps.creator.renderOccupancy(object);
+    safetymaps.creator.createHtmlTabDiv("occupancy", i18n.t("creator.occupancy"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+
+    // Media
+
+    // Floors
+
+    // Symbols
+
+    // Danger symbols
+
+    // Communication coverage (?)
 };
 
 safetymaps.creator.renderGeneral = function(object) {
@@ -163,6 +175,38 @@ safetymaps.creator.renderDetails = function(object) {
         // Remove tabs with only header as row
         return tab.rows.length > 1;
     });
+};
+
+safetymaps.creator.renderOccupancy = function(object) {
+
+    var rows = [];
+    if(object.verblijf) {
+        rows.push([
+            "<b>" + i18n.t("creator.occupancy_from") + "</b>",
+            "<b>" + i18n.t("creator.occupancy_to") + "</b>",
+            "<b>" + i18n.t("creator.occupancy_number") + "</b>",
+            "<b>" + i18n.t("creator.occupancy_notSelfReliant") + "</b>",
+            "<b>" + i18n.t("creator.occupancy_group") + "</b>",
+            "<b>" + i18n.t("creator.occupancy_days") + "</b>"
+        ]);
+
+        $.each(object.verblijf, function(i, v) {
+            var days = "";
+            $.each(["maandag","dinsdag","woensdag","donderdag","vrijdag","zaterdag","zondag"], function(j, d) {
+                days += '<span class="label label-' + (v[d] ? 'success' : 'default') + '">' + moment.weekdaysMin(j+1 % 7) + '</span>';
+            });
+            rows.push([
+                v.begintijd.substring(0,2) + ':' + v.begintijd.substring(3,5),
+                v.eindtijd.substring(0,2) + ':' + v.eindtijd.substring(3,5),
+                Number(v.aantal) || 0,
+                Number(v.aantal_nzr) || 0,
+                Mustache.escape(v.groep),
+                days
+            ]);
+        });
+    }
+
+    return rows;
 };
 
 safetymaps.creator.renderObjectFeatureInfoTab = function(object, div) {
