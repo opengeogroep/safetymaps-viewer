@@ -38,7 +38,12 @@ safetymaps.creator.renderInfoTabs = function(object, div) {
     var rows;
 
     rows = safetymaps.creator.renderGeneral(object);
-    safetymaps.creator.createHtmlTabDiv("general", "General", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+    safetymaps.creator.createHtmlTabDiv("general", i18n.t("creator.general"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+
+    rows = safetymaps.creator.renderContacts(object);
+    if(rows.length > 0) {
+        safetymaps.creator.createHtmlTabDiv("contacts", i18n.t("creator.contacts"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+    }
 
     detailTabs = safetymaps.creator.renderDetails(object);
     $.each(detailTabs, function(i, detailTab) {
@@ -78,6 +83,24 @@ safetymaps.creator.renderGeneral = function(object) {
         {l: i18n.t("creator.lowestLevel") + " (" + i18n.t("creator.floor") + ")", t: lowestFloor},
         {l: i18n.t("creator.highestLevel") + " (" + i18n.t("creator.floor") + ")", t: highestFloor}
     ];
+};
+
+safetymaps.creator.renderContacts = function(object) {
+
+    var rows = [];
+    if(object.contacten) {
+        rows.push([ "<b>" + i18n.t("creator.contact_role") + "</b>", "<b>" + i18n.t("creator.contact_name") + "</b>", "<b>" + i18n.t("creator.contact_phone") + "</b>"]);
+
+        $.each(object.contacten, function(i, contact) {
+            rows.push([
+                contact.functie,
+                contact.naam,
+                contact.telefoonnummer
+            ].map(Mustache.escape));
+        });
+    }
+
+    return rows;
 };
 
 safetymaps.creator.renderDetails = function(object) {
@@ -164,8 +187,18 @@ safetymaps.creator.createInfoTabDiv = function(rows) {
     var table = $('<table class="table table-hover"></table>');
 
     $.each(rows, function(i, row) {
-        if((row.hasOwnProperty("t") && row.t !== null && typeof row.t !== "undefined") || row.html) {
-            table.append('<tr><td>' + row.l + '</td><td>' + (row.html ? row.html : Mustache.escape(row.t)) + '</td></tr>');
+        if($.isArray(row)) {
+            // Row of escaped cell values
+            var tr = "<tr>";
+            for(var j = 0; j < row.length; j++) {
+                tr += "<td>" + row[j] + "</td>";
+            }
+            table.append(tr + "</tr>");
+        } else {
+            // Row for 2 column table row: l for first label column (escaped) and t (non-escaped) or html (escaped) for second value column
+            if((row.hasOwnProperty("t") && row.t !== null && typeof row.t !== "undefined") || row.html) {
+                table.append('<tr><td>' + row.l + '</td><td>' + (row.html ? row.html : Mustache.escape(row.t)) + '</td></tr>');
+            }
         }
     });
 
