@@ -58,8 +58,8 @@ safetymaps.creator.renderInfoTabs = function(object, div) {
     rows = safetymaps.creator.renderSymbols(object);
     safetymaps.creator.createHtmlTabDiv("symbols", i18n.t("creator.symbols"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
 
-    // Danger symbols
-
+    rows = safetymaps.creator.renderDangerSymbols(object);
+    safetymaps.creator.createHtmlTabDiv("danger_symbols", i18n.t("creator.danger_symbols"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
 };
 
 safetymaps.creator.renderGeneral = function(object) {
@@ -244,6 +244,37 @@ safetymaps.creator.renderSymbols = function(object) {
                 i18n.t("creator.symbol_no_communication_coverage")
             ]);
         }
+    }
+
+    return rows;
+};
+
+
+safetymaps.creator.renderDangerSymbols = function(object) {
+
+    var rows = [];
+    if(object.danger_symbols) {
+        rows.push([
+            "<b>" + i18n.t("creator.danger_symbol_icon") + "</b>",
+            "<b>" + i18n.t("creator.danger_symbol_hazard_identifier") + "</b>",
+            "<b>" + i18n.t("creator.danger_symbol_name") + "</b>",
+            "<b>" + i18n.t("creator.danger_symbol_quantity") + "</b>",
+            "<b>" + i18n.t("creator.danger_symbol_information") + "</b>"
+        ]);
+
+        // Display one row per danger_symbol
+
+        $.each(object.danger_symbols, function(i, ds) {
+
+            var symbolName = i18n.t("creator.danger_symbol_" + ds.symbol);
+            rows.push([
+                '<img style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'danger_symbols/' + ds.symbol + '.png' + '" alt="' + symbolName + '" title="' + symbolName + '">',
+                '<div class="gevicode">' + ds.gevi_code + '</div><div class="unnummer">' + ds.un_nr + '</div>',
+                Mustache.escape(ds.naam_stof),
+                Mustache.escape(ds.hoeveelheid),
+                Mustache.escape(ds.omschrijving)
+            ]);
+        });
     }
 
     return rows;
