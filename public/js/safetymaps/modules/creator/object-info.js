@@ -23,7 +23,7 @@
  *
  */
 
-/* global safetymaps, OpenLayers, Mustache, i18n, moment */
+/* global safetymaps, OpenLayers, Mustache, i18n, moment, PDFObject */
 
 var safetymaps = safetymaps || {};
 safetymaps.creator = safetymaps.creator || {};
@@ -51,7 +51,10 @@ safetymaps.creator.renderInfoTabs = function(object, div) {
     rows = safetymaps.creator.renderOccupancy(object);
     safetymaps.creator.createHtmlTabDiv("occupancy", i18n.t("creator.occupancy"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
 
-    // Media
+    var content = safetymaps.creator.renderMedia(object);
+    safetymaps.creator.createHtmlTabDiv("media", i18n.t("creator.media"), content, tabContent, tabs);
+
+    safetymaps.creator.embedPDFs(content);
 
     // Floors
 
@@ -207,6 +210,90 @@ safetymaps.creator.renderOccupancy = function(object) {
     }
 
     return rows;
+};
+
+safetymaps.creator.renderMedia = function(object) {
+
+    var image_carousel = null;
+
+    if(object.media) {
+        var carouselId = "media_carousel";
+        image_carousel = $('<div id="' + carouselId + '" class="carousel slide" data-interval="false"></div>');
+        var image_carousel_inner = $('<div class="carousel-inner"></div>');
+        var image_carousel_nav = $('<ol class="carousel-indicators"></ol>');
+
+        $.each(object.media, function(i, m) {
+            var active = i === 0 ? "active" : "";
+            var path = safetymaps.creator.api.mediaPath + m.filename;
+
+            if(path.match(/pdf$/i)) {
+                image_carousel_inner.append(
+                    '<div class="item ' + active + '">' +
+                        '<h3 class="pdf-heading" style="margin: 0; text-align: center; height: 28px">' + m.filename + '</h3>' +
+                        '<div class="pdf-embed" id="pdf_embed_' + i + '" data-url="' + path + '"/>' +
+                    '</div>'
+                );
+            } else if(path.match(/(jpeg|gif|jpg|png)$/i)) {
+                image_carousel_inner.append('<div class="item ' + active + '"><img class="img-full" style="width: 100%" src="' + path +
+                        '"><div class="carousel-caption"><h3>' +  m.filename + '</h3></div></div>');
+            } else {
+                image_carousel_inner.append('<div class="item ' + active + '"><img src="images/missing.gif"><div class="carousel-caption"><a href="' + path +
+                        '" target="_blank"><h1><i class="fa fa-external-link fa-3"></i></h1><h2>' +
+                        m.filename + '</h2></a></div></div>'
+                );
+            }
+        });
+        image_carousel.append(image_carousel_nav);
+        image_carousel.append(image_carousel_inner);
+        if(object.media.length > 1) {
+            // Style "bottom: auto" om alleen pijlen bovenaan te hebben, niet
+            // over PDFs heen
+            image_carousel.append('<a class="left carousel-control" style="bottom: auto" href="#' + carouselId + '" data-slide="prev">' +
+                    '<span class="fa fa-arrow-left"></span></a>');
+            image_carousel.append('<a class="right carousel-control" style="bottom: auto" href="#' + carouselId + '" data-slide="next">' +
+                    '<span class="fa fa-arrow-right"></span></a>');
+        }
+    }
+
+    return image_carousel;
+};
+
+safetymaps.creator.embedPDFs = function(element) {
+    $.each($(element).find(".pdf-embed"), function(i, pdf) {
+        if(pdf.children.length === 0) {
+            console.log("embedding PDF " + $(pdf).attr("data-url"));
+            // Add cache buster to avoid unexpected server response (206) on iOS 10 safari webapp
+            PDFObject.embed($(pdf).attr("data-url") + "?t=" + new Date().getTime(), pdf, {
+                // Use custom built pdf.js with src/core/network.js function
+                // PDFNetworkStreamFullRequestReader_validateRangeRequestCapabilities
+                // always returning false to also avoid 206 error
+                PDFJS_URL: "js/libs/pdfjs-1.6.210-disablerange-minified/web/viewer.html",
+                forcePDFJS: !!dbkjs.options.forcePDFJS
+            });
+
+            // Remove buttons from PDFJS toolbar
+            // XXX hack, use PDFJS documentloaded event?
+            function removeToolbar() {
+                var iframe = $("iframe").contents();
+                if(iframe.find("#download")[0] || iframe.find("#secondaryDownload")[0] ) {
+                    console.log("found PDFJS toolbar buttons, removing");
+                    iframe.find("#download").remove();
+                    iframe.find("#openFile").remove();
+                    iframe.find("#print").remove();
+                    iframe.find("#secondaryDownload").remove();
+                    iframe.find("#secondaryOpenFile").remove();
+                    iframe.find("#secondaryPrint").remove();
+                } else {
+                    console.log("PDFJS toolbar not found, waiting")
+                    window.setTimeout(removeToolbar, 500);
+                }
+            }
+            //this check is needed. If the program is not using PDFJS then we can't remove buttons.
+            if(PDFObject.supportsPDFs || !!dbkjs.options.forcePDFJS ){
+                removeToolbar();
+            }
+        }
+    });
 };
 
 safetymaps.creator.renderSymbols = function(object) {

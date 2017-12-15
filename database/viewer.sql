@@ -159,7 +159,9 @@ create or replace view viewer.viewer_object_details as
         -- Foto
         (select array_to_json(array_agg(row_to_json(r.*))) as array_to_json
         from (select "Documentnaam" as filename, "Bestandstype" as type
-            from wfs."Foto" where "DBK_ID" = vo.id) r
+            from wfs."Foto" where "DBK_ID" = vo.id
+            union
+            select "Picturename" as filename, 'picture' as type from wfs."Brandweervoorziening" where "Picturename" <> '' and "DBK_ID" = vo.id) r
         ) as media,        
         
         -- 0..n properties met geometrie
