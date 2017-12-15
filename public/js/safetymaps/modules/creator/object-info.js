@@ -55,11 +55,11 @@ safetymaps.creator.renderInfoTabs = function(object, div) {
 
     // Floors
 
-    // Symbols
+    rows = safetymaps.creator.renderSymbols(object);
+    safetymaps.creator.createHtmlTabDiv("symbols", i18n.t("creator.symbols"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
 
     // Danger symbols
 
-    // Communication coverage (?)
 };
 
 safetymaps.creator.renderGeneral = function(object) {
@@ -204,6 +204,46 @@ safetymaps.creator.renderOccupancy = function(object) {
                 days
             ]);
         });
+    }
+
+    return rows;
+};
+
+safetymaps.creator.renderSymbols = function(object) {
+
+    var rows = [];
+    if(object.symbols || object.communication_coverage) {
+        rows.push([
+            "<b>" + i18n.t("creator.symbol_icon") + "</b>",
+            "<b>" + i18n.t("creator.symbol_name") + "</b>"
+        ]);
+
+        // Display legend of symbols, only one symbol even if used multiple times
+
+        var symbolsDisplayed = {};
+
+        $.each(object.symbols, function(i, s) {
+            if(symbolsDisplayed[s.code]) {
+                return true;
+            }
+            symbolsDisplayed[s.code] = true;
+
+            rows.push([
+                '<img style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'symbols/' + s.code + '.png' + '" alt="' + s.code + '" title="' + s.code + '">',
+                i18n.t("creator.symbol_" + s.code) // TODO get from safetymaps.creator.api.styles info
+            ]);
+        });
+
+        if(object.communication_coverage) {
+            rows.push([
+                '<img style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'coverage.png">',
+                i18n.t("creator.symbol_communication_coverage")
+            ]);
+            rows.push([
+                '<img style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'no_coverage.png">',
+                i18n.t("creator.symbol_no_communication_coverage")
+            ]);
+        }
     }
 
     return rows;
