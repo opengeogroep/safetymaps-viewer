@@ -1,4 +1,5 @@
 {
+    "name": "Name",
     "settings": {
         "layout": "Layout settings",
         "scaleStyle": "Scale icons based on zoom",
@@ -56,8 +57,9 @@
         "usage": "Usage",
         "level": "Level",
         "lowestLevel": "Lowest level",
-        "floor": "floor",
         "highestLevel": "Highest level",
+        "floor": "floor",
+        "floors": "Floors",
         "contact_role": "Role",
         "contact_name": "Name",
         "contact_phone": "Phone",

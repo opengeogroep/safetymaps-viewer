@@ -56,7 +56,8 @@ safetymaps.creator.renderInfoTabs = function(object, div) {
 
     safetymaps.creator.embedPDFs(content);
 
-    // Floors
+    rows = safetymaps.creator.renderFloors(object);
+    safetymaps.creator.createHtmlTabDiv("floors", i18n.t("creator.floors"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
 
     rows = safetymaps.creator.renderSymbols(object);
     safetymaps.creator.createHtmlTabDiv("symbols", i18n.t("creator.symbols"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
@@ -294,6 +295,34 @@ safetymaps.creator.embedPDFs = function(element) {
             }
         }
     });
+};
+
+safetymaps.creator.renderFloors = function(object) {
+
+    var rows = [];
+    if(object.verdiepingen) {
+        rows.push([
+            "<b>" + i18n.t("creator.floor").charAt(0).toUpperCase() + i18n.t("creator.floor").slice(1) + "</b>",
+            "<b>" + i18n.t("name") + "</b>"
+        ]);
+
+        $.each(object.verdiepingen, function(i, v) {
+            var current = v.id === object.id;
+            var b = (current ? "<b>" : "");
+            var b2 = (current ? "</b>" : "");
+            var name = v.formele_naam;
+            if(v.informele_naam && v.informele_naam !== v.formele_naam) {
+                name += " (" + v.informele_naam + ")";
+            }
+            rows.push([
+                b + v.bouwlaag + b2,
+                b + name + b2
+            ]);
+        });
+
+    }
+
+    return rows;
 };
 
 safetymaps.creator.renderSymbols = function(object) {

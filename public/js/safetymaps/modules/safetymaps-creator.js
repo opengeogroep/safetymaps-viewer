@@ -23,6 +23,7 @@
 dbkjs.modules.safetymaps_creator = {
     id: "dbk.module.safetymaps_creator",
     viewerApiObjects: null,
+    clusteringLayer: null,
     selectedObject: null,
     selectedClusterFeature: null,
     infoWindow: null,
@@ -208,7 +209,7 @@ dbkjs.modules.safetymaps_creator = {
                 resultSelected: function(result) {
                     console.log("Search result selected", result);
 
-                    me.clusterObjectSelected(result.clusterFeature);
+                    me.selectObjectById(result.id, {x: result.clusterFeature.geometry.x, y: result.clusterFeature.geometry.y});
                 }
             });
         }
@@ -255,19 +256,24 @@ dbkjs.modules.safetymaps_creator = {
     clusterObjectSelected: function(feature) {
         console.log("Select feature", feature);
 
+        this.selectedClusterFeature = feature;
+        this.selectObjectById(feature.attributes.id, {x: feature.geometry.x, y: feature.geometry.y });
+    },
+
+    selectObjectById: function(id, xyToZoom) {
         var me = this;
 
         // Unselect current, if any
         me.unselectObject();
 
-        this.selectedClusterFeature = feature;
-
-        console.log("zooming to feature", feature.geometry);
-        dbkjs.map.setCenter(new OpenLayers.LonLat(feature.geometry.x, feature.geometry.y), dbkjs.options.zoom);
+        if(xyToZoom) {
+            console.log("zooming to selected object at ", xyToZoom);
+            dbkjs.map.setCenter(new OpenLayers.LonLat(xyToZoom.x, xyToZoom.y), dbkjs.options.zoom);
+        }
 
         // Get object details
         $("#creator_object_info").text(i18n.t("dialogs.busyloading") + "...");
-        safetymaps.creator.api.getObjectDetails(feature.attributes.id)
+        safetymaps.creator.api.getObjectDetails(id)
         .fail(function(msg) {
             $("#creator_object_info").text("Error: " + msg);
         })
@@ -280,12 +286,13 @@ dbkjs.modules.safetymaps_creator = {
         if(this.selectedObject) {
             this.objectLayers.removeAllFeatures();
 
-            if(this.selectedClusterFeature.layer) {
+            if(this.selectedClusterFeature && this.selectedClusterFeature.layer) {
                 dbkjs.selectControl.unselect(this.selectedClusterFeature);
             }
         }
         this.selectedObject = null;
         this.selectedClusterFeature = null;
+        this.clusteringLayer.setSelectedIds([]);
     },
 
     selectedObjectDetailsReceived: function(object) {
@@ -293,6 +300,13 @@ dbkjs.modules.safetymaps_creator = {
             this.objectLayers.addFeaturesForObject(object);
             this.updateInfoWindow(object);
             this.selectedObject = object;
+
+            var ids = [object.id];
+            $.each(object.verdiepingen || [], function(i, v) {
+                ids.push(v.id);
+            });
+            this.clusteringLayer.setSelectedIds(ids);
+
         } catch(error) {
             console.log("Error creating layers for object", object);
             if(error.stack) {
@@ -302,14 +316,28 @@ dbkjs.modules.safetymaps_creator = {
     },
 
     updateInfoWindow: function(object) {
+        var me = this;
+
         var div = $('<div class="tabbable"></div>');
 
         safetymaps.creator.renderInfoTabs(object, div);
 
         $("#creator_object_info").html(div);
 
+        $("#tab_pane_floors tr").click(function(e) {
+            var floor = e.currentTarget.firstChild.innerText;
+            console.log("click floor " + floor, e);
+
+            $.each(object.verdiepingen, function(i, v) {
+                if(v.id !== object.id && v.bouwlaag === floor) {
+                    me.selectObjectById(v.id);
+                }
+            });
+        });
+
         this.infoWindow.show();
         this.infoWindowTabsResize();
+
     }
 };
 

@@ -77,9 +77,14 @@ safetymaps.creator.api = {
                 apiObject: apiObject,
                 minClusteringResolution: 0
             };
-            var symbol = apiObject.heeft_verdiepingen ? "objectwithfloors.png" : "object.png";
-            var width = 24;
-            var height = 38;
+            var symbol = "object.png";
+            var width = 23;
+            var height = 40;
+            if(apiObject.heeft_verdiepingen) {
+                symbol = "objectwithfloors.png";
+                width = 21;
+                height = 38;
+            }
             if(apiObject.symbol) {
                 switch(apiObject.symbol.toLowerCase()) {
                     case "waterongevallen":

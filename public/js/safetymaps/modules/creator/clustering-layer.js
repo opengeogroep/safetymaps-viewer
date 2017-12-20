@@ -43,13 +43,10 @@ safetymaps.ClusteringLayer = function (options) {
             width: 51,
             height: 56
         },
-        objectSymbol: {
-            icon: safetymaps.creator.api.imagePath + 'object.png',
-            width: 23,
-            height: 40
-        },
         minLabelScale: 4000
     }, options);
+
+    this.selectedIds = [];
 };
 
 safetymaps.ClusteringLayer.prototype.createLayer = function () {
@@ -75,28 +72,29 @@ safetymaps.ClusteringLayer.prototype.createLayer = function () {
                 fontWeight: "bold",
                 labelYOffset: "${myLabelYoffset}",
                 labelOutlineColor: "white",
-                labelOutlineWidth: 3
+                labelOutlineWidth: 3,
+                graphicOpacity: "${opacity}"
             }, {
                 context: {
                     myIcon: function (feature) {
                         if (feature.cluster) {
                             return me.options.clusteringSymbol.icon;
                         } else {
-                            return me.options.objectSymbol.icon;
+                            return feature.attributes.symbol;
                         }
                     },
                     width: function (feature) {
                         if (feature.cluster) {
                             return me.options.clusteringSymbol.width;
                         } else {
-                            return me.options.objectSymbol.width;
+                            return feature.attributes.width;
                         }
                     },
                     height: function (feature) {
                         if (feature.cluster) {
                             return me.options.clusteringSymbol.height;
                         } else {
-                            return me.options.objectSymbol.height;
+                            return feature.attributes.height;
                         }
                     },
                     label: function (feature) {
@@ -114,7 +112,18 @@ safetymaps.ClusteringLayer.prototype.createLayer = function () {
                         } else {
                             return -20;
                         }
+                    },
+                    opacity: function(feature) {
+                        if(feature.cluster) {
+                            return 1;
+                        }
+                        if(me.selectedIds.indexOf(feature.attributes.id) !== -1) {
+                            console.log("selected cluster feature", feature.attributes);
+                            return 0.5;
+                        }
+                        return 1;
                     }
+
                 }
             }),
             'temporary': new OpenLayers.Style({pointRadius: 20})
@@ -124,16 +133,22 @@ safetymaps.ClusteringLayer.prototype.createLayer = function () {
     return me.layer;
 };
 
+safetymaps.ClusteringLayer.prototype.setSelectedIds = function(ids) {
+    console.log("Selected object ids: ", ids);
+    this.selectedIds = ids;
+    this.layer.redraw();
+};
+
 safetymaps.ClusteringLayer.prototype.addFeaturesToCluster = function (features) {
     this.layer.addFeatures(features);
 };
 
 safetymaps.ClusteringLayer.prototype.selected = function (e) {
-        if(e.feature.cluster){
-            console.log("object_cluster_selected", e.feature);
-            $(this).triggerHandler("object_cluster_selected", e.feature);
-        }else{
-            console.log("object_selected", e.feature);
-            $(this).triggerHandler("object_selected", e.feature);
-        }
+    if(e.feature.cluster) {
+        console.log("object_cluster_selected", e.feature);
+        $(this).triggerHandler("object_cluster_selected", e.feature);
+    } else {
+        console.log("object_selected", e.feature);
+        $(this).triggerHandler("object_selected", e.feature);
+    }
 };
