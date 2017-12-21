@@ -125,8 +125,7 @@ safetymaps.ClusteringLayer.prototype.createLayer = function () {
                     }
 
                 }
-            }),
-            'temporary': new OpenLayers.Style({pointRadius: 20})
+            })
         })
     });
     me.layer.events.register("featureselected", me, me.selected);

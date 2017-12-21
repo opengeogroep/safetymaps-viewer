@@ -63,12 +63,20 @@ dbkjs.modules.safetymaps_creator = {
             dbkjs.selectControl.multiselectlayers = [];
         }
         dbkjs.selectControl.multiselectlayers.push(layer);
-        dbkjs.selectControl.activate();
 
         // Setup object details layers
 
         me.objectLayers = new safetymaps.creator.CreatorObjectLayers();
         dbkjs.map.addLayers(me.objectLayers.createLayers());
+
+        dbkjs.hoverControl.deactivate();
+        $.each(me.objectLayers.selectLayers, function(i, l) {
+            dbkjs.selectControl.layers.push(l);
+            dbkjs.hoverControl.layers.push(l);
+        });
+
+        dbkjs.hoverControl.activate();
+        dbkjs.selectControl.activate();
 
         var pViewerObjects = safetymaps.creator.api.getViewerObjectMapOverview();
         var pStyles = safetymaps.creator.api.getStyles();

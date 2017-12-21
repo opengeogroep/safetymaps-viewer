@@ -31,7 +31,9 @@ safetymaps.creator = safetymaps.creator || {};
 safetymaps.creator.CreatorObjectLayers = function(options) {
     this.options = $.extend({
         compartmentLabelMinSegmentLength: 7.5,
-        compartmentLabelMinScale: 300
+        compartmentLabelMinScale: 300,
+        graphicSizeHover: 26,
+        graphicSizeSelect: 20,
     }, options);
 };
 
@@ -50,6 +52,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
     var me = this;
 
     this.layers = [];
+    this.selectLayers = [];
 
     this.layerBuildings = new OpenLayers.Layer.Vector("Creator buildings", {
         rendererOptions: {
@@ -89,10 +92,13 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
                         return feature.attributes.style.opacity;
                     }
                 }
-            })
+            }),
+            temporary: new OpenLayers.Style(),
+            select: new OpenLayers.Style()
         })
     });
     this.layers.push(this.layerCustomPolygon);
+    this.selectLayers.push(this.layerCustomPolygon);
 
     this.layerFireCompartmentation = new OpenLayers.Layer.Vector("Creator fire compartmentation", {
         rendererOptions: {
@@ -308,17 +314,20 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
                         return safetymaps.creator.api.imagePath + (feature.attributes.coverage ? "" : "no_") + "coverage.png";
                     }
                 }
-            })
+            }),
+            temporary: new OpenLayers.Style({pointRadius: me.options.graphicSizeHover}),
+            select: new OpenLayers.Style({pointRadius: me.options.graphicSizeSelect})
         })
     });
     this.layers.push(this.layerCommunicationCoverage);
+    this.selectLayers.push(this.layerCommunicationCoverage);
 
     this.layerSymbols = new OpenLayers.Layer.Vector("Creator symbols", {
         rendererOptions: {
             zIndexing: true
         },
         styleMap: new OpenLayers.StyleMap({
-            'default': new OpenLayers.Style({
+            default: new OpenLayers.Style({
                 externalGraphic: "${symbol}",
                 pointRadius: 14,
                 rotation: "-${rotation}"
@@ -332,23 +341,29 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
                         return safetymaps.creator.api.imagePath + 'symbols/' + symbol + '.png';
                     }
                 }
-            })
+            }),
+            temporary: new OpenLayers.Style({pointRadius: me.options.graphicSizeHover}),
+            select: new OpenLayers.Style({pointRadius: me.options.graphicSizeSelect})
         })
     });
     this.layers.push(this.layerSymbols);
+    this.selectLayers.push(this.layerSymbols);
 
     this.layerDangerSymbols = new OpenLayers.Layer.Vector("Creator danger symbols", {
         rendererOptions: {
             zIndexing: true
         },
         styleMap: new OpenLayers.StyleMap({
-            'default': new OpenLayers.Style({
+            default: new OpenLayers.Style({
                 externalGraphic: safetymaps.creator.api.imagePath + "/danger_symbols/${symbol}.png",
                 pointRadius: 14
-            })
+            }),
+            temporary: new OpenLayers.Style({pointRadius: me.options.graphicSizeHover}),
+            select: new OpenLayers.Style({pointRadius: me.options.graphicSizeSelect})
         })
     });
     this.layers.push(this.layerDangerSymbols);
+    this.selectLayers.push(this.layerDangerSymbols);
 
     this.layerLabels = new OpenLayers.Layer.Vector("Creator labels", {
         rendererOptions: {
