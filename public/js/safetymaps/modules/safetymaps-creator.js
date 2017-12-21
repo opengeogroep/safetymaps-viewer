@@ -73,6 +73,7 @@ dbkjs.modules.safetymaps_creator = {
         $.each(me.objectLayers.selectLayers, function(i, l) {
             dbkjs.selectControl.layers.push(l);
             dbkjs.hoverControl.layers.push(l);
+            l.events.register("featureselected", me, me.objectLayerFeatureSelected);
         });
 
         dbkjs.hoverControl.activate();
@@ -301,6 +302,7 @@ dbkjs.modules.safetymaps_creator = {
         this.selectedObject = null;
         this.selectedClusterFeature = null;
         this.clusteringLayer.setSelectedIds([]);
+        $("#vectorclickpanel").hide();
     },
 
     selectedObjectDetailsReceived: function(object) {
@@ -346,6 +348,84 @@ dbkjs.modules.safetymaps_creator = {
         this.infoWindow.show();
         this.infoWindowTabsResize();
 
+    },
+
+    objectLayerFeatureSelected: function(e) {
+        var me = this;
+        var layer = e.feature.layer;
+        var f = e.feature.attributes;
+        if(layer === me.objectLayers.layerCommunicationCoverage) {
+            console.log("communication feature selected", e);
+
+            var table = $('<table class="table table-hover"></table>');
+
+            table.append('<tr>' +
+                    '<th style="width: 30%">' + i18n.t("creator.symbol_" + (f.coverage ? "" : "no_") + "communication_coverage") + '</th>' +
+                    '<th>' + i18n.t("dialogs.information") + '</th>' +
+                    '<th>' + i18n.t("creator.communication_alternative") + '</th>' +
+                    '</tr>'
+            );
+            var img = safetymaps.creator.api.imagePath + (f.coverage ? "coverage" : "no_coverage") + ".png";
+            table.append(
+                    '<tr><td><img class="thumb" src="' + img + '"></td>' +
+                    '<td>' + Mustache.escape(f.info) + '</td>' +
+                    '<td>' + Mustache.escape(f.alternative) + '</td>' +
+                    '</tr>'
+            );
+           me.showFeatureInfo(i18n.t("creator.symbols"), table);
+        } else if(layer === me.objectLayers.layerSymbols) {
+            console.log("symbol selected", e);
+
+            var table = $('<table class="table table-hover"></table>');
+            table.append('<tr><th style="width: 30%">' + i18n.t("creator.symbol_" + f.code) + '</th><th>' + i18n.t("dialogs.information") + '</th></tr>');
+            var img = safetymaps.creator.api.imagePath + 'symbols/' + f.code + '.png';
+            table.append(
+                    '<tr><td><img class="thumb" src="' + img + '" alt="' + f.code + '" title="' + f.code + '"></td>' +
+                    '<td>' + Mustache.escape(f.description) + '</td></tr>'
+            );
+            me.showFeatureInfo(i18n.t("creator.symbols"), table);
+        } else if(layer === me.objectLayers.layerDangerSymbols) {
+            console.log("danger symbol selected", e);
+
+            var table = $('<table class="table table-hover"></table>');
+            table.append('<tr>' +
+                    '<th>' + i18n.t("creator.danger_symbol_icon") + '</th>' +
+                    '<th>' + i18n.t("creator.danger_symbol_hazard_identifier") + '</th>' +
+                    '<th>' + i18n.t("creator.danger_symbol_name") + '</th>' +
+                    '<th>' + i18n.t("creator.danger_symbol_quantity") + '</th>' +
+                    '<th>' + i18n.t("creator.danger_symbol_information") + '</th>' +
+                    '</tr>'
+            );
+
+            table.append(Mustache.render('<tr>' +
+                '<td><img style="width: 20%" src="{{img}}" alt="{{symbolName}}" title="{{symbolName}}"></td>' +
+                '<td><div class="gevicode">{{f.geviCode}}</div><div class="unnummer">{{f.unNr}}</div></td>' +
+                '<td>{{f.substance_name}}</td>' +
+                '<td>{{f.amount}}</td>' +
+                '<td>{{f.description}}</td>' +
+                '</tr>',
+                {
+                    img: safetymaps.creator.api.imagePath + 'danger_symbols/' + f.symbol + '.png',
+                    symbolName: i18n.t("creator.danger_symbol_" + f.symbol),
+                    f: f
+            }));
+            me.showFeatureInfo(i18n.t("creator.danger_symbols"), table);
+
+        } else {
+            console.log(layer.name + " feature selected", e);
+        }
+    },
+
+    showFeatureInfo: function(title, content) {
+        $('#vectorclickpanel_h').html('<span class="h4"><i class="fa fa-info-circle">&nbsp;' + title + '</span>');
+        var html = $('<div class="table-responsive"></div>');
+        html.append(content);
+        $('#vectorclickpanel_b').html('').append(html);
+        $('#vectorclickpanel').show();
+    },
+
+    objectLayerFeatureUnselected: function(e) {
+        $("#vectorclickpanel").hide();
     }
 };
 
