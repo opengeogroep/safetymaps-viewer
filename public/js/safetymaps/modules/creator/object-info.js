@@ -40,13 +40,13 @@ safetymaps.creator.renderInfoTabs = function(object, div) {
     rows = safetymaps.creator.renderGeneral(object);
     safetymaps.creator.createHtmlTabDiv("general", i18n.t("creator.general"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
 
-    rows = safetymaps.creator.renderContacts(object);
-    safetymaps.creator.createHtmlTabDiv("contacts", i18n.t("creator.contacts"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
-
     detailTabs = safetymaps.creator.renderDetails(object);
     $.each(detailTabs, function(i, detailTab) {
         safetymaps.creator.createHtmlTabDiv("details_" + i, detailTab.name, safetymaps.creator.createInfoTabDiv(detailTab.rows), tabContent, tabs);
     });
+
+    rows = safetymaps.creator.renderContacts(object);
+    safetymaps.creator.createHtmlTabDiv("contacts", i18n.t("creator.contacts"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
 
     rows = safetymaps.creator.renderOccupancy(object);
     safetymaps.creator.createHtmlTabDiv("occupancy", i18n.t("creator.occupancy"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
@@ -56,14 +56,14 @@ safetymaps.creator.renderInfoTabs = function(object, div) {
 
     safetymaps.creator.embedPDFs(content);
 
+    rows = safetymaps.creator.renderDangerSymbols(object);
+    safetymaps.creator.createHtmlTabDiv("danger_symbols", i18n.t("creator.danger_symbols"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+
     rows = safetymaps.creator.renderFloors(object);
     safetymaps.creator.createHtmlTabDiv("floors", i18n.t("creator.floors"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
 
     rows = safetymaps.creator.renderSymbols(object);
     safetymaps.creator.createHtmlTabDiv("symbols", i18n.t("creator.symbols"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
-
-    rows = safetymaps.creator.renderDangerSymbols(object);
-    safetymaps.creator.createHtmlTabDiv("danger_symbols", i18n.t("creator.danger_symbols"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
 };
 
 safetymaps.creator.renderGeneral = function(object) {
