@@ -119,6 +119,41 @@ safetymaps.creator.renderDetails = function(object) {
     var tabs = [];
 
     var header = {l: "<b>" + i18n.t("creator.details_type") + "</b>", html: "<b>" + i18n.t("creator.details_value") + "</b>"};
+
+    var rows = [header];
+    var objectDetails = [
+        {l: i18n.t("creator.details_general"), property: "bijzonderheden"},
+        {l: i18n.t("creator.details_general"), property: "bijzonderheden2"},
+        {l: i18n.t("creator.details_preparative"), property: "prep_bijz_1"},
+        {l: i18n.t("creator.details_preparative"), property: "prep_bijz_2"},
+        {l: i18n.t("creator.details_preventative"), property: "prev_bijz_1"},
+        {l: i18n.t("creator.details_preventative"), property: "prev_bijz_2"},
+        {l: i18n.t("creator.details_repressive"), property: "repr_bijz_1"},
+        {l: i18n.t("creator.details_repressive"), property: "repr_bijz_2"}
+    ];
+    $.each(objectDetails, function(i, od) {
+        if(object[od.property]) {
+
+            // If label is the same as the last row, add line to last row
+
+            var lastRow = rows[rows.length-1];
+            if(lastRow.l === od.l) {
+                lastRow.html += "<br>" + Mustache.escape(object[od.property]);
+            } else {
+                rows.push({
+                    l: od.l,
+                    html: Mustache.escape(object[od.property])
+                });
+            }
+        }
+    });
+    // Only show tab if one of the fields has contents
+    if(rows.length > 1) {
+        tabs.push({ name: i18n.t("creator.details"),
+              rows: rows
+        });
+    }
+
     if(object.bijzonderhedenlijst) {
         $.each(object.bijzonderhedenlijst, function(i, b) {
             var tab = null;
@@ -139,38 +174,6 @@ safetymaps.creator.renderDetails = function(object) {
                 lastRow.html += "<br>" + Mustache.escape(b.tekst);
             } else {
                 tab.rows.push({ l: b.soort, html: Mustache.escape(b.tekst)});
-            }
-        });
-    } else {
-        tabs = [{ name: i18n.t("creator.details"),
-              rows: [header]
-        }];
-        var rows = tabs[0].rows;
-        var objectDetails = [
-            {l: i18n.t("creator.details_general"), property: "bijzonderheden"},
-            {l: i18n.t("creator.details_general"), property: "bijzonderheden2"},
-            {l: i18n.t("creator.details_preparative"), property: "prep_bijz_1"},
-            {l: i18n.t("creator.details_preparative"), property: "prep_bijz_2"},
-            {l: i18n.t("creator.details_preventative"), property: "prev_bijz_1"},
-            {l: i18n.t("creator.details_preventative"), property: "prev_bijz_2"},
-            {l: i18n.t("creator.details_repressive"), property: "repr_bijz_1"},
-            {l: i18n.t("creator.details_repressive"), property: "repr_bijz_2"}
-        ];
-
-        $.each(objectDetails, function(i, od) {
-            if(object[od.property]) {
-
-                // If label is the same as the last row, add line to last row
-
-                var lastRow = rows[rows.length-1];
-                if(lastRow.l === od.l) {
-                    lastRow.html += "<br>" + Mustache.escape(object[od.property]);
-                } else {
-                    rows.push({
-                        l: od.l,
-                        html: Mustache.escape(object[od.property])
-                    });
-                }
             }
         });
     }
