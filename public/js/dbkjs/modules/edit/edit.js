@@ -45,7 +45,7 @@ dbkjs.editStyles = {
             {
                 context: {
                     labelYOffset: function(feature) {
-                        return dbkjs.scaleStyleValue(12, feature.attributes.radius) * -1.4;
+                        return /*dbkjs.scaleStyleValue(12, feature.attributes.radius)*/ 12 * -1.4;
                     },
                     label: function(feature) {
                         return feature.attributes.label || "";
