@@ -433,7 +433,7 @@ dbkjs.modules.edit = {
         if(!activeSymbol) {
             return;
         }
-        if(this.mode === activeSymbol.type) {
+        if(this.mode === activeSymbol.type && (!activeSymbol.hasOwnProperty("triangleFactor"))) {
             return;
         }
 
@@ -458,7 +458,7 @@ dbkjs.modules.edit = {
                 this.enableTriangleMode();
             } else {
                 this.enableAreaMode();
-            }
+        } 
         } else {
             this.mode = "";
         }
