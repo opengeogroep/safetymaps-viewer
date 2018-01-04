@@ -29,6 +29,7 @@ create or replace view viewer.viewer_object as
         nullif(d2."Hoofdobject_ID",0) as hoofdobject_id,
         d2."Bouwlaag" as bouwlaag,
         d."Gebruikstype" as gebruikstype,
+	d2."Gebruikstype_Specifiek" as gebruikstype_specifiek,
         
         -- Oude bijzonderheden...
         d."Bijzonderheden" as bijzonderheden,
@@ -158,7 +159,7 @@ create or replace view viewer.viewer_object_details as
         
         -- Foto
         (select array_to_json(array_agg(row_to_json(r.*))) as array_to_json
-        from (select "Documentnaam" as filename, "Bestandstype" as type
+        from (select case when "Bestandstype" = 'Weblink' then '' else "DBK_ID" || '-' end || "Documentnaam" as filename, "Bestandstype" as type
             from wfs."Foto" where "DBK_ID" = vo.id
             union
             select "Picturename" as filename, 'picture' as type from wfs."Brandweervoorziening" where "Picturename" <> '' and "DBK_ID" = vo.id) r
