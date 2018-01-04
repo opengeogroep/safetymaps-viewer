@@ -90,6 +90,7 @@ safetymaps.creator.renderGeneral = function(object) {
         {l: i18n.t("creator.buildingConstruction"), t: object.gebouwconstructie},
         {l: i18n.t("creator.fireAlarmCode"), t: object.oms_nummer},
         {l: i18n.t("creator.usage"), t: object.gebruikstype},
+        {l: i18n.t("creator.usage_specific"), t: object.gebruikstype_specifiek},
         {l: i18n.t("creator.level"), t: object.bouwlaag},
         {l: i18n.t("creator.lowestLevel") + " (" + i18n.t("creator.floor") + ")", t: lowestFloor},
         {l: i18n.t("creator.highestLevel") + " (" + i18n.t("creator.floor") + ")", t: highestFloor}
