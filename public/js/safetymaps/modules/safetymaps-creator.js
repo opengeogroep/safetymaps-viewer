@@ -40,7 +40,7 @@ dbkjs.modules.safetymaps_creator = {
 
         safetymaps.creator.api.basePath = "";
         safetymaps.creator.api.imagePath = "js/safetymaps/modules/creator/assets/";
-        safetymaps.creator.api.mediaPath = "media/";
+        safetymaps.creator.api.mediaPath = "../media/";
 
         // Setup clustering layer
 
