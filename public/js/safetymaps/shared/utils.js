@@ -72,3 +72,14 @@ safetymaps.utils.geometry.getAngle = function(p1, p2) {
 
     return angle;
 };
+
+safetymaps.utils.getAbsoluteUrl = (function() {
+	var a;
+
+	return function(url) {
+		if(!a) a = document.createElement('a');
+		a.href = url;
+
+		return a.href;
+	};
+})();
