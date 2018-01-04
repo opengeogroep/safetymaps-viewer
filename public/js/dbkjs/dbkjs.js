@@ -46,7 +46,7 @@ dbkjs.init = function () {
 
 dbkjs.setPaths = function() {
 
-    dbkjs.basePath = window.location.protocol + '//' + window.location.hostname;
+    dbkjs.basePath = dbkjs.basePath = safetymaps.utils.getAbsoluteUrl("");
     var pathname = window.location.pathname;
     // ensure basePath always ends with '/', remove 'index.html' if exists
     if(pathname.charAt(pathname.length - 1) !== '/') {
