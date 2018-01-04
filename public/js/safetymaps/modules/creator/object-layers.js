@@ -33,7 +33,7 @@ safetymaps.creator.CreatorObjectLayers = function(options) {
         compartmentLabelMinSegmentLength: 7.5,
         compartmentLabelMinScale: 300,
         graphicSizeHover: 26,
-        graphicSizeSelect: 20,
+        graphicSizeSelect: 20
     }, options);
 };
 
@@ -143,7 +143,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
                 labelOutlineWidth: 2,
                 labelAlign: "cb",
                 labelXOffset: "${labelXOffset}",
-                labelYOffset: "${labelYOffset}",
+                labelYOffset: "${labelYOffset}"
             }, {
                 context: {
                     size: function(feature) {
@@ -186,7 +186,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
                     strokeWidth: function(feature) {
                         var type = feature.attributes.style.type_viewer;
                         if(type === "doubletrack" || type === "tube") {
-                            return feature.attributes.style.thickness + 2;
+                            return feature.attributes.style.thickness * 1.5 + 2;
                         }
                     },
                     dashstyle: function(feature) {
@@ -227,7 +227,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
                         return feature.attributes.style.color2;
                     },
                     strokeWidth: function(feature) {
-                        return feature.attributes.style.thickness;
+                        return feature.attributes.style.thickness * 1.5;
                     },
                     dashstyle: function(feature) {
                         if(feature.attributes.style.type_viewer === "tube") {
@@ -256,7 +256,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
                         return feature.attributes.style.color1;
                     },
                     strokeWidth: function(feature) {
-                        return feature.attributes.style.thickness + 4;
+                        return feature.attributes.style.thickness * 1.5 + 6;
                     },
                     dashstyle: function(feature) {
                         return me.scalePattern("1 20", 1);
@@ -282,10 +282,10 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
             }, {
                 context: {
                     color: function(feature) {
-                        return feature.attributes.primary ? "#ff0000" : "#00ff00";
+                        return feature.attributes.primary ? "#ff0000" : "#0000ff";
                     },
                     strokeWidth: function(feature) {
-                        return 1;
+                        return 1.5;
                     },
                     rotation: function(feature) {
                         if(feature.attributes.lineAngle) {
@@ -379,7 +379,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
             }, {
                 context: {
                     size: function(feature) {
-                        return feature.attributes.size * 2;
+                        return feature.attributes.size * 0.8;
                     }
                 }
             })
