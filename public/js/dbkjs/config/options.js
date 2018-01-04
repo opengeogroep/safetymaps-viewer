@@ -24,8 +24,9 @@ dbkjs.options = {
 
     featureLabelResolution: 6.72,
 
-    dbkLayersMinResolution: 0
+    dbkLayersMinResolution: 0,
 
+    forcePDFJS: true
 };
 
 dbkjs.options.searchTabs = true;
