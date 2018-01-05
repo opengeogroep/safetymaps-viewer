@@ -46,14 +46,11 @@ dbkjs.init = function () {
 
 dbkjs.setPaths = function() {
 
-    dbkjs.basePath = dbkjs.basePath = safetymaps.utils.getAbsoluteUrl("");
-    var pathname = window.location.pathname;
+    dbkjs.basePath = safetymaps.utils.getAbsoluteUrl("");
     // ensure basePath always ends with '/', remove 'index.html' if exists
-    if(pathname.charAt(pathname.length - 1) !== '/') {
-        pathname = pathname.substring(0, pathname.lastIndexOf('/')+1);
+    if(dbkjs.basePath.charAt(dbkjs.basePath.length - 1) !== '/') {
+        dbkjs.basePath = dbkjs.basePath.substring(0, dbkjs.basePath.lastIndexOf('/')+1);
     }
-    // ensure single '/' between hostname and path
-    dbkjs.basePath = dbkjs.basePath + (pathname.charAt(0) === "/" ? pathname : "/" + pathname);
 
     // Wordt gebruikt in:
     // - dbkjs.challengeAuth()
