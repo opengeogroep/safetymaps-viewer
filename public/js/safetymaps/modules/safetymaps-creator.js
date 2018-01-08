@@ -74,6 +74,7 @@ dbkjs.modules.safetymaps_creator = {
             dbkjs.selectControl.layers.push(l);
             dbkjs.hoverControl.layers.push(l);
             l.events.register("featureselected", me, me.objectLayerFeatureSelected);
+            l.events.register("featureunselected", me, me.objectLayerFeatureUnselected);
         });
 
         dbkjs.hoverControl.activate();
