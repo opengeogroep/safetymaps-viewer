@@ -75,6 +75,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
     this.layers.push(this.layerBuildings);
 
     this.layerCustomPolygon = new OpenLayers.Layer.Vector("Creator custom polygons", {
+        hover:false,
         rendererOptions: {
             zIndexing: true
         },
@@ -93,14 +94,15 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
                     }
                 }
             }),
-            temporary: new OpenLayers.Style(),
-            select: new OpenLayers.Style()
+            temporary: new OpenLayers.Style({}),
+            select: new OpenLayers.Style({})
         })
     });
     this.layers.push(this.layerCustomPolygon);
     this.selectLayers.push(this.layerCustomPolygon);
 
     this.layerFireCompartmentation = new OpenLayers.Layer.Vector("Creator fire compartmentation", {
+        hover:false,
         rendererOptions: {
             zIndexing: true
         },
@@ -124,10 +126,14 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
                         return me.scalePattern(feature.attributes.style.pattern, 3);
                     }
                 }
-            })
+            }),
+
+            select: new OpenLayers.Style({strokeWidth: 7, strokeColor:"#FF00FF"})
         })
     });
     this.layers.push(this.layerFireCompartmentation);
+    this.selectLayers.push(this.layerFireCompartmentation);
+    
     this.layerFireCompartmentationLabels = new OpenLayers.Layer.Vector("Creator fire compartmentation labels", {
         minScale: me.options.compartmentLabelMinScale,
         rendererOptions: {
@@ -212,6 +218,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
     });
     this.layers.push(this.layerLines1);
     this.layerLines2 = new OpenLayers.Layer.Vector("Creator lines 2", {
+        hover:true,
         rendererOptions: {
             zIndexing: true
         },
@@ -240,7 +247,10 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
         })
     });
     this.layers.push(this.layerLines2);
+    this.selectLayers.push(this.layerLines2);
+    
     this.layerLines3 = new OpenLayers.Layer.Vector("Creator lines 3", {
+        hover:true,
         rendererOptions: {
             zIndexing: true
         },
@@ -266,7 +276,8 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
         })
     });
     this.layers.push(this.layerLines3);
-
+    this.selectLayers.push(this.layerLines3);
+    
     this.layerApproachRoutes = new OpenLayers.Layer.Vector("Creator approach routes", {
         rendererOptions: {
             zIndexing: true
@@ -301,6 +312,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
     this.layers.push(this.layerApproachRoutes);
 
     this.layerCommunicationCoverage = new OpenLayers.Layer.Vector("Creator communication coverage", {
+        hover:true,
         rendererOptions: {
             zIndexing: true
         },
@@ -323,6 +335,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
     this.selectLayers.push(this.layerCommunicationCoverage);
 
     this.layerSymbols = new OpenLayers.Layer.Vector("Creator symbols", {
+        hover:true,
         rendererOptions: {
             zIndexing: true
         },
@@ -350,6 +363,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
     this.selectLayers.push(this.layerSymbols);
 
     this.layerDangerSymbols = new OpenLayers.Layer.Vector("Creator danger symbols", {
+        hover:true,
         rendererOptions: {
             zIndexing: true
         },
