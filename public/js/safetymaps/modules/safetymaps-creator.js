@@ -72,7 +72,7 @@ dbkjs.modules.safetymaps_creator = {
         dbkjs.hoverControl.deactivate();
         $.each(me.objectLayers.selectLayers, function(i, l) {
             dbkjs.selectControl.layers.push(l);
-            dbkjs.hoverControl.layers.push(l);
+            if(l.hover) dbkjs.hoverControl.layers.push(l);
             l.events.register("featureselected", me, me.objectLayerFeatureSelected);
         });
 
@@ -354,7 +354,20 @@ dbkjs.modules.safetymaps_creator = {
         var me = this;
         var layer = e.feature.layer;
         var f = e.feature.attributes;
-        if(layer === me.objectLayers.layerCommunicationCoverage) {
+        if (layer === me.objectLayers.layerCustomPolygon) {
+            console.log("CustomPolygon feature selected", e);
+            var table = $('<table class="table table-hover"></table>');
+            table.append('<tr><th style="width: 30%">' + i18n.t("creator.symbol") + '</th><th>' + i18n.t("dialogs.information") + '</th></tr>');
+            table.append(
+                    '<tr><td bgcolor="'+f.style.color+'"></td>' +
+                    '<td>' + f.style.en+ '</td>' +
+                    '</tr>'
+                    );
+            me.showFeatureInfo(i18n.t("creator.symbols"), table);
+        } else if (layer === me.objectLayers.layerFireCompartmentation) {
+            console.log("FireCompartmentation feature selected", e);
+            //todo build info screen for this feature
+        } else if (layer === me.objectLayers.layerCommunicationCoverage) {
             console.log("communication feature selected", e);
 
             var table = $('<table class="table table-hover"></table>');
@@ -364,15 +377,15 @@ dbkjs.modules.safetymaps_creator = {
                     '<th>' + i18n.t("dialogs.information") + '</th>' +
                     '<th>' + i18n.t("creator.communication_alternative") + '</th>' +
                     '</tr>'
-            );
+                    );
             var img = safetymaps.creator.api.imagePath + (f.coverage ? "coverage" : "no_coverage") + ".png";
             table.append(
                     '<tr><td><img class="thumb" src="' + img + '"></td>' +
                     '<td>' + Mustache.escape(f.info) + '</td>' +
                     '<td>' + Mustache.escape(f.alternative) + '</td>' +
                     '</tr>'
-            );
-           me.showFeatureInfo(i18n.t("creator.symbols"), table);
+                    );
+            me.showFeatureInfo(i18n.t("creator.symbols"), table);
         } else if(layer === me.objectLayers.layerSymbols) {
             console.log("symbol selected", e);
 
