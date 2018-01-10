@@ -37,6 +37,26 @@ safetymaps.creator.CreatorObjectLayers = function(options) {
     }, options);
 };
 
+safetymaps.creator.CreatorObjectLayers.prototype.getStyleScaleFactor = function (scope) {
+    if (!scope.options.options.styleScaleAdjust) {
+        return 1;
+    } else {
+        scope.options.options.originalScale = scope.options.options.originalScale ? scope.options.options.originalScale : 595.2744;
+        return scope.options.options.originalScale / scope.options.map.getScale();
+    }
+};
+
+safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue = function (scope, value, featureAttributeValue, attributeScaleFactor, lineScale) {
+    if (featureAttributeValue) {
+        attributeScaleFactor = attributeScaleFactor ? attributeScaleFactor : 1;
+        value = featureAttributeValue * attributeScaleFactor;
+    }
+    if (lineScale && scope.options.options.noLineScaling) {
+        return value;
+    }
+    value = value + (scope.options.options.styleSizeAdjust ? scope.options.options.styleSizeAdjust : 0);
+    return value * safetymaps.creator.CreatorObjectLayers.prototype.getStyleScaleFactor(scope);
+};
 safetymaps.creator.CreatorObjectLayers.prototype.scalePattern = function(pattern, factor) {
     if(!pattern || pattern.trim().length === 0) {
         return "";
@@ -319,11 +339,14 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
         styleMap: new OpenLayers.StyleMap({
             default: new OpenLayers.Style({
                 externalGraphic: "${symbol}",
-                pointRadius: 14
+                pointRadius: "${myradius}"
             }, {
                 context: {
                     symbol: function(feature) {
                         return safetymaps.creator.api.imagePath + (feature.attributes.coverage ? "" : "no_") + "coverage.png";
+                    },
+                    myradius: function(feature){
+                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,14, feature.attributes.radius);
                     }
                 }
             }),
@@ -342,7 +365,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
         styleMap: new OpenLayers.StyleMap({
             default: new OpenLayers.Style({
                 externalGraphic: "${symbol}",
-                pointRadius: 14,
+                pointRadius: "${myradius}",
                 rotation: "-${rotation}"
             }, {
                 context: {
@@ -352,6 +375,9 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
                             symbol += "_i";
                         }
                         return safetymaps.creator.api.imagePath + 'symbols/' + symbol + '.png';
+                    },
+                    myradius: function(feature) {
+                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,14, feature.attributes.radius);
                     }
                 }
             }),
@@ -370,7 +396,13 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
         styleMap: new OpenLayers.StyleMap({
             default: new OpenLayers.Style({
                 externalGraphic: safetymaps.creator.api.imagePath + "/danger_symbols/${symbol}.png",
-                pointRadius: 14
+                pointRadius: "${myradius}"
+            },{
+                context: {
+                    myradius: function (feature) {
+                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,14, feature.attributes.radius);
+                    }
+                }
             }),
             temporary: new OpenLayers.Style({pointRadius: me.options.graphicSizeHover}),
             select: new OpenLayers.Style({pointRadius: me.options.graphicSizeSelect})

@@ -66,7 +66,7 @@ dbkjs.modules.safetymaps_creator = {
 
         // Setup object details layers
 
-        me.objectLayers = new safetymaps.creator.CreatorObjectLayers();
+        me.objectLayers = new safetymaps.creator.CreatorObjectLayers(dbkjs);
         dbkjs.map.addLayers(me.objectLayers.createLayers());
 
         dbkjs.hoverControl.deactivate();
