@@ -1054,7 +1054,16 @@ AGSIncidentService.prototype.getVehiclePositions = function(incidentIds) {
         if(incidentIds.length === 0) {
             where = "(IncidentID = '' and Speed > 5)"; // Only moving vehicles not on incident
         } else {
-            where = "(IncidentID in (" + incidentIds.join(",") + ") or (IncidentID = '' and Speed > 5))"; // Only vehicles on given incident id or not on incident and moving
+            // Use strings for IncidentIDs, because they are too big for 
+            // integers and server table column type is string
+            var incidentStringIds = "";
+            for(var i = 0; i < incidentIds.length; i++) {
+                if(i > 0) {
+                    incidentStringIds += ",";
+                }
+                incidentStringIds += "'" + incidentIds[i] + "'";
+            }
+            where = "(IncidentID in (" + incidentStringIds + ") or (IncidentID = '' and Speed > 5))"; // Only vehicles on given incident id or not on incident and moving
         }
     }
 
