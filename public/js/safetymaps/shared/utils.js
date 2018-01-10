@@ -73,6 +73,93 @@ safetymaps.utils.geometry.getAngle = function(p1, p2) {
     return angle;
 };
 
+OpenLayers.Strategy.Cluster.prototype.cluster = function (event) {
+    var wktParser = new OpenLayers.Format.WKT();
+    var gf;
+    if ((!event || event.zoomChanged || (event.type === "moveend" && !event.zoomChanged)) && this.features) {
+        var screenBounds = this.layer.map.getExtent();
+        var resolution = this.layer.map.getResolution();
+        this.resolution = resolution;
+        var clusters = [];
+        var feature, clustered, cluster;
+        for (var i = 0; i < this.features.length; ++i) {
+            feature = this.features[i];
+            if (feature.originalGeometry) {
+                feature.geometry = feature.originalGeometry;
+                delete feature.originalGeometry;
+            }
+            if (feature.geometry) {
+                if (!screenBounds.intersectsBounds(feature.geometry.getBounds())) {
+                    if (feature.attributes.apiObject.selectiekader) {
+                        var theGeom = wktParser.read(feature.attributes.apiObject.selectiekader).geometry;
+                        if (screenBounds.intersectsBounds(theGeom.getBounds())) {
+                            console.log("feature point outside screen but selectiekader inside", feature);
+                            if (!gf) gf = new jsts.geom.GeometryFactory();
+                            var buf = 50 * this.layer.map.getResolution();
+                            var smallerScreenBounds = gf.createLinearRing([
+                                new jsts.geom.Coordinate(screenBounds.left + buf, screenBounds.bottom + buf),
+                                new jsts.geom.Coordinate(screenBounds.left + buf, screenBounds.top - buf),
+                                new jsts.geom.Coordinate(screenBounds.right - buf, screenBounds.top - buf),
+                                new jsts.geom.Coordinate(screenBounds.right - buf, screenBounds.bottom + buf),
+                                new jsts.geom.Coordinate(screenBounds.left + buf, screenBounds.bottom + buf)
+                            ]);
+                            var line = gf.createLineString([
+                                new jsts.geom.Coordinate(this.layer.map.getCenter().lon, this.layer.map.getCenter().lat),
+                                new jsts.geom.Coordinate(feature.geometry.x, feature.geometry.y)
+                            ]);
+                            var newLocation = line.intersection(smallerScreenBounds);
+                            var w = new jsts.io.WKTWriter();
+                            console.log("smallerScreenBounds", w.write(smallerScreenBounds), "line", w.write(line), "newLocation",w.write(newLocation), newLocation);
+                            feature.originalGeometry = feature.geometry;
+                            feature.geometry = new OpenLayers.Geometry.Point(newLocation.getX(), newLocation.getY());
+
+                        }else{continue;}
+                    }else{continue;}
+                }
+                clustered = false;
+                for (var j = clusters.length - 1; j >= 0; --j) {
+                    cluster = clusters[j];
+                    if (this.shouldCluster(cluster, feature)) {
+                        this.addToCluster(cluster, feature);
+                        clustered = true;
+                        break;
+                    }
+                }
+                if (!clustered) {
+                    clusters.push(this.createCluster(this.features[i]));
+                }
+
+            }
+        }
+        this.clustering = true;
+        this.layer.removeAllFeatures();
+        this.clustering = false;
+        if (clusters.length > 0) {
+            if (this.threshold > 1) {
+                var clone = clusters.slice();
+                clusters = [];
+                var candidate;
+                for (var i = 0, len = clone.length; i < len; ++i) {
+                    candidate = clone[i];
+                    if (candidate.attributes.count < this.threshold) {
+                        Array.prototype.push.apply(clusters, candidate.cluster);
+                    } else {
+                        clusters.push(candidate);
+                    }
+                }
+            }
+            this.clustering = true;
+            // A legitimate feature addition could occur during this
+            // addFeatures call.  For clustering to behave well, features
+            // should be removed from a layer before requesting a new batch.
+            this.layer.addFeatures(clusters);
+            this.clustering = false;
+        }
+        this.clusters = clusters;
+
+    }
+},
+
 safetymaps.utils.getAbsoluteUrl = (function() {
 	var a;
 
