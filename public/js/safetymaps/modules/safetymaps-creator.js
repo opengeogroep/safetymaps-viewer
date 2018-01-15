@@ -391,7 +391,7 @@ dbkjs.modules.safetymaps_creator = {
             console.log("symbol selected", e);
 
             var table = $('<table class="table table-hover"></table>');
-            table.append('<tr><th style="width: 30%">' + i18n.t("creator.symbol_" + f.code) + '</th><th>' + i18n.t("dialogs.information") + '</th></tr>');
+            table.append('<tr><th style="width: 30%">' + i18n.t("symbol." + f.code) + '</th><th>' + i18n.t("dialogs.information") + '</th></tr>');
             var img = safetymaps.creator.api.imagePath + 'symbols/' + f.code + '.png';
             table.append(
                     '<tr><td><img class="thumb" src="' + img + '" alt="' + f.code + '" title="' + f.code + '"></td>' +

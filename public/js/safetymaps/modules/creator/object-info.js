@@ -351,7 +351,7 @@ safetymaps.creator.renderSymbols = function(object) {
 
             rows.push([
                 '<img style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'symbols/' + s.code + '.png' + '" alt="' + s.code + '" title="' + s.code + '">',
-                i18n.t("creator.symbol_" + s.code) // TODO get from safetymaps.creator.api.styles info
+                i18n.t("symbol." + s.code) // TODO get from safetymaps.creator.api.styles info
             ]);
         });
 
@@ -387,7 +387,7 @@ safetymaps.creator.renderDangerSymbols = function(object) {
 
         $.each(object.danger_symbols, function(i, ds) {
 
-            var symbolName = i18n.t("creator.danger_symbol_" + ds.symbol);
+            var symbolName = i18n.t("danger_symbol." + ds.symbol);
             rows.push([
                 '<img style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'danger_symbols/' + ds.symbol + '.png' + '" alt="' + symbolName + '" title="' + symbolName + '">',
                 '<div class="gevicode">' + ds.gevi_code + '</div><div class="unnummer">' + ds.un_nr + '</div>',
