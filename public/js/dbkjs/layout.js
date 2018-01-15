@@ -30,6 +30,8 @@ dbkjs.layout = {
     },
     settingsDialog: function (parent) {
         $(parent).append("<h4>" + i18n.t("settings.layout") + "</h4>");
+        $(parent).append('<label><input type="checkbox" id="checkbox_scaleStyle">' + i18n.t("settings.scaleStyle") +
+                '</label>');
 /*
         $(parent).append('<p><div class="row"><div class="col-xs-12">' +
                 '<label><input type="checkbox" id="checkbox_scaleStyle">' + i18n.t("settings.scaleStyle") +
@@ -56,7 +58,13 @@ dbkjs.layout = {
             dbkjs.options.styleScaleAdjust = e.target.checked;
             dbkjs.redrawScaledLayers();
         });
-*/
+*/      
+        $("#checkbox_scaleStyle").prop("checked", dbkjs.options.styleScaleAdjust);
+        $("#checkbox_scaleStyle").on('change', function(e) {
+            dbkjs.options.styleScaleAdjust = e.target.checked;
+        });
+        
+        
         $(parent).append("<hr><h4>" + i18n.t("settings.version") + "</h4><br>");
         $(parent).append('<p><strong>' + dbkjs.options.APPLICATION + '</strong> ' + dbkjs.options.VERSION + '</p>');
         if(dbkjs.options.CONFIG !== "_CONFIG_") {
