@@ -87,7 +87,9 @@
         "danger_symbol_hazard_identifier": "Fare identifikator",
         "danger_symbol_name": "Materiale",
         "danger_symbol_quantity": "Mængde",
-        "danger_symbol_information": "Information"
+        "danger_symbol_information": "Information",
+        "area": "Area",
+        "fire_compartment": "Fire compartment"
     },
     "symbol": {
         "Falck1": "Trappe",

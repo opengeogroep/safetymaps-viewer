@@ -87,7 +87,9 @@
         "danger_symbol_hazard_identifier": "Hazard identifier",
         "danger_symbol_name": "Material",
         "danger_symbol_quantity": "Quantity",
-        "danger_symbol_information": "Information"
+        "danger_symbol_information": "Information",
+        "area": "Area",
+        "fire_compartment": "Fire compartment"
     },
     "symbol": {
         "Falck1": "Straight stairs",

@@ -358,16 +358,31 @@ dbkjs.modules.safetymaps_creator = {
         if (layer === me.objectLayers.layerCustomPolygon) {
             console.log("CustomPolygon feature selected", e);
             var table = $('<table class="table table-hover"></table>');
-            table.append('<tr><th style="width: 30%">' + i18n.t("creator.symbol") + '</th><th>' + i18n.t("dialogs.information") + '</th></tr>');
+            table.append('<tr><th style="width: 10%"></th><th>' + i18n.t("dialogs.information") + '</th></tr>');
+            var desc = f.style.en;
+            if(f.style.hasOwnProperty(dbkjsLang)) {
+                if(f.style[dbkjsLang] !== "") {
+                    desc = f.style[dbkjsLang];
+                }
+            }
             table.append(
                     '<tr><td bgcolor="'+f.style.color+'"></td>' +
-                    '<td>' + f.style.en+ '</td>' +
+                    '<td>' + desc + '</td>' +
                     '</tr>'
                     );
-            me.showFeatureInfo(i18n.t("creator.symbols"), table);
+            me.showFeatureInfo(i18n.t("creator.area"), table);
         } else if (layer === me.objectLayers.layerFireCompartmentation) {
             console.log("FireCompartmentation feature selected", e);
-            //todo build info screen for this feature
+            var table = $('<table class="table table-hover"></table>');
+            table.append('<tr><th>' + i18n.t("dialogs.information") + '</th></tr>');
+            var desc = f.style.en;
+            if(f.style.hasOwnProperty(dbkjsLang)) {
+                if(f.style[dbkjsLang] !== "") {
+                    desc = f.style[dbkjsLang];
+                }
+            }
+            table.append('<tr><td>' + desc + '</td></tr>');
+            me.showFeatureInfo(i18n.t("creator.fire_compartment"), table);
         } else if (layer === me.objectLayers.layerCommunicationCoverage) {
             console.log("communication feature selected", e);
 

@@ -176,7 +176,9 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
                         return 16;
                     },
                     label: function(feature) {
-                        return feature.attributes.style[OpenLayers.Lang.getCode()];
+                        var def = feature.attributes.style["en"];
+                        var local = feature.attributes.style[dbkjsLang];
+                        return local && local !== "" ? local : def;
                     },
                     labelYOffset: function(feature) {
                         return Math.sin(feature.attributes.theta + Math.PI/2) * 5;
@@ -191,6 +193,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
     this.layers.push(this.layerFireCompartmentationLabels);
 
     this.layerLines1 = new OpenLayers.Layer.Vector("Creator lines 1", {
+        hover: false,
         rendererOptions: {
             zIndexing: true
         },
@@ -238,7 +241,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
     });
     this.layers.push(this.layerLines1);
     this.layerLines2 = new OpenLayers.Layer.Vector("Creator lines 2", {
-        hover:true,
+        hover: false,
         rendererOptions: {
             zIndexing: true
         },
@@ -267,10 +270,9 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
         })
     });
     this.layers.push(this.layerLines2);
-    this.selectLayers.push(this.layerLines2);
     
     this.layerLines3 = new OpenLayers.Layer.Vector("Creator lines 3", {
-        hover:true,
+        hover: false,
         rendererOptions: {
             zIndexing: true
         },
@@ -296,7 +298,6 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
         })
     });
     this.layers.push(this.layerLines3);
-    this.selectLayers.push(this.layerLines3);
     
     this.layerApproachRoutes = new OpenLayers.Layer.Vector("Creator approach routes", {
         rendererOptions: {
