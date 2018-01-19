@@ -262,7 +262,7 @@ create or replace view viewer.layer_approach_routes as
 -- Puntlagen
 
 create or replace view viewer.layer_communication_coverage as
-    select vo.id, the_geom as location, case when "Dekking" then 'Dekking_nOK'::varchar else 'Dekking_OK'::varchar end as symbol, 0 as rotation
+    select vo.id, the_geom as location, "Dekking" as coverage, 0 as rotation
     from viewer.viewer_object vo
     join wfs."AfwijkendeBinnendekking" on ("DBK_ID" = vo.id);
     
