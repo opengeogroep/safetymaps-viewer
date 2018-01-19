@@ -7,7 +7,7 @@ create schema viewer;
 -- Used in cache key for ETag to refresh cache when schema of JSON results change,
 -- increase value when doing schema updates!
 create table viewer.schema_version(value integer);
-insert into viewer.schema_version(value) values(1);
+insert into viewer.schema_version(value) values(2);
 
 create or replace view viewer.viewer_object as
     select d."DBK_ID" as id,
