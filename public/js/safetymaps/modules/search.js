@@ -123,7 +123,7 @@
         });
 
         $("#search_tabs li a").click(function(e) {
-            var index = Number($(e.target).attr("id").substring("search_tab_".length));
+            var index = Number($(e.currentTarget).attr("id").substring("search_tab_".length));
             me.activateSearch(index);
         });
     },
@@ -138,17 +138,21 @@
         this.activeConfig.search("");
     },
 
-    addSearchConfig: function(config) {
-        this.searchConfigs.push(config);
+    addSearchConfig: function(config, first) {
+        if(first) {
+            this.searchConfigs.unshift(config);
+        } else {
+            this.searchConfigs.push(config);
+        }
 
-        if(this.searchConfigs.length === 1) {
+        if(this.searchConfigs.length === 1 || first) {
             this.activateSearch(0);
         }
 
         this.createTabs();
     },
 
-    showResults: function(results, displayFunction) {
+    showResults: function(results, displayFunction, dontHtmlEscape) {
         var me = this;
 
         $("#search_results ul").remove();
@@ -156,7 +160,11 @@
 
         var ul = $("<ul class='nav nav-pills nav-stacked'></ul>");
         $.each(results, function(i, r) {
-            ul.append($("<li><a href='#' x-index='" + i + "'>" + Mustache.escape(displayFunction(r)) + "</a></li>"));
+            var t = displayFunction(r);
+            if(!dontHtmlEscape) {
+                t = Mustache.escape(t);
+            }
+            ul.append($("<li><a href='#' x-index='" + i + "'>" + t + "</a></li>"));
         });
         ul.click(function(e) {
             var resultIndex = Number($(e.target).attr("x-index"));
@@ -165,4 +173,6 @@
         });
         $("#search_results").append(ul);
     }
+
+    // TODO add show error
  };

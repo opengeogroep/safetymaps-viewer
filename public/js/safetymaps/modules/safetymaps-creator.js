@@ -221,7 +221,7 @@ dbkjs.modules.safetymaps_creator = {
 
                     me.selectObjectById(result.id, {x: result.clusterFeature.geometry.x, y: result.clusterFeature.geometry.y});
                 }
-            });
+            }, true);
         }
     },
 
