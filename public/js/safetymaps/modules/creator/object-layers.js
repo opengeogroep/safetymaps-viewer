@@ -23,7 +23,7 @@
  *
  */
 
- /* global safetymaps, OpenLayers */
+ /* global safetymaps, OpenLayers, i18n */
 
 var safetymaps = safetymaps || {};
 safetymaps.creator = safetymaps.creator || {};
@@ -103,7 +103,8 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
             default: new OpenLayers.Style({
                 fillColor: "${fillColor}",
                 fillOpacity: "${fillOpacity}",
-                strokeWidth: 0
+                strokeColor: "${strokeColor}",
+                strokeWidth: "${strokeWidth}"
             }, {
                 context: {
                     fillColor: function(feature) {
@@ -111,6 +112,12 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
                     },
                     fillOpacity: function(feature) {
                         return feature.attributes.style.opacity;
+                    },
+                    strokeColor: function(feature) {
+                        return feature.attributes.style.strokeColor;
+                    },
+                    strokeWidth: function(feature) {
+                        return feature.attributes.style.strokeWidth;
                     }
                 }
             }),
@@ -474,6 +481,21 @@ safetymaps.creator.CreatorObjectLayers.prototype.addCustomPolygonFeatures = func
     var wktParser = new OpenLayers.Format.WKT();
 
     var features = [];
+    if(object.select_area) {
+        // Add special feature to this layer to show the selection area
+        console.log("add select area", object.select_area);
+        var f = wktParser.read(object.select_area);
+        f.attributes.index = 0;
+        // Hardcode the style here
+        f.attributes.style = {
+            "color": "#B45F04",
+            "opacity": 0.2,
+            "strokeWidth": 1,
+            "strokeColor": "#B45F04",
+            "en": i18n.t("creator.area")
+        };
+        features.push(f);
+    }
     $.each(object.custom_polygons || [], function(i, detail) {
         var f = wktParser.read(detail.polygon);
         f.attributes.index = i;
@@ -481,6 +503,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.addCustomPolygonFeatures = func
         f.attributes.style = safetymaps.creator.api.styles.custom_polygons[detail.style];
         features.push(f);
     });
+
     this.layerCustomPolygon.addFeatures(features);
     if(features.length > 0) console.log("added custom polygons", features);
 };

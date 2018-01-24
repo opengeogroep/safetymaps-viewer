@@ -196,6 +196,9 @@ create or replace view viewer.viewer_object_details as
             from wfs."Brandcompartiment" where "DBK_ID" = vo.id) r
         ) as fire_compartmentation,
         
+        -- Gebied
+        (select st_astext(the_geom) from wfs."Gebied" where "DBK_ID" = vo.id limit 1) as select_area,
+
         -- Custom_Polygon
         (select array_to_json(array_agg(row_to_json(r.*))) as array_to_json
         from (select "Soort" as style, "Omschrijving" as omschrijving, st_astext(the_geom) as polygon
