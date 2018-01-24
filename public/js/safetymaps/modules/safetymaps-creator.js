@@ -219,7 +219,7 @@ dbkjs.modules.safetymaps_creator = {
                 resultSelected: function(result) {
                     console.log("Search result selected", result);
 
-                    me.selectObjectById(result.id, {x: result.clusterFeature.geometry.x, y: result.clusterFeature.geometry.y});
+                    me.selectObjectById(result.id, result.extent);
                 }
             }, true);
         }
@@ -267,18 +267,34 @@ dbkjs.modules.safetymaps_creator = {
         console.log("Select feature", feature);
 
         this.selectedClusterFeature = feature;
-        this.selectObjectById(feature.attributes.id, {x: feature.geometry.x, y: feature.geometry.y });
+        this.selectObjectById(feature.attributes.id, feature.attributes.apiObject.extent);
     },
 
-    selectObjectById: function(id, xyToZoom) {
+    selectObjectById: function(id, extent) {
         var me = this;
 
         // Unselect current, if any
         me.unselectObject();
 
-        if(xyToZoom) {
-            console.log("zooming to selected object at ", xyToZoom);
-            dbkjs.map.setCenter(new OpenLayers.LonLat(xyToZoom.x, xyToZoom.y), dbkjs.options.zoom);
+        // No extent when different floor is selected, do not zoom
+        if(extent) {
+            console.log("zooming to selected object at ", extent);
+
+            // Parse "BOX(n n,n n)" to array of left, bottom, top, right
+            var bounds = extent.match(/[0-9. ,]+/)[0].split(/[ ,]/);
+            bounds = new OpenLayers.Bounds(bounds);
+
+            if(dbkjs.options.objectZoomExtentScale) {
+                bounds = bounds.scale(dbkjs.options.objectZoomExtentScale);
+            } else if(dbkjs.options.objectZoomExtentBuffer) {
+                bounds = bounds.toArray();
+                bounds[0] -= dbkjs.options.objectZoomExtentBuffer;
+                bounds[1] -= dbkjs.options.objectZoomExtentBuffer;
+                bounds[2] += dbkjs.options.objectZoomExtentBuffer;
+                bounds[3] += dbkjs.options.objectZoomExtentBuffer;
+            }
+
+            dbkjs.map.zoomToExtent(bounds, true);
         }
 
         // Get object details

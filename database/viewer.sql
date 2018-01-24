@@ -73,9 +73,20 @@ create or replace view viewer.viewer_object_map as
             informele_naam,
             symbool,
         
-            st_astext(pand.pand_centroid) as pand_centroid,
+            --st_astext(pand.pand_centroid) as pand_centroid,
+            -- ipv st_collect() zou st_extent() ook kunnen
+            (select st_astext(st_centroid(st_collect(the_geom))) from wfs."Polygon" where "DBK_ID" = vo.id) as pand_centroid,
             st_astext(selectiekader.the_geom) as selectiekader,
             st_astext(st_centroid(selectiekader.the_geom)) as selectiekader_centroid,
+            (select st_extent(the_geom)::varchar from (
+                select the_geom from wfs."Gebied" where "DBK_ID" = vo.id
+                union all select the_geom from wfs."Polygon" where "DBK_ID" = vo.id
+                union all select the_geom from wfs."Brandweervoorziening" where "DBK_ID" = vo.id
+                union all select the_geom from wfs."Custom_Polygon" where "DBK_ID" = vo.id
+                union all select the_geom from wfs."Hulplijn" where "DBK_ID" = vo.id
+                union all select the_geom from wfs."ToegangTerrein" where "DBK_ID" = vo.id
+                -- Geen AfwijkendeBinnendekking, Brandcompartiment of GevaarlijkeStof (vaak binnen pand)
+            ) e) as extent,
 
             -- Adres
             a."Straatnaam" as straatnaam,
@@ -94,7 +105,7 @@ create or replace view viewer.viewer_object_map as
             
         from viewer.viewer_object vo
         left join wfs."Adres" a on (a."Adres_ID" = vo.adres_id)
-        left join (select "DBK_ID", st_centroid(st_collect(the_geom)) as pand_centroid from wfs."Polygon" group by "DBK_ID") pand on (pand."DBK_ID" = vo.id)
+        --left join (select "DBK_ID", st_centroid(st_collect(the_geom)) as pand_centroid from wfs."Polygon" group by "DBK_ID") pand on (pand."DBK_ID" = vo.id)
         left join wfs."Gebied" selectiekader on (selectiekader."DBK_ID" = vo.id)
         left join viewer.viewer_object_selectieadressen sa on (sa.id = vo.id)
         where 

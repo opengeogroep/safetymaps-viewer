@@ -31,8 +31,12 @@ dbkjs.options = {
 
 dbkjs.options.searchTabs = true;
 
-dbkjs.options.zoomToPandgeometrie = true;
-dbkjs.options.zoomToPandgeometrieMargin = 50;
+// Scale the extent of the object by 140% to set map extent when zooming to object
+//dbkjs.options.objectZoomExtentScale = 1.4;
+
+// Comment the line above and uncomment this line to zoom to the extent of the
+// object buffered with a fixed number of meters(/projection units)
+dbkjs.options.objectZoomExtentBuffer = 50;
 
 dbkjs.options.showZoomButtons = true;
 
