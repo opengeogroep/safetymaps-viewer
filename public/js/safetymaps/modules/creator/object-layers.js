@@ -74,26 +74,6 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
     this.layers = [];
     this.selectLayers = [];
 
-    this.layerBuildings = new OpenLayers.Layer.Vector("Creator buildings", {
-        rendererOptions: {
-            zIndexing: true
-        },
-        // TODO add VRH functionality for switching style when aerial basemap
-        // is enabled
-        styleMap: new OpenLayers.StyleMap({
-            default: new OpenLayers.Style({
-                fillColor: "#66ff66",
-                fillOpacity: 0.2,
-                strokeColor: "#66ff66",
-                strokeWidth: 1
-            }, {
-                context: {
-                }
-            })
-        })
-    });
-    this.layers.push(this.layerBuildings);
-
     this.layerCustomPolygon = new OpenLayers.Layer.Vector("Creator custom polygons", {
         hover:false,
         rendererOptions: {
@@ -127,6 +107,26 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
     });
     this.layers.push(this.layerCustomPolygon);
     this.selectLayers.push(this.layerCustomPolygon);
+
+    this.layerBuildings = new OpenLayers.Layer.Vector("Creator buildings", {
+        rendererOptions: {
+            zIndexing: true
+        },
+        // TODO add VRH functionality for switching style when aerial basemap
+        // is enabled
+        styleMap: new OpenLayers.StyleMap({
+            default: new OpenLayers.Style({
+                fillColor: "#66ff66",
+                fillOpacity: 0.2,
+                strokeColor: "#66ff66",
+                strokeWidth: 1
+            }, {
+                context: {
+                }
+            })
+        })
+    });
+    this.layers.push(this.layerBuildings);
 
     this.layerFireCompartmentation = new OpenLayers.Layer.Vector("Creator fire compartmentation", {
         hover:false,
