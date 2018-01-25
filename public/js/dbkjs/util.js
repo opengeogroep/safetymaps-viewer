@@ -1088,7 +1088,7 @@ dbkjs.util = {
                 'class': 'modal-popup-close',
                 'href': '#'
             })
-            .html('<i class="fa fa-arrow-left"></i> ' + i18n.t("dialogs.back"))
+            .html('<i class="fa fa-close"></i> ' + i18n.t("dialogs.close"))
             .on('click', function (e) {
                 e.preventDefault();
                 hidingFunction();

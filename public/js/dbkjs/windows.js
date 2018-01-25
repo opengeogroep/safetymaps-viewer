@@ -18,7 +18,7 @@
  *
  */
 
-/* global dbkjs */
+/* global dbkjs, i18n */
 
 /**
  * Modal window which takes up the entire screen. Automatically closed when
@@ -56,7 +56,7 @@ ModalWindow.prototype.createElements = function(title) {
             'class': 'modal-popup-close',
             'href': '#'
         })
-        .html('<i class="fa fa-arrow-left"></i> ' + i18n.t("dialogs.back"))
+        .html('<i class="fa fa-close"></i> ' + i18n.t("dialogs.close"))
         .on('click', function (e) {
             me.hide();
         })
@@ -156,7 +156,6 @@ SplitScreenWindow.prototype.constructor = SplitScreenWindow;
 SplitScreenWindow.prototype.createElements = function(title) {
     var me = this;
     ModalWindow.prototype.createElements.call(this, title);
-    $(this.popup).find("a.modal-popup-close").html('<i class="fa fa-arrow-left"/> ' + i18n.t("dialogs.showMap"));
 
     if(dbkjs.options.splitScreenSwitch) {
         function switchContents() {
@@ -164,7 +163,7 @@ SplitScreenWindow.prototype.createElements = function(title) {
         };
 
         var a = $("<a class='modal-popup-switch'>" + switchContents() + "</a>");
-        a.prependTo(this.popup);
+        $(this.popup).find("a.modal-popup-close").after(a);
         $(a).on("click", function() {
             me.setSplitScreen(!me.splitScreen);
             $(me.popup).find("a.modal-popup-switch").html(switchContents());
@@ -188,7 +187,6 @@ SplitScreenWindow.prototype.setSplitScreen = function(splitScreen) {
     if(wasVisible) {
         this.show();
     }
-    $(this.popup).find("a.modal-popup-close").html('<i class="fa fa-arrow-left"/> ' + i18n.t(splitScreen ? 'dialogs.showMap' : 'dialogs.back'));
 
     $(this).triggerHandler('splitScreenChange', splitScreen, this.visible);
 };
