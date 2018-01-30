@@ -12,7 +12,7 @@ dbkjs.options = {
     zoom: 13,
 
     // Set to true to enable style scaling according to map scale
-    styleScaleAdjust: false,
+    styleScaleAdjust: true,
     // Scale at which scaled values are returned as original
     originalScale: 595.2744,
     // User style value adjustment (before scaling)
