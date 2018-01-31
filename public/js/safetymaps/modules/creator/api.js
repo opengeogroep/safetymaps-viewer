@@ -85,8 +85,8 @@ safetymaps.creator.api = {
                 width = 21;
                 height = 38;
             }
-            if(apiObject.symbol) {
-                switch(apiObject.symbol.toLowerCase()) {
+            if(apiObject.symbool) {
+                switch(apiObject.symbool.toLowerCase()) {
                     case "waterongevallen":
                         symbol = "wo.png"; width = 40; height = 40;
                         break;
