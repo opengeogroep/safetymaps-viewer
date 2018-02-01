@@ -119,7 +119,7 @@ safetymaps.ClusteringLayer.prototype.createLayer = function () {
                         }
                         if(me.selectedIds.indexOf(feature.attributes.id) !== -1) {
                             console.log("selected cluster feature", feature.attributes);
-                            return 0.5;
+                            return 0.01;
                         }
                         return 1;
                     }
