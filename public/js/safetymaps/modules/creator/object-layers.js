@@ -88,16 +88,20 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
             }, {
                 context: {
                     fillColor: function(feature) {
-                        return feature.attributes.style.color;
+                        if(feature.attributes.style.color)return feature.attributes.style.color;
+                        else return "#000000";
                     },
                     fillOpacity: function(feature) {
-                        return feature.attributes.style.opacity;
+                        if(feature.attributes.style.opacity)return feature.attributes.style.opacity;
+                        else return 0.2;
                     },
                     strokeColor: function(feature) {
-                        return feature.attributes.style.strokeColor;
+                        if(feature.attributes.style.strokeColor)return feature.attributes.style.strokeColor;
+                        else return "#000000";
                     },
                     strokeWidth: function(feature) {
-                        return feature.attributes.style.strokeWidth;
+                        if(feature.attributes.style.strokeWidth)return feature.attributes.style.strokeWidth;
+                        else return 1;
                     }
                 }
             }),
@@ -142,15 +146,18 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
             }, {
                 context: {
                     color: function(feature) {
-                        return feature.attributes.style.color;
+                        if(feature.attributes.style.color)return feature.attributes.style.color;
+                        else return "#000000";
                     },
                     width: function(feature) {
                         // TODO: scaling
-                        return feature.attributes.style.thickness;
+                        if(feature.attributes.style.thickness)return feature.attributes.style.thickness;
+                        else return 2;
                     },
                     dashstyle: function(feature) {
                         // TODO: scaling
-                        return me.scalePattern(feature.attributes.style.pattern, 3);
+                        if(feature.attributes.style.pattern)return me.scalePattern(feature.attributes.style.pattern, 3);
+                        else return me.scalePattern("", 3);
                     }
                 }
             }),
@@ -217,16 +224,22 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
             }, {
                 context: {
                     color: function(feature) {
-                        return feature.attributes.style.color1;
+                        if(feature.attributes.style.color1)return feature.attributes.style.color1;
+                        else  return "#000000";
                     },
                     strokeWidth: function(feature) {
-                        var type = feature.attributes.style.type_viewer;
-                        if(type === "doubletrack" || type === "tube") {
-                            return feature.attributes.style.thickness * 1.5 + 2;
+                        if (feature.attributes.style.type_viewer) {
+                            var type = feature.attributes.style.type_viewer;
+                            if (type === "doubletrack" || type === "tube") {
+                                return feature.attributes.style.thickness * 1.5 + 2;
+                            }
+                        }else{
+                            return 2 * 1.5 + 2;
                         }
                     },
                     dashstyle: function(feature) {
-                        return me.scalePattern(feature.attributes.style.pattern, 3);
+                        if(feature.attributes.style.pattern)return me.scalePattern(feature.attributes.style.pattern, 3);
+                        else return me.scalePattern("", 3);
                     },
                     graphicName: function(feature) {
                         if(feature.attributes.style.type_viewer === "arrow") {
@@ -261,10 +274,12 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
             }, {
                 context: {
                     color: function(feature) {
-                        return feature.attributes.style.color2;
+                        if(feature.attributes.style.color2)return feature.attributes.style.color2;
+                        else  return "#000000";
                     },
                     strokeWidth: function(feature) {
-                        return feature.attributes.style.thickness * 1.5;
+                        if(feature.attributes.style.thickness) return feature.attributes.style.thickness * 1.5;
+                        else return 2 * 1.5;
                     },
                     dashstyle: function(feature) {
                         if(feature.attributes.style.type_viewer === "tube") {
@@ -292,10 +307,12 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
             }, {
                 context: {
                     color: function(feature) {
-                        return feature.attributes.style.color1;
+                        if(feature.attributes.style.color1)return feature.attributes.style.color1;
+                        else  return "#000000";
                     },
                     strokeWidth: function(feature) {
-                        return feature.attributes.style.thickness * 1.5 + 6;
+                        if(feature.attributes.style.thickness) return feature.attributes.style.thickness * 1.5 + 6;
+                        else return 2 * 1.5 + 6;
                     },
                     dashstyle: function(feature) {
                         return me.scalePattern("1 20", 1);
