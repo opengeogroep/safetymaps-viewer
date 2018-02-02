@@ -97,7 +97,6 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
                     },
                     strokeColor: function(feature) {
                         if(feature.attributes.style.strokeColor)return feature.attributes.style.strokeColor;
-                        else return "#000000";
                     },
                     strokeWidth: function(feature) {
                         if(feature.attributes.style.strokeWidth)return feature.attributes.style.strokeWidth;
@@ -146,17 +145,17 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
             }, {
                 context: {
                     color: function(feature) {
-                        if(feature.attributes.style.color)return feature.attributes.style.color;
+                        if(feature.attributes.style && feature.attributes.style.color)return feature.attributes.style.color;
                         else return "#000000";
                     },
                     width: function(feature) {
                         // TODO: scaling
-                        if(feature.attributes.style.thickness)return feature.attributes.style.thickness;
+                        if(feature.attributes.style && feature.attributes.style.thickness)return feature.attributes.style.thickness;
                         else return 2;
                     },
                     dashstyle: function(feature) {
                         // TODO: scaling
-                        if(feature.attributes.style.pattern)return me.scalePattern(feature.attributes.style.pattern, 3);
+                        if(feature.attributes.style && feature.attributes.style.pattern)return me.scalePattern(feature.attributes.style.pattern, 3);
                         else return me.scalePattern("", 3);
                     }
                 }
@@ -190,9 +189,11 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
                         return 16;
                     },
                     label: function(feature) {
-                        var def = feature.attributes.style["en"];
-                        var local = feature.attributes.style[dbkjsLang];
-                        return local && local !== "" ? local : def;
+                        if (feature.attributes.style) {
+                            var def = feature.attributes.style["en"];
+                            var local = feature.attributes.style[dbkjsLang];
+                            return local && local !== "" ? local : def;
+                        }
                     },
                     labelYOffset: function(feature) {
                         return Math.sin(feature.attributes.theta + Math.PI/2) * 5;
@@ -232,13 +233,15 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
                             var type = feature.attributes.style.type_viewer;
                             if (type === "doubletrack" || type === "tube") {
                                 return feature.attributes.style.thickness * 1.5 + 2;
-                            }
+                            }else{
+                            return feature.attributes.style.thickness * 1.5;
+                        }
                         }else{
                             return 2 * 1.5 + 2;
                         }
                     },
                     dashstyle: function(feature) {
-                        if(feature.attributes.style.pattern)return me.scalePattern(feature.attributes.style.pattern, 3);
+                        if(feature.attributes.style.pattern)return me.scalePattern(feature.attributes.style.pattern, 5);
                         else return me.scalePattern("", 3);
                     },
                     graphicName: function(feature) {
