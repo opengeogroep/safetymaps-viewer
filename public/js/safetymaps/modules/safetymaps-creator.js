@@ -210,7 +210,7 @@ dbkjs.modules.safetymaps_creator = {
                     });
                     dbkjs.modules.search.showResults(searchResults, function(r) {
                         var s = r.formele_naam;
-                        if(r.informele_naam && r.informele_naam !== r.formele_naam) {
+                        if(r.informele_naam && r.informele_naam.trim().length > 0 && r.informele_naam !== r.formele_naam) {
                             s += " (" + r.informele_naam + ")";
                         }
                         return s;
