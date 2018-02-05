@@ -145,7 +145,7 @@ PharosIncidentsController.prototype.newIncident = function() {
 
     var pos = this.getIncidentOpenLayersLonLat();
     var adres = this.data.Gms.IncidentAdres.Adres;
-    me.featureSelector = new IncidentFeatureSelector(me.data.Gms, {
+    var commonIncidentObject = {
         postcode: adres.Postcode,
         woonplaats: adres.Plaats,
         huisnummer: Number(adres.Huisnummer),
@@ -154,14 +154,15 @@ PharosIncidentsController.prototype.newIncident = function() {
         straat: adres.Straat,
         x: pos.lon,
         y: pos.lat
-    }, true, false);
+    };
+    me.featureSelector = new IncidentFeatureSelector(me.data.Gms, commonIncidentObject, true, false);
 
     me.featureSelector.updateBalkRechtsonder();
     me.featureSelector.findAndSelectMatches(me.incidentDetailsWindow);
 
     me.incidentDetailsWindow.show();
 
-    $(me).triggerHandler("new_incident", null);
+    $(me).triggerHandler("new_incident", [commonIncidentObject]);
 };
 
 PharosIncidentsController.prototype.markerClick = function() {

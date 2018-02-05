@@ -252,7 +252,7 @@ VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
 
             var x = incident.T_X_COORD_LOC;
             var y = incident.T_Y_COORD_LOC;
-            me.featureSelector = new IncidentFeatureSelector(incident, {
+            var commonIncidentObject = {
                 postcode: incident.POSTCODE,
                 woonplaats: incident.PLAATS_NAAM_NEN,
                 huisnummer: Number(incident.HUIS_PAAL_NR),
@@ -261,7 +261,8 @@ VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
                 straat: incident.NAAM_LOCATIE1,
                 x: x,
                 y: y
-            }, true, false);
+            };
+            me.featureSelector = new IncidentFeatureSelector(incident, commonIncidentObject, true, false);
 
             me.featureSelector.updateBalkRechtsonder();
             me.featureSelector.findAndSelectMatches(me.incidentDetailsWindow);
@@ -272,7 +273,7 @@ VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
 
             me.button.setIcon("bell");
 
-            $(me).triggerHandler("new_incident", incident);
+            $(me).triggerHandler("new_incident", [commonIncidentObject]);
         });
     }
 };

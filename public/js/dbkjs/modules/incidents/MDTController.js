@@ -125,7 +125,7 @@ MDTController.prototype.newIncident = function() {
     var x = $(this.xml).find("IncidentLocatie XYCoordinaten XCoordinaat").text();
     var y = $(this.xml).find("IncidentLocatie XYCoordinaten YCoordinaat").text();
     var adres = $(this.xml).find("IncidentLocatie Adres");
-    me.featureSelector = new IncidentFeatureSelector(me.xml, {
+    var commonIncidentObject = {
         postcode: $(adres).find("Postcode").text(),
         woonplaats: $(adres).find("Woonplaats").text(),
         huisnummer: Number($(adres).find("Huisnummer").text()),
@@ -134,14 +134,15 @@ MDTController.prototype.newIncident = function() {
         straat: $(adres).find("Straat").text(),
         x: x,
         y: y
-    }, true, false);
+    };
+    me.featureSelector = new IncidentFeatureSelector(me.xml, commonIncidentObject, true, false);
 
     me.featureSelector.updateBalkRechtsonder();
     me.featureSelector.findAndSelectMatches(me.incidentDetailsWindow);
 
     me.incidentDetailsWindow.show();
 
-    $(me).triggerHandler("new_incident", null);
+    $(me).triggerHandler("new_incident", [commonIncidentObject]);
 };
 
 MDTController.prototype.markerClick = function() {

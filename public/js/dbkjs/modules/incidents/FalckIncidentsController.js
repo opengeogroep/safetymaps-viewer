@@ -337,7 +337,7 @@ FalckIncidentsController.prototype.inzetIncident = function(incidentId) {
             var x = incident.IncidentLocatie.XCoordinaat;
             var y = incident.IncidentLocatie.YCoordinaat;
             var l = incident.IncidentLocatie;
-            me.featureSelector = new IncidentFeatureSelector(incident, {
+            var commonIncidentObject = {
                 postcode: l.Postcode,
                 woonplaats: l.Plaatsnaam,
                 huisnummer: l.Huisnummer,
@@ -346,7 +346,8 @@ FalckIncidentsController.prototype.inzetIncident = function(incidentId) {
                 straat: l.NaamLocatie1,
                 x: x,
                 y: y
-            }, true, false);
+            };
+            me.featureSelector = new IncidentFeatureSelector(incident, commonIncidentObject, true, false);
 
             me.featureSelector.updateBalkRechtsonder(me.getBalkrechtsonderTitle());
             me.featureSelector.findAndSelectMatches(me.incidentDetailsWindow);
@@ -356,7 +357,7 @@ FalckIncidentsController.prototype.inzetIncident = function(incidentId) {
 
             me.button.setIcon("bell");
 
-            $(me).triggerHandler("new_incident", incident);
+            $(me).triggerHandler("new_incident", [commonIncidentObject]);
         });
     }
 };
