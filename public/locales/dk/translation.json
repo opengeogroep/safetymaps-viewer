@@ -56,7 +56,7 @@
         "respondingProcedure": "Ulykkesprocedure",
         "buildingConstruction": "Bygningskonstruktion",
         "fireAlarmCode": "Brandalarmskode",
-        "usage": "Brug",
+        "usage": "Risikoklasse",
         "usage_specific": "Specifikt brug",
         "level": "Niveau",
         "lowestLevel": "Laveste niveau",
