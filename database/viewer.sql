@@ -7,7 +7,7 @@ create schema viewer;
 -- Used in cache key for ETag to refresh cache when schema of JSON results change,
 -- increase value when doing schema updates!
 create table viewer.schema_version(value integer);
-insert into viewer.schema_version(value) values(2);
+insert into viewer.schema_version(value) values(3);
 
 create or replace view viewer.viewer_object as
     select d."DBK_ID" as id,
@@ -231,7 +231,7 @@ create or replace view viewer.viewer_object_details as
         
         -- ToegangTerrein    
         (select array_to_json(array_agg(row_to_json(r.*))) as array_to_json
-        from (select "Primair" = 1 as primair, "NaamRoute" as naam, "Omschrijving" as omschrijving, st_astext(the_geom) as line
+        from (select "Primair" as style, "NaamRoute" as naam, "Omschrijving" as omschrijving, st_astext(the_geom) as line
             from wfs."ToegangTerrein" where "DBK_ID" = vo.id) r
         ) as approach_routes            
         

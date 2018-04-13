@@ -341,7 +341,12 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
             }, {
                 context: {
                     color: function(feature) {
-                        return feature.attributes.primary ? "#ff0000" : "#0000ff";
+                        switch(feature.attributes.style) {
+                            case 1: return "#ff0000";
+                            case 2: return "#0000ff";
+                            case 3: return "#00a000";
+                        }
+                        return "#000000";
                     },
                     strokeWidth: function(feature) {
                         return 1.5;
@@ -628,7 +633,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.addApproachRouteFeatures = func
         f.attributes.index = i;
         f.attributes.description = detail.omschrijving;
         f.attributes.name = detail.naam;
-        f.attributes.primary = detail.primair;
+        f.attributes.style = detail.style;
 
         // Create two geometries: one line and a point at the end of the
         // line to display the arrow
