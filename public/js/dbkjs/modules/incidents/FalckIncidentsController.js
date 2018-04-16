@@ -330,7 +330,9 @@ FalckIncidentsController.prototype.inzetIncident = function(incidentId) {
             me.incidentDetailsWindow.data(incident, true);
             me.markerLayer.addIncident(incident, false, true);
             me.markerLayer.setZIndexFix();
-
+            if (dbkjs.options.incidents.enableVehicleControl) {
+                dbkjs.modules.incidents.vehicleController.incidentFound(incident)
+            }   
             dbkjs.protocol.jsonDBK.deselect();
             me.zoomToIncident();
 
@@ -465,6 +467,10 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
         var oldIncident = me.incident;
         me.incident = incident;
         me.button.setIcon("bell");
+
+        if(dbkjs.options.incidents.enableVehicleControl){
+            dbkjs.modules.incidents.vehicleController.incidentFound(incident);
+        }
 
         // Always update window, updates moment.fromNow() times
         me.incidentDetailsWindow.data(incident, true, true);
