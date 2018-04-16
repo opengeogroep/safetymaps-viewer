@@ -73,6 +73,9 @@ dbkjs.modules.incidents = {
             this.controller = new MDTController(this);
         } else if(this.options.controller === "FalckIncidentsController") {
             this.controller = new FalckIncidentsController(this);
+            if(dbkjs.options.incidents.enableVehicleControl){
+                this.vehicleController = new FalckIncidentVehicleController(this.controller);
+            }
         } else {
             console.log("No incidents controller configured");
         }
