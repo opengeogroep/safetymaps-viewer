@@ -22,7 +22,15 @@ function VehiclePositionLayer() {
     OpenLayers.Renderer.symbol.pointer = [1, -7, 0, -9, -1, -7, 1, -7];
 
     var me = this;
-
+        var panelName = "";
+    var controllerName = "";
+    if(dbkjs.options.incidents.falck){
+        controllerName = "dbkjs.modules.incidents.vehicleController.vehiclePositionLayer.setVisibility(event.target.checked)";
+        panelName = "#settingspanel_b";
+    } else {
+        controllerName = "dbkjs.modules.incidents.controller.vehiclePositionLayer.setVisibility(event.target.checked)";
+        panelName = "#baselayerpanel_b";
+    }
     this.showMoving = window.localStorage.getItem("VehiclePositionLayer.showMoving") === "true";
     this.visibility = !(window.localStorage.getItem("VehiclePositionLayer.hidden") === "true");
 
@@ -109,10 +117,10 @@ function VehiclePositionLayer() {
     dbkjs.map.addControl(this.selectControl);
     this.selectControl.activate();
 */
-    $("#baselayerpanel_b").append('<hr/><label><input type="checkbox" ' + (this.visibility ? 'checked' : '') + ' onclick="dbkjs.modules.incidents.controller.vehiclePositionLayer.setVisibility(event.target.checked)">Toon voertuigposities</label>');
+    $(panelName).append('<hr/><label><input type="checkbox" ' + (this.visibility ? 'checked' : '') + ' onclick='+controllerName+'>Toon voertuigposities</label>');
 
     if(dbkjs.options.incidents.enableOngekoppeldeEenheden) {
-        $("#baselayerpanel_b").append('<hr/><label><input type="checkbox" ' + (this.showMoving ? 'checked' : '') + ' onclick="dbkjs.modules.incidents.controller.vehiclePositionLayer.setShowMoving(event.target.checked)">Toon bewegende voertuigen niet gekoppeld aan incident (grijs)</label>');
+        $(panelName).append('<hr/><label><input type="checkbox" ' + (this.showMoving ? 'checked' : '') + ' onclick='+controllerName+'>Toon bewegende voertuigen niet gekoppeld aan incident (grijs)</label>');
     } else {
         this.showMoving = false;
     }
