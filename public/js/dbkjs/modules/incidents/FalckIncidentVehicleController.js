@@ -23,8 +23,18 @@ function FalckIncidentVehicleController(controller) {
             me.getEenheidLocatie();
         }
     }, 30000);
-}
-;
+
+    $(dbkjs).one("dbkjs_init_complete", function () {
+        if (dbkjs.modules.incidents && dbkjs.modules.incidents.controller) {
+            $(dbkjs.modules.incidents.controller).on("new_incident", function (event, commonIncident,incident) {
+                me.incidentFound(incident);
+            });
+            (dbkjs.modules.incidents.controller).on("incidents.vehicle.update", function(event, incident){
+               me.incidentFound(incident); 
+            });
+        }
+    });
+};
 
 FalckIncidentVehicleController.prototype.getEenheidLocatie = function () {
 
