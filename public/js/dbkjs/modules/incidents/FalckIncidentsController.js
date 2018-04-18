@@ -329,10 +329,8 @@ FalckIncidentsController.prototype.inzetIncident = function(incidentId) {
             console.log("Got incident data", incident);
             me.incidentDetailsWindow.data(incident, true);
             me.markerLayer.addIncident(incident, false, true);
-            me.markerLayer.setZIndexFix();
-            if (dbkjs.options.incidents.enableVehicleControl) {
-                dbkjs.modules.incidents.vehicleController.incidentFound(incident)
-            }   
+            me.markerLayer.setZIndexFix(); 
+            
             dbkjs.protocol.jsonDBK.deselect();
             me.zoomToIncident();
 
@@ -359,7 +357,7 @@ FalckIncidentsController.prototype.inzetIncident = function(incidentId) {
 
             me.button.setIcon("bell");
 
-            $(me).triggerHandler("new_incident", [commonIncidentObject]);
+            $(me).triggerHandler("new_incident", [commonIncidentObject,incident]);
         });
     }
 };
@@ -468,9 +466,7 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
         me.incident = incident;
         me.button.setIcon("bell");
 
-        if(dbkjs.options.incidents.enableVehicleControl){
-            dbkjs.modules.incidents.vehicleController.incidentFound(incident);
-        }
+        $(dbkjs).trigger("incidents.vehicle.update",[incident]);
 
         // Always update window, updates moment.fromNow() times
         me.incidentDetailsWindow.data(incident, true, true);
@@ -482,7 +478,7 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
             if(!me.incidentDetailsWindow.isVisible()) {
                 me.button.setAlerted(true);
             }
-
+            
             // Possibly update marker position
             me.markerLayer.addIncident(incident, false, true);
             me.markerLayer.setZIndexFix();
