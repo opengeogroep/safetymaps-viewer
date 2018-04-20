@@ -288,6 +288,7 @@ dbkjs.modules.edit = {
         me.editBox.show();
         $(me).triggerHandler("activate");
         me.plusButton.activate();
+        me.readSavedFeatures();
         this.updateDrawings = window.setInterval(function() {
         me.readSavedFeatures();
     }, 15000);
