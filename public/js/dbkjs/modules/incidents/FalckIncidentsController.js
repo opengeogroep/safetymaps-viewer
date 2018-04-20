@@ -470,7 +470,7 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
         me.incident = incident;
         me.button.setIcon("bell");
 
-        $(dbkjs).trigger("incidents.vehicle.update",[incident]);
+        $(dbkjs).triggerHandler("incidents.vehicle.update",[incident]);
 
         // Always update window, updates moment.fromNow() times
         me.incidentDetailsWindow.data(incident, true, true);
