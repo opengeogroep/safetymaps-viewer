@@ -202,10 +202,21 @@ dbkjs.modules.edit = {
             showMeasureButtons: true
         }, me.options);
 
+        me.createElements();
         me.catchClick = false;
 
-        me.createElements();
-
+        $.ajax("editAllowed", {cache: false})
+                .always(function (jqXHR) {
+                    if (jqXHR.status === 404) {
+                        console.log("Edit-allowed");
+                    } else if (jqXHR.status !== 403) {
+                        console.log("Unexpected status: " + jqXHR + " " + jqXHR.statusText, jqXHR.responseText)
+                    } else {
+                        console.log("Edit-not allowed");
+                        me.setViewerMode();
+                    }
+                });
+        
         me.layer = new OpenLayers.Layer.Vector("_Edit", {
             styleMap: dbkjs.editStyles.symbol
         });
@@ -696,7 +707,7 @@ dbkjs.modules.edit = {
 
         // me.loadStylesheet();
 
-        var mainEditButton = new dbkjs.modules.EditButton("edit", "Tekenen", "#mapc1map1", "fa-pencil-square-o", {
+        this.mainEditButton = new dbkjs.modules.EditButton("edit", "Tekenen", "#mapc1map1", "fa-pencil-square-o", {
             divClass: "edit-button"
         }).on("activate", function() {
             me.activate();
@@ -800,5 +811,29 @@ dbkjs.modules.edit = {
                 "<div class='row'> <div class='col-md-12' style='margin-top: 5px'>  </div> </div>" +
           "</div>")
           .appendTo("#symbol-picker-bar");
+    },
+    
+    setViewerMode: function() {
+        var me = this;
+        this.mainEditButton = new dbkjs.modules.EditButton("edit", "Lezen", "#mapc1map1", "fa fa-eye", {
+            divClass: "edit-button"
+        }).on("activate", function() {
+            me.activateView();
+        }).on("deactivate", function() {
+            me.deactivateView();
+        });
+    },
+    
+    activateView: function() {
+        var me = this;
+        me.readSavedFeatures();
+        me.updateDrawings = window.setInterval(function() {
+        me.readSavedFeatures();
+    }, 15000);
+    },
+    
+    deactivateView: function() {
+        window.clearInterval(this.updateDrawings);
+        this.featuresManager.removeAllFeatures();
     }
 };
