@@ -53,6 +53,20 @@ dbkjs.options.baselayers = [
             }
     ),
     new OpenLayers.Layer.TMS(
+            'Luchtfoto 2017 (PDOK)',
+            'https://geodata.nationaalgeoregister.nl/luchtfoto/rgb/tms/',
+            {
+                layername: '2017_ortho25/EPSG:28992',
+                metadata:{pl: "01"},
+                isBaseLayer: true,
+                displayInLayerSwitcher: true,
+                type: 'png',
+                tileOrigin: tileScheme.geonovum.origin,
+                tileFullExtent: tileScheme.geonovum.maxExtent,
+                serverResolutions: tileScheme.geonovum.standardResolutions
+            }
+    ),
+    new OpenLayers.Layer.TMS(
             'Basisregistratie Topografie (PDOK)',
             'http://geodata.nationaalgeoregister.nl/tms/',
             {
