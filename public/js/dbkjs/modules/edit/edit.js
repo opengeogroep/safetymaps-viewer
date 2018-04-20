@@ -111,10 +111,11 @@ dbkjs.modules.EditSymbols = [
             {
                 "name": "RAMPZONES",
                 "symbols": [
-                    { "id": "s0070", "type": "area", "image": "images/imoov/s0070---g.png", "label": "Brongebied", "rotation": 0, "strokeWidth": 2, "strokeColor": "#000000", "fillColor": "#808284" },
-                    { "id": "s0080", "type": "area", "image": "images/imoov/s0080---g.png", "label": "Effectgebied, huidige situatie", "rotation": 0, "strokeWidth": 2, "strokeColor": "#000000", "fillColor": "#1FA2FF" },
-                    { "id": "s0090", "type": "area", "image": "images/imoov/s0090---g.png", "label": "Effectgebied, prognose", "rotation": 0, "strokeWidth": 3, "strokeColor": "#1FA2FF", "strokeDashstyle": "1,6" },
-                    { "id": "s0081", "type": "area", "image": "images/imoov/s0080---g.png", "label": "Rookpluim, prognose", "strokeWidth": 1, "strokeColor": "#000000", "fillColor": "#1FA2FF", "triangleFactor": 1 }
+                    { "id": "s0070", "type": "area", "isMulti":true, "sides":40, "image": "images/imoov/s0070---g.png", "label": "Brongebied", "rotation": 0, "strokeWidth": 2, "strokeColor": "#000000", "fillColor": "#808284" },
+                    { "id": "s0080", "type": "area", "isMulti":true, "sides":40, "image": "images/imoov/s0080---g.png", "label": "Effectgebied, huidige situatie", "rotation": 0, "strokeWidth": 2, "strokeColor": "#000000", "fillColor": "#1FA2FF" },
+                    { "id": "s0090", "type": "area", "isMulti":true, "sides":40, "image": "images/imoov/s0090---g.png", "label": "Effectgebied, prognose", "rotation": 0, "strokeWidth": 3, "strokeColor": "#1FA2FF", "strokeDashstyle": "1,6" },
+                    { "id": "s0081", "type": "area", "image": "images/imoov/s0080---g.png", "label": "Rookpluim, prognose", "strokeWidth": 1, "strokeColor": "#000000", "fillColor": "#1FA2FF", "triangleFactor": 1 },
+                    { "id": "s0090", "type": "area", "isMulti":false, "sides":4, "image": "images/imoov/s0090---g.png", "label": "Effectgebied, prognose", "rotation": 0, "strokeWidth": 3, "strokeColor": "#1FA2FF", "strokeDashstyle": "1,6" }
                 ]
             }
         ]
@@ -272,7 +273,7 @@ dbkjs.modules.edit = {
         me.drawTriangleControl = new OpenLayers.Control.DrawFeature(me.layer, OpenLayers.Handler.Path, drawTriangleOptions);
         dbkjs.map.addControl(me.drawTriangleControl);
         me.drawTriangleControl.deactivate();
-
+        
 
         this.symbolmanager = new dbkjs.modules.SymbolManager(dbkjs.modules.EditSymbols, "#edit-symbol-buttons", "#symbol-picker-button");
         this.symbolmanager.on("activeSymbolChanged", this.activeSymbolChanged, this);
@@ -438,13 +439,14 @@ dbkjs.modules.edit = {
         if(!activeSymbol) {
             return;
         }
+        /* 
         if(this.mode === activeSymbol.type && (!activeSymbol.hasOwnProperty("triangleFactor"))) {
             if(this.mode ==="line"){
                 this.drawLineControl.handler.freehand = activeSymbol.isFreehand; 
             }
             return;
-        }
-
+        }*/
+        
         // Disable previous mode
         if(this.mode === "point") {
             this.disablePointMode();
@@ -466,6 +468,8 @@ dbkjs.modules.edit = {
             if(activeSymbol.hasOwnProperty("triangleFactor")) {
                 this.enableTriangleMode();
             } else {
+                this.drawAreaControl.handler.multi = activeSymbol.isMulti;
+                this.drawAreaControl.handler.sides = activeSymbol.sides;
                 this.enableAreaMode();
         } 
         } else {
