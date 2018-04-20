@@ -115,7 +115,9 @@ dbkjs.modules.EditSymbols = [
                     { "id": "s0080", "type": "area", "isMulti":true, "sides":40, "image": "images/imoov/s0080---g.png", "label": "Effectgebied, huidige situatie", "rotation": 0, "strokeWidth": 2, "strokeColor": "#000000", "fillColor": "#1FA2FF" },
                     { "id": "s0090", "type": "area", "isMulti":true, "sides":40, "image": "images/imoov/s0090---g.png", "label": "Effectgebied, prognose", "rotation": 0, "strokeWidth": 3, "strokeColor": "#1FA2FF", "strokeDashstyle": "1,6" },
                     { "id": "s0081", "type": "area", "image": "images/imoov/s0080---g.png", "label": "Rookpluim, prognose", "strokeWidth": 1, "strokeColor": "#000000", "fillColor": "#1FA2FF", "triangleFactor": 1 },
-                    { "id": "s0090", "type": "area", "isMulti":false, "sides":4, "image": "images/imoov/s0090---g.png", "label": "Effectgebied, prognose", "rotation": 0, "strokeWidth": 3, "strokeColor": "#1FA2FF", "strokeDashstyle": "1,6" }
+                    { "id": "s0090", "type": "area", "isMulti":false, "sides":4, "image": "images/imoov/s0090---g.png", "label": "Draw Box", "rotation": 0, "strokeWidth": 3, "strokeColor": "#1FA2FF", "strokeDashstyle": "1,6" },
+                    { "id": "s0090", "type": "area", "isFreehand":true, "sides":4, "image": "images/imoov/s0090---g.png", "label": "Free hand", "rotation": 0, "strokeWidth": 3, "strokeColor": "#1FA2FF", "strokeDashstyle": "1,6", "polygon":1 },
+                    { "id": "s0070", "type": "area", "isFreehand":false, "sides":4, "image": "images/imoov/s0070---g.png", "label": "Brongebied", "rotation": 0, "strokeWidth": 2, "strokeColor": "#000000", "fillColor": "#808284", "polygon":1 }
                 ]
             }
         ]
@@ -186,6 +188,8 @@ dbkjs.modules.edit = {
     drawAreaControl: null,
     /** @var OpenLayers.Control.DrawFeature drawLineControl */
     drawTriangleControl: null,
+    /** @var OpenLayers.Control.DrawFeature drawPolygonControl */
+    drawPolygonControl: null,
 
     register: function() {
         var me = this;
@@ -256,7 +260,23 @@ dbkjs.modules.edit = {
         me.drawAreaControl = new OpenLayers.Control.DrawFeature(me.layer, OpenLayers.Handler.RegularPolygon, areaDrawOptions);
         dbkjs.map.addControl(me.drawAreaControl);
         me.drawAreaControl.deactivate();
-
+        
+        var polygonOptions = {
+            eventListeners: {
+                "featureadded": function (evt) {
+                    evt.feature.attributes = me.getFeatureAttributes();
+                    me.addFeatureToFeatureManager(evt.feature);
+                },
+                handlerOptions: {
+                    freehand: true,
+                    freehandToggle: null
+                }
+            }
+        };
+        me.drawPolygonControl = new OpenLayers.Control.DrawFeature(me.layer, OpenLayers.Handler.Polygon, polygonOptions);
+        dbkjs.map.addControl(me.drawPolygonControl);
+        me.drawPolygonControl.deactivate();
+        
         var drawTriangleOptions = {
             eventListeners: {
                 "featureadded": function(evt) {
@@ -457,6 +477,8 @@ dbkjs.modules.edit = {
             this.disableAreaMode();
         } else if(this.mode === "triangle") {
             this.disableTriangleMode();
+        } else if(this.mode === "polygon"){
+            this.disablePolygonMode();
         }
 
         // Enable new mode
@@ -465,14 +487,17 @@ dbkjs.modules.edit = {
         } else if(activeSymbol.type === "line") {
             this.drawLineControl.handler.freehand = activeSymbol.isFreehand; 
             this.enableLineMode();
-        } else if(activeSymbol.type === "area") {
-            if(activeSymbol.hasOwnProperty("triangleFactor")) {
+        } else if (activeSymbol.type === "area") {
+            if (activeSymbol.hasOwnProperty("triangleFactor")) {
                 this.enableTriangleMode();
+            } else if (activeSymbol.hasOwnProperty("polygon")) {
+                this.drawPolygonControl.handler.freehand = activeSymbol.isFreehand;
+                this.enablePolygonMode();
             } else {
                 this.drawAreaControl.handler.multi = activeSymbol.isMulti;
                 this.drawAreaControl.handler.sides = activeSymbol.sides;
                 this.enableAreaMode();
-        } 
+            }
         } else {
             this.mode = "";
         }
@@ -520,7 +545,13 @@ dbkjs.modules.edit = {
         $("body").addClass("disable-selection");
         this.drawAreaControl.activate();
     },
-
+    
+    enablePolygonMode: function() {
+        this.mode = "polygon";
+        $("body").addClass("disable-selection");
+        this.drawPolygonControl.activate();
+    },
+    
     enableTriangleMode: function() {
         this.mode = "triangle";
         $("body").addClass("disable-selection");
@@ -531,7 +562,12 @@ dbkjs.modules.edit = {
         $("body").removeClass("disable-selection");
         this.drawAreaControl.deactivate();
     },
-
+    
+    disablePolygonMode: function(){
+        $("body").removeClass("disable-selection");
+        this.drawPolygonControl.deactivate();
+    },
+    
     disableTriangleMode: function() {
         $("body").removeClass("disable-selection");
         this.drawTriangleControl.deactivate();
