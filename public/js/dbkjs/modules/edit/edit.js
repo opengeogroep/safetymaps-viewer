@@ -337,6 +337,7 @@ dbkjs.modules.edit = {
         $(me).triggerHandler("deactivate");
         this.clearSelectedFeature();
         window.clearInterval(this.updateDrawings);
+        this.featuresManager.removeAllFeatures();
     },
 
     initDrag: function() {
