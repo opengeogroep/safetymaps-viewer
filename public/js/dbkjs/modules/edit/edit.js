@@ -33,6 +33,7 @@ dbkjs.editStyles = {
                 labelYOffset: "${labelYOffset}",
                 labelOutlineWidth: 2,
                 labelOutlineColor: 'white',
+                rotation: "${rotation}",
                 // lines and areas
                 strokeColor: "${strokeColor}",
                 strokeWidth: "${strokeWidth}",
@@ -46,6 +47,9 @@ dbkjs.editStyles = {
                 context: {
                     labelYOffset: function(feature) {
                         return /*dbkjs.scaleStyleValue(12, feature.attributes.radius)*/ 12 * -1.4;
+                    },
+                    rotation: function(feature){
+                        return feature.attributes.rotation || 0;
                     },
                     label: function(feature) {
                         return feature.attributes.label || "";
@@ -132,7 +136,7 @@ dbkjs.modules.EditSymbols = [
                     { "id": "s0600_B04", "type": "point", "image": "images/imoov/s0600_B04---g.png", "label": "Brandweer Blusboot" },
                     { "id": "s0610_B05", "type": "point", "image": "images/imoov/s0610_B05---g.png", "label": "Brandweer Meetploeg" },
                     { "id": "s0620_B12", "type": "point", "image": "images/imoov/s0620_B12---g.png", "label": "Brandweer Ontsmettingssluis voertuigen" },
-                    { "id": "s0630_B13", "type": "point", "image": "images/imoov/s0630_B13---g.png", "label": "Brandweer Decontaminatie (personen)" }
+                    { "id": "s0630_B13", "type": "point", "image": "images/imoov/s0630_B13---g.png", "label": "Brandweer Decontaminatie (personen)", "rotation":0 }
                 ]
             },
             {
