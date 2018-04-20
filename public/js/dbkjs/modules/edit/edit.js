@@ -286,6 +286,9 @@ dbkjs.modules.edit = {
         me.editBox.show();
         $(me).triggerHandler("activate");
         me.plusButton.activate();
+        this.updateDrawings = window.setInterval(function() {
+        me.readSavedFeatures();
+    }, 15000);
     },
 
     deactivate: function() {
@@ -295,6 +298,7 @@ dbkjs.modules.edit = {
         me.deactivateButtons();
         $(me).triggerHandler("deactivate");
         this.clearSelectedFeature();
+        window.clearInterval(this.updateDrawings);
     },
 
     initDrag: function() {
