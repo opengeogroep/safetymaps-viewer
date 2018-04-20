@@ -53,8 +53,8 @@ dbkjs.modules.FeaturesManager = function() {
         .addClass("panel");
     var featurescontainer = $("<div class='features-container'><table class='table table-striped features-table'>" +
         "<thead>" +
-        "<tr><td colspan='3'><a href='#' class='remove-all'>Verwijder alle</a>" +
-            "<div style='float: right;'><a href='#' class='save-all'><i class='fa fa-save'></i> Opslaan</a> &nbsp; <a href='#' class='load-all'><i class='fa fa-upload'></i> Laden</a></div>" +
+        "<tr><td colspan='3'><a title='Delete all' href='#' class='btn btn-info btn-lg remove-all'><span class='glyphicon glyphicon-trash'></span></a>" +
+            "<div style='float: right;'><a title='Save all' href='#' class='btn btn-info btn-lg save-all'><i class='fa fa-save'></i></a> &nbsp; <a title='Load' href='#' class='btn btn-info btn-lg load-all'><i class='fa fa-upload'></i></a></div>" +
         "</td></tr>" +
         "<tr><td>Symb.</td><td colspan='2'>Label</td></tr>" +
         "</thead>" +
