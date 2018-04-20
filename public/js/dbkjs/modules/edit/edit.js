@@ -621,6 +621,7 @@ dbkjs.modules.edit = {
     addFeatureToFeatureManager: function(feature) {
         this.featuresManager.addFeature(feature);
         this.setSelectedFeature(feature);
+        this.saveFeatures();
     },
 
     deactivateButtons: function(btn) {
