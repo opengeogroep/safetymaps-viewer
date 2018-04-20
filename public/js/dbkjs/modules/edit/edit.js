@@ -119,9 +119,9 @@ dbkjs.modules.EditSymbols = [
                     { "id": "s0080", "type": "area", "isMulti":true, "sides":40, "image": "images/imoov/s0080---g.png", "label": "Effectgebied, huidige situatie", "rotation": 0, "strokeWidth": 2, "strokeColor": "#000000", "fillColor": "#1FA2FF" },
                     { "id": "s0090", "type": "area", "isMulti":true, "sides":40, "image": "images/imoov/s0090---g.png", "label": "Effectgebied, prognose", "rotation": 0, "strokeWidth": 3, "strokeColor": "#1FA2FF", "strokeDashstyle": "1,6" },
                     { "id": "s0081", "type": "area", "image": "images/imoov/s0080---g.png", "label": "Rookpluim, prognose", "strokeWidth": 1, "strokeColor": "#000000", "fillColor": "#1FA2FF", "triangleFactor": 1 },
-                    { "id": "s0090", "type": "area", "isMulti":false, "sides":4, "image": "images/imoov/s0090---g.png", "label": "Draw Box", "rotation": 0, "strokeWidth": 3, "strokeColor": "#1FA2FF", "strokeDashstyle": "1,6" },
-                    { "id": "s0090", "type": "area", "isFreehand":true, "sides":4, "image": "images/imoov/s0090---g.png", "label": "Free hand", "rotation": 0, "strokeWidth": 3, "strokeColor": "#1FA2FF", "strokeDashstyle": "1,6", "polygon":1 },
-                    { "id": "s0070", "type": "area", "isFreehand":false, "sides":4, "image": "images/imoov/s0070---g.png", "label": "Brongebied", "rotation": 0, "strokeWidth": 2, "strokeColor": "#000000", "fillColor": "#808284", "polygon":1 }
+                    { "id": "s0091", "type": "area", "isMulti":false, "sides":4, "image": "images/imoov/s0090---g.png", "label": "Draw Box", "rotation": 0, "strokeWidth": 3, "strokeColor": "#1FA2FF", "strokeDashstyle": "1,6" },
+                    { "id": "s0092", "type": "area", "isFreehand":true, "sides":4, "image": "images/imoov/s0080---g.png", "label": "Effectgebied, huidige situatie", "rotation": 0, "strokeWidth": 2, "strokeColor": "#000000", "fillColor": "#1FA2FF", "polygon":1 },
+                    { "id": "s0093", "type": "area", "isFreehand":false, "sides":4, "image": "images/imoov/s0070---g.png", "label": "Brongebied", "rotation": 0, "strokeWidth": 2, "strokeColor": "#000000", "fillColor": "#808284", "polygon":1 }
                 ]
             }
         ]
@@ -145,7 +145,7 @@ dbkjs.modules.EditSymbols = [
                     { "id": "s0690", "type": "line", "isFreehand":true,"image": "images/imoov/s0690---g.png", "label": "Evacuatiegebied, grens", "strokeWidth": 6, "strokeColor": "#A41926", "strokeDashstyle": "1,9", "strokeLinecap": "square" },
                     { "id": "s0700", "type": "line", "isFreehand":true,"image": "images/imoov/s0700---g.png", "label": "Evacuatieroute", "strokeWidth": 6, "strokeColor": "#51B848" },
                     { "id": "s0720", "type": "line", "isFreehand":true,"image": "images/imoov/s0720---g.png", "label": "Extra aanvoerroutes hulpdiensten", "strokeWidth": 3, "strokeColor": "#51B848" },
-                    { "id": "s0720", "type": "line", "isFreehand":false, "image": "images/imoov/s0720---g.png", "label": "Point 2 point", "strokeWidth": 3, "strokeColor": "#51B848" },
+                    { "id": "s0721", "type": "line", "isFreehand":false, "image": "images/imoov/s0720---g.png", "label": "Point 2 point", "strokeWidth": 3, "strokeColor": "#51B848" },
                     { "id": "s0740_B14", "type": "point", "isFreehand":true,"image": "images/imoov/s0740_B14---g.png", "label": "Brandstofvoorziening voor hulpverleningsvoertuigen" }
                 ]
             }
