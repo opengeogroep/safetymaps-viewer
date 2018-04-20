@@ -29,7 +29,7 @@ function FalckIncidentVehicleController(controller) {
             $(dbkjs.modules.incidents.controller).on("new_incident", function (event, commonIncident,incident) {
                 me.incidentFound(incident);
             });
-            (dbkjs.modules.incidents.controller).on("incidents.vehicle.update", function(event, incident){
+            $(dbkjs.modules.incidents.controller).on("incidents.vehicle.update", function(event, incident){
                me.incidentFound(incident); 
             });
         }
