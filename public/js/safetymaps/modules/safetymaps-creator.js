@@ -387,6 +387,7 @@ dbkjs.modules.safetymaps_creator = {
                     '</tr>'
                     );
             me.showFeatureInfo(i18n.t("creator.area"), table);
+            layer.redraw();
         } else if (layer === me.objectLayers.layerFireCompartmentation) {
             console.log("FireCompartmentation feature selected", e);
             var table = $('<table class="table table-hover"></table>');
@@ -469,8 +470,11 @@ dbkjs.modules.safetymaps_creator = {
         $('#vectorclickpanel').show();
     },
 
-    objectLayerFeatureUnselected: function(e) {
+    objectLayerFeatureUnselected: function (e) {
         $("#vectorclickpanel").hide();
+        if (e.feature.layer === this.objectLayers.layerCustomPolygon) {
+            e.feature.layer.redraw();
+        }
     }
 };
 
