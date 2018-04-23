@@ -8,9 +8,9 @@
 function FalckIncidentVehicleController(controller) {
     var me = this;
     me.controller = controller;
-    me.options = dbkjs.options.incidents;
+    me.options = controller.options;
     var selectLayers = [];
-    me.vehiclePositionLayer = new VehiclePositionLayer();
+    me.vehiclePositionLayer = new VehiclePositionLayer(me.options);
 
     selectLayers.push(me.vehiclePositionLayer.layer);
     //me.addSelectLayers(selectLayers);
