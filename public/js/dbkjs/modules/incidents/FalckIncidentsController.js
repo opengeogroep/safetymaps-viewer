@@ -29,7 +29,11 @@
 function FalckIncidentsController(incidents) {
     var me = this;
     me.first = true;
-    me.options = dbkjs.options.incidents;
+    me.options = dbkjs.options.incidents || incidents.options;
+
+    me.options = $.extend({
+        incidentsUrl: "gms"
+    }, me.options);
 
     me.button = new AlertableButton("btn_incident", "Incident", "bell-o");
     me.button.getElement().prependTo('.layertoggle-btn-group');
