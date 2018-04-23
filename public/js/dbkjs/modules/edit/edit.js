@@ -325,8 +325,8 @@ dbkjs.modules.edit = {
         me.plusButton.activate();
         me.readSavedFeatures();
         this.updateDrawings = window.setInterval(function() {
-        me.readSavedFeatures();
-    }, 15000);
+            me.readSavedFeatures();
+        }, 15000);
     },
 
     deactivate: function() {
@@ -476,6 +476,8 @@ dbkjs.modules.edit = {
         if(!activeSymbol) {
             return;
         }
+        $(".selected-label").remove();
+        $("#symbol-picker-bar").append("<span class='selected-label' style='font-weight: bold;'>("+activeSymbol.label+")</span>");
         /* 
         if(this.mode === activeSymbol.type && (!activeSymbol.hasOwnProperty("triangleFactor"))) {
             if(this.mode ==="line"){
