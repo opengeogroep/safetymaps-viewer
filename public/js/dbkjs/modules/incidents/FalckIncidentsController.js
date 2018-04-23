@@ -29,7 +29,7 @@
 function FalckIncidentsController(incidents) {
     var me = this;
     me.first = true;
-    me.options = dbkjs.options.incidents || incidents.options;
+    me.options = incidents.options;
 
     me.options = $.extend({
         incidentsUrl: "gms"
