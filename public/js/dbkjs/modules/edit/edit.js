@@ -326,7 +326,7 @@ dbkjs.modules.edit = {
         me.readSavedFeatures();
         this.updateDrawings = window.setInterval(function() {
             me.readSavedFeatures();
-        }, 15000);
+        }, 5000);
     },
 
     deactivate: function() {
@@ -766,6 +766,7 @@ dbkjs.modules.edit = {
                 me.disableLineMode();
                 me.disableAreaMode();
                 me.disableTriangleMode();
+                me.disablePolygonMode();
                 me.featuresManager.hidePropertiesGrid();
             });
 
@@ -832,9 +833,9 @@ dbkjs.modules.edit = {
         me.readSavedFeatures();
         me.updateDrawings = window.setInterval(function() {
         me.readSavedFeatures();
-    }, 15000);
-    },
+    }, 5000);
     
+    },
     deactivateView: function() {
         window.clearInterval(this.updateDrawings);
         this.featuresManager.removeAllFeatures();
