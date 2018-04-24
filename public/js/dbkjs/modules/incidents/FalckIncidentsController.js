@@ -335,7 +335,7 @@ FalckIncidentsController.prototype.inzetIncident = function(incidentId) {
             me.markerLayer.addIncident(incident, false, true);
             me.markerLayer.setZIndexFix(); 
             
-            dbkjs.protocol.jsonDBK.deselect();
+            //dbkjs.protocol.jsonDBK.deselect();
             me.zoomToIncident();
 
             var x = incident.IncidentLocatie.XCoordinaat;
