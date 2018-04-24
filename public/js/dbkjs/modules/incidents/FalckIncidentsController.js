@@ -354,7 +354,7 @@ FalckIncidentsController.prototype.inzetIncident = function(incidentId) {
             me.featureSelector = new IncidentFeatureSelector(incident, commonIncidentObject, true, false);
 
             me.featureSelector.updateBalkRechtsonder(me.getBalkrechtsonderTitle());
-            me.featureSelector.findAndSelectMatches(me.incidentDetailsWindow);
+            //me.featureSelector.findAndSelectMatches(me.incidentDetailsWindow);
 
             me.incidentDetailsWindow.show();
             me.enableIncidentUpdates();
