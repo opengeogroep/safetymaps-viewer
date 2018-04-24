@@ -265,7 +265,9 @@ dbkjs.modules.SymbolManager = function(symbols, quickSelectContainer, symbolPick
     this.loadRecentlyUsedSymbols();
 
     // Listeners
-    $(symbolPickerBtn).on("click", (function() { this.symbolpicker.show() }).bind(this));
+    $(symbolPickerBtn).on("click", (function() {
+        $("#edit-symbol-properties").hide();
+        this.symbolpicker.show(); }).bind(this));
     this.quickSelectContainer.add(this.symbolpicker.find(".panel-body"))
         .on("click", ".symbol-btn", this.handleSymbolButtonClick.bind(this));
 };
@@ -433,6 +435,7 @@ $.extend(dbkjs.modules.SymbolManager.prototype, {
 
     handleSymbolButtonClick: function(e) {
         this.symbolpicker.hide();
+        $("#edit-symbol-properties").show();
         this.setActiveSymbol(e.currentTarget.getAttribute("data-symbolid"));
     },
 
