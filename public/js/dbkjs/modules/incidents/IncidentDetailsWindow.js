@@ -510,7 +510,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
                     tooltip = "actie be&euml;indigd om " + einde.format("HH:mm") + ", " + einde.fromNow();
                 }
 
-                html += (!inzet.IsActief ? "<span class='einde'style='color:black'" : "<span font style='color:gray'")  + " title='" + tooltip + "'>" + dbkjs.util.htmlEncode(eenheid) + "</span><br/>";
+                html += (!inzet.IsActief ? "<span class='einde'style='color:gray'" : "<span font style='color:black'")  + " title='" + tooltip + "'>" + dbkjs.util.htmlEncode(eenheid) + "</span><br/>";
             }
         });
         html += '</div>';
