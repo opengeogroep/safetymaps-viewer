@@ -452,7 +452,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
     html += '<tr><td>Postcode & Woonplaats: </td><td>' + (a.Postcode ? a.Postcode : "-") +  ', '+(a.Plaatsnaam ? a.Plaatsnaam : "-") + '</td></tr>';
     //html += '<tr><td>Woonplaats: </td><td>' + (a.Plaatsnaam ? a.Plaatsnaam : "-") + '</td></tr>';
 
-    html += '<tr><td>&nbsp;</td><td></td></tr>';
+    //html += '<tr><td>&nbsp;</td><td></td></tr>';
     html += '<tr><td>Melding classificatie:</td><td>' + me.getIncidentClassificatiesFalck(incident) + '</td></tr>';
 
     if(!incident.Karakteristieken || incident.Karakteristieken.length === 0) {
@@ -470,7 +470,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
     html += '</td></tr>';
 
     if(showInzet) {
-        html += '<tr><td>&nbsp;</td><td></td></tr>';
+        //html += '<tr><td>&nbsp;</td><td></td></tr>';
         html += '<tr class="detailed"><td colspan="2" id="eenheden">';
         html += "Eenheden: ";
         
@@ -485,7 +485,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
             
             html += (inzet.IsActief ? '<font color="#000000">' : '<font color="#A9A9A9">') +dbkjs.util.htmlEncode(inzet.Roepnaam+""+eta)+'</font>';
         });
-        html += " (Klik voor meer info)";
+        html += "<font color='#A9A9A9'> (Klik voor meer info)</font>";
         
         $(document).on('click', '#eenheden', function(){
                 $('#allEenheden').show();
@@ -494,7 +494,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
         
         html += '</td></tr>';
         html += '<tr class="detailed"><td style="display:none;" colspan="2" id="allEenheden">';
-        html += '<div id="brw">Eenheden: (Klik voor minder info)<br/>';
+        html += '<div id="brw">Eenheden:<font color="#A9A9A9"> (Klik voor minder info)</font><br/>';
         $.each(incident.BetrokkenEenheden, function(i, inzet) {
             if(inzet.Discipline === "B") {
                 var eenheid = (inzet.InzetRol ? inzet.InzetRol : "") + " " + inzet.Roepnaam;
@@ -510,7 +510,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
                     tooltip = "actie be&euml;indigd om " + einde.format("HH:mm") + ", " + einde.fromNow();
                 }
 
-                html += (!inzet.IsActief ? "<span class='einde' " : "<span ")  + " title='" + tooltip + "'>" + dbkjs.util.htmlEncode(eenheid) + "</span><br/>";
+                html += (!inzet.IsActief ? "<span class='einde'style='color:black'" : "<span font style='color:gray'")  + " title='" + tooltip + "'>" + dbkjs.util.htmlEncode(eenheid) + "</span><br/>";
             }
         });
         html += '</div>';
