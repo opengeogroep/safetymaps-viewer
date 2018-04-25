@@ -471,7 +471,16 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
 
     if(showInzet) {
         //html += '<tr><td>&nbsp;</td><td></td></tr>';
-        html += '<tr class="detailed"><td colspan="2" id="eenheden">';
+        var showEenheden = "";
+        var showAllEeenheden = "";
+        if($("#allEenheden").is(":visible")){
+            showAllEeenheden = "visible";
+            showEenheden = "none";
+        } else {
+            showAllEeenheden = "none";
+            showEenheden = "visible";
+        }
+        html += '<tr class="detailed"><td colspan="2" id="eenheden" style = "display:'+showEenheden+';">';
         html += "Eenheden: ";
         
         $.each(incident.BetrokkenEenheden, function(i, inzet) {
@@ -493,7 +502,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
         });
         
         html += '</td></tr>';
-        html += '<tr class="detailed"><td style="display:none;" colspan="2" id="allEenheden">';
+        html += '<tr class="detailed"><td style="display:'+showAllEeenheden+';" colspan="2" id="allEenheden">';
         html += '<div id="brw">Eenheden:<font color="#A9A9A9"> (Klik voor minder info)</font><br/>';
         $.each(incident.BetrokkenEenheden, function(i, inzet) {
             if(inzet.Discipline === "B") {
