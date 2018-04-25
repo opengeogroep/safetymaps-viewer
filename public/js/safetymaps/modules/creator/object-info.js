@@ -336,7 +336,8 @@ safetymaps.creator.renderSymbols = function(object) {
     if(object.symbols || object.communication_coverage) {
         rows.push([
             "<b>" + i18n.t("creator.symbol_icon") + "</b>",
-            "<b>" + i18n.t("creator.symbol_name") + "</b>"
+            "<b>" + i18n.t("creator.symbol_name") + "</b>",
+            "<b>" + i18n.t("dialogs.information") + "</b>"
         ]);
 
         // Display legend of symbols, only one symbol even if used multiple times
@@ -351,18 +352,18 @@ safetymaps.creator.renderSymbols = function(object) {
 
             rows.push([
                 '<img style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'symbols/' + s.code + '.png' + '" alt="' + s.code + '" title="' + s.code + '">',
-                i18n.t("symbol." + s.code) // TODO get from safetymaps.creator.api.styles info
+                i18n.t("symbol." + s.code),s.omschrijving // TODO get from safetymaps.creator.api.styles info
             ]);
         });
 
         if(object.communication_coverage) {
             rows.push([
                 '<img style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'coverage.png">',
-                i18n.t("creator.symbol_communication_coverage")
+                i18n.t("creator.symbol_communication_coverage"),""
             ]);
             rows.push([
                 '<img style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'no_coverage.png">',
-                i18n.t("creator.symbol_no_communication_coverage")
+                i18n.t("creator.symbol_no_communication_coverage"), ""
             ]);
         }
     }
