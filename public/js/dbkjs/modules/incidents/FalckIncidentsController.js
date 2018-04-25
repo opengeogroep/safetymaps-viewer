@@ -201,6 +201,7 @@ FalckIncidentsController.prototype.getInzetInfo = function() {
     var me = this;
 
     if(!me.voertuignummer) {
+        me.button.setIcon("bell-o");
         return;
     }
 
@@ -258,7 +259,7 @@ FalckIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
         }
     } else {
         $('#systeem_meldingen').hide();
-        me.button.setIcon("bell-o");
+        //me.button.setIcon("bell-o");
         var incidenten = inzetInfo;
         me.inzetIncident(incidenten[incidenten.length-1]);
     }
