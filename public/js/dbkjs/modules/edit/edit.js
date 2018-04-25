@@ -790,8 +790,9 @@ dbkjs.modules.edit = {
         // Create symbol properties window
         me.properties = $("<div/>")
                 .attr("id", "edit-symbol-container")
+                .css("cursor","crosshair")
                 .addClass("panel");
-        me.properties.appendTo("#mapc1map1");
+        me.properties.appendTo("body");
 
         var group = $("<div/>")
                 .addClass("btn-group-vertical edit-type-buttons")
