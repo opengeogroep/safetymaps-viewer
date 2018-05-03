@@ -55,7 +55,8 @@ IncidentFeatureSelector.prototype.findAndSelectMatches = function(incidentDetail
     var matches = me.matches;
     if(matches.length === 1) {
         console.log("Selecting match", matches[0]);
-        dbkjs.protocol.jsonDBK.process(matches[0], null, true);
+        //dbkjs.protocol.jsonDBK.process(matches[0], null, true);
+        dbkjs.modules.safetymaps_creator.selectObjectById(matches[0].attributes.apiObject.id,matches[0].attributes.apiObject.extent);
     } else if(me.matches.length > 1) {
         incidentDetailsWindow.setMultipleFeatureMatches(matches, new OpenLayers.LonLat(me.matchInfo.x, me.matchInfo.y));
     }
@@ -79,7 +80,7 @@ IncidentFeatureSelector.prototype.findMatches = function() {
 
     // Find main and additional addresses matches, only if features are loaded
 
-    if(!dbkjs.modules.feature.features || dbkjs.modules.feature.features.length === 0) {
+    if(!dbkjs.modules.safetymaps_creator.features || dbkjs.modules.safetymaps_creator.features.length === 0) {
         console.log("Features not loaded, can't search for feature matching incident");
         return false;
     } else if(dbkjs.modules.waterongevallen.enabled && !dbkjs.modules.waterongevallen.loaded) {
@@ -89,12 +90,13 @@ IncidentFeatureSelector.prototype.findMatches = function() {
         console.log("Searching feature for incident address " + straat + " " + huisnummer + huisletter + " " + toevoeging + ", " + postcode + " " + woonplaats, me.matchInfo);
 
         var dbk = null;
-        $.each(dbkjs.modules.feature.features, function(index, f) {
+        $.each(dbkjs.modules.safetymaps_creator.features, function(index, f) {
             if($.isArray(f.attributes.adres)) {
                 $.each(f.attributes.adres, function(index, fa) {
                     if(fa) {
-                        var matchPostcode = fa.postcode && postcode === fa.postcode;
+                        var matchPostcode = fa.postcode && postcode === fa.postcode;                       
                         var matchHuisnummer = fa.huisnummer && huisnummer === fa.huisnummer;
+                        fa.huisletter = fa.huisletter ? fa.huisletter : "";
                         var matchHuisletter = !me.matchHuisletter || (fa.huisletter === huisletter);
                         var matchToevoeging = !me.matchToevoeging || (fa.toevoeging === toevoeging);
                         var matchWoonplaats = woonplaats && fa.woonplaatsNaam && fa.woonplaatsNaam.toLowerCase().indexOf(woonplaats.toLowerCase()) !== -1;
@@ -142,7 +144,7 @@ IncidentFeatureSelector.prototype.findMatches = function() {
         if(me.matchInfo.x && me.matchInfo.y) {
             var point = new OpenLayers.Geometry.Point(me.matchInfo.x, me.matchInfo.y);
 
-            $.each(dbkjs.modules.feature.features, function(index, f) {
+            $.each(dbkjs.modules.safetymaps_creator.features, function(index, f) {
                 if(f.attributes.selectiekader) {
                     $.each(f.attributes.selectiekader.components, function(j, c) {
                         if(c.containsPoint(point)) {
