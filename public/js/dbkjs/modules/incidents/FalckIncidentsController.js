@@ -202,6 +202,7 @@ FalckIncidentsController.prototype.getInzetInfo = function() {
 
     if(!me.voertuignummer) {
         me.button.setIcon("bell-o");
+        me.geenInzet(false);
         return;
     }
 
@@ -355,7 +356,7 @@ FalckIncidentsController.prototype.inzetIncident = function(incidentId) {
             me.featureSelector = new IncidentFeatureSelector(incident, commonIncidentObject, true, false);
 
             me.featureSelector.updateBalkRechtsonder(me.getBalkrechtsonderTitle());
-            //me.featureSelector.findAndSelectMatches(me.incidentDetailsWindow);
+            me.featureSelector.findAndSelectMatches(me.incidentDetailsWindow);
 
             me.incidentDetailsWindow.show();
             me.enableIncidentUpdates();
