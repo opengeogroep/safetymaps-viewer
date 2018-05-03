@@ -465,7 +465,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
             }, {
                 context: {
                     size: function(feature) {
-                        return feature.attributes.size * 0.8;
+                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,14,feature.attributes.size);
                     }
                 }
             })
