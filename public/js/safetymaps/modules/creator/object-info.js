@@ -77,6 +77,7 @@ safetymaps.creator.renderGeneral = function(object) {
         var n = Number(object.bouwlaag_max);
         highestFloor = n === 0 ? 0 : n + " (" + (n-1) + ")";
     }
+    if(object.huisnummer === 0) object.huisnummer = "";
     return [
         {l: i18n.t("creator.formal_name"), t: object.formele_naam},
         {l: i18n.t("creator.informal_name"), t: object.informele_naam},
