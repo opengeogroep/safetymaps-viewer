@@ -99,6 +99,8 @@ safetymaps.creator.api = {
             feature.attributes.symbol = me.imagePath + symbol;
             feature.attributes.width = width;
             feature.attributes.height = height;
+            feature.attributes.adres = [apiObject  
+            ];
             if(apiObject.selectiekader) {
                 var selectiekaderFeature = wktParser.read(apiObject.selectiekader);
                 feature.attributes.selectionPolygon = selectiekaderFeature.geometry;
