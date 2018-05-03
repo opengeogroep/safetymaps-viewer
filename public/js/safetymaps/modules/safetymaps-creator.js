@@ -27,6 +27,7 @@ dbkjs.modules.safetymaps_creator = {
     selectedObject: null,
     selectedClusterFeature: null,
     infoWindow: null,
+    features:[],
 
     register: function() {
         var me = this;
@@ -184,8 +185,8 @@ dbkjs.modules.safetymaps_creator = {
         this.viewerApiObjects.sort(function(lhs, rhs) {
             return lhs.formele_naam.localeCompare(rhs.formele_naam, dbkjsLang);
         });
-        var features = safetymaps.creator.api.createViewerObjectFeatures(this.viewerApiObjects);
-        this.clusteringLayer.addFeaturesToCluster(features);
+        this.features = safetymaps.creator.api.createViewerObjectFeatures(this.viewerApiObjects);
+        this.clusteringLayer.addFeaturesToCluster(this.features);
 
         this.createSearchConfig();
     },
