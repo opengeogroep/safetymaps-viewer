@@ -187,7 +187,7 @@ dbkjs.modules.safetymaps_creator = {
         });
         this.features = safetymaps.creator.api.createViewerObjectFeatures(this.viewerApiObjects);
         this.clusteringLayer.addFeaturesToCluster(this.features);
-
+        
         this.createSearchConfig();
     },
 
@@ -372,7 +372,10 @@ dbkjs.modules.safetymaps_creator = {
         var me = this;
         var layer = e.feature.layer;
         var f = e.feature.attributes;
-        if (layer === me.objectLayers.layerCustomPolygon) {
+        if(f.style.en === "Area"){
+            console.log("Area selected, do nothing");
+            layer.redraw();
+        } else if (layer === me.objectLayers.layerCustomPolygon) {
             console.log("CustomPolygon feature selected", e);
             var table = $('<table class="table table-hover"></table>');
             table.append('<tr><th style="width: 10%"></th><th>' + i18n.t("dialogs.information") + '</th></tr>');
