@@ -1,0 +1,30 @@
+
+body {
+    background: white;
+    page-break-before: avoid;    
+    size: landscape;
+    -webkit-transform: rotate(-90deg) scale(.68,.68); 
+    -moz-transform:rotate(-90deg) scale(.58,.58);    
+}
+
+.main-button-group #noordpijl #zoom_buttons #edit .modal-popup {
+    display: none !important;
+}
+
+.modal-popup > * {
+    display: none !important;
+}
+
+#mapc1map1 {
+    left: 0;
+    top: 0;
+    width: 500px;
+    height: 500px;
+    display: block;
+    visiblity: visible;
+}
+
+* {
+    overflow: visible !important;
+    position: relative;
+}
