@@ -139,15 +139,39 @@ function IncidentMonitorController(incidents) {
 
     me.archivedIncidents = [];
 
-    $(this.service).on('initialized', function() {
-        me.addAGSLayers();
-        me.getIncidentList();
-    });
+    me.checkFalckEnabledByAuthz()
+            .always(function() {
+        $(me.service).on('initialized', function() {
+            me.addAGSLayers();
+            me.getIncidentList();
+        });
 
-    window.setInterval(function() {
-        me.checkIncidentListOutdated();
-    }, 500);
-}
+        window.setInterval(function() {
+            me.checkIncidentListOutdated();
+        }, 500);
+    });
+};
+
+IncidentMonitorController.prototype.checkFalckEnabledByAuthz = function() {
+    var me = this;
+    var d = $.Deferred();
+
+    $.ajax("webservice_enabled", { cache: false } )
+    .always(function(jqXHR) {
+        if(jqXHR.status === 404) {
+            console.log("Webservice enabled by authz!");
+            me.falck = true;
+            d.resolve();
+        } else if(jqXHR.status !== 403) {
+            console.log("Unexpected status: " + jqXHR + " " + jqXHR.statusText, jqXHR.responseText);
+            d.resolve();
+        } else {
+            console.log("Webservice not enabled by authz, webservice enabled by param: " + me.falck);
+            d.resolve();
+        }
+    });
+    return d.promise();
+};
 
 IncidentMonitorController.prototype.UPDATE_INTERVAL_MS = 30000;
 IncidentMonitorController.prototype.UPDATE_INTERVAL_ERROR_MS = 5000;
