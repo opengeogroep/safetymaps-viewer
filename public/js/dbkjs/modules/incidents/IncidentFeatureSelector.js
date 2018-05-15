@@ -56,7 +56,7 @@ IncidentFeatureSelector.prototype.findAndSelectMatches = function(incidentDetail
     if(matches.length === 1) {
         console.log("Selecting match", matches[0]);
         //dbkjs.protocol.jsonDBK.process(matches[0], null, true);
-        dbkjs.modules.safetymaps_creator.selectObjectById(matches[0].attributes.apiObject.id,matches[0].attributes.apiObject.extent);
+        dbkjs.modules.safetymaps_creator.selectObjectById(matches[0].attributes.apiObject.id,matches[0].attributes.apiObject.extent,true);
     } else if(me.matches.length > 1) {
         incidentDetailsWindow.setMultipleFeatureMatches(matches, new OpenLayers.LonLat(me.matchInfo.x, me.matchInfo.y));
     }
@@ -114,13 +114,13 @@ IncidentFeatureSelector.prototype.findMatches = function() {
 
             if($.isArray(f.attributes.adressen)) {
                 $.each(f.attributes.adressen, function(i, a) {
-                    var matchPostcode = a.postcode && a.postcode === postcode;
+                    var matchPostcode = a.pc && a.pc === postcode;
                     // Exacte matches vanwege BAG, geen toLowerCase() / indexOf() nodig
-                    var matchWoonplaats = a.woonplaats && a.woonplaats === woonplaats;
-                    var matchStraat = a.straat && a.straat === straat;
-                    if(matchPostcode || (matchWoonplaats && matchStraat) && a.nummers) {
-                        console.log("Checking nummers for match DBK " + f.attributes.formeleNaam + ", " + a.postcode + " " + a.woonplaats);
-                        $.each(a.nummers, function(j, n) {
+                    var matchWoonplaats = a.pl && a.pl === woonplaats;
+                    var matchStraat = a.sn && a.sn === straat;
+                    if(matchPostcode || (matchWoonplaats && matchStraat) && a.nrs) {
+                        console.log("Checking nummers for match DBK " + f.attributes.formeleNaam + ", " + a.pc + " " + a.pl);
+                        $.each(a.nrs, function(j, n) {
                             var parts = n.split("|");
                             var matchHuisnummer = Number(parts[0]) === huisnummer;
                             var fHuisletter = parts.length > 1 ? parts[1] : "";
@@ -145,8 +145,8 @@ IncidentFeatureSelector.prototype.findMatches = function() {
             var point = new OpenLayers.Geometry.Point(me.matchInfo.x, me.matchInfo.y);
 
             $.each(dbkjs.modules.safetymaps_creator.features, function(index, f) {
-                if(f.attributes.selectiekader) {
-                    $.each(f.attributes.selectiekader.components, function(j, c) {
+                if(f.attributes.selectionPolygon) {
+                    $.each(f.attributes.selectionPolygon.components, function(j, c) {
                         if(c.containsPoint(point)) {
                             console.log("Incident XY inside feature selectiekader", f);
                             selectiekaderMatches.push(f);
