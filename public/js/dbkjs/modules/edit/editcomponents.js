@@ -111,10 +111,10 @@ dbkjs.modules.FeaturesManager = function() {
         e.stopPropagation();
         var removeBtn = $(e.currentTarget);
         if(removeBtn.hasClass("remove-all")) {
-            this.removeAllFeatures();
+            this.removeAllFeatures(true);
             return;
         }
-        this.removeFeatureByRow(removeBtn.closest("tr"));
+        this.removeFeatureByRow(removeBtn.closest("tr"),true);
     }).bind(this));
     this.featureslist.on("click", ".load-all", (function(e) {
         e.preventDefault();
@@ -173,20 +173,20 @@ $.extend(dbkjs.modules.FeaturesManager.prototype, {
         var row = this.findRowByFeatureId(feature.id);
         row.find(".lbl span").html(feature.attributes.label);
     },
-    removeAllFeatures: function() {
+    removeAllFeatures: function(buttonClicked = false) {
         this.featurestable.children().remove();
-        this.trigger("removeAllFeatures");
+        this.trigger("removeAllFeatures",[buttonClicked]);
     },
-    removeFeatureByRow: function(row) {
-        this.removeFeature(row.data("featureid"), row);
+    removeFeatureByRow: function(row,buttonClicked = false) {
+        this.removeFeature(row.data("featureid"), row,buttonClicked);
     },
-    removeFeature: function(featureid, row) {
+    removeFeature: function(featureid, row,buttonClicked = false) {
         if(row) {
             row.remove();
         } else {
             this.findRowByFeatureId(featureid).remove();
         }
-        this.trigger("removeFeature", [ featureid ]);
+        this.trigger("removeFeature", [ featureid,buttonClicked ]);
     },
     setSelectedFeature: function(feature) {
         this.featurestable.find(".info").removeClass("info");
