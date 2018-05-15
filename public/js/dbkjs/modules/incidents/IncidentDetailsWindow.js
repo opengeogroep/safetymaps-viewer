@@ -212,15 +212,20 @@ IncidentDetailsWindow.prototype.showMultipleFeatureMatches = function() {
     div.append("<h3>Meerdere informatiekaarten gevonden op de locatie van het incident:</h3>");
     var item_ul = $('<ul class="nav nav-pills nav-stacked"></ul>');
     $.each(me.multipleFeatureMatches, function(i, m) {
-        var info = dbkjs.config.styles.getFeatureStylingInfo(m);
-
-        item_ul.append($('<li><a href="#"><img src="' + info.icon + '" style="width: 25px; margin-right: 10px">' + (m.attributes.locatie || m.attributes.formeleNaam) + (m.attributes.informeleNaam ? ' (' + m.attributes.informeleNaam + ')' : '') + '</a></li>').on('click', function(e) {
+        //var info = dbkjs.config.styles.getFeatureStylingInfo(m);
+        var info = {
+            "icon" : m.attributes.symbol,
+            "iconWidth" : m.attributes.width,
+            "iconHeight" : m.attributes.height
+        };
+        item_ul.append($('<li><a href="#"><img src="' + info.icon + '" style="width: 25px; margin-right: 10px">' + (m.attributes.apiObject.locatie || m.attributes.apiObject.formele_naam) + (m.attributes.apiObject.informele_naam ? ' (' + m.attributes.apiObject.informele_naam + ')' : '') + '</a></li>').on('click', function(e) {
             e.preventDefault();
             me.hideMultipleFeatureMatches();
             if(me.incidentLonLat) {
                 dbkjs.map.setCenter(me.incidentLonLat, dbkjs.options.zoom);
             }
-            dbkjs.protocol.jsonDBK.process(m, null, true);
+            //dbkjs.protocol.jsonDBK.process(m, null, true);
+            dbkjs.modules.safetymaps_creator.selectObjectById(m.attributes.apiObject.id,m.attributes.apiObject.extent, true);
         }));
     });
     div.append(item_ul);
