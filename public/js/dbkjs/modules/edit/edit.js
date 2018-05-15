@@ -850,8 +850,8 @@ dbkjs.modules.edit = {
         var me = this;
         me.readSavedFeatures();
         me.updateDrawings = window.setInterval(function() {
-        me.readSavedFeatures();
-    }, 5000);
+        me.readSavedFeatures(false);
+    }, 1000);
     
     },
     deactivateView: function() {
