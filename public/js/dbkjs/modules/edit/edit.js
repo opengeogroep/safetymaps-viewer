@@ -379,6 +379,7 @@ dbkjs.modules.edit = {
                 }
             }, this)
             .on("propertyUpdated", function(property) {
+                this.allowedToRead = false;
                 if(!this.selectedFeature) {
                     return;
                 }
