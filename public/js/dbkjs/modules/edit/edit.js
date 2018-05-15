@@ -174,6 +174,7 @@ dbkjs.modules.edit = {
     id: "dbk.module.edit",
     catchClick: null,
     layer: null,
+    allowedToRead: true,
 
     debounceUpdateLayer: null,
 
@@ -396,6 +397,10 @@ dbkjs.modules.edit = {
                 }
                 this.updateLayer();
                 this.featuresManager.updateFeature(this.selectedFeature);
+                //this.saveFeatures();
+            }, this).on("propertyChanged",function(e){
+                this.allowedToRead = true;
+                this.saveFeatures();                   
             }, this)
             .on("featureOver", function(featureid) {
                 var feature = this.layer.getFeatureById(featureid);
