@@ -63,9 +63,10 @@ function FalckIncidentsController(incidents) {
         me.zoomToIncident();
         me.incidentDetailsWindow.show();
         if(me.featureSelector.matches.length === 1) {
-            dbkjs.protocol.jsonDBK.process(me.featureSelector.matches[0], null, true);
+            dbkjs.modules.safetymaps_creator.selectObjectById(me.featureSelector.matches[0].attributes.apiObject.id,me.featureSelector.matches[0].attributes.apiObject.extent,true);
+            //dbkjs.protocol.jsonDBK.process(me.featureSelector.matches[0], null, true);
         } else {
-            dbkjs.protocol.jsonDBK.deselect();
+            dbkjs.modules.safetymaps_creator.unselectObject();
             me.incidentDetailsWindow.showMultipleFeatureMatches();
         }
     });
