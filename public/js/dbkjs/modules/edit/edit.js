@@ -204,7 +204,7 @@ dbkjs.modules.edit = {
 
         me.createElements();
         me.catchClick = false;
-
+        
         $.ajax("editAllowed", {cache: false})
                 .always(function (jqXHR) {
                     if (jqXHR.status === 404) {
@@ -297,7 +297,7 @@ dbkjs.modules.edit = {
                 "featureadded": function(evt) {
                     var attributes = me.getFeatureAttributes();
                     var vertices = evt.feature.geometry.getVertices();
-                    me.createTriangleFromPoints(vertices[0], vertices[1], attributes);
+                    me.createTriangleFromPoints(vertices[0], vertices[1], attributes,true);
                     me.layer.removeFeatures(evt.feature);
                 }
             },
@@ -322,9 +322,9 @@ dbkjs.modules.edit = {
         me.editTriangle.show();
         me.editBox.show();
         $(me).triggerHandler("activate");
-        me.plusButton.activate();
+        me.plusButton.activate();      
         /*
-        me.readSavedFeatures();
+        me.readSavedFeatures();        
         this.updateDrawings = window.setInterval(function() {
             me.readSavedFeatures();
         }, 5000);
@@ -392,7 +392,7 @@ dbkjs.modules.edit = {
                     var vertices = this.selectedFeature.geometry.getVertices();
                     var attributes = $.extend({}, this.selectedFeature.attributes);
                     this.featuresManager.removeFeature(this.selectedFeature.id);
-                    this.createTriangleFromPoints(vertices[0], this.lineCenter(vertices[1], vertices[vertices.length - 1]), attributes);
+                    this.createTriangleFromPoints(vertices[0], this.lineCenter(vertices[1], vertices[vertices.length - 1]), attributes,false);
                 }
                 this.updateLayer();
                 this.featuresManager.updateFeature(this.selectedFeature);
@@ -618,7 +618,7 @@ dbkjs.modules.edit = {
         return attributes;
     },
 
-    createTriangleFromPoints: function(a, b, attributes) {
+    createTriangleFromPoints: function(a, b, attributes,save) {
         var triangleFactor = attributes.triangleFactor / 10;
         if(triangleFactor <= 0) {
             triangleFactor = 0.001;
@@ -658,7 +658,7 @@ dbkjs.modules.edit = {
         var geom = new OpenLayers.Geometry.Polygon([new OpenLayers.Geometry.LinearRing(points)]);
         var triangleFeature = new OpenLayers.Feature.Vector(geom, attributes);
         this.layer.addFeatures(triangleFeature);
-        this.addFeatureToFeatureManager(triangleFeature);
+        this.addFeatureToFeatureManager(triangleFeature,save);
         return triangleFeature;
     },
 
@@ -684,10 +684,10 @@ dbkjs.modules.edit = {
         return b;
     },
 
-    addFeatureToFeatureManager: function(feature) {
+    addFeatureToFeatureManager: function(feature,save=true) {
         this.featuresManager.addFeature(feature);
         this.setSelectedFeature(feature);
-        this.saveFeatures();
+        if(save)this.saveFeatures();
     },
 
     deactivateButtons: function(btn) {
