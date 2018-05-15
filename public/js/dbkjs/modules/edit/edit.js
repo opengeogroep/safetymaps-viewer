@@ -446,7 +446,7 @@ dbkjs.modules.edit = {
                 feature = me.layer.features[i];
                 me.featuresManager.addFeature(feature);
             }
-            me.setSelectedFeature(feature);
+            if(feature)me.setSelectedFeature(feature);
         });
     },
 
