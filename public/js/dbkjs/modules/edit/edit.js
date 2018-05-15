@@ -359,7 +359,7 @@ dbkjs.modules.edit = {
     initFeaturesManager: function() {
         this.featuresManager = new dbkjs.modules.FeaturesManager();
         this.featuresManager
-            .on("removeFeature", function(featureid) {
+            .on("removeFeature", function(featureid, buttonClicked) {
                 var feature = this.layer.getFeatureById(featureid);
                 if(feature) {
                     if(this.selectedFeature === feature) {
@@ -367,10 +367,18 @@ dbkjs.modules.edit = {
                     }
                     this.layer.removeFeatures([feature]);
                 }
+                if(buttonClicked)this.saveFeatures();
             }, this)
-            .on("removeAllFeatures", function() {
+            .on("removeAllFeatures", function(buttonClicked) {
                 this.layer.removeAllFeatures();
                 this.selectedFeature = null;
+                if(buttonClicked){
+                    if(confirm('Weet u zeker dat alle features verwijderd mogen worden? Dit geld ook voor alle andere tekenaars en kijkers.!')){
+                        this.saveFeatures();
+                    } else {
+                        //do nothing
+                    }
+                }
             }, this)
             .on("featureSelected", function(featureid) {
                 var feature = this.layer.getFeatureById(featureid);
