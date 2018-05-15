@@ -320,19 +320,21 @@ dbkjs.modules.edit = {
 
     activate: function() {
         var me = this;
+        dbkjs.selectControl.deactivate();
         me.editTriangle.show();
         me.editBox.show();
         $(me).triggerHandler("activate");
         me.plusButton.activate();      
         me.readSavedFeatures();        
         this.updateDrawings = window.setInterval(function() {
-            if(me.allowedToRead && !$("#label").is(":focus"))me.readSavedFeatures();        
+            if(me.allowedToRead && !$("#label").is(":focus"))me.readSavedFeatures();
         }, 1000);       
         
     },
 
     deactivate: function() {
         var me = this;
+        dbkjs.selectControl.activate();
         me.editTriangle.hide();
         me.editBox.hide();
         me.deactivateButtons();
