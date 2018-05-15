@@ -240,6 +240,11 @@ $.extend(dbkjs.modules.FeaturesManager.prototype, {
             prop[name] = this.value;
             me.trigger("propertyUpdated", [ prop ]);
         });
+        var propGrid = this.propertiesGrid;
+        propGrid.on("mouseup touchend", function(e){
+            console.log(e);
+            me.trigger("propertyChanged", [e]);
+        });
     }
 });
 dbkjs.modules.FeaturesManager.prototype.constructor = dbkjs.modules.FeaturesManager;
