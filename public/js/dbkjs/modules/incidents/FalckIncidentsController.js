@@ -184,7 +184,7 @@ FalckIncidentsController.prototype.setVoertuignummer = function(voertuignummer, 
     }
     me.voertuignummer = voertuignummer;
     window.localStorage.setItem("voertuignummer", voertuignummer);
-
+    $(me).triggerHandler("voertuigNummerUpdated", [true]);
     me.cancelGetInzetInfo();
     me.getInzetInfo();
 };
@@ -473,7 +473,7 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
         me.incident = incident;
         me.button.setIcon("bell");
 
-        $(dbkjs).triggerHandler("incidents.vehicle.update",[incident]);
+        $(me).triggerHandler("incidents.vehicle.update",[incident]);
 
         // Always update window, updates moment.fromNow() times
         me.incidentDetailsWindow.data(incident, true, true);
