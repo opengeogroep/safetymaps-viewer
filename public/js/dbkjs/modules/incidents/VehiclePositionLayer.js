@@ -31,7 +31,11 @@ function VehiclePositionLayer(options) {
     var panelName = "#settingspanel_b";
 
     this.showMoving = window.localStorage.getItem("VehiclePositionLayer.showMoving") === "true";
-    this.visibility = !(window.localStorage.getItem("VehiclePositionLayer.hidden") === "true");
+    if(window.localStorage.getItem("VehiclePositionLayer.hidden") === null){
+        this.visibility =false;
+    }else{
+        this.visibility = !(window.localStorage.getItem("VehiclePositionLayer.hidden") === "true");
+    }
 
     function displayFunction(feature) {
         if(!me.showMoving) {
@@ -58,10 +62,12 @@ function VehiclePositionLayer(options) {
             }, {
                 context: {
                     speed: function(feature) {
-                        if(feature.attributes.Speed === 0) {
-                            return "";
-                        } else {
-                            return feature.attributes.Speed + "km/h";
+                        if (me.options.showSpeed) {
+                            if (feature.attributes.Speed === 0) {
+                                return "";
+                            } else {
+                                return feature.attributes.Speed + "km/h";
+                            }
                         }
                     },
                     display: displayFunction,
