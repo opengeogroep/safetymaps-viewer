@@ -9,7 +9,8 @@
     },
     "map": {
         "measureDistance": "Meet afstand",
-        "measureArea": "Meet oppervlakte"
+        "measureArea": "Meet oppervlakte",
+        "permalink": "Snelkoppeling"
     },
     "dialogs": {
         "clickinfo": "Klik informatie",
