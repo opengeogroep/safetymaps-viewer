@@ -170,3 +170,84 @@ safetymaps.utils.getAbsoluteUrl = (function() {
 		return a.href;
 	};
 })();
+safetymaps.utils.Permalink =
+    OpenLayers.Class(OpenLayers.Control.Permalink, {
+    //argParserClass: dbkjs.ArgParser,
+    SELECT_ARGUMENT_KEY: "select",
+    initialize: function (options) {
+        OpenLayers.Control.Permalink.prototype.initialize.apply(this, arguments);
+    },
+    updateLink: function () {
+        var separator = this.anchor ? '#' : '?';
+        var updateLinkhref = this.base;
+        var anchor = null;
+        if (updateLinkhref.indexOf("#") !== -1 && this.anchor === false) {
+            anchor = updateLinkhref.substring(updateLinkhref.indexOf("#"), updateLinkhref.length);
+        }
+        if (updateLinkhref.indexOf(separator) !== -1) {
+            updateLinkhref = updateLinkhref.substring(0, updateLinkhref.indexOf(separator));
+        }
+        var splits = updateLinkhref.split("#");
+        updateLinkhref = splits[0] + separator + OpenLayers.Util.getParameterString(this.createParams());
+        if (anchor) {
+            updateLinkhref += anchor;
+        }
+        if (this.anchor && !this.element) {
+            window.location.href = updateLinkhref;
+        } else {
+            this.element.href = updateLinkhref;
+        }
+    },
+    createParams: function (center, zoom, layers) {
+        center = center || this.map.getCenter();
+
+        var params = OpenLayers.Util.getParameters(this.base);
+        // If there's still no center, map is not initialized yet.
+        // Break out of this function, and simply return the params from the
+        // base link.
+        if (dbkjs.options) {
+            if (dbkjs.options.dbk && dbkjs.options.dbk !== 0) {
+                params[i18n.t('app.queryDBK')] = dbkjs.options.dbk;
+            }
+        }
+        if (center) {
+            //zoom
+            params.zoom = zoom || this.map.getZoom();
+
+            //lon,lat
+            var lat = center.lat;
+            var lon = center.lon;
+
+            if (this.displayProjection) {
+                var mapPosition = OpenLayers.Projection.transform(
+                    { x: lon, y: lat },
+                    this.map.getProjectionObject(),
+                    this.displayProjection
+                );
+                lon = mapPosition.x;
+                lat = mapPosition.y;
+            }
+            params.lat = Math.round(lat * 100000) / 100000;
+            params.lon = Math.round(lon * 100000) / 100000;
+
+
+            //layers
+            layers = this.map.layers;
+            params.ly = [];
+            for (var i = 0, len = layers.length; i < len; i++) {
+                var layer = layers[i];
+                if (layer.isBaseLayer) {
+                    if (layer === this.map.baseLayer) {
+                        params.b = layer.metadata.pl;
+                    }
+                } else {
+                    if (layer.metadata.pl && layer.getVisibility()) {
+                        params.ly.push(layer.metadata.pl);
+                    }
+                }
+            }
+        }
+        return params;
+    },
+    CLASS_NAME: "dbkjs.Permalink"
+});
