@@ -265,6 +265,8 @@ dbkjs.finishMap = function () {
             dbkjs.map.zoomToMaxExtent();
         }
     }
+    dbkjs.permalink = new safetymaps.utils.Permalink('permalink');
+    dbkjs.map.addControl(dbkjs.permalink);
 };
 
 dbkjs.bind_dbkjs_init_complete = function() {
