@@ -32,6 +32,10 @@ function FalckIncidentVehicleController(controller) {
             $(dbkjs.modules.incidents.controller).on("incidents.vehicle.update", function(event, incident){
                me.incidentFound(incident); 
             });
+            $(dbkjs.modules.incidents.controller).on("voertuigNummerUpdated", function(event, incident){
+               me.vehiclePositionLayer.layer.destroyFeatures();
+               me.vehiclePositionLayer.layer2.destroyFeatures(); 
+            });
         }
     });
 };
