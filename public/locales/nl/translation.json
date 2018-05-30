@@ -30,16 +30,27 @@
         "button": "Zoeken",
         "title": "Zoeken"
     },
-    "email":{
-        "subject": "Onderwerp",
-        "address": "Adres",
+"email": {
+        "title": "Melding",
+        "new": "Nieuwe melding",
+        "annotation": "Melding",
+        "annotationtitle": "Er is een melding gedaan",
         "name": "Naam",
-        "email": "E-mail",
-        "phone": "Telefoon",
+        "address": "Adres",
+        "subject": "Onderwerp",
         "remarks": "Opmerking",
-        "generalmessage": "Algemene melding",
+        "sender": "Afzender",
         "send": "Verstuur",
-        "help": "Versleep het symbool op de kaart om aan te geven waar de fout is geconstateerd of waar de melding over gaat."
+        "sent":"Melding is verstuurd.",
+        "error":"Er is iets fout gegaan.",
+        "email": "E-mail",
+        "link": "Link naar de melding",
+        "phone": "Telefoon",
+        "kindregards": "Met vriendelijke groet",
+        "team": "de opendispatcher applicatie",
+        "help": "Versleep het symbool op de kaart om aan te geven waar de fout is geconstateerd of waar de melding over gaat.",
+        "generalmessage":"Algemene melding",
+        "construction": "Gebouw constructie"
     },
     "geolocate": {
         "button": "Vind mijn locatie"
