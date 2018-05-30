@@ -30,6 +30,17 @@
         "button": "Zoeken",
         "title": "Zoeken"
     },
+    "email":{
+        "subject": "Onderwerp",
+        "address": "Adres",
+        "name": "Naam",
+        "email": "E-mail",
+        "phone": "Telefoon",
+        "remarks": "Opmerking",
+        "generalmessage": "Algemene melding",
+        "send": "Verstuur",
+        "help": "Versleep het symbool op de kaart om aan te geven waar de fout is geconstateerd of waar de melding over gaat."
+    },
     "geolocate": {
         "button": "Vind mijn locatie"
     },   
