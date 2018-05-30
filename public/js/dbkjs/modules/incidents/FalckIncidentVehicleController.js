@@ -16,14 +16,14 @@ function FalckIncidentVehicleController(controller) {
     //me.addSelectLayers(selectLayers);
     me.getEenheidLocatie();
 
-    window.setInterval(function () {
+    /* window.setInterval(function () {
         if ((window.localStorage.getItem("VehiclePositionLayer.hidden") === "true")) {
             //me.getEenheidLocatieIncident();
         } else {
             me.getEenheidLocatie();
         }
     }, 30000);
-
+    */
     $(dbkjs).one("dbkjs_init_complete", function () {
         if (dbkjs.modules.incidents && dbkjs.modules.incidents.controller) {
             $(dbkjs.modules.incidents.controller).on("new_incident", function (event, commonIncident,incident) {
@@ -120,7 +120,6 @@ FalckIncidentVehicleController.prototype.incidentFound = function (incidenten) {
     console.log("incidenten: ", incidenten);
     var betrokkenEenheden = [];
     var me = this;
-    if ((window.localStorage.getItem("VehiclePositionLayer.hidden") === "true")) {
         if (me.controller.incidentId) {
             me.vehiclePositionLayer.visibility = true;
             me.vehiclePositionLayer.layer.setVisibility(true);
@@ -135,5 +134,4 @@ FalckIncidentVehicleController.prototype.incidentFound = function (incidenten) {
             me.vehiclePositionLayer.layer.setVisibility(false);
             me.vehiclePositionLayer.layer2.setVisibility(false);
         }
-    }
 };
