@@ -122,7 +122,7 @@ function VehiclePositionLayer(options) {
     dbkjs.map.addControl(this.selectControl);
     this.selectControl.activate();
 */
-    $(panelName).append('<hr/><label><input type="checkbox" ' + (this.visibility ? 'checked' : '') + ' onclick='+controllerName+'>Toon voertuigposities</label>');
+    //$(panelName).append('<hr/><label><input type="checkbox" ' + (this.visibility ? 'checked' : '') + ' onclick='+controllerName+'>Toon voertuigposities</label>');
 
     if(me.options.enableOngekoppeldeEenheden) {
         $(panelName).append('<hr/><label><input type="checkbox" ' + (this.showMoving ? 'checked' : '') + ' onclick='+controllerName+'>Toon bewegende voertuigen niet gekoppeld aan incident (grijs)</label>');
