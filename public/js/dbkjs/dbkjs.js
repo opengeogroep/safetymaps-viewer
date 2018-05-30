@@ -192,7 +192,7 @@ dbkjs.gotOrganisation = function () {
         }
     });
 
-    //dbkjs.layers.loadFromWMSGetCapabilities();
+    dbkjs.layers.loadFromWMSGetCapabilities();
     dbkjs.finishMap();
     $(dbkjs).trigger('dbkjs_init_complete');
 };
