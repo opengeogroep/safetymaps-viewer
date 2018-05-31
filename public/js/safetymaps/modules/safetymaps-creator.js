@@ -253,7 +253,7 @@ dbkjs.modules.safetymaps_creator = {
     getClusterLink: function (feature) {
         var me = this;
         var v = {
-            name: feature.attributes.apiObject.formele_naam,
+            name: feature.attributes.apiObject.formele_naam+" ("+feature.attributes.apiObject.informele_naam+")",
             id: feature.attributes.apiObject.id
         };
         var link = $(Mustache.render('<li><a id="{{id}}" href="#">{{name}}</a></li>', v));
