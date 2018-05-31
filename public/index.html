@@ -24,13 +24,14 @@
             <a id="zoom_in" href="#" class="btn navbar-btn btn-default"><i class="fa fa-search-plus"></i></a>
             <a id="zoom_out" href="#" class="btn navbar-btn btn-default"><i class="fa fa-search-minus"></i></a>
             <a id="zoom_extent" href="#" class="btn navbar-btn btn-default needsclick"><i class="fa fa-arrows-alt"></i></a>
+            <a id="permalink" title="Snelkoppeling" class="btn navbar-btn btn-default"><i class="fa fa-link"></i></a>
         </div>
         <div id="btngrp_3" class="btn-group pull-right">
             <a href="#" class="btn navbar-btn btn-default drag-handle"><i class="fa fa-ellipsis-v"></i></a>
             <a id="c_minimap" href="#" title="Overzichtskaart" class="btn navbar-btn btn-default"><i class="fa fa-image"></i></a>
-            <a id="c_settings" href="#settingspanel" data-toggle="modal" title="Settings" class="btn navbar-btn btn-default"><i class="fa fa-cogs"></i></a>
-            <a id="tb01" href="#overlaypanel" data-toggle="modal" title="Layers" class="btn navbar-btn btn-default"><i class="fa fa-map-marker"></i></a>
-            <a id="tb02" href="#baselayerpanel" data-toggle="modal" title="Base layers" class="btn navbar-btn btn-default"><i class="fa fa-globe"></i></a>
+            <a id="c_settings" href="#settingspanel" data-toggle="modal" title="Settings" class="btn navbar-btn btn-default" data-sid="1"><i class="fa fa-cogs"></i></a>
+            <a id="tb01" href="#overlaypanel" data-toggle="modal" title="Layers" class="btn navbar-btn btn-default" data-sid="2"><i class="fa fa-map-marker"></i></a>
+            <a id="tb02" href="#baselayerpanel" data-toggle="modal" title="Base layers" class="btn navbar-btn btn-default" data-sid="3"><i class="fa fa-globe"></i></a>
         </div>
         <div id="btngrp_object" class="btn-group pull-right layertoggle-btn-group">
         </div>
@@ -121,6 +122,7 @@
     <script src="js/dbkjs/modules/incidents/AGSIncidentService.js?" type="text/javascript"></script>
     <script src="js/dbkjs/modules/incidents/IncidentFeatureSelector.js?" type="text/javascript"></script>
     <script src="js/dbkjs/modules/incidents/IncidentDetailsWindow.js?" type="text/javascript"></script>
+    <script src="js/dbkjs/modules/incidents/VehiclePositionLayer.js?" type="text/javascript"></script>
     <script src="js/dbkjs/modules/incidents/IncidentMarkerLayer.js?" type="text/javascript"></script>
     <script src="js/dbkjs/modules/incidents/IncidentVectorLayer.js?" type="text/javascript"></script>
     <script src="js/dbkjs/modules/incidents/AlertableButton.js?" type="text/javascript"></script>
@@ -128,6 +130,7 @@
     <script src="js/dbkjs/modules/incidents/VoertuigInzetController.js?" type="text/javascript"></script>
     <script src="js/dbkjs/modules/incidents/FalckIncidentsController.js?" type="text/javascript"></script>
     <script src="js/dbkjs/modules/incidents/PharosIncidentsController.js?" type="text/javascript"></script>
+    <script src="js/dbkjs/modules/incidents/FalckIncidentVehicleController.js?" type="text/javascript"></script>
     <script src="js/dbkjs/modules/incidents.js?" type="text/javascript"></script>
     <script src="js/dbkjs/modules/vrhinzetbalk.js?" type="text/javascript"></script>
     <script src="js/dbkjs/modules/streetview.js?" type="text/javascript"></script>

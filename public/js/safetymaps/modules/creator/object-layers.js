@@ -189,11 +189,18 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
                         return 16;
                     },
                     label: function(feature) {
+                        if(feature.attributes.label){
+                            return feature.attributes.label;
+                        } else {
+                            return "";
+                        }
+                        /*
                         if (feature.attributes.style) {
                             var def = feature.attributes.style["en"];
                             var local = feature.attributes.style[dbkjsLang];
                             return local && local !== "" ? local : def;
                         }
+                        */
                     },
                     labelYOffset: function(feature) {
                         return Math.sin(feature.attributes.theta + Math.PI/2) * 5;
@@ -433,7 +440,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
             },{
                 context: {
                     myradius: function (feature) {
-                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,14, feature.attributes.radius);
+                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,25, feature.attributes.radius);
                     }
                 }
             }),
@@ -458,7 +465,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
             }, {
                 context: {
                     size: function(feature) {
-                        return feature.attributes.size * 0.8;
+                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,14,feature.attributes.size);
                     }
                 }
             })
@@ -544,6 +551,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.addFireCompartmentationFeatures
         var f = wktParser.read(detail.line);
         f.attributes.index = i;
         f.attributes.description = detail.omschrijving;
+        f.attributes.label = detail.label;
         f.attributes.style = safetymaps.creator.api.styles.compartments[detail.style];
         features.push(f);
 
@@ -571,6 +579,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.addFireCompartmentationFeatures
                 var labelPoint = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(midx, midy), {
                     index: i,
                     style: f.attributes.style,
+                    label: f.attributes.label,
                     rotation: angle,
                     theta: theta
                 });

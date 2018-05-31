@@ -92,6 +92,8 @@ IncidentMarkerLayer.prototype.removeMarker = function(marker) {
 
 IncidentMarkerLayer.prototype.clear = function() {
     this.layer.clearMarkers();
+    this.x = null;
+    this.y= null;
 };
 
 IncidentMarkerLayer.prototype.markerClick = function(marker, incident, archief) {

@@ -1,4 +1,5 @@
 {
+    "name": "Naam",
     "settings": {
         "layout": "Layout instellingen",
         "scaleStyle": "Schaal iconen op basis van zoomniveau",
@@ -8,7 +9,8 @@
     },
     "map": {
         "measureDistance": "Meet afstand",
-        "measureArea": "Meet oppervlakte"
+        "measureArea": "Meet oppervlakte",
+        "permalink": "Snelkoppeling"
     },
     "dialogs": {
         "clickinfo": "Klik informatie",
@@ -27,6 +29,28 @@
     "search": {
         "button": "Zoeken",
         "title": "Zoeken"
+    },
+"email": {
+        "title": "Melding",
+        "new": "Nieuwe melding",
+        "annotation": "Melding",
+        "annotationtitle": "Er is een melding gedaan",
+        "name": "Naam",
+        "address": "Adres",
+        "subject": "Onderwerp",
+        "remarks": "Opmerking",
+        "sender": "Afzender",
+        "send": "Verstuur",
+        "sent":"Melding is verstuurd.",
+        "error":"Er is iets fout gegaan.",
+        "email": "E-mail",
+        "link": "Link naar de melding",
+        "phone": "Telefoon",
+        "kindregards": "Met vriendelijke groet",
+        "team": "de opendispatcher applicatie",
+        "help": "Versleep het symbool op de kaart om aan te geven waar de fout is geconstateerd of waar de melding over gaat.",
+        "generalmessage":"Algemene melding",
+        "construction": "Gebouw constructie"
     },
     "geolocate": {
         "button": "Vind mijn locatie"
@@ -52,14 +76,14 @@
         "emergencyResponderPresent": "BHV",
         "emergencyResponderPresentYes": "BHV aanwezig",
         "emergencyResponderPresentNo": "Geen BHV aanwezig",
-        "respondingProcedure": "Responding procedure",
+        "respondingProcedure": "Inzetprocedure",
         "buildingConstruction": "Gebouwconstructie",
-        "fireAlarmCode": "Brandalarm code",
+        "fireAlarmCode": "OMS nummer",
         "usage": "Gebruik",
         "usage_specific": "Specifiek gebruik",
         "level": "Bouwlaag",
-        "lowestLevel": "Laagste bouwlaag (Verdieping)",
-        "highestLevel": "Hoogste bouwlaag (Verdieping)",
+        "lowestLevel": "Laagste bouwlaag",
+        "highestLevel": "Hoogste bouwlaag",
         "floor": "Verdieping",
         "floors": "Verdiepingen",
         "contact_role": "Functie",
