@@ -191,12 +191,23 @@ dbkjs.gotOrganisation = function () {
             }
         }
     });
-
+    
+    dbkjs.sortModuleButtons();
     dbkjs.layers.loadFromWMSGetCapabilities();
     dbkjs.finishMap();
     $(dbkjs).trigger('dbkjs_init_complete');
 };
 
+dbkjs.sortModuleButtons = function(){
+    $.each($("#btngrp_3")[0].children, function(i,m){
+        if($(m).data("sid") === undefined){
+            m.setAttribute("data-sid",99);
+        }       
+    });
+    $('#btngrp_3 a').sort(function(a,b){
+        return a.dataset.sid > b.dataset.sid;
+    }).appendTo("#btngrp_3");
+};
 dbkjs.zoomToFixedMapResolutionForBounds = function(bounds) {
     dbkjs.map.zoomToExtent(bounds);
 
