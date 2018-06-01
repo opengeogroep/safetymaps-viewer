@@ -45,7 +45,7 @@ dbkjs.modules.brandkranen = {
     },
     loadBrandkranen: function() {
         var me = this;
-        var url = dbkjs.options.onboard ? "api/brandkranen.json" : (dbkjs.options.serverUrlPrefix ? dbkjs.options.serverUrlPrefix : "") + "action/vrln";
+        var url = dbkjs.options.onboard ? "api/brandkranen.json" : (dbkjs.options.serverUrlPrefix ? dbkjs.options.serverUrlPrefix : "") + "action/vrln/";
         $.ajax(url, {
             method: "GET",
             data: {},
@@ -223,7 +223,8 @@ dbkjs.modules.brandkranen = {
                             } else if(feature.attributes.capaciteit === 0){
                                 return "N.B.";
                             }else{
-                                return (feature.attributes.capaciteit / 1000).toFixed();
+                                //return (feature.attributes.capaciteit / 1000).toFixed();
+                                return feature.attributes.capaciteit/1000;
                             }
                         }
                     }
@@ -239,7 +240,7 @@ dbkjs.modules.brandkranen = {
                 'temporary': new OpenLayers.Style({pointRadius: 20})
             })
         });
-        dbkjs.protocol.jsonDBK.layers.push(this.brandkranen);
+        //dbkjs.protocol.jsonDBK.layers.push(this.brandkranen);
         this.brandkranen.events.register("featureselected", this, this.brandkraanSelected);
         this.brandkranen.events.register("beforefeatureselected", this, this.beforeBrandkraanSelected);
         this.brandkranen.events.register("featureunselected", this, this.brandkraanUnselected);
