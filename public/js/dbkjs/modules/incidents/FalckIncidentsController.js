@@ -63,9 +63,10 @@ function FalckIncidentsController(incidents) {
         me.zoomToIncident();
         me.incidentDetailsWindow.show();
         if(me.featureSelector.matches.length === 1) {
-            dbkjs.protocol.jsonDBK.process(me.featureSelector.matches[0], null, true);
+            dbkjs.modules.safetymaps_creator.selectObjectById(me.featureSelector.matches[0].attributes.apiObject.id,me.featureSelector.matches[0].attributes.apiObject.extent,true);
+            //dbkjs.protocol.jsonDBK.process(me.featureSelector.matches[0], null, true);
         } else {
-            dbkjs.protocol.jsonDBK.deselect();
+            dbkjs.modules.safetymaps_creator.unselectObject();
             me.incidentDetailsWindow.showMultipleFeatureMatches();
         }
     });
@@ -183,7 +184,7 @@ FalckIncidentsController.prototype.setVoertuignummer = function(voertuignummer, 
     }
     me.voertuignummer = voertuignummer;
     window.localStorage.setItem("voertuignummer", voertuignummer);
-
+    $(me).triggerHandler("voertuigNummerUpdated", [true]);
     me.cancelGetInzetInfo();
     me.getInzetInfo();
 };
@@ -201,6 +202,8 @@ FalckIncidentsController.prototype.getInzetInfo = function() {
     var me = this;
 
     if(!me.voertuignummer) {
+        me.button.setIcon("bell-o");
+        me.geenInzet(false);
         return;
     }
 
@@ -258,7 +261,7 @@ FalckIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
         }
     } else {
         $('#systeem_meldingen').hide();
-        me.button.setIcon("bell-o");
+        //me.button.setIcon("bell-o");
         var incidenten = inzetInfo;
         me.inzetIncident(incidenten[incidenten.length-1]);
     }
@@ -333,9 +336,9 @@ FalckIncidentsController.prototype.inzetIncident = function(incidentId) {
             console.log("Got incident data", incident);
             me.incidentDetailsWindow.data(incident, true);
             me.markerLayer.addIncident(incident, false, true);
-            me.markerLayer.setZIndexFix();
-
-            dbkjs.protocol.jsonDBK.deselect();
+            me.markerLayer.setZIndexFix(); 
+            
+            //dbkjs.protocol.jsonDBK.deselect();
             me.zoomToIncident();
 
             var x = incident.IncidentLocatie.XCoordinaat;
@@ -361,7 +364,7 @@ FalckIncidentsController.prototype.inzetIncident = function(incidentId) {
 
             me.button.setIcon("bell");
 
-            $(me).triggerHandler("new_incident", [commonIncidentObject]);
+            $(me).triggerHandler("new_incident", [commonIncidentObject,incident]);
         });
     }
 };
@@ -470,6 +473,8 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
         me.incident = incident;
         me.button.setIcon("bell");
 
+        $(me).triggerHandler("incidents.vehicle.update",[incident]);
+
         // Always update window, updates moment.fromNow() times
         me.incidentDetailsWindow.data(incident, true, true);
 
@@ -480,7 +485,7 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
             if(!me.incidentDetailsWindow.isVisible()) {
                 me.button.setAlerted(true);
             }
-
+            
             // Possibly update marker position
             me.markerLayer.addIncident(incident, false, true);
             me.markerLayer.setZIndexFix();

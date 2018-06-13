@@ -27,6 +27,7 @@ dbkjs.modules.safetymaps_creator = {
     selectedObject: null,
     selectedClusterFeature: null,
     infoWindow: null,
+    features:[],
 
     register: function() {
         var me = this;
@@ -184,9 +185,9 @@ dbkjs.modules.safetymaps_creator = {
         this.viewerApiObjects.sort(function(lhs, rhs) {
             return lhs.formele_naam.localeCompare(rhs.formele_naam, dbkjsLang);
         });
-        var features = safetymaps.creator.api.createViewerObjectFeatures(this.viewerApiObjects);
-        this.clusteringLayer.addFeaturesToCluster(features);
-
+        this.features = safetymaps.creator.api.createViewerObjectFeatures(this.viewerApiObjects);
+        this.clusteringLayer.addFeaturesToCluster(this.features);
+        
         this.createSearchConfig();
     },
 
@@ -252,7 +253,7 @@ dbkjs.modules.safetymaps_creator = {
     getClusterLink: function (feature) {
         var me = this;
         var v = {
-            name: feature.attributes.apiObject.formele_naam,
+            name: feature.attributes.apiObject.formele_naam+" ("+feature.attributes.apiObject.informele_naam+")",
             id: feature.attributes.apiObject.id
         };
         var link = $(Mustache.render('<li><a id="{{id}}" href="#">{{name}}</a></li>', v));
@@ -270,7 +271,7 @@ dbkjs.modules.safetymaps_creator = {
         this.selectObjectById(feature.attributes.id, feature.attributes.apiObject.extent);
     },
 
-    selectObjectById: function(id, extent) {
+    selectObjectById: function(id, extent, isIncident = false) {
         var me = this;
 
         // Unselect current, if any
@@ -304,7 +305,7 @@ dbkjs.modules.safetymaps_creator = {
             $("#creator_object_info").text("Error: " + msg);
         })
         .done(function(object) {
-            me.selectedObjectDetailsReceived(object);
+            me.selectedObjectDetailsReceived(object, isIncident);
         });
     },
 
@@ -322,10 +323,10 @@ dbkjs.modules.safetymaps_creator = {
         $("#vectorclickpanel").hide();
     },
 
-    selectedObjectDetailsReceived: function(object) {
+    selectedObjectDetailsReceived: function(object,isIncident = false) {
         try {
             this.objectLayers.addFeaturesForObject(object);
-            this.updateInfoWindow(object);
+            this.updateInfoWindow(object,isIncident);
             this.selectedObject = object;
 
             var ids = [object.id];
@@ -342,7 +343,7 @@ dbkjs.modules.safetymaps_creator = {
         }
     },
 
-    updateInfoWindow: function(object) {
+    updateInfoWindow: function(object,isIncident = false) {
         var me = this;
 
         var div = $('<div class="tabbable"></div>');
@@ -362,7 +363,7 @@ dbkjs.modules.safetymaps_creator = {
             });
         });
 
-        this.infoWindow.show();
+        if(!isIncident)this.infoWindow.show();
         this.infoWindowTabsResize();
 
     },
@@ -372,6 +373,11 @@ dbkjs.modules.safetymaps_creator = {
         var layer = e.feature.layer;
         var f = e.feature.attributes;
         if (layer === me.objectLayers.layerCustomPolygon) {
+            if(f.style.en === "Area"){
+                console.log("Area selected, do nothing");
+                layer.redraw();
+                return;
+            }
             console.log("CustomPolygon feature selected", e);
             var table = $('<table class="table table-hover"></table>');
             table.append('<tr><th style="width: 10%"></th><th>' + i18n.t("dialogs.information") + '</th></tr>');

@@ -33,6 +33,7 @@ dbkjs.editStyles = {
                 labelYOffset: "${labelYOffset}",
                 labelOutlineWidth: 2,
                 labelOutlineColor: 'white',
+                rotation: "${rotation}",
                 // lines and areas
                 strokeColor: "${strokeColor}",
                 strokeWidth: "${strokeWidth}",
@@ -46,6 +47,9 @@ dbkjs.editStyles = {
                 context: {
                     labelYOffset: function(feature) {
                         return /*dbkjs.scaleStyleValue(12, feature.attributes.radius)*/ 12 * -1.4;
+                    },
+                    rotation: function(feature){
+                        return feature.attributes.rotation || 0;
                     },
                     label: function(feature) {
                         return feature.attributes.label || "";
@@ -111,10 +115,13 @@ dbkjs.modules.EditSymbols = [
             {
                 "name": "RAMPZONES",
                 "symbols": [
-                    { "id": "s0070", "type": "area", "image": "images/imoov/s0070---g.png", "label": "Brongebied", "rotation": 0, "strokeWidth": 2, "strokeColor": "#000000", "fillColor": "#808284" },
-                    { "id": "s0080", "type": "area", "image": "images/imoov/s0080---g.png", "label": "Effectgebied, huidige situatie", "rotation": 0, "strokeWidth": 2, "strokeColor": "#000000", "fillColor": "#1FA2FF" },
-                    { "id": "s0090", "type": "area", "image": "images/imoov/s0090---g.png", "label": "Effectgebied, prognose", "rotation": 0, "strokeWidth": 3, "strokeColor": "#1FA2FF", "strokeDashstyle": "1,6" },
-                    { "id": "s0081", "type": "area", "image": "images/imoov/s0080---g.png", "label": "Rookpluim, prognose", "strokeWidth": 1, "strokeColor": "#000000", "fillColor": "#1FA2FF", "triangleFactor": 1 }
+                    { "id": "s0070", "type": "area", "isMulti":true, "sides":40, "image": "images/imoov/s0070---g.png", "label": "Brongebied", "rotation": 0, "strokeWidth": 2, "strokeColor": "#000000", "fillColor": "#808284" },
+                    { "id": "s0080", "type": "area", "isMulti":true, "sides":40, "image": "images/imoov/s0080---g.png", "label": "Effectgebied, huidige situatie", "rotation": 0, "strokeWidth": 2, "strokeColor": "#000000", "fillColor": "#1FA2FF" },
+                    { "id": "s0090", "type": "area", "isMulti":true, "sides":40, "image": "images/imoov/s0090---g.png", "label": "Effectgebied, prognose", "rotation": 0, "strokeWidth": 3, "strokeColor": "#1FA2FF", "strokeDashstyle": "1,6" },
+                    { "id": "s0081", "type": "area", "image": "images/imoov/s0080---g.png", "label": "Rookpluim, prognose", "strokeWidth": 1, "strokeColor": "#000000", "fillColor": "#1FA2FF", "triangleFactor": 1 },
+                    { "id": "s0091", "type": "area", "isMulti":false, "sides":4, "image": "images/imoov/s0090---g.png", "label": "Draw Box", "rotation": 0, "strokeWidth": 3, "strokeColor": "#1FA2FF", "strokeDashstyle": "1,6" },
+                    { "id": "s0092", "type": "area", "isFreehand":true, "sides":4, "image": "images/imoov/s0080---g.png", "label": "Effectgebied, huidige situatie", "rotation": 0, "strokeWidth": 2, "strokeColor": "#000000", "fillColor": "#1FA2FF", "polygon":1 },
+                    { "id": "s0093", "type": "area", "isFreehand":false, "sides":4, "image": "images/imoov/s0070---g.png", "label": "Brongebied", "rotation": 0, "strokeWidth": 2, "strokeColor": "#000000", "fillColor": "#808284", "polygon":1 }
                 ]
             }
         ]
@@ -129,16 +136,17 @@ dbkjs.modules.EditSymbols = [
                     { "id": "s0600_B04", "type": "point", "image": "images/imoov/s0600_B04---g.png", "label": "Brandweer Blusboot" },
                     { "id": "s0610_B05", "type": "point", "image": "images/imoov/s0610_B05---g.png", "label": "Brandweer Meetploeg" },
                     { "id": "s0620_B12", "type": "point", "image": "images/imoov/s0620_B12---g.png", "label": "Brandweer Ontsmettingssluis voertuigen" },
-                    { "id": "s0630_B13", "type": "point", "image": "images/imoov/s0630_B13---g.png", "label": "Brandweer Decontaminatie (personen)" }
+                    { "id": "s0630_B13", "type": "point", "image": "images/imoov/s0630_B13---g.png", "label": "Brandweer Decontaminatie (personen)", "rotation":0 }
                 ]
             },
             {
                 "name": "EVACUATIE EN LOGISTIEK",
                 "symbols": [
-                    { "id": "s0690", "type": "line", "image": "images/imoov/s0690---g.png", "label": "Evacuatiegebied, grens", "strokeWidth": 6, "strokeColor": "#A41926", "strokeDashstyle": "1,9", "strokeLinecap": "square" },
-                    { "id": "s0700", "type": "line", "image": "images/imoov/s0700---g.png", "label": "Evacuatieroute", "strokeWidth": 6, "strokeColor": "#51B848" },
-                    { "id": "s0720", "type": "line", "image": "images/imoov/s0720---g.png", "label": "Extra aanvoerroutes hulpdiensten", "strokeWidth": 3, "strokeColor": "#51B848" },
-                    { "id": "s0740_B14", "type": "point", "image": "images/imoov/s0740_B14---g.png", "label": "Brandstofvoorziening voor hulpverleningsvoertuigen" }
+                    { "id": "s0690", "type": "line", "isFreehand":true,"image": "images/imoov/s0690---g.png", "label": "Evacuatiegebied, grens", "strokeWidth": 6, "strokeColor": "#A41926", "strokeDashstyle": "1,9", "strokeLinecap": "square" },
+                    { "id": "s0700", "type": "line", "isFreehand":true,"image": "images/imoov/s0700---g.png", "label": "Evacuatieroute", "strokeWidth": 6, "strokeColor": "#51B848" },
+                    { "id": "s0720", "type": "line", "isFreehand":true,"image": "images/imoov/s0720---g.png", "label": "Extra aanvoerroutes hulpdiensten", "strokeWidth": 3, "strokeColor": "#51B848" },
+                    { "id": "s0721", "type": "line", "isFreehand":false, "image": "images/imoov/s0720---g.png", "label": "Point 2 point", "strokeWidth": 3, "strokeColor": "#51B848" },
+                    { "id": "s0740_B14", "type": "point", "isFreehand":true,"image": "images/imoov/s0740_B14---g.png", "label": "Brandstofvoorziening voor hulpverleningsvoertuigen" }
                 ]
             }
         ]
@@ -166,6 +174,7 @@ dbkjs.modules.edit = {
     id: "dbk.module.edit",
     catchClick: null,
     layer: null,
+    allowedToRead: true,
 
     debounceUpdateLayer: null,
 
@@ -184,6 +193,8 @@ dbkjs.modules.edit = {
     drawAreaControl: null,
     /** @var OpenLayers.Control.DrawFeature drawLineControl */
     drawTriangleControl: null,
+    /** @var OpenLayers.Control.DrawFeature drawPolygonControl */
+    drawPolygonControl: null,
 
     register: function() {
         var me = this;
@@ -192,10 +203,21 @@ dbkjs.modules.edit = {
             showMeasureButtons: true
         }, me.options);
 
-        me.catchClick = false;
-
         me.createElements();
-
+        me.catchClick = false;
+        
+        $.ajax("editAllowed", {cache: false})
+                .always(function (jqXHR) {
+                    if (jqXHR.status === 404) {
+                        console.log("Edit-allowed");
+                    } else if (jqXHR.status !== 403) {
+                        console.log("Unexpected status: " + jqXHR + " " + jqXHR.statusText, jqXHR.responseText)
+                    } else {
+                        console.log("Edit-not allowed");
+                        me.setViewerMode();
+                    }
+                });
+        
         me.layer = new OpenLayers.Layer.Vector("_Edit", {
             styleMap: dbkjs.editStyles.symbol
         });
@@ -254,13 +276,29 @@ dbkjs.modules.edit = {
         me.drawAreaControl = new OpenLayers.Control.DrawFeature(me.layer, OpenLayers.Handler.RegularPolygon, areaDrawOptions);
         dbkjs.map.addControl(me.drawAreaControl);
         me.drawAreaControl.deactivate();
-
+        
+        var polygonOptions = {
+            eventListeners: {
+                "featureadded": function (evt) {
+                    evt.feature.attributes = me.getFeatureAttributes();
+                    me.addFeatureToFeatureManager(evt.feature);
+                },
+                handlerOptions: {
+                    freehand: true,
+                    freehandToggle: null
+                }
+            }
+        };
+        me.drawPolygonControl = new OpenLayers.Control.DrawFeature(me.layer, OpenLayers.Handler.Polygon, polygonOptions);
+        dbkjs.map.addControl(me.drawPolygonControl);
+        me.drawPolygonControl.deactivate();
+        
         var drawTriangleOptions = {
             eventListeners: {
                 "featureadded": function(evt) {
                     var attributes = me.getFeatureAttributes();
                     var vertices = evt.feature.geometry.getVertices();
-                    me.createTriangleFromPoints(vertices[0], vertices[1], attributes);
+                    me.createTriangleFromPoints(vertices[0], vertices[1], attributes,true);
                     me.layer.removeFeatures(evt.feature);
                 }
             },
@@ -271,7 +309,7 @@ dbkjs.modules.edit = {
         me.drawTriangleControl = new OpenLayers.Control.DrawFeature(me.layer, OpenLayers.Handler.Path, drawTriangleOptions);
         dbkjs.map.addControl(me.drawTriangleControl);
         me.drawTriangleControl.deactivate();
-
+        
 
         this.symbolmanager = new dbkjs.modules.SymbolManager(dbkjs.modules.EditSymbols, "#edit-symbol-buttons", "#symbol-picker-button");
         this.symbolmanager.on("activeSymbolChanged", this.activeSymbolChanged, this);
@@ -282,19 +320,28 @@ dbkjs.modules.edit = {
 
     activate: function() {
         var me = this;
+        dbkjs.selectControl.deactivate();
         me.editTriangle.show();
         me.editBox.show();
         $(me).triggerHandler("activate");
-        me.plusButton.activate();
+        me.plusButton.activate();      
+        me.readSavedFeatures();        
+        this.updateDrawings = window.setInterval(function() {
+            if(me.allowedToRead && !$("#label").is(":focus"))me.readSavedFeatures();
+        }, 1000);       
+        
     },
 
     deactivate: function() {
         var me = this;
+        dbkjs.selectControl.activate();
         me.editTriangle.hide();
         me.editBox.hide();
         me.deactivateButtons();
         $(me).triggerHandler("deactivate");
         this.clearSelectedFeature();
+        window.clearInterval(this.updateDrawings);
+        this.featuresManager.removeAllFeatures();
     },
 
     initDrag: function() {
@@ -313,7 +360,7 @@ dbkjs.modules.edit = {
     initFeaturesManager: function() {
         this.featuresManager = new dbkjs.modules.FeaturesManager();
         this.featuresManager
-            .on("removeFeature", function(featureid) {
+            .on("removeFeature", function(featureid, buttonClicked) {
                 var feature = this.layer.getFeatureById(featureid);
                 if(feature) {
                     if(this.selectedFeature === feature) {
@@ -321,10 +368,18 @@ dbkjs.modules.edit = {
                     }
                     this.layer.removeFeatures([feature]);
                 }
+                if(buttonClicked)this.saveFeatures();
             }, this)
-            .on("removeAllFeatures", function() {
+            .on("removeAllFeatures", function(buttonClicked) {
                 this.layer.removeAllFeatures();
                 this.selectedFeature = null;
+                if(buttonClicked){
+                    if(confirm('Weet u zeker dat alle features verwijderd mogen worden? Dit geld ook voor alle andere tekenaars en kijkers.!')){
+                        this.saveFeatures();
+                    } else {
+                        //do nothing
+                    }
+                }
             }, this)
             .on("featureSelected", function(featureid) {
                 var feature = this.layer.getFeatureById(featureid);
@@ -333,6 +388,7 @@ dbkjs.modules.edit = {
                 }
             }, this)
             .on("propertyUpdated", function(property) {
+                this.allowedToRead = false;
                 if(!this.selectedFeature) {
                     return;
                 }
@@ -347,10 +403,14 @@ dbkjs.modules.edit = {
                     var vertices = this.selectedFeature.geometry.getVertices();
                     var attributes = $.extend({}, this.selectedFeature.attributes);
                     this.featuresManager.removeFeature(this.selectedFeature.id);
-                    this.createTriangleFromPoints(vertices[0], this.lineCenter(vertices[1], vertices[vertices.length - 1]), attributes);
+                    this.createTriangleFromPoints(vertices[0], this.lineCenter(vertices[1], vertices[vertices.length - 1]), attributes,false);
                 }
                 this.updateLayer();
                 this.featuresManager.updateFeature(this.selectedFeature);
+                //this.saveFeatures();
+            }, this).on("propertyChanged",function(e){
+                this.allowedToRead = true;
+                this.saveFeatures();                   
             }, this)
             .on("featureOver", function(featureid) {
                 var feature = this.layer.getFeatureById(featureid);
@@ -386,7 +446,7 @@ dbkjs.modules.edit = {
                 feature = me.layer.features[i];
                 me.featuresManager.addFeature(feature);
             }
-            me.setSelectedFeature(feature);
+            if(feature)me.setSelectedFeature(feature);
         });
     },
 
@@ -433,10 +493,16 @@ dbkjs.modules.edit = {
         if(!activeSymbol) {
             return;
         }
+        $(".selected-label").remove();
+        $("#symbol-picker-bar").append("<span class='selected-label' style='font-weight: bold;'>("+activeSymbol.label+")</span>");
+        /* 
         if(this.mode === activeSymbol.type && (!activeSymbol.hasOwnProperty("triangleFactor"))) {
+            if(this.mode ==="line"){
+                this.drawLineControl.handler.freehand = activeSymbol.isFreehand; 
+            }
             return;
-        }
-
+        }*/
+        
         // Disable previous mode
         if(this.mode === "point") {
             this.disablePointMode();
@@ -446,19 +512,27 @@ dbkjs.modules.edit = {
             this.disableAreaMode();
         } else if(this.mode === "triangle") {
             this.disableTriangleMode();
+        } else if(this.mode === "polygon"){
+            this.disablePolygonMode();
         }
 
         // Enable new mode
         if(activeSymbol.type === "point") {
             this.enablePointMode();
         } else if(activeSymbol.type === "line") {
+            this.drawLineControl.handler.freehand = activeSymbol.isFreehand; 
             this.enableLineMode();
-        } else if(activeSymbol.type === "area") {
-            if(activeSymbol.hasOwnProperty("triangleFactor")) {
+        } else if (activeSymbol.type === "area") {
+            if (activeSymbol.hasOwnProperty("triangleFactor")) {
                 this.enableTriangleMode();
+            } else if (activeSymbol.hasOwnProperty("polygon")) {
+                this.drawPolygonControl.handler.freehand = activeSymbol.isFreehand;
+                this.enablePolygonMode();
             } else {
+                this.drawAreaControl.handler.multi = activeSymbol.isMulti;
+                this.drawAreaControl.handler.sides = activeSymbol.sides;
                 this.enableAreaMode();
-        } 
+            }
         } else {
             this.mode = "";
         }
@@ -506,7 +580,13 @@ dbkjs.modules.edit = {
         $("body").addClass("disable-selection");
         this.drawAreaControl.activate();
     },
-
+    
+    enablePolygonMode: function() {
+        this.mode = "polygon";
+        $("body").addClass("disable-selection");
+        this.drawPolygonControl.activate();
+    },
+    
     enableTriangleMode: function() {
         this.mode = "triangle";
         $("body").addClass("disable-selection");
@@ -517,7 +597,12 @@ dbkjs.modules.edit = {
         $("body").removeClass("disable-selection");
         this.drawAreaControl.deactivate();
     },
-
+    
+    disablePolygonMode: function(){
+        $("body").removeClass("disable-selection");
+        this.drawPolygonControl.deactivate();
+    },
+    
     disableTriangleMode: function() {
         $("body").removeClass("disable-selection");
         this.drawTriangleControl.deactivate();
@@ -548,7 +633,7 @@ dbkjs.modules.edit = {
         return attributes;
     },
 
-    createTriangleFromPoints: function(a, b, attributes) {
+    createTriangleFromPoints: function(a, b, attributes,save) {
         var triangleFactor = attributes.triangleFactor / 10;
         if(triangleFactor <= 0) {
             triangleFactor = 0.001;
@@ -588,7 +673,7 @@ dbkjs.modules.edit = {
         var geom = new OpenLayers.Geometry.Polygon([new OpenLayers.Geometry.LinearRing(points)]);
         var triangleFeature = new OpenLayers.Feature.Vector(geom, attributes);
         this.layer.addFeatures(triangleFeature);
-        this.addFeatureToFeatureManager(triangleFeature);
+        this.addFeatureToFeatureManager(triangleFeature,save);
         return triangleFeature;
     },
 
@@ -614,9 +699,10 @@ dbkjs.modules.edit = {
         return b;
     },
 
-    addFeatureToFeatureManager: function(feature) {
+    addFeatureToFeatureManager: function(feature,save=true) {
         this.featuresManager.addFeature(feature);
         this.setSelectedFeature(feature);
+        if(save)this.saveFeatures();
     },
 
     deactivateButtons: function(btn) {
@@ -641,7 +727,7 @@ dbkjs.modules.edit = {
 
         // me.loadStylesheet();
 
-        var mainEditButton = new dbkjs.modules.EditButton("edit", "Tekenen", "#mapc1map1", "fa-pencil-square-o", {
+        this.mainEditButton = new dbkjs.modules.EditButton("edit", "Tekenen", "#mapc1map1", "fa-pencil-square-o", {
             divClass: "edit-button"
         }).on("activate", function() {
             me.activate();
@@ -697,6 +783,7 @@ dbkjs.modules.edit = {
                 me.disableLineMode();
                 me.disableAreaMode();
                 me.disableTriangleMode();
+                me.disablePolygonMode();
                 me.featuresManager.hidePropertiesGrid();
             });
 
@@ -718,8 +805,9 @@ dbkjs.modules.edit = {
         // Create symbol properties window
         me.properties = $("<div/>")
                 .attr("id", "edit-symbol-container")
+                .css("cursor","crosshair")
                 .addClass("panel");
-        me.properties.appendTo("#mapc1map1");
+        me.properties.appendTo("body");
 
         var group = $("<div/>")
                 .addClass("btn-group-vertical edit-type-buttons")
@@ -745,5 +833,29 @@ dbkjs.modules.edit = {
                 "<div class='row'> <div class='col-md-12' style='margin-top: 5px'>  </div> </div>" +
           "</div>")
           .appendTo("#symbol-picker-bar");
+    },
+    
+    setViewerMode: function() {
+        var me = this;
+        this.mainEditButton = new dbkjs.modules.EditButton("edit", "Lezen", "#mapc1map1", "fa fa-eye", {
+            divClass: "edit-button"
+        }).on("activate", function() {
+            me.activateView();
+        }).on("deactivate", function() {
+            me.deactivateView();
+        });
+    },
+    
+    activateView: function() {
+        var me = this;
+        me.readSavedFeatures();
+        me.updateDrawings = window.setInterval(function() {
+        me.readSavedFeatures(false);
+    }, 1000);
+    
+    },
+    deactivateView: function() {
+        window.clearInterval(this.updateDrawings);
+        this.featuresManager.removeAllFeatures();
     }
 };

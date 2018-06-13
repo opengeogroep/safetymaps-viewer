@@ -52,7 +52,8 @@
             id: "btn_opensearch",
             class: "btn btn-default navbar-btn",
             href: "#",
-            title: i18n.t("search.button")
+            title: i18n.t("search.button"),
+            "data-sid":me.options.index
         })
         .append("<i class='fa fa-search'></i>")
         .click(function(e) {

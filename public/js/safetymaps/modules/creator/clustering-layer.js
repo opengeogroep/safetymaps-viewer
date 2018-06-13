@@ -101,6 +101,9 @@ safetymaps.ClusteringLayer.prototype.createLayer = function () {
                         if (feature.attributes.count) {
                             return feature.attributes.count;
                         } else if (feature.layer.map.getScale() > me.options.minLabelScale) {
+                            return "";                        
+                        } else if(me.selectedIds.indexOf(feature.attributes.id) !== -1) {
+                            console.log("selected cluster feature", feature.attributes);
                             return "";
                         } else {
                             return feature.attributes.label || "";

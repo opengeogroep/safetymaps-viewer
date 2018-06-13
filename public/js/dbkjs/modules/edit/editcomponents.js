@@ -53,8 +53,8 @@ dbkjs.modules.FeaturesManager = function() {
         .addClass("panel");
     var featurescontainer = $("<div class='features-container'><table class='table table-striped features-table'>" +
         "<thead>" +
-        "<tr><td colspan='3'><a href='#' class='remove-all'>Verwijder alle</a>" +
-            "<div style='float: right;'><a href='#' class='save-all'><i class='fa fa-save'></i> Opslaan</a> &nbsp; <a href='#' class='load-all'><i class='fa fa-upload'></i> Laden</a></div>" +
+        "<tr><td colspan='3'><a title='Delete all' href='#' class='btn btn-info btn-lg remove-all'><span class='glyphicon glyphicon-trash'></span></a>" +
+            "<div style='float: right;'><a title='Save all' href='#' class='btn btn-info btn-lg save-all'><i class='fa fa-save'></i></a> &nbsp; <a title='Load' href='#' class='btn btn-info btn-lg load-all'><i class='fa fa-upload'></i></a></div>" +
         "</td></tr>" +
         "<tr><td>Symb.</td><td colspan='2'>Label</td></tr>" +
         "</thead>" +
@@ -111,10 +111,10 @@ dbkjs.modules.FeaturesManager = function() {
         e.stopPropagation();
         var removeBtn = $(e.currentTarget);
         if(removeBtn.hasClass("remove-all")) {
-            this.removeAllFeatures();
+            this.removeAllFeatures(true);
             return;
         }
-        this.removeFeatureByRow(removeBtn.closest("tr"));
+        this.removeFeatureByRow(removeBtn.closest("tr"),true);
     }).bind(this));
     this.featureslist.on("click", ".load-all", (function(e) {
         e.preventDefault();
@@ -173,20 +173,20 @@ $.extend(dbkjs.modules.FeaturesManager.prototype, {
         var row = this.findRowByFeatureId(feature.id);
         row.find(".lbl span").html(feature.attributes.label);
     },
-    removeAllFeatures: function() {
+    removeAllFeatures: function(buttonClicked = false) {
         this.featurestable.children().remove();
-        this.trigger("removeAllFeatures");
+        this.trigger("removeAllFeatures",[buttonClicked]);
     },
-    removeFeatureByRow: function(row) {
-        this.removeFeature(row.data("featureid"), row);
+    removeFeatureByRow: function(row,buttonClicked = false) {
+        this.removeFeature(row.data("featureid"), row,buttonClicked);
     },
-    removeFeature: function(featureid, row) {
+    removeFeature: function(featureid, row,buttonClicked = false) {
         if(row) {
             row.remove();
         } else {
             this.findRowByFeatureId(featureid).remove();
         }
-        this.trigger("removeFeature", [ featureid ]);
+        this.trigger("removeFeature", [ featureid,buttonClicked ]);
     },
     setSelectedFeature: function(feature) {
         this.featurestable.find(".info").removeClass("info");
@@ -240,6 +240,11 @@ $.extend(dbkjs.modules.FeaturesManager.prototype, {
             prop[name] = this.value;
             me.trigger("propertyUpdated", [ prop ]);
         });
+        var propGrid = this.propertiesGrid;
+        propGrid.on("mouseup touchend", function(e){
+            console.log(e);
+            me.trigger("propertyChanged", [e]);
+        });
     }
 });
 dbkjs.modules.FeaturesManager.prototype.constructor = dbkjs.modules.FeaturesManager;
@@ -265,7 +270,9 @@ dbkjs.modules.SymbolManager = function(symbols, quickSelectContainer, symbolPick
     this.loadRecentlyUsedSymbols();
 
     // Listeners
-    $(symbolPickerBtn).on("click", (function() { this.symbolpicker.show() }).bind(this));
+    $(symbolPickerBtn).on("click", (function() {
+        $("#edit-symbol-properties").hide();
+        this.symbolpicker.show(); }).bind(this));
     this.quickSelectContainer.add(this.symbolpicker.find(".panel-body"))
         .on("click", ".symbol-btn", this.handleSymbolButtonClick.bind(this));
 };
@@ -433,6 +440,7 @@ $.extend(dbkjs.modules.SymbolManager.prototype, {
 
     handleSymbolButtonClick: function(e) {
         this.symbolpicker.hide();
+        $("#edit-symbol-properties").show();
         this.setActiveSymbol(e.currentTarget.getAttribute("data-symbolid"));
     },
 

@@ -168,6 +168,9 @@ SplitScreenWindow.prototype.createElements = function(title) {
             me.setSplitScreen(!me.splitScreen);
             $(me.popup).find("a.modal-popup-switch").html(switchContents());
         });
+        $(this).on('splitScreenChange', function(){
+            $(me.popup).find("a.modal-popup-switch").html(switchContents());
+        });
     }
 };
 
@@ -187,7 +190,7 @@ SplitScreenWindow.prototype.setSplitScreen = function(splitScreen) {
     if(wasVisible) {
         this.show();
     }
-
+    
     $(this).triggerHandler('splitScreenChange', splitScreen, this.visible);
 };
 

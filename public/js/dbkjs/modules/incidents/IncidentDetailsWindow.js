@@ -212,15 +212,20 @@ IncidentDetailsWindow.prototype.showMultipleFeatureMatches = function() {
     div.append("<h3>Meerdere informatiekaarten gevonden op de locatie van het incident:</h3>");
     var item_ul = $('<ul class="nav nav-pills nav-stacked"></ul>');
     $.each(me.multipleFeatureMatches, function(i, m) {
-        var info = dbkjs.config.styles.getFeatureStylingInfo(m);
-
-        item_ul.append($('<li><a href="#"><img src="' + info.icon + '" style="width: 25px; margin-right: 10px">' + (m.attributes.locatie || m.attributes.formeleNaam) + (m.attributes.informeleNaam ? ' (' + m.attributes.informeleNaam + ')' : '') + '</a></li>').on('click', function(e) {
+        //var info = dbkjs.config.styles.getFeatureStylingInfo(m);
+        var info = {
+            "icon" : m.attributes.symbol,
+            "iconWidth" : m.attributes.width,
+            "iconHeight" : m.attributes.height
+        };
+        item_ul.append($('<li><a href="#"><img src="' + info.icon + '" style="width: 25px; margin-right: 10px">' + (m.attributes.apiObject.locatie || m.attributes.apiObject.formele_naam) + (m.attributes.apiObject.informele_naam ? ' (' + m.attributes.apiObject.informele_naam + ')' : '') + '</a></li>').on('click', function(e) {
             e.preventDefault();
             me.hideMultipleFeatureMatches();
             if(me.incidentLonLat) {
                 dbkjs.map.setCenter(me.incidentLonLat, dbkjs.options.zoom);
             }
-            dbkjs.protocol.jsonDBK.process(m, null, true);
+            //dbkjs.protocol.jsonDBK.process(m, null, true);
+            dbkjs.modules.safetymaps_creator.selectObjectById(m.attributes.apiObject.id,m.attributes.apiObject.extent, true);
         }));
     });
     div.append(item_ul);
@@ -441,17 +446,18 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
     var m = incident.BrwDisciplineGegevens;
     var d = new moment(incident.BrwDisciplineGegevens.StartDTG);
 
-    html += '<tr><td colspan="2" style="font-weight: bold; text-align: center; color: ' + me.getPrioriteitColor(m.Prioriteit) + '">PRIO ' + m.Prioriteit + '</td></tr>';
-    html += '<tr><td>Start incident: </td><td>' + d.format("dddd, D-M-YYYY HH:mm:ss")  + (compareMode ? "" : " (" + d.fromNow() + ")") + '</td></tr>';
+    html += '<tr><td colspan="2" style="font-weight: bold; text-align: center; color: ' + me.getPrioriteitColor(m.Prioriteit) + '">PRIO ' + m.Prioriteit + '<sub style="font-size:10px; text-align: center; color:black;"> ('+incident.IncidentNummer+')</sub></td></tr>';
+    //html += '<tr><td>Start incident: </td><td>' + d.format("dddd, D-M-YYYY HH:mm:ss")  + (compareMode ? "" : " (" + d.fromNow() + ")") + '</td></tr>';
+    html += '<tr><td>Start incident: </td><td>' + d.format("dddd, D-M-YYYY HH:mm:ss")+'</td></tr>';
     var a = incident.IncidentLocatie;
     html += '<tr><td>Adres: </td><td>' + me.getIncidentAdres(incident, false) + '</td></tr>';
     if(a.NaamLocatie2) {
         html += '<tr><td></td><td>' + dbkjs.util.htmlEncode(a.NaamLocatie2) + '</td></tr>';
     }
-    html += '<tr><td>Postcode: </td><td>' + (a.Postcode ? a.Postcode : "-") + '</td></tr>';
-    html += '<tr><td>Woonplaats: </td><td>' + (a.Plaatsnaam ? a.Plaatsnaam : "-") + '</td></tr>';
+    html += '<tr><td>Postcode & Woonplaats: </td><td>' + (a.Postcode ? a.Postcode : "-") +  ', '+(a.Plaatsnaam ? a.Plaatsnaam : "-") + '</td></tr>';
+    //html += '<tr><td>Woonplaats: </td><td>' + (a.Plaatsnaam ? a.Plaatsnaam : "-") + '</td></tr>';
 
-    html += '<tr><td>&nbsp;</td><td></td></tr>';
+    //html += '<tr><td>&nbsp;</td><td></td></tr>';
     html += '<tr><td>Melding classificatie:</td><td>' + me.getIncidentClassificatiesFalck(incident) + '</td></tr>';
 
     if(!incident.Karakteristieken || incident.Karakteristieken.length === 0) {
@@ -469,25 +475,63 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
     html += '</td></tr>';
 
     if(showInzet) {
-        html += '<tr class="detailed"><td colspan="2" id="eenheden">';
-        html += '<div id="brw"><b>Brandweereenheden</b><br/>';
+        //html += '<tr><td>&nbsp;</td><td></td></tr>';
+        var showEenheden = "";
+        var showAllEeenheden = "";
+        if($("#allEenheden").is(":visible")){
+            showAllEeenheden = "visible";
+            showEenheden = "none";
+        } else {
+            showAllEeenheden = "none";
+            showEenheden = "visible";
+        }
+        html += '<tr class="detailed"><td colspan="2" id="eenheden" style = "display:'+showEenheden+';">';
+        html += "Eenheden: ";
+        
+        $.each(incident.BetrokkenEenheden, function(i, inzet) {
+            if(i!==0){
+                html += ", ";
+            }
+            var eta ="";
+            if(inzet.ETA !== null || inzet.ETA === ""){
+                eta = me.calculateETA(inzet.ETA[0],false);
+            }
+            
+            html += (inzet.IsActief ? '<font color="#000000">' : '<font color="#A9A9A9">') +dbkjs.util.htmlEncode(inzet.Roepnaam+""+eta)+'</font>';
+        });
+        html += "<font color='#A9A9A9'> (Klik voor meer info)</font>";
+        
+        $(document).on('click', '#eenheden', function(){
+                $('#allEenheden').show();
+                $('#eenheden').hide();
+        });
+        
+        html += '</td></tr>';
+        html += '<tr class="detailed"><td style="display:'+showAllEeenheden+';" colspan="2" id="allEenheden">';
+        html += '<div id="brw">Eenheden:<font color="#A9A9A9"> (Klik voor minder info)</font><br/>';
         $.each(incident.BetrokkenEenheden, function(i, inzet) {
             if(inzet.Discipline === "B") {
                 var eenheid = (inzet.InzetRol ? inzet.InzetRol : "") + " " + inzet.Roepnaam;
                 if(inzet.BrwKazerne) {
                     eenheid += " (" + inzet.BrwKazerne + ")";
                 }
-
+                if(inzet.ETA !== null || inzet.ETA === ""){
+                    eenheid +=  me.calculateETA(inzet.ETA[0],true);
+                }
                 var tooltip = "";
                 if(inzet.EindeActieDTG) {
                     var einde = new moment(inzet.EindeActieDTG);
                     tooltip = "actie be&euml;indigd om " + einde.format("HH:mm") + ", " + einde.fromNow();
                 }
 
-                html += (!inzet.IsActief ? "<span class='einde' " : "<span ")  + " title='" + tooltip + "'>" + dbkjs.util.htmlEncode(eenheid) + "</span><br/>";
+                html += (!inzet.IsActief ? "<span class='einde'style='color:gray'" : "<span font style='color:black'")  + " title='" + tooltip + "'>" + dbkjs.util.htmlEncode(eenheid) + "</span><br/>";
             }
         });
         html += '</div>';
+        $(document).on('click', '#allEenheden', function(){
+                $('#allEenheden').hide();
+                $('#eenheden').show();
+        });
         html += '</td></tr>';
     }
 
@@ -651,4 +695,25 @@ IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInze
     html += '</table>';
 
     return html;
+};
+
+IncidentDetailsWindow.prototype.calculateETA = function (ETA, fullName) {
+    if (ETA) {
+        var eta = ETA.match(/\d+/g).map(Number)[0];
+        var minutesToRide = (eta - new Date().getTime()) / 60000;
+        minutesToRide = Math.round(minutesToRide);
+        //minutesToRide = 10;
+        if (minutesToRide > 1 && minutesToRide <= 99) {
+            if (fullName) {
+                return " " + minutesToRide.toString() + " minuten";
+            } else {
+                return " (" + minutesToRide.toString() + "m)";
+            }
+        } else {
+            return "";
+        }
+    } else {
+        return "";
+    }
+    ;
 };
