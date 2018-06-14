@@ -29,6 +29,13 @@ dbkjs.mapcontrols = {
                 })
             );
         }
+
+        if(window.location.search.indexOf("res=true") !== -1) {
+            $("<span id='res' style='position: absolute; left: 0; top:0; font-size: 14pt'></span>").appendTo(document.body);
+            dbkjs.map.events.register("zoomend", undefined, function(e) {
+                    $("#res").text("Zoom: " + e.object.getZoom().toFixed(2) + ", res: " + e.object.getResolution().toFixed(4));
+            });
+        }
     },
     //dbkjs.js: init
     registerMapEvents: function() {
