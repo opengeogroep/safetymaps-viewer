@@ -26,12 +26,14 @@ dbkjs.modules.vrh_objects = {
     selectedObject: null,
     selectedClusterFeature: null,
     infoWindow: null,
-    dbkObjects: null,
+    overviewObjects: null,
     features:[],
 
     register: function() {
         var me = this;
-        
+
+        this.overviewObjects = [];
+
         // XXX
         safetymaps.creator.api.imagePath = "js/safetymaps/modules/creator/assets/";        
 
@@ -71,28 +73,51 @@ dbkjs.modules.vrh_objects = {
         }
         dbkjs.selectControl.multiselectlayers.push(layer);
 
-        // Setup object details layers
+        // Setup details layers
 
-//        me.objectLayers = new safetymaps.creator.CreatorObjectLayers(dbkjs);
-//        dbkjs.map.addLayers(me.objectLayers.createLayers());
-/*
+        me.eventLayers = new safetymaps.vrh.EventLayers(dbkjs);
+        dbkjs.map.addLayers(me.eventLayers.createLayers());
         dbkjs.hoverControl.deactivate();
-        $.each(me.objectLayers.selectLayers, function(i, l) {
+        $.each(me.eventLayers.selectLayers, function(i, l) {
             dbkjs.selectControl.layers.push(l);
             if(l.hover) dbkjs.hoverControl.layers.push(l);
-            l.events.register("featureselected", me, me.objectLayerFeatureSelected);
-            l.events.register("featureunselected", me, me.objectLayerFeatureUnselected);
+            l.events.register("featureselected", me, me.eventLayerFeatureSelected);
+            l.events.register("featureunselected", me, me.eventLayerFeatureUnselected);
         });
 
         dbkjs.hoverControl.activate();
         dbkjs.selectControl.activate();
-*/
+/*
         safetymaps.vrh.api.getDbks()
         .fail(function(msg) {
             dbkjs.util.alert("Fout", msg, "alert-danger");
         })
         .done(function(dbkObjects) {
-            me.dbkObjectsLoaded(dbkObjects);
+            console.log("Got DBK objects", dbkObjects);
+
+            dbkObjects.sort(function(lhs, rhs) {
+                return lhs.naam.localeCompare(rhs.naam, dbkjsLang);
+            });
+            me.overviewObjects = me.overviewObjects.concat(dbkObjects);
+
+            var features = safetymaps.vrh.api.createDbkFeatures(dbkObjects);
+            me.clusteringLayer.addFeaturesToCluster(features);
+        });
+*/
+        safetymaps.vrh.api.getEvenementen()
+        .fail(function(msg) {
+            dbkjs.util.alert("Fout", msg, "alert-danger");
+        })
+        .done(function(evenementenObjects) {
+            console.log("Got event objects", evenementenObjects);
+
+            evenementenObjects.sort(function(lhs, rhs) {
+                return lhs.evnaam.localeCompare(rhs.evnaam, dbkjsLang);
+            });
+            me.overviewObjects = me.overviewObjects.concat(evenementenObjects);
+
+            var features = safetymaps.vrh.api.createEvenementFeatures(evenementenObjects);
+            me.clusteringLayer.addFeaturesToCluster(features);
         });
 
         // Setup user interface for object info window
@@ -103,10 +128,9 @@ dbkjs.modules.vrh_objects = {
     setupInterface: function() {
         var me = this;
 
-/*        
         // Element for displaying list of Creator objects in a cluster
         dbkjs.util.createModalPopup({name: "creator_cluster_list"}).getView().append($("<div></div>").attr({'id': 'creator_cluster_list'}));
-
+/*
         // Button to open info window
         $("#btngrp_object").append($('<a id="btn_object_info" href="#" class="btn navbar-btn btn-default"><i class="fa fa-info-circle"></i></a>'));
         $("#btn_object_info")
@@ -150,20 +174,7 @@ dbkjs.modules.vrh_objects = {
 
         view.find(".pdf-embed").css("height", tabContentHeight - 28);
     },
-*/
-    dbkObjectsLoaded: function(data) {
-        this.dbkObjects = data;
-        console.log("Got DBK objects", data);
 
-        this.dbkObjects.sort(function(lhs, rhs) {
-            return lhs.naam.localeCompare(rhs.naam, dbkjsLang);
-        });
-        this.features = safetymaps.vrh.api.createDbkFeatures(this.dbkObjects);
-        this.clusteringLayer.addFeaturesToCluster(this.features);
-        
-        //this.createSearchConfig();
-    }
-/*
     createSearchConfig: function() {
         var me = this;
 
@@ -198,7 +209,7 @@ dbkjs.modules.vrh_objects = {
             }, true);
         }
     },
-
+*/
     clusterObjectClusterSelected: function (feature) {
         console.log("show selection list", feature);
 
@@ -226,10 +237,11 @@ dbkjs.modules.vrh_objects = {
     getClusterLink: function (feature) {
         var me = this;
         var v = {
-            name: feature.attributes.apiObject.formele_naam+" ("+feature.attributes.apiObject.informele_naam+")",
+            name: feature.attributes.apiObject.naam,
+            oms: feature.attributes.apiObject.oms_nummer,
             id: feature.attributes.apiObject.id
         };
-        var link = $(Mustache.render('<li><a id="{{id}}" href="#">{{name}}</a></li>', v));
+        var link = $(Mustache.render('<li><a id="{{id}}" href="#">{{name}}{{#oms}} (OMS: {{oms}}){{/oms}}</a></li>', v));
         $(link).click(function () {
             dbkjs.util.getModalPopup("creator_cluster_list").hide();
             me.clusterObjectSelected(feature);
@@ -241,10 +253,10 @@ dbkjs.modules.vrh_objects = {
         console.log("Select feature", feature);
 
         this.selectedClusterFeature = feature;
-        this.selectObjectById(feature.attributes.id, feature.attributes.apiObject.extent);
+        this.selectObjectById(feature.attributes.type, feature.attributes.id, feature.attributes.apiObject.extent);
     },
 
-    selectObjectById: function(id, extent, isIncident = false) {
+    selectObjectById: function(type, id, extent, isIncident = false) {
         var me = this;
 
         // Unselect current, if any
@@ -252,7 +264,7 @@ dbkjs.modules.vrh_objects = {
 
         // No extent when different floor is selected, do not zoom
         if(extent) {
-            console.log("zooming to selected object at ", extent);
+            console.log("zooming to selected " + type + " object at ", extent);
 
             // Parse "BOX(n n,n n)" to array of left, bottom, top, right
             var bounds = extent.match(/[0-9. ,]+/)[0].split(/[ ,]/);
@@ -272,19 +284,19 @@ dbkjs.modules.vrh_objects = {
         }
 
         // Get object details
-        $("#creator_object_info").text(i18n.t("dialogs.busyloading") + "...");
-        safetymaps.creator.api.getObjectDetails(id)
+        //$("#creator_object_info").text(i18n.t("dialogs.busyloading") + "...");
+        safetymaps.vrh.api.getObjectDetails(type, id)
         .fail(function(msg) {
-            $("#creator_object_info").text("Error: " + msg);
+            //$("#creator_object_info").text("Error: " + msg);
         })
         .done(function(object) {
-            me.selectedObjectDetailsReceived(object, isIncident);
+            me.selectedObjectDetailsReceived(type, object, isIncident);
         });
     },
 
     unselectObject: function() {
         if(this.selectedObject) {
-            this.objectLayers.removeAllFeatures();
+            this.eventLayers.removeAllFeatures();
 
             if(this.selectedClusterFeature && this.selectedClusterFeature.layer) {
                 dbkjs.selectControl.unselect(this.selectedClusterFeature);
@@ -296,26 +308,26 @@ dbkjs.modules.vrh_objects = {
         $("#vectorclickpanel").hide();
     },
 
-    selectedObjectDetailsReceived: function(object,isIncident = false) {
+    selectedObjectDetailsReceived: function(type, object,isIncident = false) {
         try {
-            this.objectLayers.addFeaturesForObject(object);
-            this.updateInfoWindow(object,isIncident);
+            this.eventLayers.addFeaturesForObject(object);
+//            this.updateInfoWindow(object,isIncident);
             this.selectedObject = object;
-
+/*
             var ids = [object.id];
             $.each(object.verdiepingen || [], function(i, v) {
                 ids.push(v.id);
             });
             this.clusteringLayer.setSelectedIds(ids);
-
+*/
         } catch(error) {
             console.log("Error creating layers for object", object);
             if(error.stack) {
                 console.log(error.stack);
             }
         }
-    },
-
+    }
+/*
     updateInfoWindow: function(object,isIncident = false) {
         var me = this;
 
