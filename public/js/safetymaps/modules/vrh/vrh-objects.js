@@ -326,7 +326,7 @@ dbkjs.modules.vrh_objects = {
                 console.log(error.stack);
             }
         }
-    }
+    },
 /*
     updateInfoWindow: function(object,isIncident = false) {
         var me = this;
@@ -352,111 +352,81 @@ dbkjs.modules.vrh_objects = {
         this.infoWindowTabsResize();
 
     },
-
-    objectLayerFeatureSelected: function(e) {
+*/
+    eventLayerFeatureSelected: function(e) {
         var me = this;
         var layer = e.feature.layer;
         var f = e.feature.attributes;
-        if (layer === me.objectLayers.layerCustomPolygon) {
-            if(f.style.en === "Area"){
-                console.log("Area selected, do nothing");
-                layer.redraw();
-                return;
-            }
-            console.log("CustomPolygon feature selected", e);
-            var table = $('<table class="table table-hover"></table>');
-            table.append('<tr><th style="width: 10%"></th><th>' + i18n.t("dialogs.information") + '</th></tr>');
-            var desc = f.style.en;
-            if(f.style.hasOwnProperty(dbkjsLang)) {
-                if(f.style[dbkjsLang] !== "") {
-                    desc = f.style[dbkjsLang];
-                }
-            }
-            table.append(
-                    '<tr><td bgcolor="'+f.style.color+'"></td>' +
-                    '<td>' + desc + '</td>' +
-                    '</tr>'
-                    );
-            me.showFeatureInfo(i18n.t("creator.area"), table);
+        console.log(layer.name + " feature selected", e);
+        if(layer === me.eventLayers.layerLocationPolygon) {
+            var s = me.eventLayers.locationPolygonStyle[f.vlaksoort];
+            me.showFeatureInfo("Locatie", s.label, s.omschrijvi);
             layer.redraw();
-        } else if (layer === me.objectLayers.layerFireCompartmentation) {
-            console.log("FireCompartmentation feature selected", e);
-            var table = $('<table class="table table-hover"></table>');
-            table.append('<tr><th>' + i18n.t("dialogs.information") + '</th></tr>');
-            var desc = f.style.en;
-            if(f.style.hasOwnProperty(dbkjsLang)) {
-                if(f.style[dbkjsLang] !== "") {
-                    desc = f.style[dbkjsLang];
-                }
-            }
-            table.append('<tr><td>' + desc + '</td></tr>');
-            me.showFeatureInfo(i18n.t("creator.fire_compartment"), table);
-        } else if (layer === me.objectLayers.layerCommunicationCoverage) {
-            console.log("communication feature selected", e);
-
-            var table = $('<table class="table table-hover"></table>');
-
-            table.append('<tr>' +
-                    '<th style="width: 30%">' + i18n.t("creator.symbol_" + (f.coverage ? "" : "no_") + "communication_coverage") + '</th>' +
-                    '<th>' + i18n.t("dialogs.information") + '</th>' +
-                    '<th>' + i18n.t("creator.communication_alternative") + '</th>' +
-                    '</tr>'
-                    );
-            var img = safetymaps.creator.api.imagePath + (f.coverage ? "coverage" : "no_coverage") + ".png";
-            table.append(
-                    '<tr><td><img class="thumb" src="' + img + '"></td>' +
-                    '<td>' + Mustache.escape(f.info) + '</td>' +
-                    '<td>' + Mustache.escape(f.alternative) + '</td>' +
-                    '</tr>'
-                    );
-            me.showFeatureInfo(i18n.t("creator.symbols"), table);
-        } else if(layer === me.objectLayers.layerSymbols) {
-            console.log("symbol selected", e);
-
-            var table = $('<table class="table table-hover"></table>');
-            table.append('<tr><th style="width: 30%">' + i18n.t("symbol." + f.code) + '</th><th>' + i18n.t("dialogs.information") + '</th></tr>');
-            var img = safetymaps.creator.api.imagePath + 'symbols/' + f.code + '.png';
-            table.append(
-                    '<tr><td><img class="thumb" src="' + img + '" alt="' + f.code + '" title="' + f.code + '"></td>' +
-                    '<td>' + Mustache.escape(f.description) + '</td></tr>'
-            );
-            me.showFeatureInfo(i18n.t("creator.symbols"), table);
-        } else if(layer === me.objectLayers.layerDangerSymbols) {
-            console.log("danger symbol selected", e);
-
-            var table = $('<table class="table table-hover"></table>');
-            table.append('<tr>' +
-                    '<th>' + i18n.t("creator.danger_symbol_icon") + '</th>' +
-                    '<th>' + i18n.t("creator.danger_symbol_hazard_identifier") + '</th>' +
-                    '<th>' + i18n.t("creator.danger_symbol_name") + '</th>' +
-                    '<th>' + i18n.t("creator.danger_symbol_quantity") + '</th>' +
-                    '<th>' + i18n.t("creator.danger_symbol_information") + '</th>' +
-                    '</tr>'
-            );
-
-            table.append(Mustache.render('<tr>' +
-                '<td><img style="width: 20%" src="{{img}}" alt="{{symbolName}}" title="{{symbolName}}"></td>' +
-                '<td><div class="gevicode">{{f.geviCode}}</div><div class="unnummer">{{f.unNr}}</div></td>' +
-                '<td>{{f.substance_name}}</td>' +
-                '<td>{{f.amount}}</td>' +
-                '<td>{{f.description}}</td>' +
-                '</tr>',
-                {
-                    img: safetymaps.creator.api.imagePath + 'danger_symbols/' + f.symbol + '.png',
-                    symbolName: i18n.t("creator.danger_symbol_" + f.symbol),
-                    f: f
-            }));
-            me.showFeatureInfo(i18n.t("creator.danger_symbols"), table);
-
-        } else {
-            console.log(layer.name + " feature selected", e);
+        } else if(layer === me.eventLayers.layerLocationSymbols) {
+            var types = {
+                "agg": "Aggegraat",
+                "dga": "Doorgang algemeen",
+                "dgh": "Doorgang hekwerk",
+                "dgn": "Doorgang nood",
+                "dgp": "Doorgang publiek",
+                "inf": "Informatiepunt",
+                "inv": "Invalideplaats",
+                "wck": "Kruis urinoir",
+                "lim": "Lichtmast",
+                "paa": "Parkeren auto",
+                "paf": "Parkeren fiets",
+                "pam": "Parkeren motor",
+                "pla": "Pijlaanduiding",
+                "wca": "Wc algemeen"
+            };
+            me.showFeatureInfo("Locatie", types[f.type] || "", f.ballonteks);
+            layer.redraw();
+        } else if(layer === me.eventLayers.layerRouteSymbols) {
+            var types = {
+                "afz": "Afzetting",
+                "amb": "Ambulance",
+                "bev": "Beveiliging",
+                "bkm": "Blokkade mobiel",
+                "bkv": "Blokkade vast",
+                "brb": "Boot reddingsbrigade",
+                "brw": "Brandweer",
+                "bwi": "Brandweeringang",
+                "cop": "Comprimeerpunt",
+                "doa": "Doorlaatpost algemeen",
+                "dov": "Doorlaatpost voetgangers",
+                "ehb": "Ehbo",
+                "ghr": "Ghor",
+                "hel": "Helicopter",
+                "hok": "Hoogwerkerkraan",
+                "mcb": "Mobiele commando BRW",
+                "mcg": "Mobiele commando GHOR",
+                "mcp": "Mobiele commando Politie",
+                "mcr": "Mobiele commando Rode Kruis",
+                "moa": "Motor Ambulance",
+                "mob": "Motor Brandweer",
+                "pol": "Politie",
+                "pos": "Politie servicepunt",
+                "poh": "Poller hulpdiensten",
+                "rok": "Rode Kruis",
+                "dpl": "Drinkplaats",
+                "siv": "Snelle interventie voertuig",
+                "tas": "Tankautospuit",
+                "ver": "Verkeersregelaar",
+                "vaf": "Vlag finish",
+                "vas": "Vlag start"
+            };
+            me.showFeatureInfo("Route", types[f.soort] || "", f.ballonteks);
+            layer.redraw();
         }
     },
 
-    showFeatureInfo: function(title, content) {
+    showFeatureInfo: function(title, label, description) {
         $('#vectorclickpanel_h').html('<span class="h4"><i class="fa fa-info-circle">&nbsp;' + title + '</span>');
         var html = $('<div class="table-responsive"></div>');
-        html.append(content);
+        var table = $('<table class="table table-hover"></table>');
+        table.append('<tr><th style="width: 20%">Soort</th><th>' + i18n.t("dialogs.information") + '</th></tr>');
+        table.append('<tr><td>' + label + '</td><td>' + (description || "") + '</td></tr>');
+        html.append(table);
         $('#vectorclickpanel_b').html('').append(html);
         $('#vectorclickpanel').show();
     },
@@ -466,6 +436,6 @@ dbkjs.modules.vrh_objects = {
         if (e.feature.layer === this.objectLayers.layerCustomPolygon) {
             e.feature.layer.redraw();
         }
-    }*/
+    }
 };
 

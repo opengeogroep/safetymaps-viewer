@@ -397,6 +397,450 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
     this.layers.push(this.layerSymbols);
     this.selectLayers.push(this.layerSymbols);
 */
+
+    me.locationPolygonStyle = {
+        "bas": {
+            fill: "rgb(57,128,70)",
+            stroke: "rgb(110,110,110)",
+            strokeWidth: 0.4,
+            label: "Backstage"
+        },
+        "scp": {
+            fill: "rgb(209,255,115)",
+            stroke: "rgb(110,110,110)",
+            label: "Scanpoort"
+            // TODO hatch, pattern
+        },
+        "cat": {
+            fill: "rgb(115,0,76)",
+            stroke: "#000",
+            strokeWidth: 0.4,
+            label: "Catering"
+        },
+        "cot": {
+            fill: "rgb(255,0,0)",
+            stroke: "rgb(85,255,0)",
+            strokeWidth: 4,
+            stroke2: "rgb(115,0,0)",
+            strokeWidth2: 1.3,
+            label: "Coordinatieteam"
+        },
+        "ent": {
+            fill: "rgb(192,96,247)",
+            stroke: "rgb(110,110,110)",
+            strokeWidth: 0.4,
+            label: "Entertainment"
+        },
+        "eva": {
+            fill: "rgb(255,255,115)",
+            stroke: "rgb(0,0,0)",
+            label: "Entertainment algemeen"
+        },
+        "evo": {
+            fill: "rgb(56,168,0)",
+            stroke: "rgb(0,0,0)",
+            strokeWidth: 0.4,
+            label: "Entertainment onderdeel"
+        },
+        "foh": {
+            fill: "rgb(132,0,168)",
+            stroke: "#000",
+            strokeWidth: 0.4,
+            label: "Front of house"
+        },
+        "hud": {
+            fill: "rgb(255,170,0)",
+            stroke: "#f00",
+            label: "Hulpdiensten"
+        },
+        "kas": {
+            fill: "rgb(54,52,133)",
+            stroke: "rgb(110,110,110)",
+            strokeWidth: 0.4,
+            label: "Kassa"
+        },
+        "klk": {
+            fill: "rgb(105,250,238)",
+            stroke: "rgb(110,110,110)",
+            strokeWidth: 0.4,
+            label: "Kleedkamer"
+        },
+        "lig": {
+            fill: "rgb(162,245,103)",
+            stroke: "rgb(110,110,110)",
+            strokeWidth: 0.4,
+            label: "Lineup gate"
+        },
+        "med": {
+            fill: "rgb(227,143,203)",
+            stroke: "rgb(110,110,110)",
+            strokeWidth: 0.4,
+            label: "Media"
+        },
+        "ops": {
+            fill: "rgb(158,170,215)",
+            stroke: "rgb(68,79,137)",
+            strokeWidth: 0.4,
+            label: "Opslag"
+        },
+        "par": {
+            fill: "rgb(130,130,130)",
+            stroke: "rgb(0,38,115)",
+            strokeWidth: 0.4,
+            strokePattern: "1 3",
+            label: "Parkeerlocatie"
+        },
+        "pec": {
+            fill: "rgb(128,47,106)",
+            stroke: "rgb(110,110,110)",
+            strokeWidth: 0.4,
+            label: "Perscontainer"
+        },
+        "pla": {
+            fill: "rgb(147,137,240)",
+            stroke: "rgb(110,110,110)",
+            strokeWidth: 0.4,
+            label: "Pijlaanduiding"
+        },
+        "pdm": {
+            fill: "rgb(223,115,255)",
+            stroke: "#000",
+            strokeWidth: 1.3,
+            label: "Podium"
+        },
+        "poc": {
+            fill: "rgb(79,140,134)",
+            stroke: "rgb(110,110,110)",
+            strokeWidth: 0.4,
+            label: "Portocabine"
+        },
+        "rez": {
+            fill: "rgb(0,255,197)",
+            stroke: "rgb(0,115,76)",
+            strokeWidth: 0.4,
+            label: "Reclamezuil"
+        },
+        "reg": {
+            fill: "rgb(242,167,155)",
+            stroke: "rgb(110,110,110)",
+            strokeWidth: 0.4,
+            label: "Regie"
+        },
+        "sta": {
+            fill: "rgb(250,167,90)",
+            stroke: "#000",
+            strokeWidth: 0.4,
+            label: "Stands"
+        },
+        "tnt": {
+            fill: "#fff",
+            stroke: "#000",
+            strokeWidth: 1.5,
+            label: "Tent"
+        },
+        "trs": {
+            fill: "rgb(205,170,102)",
+            stroke: "#000",
+            strokeWidth: 0.4,
+            label: "Terras"
+        },
+        "wcl": {
+            fill: "rgb(190,232,255)",
+            stroke: "rgb(0,77,168)",
+            strokeWidth: 0.4,
+            label: "Toiletlocatie"
+        },
+        "trb": {
+            fill: "rgb(255,235,175)",
+            stroke: "#000",
+            strokeWidth: 2,
+            label: "Tribune"
+            // TODO hatch
+        },
+        "trl": {
+            fill: "rgb(104,104,104)",
+            stroke: "#000",
+            strokeWidth: 0.4,
+            label: "Voertuigen"
+        },
+        "rpl": {
+            fill: "rgb(215,194,158)",
+            stroke: "rgb(104,104,104)",
+            strokeWidth: 0.4,
+            label: "Rijplaten"
+        },
+        "evt": {
+            fill: "rgb(233,255,190)",
+            stroke: "rgb(0,115,76)",
+            strokeWidth: 1,
+            label: "Evenementterrein"
+        },
+        "vrk": {
+            fill: "rgb(237,128,85)",
+            stroke: "rgb(110,110,110)",
+            strokeWidth: 0.4,
+            label: "Vc Nederlandse Rode Kruis"
+        },
+        "vip": {
+            fill: "rgb(212,74,168)",
+            stroke: "rgb(110,110,110)",
+            strokeWidth: 0.4,
+            label: "Vip"
+        },
+        "vz1": {
+            fill: "rgb(255,255,255)",
+            stroke: "rgb(255,0,0)",
+            strokeWidth: 2,
+            label: "Vrij houden"
+            // TODO hatch
+        },
+        "vz2": {
+            fill: "rgb(228,238,204)",
+            stroke: "rgb(228,238,204)",
+            strokeWidth: 2,
+            label: "Veiligheidszone 2"
+        },
+        "vz3": {
+            fill: "rgb(80,204,82)",
+            stroke: "rgb(110,110,110)",
+            strokeWidth: 0.4,
+            label: "Veiligheidszone 3"
+        },
+        "vz4": {
+            fill: "rgb(84,107,240)",
+            stroke: "rgb(110,110,110)",
+            strokeWidth: 0.4,
+            label: "Veiligheidszone 4"
+        }
+    };
+    this.layerLocationPolygon = new OpenLayers.Layer.Vector("Event location polygons", {
+        hover:false,
+        rendererOptions: {
+            zIndexing: true
+        },
+        styleMap: new OpenLayers.StyleMap({
+            default: new OpenLayers.Style({
+                fillColor: "${fillColor}",
+//                fillOpacity: "0.5",
+                strokeColor: "${strokeColor}",
+                strokeWidth: "${strokeWidth}",
+                strokeDashstyle: "${strokePattern}"
+            }, {
+                context: {
+                    fillColor: function(feature) {
+                        var s = me.locationPolygonStyle[feature.attributes.vlaksoort];
+                        return s ? s.fill : "";
+                    },
+                    strokeColor: function(feature) {
+                        var s = me.locationPolygonStyle[feature.attributes.vlaksoort];
+                        return s ? s.stroke : "";
+                    },
+                    strokeWidth: function(feature) {
+                        var s = me.locationPolygonStyle[feature.attributes.vlaksoort];
+                        return s ? s.strokeWidth : "1";
+                    },
+                    strokePattern: function(feature) {
+                        var s = me.locationPolygonStyle[feature.attributes.vlaksoort];
+                        return s ? s.strokePattern : "";
+                    }
+                }
+            }),
+            temporary: new OpenLayers.Style({}),
+            select: new OpenLayers.Style({})
+        })
+    });
+    this.layers.push(this.layerLocationPolygon);
+    this.selectLayers.push(this.layerLocationPolygon);
+
+    me.routePolygonStyle = {
+        "evt": {
+            fill: "rgb(255,190,190)",
+            stroke: "rgb(110,110,110)",
+            strokeWidth: 0.4,
+            label: "Evenementterrein"
+        },
+        "kab": {
+            fill: "rgb(255,255,0)",
+            stroke: "rgb(255,0,0)",
+            strokePattern: "15 6 1 3 1 3",
+            label: "Kabelbrug"
+        },
+        "obg": {
+            fill: "rgb(255,255,255)",
+            stroke: "#000",
+            strokeWidth: 2,
+            label: "Onderbrekingsgebied"
+            // TODO hatch
+        },
+        "vz1": {
+            fill: "rgb(69,196,81)",
+            stroke: "rgb(110,110,110)",
+            strokeWidth: 0.4,
+            label: "Veiligheidszone 1"
+        },
+        "vz2": {
+            fill: "rgb(117,226,250)",
+            stroke: "rgb(110,110,110)",
+            strokeWidth: 0.4,
+            label: "Veiligheidszone 2"
+        },
+        "vz3": {
+            fill: "rgb(90,81,224)",
+            stroke: "rgb(110,110,110)",
+            strokeWidth: 0.4,
+            label: "Veiligheidszone 3"
+        },
+        "vz4": {
+            fill: "rgb(70,91,140)",
+            stroke: "rgb(110,110,110)",
+            strokeWidth: 0.4,
+            label: "Veiligheidszone 4"
+        }
+    };
+    this.layerRoutePolygon = new OpenLayers.Layer.Vector("Event route polygons", {
+        hover:false,
+        rendererOptions: {
+            zIndexing: true
+        },
+        styleMap: new OpenLayers.StyleMap({
+            default: new OpenLayers.Style({
+                fillColor: "${fillColor}",
+//                fillOpacity: "0.5",
+                strokeColor: "${strokeColor}",
+                strokeWidth: "${strokeWidth}",
+                strokeDashstyle: "${strokePattern}"
+            }, {
+                context: {
+                    fillColor: function(feature) {
+                        var s = me.routePolygonStyle[feature.attributes.vlaksoort];
+                        return s ? s.fill : "";
+                    },
+                    strokeColor: function(feature) {
+                        var s = me.routePolygonStyle[feature.attributes.vlaksoort];
+                        return s ? s.stroke : "";
+                    },
+                    strokeWidth: function(feature) {
+                        var s = me.routePolygonStyle[feature.attributes.vlaksoort];
+                        return s ? s.strokeWidth : "1";
+                    },
+                    strokePattern: function(feature) {
+                        var s = me.routePolygonStyle[feature.attributes.vlaksoort];
+                        return s ? s.strokePattern : "";
+                    }
+                }
+            }),
+            temporary: new OpenLayers.Style({}),
+            select: new OpenLayers.Style({})
+        })
+    });
+    this.layers.push(this.layerRoutePolygon);
+    this.selectLayers.push(this.layerRoutePolygon);
+
+
+    me.locationLineStyle = {
+        "evt": {
+            fill: "rgb(255,190,190)",
+            stroke: "rgb(110,110,110)",
+            strokeWidth: 0.4,
+            label: "Evenementterrein"
+        },
+        "kab": {
+            fill: "rgb(255,255,0)",
+            stroke: "rgb(255,0,0)",
+            strokePattern: "15 6 1 3 1 3",
+            label: "Kabelbrug"
+        },
+        "obg": {
+            fill: "rgb(255,255,255)",
+            stroke: "#000",
+            strokeWidth: 2,
+            label: "Onderbrekingsgebied"
+            // TODO hatch
+        },
+        "vz1": {
+            fill: "rgb(69,196,81)",
+            stroke: "rgb(110,110,110)",
+            strokeWidth: 0.4,
+            label: "Veiligheidszone 1"
+        },
+        "vz2": {
+            fill: "rgb(117,226,250)",
+            stroke: "rgb(110,110,110)",
+            strokeWidth: 0.4,
+            label: "Veiligheidszone 2"
+        },
+        "vz3": {
+            fill: "rgb(90,81,224)",
+            stroke: "rgb(110,110,110)",
+            strokeWidth: 0.4,
+            label: "Veiligheidszone 3"
+        },
+        "vz4": {
+            fill: "rgb(70,91,140)",
+            stroke: "rgb(110,110,110)",
+            strokeWidth: 0.4,
+            label: "Veiligheidszone 4"
+        }
+    };
+    this.layerLocationLine = new OpenLayers.Layer.Vector("Event location lines", {
+        hover:false,
+        rendererOptions: {
+            zIndexing: true
+        },
+        styleMap: new OpenLayers.StyleMap({
+            default: new OpenLayers.Style({
+                fillColor: "${fillColor}",
+//                fillOpacity: "0.5",
+                strokeColor: "${strokeColor}",
+                strokeWidth: "${strokeWidth}",
+                strokeDashstyle: "${strokePattern}"
+            }, {
+                context: {
+                    fillColor: function(feature) {
+                        var s = me.locationLineStyle[feature.attributes.lijnsoort];
+                        return s ? s.fill : "";
+                    },
+                    strokeColor: function(feature) {
+                        var s = me.locationLineStyle[feature.attributes.lijnsoort];
+                        return s ? s.stroke : "";
+                    },
+                    strokeWidth: function(feature) {
+                        var s = me.locationLineStyle[feature.attributes.vlaksoort];
+                        return s ? s.strokeWidth : "1";
+                    },
+                    strokePattern: function(feature) {
+                        var s = me.locationLineStyle[feature.attributes.vlaksoort];
+                        return s ? s.strokePattern : "";
+                    }
+                }
+            }),
+            temporary: new OpenLayers.Style({}),
+            select: new OpenLayers.Style({})
+        })
+    });
+    this.layers.push(this.layerLocationLine);
+    this.selectLayers.push(this.layerLocationLine);
+
+
+    this.layerLabels = new OpenLayers.Layer.Vector("Event labels", {
+        rendererOptions: {
+            zIndexing: true
+        },
+        styleMap: new OpenLayers.StyleMap({
+            'default': new OpenLayers.Style({
+                fontSize: "${tekstgroot}",
+                label: "${tekstreeks}",
+                rotation: "${teksthoek}",
+                labelOutlineColor: "#ffffff",
+                labelOutlineWidth: 1
+            }, {
+                context: {
+                }
+            })
+        })
+    });
+    this.layers.push(this.layerLabels);
+    
     this.layerLocationSymbols = new OpenLayers.Layer.Vector("Event location symbols", {
         hover:true,
         rendererOptions: {
@@ -418,24 +862,27 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
     this.layers.push(this.layerLocationSymbols);
     this.selectLayers.push(this.layerLocationSymbols);
 
-    this.layerLabels = new OpenLayers.Layer.Vector("Event labels", {
+    this.layerRouteSymbols = new OpenLayers.Layer.Vector("Event route symbols", {
+        hover:true,
         rendererOptions: {
             zIndexing: true
         },
         styleMap: new OpenLayers.StyleMap({
-            'default': new OpenLayers.Style({
-                fontSize: "${tekstgroot}",
-                label: "${tekstreeks}",
-                rotation: "${teksthoek}",
-                labelOutlineColor: "#ffffff",
-                labelOutlineWidth: 1
-            }, {
+            default: new OpenLayers.Style({
+                externalGraphic: me.imagePath + "/${soort}.png",
+                pointRadius: 12,
+                rotation: "${hoek}"
+            },{
                 context: {
                 }
-            })
+            }),
+            temporary: new OpenLayers.Style({pointRadius: me.options.graphicSizeHover}),
+            select: new OpenLayers.Style({pointRadius: me.options.graphicSizeSelect})
         })
     });
-    this.layers.push(this.layerLabels);
+    this.layers.push(this.layerRouteSymbols);
+    this.selectLayers.push(this.layerRouteSymbols);
+
 
     return this.layers;
 };
@@ -457,8 +904,29 @@ safetymaps.vrh.EventLayers.prototype.addFeaturesForObject = function(object) {
     this.addCommunicationCoverageFeatures(object);
     this.addSymbolFeatures(object);
     this.addDangerSymbolFeatures(object);*/
-    this.addLabelFeatures(object);
-    this.addLocationSymbolFeatures(object);
+
+    var wktParser = new OpenLayers.Format.WKT();
+
+    this.layerLocationPolygon.addFeatures(object.locatie_vlak.map(function(d) {
+        var f = wktParser.read(d.geom);
+        f.attributes = d;
+        return f;
+    }));
+    // TODO add label points, or text symbolizer for polygon?
+
+    this.layerRoutePolygon.addFeatures(object.route_vlak.map(function(d) {
+        var f = wktParser.read(d.geom);
+        f.attributes = d;
+        return f;
+    }));
+    // TODO add label points, or text symbolizer for polygon?
+
+    this.layerLabels.addFeatures(object.teksten.map(d => new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(d.x, d.y), d)));
+
+    this.layerLocationSymbols.addFeatures(object.locatie_punt.map(d => new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(d.x, d.y), d)));
+    this.layerRouteSymbols.addFeatures(object.route_punt.map(d => new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(d.x, d.y), d)));
+
+    console.log("Added event layers", this.layers);
 };
 /*
 safetymaps.creator.CreatorObjectLayers.prototype.addBuildingFeatures = function(object) {
@@ -675,24 +1143,3 @@ safetymaps.creator.CreatorObjectLayers.prototype.addDangerSymbolFeatures = funct
     if(features.length > 0) console.log("added danger symbols", features);
 };
 */
-safetymaps.vrh.EventLayers.prototype.addLabelFeatures = function(object) {
-    var features = [];
-    $.each(object.teksten || [], function(i, detail) {
-        var f = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(detail.x, detail.y), detail);
-        f.attributes.index = i;
-        features.push(f);
-    });
-    this.layerLabels.addFeatures(features);
-    if(features.length > 0) console.log("added labels", features);
-};
-
-safetymaps.vrh.EventLayers.prototype.addLocationSymbolFeatures = function(object) {
-    var features = [];
-    $.each(object.locatie_punt || [], function(i, detail) {
-        var f = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(detail.x, detail.y), detail);
-        f.attributes.index = i;
-        features.push(f);
-    });
-    this.layerLocationSymbols.addFeatures(features);
-    if(features.length > 0) console.log("added location symbols", features);
-};
