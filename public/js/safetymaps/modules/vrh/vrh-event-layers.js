@@ -35,6 +35,17 @@ safetymaps.vrh.EventLayers = function(options) {
     }, options);
 };
 
+safetymaps.vrh.EventLayers.prototype.scalePattern = function(pattern, factor) {
+    if(!pattern || pattern.trim().length === 0) {
+        return "";
+    }
+    var values = pattern.replace(/\s+/g, " ").split(" ");
+    for(var i = 0; i < values.length; i++) {
+        values[i] *= factor;
+    }
+    return values.join(" ");
+};
+
 safetymaps.vrh.EventLayers.prototype.createLayers = function() {
     var me = this;
 
@@ -621,7 +632,6 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
         styleMap: new OpenLayers.StyleMap({
             default: new OpenLayers.Style({
                 fillColor: "${fillColor}",
-//                fillOpacity: "0.5",
                 strokeColor: "${strokeColor}",
                 strokeWidth: "${strokeWidth}",
                 strokeDashstyle: "${strokePattern}"
@@ -637,7 +647,7 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
                     },
                     strokeWidth: function(feature) {
                         var s = me.locationPolygonStyle[feature.attributes.vlaksoort];
-                        return s ? s.strokeWidth : "1";
+                        return s ? s.strokeWidth : 2;
                     },
                     strokePattern: function(feature) {
                         var s = me.locationPolygonStyle[feature.attributes.vlaksoort];
@@ -705,7 +715,6 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
         styleMap: new OpenLayers.StyleMap({
             default: new OpenLayers.Style({
                 fillColor: "${fillColor}",
-//                fillOpacity: "0.5",
                 strokeColor: "${strokeColor}",
                 strokeWidth: "${strokeWidth}",
                 strokeDashstyle: "${strokePattern}"
@@ -721,7 +730,7 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
                     },
                     strokeWidth: function(feature) {
                         var s = me.routePolygonStyle[feature.attributes.vlaksoort];
-                        return s ? s.strokeWidth : "1";
+                        return s ? s.strokeWidth : 2;
                     },
                     strokePattern: function(feature) {
                         var s = me.routePolygonStyle[feature.attributes.vlaksoort];
@@ -736,50 +745,55 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
     this.layers.push(this.layerRoutePolygon);
     this.selectLayers.push(this.layerRoutePolygon);
 
-
     me.locationLineStyle = {
-        "evt": {
-            fill: "rgb(255,190,190)",
-            stroke: "rgb(110,110,110)",
-            strokeWidth: 0.4,
-            label: "Evenementterrein"
+        "hkh": {
+            label: "Hekwerk hoog",
+            stroke: "#a70683",
+            strokeWidth: 1,
+            stroke2: "black",
+            strokeWidth2: 2,
+            strokePattern2: "2 6"
         },
-        "kab": {
-            fill: "rgb(255,255,0)",
-            stroke: "rgb(255,0,0)",
-            strokePattern: "15 6 1 3 1 3",
-            label: "Kabelbrug"
+        "hkb": {
+            label: "Hekwerk hoogblind",
+            stroke: "#00ffc4",
+            strokeWidth: 1,
+            stroke2: "#730200",
+            strokeWidth2: 1,
+            strokePattern2: "3 8",
+            stroke3: "#730200",
+            strokeWidth3: 3,
+            strokePattern3: "0 1 1 9" // xxx dash-offset van 1 voor +
         },
-        "obg": {
-            fill: "rgb(255,255,255)",
-            stroke: "#000",
-            strokeWidth: 2,
-            label: "Onderbrekingsgebied"
-            // TODO hatch
+        "hkl": {
+            label: "Hekwerk laag",
+            stroke: "#e69700",
+            strokeWidth: 1,
+            stroke2: "black",
+            strokeWidth2: 4,
+            strokePattern2: "1 9"
         },
-        "vz1": {
-            fill: "rgb(69,196,81)",
-            stroke: "rgb(110,110,110)",
-            strokeWidth: 0.4,
-            label: "Veiligheidszone 1"
+        "hl": {
+            label: "Hekwerk laag",
+            stroke: "#e69700",
+            strokeWidth: 1,
+            stroke2: "black",
+            strokeWidth2: 4,
+            strokePattern2: "1 9"
         },
-        "vz2": {
-            fill: "rgb(117,226,250)",
-            stroke: "rgb(110,110,110)",
-            strokeWidth: 0.4,
-            label: "Veiligheidszone 2"
+        "stb": {
+            label: "Stagebarrier",
+            stroke: "#ffbde7",
+            strokeWidth: 1,
+            stroke2: "#686868",
+            strokePattern2: "7 7"
         },
-        "vz3": {
-            fill: "rgb(90,81,224)",
-            stroke: "rgb(110,110,110)",
-            strokeWidth: 0.4,
-            label: "Veiligheidszone 3"
-        },
-        "vz4": {
-            fill: "rgb(70,91,140)",
-            stroke: "rgb(110,110,110)",
-            strokeWidth: 0.4,
-            label: "Veiligheidszone 4"
+        "ort": {
+            label: "Ontruimingsrichting",
+            stroke: "#55ff00",
+            strokeWidth: 4.5,
+            stroke2: "#00a683",
+            strokeWidth2: 2.5
         }
     };
     this.layerLocationLine = new OpenLayers.Layer.Vector("Event location lines", {
@@ -789,28 +803,95 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
         },
         styleMap: new OpenLayers.StyleMap({
             default: new OpenLayers.Style({
-                fillColor: "${fillColor}",
-//                fillOpacity: "0.5",
+                strokeLinecap: "butt",
                 strokeColor: "${strokeColor}",
                 strokeWidth: "${strokeWidth}",
                 strokeDashstyle: "${strokePattern}"
             }, {
                 context: {
-                    fillColor: function(feature) {
-                        var s = me.locationLineStyle[feature.attributes.lijnsoort];
-                        return s ? s.fill : "";
-                    },
                     strokeColor: function(feature) {
                         var s = me.locationLineStyle[feature.attributes.lijnsoort];
                         return s ? s.stroke : "";
                     },
                     strokeWidth: function(feature) {
-                        var s = me.locationLineStyle[feature.attributes.vlaksoort];
-                        return s ? s.strokeWidth : "1";
+                        var s = me.locationLineStyle[feature.attributes.lijnsoort];
+                        return s ? s.strokeWidth*2 : 2;
                     },
                     strokePattern: function(feature) {
-                        var s = me.locationLineStyle[feature.attributes.vlaksoort];
-                        return s ? s.strokePattern : "";
+                        var s = me.locationLineStyle[feature.attributes.lijnsoort];
+                        return s ? me.scalePattern(s.strokePattern,2) || "none" : "none";
+                    }
+                }
+            }),
+            temporary: new OpenLayers.Style({}),
+            select: new OpenLayers.Style({})
+        })
+    });
+    this.layerLocationLine2 = new OpenLayers.Layer.Vector("Event location lines 2", {
+        hover:false,
+        rendererOptions: {
+            zIndexing: true
+        },
+        styleMap: new OpenLayers.StyleMap({
+            default: new OpenLayers.Style({
+               // display: "${display}",
+                strokeLinecap: "butt",
+                strokeColor: "${strokeColor}",
+                strokeWidth: "${strokeWidth}",
+                strokeDashstyle: "${strokePattern}"
+            }, {
+                context: {
+                    display: function(feature) {
+                        var s = me.locationLineStyle[feature.attributes.lijnsoort];
+                        return s ? "visible" : "none";
+                    },
+                    strokeColor: function(feature) {
+                        var s = me.locationLineStyle[feature.attributes.lijnsoort];
+                        return s ? s.stroke2 : "";
+                    },
+                    strokeWidth: function(feature) {
+                        var s = me.locationLineStyle[feature.attributes.lijnsoort];
+                        return s ? s.strokeWidth2*2 : "1";
+                    },
+                    strokePattern: function(feature) {
+                        var s = me.locationLineStyle[feature.attributes.lijnsoort];
+                        return s ? me.scalePattern(s.strokePattern2,2) || "none" : "none";
+                    }
+                }
+            }),
+            temporary: new OpenLayers.Style({}),
+            select: new OpenLayers.Style({})
+        })
+    });
+    this.layerLocationLine3 = new OpenLayers.Layer.Vector("Event location lines 3", {
+        hover:false,
+        rendererOptions: {
+            zIndexing: true
+        },
+        styleMap: new OpenLayers.StyleMap({
+            default: new OpenLayers.Style({
+               // display: "${display}",
+                strokeLinecap: "butt",
+                strokeColor: "${strokeColor}",
+                strokeWidth: "${strokeWidth}",
+                strokeDashstyle: "${strokePattern}"
+            }, {
+                context: {
+                    display: function(feature) {
+                        var s = me.locationLineStyle[feature.attributes.lijnsoort];
+                        return s ? "visible" : "none";
+                    },
+                    strokeColor: function(feature) {
+                        var s = me.locationLineStyle[feature.attributes.lijnsoort];
+                        return s ? s.stroke3 : "";
+                    },
+                    strokeWidth: function(feature) {
+                        var s = me.locationLineStyle[feature.attributes.lijnsoort];
+                        return s ? s.strokeWidth3*2 : "1";
+                    },
+                    strokePattern: function(feature) {
+                        var s = me.locationLineStyle[feature.attributes.lijnsoort];
+                        return s ? me.scalePattern(s.strokePattern3,2) || "none" : "none";
                     }
                 }
             }),
@@ -819,7 +900,11 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
         })
     });
     this.layers.push(this.layerLocationLine);
+    this.layers.push(this.layerLocationLine2);
+    this.layers.push(this.layerLocationLine3);
     this.selectLayers.push(this.layerLocationLine);
+    this.selectLayers.push(this.layerLocationLine2);
+    this.selectLayers.push(this.layerLocationLine3);
 
 
     this.layerLabels = new OpenLayers.Layer.Vector("Event labels", {
@@ -849,7 +934,7 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
         styleMap: new OpenLayers.StyleMap({
             default: new OpenLayers.Style({
                 externalGraphic: me.imagePath + "/${type}.png",
-                pointRadius: 12,
+                pointRadius: 14,
                 rotation: "${hoek}"
             },{
                 context: {
@@ -870,7 +955,7 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
         styleMap: new OpenLayers.StyleMap({
             default: new OpenLayers.Style({
                 externalGraphic: me.imagePath + "/${soort}.png",
-                pointRadius: 12,
+                pointRadius: 14,
                 rotation: "${hoek}"
             },{
                 context: {
@@ -913,6 +998,21 @@ safetymaps.vrh.EventLayers.prototype.addFeaturesForObject = function(object) {
         return f;
     }));
     // TODO add label points, or text symbolizer for polygon?
+    this.layerLocationLine.addFeatures(object.locatie_lijn.map(function(d) {
+        var f = wktParser.read(d.geom);
+        f.attributes = d;
+        return f;
+    }));
+    this.layerLocationLine2.addFeatures(object.locatie_lijn.map(function(d) {
+        var f = wktParser.read(d.geom);
+        f.attributes = d;
+        return f;
+    }));
+    this.layerLocationLine3.addFeatures(object.locatie_lijn.map(function(d) {
+        var f = wktParser.read(d.geom);
+        f.attributes = d;
+        return f;
+    }));
 
     this.layerRoutePolygon.addFeatures(object.route_vlak.map(function(d) {
         var f = wktParser.read(d.geom);
@@ -920,6 +1020,11 @@ safetymaps.vrh.EventLayers.prototype.addFeaturesForObject = function(object) {
         return f;
     }));
     // TODO add label points, or text symbolizer for polygon?
+   /* this.layerRouteLine.addFeatures(object.route_lijn.map(function(d) {
+        var f = wktParser.read(d.geom);
+        f.attributes = d;
+        return f;
+    }));*/
 
     this.layerLabels.addFeatures(object.teksten.map(d => new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(d.x, d.y), d)));
 
