@@ -763,7 +763,7 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
             strokePattern2: "3 8",
             stroke3: "#730200",
             strokeWidth3: 3,
-            strokePattern3: "0 1 1 9" // xxx dash-offset van 1 voor +
+            strokePattern3: "0 1 1 9" // dash-offset van 1 voor + met 0 aan begin
         },
         "hkl": {
             label: "Hekwerk laag",
@@ -784,8 +784,9 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
         "stb": {
             label: "Stagebarrier",
             stroke: "#ffbde7",
-            strokeWidth: 1,
+            strokeWidth: 2,
             stroke2: "#686868",
+            strokeWidth2: 2,
             strokePattern2: "7 7"
         },
         "ort": {
@@ -834,17 +835,12 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
         },
         styleMap: new OpenLayers.StyleMap({
             default: new OpenLayers.Style({
-               // display: "${display}",
                 strokeLinecap: "butt",
                 strokeColor: "${strokeColor}",
                 strokeWidth: "${strokeWidth}",
                 strokeDashstyle: "${strokePattern}"
             }, {
                 context: {
-                    display: function(feature) {
-                        var s = me.locationLineStyle[feature.attributes.lijnsoort];
-                        return s ? "visible" : "none";
-                    },
                     strokeColor: function(feature) {
                         var s = me.locationLineStyle[feature.attributes.lijnsoort];
                         return s ? s.stroke2 : "";
@@ -870,17 +866,12 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
         },
         styleMap: new OpenLayers.StyleMap({
             default: new OpenLayers.Style({
-               // display: "${display}",
                 strokeLinecap: "butt",
                 strokeColor: "${strokeColor}",
                 strokeWidth: "${strokeWidth}",
                 strokeDashstyle: "${strokePattern}"
             }, {
                 context: {
-                    display: function(feature) {
-                        var s = me.locationLineStyle[feature.attributes.lijnsoort];
-                        return s ? "visible" : "none";
-                    },
                     strokeColor: function(feature) {
                         var s = me.locationLineStyle[feature.attributes.lijnsoort];
                         return s ? s.stroke3 : "";
@@ -906,6 +897,177 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
     this.selectLayers.push(this.layerLocationLine2);
     this.selectLayers.push(this.layerLocationLine3);
 
+    me.routeLineStyle = {
+        "ara": {
+            label: "Afvoerroute ambulance",
+            stroke: "#ffff00",
+            strokeWidth: 2,
+            stroke2: "#005de6",
+            strokeWidth2: 2,
+            strokePattern2: "2 2"
+        },
+        "c1r": {
+            label: "Calamiteitenroute 1 richting",
+            stroke: "white",
+            strokeWidth: 2,
+            stroke2: "red",
+            strokeWidth2: 2,
+            strokePattern2: "2 2"
+        },
+        "c2r": {
+            label: "Calamiteitenroute 2 richting",
+            stroke: "white",
+            strokeWidth: 2,
+            stroke2: "red",
+            strokeWidth2: 2,
+            strokePattern2: "2 2"
+        },
+        "vek": {
+            label: "Verkeersring",
+            stroke: "#0070ff",
+            strokeWidth: 2,
+            stroke2: "white",
+            strokeWidth2: 1,
+            strokePattern2: "2 2"
+        },
+        "ro1": {
+            label: "Route 1",
+            stroke: "white",
+            strokeWidth: 2,
+            stroke2: "#55ff00",
+            strokeWidth2: 2,
+            strokePattern2: "2 2"
+        },
+        "ro2": {
+            label: "Route 2",
+            stroke: "white",
+            strokeWidth: 2,
+            stroke2: "#00c4ff",
+            strokeWidth2: 2,
+            strokePattern2: "2 2"
+        },
+        "ro3": {
+            label: "Route 3",
+            stroke: "white",
+            strokeWidth: 2,
+            stroke2: "#ffa900",
+            strokeWidth2: 2,
+            strokePattern2: "2 2"
+        },
+        "ro4": {
+            label: "Route 4",
+            stroke: "white",
+            strokeWidth: 2,
+            stroke2: "#de73ff",
+            strokeWidth2: 2,
+            strokePattern2: "2 2"
+        },
+        "ro5": {
+            label: "Route 5",
+            stroke: "black",
+            strokeWidth: 1
+        }
+    };
+    // TODO https://gist.github.com/pgiraud/6131715
+    this.layerRouteLine = new OpenLayers.Layer.Vector("Event route lines", {
+        hover:false,
+        rendererOptions: {
+            zIndexing: true
+        },
+        styleMap: new OpenLayers.StyleMap({
+            default: new OpenLayers.Style({
+                strokeLinecap: "butt",
+                strokeColor: "${strokeColor}",
+                strokeWidth: "${strokeWidth}",
+                strokeDashstyle: "${strokePattern}"
+            }, {
+                context: {
+                    strokeColor: function(feature) {
+                        var s = me.routeLineStyle[feature.attributes.routetype];
+                        return s ? s.stroke : "";
+                    },
+                    strokeWidth: function(feature) {
+                        var s = me.routeLineStyle[feature.attributes.routetype];
+                        return s ? s.strokeWidth*2 : 2;
+                    },
+                    strokePattern: function(feature) {
+                        var s = me.routeLineStyle[feature.attributes.routetype];
+                        return s ? me.scalePattern(s.strokePattern,2) || "none" : "none";
+                    }
+                }
+            }),
+            temporary: new OpenLayers.Style({}),
+            select: new OpenLayers.Style({})
+        })
+    });
+    this.layerRouteLine2 = new OpenLayers.Layer.Vector("Event route lines 2", {
+        hover:false,
+        rendererOptions: {
+            zIndexing: true
+        },
+        styleMap: new OpenLayers.StyleMap({
+            default: new OpenLayers.Style({
+                strokeLinecap: "butt",
+                strokeColor: "${strokeColor}",
+                strokeWidth: "${strokeWidth}",
+                strokeDashstyle: "${strokePattern}"
+            }, {
+                context: {
+                    strokeColor: function(feature) {
+                        var s = me.routeLineStyle[feature.attributes.routetype];
+                        return s ? s.stroke2 : "";
+                    },
+                    strokeWidth: function(feature) {
+                        var s = me.routeLineStyle[feature.attributes.routetype];
+                        return s ? s.strokeWidth2*2 : "1";
+                    },
+                    strokePattern: function(feature) {
+                        var s = me.routeLineStyle[feature.attributes.routetype];
+                        return s ? me.scalePattern(s.strokePattern2,2) || "none" : "none";
+                    }
+                }
+            }),
+            temporary: new OpenLayers.Style({}),
+            select: new OpenLayers.Style({})
+        })
+    });
+    this.layerRouteLine3 = new OpenLayers.Layer.Vector("Event route lines 3", {
+        hover:false,
+        rendererOptions: {
+            zIndexing: true
+        },
+        styleMap: new OpenLayers.StyleMap({
+            default: new OpenLayers.Style({
+                strokeLinecap: "butt",
+                strokeColor: "${strokeColor}",
+                strokeWidth: "${strokeWidth}",
+                strokeDashstyle: "${strokePattern}"
+            }, {
+                context: {
+                    strokeColor: function(feature) {
+                        var s = me.routeLineStyle[feature.attributes.routetype];
+                        return s ? s.stroke3 : "";
+                    },
+                    strokeWidth: function(feature) {
+                        var s = me.routeLineStyle[feature.attributes.routetype];
+                        return s ? s.strokeWidth3*2 : "1";
+                    },
+                    strokePattern: function(feature) {
+                        var s = me.routeLineStyle[feature.attributes.routetype];
+                        return s ? me.scalePattern(s.strokePattern3,2) || "none" : "none";
+                    }
+                }
+            }),
+            temporary: new OpenLayers.Style({}),
+            select: new OpenLayers.Style({})
+        })
+    });
+    this.layers.push(this.layerRouteLine);
+    this.layers.push(this.layerRouteLine2);
+    this.layers.push(this.layerRouteLine3);
+    this.selectLayers.push(this.layerRouteLine);
+    this.selectLayers.push(this.layerRouteLine2);
+    this.selectLayers.push(this.layerRouteLine3);
 
     this.layerLabels = new OpenLayers.Layer.Vector("Event labels", {
         rendererOptions: {
@@ -981,50 +1143,25 @@ safetymaps.vrh.EventLayers.prototype.removeAllFeatures = function(object) {
 };
 
 safetymaps.vrh.EventLayers.prototype.addFeaturesForObject = function(object) {
-    /*this.addBuildingFeatures(object);
-    this.addCustomPolygonFeatures(object);
-    this.addFireCompartmentationFeatures(object);
-    this.addLineFeatures(object);
-    this.addApproachRouteFeatures(object);
-    this.addCommunicationCoverageFeatures(object);
-    this.addSymbolFeatures(object);
-    this.addDangerSymbolFeatures(object);*/
-
     var wktParser = new OpenLayers.Format.WKT();
 
-    this.layerLocationPolygon.addFeatures(object.locatie_vlak.map(function(d) {
+    var wktReader = function(d) {
         var f = wktParser.read(d.geom);
         f.attributes = d;
         return f;
-    }));
-    // TODO add label points, or text symbolizer for polygon?
-    this.layerLocationLine.addFeatures(object.locatie_lijn.map(function(d) {
-        var f = wktParser.read(d.geom);
-        f.attributes = d;
-        return f;
-    }));
-    this.layerLocationLine2.addFeatures(object.locatie_lijn.map(function(d) {
-        var f = wktParser.read(d.geom);
-        f.attributes = d;
-        return f;
-    }));
-    this.layerLocationLine3.addFeatures(object.locatie_lijn.map(function(d) {
-        var f = wktParser.read(d.geom);
-        f.attributes = d;
-        return f;
-    }));
+    };
 
-    this.layerRoutePolygon.addFeatures(object.route_vlak.map(function(d) {
-        var f = wktParser.read(d.geom);
-        f.attributes = d;
-        return f;
-    }));
+    this.layerLocationPolygon.addFeatures(object.locatie_vlak.map(wktReader));
     // TODO add label points, or text symbolizer for polygon?
-   /* this.layerRouteLine.addFeatures(object.route_lijn.map(function(d) {
-        var f = wktParser.read(d.geom);
-        f.attributes = d;
-        return f;
-    }));*/
+    this.layerLocationLine.addFeatures(object.locatie_lijn.map(wktReader));
+    this.layerLocationLine2.addFeatures(object.locatie_lijn.map(wktReader));
+    this.layerLocationLine3.addFeatures(object.locatie_lijn.map(wktReader));
+
+    this.layerRoutePolygon.addFeatures(object.route_vlak.map(wktReader));
+    // TODO add label points, or text symbolizer for polygon?
+    this.layerRouteLine.addFeatures(object.route_lijn.map(wktReader));
+    this.layerRouteLine2.addFeatures(object.route_lijn.map(wktReader));
+    this.layerRouteLine3.addFeatures(object.route_lijn.map(wktReader));
 
     this.layerLabels.addFeatures(object.teksten.map(d => new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(d.x, d.y), d)));
 
@@ -1033,218 +1170,3 @@ safetymaps.vrh.EventLayers.prototype.addFeaturesForObject = function(object) {
 
     console.log("Added event layers", this.layers);
 };
-/*
-safetymaps.creator.CreatorObjectLayers.prototype.addBuildingFeatures = function(object) {
-    var wktParser = new OpenLayers.Format.WKT();
-
-    var features = [];
-    $.each(object.buildings || [], function(i, buildingWkt) {
-        var f = wktParser.read(buildingWkt);
-        f.attributes.index = i;
-        features.push(f);
-    });
-    this.layerBuildings.addFeatures(features);
-    if(features.length > 0) console.log("added buildings", features);
-};
-
-safetymaps.creator.CreatorObjectLayers.prototype.addCustomPolygonFeatures = function(object) {
-    var wktParser = new OpenLayers.Format.WKT();
-
-    var features = [];
-    if(object.select_area) {
-        // Add special feature to this layer to show the selection area
-        console.log("add select area", object.select_area);
-        var f = wktParser.read(object.select_area);
-        f.attributes.index = 0;
-        // Hardcode the style here
-        f.attributes.style = {
-            "color": "#B45F04",
-            "opacity": 0.2,
-            "strokeWidth": 1,
-            "strokeColor": "#B45F04",
-            "en": i18n.t("creator.area")
-        };
-        features.push(f);
-    }
-    $.each(object.custom_polygons || [], function(i, detail) {
-        var f = wktParser.read(detail.polygon);
-        f.attributes.index = i;
-        f.attributes.description = detail.omschrijving;
-        f.attributes.style = safetymaps.creator.api.styles.custom_polygons[detail.style];
-        features.push(f);
-    });
-
-    this.layerCustomPolygon.addFeatures(features);
-    if(features.length > 0) console.log("added custom polygons", features);
-};
-
-safetymaps.creator.CreatorObjectLayers.prototype.addFireCompartmentationFeatures = function(object) {
-    var me = this;
-
-    var wktParser = new OpenLayers.Format.WKT();
-
-    var features = [];
-    var labelFeatures = [];
-    $.each(object.fire_compartmentation || [], function(i, detail) {
-        var f = wktParser.read(detail.line);
-        f.attributes.index = i;
-        f.attributes.description = detail.omschrijving;
-        f.attributes.label = detail.label;
-        f.attributes.style = safetymaps.creator.api.styles.compartments[detail.style];
-        features.push(f);
-
-        var line = f.geometry;
-
-        // MultiLineString
-        for(var j = 0; j < line.components.length; j++) {
-            for(var k = 0; k < line.components[j].components.length-1; k++) {
-                var start = line.components[j].components[k];
-                var end = line.components[j].components[k+1];
-
-                console.log("segment length " + start.distanceTo(end) + ", min " + me.options.compartmentLabelMinSegmentLength);
-                if(start.distanceTo(end) < me.options.compartmentLabelMinSegmentLength) {
-                    continue;
-                }
-
-                var midx = start.x + (end.x - start.x)/2;
-                var midy = start.y + (end.y - start.y)/2;
-
-                var opposite = (end.y - start.y);
-                var adjacent = (end.x - start.x);
-                var theta = Math.atan2(opposite, adjacent);
-                var angle = -theta * (180/Math.PI);
-
-                var labelPoint = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(midx, midy), {
-                    index: i,
-                    style: f.attributes.style,
-                    label: f.attributes.label,
-                    rotation: angle,
-                    theta: theta
-                });
-                labelFeatures.push(labelPoint);
-            }
-        }
-    });
-    this.layerFireCompartmentation.addFeatures(features);
-    this.layerFireCompartmentationLabels.addFeatures(labelFeatures);
-    if(features.length > 0) console.log("added fire compartmentation", features, labelFeatures);
-};
-
-safetymaps.creator.CreatorObjectLayers.prototype.addLineFeatures = function(object) {
-    var wktParser = new OpenLayers.Format.WKT();
-
-    var features1 = [];
-    var features2 = [];
-    var features3 = [];
-    $.each(object.lines || [], function(i, detail) {
-        var f = wktParser.read(detail.line);
-
-        var style = safetymaps.creator.api.styles.custom_lines[detail.style];
-
-        if(style.type_viewer === "arrow") {
-            // Create two geometries: one line and a point at the end of the
-            // line to display the arrow
-            var vertices = f.geometry.getVertices();
-            var end = vertices[vertices.length - 1];
-
-            // Rotation for triangle graphic rendered at end of line
-            f.attributes.lineAngle = safetymaps.utils.geometry.getLastLineSegmentAngle(f.geometry);
-
-            f.geometry = new OpenLayers.Geometry.Collection([f.geometry, end]);
-        }
-
-        f.attributes.index = i;
-        f.attributes.description = detail.omschrijving;
-        f.attributes.style = style;
-        features1.push(f);
-
-        if(style.type_viewer === "doubletrack" || style.type_viewer === "tube") {
-            features2.push(f.clone());
-        }
-        if(style.type_viewer === "track" || style.type_viewer === "doubletrack") {
-            features3.push(f.clone());
-        }
-    });
-    this.layerLines1.addFeatures(features1);
-    this.layerLines2.addFeatures(features2);
-    this.layerLines3.addFeatures(features3);
-    if(features1.length > 0) console.log("added lines", features1, features2, features3);
-};
-
-safetymaps.creator.CreatorObjectLayers.prototype.addApproachRouteFeatures = function(object) {
-    var wktParser = new OpenLayers.Format.WKT();
-
-    var features = [];
-    $.each(object.approach_routes || [], function(i, detail) {
-        var f = wktParser.read(detail.line);
-        f.attributes.index = i;
-        f.attributes.description = detail.omschrijving;
-        f.attributes.name = detail.naam;
-        f.attributes.style = detail.style;
-
-        // Create two geometries: one line and a point at the end of the
-        // line to display the arrow
-        var vertices = f.geometry.getVertices();
-        var end = vertices[vertices.length - 1];
-
-        // Rotation for triangle graphic rendered at end of line
-        f.attributes.lineAngle = safetymaps.utils.geometry.getLastLineSegmentAngle(f.geometry);
-
-        f.geometry = new OpenLayers.Geometry.Collection([f.geometry, end]);
-        features.push(f);
-    });
-    this.layerApproachRoutes.addFeatures(features);
-    if(features.length > 0) console.log("added approach routes", features);
-};
-
-safetymaps.creator.CreatorObjectLayers.prototype.addCommunicationCoverageFeatures = function(object) {
-    var wktParser = new OpenLayers.Format.WKT();
-
-    var features = [];
-    $.each(object.communication_coverage || [], function(i, detail) {
-        var f = wktParser.read(detail.location);
-        f.attributes.index = i;
-        f.attributes.info = detail.aanvullende_informatie;
-        f.attributes.coverage = detail.dekking;
-        f.attributes.alternative = detail.alternatief;
-        features.push(f);
-    });
-    this.layerCommunicationCoverage.addFeatures(features);
-    if(features.length > 0) console.log("added communication coverage", features);
-};
-
-safetymaps.creator.CreatorObjectLayers.prototype.addSymbolFeatures = function(object) {
-    var wktParser = new OpenLayers.Format.WKT();
-
-    var features = [];
-    $.each(object.symbols || [], function(i, detail) {
-        var f = wktParser.read(detail.location);
-        f.attributes.index = i;
-        f.attributes.description = detail.omschrijving;
-        f.attributes.rotation = detail.rotation;
-        f.attributes.code = detail.code;
-        features.push(f);
-    });
-    this.layerSymbols.addFeatures(features);
-    if(features.length > 0) console.log("added symbols", features);
-};
-
-safetymaps.creator.CreatorObjectLayers.prototype.addDangerSymbolFeatures = function(object) {
-    var wktParser = new OpenLayers.Format.WKT();
-
-    var features = [];
-    $.each(object.danger_symbols || [], function(i, detail) {
-        var f = wktParser.read(detail.location);
-        f.attributes.index = i;
-        f.attributes.description = detail.omschrijving;
-        f.attributes.symbol = detail.symbol;
-        f.attributes.geviCode = detail.gevi_code;
-        f.attributes.unNr = detail.un_nr;
-        f.attributes.amount = detail.hoeveelheid;
-        f.attributes.substance_name = detail.naam_stof;
-        features.push(f);
-    });
-    this.layerDangerSymbols.addFeatures(features);
-    if(features.length > 0) console.log("added danger symbols", features);
-};
-*/
