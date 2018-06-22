@@ -123,6 +123,8 @@ dbkjs.modules.vrh_objects = {
         // Setup user interface for object info window
 
         me.setupInterface();
+
+        me.createSearchConfig();
     },
 
     setupInterface: function() {
@@ -174,42 +176,36 @@ dbkjs.modules.vrh_objects = {
 
         view.find(".pdf-embed").css("height", tabContentHeight - 28);
     },
-
+*/
     createSearchConfig: function() {
         var me = this;
 
         if(dbkjs.modules.search) {
             dbkjs.modules.search.addSearchConfig({
-                tabContents: "<i class='fa fa-building'></i> " + i18n.t("creator.search"),
+                tabContents: "<i class='fa fa-calendar-alt'></i> Evenementen",
                 placeholder: i18n.t("creator.search_placeholder"),
                 search: function(value) {
-                    console.log("search object " + value);
+                    console.log("search event " + value);
                     var searchResults = [];
-                    $.each(me.viewerApiObjects, function(i, o) {
-                        if(value === "" || o.formele_naam.toLowerCase().indexOf(value) !== -1 || (o.informele_naam && o.informele_naam.toLowerCase().indexOf(value) !== -1)) {
+                    $.each(me.overviewObjects, function(i, o) {
+                        if(value === "" || o.evnaam.toLowerCase().indexOf(value) !== -1) {
                             searchResults.push(o);
                             if(searchResults.length === me.options.maxSearchResults) {
                                 return false;
                             }
                         }
                     });
-                    dbkjs.modules.search.showResults(searchResults, function(r) {
-                        var s = r.formele_naam;
-                        if(r.informele_naam && r.informele_naam.trim().length > 0 && r.informele_naam !== r.formele_naam) {
-                            s += " (" + r.informele_naam + ")";
-                        }
-                        return s;
-                    });
+                    dbkjs.modules.search.showResults(searchResults, r => r.evnaam);
                 },
                 resultSelected: function(result) {
                     console.log("Search result selected", result);
 
-                    me.selectObjectById(result.id, result.extent);
+                    me.selectObjectById("evenement",result.evnaam, result.extent);
                 }
             }, true);
         }
     },
-*/
+
     clusterObjectClusterSelected: function (feature) {
         console.log("show selection list", feature);
 
