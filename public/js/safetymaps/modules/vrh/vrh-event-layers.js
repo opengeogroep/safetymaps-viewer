@@ -53,361 +53,21 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
 
     this.layers = [];
     this.selectLayers = [];
-/*
-    this.layerCustomPolygon = new OpenLayers.Layer.Vector("Creator custom polygons", {
+
+    this.layerTerrain = new OpenLayers.Layer.Vector("Event terrain", {
         hover:false,
         rendererOptions: {
             zIndexing: true
         },
         styleMap: new OpenLayers.StyleMap({
             default: new OpenLayers.Style({
-                fillColor: "${fillColor}",
-                fillOpacity: "${fillOpacity}",
-                strokeColor: "${strokeColor}",
-                strokeWidth: "${strokeWidth}"
-            }, {
-                context: {
-                    fillColor: function(feature) {
-                        if(feature.attributes.style.color)return feature.attributes.style.color;
-                        else return "#000000";
-                    },
-                    fillOpacity: function(feature) {
-                        if(feature.attributes.style.opacity)return feature.attributes.style.opacity;
-                        else return 0.2;
-                    },
-                    strokeColor: function(feature) {
-                        if(feature.attributes.style.strokeColor)return feature.attributes.style.strokeColor;
-                    },
-                    strokeWidth: function(feature) {
-                        if(feature.attributes.style.strokeWidth)return feature.attributes.style.strokeWidth;
-                        else return 1;
-                    }
-                }
-            }),
-            temporary: new OpenLayers.Style({}),
-            select: new OpenLayers.Style({})
-        })
-    });
-    this.layers.push(this.layerCustomPolygon);
-    this.selectLayers.push(this.layerCustomPolygon);
-
-    this.layerBuildings = new OpenLayers.Layer.Vector("Creator buildings", {
-        rendererOptions: {
-            zIndexing: true
-        },
-        // TODO add VRH functionality for switching style when aerial basemap
-        // is enabled
-        styleMap: new OpenLayers.StyleMap({
-            default: new OpenLayers.Style({
-                fillColor: "#66ff66",
-                fillOpacity: 0.2,
-                strokeColor: "#66ff66",
-                strokeWidth: 1
-            }, {
-                context: {
-                }
+                fillColor: "rgb(255,190,190)",
+                fillOpacity: 0.5,
+                strokeColor: ""
             })
         })
     });
-    this.layers.push(this.layerBuildings);
-
-    this.layerFireCompartmentation = new OpenLayers.Layer.Vector("Creator fire compartmentation", {
-        hover:false,
-        rendererOptions: {
-            zIndexing: true
-        },
-        styleMap: new OpenLayers.StyleMap({
-            default: new OpenLayers.Style({
-                strokeColor: "${color}",
-                strokeWidth: "${width}",
-                strokeLinecap: "butt",
-                strokeDashstyle: "${dashstyle}"
-            }, {
-                context: {
-                    color: function(feature) {
-                        if(feature.attributes.style && feature.attributes.style.color)return feature.attributes.style.color;
-                        else return "#000000";
-                    },
-                    width: function(feature) {
-                        // TODO: scaling
-                        if(feature.attributes.style && feature.attributes.style.thickness)return feature.attributes.style.thickness;
-                        else return 2;
-                    },
-                    dashstyle: function(feature) {
-                        // TODO: scaling
-                        if(feature.attributes.style && feature.attributes.style.pattern)return me.scalePattern(feature.attributes.style.pattern, 3);
-                        else return me.scalePattern("", 3);
-                    }
-                }
-            }),
-
-            select: new OpenLayers.Style({strokeWidth: 7, strokeColor:"#FF00FF"})
-        })
-    });
-    this.layers.push(this.layerFireCompartmentation);
-    this.selectLayers.push(this.layerFireCompartmentation);
-
-    this.layerFireCompartmentationLabels = new OpenLayers.Layer.Vector("Creator fire compartmentation labels", {
-        minScale: me.options.compartmentLabelMinScale,
-        rendererOptions: {
-            zIndexing: true
-        },
-        styleMap: new OpenLayers.StyleMap({
-            'default': new OpenLayers.Style({
-                fontSize: "${size}",
-                label: "${label}",
-                labelSelect: false,
-                rotation: "${rotation}",
-                labelOutlineColor: "#ffffff",
-                labelOutlineWidth: 2,
-                labelAlign: "cb",
-                labelXOffset: "${labelXOffset}",
-                labelYOffset: "${labelYOffset}"
-            }, {
-                context: {
-                    size: function(feature) {
-                        return 16;
-                    },
-                    label: function(feature) {
-                        if(feature.attributes.label){
-                            return feature.attributes.label;
-                        } else {
-                            return "";
-                        }
-                        /*
-                        if (feature.attributes.style) {
-                            var def = feature.attributes.style["en"];
-                            var local = feature.attributes.style[dbkjsLang];
-                            return local && local !== "" ? local : def;
-                        }
-                        * /
-                    },
-                    labelYOffset: function(feature) {
-                        return Math.sin(feature.attributes.theta + Math.PI/2) * 5;
-                    },
-                    labelXOffset: function(feature) {
-                        return Math.cos(feature.attributes.theta + Math.PI/2) * 5;
-                    }
-                }
-            })
-        })
-    });
-    this.layers.push(this.layerFireCompartmentationLabels);
-
-    this.layerLines1 = new OpenLayers.Layer.Vector("Creator lines 1", {
-        hover: false,
-        rendererOptions: {
-            zIndexing: true
-        },
-        styleMap: new OpenLayers.StyleMap({
-            default: new OpenLayers.Style({
-                strokeColor: "${color}",
-                strokeDashstyle: "${dashstyle}",
-                fillColor: "${color}",
-                strokeWidth: "${strokeWidth}",
-                graphicName: "${graphicName}",
-                rotation: "${rotation}",
-                pointRadius: 5,
-                label: "${description}"
-            }, {
-                context: {
-                    color: function(feature) {
-                        if(feature.attributes.style.color1)return feature.attributes.style.color1;
-                        else  return "#000000";
-                    },
-                    strokeWidth: function(feature) {
-                        if (feature.attributes.style.type_viewer) {
-                            var type = feature.attributes.style.type_viewer;
-                            if (type === "doubletrack" || type === "tube") {
-                                return feature.attributes.style.thickness * 1.5 + 2;
-                            }else{
-                            return feature.attributes.style.thickness * 1.5;
-                        }
-                        }else{
-                            return 2 * 1.5 + 2;
-                        }
-                    },
-                    dashstyle: function(feature) {
-                        if(feature.attributes.style.pattern)return me.scalePattern(feature.attributes.style.pattern, 5);
-                        else return me.scalePattern("", 3);
-                    },
-                    graphicName: function(feature) {
-                        if(feature.attributes.style.type_viewer === "arrow") {
-                            return "triangle";
-                            console.log("triangle");
-                        }
-                    },
-                    rotation: function(feature) {
-                        if(feature.attributes.lineAngle) {
-                            // Subtract angle from 90 because triangle with 0 rotation is pointing north
-                            return 90 - feature.attributes.lineAngle;
-                        }
-                        return 0;
-                    }
-
-                }
-            })
-        })
-    });
-    this.layers.push(this.layerLines1);
-    this.layerLines2 = new OpenLayers.Layer.Vector("Creator lines 2", {
-        hover: false,
-        rendererOptions: {
-            zIndexing: true
-        },
-        styleMap: new OpenLayers.StyleMap({
-            default: new OpenLayers.Style({
-                strokeColor: "${color}",
-                strokeLinecap: "butt",
-                strokeWidth: "${strokeWidth}",
-                strokeDashstyle: "${dashstyle}"
-            }, {
-                context: {
-                    color: function(feature) {
-                        if(feature.attributes.style.color2)return feature.attributes.style.color2;
-                        else  return "#000000";
-                    },
-                    strokeWidth: function(feature) {
-                        if(feature.attributes.style.thickness) return feature.attributes.style.thickness * 1.5;
-                        else return 2 * 1.5;
-                    },
-                    dashstyle: function(feature) {
-                        if(feature.attributes.style.type_viewer === "tube") {
-                            return me.scalePattern("8 8", 1);
-                        }
-                        return "";
-                    }
-                }
-            })
-        })
-    });
-    this.layers.push(this.layerLines2);
-
-    this.layerLines3 = new OpenLayers.Layer.Vector("Creator lines 3", {
-        hover: false,
-        rendererOptions: {
-            zIndexing: true
-        },
-        styleMap: new OpenLayers.StyleMap({
-            default: new OpenLayers.Style({
-                strokeColor: "${color}",
-                strokeWidth: "${strokeWidth}",
-                strokeDashstyle: "${dashstyle}",
-                strokeLinecap: "butt"
-            }, {
-                context: {
-                    color: function(feature) {
-                        if(feature.attributes.style.color1)return feature.attributes.style.color1;
-                        else  return "#000000";
-                    },
-                    strokeWidth: function(feature) {
-                        if(feature.attributes.style.thickness) return feature.attributes.style.thickness * 1.5 + 6;
-                        else return 2 * 1.5 + 6;
-                    },
-                    dashstyle: function(feature) {
-                        return me.scalePattern("1 20", 1);
-                    }
-                }
-            })
-        })
-    });
-    this.layers.push(this.layerLines3);
-
-    this.layerApproachRoutes = new OpenLayers.Layer.Vector("Creator approach routes", {
-        rendererOptions: {
-            zIndexing: true
-        },
-        styleMap: new OpenLayers.StyleMap({
-            default: new OpenLayers.Style({
-                strokeColor: "${color}",
-                fillColor: "${color}",
-                strokeWidth: "${strokeWidth}",
-                graphicName: "triangle",
-                rotation: "${rotation}",
-                pointRadius: 5
-            }, {
-                context: {
-                    color: function(feature) {
-                        switch(feature.attributes.style) {
-                            case 1: return "#ff0000";
-                            case 2: return "#0000ff";
-                            case 3: return "#00a000";
-                        }
-                        return "#000000";
-                    },
-                    strokeWidth: function(feature) {
-                        return 1.5;
-                    },
-                    rotation: function(feature) {
-                        if(feature.attributes.lineAngle) {
-                            // Subtract angle from 90 because triangle with 0 rotation is pointing north
-                            return 90 - feature.attributes.lineAngle;
-                        }
-                        return 0;
-                    }
-                }
-            })
-        })
-    });
-    this.layers.push(this.layerApproachRoutes);
-
-    this.layerCommunicationCoverage = new OpenLayers.Layer.Vector("Creator communication coverage", {
-        hover:true,
-        rendererOptions: {
-            zIndexing: true
-        },
-        styleMap: new OpenLayers.StyleMap({
-            default: new OpenLayers.Style({
-                externalGraphic: "${symbol}",
-                pointRadius: "${myradius}"
-            }, {
-                context: {
-                    symbol: function(feature) {
-                        return safetymaps.creator.api.imagePath + (feature.attributes.coverage ? "" : "no_") + "coverage.png";
-                    },
-                    myradius: function(feature){
-                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,14, feature.attributes.radius);
-                    }
-                }
-            }),
-            temporary: new OpenLayers.Style({pointRadius: me.options.graphicSizeHover}),
-            select: new OpenLayers.Style({pointRadius: me.options.graphicSizeSelect})
-        })
-    });
-    this.layers.push(this.layerCommunicationCoverage);
-    this.selectLayers.push(this.layerCommunicationCoverage);
-
-    this.layerSymbols = new OpenLayers.Layer.Vector("Creator symbols", {
-        hover:true,
-        rendererOptions: {
-            zIndexing: true
-        },
-        styleMap: new OpenLayers.StyleMap({
-            default: new OpenLayers.Style({
-                externalGraphic: "${symbol}",
-                pointRadius: "${myradius}",
-                rotation: "-${rotation}"
-            }, {
-                context: {
-                    symbol: function(feature) {
-                        var symbol = feature.attributes.code;
-                        if(feature.attributes.description.trim().length > 0) {
-                            symbol += "_i";
-                        }
-                        return safetymaps.creator.api.imagePath + 'symbols/' + symbol + '.png';
-                    },
-                    myradius: function(feature) {
-                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,14, feature.attributes.radius);
-                    }
-                }
-            }),
-            temporary: new OpenLayers.Style({pointRadius: me.options.graphicSizeHover}),
-            select: new OpenLayers.Style({pointRadius: me.options.graphicSizeSelect})
-        })
-    });
-    this.layers.push(this.layerSymbols);
-    this.selectLayers.push(this.layerSymbols);
-*/
+    this.layers.push(this.layerTerrain);
 
     me.locationPolygonStyle = {
         "bas": {
@@ -626,6 +286,7 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
     };
     this.layerLocationPolygon = new OpenLayers.Layer.Vector("Event location polygons", {
         hover:false,
+        maxResolution: 0.21,
         rendererOptions: {
             zIndexing: true
         },
@@ -709,17 +370,23 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
     };
     this.layerRoutePolygon = new OpenLayers.Layer.Vector("Event route polygons", {
         hover:false,
+        maxResolution: 0.84,
         rendererOptions: {
             zIndexing: true
         },
         styleMap: new OpenLayers.StyleMap({
             default: new OpenLayers.Style({
+                display: "${display}",
                 fillColor: "${fillColor}",
                 strokeColor: "${strokeColor}",
                 strokeWidth: "${strokeWidth}",
                 strokeDashstyle: "${strokePattern}"
             }, {
                 context: {
+                    display: function(feature) {
+                        var s = me.routePolygonStyle[feature.attributes.vlaksoort];
+                        return s ? "visible" : "none";
+                    },
                     fillColor: function(feature) {
                         var s = me.routePolygonStyle[feature.attributes.vlaksoort];
                         return s ? s.fill : "";
@@ -799,6 +466,7 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
     };
     this.layerLocationLine = new OpenLayers.Layer.Vector("Event location lines", {
         hover:false,
+        maxResolution: 0.84,
         rendererOptions: {
             zIndexing: true
         },
@@ -830,6 +498,7 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
     });
     this.layerLocationLine2 = new OpenLayers.Layer.Vector("Event location lines 2", {
         hover:false,
+        maxResolution: 0.84,
         rendererOptions: {
             zIndexing: true
         },
@@ -861,6 +530,7 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
     });
     this.layerLocationLine3 = new OpenLayers.Layer.Vector("Event location lines 3", {
         hover:false,
+        maxResolution: 0.84,
         rendererOptions: {
             zIndexing: true
         },
@@ -971,6 +641,7 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
     // TODO https://gist.github.com/pgiraud/6131715
     this.layerRouteLine = new OpenLayers.Layer.Vector("Event route lines", {
         hover:false,
+        maxResolution: 3.36,
         rendererOptions: {
             zIndexing: true
         },
@@ -1002,6 +673,7 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
     });
     this.layerRouteLine2 = new OpenLayers.Layer.Vector("Event route lines 2", {
         hover:false,
+        maxResolution: 3.36,
         rendererOptions: {
             zIndexing: true
         },
@@ -1033,6 +705,7 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
     });
     this.layerRouteLine3 = new OpenLayers.Layer.Vector("Event route lines 3", {
         hover:false,
+        maxResolution: 3.36,
         rendererOptions: {
             zIndexing: true
         },
@@ -1090,6 +763,7 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
     
     this.layerLocationSymbols = new OpenLayers.Layer.Vector("Event location symbols", {
         hover:true,
+        maxResolution: 0.84,
         rendererOptions: {
             zIndexing: true
         },
@@ -1111,6 +785,7 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
 
     this.layerRouteSymbols = new OpenLayers.Layer.Vector("Event route symbols", {
         hover:true,
+        maxResolution: 0.84,
         rendererOptions: {
             zIndexing: true
         },
@@ -1150,6 +825,9 @@ safetymaps.vrh.EventLayers.prototype.addFeaturesForObject = function(object) {
         f.attributes = d;
         return f;
     };
+
+    var terrein = wktReader(object.terrein);
+    this.layerTerrain.addFeatures([terrein]);
 
     this.layerLocationPolygon.addFeatures(object.locatie_vlak.map(wktReader));
     // TODO add label points, or text symbolizer for polygon?

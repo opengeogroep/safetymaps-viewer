@@ -417,6 +417,14 @@ dbkjs.modules.vrh_objects = {
             };
             me.showFeatureInfo("Route", types[f.soort] || "", f.ballonteks);
             layer.redraw();
+        } else if(layer.name.startsWith("Event location lines")) {
+            me.showFeatureInfo("Locatie", me.eventLayers.locationLineStyle[f.lijnsoort].label, f.lijnbeschr);
+            layer.redraw();
+        } else if(layer.name.startsWith("Event route lines")) {
+            me.showFeatureInfo("Route", me.eventLayers.routeLineStyle[f.routetype].label, f.routebesch);
+            layer.redraw();
+        } else {
+            $("#vectorclickpanel").hide();
         }
     },
 
@@ -433,9 +441,6 @@ dbkjs.modules.vrh_objects = {
 
     objectLayerFeatureUnselected: function (e) {
         $("#vectorclickpanel").hide();
-        if (e.feature.layer === this.objectLayers.layerCustomPolygon) {
-            e.feature.layer.redraw();
-        }
     }
 };
 
