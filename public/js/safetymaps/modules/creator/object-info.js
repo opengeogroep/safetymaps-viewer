@@ -331,7 +331,7 @@ safetymaps.creator.renderFloors = function(object) {
     return rows;
 };
 
-safetymaps.creator.renderSymbols = function(object) {
+safetymaps.creator.renderSymbols = function(object, isFlamingo = false) {
 
     var rows = [];
     if(object.symbols || object.communication_coverage) {
@@ -346,11 +346,11 @@ safetymaps.creator.renderSymbols = function(object) {
         var symbolsDisplayed = {};
 
         $.each(object.symbols, function(i, s) {
-            if(symbolsDisplayed[s.code]) {
+            if(symbolsDisplayed[s.code] && !isFlamingo) {
                 return true;
             }
             symbolsDisplayed[s.code] = true;
-
+            
             rows.push([
                 '<img style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'symbols/' + s.code + '.png' + '" alt="' + s.code + '" title="' + s.code + '">',
                 i18n.t("symbol." + s.code),s.omschrijving // TODO get from safetymaps.creator.api.styles info
