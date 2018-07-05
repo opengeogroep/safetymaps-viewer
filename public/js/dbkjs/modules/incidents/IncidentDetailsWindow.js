@@ -71,26 +71,29 @@ IncidentDetailsWindow.prototype.renderDetailsScreen = function() {
     var v = this.getView();
     var renderKladblok = !dbkjs.modules.incidents.options.hideKladblok;
     var renderTwitter = !!dbkjs.modules.incidents.options.showTwitter;
+    var showFoto = dbkjs.modules.incidents.options.showFoto;
     var html = '<div style="width: 100%" class="table-responsive incidentDetails"></div>';
-    html += this.renderKladblokTwitter(renderKladblok, renderTwitter);
+    html += this.renderKladblokTwitter(renderKladblok, renderTwitter, showFoto);
     v.html(html);
     this.addTabClickListener();
 };
 
-IncidentDetailsWindow.prototype.renderKladblokTwitter = function(showKladblok, showTwitter) {
-    if(!showKladblok && !showTwitter) {
+IncidentDetailsWindow.prototype.renderKladblokTwitter = function(showKladblok, showTwitter, showFoto) {
+    if(!showKladblok && !showTwitter && !showFoto) {
         return "";
     }
-    if(showKladblok && !showTwitter) {
+    if(showKladblok && !showTwitter && !showFoto) {
         return '<div id="tab_kladblok" class="incident_tab" style="display: block;"></div>';
     }
     var tabsHTML = '<div class="incident_tabs">';
     tabsHTML += '<ul id="incident_details_tabs" class="nav nav-pills" style="margin-bottom: 10px">';
     if(showKladblok) tabsHTML += '<li class="active"><a data-toggle="tab" href="#" id="t_kladblok" class="tab-button"><i class="fa fa-comment"></i> Kladblok</a></li>';
     if(showTwitter) tabsHTML += '<li' + (!showKladblok ? ' class="active"' : '') + '><a data-toggle="tab" href="#" id="t_twitter" class="tab-button"><i class="fa fa-twitter"></i> <span id="t_twitter_title">Twitter</span></a></li>';
+    if(showFoto) tabsHTML += '<li' + (!showKladblok ? ' class="active"' : '') + '><a data-toggle="tab" href="#" id="t_foto" class="tab-button"><i class="fa fa-camera"></i> <span id="t_foto_title">Foto</span></a></li>';
     tabsHTML += '</ul>';
     if(showKladblok) tabsHTML += '<div id="tab_kladblok" class="incident_tab" style="display: block;"></div>';
     if(showTwitter) tabsHTML += '<div id="tab_twitter" class="incident_tab" style=" display: ' + (!showTwitter ? 'block' : 'none') + ';"></div>';
+    if(showFoto) tabsHTML += '<div id="tab_foto" class="incident_tab" style=" display: ' + (!showFoto ? 'block' : 'none') + ';"></div>';
     tabsHTML += "</div>";
 
     return tabsHTML;
@@ -106,7 +109,7 @@ IncidentDetailsWindow.prototype.addTabClickListener = function() {
             tab = tab.replace("t_", "");
         }
         var tabsContainer = $(this).closest(".incident_tabs");
-        tabsContainer.find(".active").removeClass("active");
+        tabsContainer.find("#incident_details_tabs .active").removeClass("active");
         tabsContainer.find(".incident_tab").hide();
         tabsContainer.find("#tab_" + tab).show();
         tabbutton.parent().addClass("active");
@@ -166,7 +169,6 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
 
     v.find(".incidentDetails").html(table);
     v.find("#tab_kladblok").html(kladblok);
-
     if(this.showFeatureMatches) {
         this.showMultipleFeatureMatches();
     }
@@ -191,7 +193,7 @@ IncidentDetailsWindow.prototype.hideMultipleFeatureMatches = function() {
     me.showFeatureMatches = false;
 
     $(".incidentDetails .detailed").show();
-    $(".incident_tab").show();
+    //$(".incident_tab").show();
     $("#multiple_matches").hide();
 };
 
