@@ -22,6 +22,7 @@
         <div id="btngrp_navigation" class="btn-group pull-right">
             <a href="#" class="btn navbar-btn btn-default drag-handle"><i class="fa fa-ellipsis-v"></i></a>
             <a id="zoom_in" href="#" class="btn navbar-btn btn-default"><i class="fa fa-search-plus"></i></a>
+            <a id="btn_fotoFunc" class="btn navbar-btn btn-default" href="#" style="display: none;"><i class="fa fa-camera"></i></a>
             <a id="zoom_out" href="#" class="btn navbar-btn btn-default"><i class="fa fa-search-minus"></i></a>
             <a id="zoom_extent" href="#" class="btn navbar-btn btn-default needsclick"><i class="fa fa-arrows-alt"></i></a>
             <a id="permalink" title="Snelkoppeling" class="btn navbar-btn btn-default"><i class="fa fa-link"></i></a>
@@ -155,10 +156,13 @@
     <script src="js/safetymaps/modules/creator/clustering-layer.js?"></script>
     <script src="js/safetymaps/modules/creator/object-layers.js?"></script>
     <script src="js/safetymaps/modules/creator/object-info.js?"></script>
+    <script src="js/safetymaps/modules/fotoFunctionaliteit.js?"></script>
     <script src="js/safetymaps/modules/search.js?"></script>
     <script src="js/safetymaps/modules/bagAddressSearch.js?"></script>
     <script src="js/safetymaps/modules/dk/search_dawa.js?"></script>
 
     <script src="js/safetymaps/customize.js?"></script>
+    <input type="file" id="fotoConnector" accept="image/*" capture="camera" style="display: none;">
+    
   </body>
 </html>
