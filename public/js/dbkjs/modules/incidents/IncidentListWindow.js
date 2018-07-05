@@ -235,7 +235,7 @@ IncidentListWindow.prototype.getIncidentEenhedenIcons = function(incident) {
     };
     $.each(incident.inzetEenhedenStats.B, function(soort, count) {
         if(soort !== "total") {
-            if(soort.indexOf("DA") !== -1 || soort === "DV-OVD") {
+            if(soort.indexOf("DA") !== -1 || soort.indexOf("DV") !== -1) {
                 iconsB.cab += count;
             } else if(soort === "BMM") {
                 iconsB.motorcycle += count;
