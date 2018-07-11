@@ -325,6 +325,7 @@ dbkjs.modules.safetymaps_creator = {
     },
 
     selectedObjectDetailsReceived: function(object,isIncident = false) {
+        var me = this;
         try {
             this.objectLayers.addFeaturesForObject(object);
             this.updateInfoWindow(object,isIncident);
@@ -335,7 +336,15 @@ dbkjs.modules.safetymaps_creator = {
                 ids.push(v.id);
             });
             this.clusteringLayer.setSelectedIds(ids);
-
+            $("#symbols tr").click(function(e){
+                if(e.delegateTarget.children[2].innerText === ""){
+                    return;
+                }
+                dbkjs.selectControl.unselectAll();
+                var id  = e.delegateTarget.children[0].firstChild.id;
+                var f = me.objectLayers.layerSymbols.getFeaturesByAttribute("index",id);
+                dbkjs.selectControl.select(f[0]);
+            });
         } catch(error) {
             console.log("Error creating layers for object", object);
             if(error.stack) {
