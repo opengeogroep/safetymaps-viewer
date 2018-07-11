@@ -25,7 +25,7 @@
             tabContents: "<i class='fa fa-home'></i> " + i18n.t("creator.queryAddress"),
             placeholder: i18n.t("creator.search_placeholder"),
             search: function(value) {
-                $.ajax("/api/autocomplete/"+value, {
+                $.ajax("api/autocomplete/"+value, {
                     term: value
                 })
                 .done(function(data) {
