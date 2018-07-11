@@ -677,15 +677,17 @@ safetymaps.creator.CreatorObjectLayers.prototype.addCommunicationCoverageFeature
 
 safetymaps.creator.CreatorObjectLayers.prototype.addSymbolFeatures = function(object) {
     var wktParser = new OpenLayers.Format.WKT();
-
+    var prefix = "safetymaps_creatorSymbolsId:";
     var features = [];
     $.each(object.symbols || [], function(i, detail) {
         var f = wktParser.read(detail.location);
-        f.attributes.index = i;
+        f.attributes.index = prefix+i;
         f.attributes.description = detail.omschrijving;
         f.attributes.rotation = detail.rotation;
         f.attributes.code = detail.code;
         features.push(f);
+        detail.id= prefix+i;
+        object.symbols[i] = detail;
     });
     this.layerSymbols.addFeatures(features);
     if(features.length > 0) console.log("added symbols", features);
