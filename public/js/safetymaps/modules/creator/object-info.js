@@ -78,11 +78,11 @@ safetymaps.creator.renderGeneral = function(object) {
         highestFloor = n === 0 ? 0 : n + " (" + (n-1) + ")";
     }
     if(object.huisnummer === 0) object.huisnummer = "";
-    return [
+    var result = [
         {l: i18n.t("creator.formal_name"), t: object.formele_naam},
         {l: i18n.t("creator.informal_name"), t: object.informele_naam},
         {l: i18n.t("creator.adress"), html: Mustache.render("{{straatnaam}} {{huisnummer}} {{huisletter}} {{toevoeging}}<br>{{postcode}} {{plaats}}", object)},
-        {l: i18n.t("creator.check_date"), t: new moment(object.datum_controle).format("LL")},
+        //{l: i18n.t("creator.check_date"), t: new moment(object.datum_controle).format("LL")},
         {l: i18n.t("creator.modified_date"), t: new moment(object.datum_actualisatie).format("LLLL")},
         {l: i18n.t("creator.emergencyResponderPresent"), html:
                 '<span class="label label-' + (object.bhv_aanwezig ? 'success' : 'warning') + '">' +
@@ -96,6 +96,10 @@ safetymaps.creator.renderGeneral = function(object) {
         {l: i18n.t("creator.lowestLevel") + " (" + i18n.t("creator.floor") + ")", t: lowestFloor},
         {l: i18n.t("creator.highestLevel") + " (" + i18n.t("creator.floor") + ")", t: highestFloor}
     ];
+    if(object.datum_controle){
+        result.splice(3,0,{l: i18n.t("creator.check_date"), t: new moment(object.datum_controle).format("LL")});
+    }
+    return result;
 };
 
 safetymaps.creator.renderContacts = function(object) {
