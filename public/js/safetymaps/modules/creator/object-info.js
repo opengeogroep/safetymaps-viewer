@@ -345,12 +345,12 @@ safetymaps.creator.renderSymbols = function(object, isFlamingo = false) {
             "<b>" + i18n.t("dialogs.information") + "</b>"
         ]);
 
-        // Display legend of symbols, only one symbol even if used multiple times
+        // Display legend of symbols, only one symbol if there is no extra information even if used multiple times
 
         var symbolsDisplayed = {};
         
         $.each(object.symbols, function(i, s) {
-            if(symbolsDisplayed[s.code] && !isFlamingo) {
+            if(symbolsDisplayed[s.code] && s.omschrijving === "" && !isFlamingo) {
                     return true;
             }
             symbolsDisplayed[s.code] = true;
