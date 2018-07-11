@@ -338,6 +338,7 @@ safetymaps.creator.renderFloors = function(object) {
 safetymaps.creator.renderSymbols = function(object, isFlamingo = false) {
 
     var rows = [];
+    var symbolsWithoutInfo = [];
     if(object.symbols || object.communication_coverage) {
         rows.push([
             "<b>" + i18n.t("creator.symbol_icon") + "</b>",
@@ -355,12 +356,19 @@ safetymaps.creator.renderSymbols = function(object, isFlamingo = false) {
             }
             symbolsDisplayed[s.code] = true;
             
-                rows.push([
-                '<img style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'symbols/' + s.code + '.png' + '" alt="' + s.code + '" title="' + s.code + '">',
+            if (s.omschrijving === ""){
+                symbolsWithoutInfo.push([
+                    '<img id="'+s.id+'" style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'symbols/' + s.code + '.png' + '" alt="' + s.code + '" title="' + s.code + '">',
                     i18n.t("symbol." + s.code),s.omschrijving // TODO get from safetymaps.creator.api.styles info
                 ]);
+            } else {
+                rows.push([
+                    '<img id="'+s.id+'" style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'symbols/' + s.code + '.png' + '" alt="' + s.code + '" title="' + s.code + '">',
+                    i18n.t("symbol." + s.code),s.omschrijving // TODO get from safetymaps.creator.api.styles info
+                ]);
+            }
         });
-
+        rows.push.apply(rows,symbolsWithoutInfo);
         if(object.communication_coverage) {
             rows.push([
                 '<img style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'coverage.png">',
