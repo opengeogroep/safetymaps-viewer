@@ -62,8 +62,10 @@ safetymaps.creator.renderInfoTabs = function(object, div) {
     rows = safetymaps.creator.renderFloors(object);
     safetymaps.creator.createHtmlTabDiv("floors", i18n.t("creator.floors"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
     
+    if(dbkjs.modules.safetymaps_creator.options.hideBrandweervoorziening){
         rows = safetymaps.creator.renderSymbols(object);
         safetymaps.creator.createHtmlTabDiv("symbols", i18n.t("creator.symbols"), safetymaps.creator.createInfoTabDiv(rows,"symbols"), tabContent, tabs);
+    }
 };
 
 safetymaps.creator.renderGeneral = function(object) {
