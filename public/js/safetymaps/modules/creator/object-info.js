@@ -61,9 +61,9 @@ safetymaps.creator.renderInfoTabs = function(object, div) {
 
     rows = safetymaps.creator.renderFloors(object);
     safetymaps.creator.createHtmlTabDiv("floors", i18n.t("creator.floors"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
-
-    rows = safetymaps.creator.renderSymbols(object);
-    safetymaps.creator.createHtmlTabDiv("symbols", i18n.t("creator.symbols"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+    
+        rows = safetymaps.creator.renderSymbols(object);
+        safetymaps.creator.createHtmlTabDiv("symbols", i18n.t("creator.symbols"), safetymaps.creator.createInfoTabDiv(rows,"symbols"), tabContent, tabs);
 };
 
 safetymaps.creator.renderGeneral = function(object) {
@@ -344,17 +344,17 @@ safetymaps.creator.renderSymbols = function(object, isFlamingo = false) {
         // Display legend of symbols, only one symbol even if used multiple times
 
         var symbolsDisplayed = {};
-
+        
         $.each(object.symbols, function(i, s) {
             if(symbolsDisplayed[s.code] && !isFlamingo) {
-                return true;
+                    return true;
             }
             symbolsDisplayed[s.code] = true;
             
-            rows.push([
+                rows.push([
                 '<img style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'symbols/' + s.code + '.png' + '" alt="' + s.code + '" title="' + s.code + '">',
-                i18n.t("symbol." + s.code),s.omschrijving // TODO get from safetymaps.creator.api.styles info
-            ]);
+                    i18n.t("symbol." + s.code),s.omschrijving // TODO get from safetymaps.creator.api.styles info
+                ]);
         });
 
         if(object.communication_coverage) {
@@ -368,7 +368,7 @@ safetymaps.creator.renderSymbols = function(object, isFlamingo = false) {
             ]);
         }
     }
-
+    
     return rows;
 };
 
@@ -421,13 +421,13 @@ safetymaps.creator.createHtmlTabDiv = function(id, label, content, tabContent, t
     }
 };
 
-safetymaps.creator.createInfoTabDiv = function(rows) {
+safetymaps.creator.createInfoTabDiv = function(rows, id = "") {
     if(rows.length === 0) {
         return null;
     }
 
     var div = $('<div class="table-responsive"></div>');
-    var table = $('<table class="table table-hover"></table>');
+    var table = $('<table id="'+id+'" class="table table-hover"></table>');
 
     $.each(rows, function(i, row) {
         if($.isArray(row)) {
@@ -442,7 +442,7 @@ safetymaps.creator.createInfoTabDiv = function(rows) {
             if((row.hasOwnProperty("t") && row.t !== null && typeof row.t !== "undefined") || row.html) {
                 table.append('<tr><td>' + row.l + '</td><td>' + (row.html ? row.html : Mustache.escape(row.t)) + '</td></tr>');
             }
-        }
+        }     
     });
 
     div.append(table);
