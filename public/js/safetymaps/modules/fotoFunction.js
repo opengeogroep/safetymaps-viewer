@@ -5,8 +5,8 @@
  */
 
 
-dbkjs.modules.fotoFunctionaliteit = {
-    id: "dbk.module.fotoFunctionaliteit",
+dbkjs.modules.fotoFunction = {
+    id: "dbk.module.fotoFunction",
     popup: null,
     picture: null,
     incidentNr: null,
