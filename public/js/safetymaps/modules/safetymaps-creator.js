@@ -203,6 +203,7 @@ dbkjs.modules.safetymaps_creator = {
                     console.log("search object " + value);
                     var searchResults = [];
                     $.each(me.viewerApiObjects, function(i, o) {
+                        value = value.toLowerCase();
                         if(value === "" || o.formele_naam.toLowerCase().indexOf(value) !== -1 || (o.informele_naam && o.informele_naam.toLowerCase().indexOf(value) !== -1)) {
                             searchResults.push(o);
                             if(searchResults.length === me.options.maxSearchResults) {
