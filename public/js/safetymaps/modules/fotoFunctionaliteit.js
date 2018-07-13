@@ -53,26 +53,20 @@ dbkjs.modules.fotoFunctionaliteit = {
     },
 
     createButton: function () {
-        var me = this;
-        var fotoContainer = $("<div id='foto_buttons'/>").css({
-                "position": "absolute",
-                "left": "20px",
-                "top": "20px",
-                "z-index": "3000"
-            });
-        fotoContainer.appendTo("#mapc1map1");
-        $("#btn_fotoFunc").css({"display": "block", "font-size": "24px"}).removeClass("navbar-btn").appendTo(fotoContainer).show();
+        var me = this;        
+        $(".main-button-group").append($("<div class=\"btn-group pull-left\">" +
+            "<a id=\"btn_fotoFunc\" title=\"" + i18n.t("photo.photoButton") + "\" class=\"btn navbar-btn btn-default\">" +
+            "<i id=\"btn_fotoFuncIcon\" class=\"fa fa-camera\"></i></a>"));
         $("#btn_fotoFunc").click(function(e){
             e.preventDefault();
-                    me.takePicture();
+            me.takePicture();
         });
     },
-
     createPopup: function () {
         var me = this;
 
         this.popup = dbkjs.util.createModalPopup({
-            title: i18n.t("search.foto")
+            title: i18n.t("photo.savePictureTitle")
         });
 
         var div = $("<div></div>").addClass("input-group input-group-lg");
@@ -85,8 +79,11 @@ dbkjs.modules.fotoFunctionaliteit = {
                     alt: "fotoConnector",
                     width: 500,
                     height: 500
-                });
-
+                })
+                .css('border', "solid 8px black"
+                    
+               );
+                
         me.button = $("<a></a>")
                 .attr({
                     id: "btn_fotoSave",
@@ -94,7 +91,7 @@ dbkjs.modules.fotoFunctionaliteit = {
                     href: "#",
                     title: i18n.t("search.button"),
                 })
-                .append("<i class='fa fa-save'></i>")
+                .append("<i class='fa fa-save'></i> "+i18n.t("photo.savePhotoButton"))
                 .click(function (e) {
                     e.preventDefault();
                     me.savePicture();
@@ -102,8 +99,9 @@ dbkjs.modules.fotoFunctionaliteit = {
 
         this.popup.getView().append(me.img);
         this.popup.getView().append(me.button);
-        this.popup.getView().append("<div><input type='text' disabled id='input_filename'></div>");
-        this.popup.getView().append("<textarea id='input_textfield'></textarea>");
+        this.popup.getView().append("<div><label for='input_filename'>Bestandsnaam: </label><input type='text' disabled id='input_filename' size='28'></div>");
+        this.popup.getView().append("<div><br><label id='textarea_label' for='input_textfield'>Geef extra informatie op bij de foto: </label><textarea id='input_textfield' name='input_textfield' rows ='3' cols='33' maxlength='200' wrap='hard'></textarea></div>");
+        $("#textarea_label").css('display', "block");
     },
 
     takePicture: function () {
@@ -133,6 +131,7 @@ dbkjs.modules.fotoFunctionaliteit = {
             var picURL = windowURL.createObjectURL(fileInput[0]);
             me.picture = fileInput[0];
             $("#pictured").attr({"src": picURL});
+            $("#input_textfield").val("");
             me.showPopup();
         }
     },
@@ -160,9 +159,12 @@ dbkjs.modules.fotoFunctionaliteit = {
             if (xhr.status === 200) {
                 // File(s) uploaded.
                 var response = JSON.parse(xhr.responseText);
-                alert(response.message);
+                console.log(response.message);
                 //me.carouselItems.push(me.fileName);
                 me.popup.hide();
+                if(me.incidentNr){
+                    me.addSinglePictureToCarousel();
+                }
             } else {
                 alert('An error occurred! wiht status code: ' + xhr.status);
             }
@@ -182,25 +184,56 @@ dbkjs.modules.fotoFunctionaliteit = {
         var me = this;
         $("#t_foto_title").text("Foto (" + data.length + ")");
         var isFirst = me.carouselItems.length === 0;
-        if (data.length > me.carouselItems.length && me.carouselItems.length !== 0 ) {
+        if (data.length > me.carouselItems.length && !isNew && !dbkjs.modules.incidents.controller.incidentDetailsWindow.isVisible()) {
             me.alertFoto(true);
         }
-        if (data.length > 0) {
-            $.each(data, function (i, object) {
-                if (!me.objectIsinList(object.filename)) {
-                    var path = safetymaps.creator.api.fotoPath + object.filename;
-                    var info = (object.omschrijving === "" ? "Geen opmerkingen" : object.omschrijving)
-                    me.image_carousel_inner.append('<div class="item"><img class="img-full" style="width: 100%" src="' + path +
-                            '"><div class="carousel-caption"><h3>' + info + '</h3></div></div>');
-                    me.image_carousel_nav.append('<li data-target="#foto_carousel" data-slide-to="' + i + '"></li>');
-                }
-            });
-        }
+        if (data.length > 0 && data.length > me.carouselItems.length) { // photo added
+            me.addMultiplePicturesToCarousel(data);
+        } else if(data.length >= 0 && data.length < me.carouselItems.length){ // photo deleted
+           me.carouselItems = [];
+           me.resetCarousel();
+           me.addMultiplePicturesToCarousel(data);
+           $('.item').first().addClass('active');
+        } 
         if (isFirst && data.length > 0) {
             $('.item').first().addClass('active');
         }
     },
-
+    
+    addMultiplePicturesToCarousel: function (data) {
+        var me = this;
+        $.each(data, function (i, object) {
+            if (!me.objectIsinList(me.carouselItems, object.filename)) {
+                me.carouselItems.push(object.filename);
+                var path = safetymaps.creator.api.fotoPath + object.filename;
+                var info = (object.omschrijving === "" ? "" : object.omschrijving);
+                me.image_carousel_inner.append('<div class="item"><img class="img-full" style="width: 100%" src="' + path +
+                        '"><div class="carousel-caption"><h3>' + info + '</h3></div></div>');
+                me.image_carousel_nav.append('<li data-target="#foto_carousel" data-slide-to="' + i + '"></li>');
+            }
+        });
+    },
+    
+    addSinglePictureToCarousel: function () {
+        var me = this;
+        var i;
+        var path = safetymaps.creator.api.fotoPath + me.fileName;
+        var info = $("#input_textfield").val();
+        if(me.carouselItems.length === 0){
+            i = 0;
+        } else {
+            i = me.carouselItems.lenght+1;
+        }
+        me.image_carousel_inner.append('<div class="item"><img class="img-full" style="width: 100%" src="' + path +
+                '"><div class="carousel-caption"><h3>' + info + '</h3></div></div>');
+        me.image_carousel_nav.append('<li data-target="#foto_carousel" data-slide-to="' + i + '"></li>');
+        if(i===0){
+            $('.item').first().addClass('active');
+        }
+        me.carouselItems.push(me.fileName);
+        $("#t_foto_title").text("Foto (" +me.carouselItems.length+")");
+    },
+    
     initCarousel: function () {
         var me = this;
         me.image_carousel.append(me.image_carousel_nav);
@@ -216,21 +249,17 @@ dbkjs.modules.fotoFunctionaliteit = {
         });
     },
 
-    objectIsinList: function (filename) {
+    objectIsinList: function (list,filename) {
         var me = this;
-        if (me.carouselItems.length === 0) {
-            me.carouselItems.push(filename);
+        if (list.length === 0) {
             return false;
         } else {
             var found = false;
-            for (var i = 0; i < me.carouselItems.length; i++) {
-                if (filename === me.carouselItems[i]) {
+            for (var i = 0; i < list.length; i++) {
+                if (filename === list[i]) {
                     found = true;
                     break;
                 }
-            }
-            if (!found) {
-                me.carouselItems.push(filename);
             }
             return found;
         }
