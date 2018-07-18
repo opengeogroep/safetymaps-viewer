@@ -34,15 +34,17 @@ dbkjs.modules.safetymaps_creator = {
 
         this.options = $.extend({
             // default options here
-            maxSearchResults: 30
+            maxSearchResults: 30,
+            mediaPath: "../media/",
+            fotoPath: "../foto/"
         }, this.options);
 
         // Setup API
 
         safetymaps.creator.api.basePath = "";
         safetymaps.creator.api.imagePath = "js/safetymaps/modules/creator/assets/";
-        safetymaps.creator.api.mediaPath = "../media/";
-        safetymaps.creator.api.fotoPath = "../foto/";
+        safetymaps.creator.api.mediaPath = this.options.mediaPath;
+        safetymaps.creator.api.fotoPath = this.options.fotoPath;
 
         // Setup clustering layer
 
