@@ -132,7 +132,7 @@ dbkjs.modules.vrh_objects = {
 
         // Element for displaying list of Creator objects in a cluster
         dbkjs.util.createModalPopup({name: "creator_cluster_list"}).getView().append($("<div></div>").attr({'id': 'creator_cluster_list'}));
-/*
+
         // Button to open info window
         $("#btngrp_object").append($('<a id="btn_object_info" href="#" class="btn navbar-btn btn-default"><i class="fa fa-info-circle"></i></a>'));
         $("#btn_object_info")
@@ -142,14 +142,15 @@ dbkjs.modules.vrh_objects = {
         });
 
         // Window for object info tabs
-        me.infoWindow = new SplitScreenWindow("Creator object info");
+        me.infoWindow = new SplitScreenWindow("Object info");
         me.infoWindow.createElements();
 
         me.infoWindow.getView().append(
                 $('<div></div>')
-                .attr({'id': 'creator_object_info'})
+                .attr({'id': 'vrh_object_info'})
                 .text(i18n.t("dialogs.noinfo"))
         );
+
 
         // Put tabs at the bottom after width transition has ended
         var resizeFunction = function() {
@@ -164,19 +165,15 @@ dbkjs.modules.vrh_objects = {
             } else {
                 resizeFunction();
             }
-
         });
-        */
     },
-/*
+
     infoWindowTabsResize: function() {
         var view = this.infoWindow.getView();
         var tabContentHeight = view.height() - view.find(".nav-pills").height();
         view.find(".tab-content").css("height", tabContentHeight);
-
-        view.find(".pdf-embed").css("height", tabContentHeight - 28);
     },
-*/
+
     createSearchConfig: function() {
         var me = this;
 
@@ -307,14 +304,8 @@ dbkjs.modules.vrh_objects = {
     selectedObjectDetailsReceived: function(type, id, object,isIncident = false) {
         try {
             this.eventLayers.addFeaturesForObject(object);
-//            this.updateInfoWindow(object,isIncident);
+            this.updateInfoWindow(object,isIncident);
             this.selectedObject = object;
-/*
-            var ids = [object.id];
-            $.each(object.verdiepingen || [], function(i, v) {
-                ids.push(v.id);
-            });
-*/
             this.clusteringLayer.setSelectedIds([id]);
         } catch(error) {
             console.log("Error creating layers for object", object);
@@ -323,32 +314,99 @@ dbkjs.modules.vrh_objects = {
             }
         }
     },
-/*
+
     updateInfoWindow: function(object,isIncident = false) {
         var me = this;
 
         var div = $('<div class="tabbable"></div>');
 
-        safetymaps.creator.renderInfoTabs(object, div);
+        var tabContent = $('<div class="tab-content"></div>');
+        var tabs = $('<ul class="nav nav-pills"></ul>');
+        div.append(tabContent);
+        //div.append(tabs);
 
-        $("#creator_object_info").html(div);
+        var rows = [];
 
-        $("#tab_pane_floors tr").click(function(e) {
-            var floor = e.currentTarget.firstChild.innerText;
-            console.log("click floor " + floor, e);
+        var t = object.terrein;
+        rows.push({l: "Naam evenement",                         t: t.evnaam});
+        rows.push({l: "Locatie",                                t: t.locatie});
+        rows.push({l: "Adres",                                  t: t.adres});
+        rows.push({l: "Gemeente",                               t: t.gemeente});
+        rows.push({l: "Begindatum",                             t: t.sbegin});
+        rows.push({l: "Soort evenement",                        t: t.soort_even});
+        rows.push({l: "Aanvrager",                              t: t.aanvrager});
+        rows.push({l: "Contactpersoon organisatie",             t: t.contactper});
+        rows.push({l: "Programma",                              t: t.programma});
+        rows.push({l: "Bijzonderheden algemeen",                t: t.bijzonderh});
+        rows.push({l: "Tijden",                                 t: t.tijden});
+        rows.push({l: "Aantal bezoekers",                       t: t.aantal_bez});
+        rows.push({l: "Personeel EHBO",                         t: t.personeel_});
+        rows.push({l: "Personeel security",                     t: t.personeel1});
+        rows.push({l: "Personeel BHV",                          t: t.personee_1});
+        rows.push({l: "Omroepinstallatie",                      t: t.omroepinst});
+        rows.push({l: "Veiligheidsplan",                        t: t.veiligheid});
+        rows.push({l: "Verzamelplaats",                         t: t.verzamelpl});
+        rows.push({l: "Bijzonderheden personen",                t: t.bijzonde_1});
+        rows.push({l: "Aantal tijdelijke bouwsels",             t: t.aantal_tij});
+        rows.push({l: "Herpositionering voertuigen",            t: t.herpositio});
+        rows.push({l: "OD uitrukvolgorde",                      t: t.od_uitrukv});
+        rows.push({l: "Locatie Copi",                           t: t.locatie_co});
+        rows.push({l: "Toegangswegen",                          t: t.toegangswe});
+        rows.push({l: "Bijzonderheden evenement",               t: t.bijzonde_2});
+        rows.push({l: "Publieksprofiel",                        t: t.publiekspr});
+        rows.push({l: "Activiteiten profiel",                   t: t.activiteit});
+        rows.push({l: "Ruimtelijk profiel",                     t: t.ruimtelijk});
+        rows.push({l: "Voertuigen",                             t: t.voertuigen});
+        rows.push({l: "Functionarissen",                        t: t.functionar});
+        rows.push({l: "Coördinatie ter plaatse",                t: t.coordinati});
+        rows.push({l: "Communicatie/verbindingen",              t: t.communicat});
+        rows.push({l: "Informatievoorziening",                  t: t.informatie});
+        rows.push({l: "Logistiek",                              t: t.logistiek});
+        rows.push({l: "Commandant van Dienst naam",             t: t.commandant});
+        rows.push({l: "Commandant van Dienst telefoon",         t: t.commanda_1});
+        rows.push({l: "Hoofd officier van Dienst naam",         t: t.hoofd_offi});
+        rows.push({l: "AHoofd officier van Dienst telefoon",    t: t.hoofd_of_1});
+        rows.push({l: "AC Brandweer naam",                      t: t.ac_brandwe});
+        rows.push({l: "AC Brandweer telefoon",                  t: t.ac_brand_1 });
+        rows.push({l: "Leider CoPI naam",                       t: t.leider_cop});
+        rows.push({l: "Leider CoPI telefoon",                   t: t.leider_c_1});
+        rows.push({l: "Officier van dienst naam",               t: t.officier_v });
+        rows.push({l: "Officier van dienst telefoon",           t: t.officier_1 });
+        rows.push({l: "Reserve OvD 1 naam",                     t: t.reserve_of});
+        rows.push({l: "Reserve OvD 1 telefoon",                 t: t.reserve__1});
+        rows.push({l: "Reserve OvD 2 naam",                     t: t.reserve__2});
+        rows.push({l: "Reserve OvD 2 telefoon",                 t: t.reserve__3});
+        rows.push({l: "AGS naam",                               t: t.ags_naam});
+        rows.push({l: "AGS telefoon",                           t: t.ags_telefo});
+        rows.push({l: "Woordvoerder naam",                      t: t.woordvoerd});
+        rows.push({l: "Woordvoerder telefoon",                  t: t.woordvoe_1});
+        rows.push({l: "HON naam",                               t: t.hon_naam});
+        rows.push({l: "HON telefoon",                           t: t.hon_telefo});
+        rows.push({l: "Centralist naam",                        t: t.centralist});
+        rows.push({l: "Centralist telefoon",                    t: t.centrali_1});
+        rows.push({l: "PID naam",                               t: t.pid_naam});
+        rows.push({l: "PID telefoon",                           t: t.pid_telefo});
+        rows.push({l: "Objectofficier naam",                    t: t.objectoffi });
+        rows.push({l: "Object officier telefoon",               t: t.objectof_1});
+        rows.push({l: "HIN naam",                               t: t.hin_naam});
+        rows.push({l: "HIN telefoon",                           t: t.hin_telefo});
+        rows.push({l: "Medewerker OV naam",                     t: t.medewerker});
+        rows.push({l: "Medewerker OV telefoon",                 t: t.medewerk_1});
+        rows.push({l: "Brandweer in de wijk naam",              t: t.brandweer_});
+        rows.push({l: "Brandweer in de wijk telefoon",          t: t.brandweer1});
+        rows.push({l: "MOB naam",                               t: t.mob_naam});
+        rows.push({l: "MOB naam",                               t: t.mob_telefo});
 
-            $.each(object.verdiepingen, function(i, v) {
-                if(v.id !== object.id && v.bouwlaag === floor) {
-                    me.selectObjectById(v.id);
-                }
-            });
-        });
+        safetymaps.creator.createHtmlTabDiv("algemeen", "Evenement", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
 
-        if(!isIncident)this.infoWindow.show();
+        $("#vrh_object_info").html(div);
+
+        if(!isIncident) {
+            this.infoWindow.show();
+        }
         this.infoWindowTabsResize();
-
     },
-*/
+
     eventLayerFeatureSelected: function(e) {
         var me = this;
         var layer = e.feature.layer;
