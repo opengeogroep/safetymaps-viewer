@@ -286,7 +286,7 @@ dbkjs.modules.vrh_objects = {
             //$("#creator_object_info").text("Error: " + msg);
         })
         .done(function(object) {
-            me.selectedObjectDetailsReceived(type, object, isIncident);
+            me.selectedObjectDetailsReceived(type, id, object, isIncident);
         });
     },
 
@@ -304,7 +304,7 @@ dbkjs.modules.vrh_objects = {
         $("#vectorclickpanel").hide();
     },
 
-    selectedObjectDetailsReceived: function(type, object,isIncident = false) {
+    selectedObjectDetailsReceived: function(type, id, object,isIncident = false) {
         try {
             this.eventLayers.addFeaturesForObject(object);
 //            this.updateInfoWindow(object,isIncident);
@@ -314,8 +314,8 @@ dbkjs.modules.vrh_objects = {
             $.each(object.verdiepingen || [], function(i, v) {
                 ids.push(v.id);
             });
-            this.clusteringLayer.setSelectedIds(ids);
 */
+            this.clusteringLayer.setSelectedIds([id]);
         } catch(error) {
             console.log("Error creating layers for object", object);
             if(error.stack) {
