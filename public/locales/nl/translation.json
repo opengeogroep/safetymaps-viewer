@@ -58,6 +58,11 @@
     "connectionmonitor": {
         "button": "Verbindingsstatus"
     }, 
+    "photo":{
+        "savePictureTitle": "Gemaakte foto opslaan",
+        "photoButton": "Fotofunctionaliteit",
+        "savePhotoButton": "Foto Opslaan"
+    },
     "creator": {
         "search": "Safety map",
         "queryAddress": "Adres",

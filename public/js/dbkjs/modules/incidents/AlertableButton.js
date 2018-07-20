@@ -66,6 +66,31 @@ AlertableButton.prototype.setAlerted = function(alert) {
     me.alerted = alert;
 };
 
+AlertableButton.prototype.setFotoAlert = function (alertFoto) {
+    var me = this;
+    if (!me.alerted) {//setAlerted heeft voorrang op foto
+        if (alertFoto && !me.fotoAlerted) {
+            $(me.a).css({"color": 'white', "background-color": 'red'});
+            var $i = $(me.i);
+            $i.removeClass("fa-" + me.icon).addClass("fa-camera");
+            window.clearInterval(me.cameraFlashInterval);
+            me.cameraFlashInterval = window.setInterval(function () {
+                if ($i.hasClass("fa-" + me.icon)) {
+                    $i.removeClass("fa-" + me.icon).addClass("fa-camera");
+                } else {
+                    $i.removeClass("fa-camera").addClass("fa-" + me.icon);
+                }
+            }, 1500);
+        } else if (!alertFoto && me.fotoAlerted) {
+            $(me.a).css({"color": 'black', "background-color": ""});
+            $(me.i).removeClass("fa-camera").addClass("fa-" + me.icon);
+            window.clearInterval(me.cameraFlashInterval);
+            me.cameraFlashInterval = null;
+        }
+    }
+    me.fotoAlerted = alertFoto;
+};
+
 AlertableButton.prototype.setIcon = function(icon) {
     var i = $(this.a).find("i");
     if(!i.hasClass("fa-exclamation")) {

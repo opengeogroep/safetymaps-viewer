@@ -61,9 +61,11 @@ safetymaps.creator.renderInfoTabs = function(object, div) {
 
     rows = safetymaps.creator.renderFloors(object);
     safetymaps.creator.createHtmlTabDiv("floors", i18n.t("creator.floors"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
-
-    rows = safetymaps.creator.renderSymbols(object);
-    safetymaps.creator.createHtmlTabDiv("symbols", i18n.t("creator.symbols"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+    
+    if(!dbkjs.modules.safetymaps_creator.options.hideBrandweervoorziening){
+        rows = safetymaps.creator.renderSymbols(object);
+        safetymaps.creator.createHtmlTabDiv("symbols", i18n.t("creator.symbols"), safetymaps.creator.createInfoTabDiv(rows,"symbols"), tabContent, tabs);
+    }
 };
 
 safetymaps.creator.renderGeneral = function(object) {
@@ -78,11 +80,11 @@ safetymaps.creator.renderGeneral = function(object) {
         highestFloor = n === 0 ? 0 : n + " (" + (n-1) + ")";
     }
     if(object.huisnummer === 0) object.huisnummer = "";
-    return [
+    var result = [
         {l: i18n.t("creator.formal_name"), t: object.formele_naam},
         {l: i18n.t("creator.informal_name"), t: object.informele_naam},
         {l: i18n.t("creator.adress"), html: Mustache.render("{{straatnaam}} {{huisnummer}} {{huisletter}} {{toevoeging}}<br>{{postcode}} {{plaats}}", object)},
-        {l: i18n.t("creator.check_date"), t: new moment(object.datum_controle).format("LL")},
+        //{l: i18n.t("creator.check_date"), t: new moment(object.datum_controle).format("LL")},
         {l: i18n.t("creator.modified_date"), t: new moment(object.datum_actualisatie).format("LLLL")},
         {l: i18n.t("creator.emergencyResponderPresent"), html:
                 '<span class="label label-' + (object.bhv_aanwezig ? 'success' : 'warning') + '">' +
@@ -96,6 +98,10 @@ safetymaps.creator.renderGeneral = function(object) {
         {l: i18n.t("creator.lowestLevel") + " (" + i18n.t("creator.floor") + ")", t: lowestFloor},
         {l: i18n.t("creator.highestLevel") + " (" + i18n.t("creator.floor") + ")", t: highestFloor}
     ];
+    if(object.datum_controle){
+        result.splice(3,0,{l: i18n.t("creator.check_date"), t: new moment(object.datum_controle).format("LL")});
+    }
+    return result;
 };
 
 safetymaps.creator.renderContacts = function(object) {
@@ -331,9 +337,10 @@ safetymaps.creator.renderFloors = function(object) {
     return rows;
 };
 
-safetymaps.creator.renderSymbols = function(object) {
+safetymaps.creator.renderSymbols = function(object, isFlamingo = false) {
 
     var rows = [];
+    var symbolsWithoutInfo = [];
     if(object.symbols || object.communication_coverage) {
         rows.push([
             "<b>" + i18n.t("creator.symbol_icon") + "</b>",
@@ -341,22 +348,29 @@ safetymaps.creator.renderSymbols = function(object) {
             "<b>" + i18n.t("dialogs.information") + "</b>"
         ]);
 
-        // Display legend of symbols, only one symbol even if used multiple times
+        // Display legend of symbols, only one symbol if there is no extra information even if used multiple times
 
         var symbolsDisplayed = {};
-
+        
         $.each(object.symbols, function(i, s) {
-            if(symbolsDisplayed[s.code]) {
-                return true;
+            if(symbolsDisplayed[s.code] && s.omschrijving === "" && !isFlamingo) {
+                    return true;
             }
             symbolsDisplayed[s.code] = true;
-
-            rows.push([
-                '<img style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'symbols/' + s.code + '.png' + '" alt="' + s.code + '" title="' + s.code + '">',
-                i18n.t("symbol." + s.code),s.omschrijving // TODO get from safetymaps.creator.api.styles info
-            ]);
+            
+            if (s.omschrijving === ""){
+                symbolsWithoutInfo.push([
+                    '<img id="'+s.id+'" style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'symbols/' + s.code + '.png' + '" alt="' + s.code + '" title="' + s.code + '">',
+                    i18n.t("symbol." + s.code),s.omschrijving // TODO get from safetymaps.creator.api.styles info
+                ]);
+            } else {
+                rows.push([
+                    '<img id="'+s.id+'" style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'symbols/' + s.code + '.png' + '" alt="' + s.code + '" title="' + s.code + '">',
+                    i18n.t("symbol." + s.code),s.omschrijving // TODO get from safetymaps.creator.api.styles info
+                ]);
+            }
         });
-
+        rows.push.apply(rows,symbolsWithoutInfo);
         if(object.communication_coverage) {
             rows.push([
                 '<img style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'coverage.png">',
@@ -368,7 +382,7 @@ safetymaps.creator.renderSymbols = function(object) {
             ]);
         }
     }
-
+    
     return rows;
 };
 
@@ -421,13 +435,13 @@ safetymaps.creator.createHtmlTabDiv = function(id, label, content, tabContent, t
     }
 };
 
-safetymaps.creator.createInfoTabDiv = function(rows) {
+safetymaps.creator.createInfoTabDiv = function(rows, id = "") {
     if(rows.length === 0) {
         return null;
     }
 
     var div = $('<div class="table-responsive"></div>');
-    var table = $('<table class="table table-hover"></table>');
+    var table = $('<table id="'+id+'" class="table table-hover"></table>');
 
     $.each(rows, function(i, row) {
         if($.isArray(row)) {
@@ -442,7 +456,7 @@ safetymaps.creator.createInfoTabDiv = function(rows) {
             if((row.hasOwnProperty("t") && row.t !== null && typeof row.t !== "undefined") || row.html) {
                 table.append('<tr><td>' + row.l + '</td><td>' + (row.html ? row.html : Mustache.escape(row.t)) + '</td></tr>');
             }
-        }
+        }     
     });
 
     div.append(table);

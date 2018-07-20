@@ -53,6 +53,7 @@ dbkjs.layers = {
               if (!dbkjs.util.isJsonNull(wms_v.pl)) {
                   options.pl = wms_v.pl;
               }
+              var myCapabilities = new dbkjs.Capabilities(options);
           } else if (!wms_v.baselayer) {
               params = wms_v.params || {};
               options = wms_v.options || {};

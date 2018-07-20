@@ -34,14 +34,17 @@ dbkjs.modules.safetymaps_creator = {
 
         this.options = $.extend({
             // default options here
-            maxSearchResults: 30
+            maxSearchResults: 30,
+            mediaPath: "../media/",
+            fotoPath: "../foto/"
         }, this.options);
 
         // Setup API
 
         safetymaps.creator.api.basePath = "";
         safetymaps.creator.api.imagePath = "js/safetymaps/modules/creator/assets/";
-        safetymaps.creator.api.mediaPath = "../media/";
+        safetymaps.creator.api.mediaPath = this.options.mediaPath;
+        safetymaps.creator.api.fotoPath = this.options.fotoPath;
 
         // Setup clustering layer
 
@@ -202,6 +205,7 @@ dbkjs.modules.safetymaps_creator = {
                     console.log("search object " + value);
                     var searchResults = [];
                     $.each(me.viewerApiObjects, function(i, o) {
+                        value = value.toLowerCase();
                         if(value === "" || o.formele_naam.toLowerCase().indexOf(value) !== -1 || (o.informele_naam && o.informele_naam.toLowerCase().indexOf(value) !== -1)) {
                             searchResults.push(o);
                             if(searchResults.length === me.options.maxSearchResults) {
@@ -324,6 +328,7 @@ dbkjs.modules.safetymaps_creator = {
     },
 
     selectedObjectDetailsReceived: function(object,isIncident = false) {
+        var me = this;
         try {
             this.objectLayers.addFeaturesForObject(object);
             this.updateInfoWindow(object,isIncident);
@@ -334,7 +339,15 @@ dbkjs.modules.safetymaps_creator = {
                 ids.push(v.id);
             });
             this.clusteringLayer.setSelectedIds(ids);
-
+            $("#symbols tr").click(function(e){
+                if(e.delegateTarget.children[2].innerText === ""){
+                    return;
+                }
+                dbkjs.selectControl.unselectAll();
+                var id  = e.delegateTarget.children[0].firstChild.id;
+                var f = me.objectLayers.layerSymbols.getFeaturesByAttribute("index",id);
+                dbkjs.selectControl.select(f[0]);
+            });
         } catch(error) {
             console.log("Error creating layers for object", object);
             if(error.stack) {

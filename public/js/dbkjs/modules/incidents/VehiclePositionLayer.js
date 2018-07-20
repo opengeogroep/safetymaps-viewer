@@ -68,6 +68,8 @@ function VehiclePositionLayer(options) {
                             } else {
                                 return feature.attributes.Speed + "km/h";
                             }
+                        }else {
+                            return "";
                         }
                     },
                     display: displayFunction,

@@ -47,6 +47,7 @@ function FalckIncidentsController(incidents) {
     me.incidentDetailsWindow.createElements("Incident");
     $(me.incidentDetailsWindow).on('show', function() {
         me.button.setAlerted(false);
+        me.button.setFotoAlert(false);
     });
 
     me.markerLayer = new IncidentMarkerLayer();
@@ -307,6 +308,7 @@ FalckIncidentsController.prototype.geenInzet = function(triggerEvent) {
         this.featureSelector.hideBalkRechtsonder();
     }
     this.button.setAlerted(false);
+    this.button.setFotoAlert(false);
     this.button.setIcon("bell-o");
 
     if(triggerEvent) {
@@ -490,7 +492,7 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
             me.markerLayer.addIncident(incident, false, true);
             me.markerLayer.setZIndexFix();
 
-            me.updateBalkrechtsonder();
+            me.featureSelector.updateBalkRechtsonder();
         }
 
         // Check if position updated
