@@ -42,8 +42,13 @@ dbkjs.modules.vrh_objects = {
             maxSearchResults: 30,
             dbk: true,
             evenementen: false,
-            waterveiligheid: true
+            waterveiligheid: true,
+            filterEvDate: true
         }, this.options);
+
+        if("off" === OpenLayers.Util.getParameters()["evfilter"]) {
+            this.options.filterEvDate = false;
+        }
 
         // Setup API
 
@@ -111,6 +116,9 @@ dbkjs.modules.vrh_objects = {
         .done(function(evenementenObjects) {
             console.log("Got event objects", evenementenObjects);
 
+            if(me.options.filterEvDate) {
+                evenementenObjects = evenementenObjects.filter(ev => !new moment(ev.sbegin).isAfter(new moment()));
+            }
             evenementenObjects.sort(function(lhs, rhs) {
                 return lhs.evnaam.localeCompare(rhs.evnaam, dbkjsLang);
             });
