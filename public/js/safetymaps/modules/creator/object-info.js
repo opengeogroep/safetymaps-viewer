@@ -459,6 +459,10 @@ safetymaps.creator.createInfoTabDiv = function(rows, id = "") {
         }     
     });
 
+    if(!table[0].hasChildNodes()) {
+        return null;
+    }
+
     div.append(table);
     return div;
 };

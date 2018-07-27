@@ -331,21 +331,25 @@ dbkjs.modules.vrh_objects = {
         var tabContent = $('<div class="tab-content"></div>');
         var tabs = $('<ul class="nav nav-pills"></ul>');
         div.append(tabContent);
-        //div.append(tabs);
+        div.append(tabs);
 
         var rows = [];
+
+        //rows.push({l: "Gemeente",                               t: t.gemeente});
+        //rows.push({l: "Begindatum",                             t: t.sbegin});
+        //rows.push({l: "Aanvrager",                              t: t.aanvrager});
 
         var t = object.terrein;
         rows.push({l: "Naam evenement",                         t: t.evnaam});
         rows.push({l: "Locatie",                                t: t.locatie});
         rows.push({l: "Adres",                                  t: t.adres});
-        rows.push({l: "Gemeente",                               t: t.gemeente});
-        rows.push({l: "Begindatum",                             t: t.sbegin});
         rows.push({l: "Soort evenement",                        t: t.soort_even});
-        rows.push({l: "Aanvrager",                              t: t.aanvrager});
         rows.push({l: "Contactpersoon organisatie",             t: t.contactper});
         rows.push({l: "Programma",                              t: t.programma});
-        rows.push({l: "Bijzonderheden algemeen",                t: t.bijzonderh});
+        rows.push({l: "Bijzonderheden",                         t: t.bijzonderh});
+        safetymaps.creator.createHtmlTabDiv("algemeen", "Evenementgegevens algemeen", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+
+        rows = [];
         rows.push({l: "Tijden",                                 t: t.tijden});
         rows.push({l: "Aantal bezoekers",                       t: t.aantal_bez});
         rows.push({l: "Personeel EHBO",                         t: t.personeel_});
@@ -354,36 +358,51 @@ dbkjs.modules.vrh_objects = {
         rows.push({l: "Omroepinstallatie",                      t: t.omroepinst});
         rows.push({l: "Veiligheidsplan",                        t: t.veiligheid});
         rows.push({l: "Verzamelplaats",                         t: t.verzamelpl});
-        rows.push({l: "Bijzonderheden personen",                t: t.bijzonde_1});
+        rows.push({l: "Bijzonderheden",                         t: t.bijzonde_1});
+        safetymaps.creator.createHtmlTabDiv("aanwezigheid", "Aanwezige personen", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+
+        rows = [];
         rows.push({l: "Aantal tijdelijke bouwsels",             t: t.aantal_tij});
         rows.push({l: "Herpositionering voertuigen",            t: t.herpositio});
         rows.push({l: "OD uitrukvolgorde",                      t: t.od_uitrukv});
-        rows.push({l: "Locatie Copi",                           t: t.locatie_co});
+        rows.push({l: "Locatie CoPI",                           t: t.locatie_co});
         rows.push({l: "Toegangswegen",                          t: t.toegangswe});
         rows.push({l: "Bijzonderheden evenement",               t: t.bijzonde_2});
+        safetymaps.creator.createHtmlTabDiv("gegevens", "Gegevens evenement", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+
+        rows = [];
         rows.push({l: "Publieksprofiel",                        t: t.publiekspr});
         rows.push({l: "Activiteiten profiel",                   t: t.activiteit});
         rows.push({l: "Ruimtelijk profiel",                     t: t.ruimtelijk});
+        safetymaps.creator.createHtmlTabDiv("risico", "Risico-inventarisatie", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+
+        rows = [];
         rows.push({l: "Voertuigen",                             t: t.voertuigen});
         rows.push({l: "Functionarissen",                        t: t.functionar});
+        safetymaps.creator.createHtmlTabDiv("maatregelen", "Maatregelen", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+
+        rows = [];
         rows.push({l: "Coördinatie ter plaatse",                t: t.coordinati});
-        rows.push({l: "Communicatie/verbindingen",              t: t.communicat});
+        rows.push({l: "Communicatie & verbindingen",              t: t.communicat});
         rows.push({l: "Informatievoorziening",                  t: t.informatie});
         rows.push({l: "Logistiek",                              t: t.logistiek});
+        safetymaps.creator.createHtmlTabDiv("leiding", "Leiding & Coördinatie", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+
+        rows = [];
         rows.push({l: "Commandant van Dienst naam",             t: t.commandant});
         rows.push({l: "Commandant van Dienst telefoon",         t: t.commanda_1});
         rows.push({l: "Hoofd officier van Dienst naam",         t: t.hoofd_offi});
-        rows.push({l: "AHoofd officier van Dienst telefoon",    t: t.hoofd_of_1});
+        rows.push({l: "Hoofd officier van Dienst telefoon",     t: t.hoofd_of_1});
         rows.push({l: "AC Brandweer naam",                      t: t.ac_brandwe});
         rows.push({l: "AC Brandweer telefoon",                  t: t.ac_brand_1 });
         rows.push({l: "Leider CoPI naam",                       t: t.leider_cop});
         rows.push({l: "Leider CoPI telefoon",                   t: t.leider_c_1});
         rows.push({l: "Officier van dienst naam",               t: t.officier_v });
         rows.push({l: "Officier van dienst telefoon",           t: t.officier_1 });
-        rows.push({l: "Reserve OvD 1 naam",                     t: t.reserve_of});
-        rows.push({l: "Reserve OvD 1 telefoon",                 t: t.reserve__1});
-        rows.push({l: "Reserve OvD 2 naam",                     t: t.reserve__2});
-        rows.push({l: "Reserve OvD 2 telefoon",                 t: t.reserve__3});
+        rows.push({l: "Reserve Officier van dienst 1 naam",     t: t.reserve_of});
+        rows.push({l: "Reserve Officier van dienst 1 telefoon", t: t.reserve__1});
+        rows.push({l: "Reserve Officier van dienst 2 naam",     t: t.reserve__2});
+        rows.push({l: "Reserve Officier van dienst 2 telefoon", t: t.reserve__3});
         rows.push({l: "AGS naam",                               t: t.ags_naam});
         rows.push({l: "AGS telefoon",                           t: t.ags_telefo});
         rows.push({l: "Woordvoerder naam",                      t: t.woordvoerd});
@@ -404,8 +423,7 @@ dbkjs.modules.vrh_objects = {
         rows.push({l: "Brandweer in de wijk telefoon",          t: t.brandweer1});
         rows.push({l: "MOB naam",                               t: t.mob_naam});
         rows.push({l: "MOB naam",                               t: t.mob_telefo});
-
-        safetymaps.creator.createHtmlTabDiv("algemeen", "Evenement", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+        safetymaps.creator.createHtmlTabDiv("functionarissen", "Functionarissen BRW", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
 
         $("#vrh_object_info").html(div);
 
