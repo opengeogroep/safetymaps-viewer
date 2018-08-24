@@ -54,7 +54,7 @@ function IncidentVectorLayer(enableLabels) {
 
     if(me.enableLabels) {
         me.hideLabel =  window.localStorage.getItem("IncidentVectorLayer.hideLabel") === "true";
-        $("#baselayerpanel_b").append('<hr/>');
+        $("#settingspanel_b").append('<hr/>');
         var l = $("<label/>");
         var input = $("<input type='checkbox' " + (me.hideLabel ? 'checked' : '') + ">");
         input.click(function(e) {
@@ -62,7 +62,7 @@ function IncidentVectorLayer(enableLabels) {
         });
         l.append(input);
         l.append("<span>Geen label tonen bij incidenten");
-        $("#baselayerpanel_b").append(l);
+        $("#settingspanel_b").append(l);
     }
 
 };
