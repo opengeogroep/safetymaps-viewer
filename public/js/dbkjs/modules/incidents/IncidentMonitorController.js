@@ -18,7 +18,7 @@
  *
  */
 
-/* global dbkjs, AGSInscidentService */
+/* global dbkjs, AGSIncidentService, OpenLayers */
 
 /**
  * Controller for displaying all current incidents.
@@ -93,14 +93,6 @@ function IncidentMonitorController(incidents) {
     });
     $(me.incidentDetailsWindow).on('hide', function() {
         me.disableIncidentUpdates();
-    });
-
-    // Replace "<- Kaart" with button
-    me.incidentDetailsWindow.getView().parent().find(".modal-popup-close").remove();
-    $("<button class='btn btn-primary' style='float: left; margin: 5px'><i class='fa fa-arrow-left'></i></button>")
-    .prependTo(me.incidentDetailsWindow.getView().parent())
-    .click(function() {
-        me.incidentDetailsWindow.hide();
     });
 
     var selectLayers = [];
@@ -253,7 +245,7 @@ IncidentMonitorController.prototype.incidentRead = function(incidentId) {
 IncidentMonitorController.prototype.addAGSLayers = function() {
     var me = this;
 
-    $("#baselayerpanel_b").append('<hr/><label><input type="checkbox" ' + (me.ghor ? '' : 'checked' )+ ' onclick="dbkjs.modules.incidents.controller.setAGSLayersVisibility(event.target.checked)">Toon DBK\'s</label>');
+    $("#settingspanel_b").prepend('<label><input type="checkbox" ' + (me.ghor ? '' : 'checked' )+ ' onclick="dbkjs.modules.incidents.controller.setAGSLayersVisibility(event.target.checked)">Toon DBK\'s</label>');
 
     me.additionalLayers = [];
     if(dbkjs.options.incidents.ags.agsLayers) {
@@ -488,7 +480,8 @@ IncidentMonitorController.prototype.getIncidentListFalck = function() {
 
         me.failedUpdateTries = me.failedUpdateTries + 1;
 
-        console.log("Error getting incident list, try: " + me.failedUpdateTries + ", error: " + AGSIncidentService.prototype.getAjaxError(jqXHR, textStatus, errorThrown));
+        var e = AGSIncidentService.prototype.getAjaxError(jqXHR, textStatus, errorThrown);
+        console.log("Error getting incident list, try: " + me.failedUpdateTries + ", error: " + e);
 
         // Only show error after number of failed tries
         if(me.failedUpdateTries > me.UPDATE_TRIES) {
