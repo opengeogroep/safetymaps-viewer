@@ -209,10 +209,14 @@ IncidentDetailsWindow.prototype.showMultipleFeatureMatches = function() {
 
     $(".incidentDetails .detailed").hide();
     $(".incident_tab").hide();
-
-    var div = $("<div id='multiple_matches'/>");
-    div.append("<h3>Meerdere informatiekaarten gevonden op de locatie van het incident:</h3>");
-    var item_ul = $('<ul class="nav nav-pills nav-stacked"></ul>');
+    
+    if(!me.multipleDiv){
+        me.multipleDiv = $("<div id='multiple_matches'/>");
+        me.multipleDiv.append("<h3>Meerdere informatiekaarten gevonden op de locatie van het incident:</h3>");
+        me.multipleItemUl = $('<ul class="nav nav-pills nav-stacked"></ul>');
+    }
+    me.multipleItemUl.empty();
+    //var item_ul = $('<ul class="nav nav-pills nav-stacked"></ul>');
     $.each(me.multipleFeatureMatches, function(i, m) {
         //var info = dbkjs.config.styles.getFeatureStylingInfo(m);
         var info = {
@@ -220,7 +224,7 @@ IncidentDetailsWindow.prototype.showMultipleFeatureMatches = function() {
             "iconWidth" : m.attributes.width,
             "iconHeight" : m.attributes.height
         };
-        item_ul.append($('<li><a href="#"><img src="' + info.icon + '" style="width: 25px; margin-right: 10px">' + (m.attributes.apiObject.locatie || m.attributes.apiObject.formele_naam) + (m.attributes.apiObject.informele_naam ? ' (' + m.attributes.apiObject.informele_naam + ')' : '') + '</a></li>').on('click', function(e) {
+        me.multipleItemUl.append($('<li><a href="#"><img src="' + info.icon + '" style="width: 25px; margin-right: 10px">' + (m.attributes.apiObject.locatie || m.attributes.apiObject.formele_naam) + (m.attributes.apiObject.informele_naam ? ' (' + m.attributes.apiObject.informele_naam + ')' : '') + '</a></li>').on('click', function(e) {
             e.preventDefault();
             me.hideMultipleFeatureMatches();
             if(me.incidentLonLat) {
@@ -228,10 +232,14 @@ IncidentDetailsWindow.prototype.showMultipleFeatureMatches = function() {
             }
             //dbkjs.protocol.jsonDBK.process(m, null, true);
             dbkjs.modules.safetymaps_creator.selectObjectById(m.attributes.apiObject.id,m.attributes.apiObject.extent, true);
+            $(".incidentDetails .detailed").show();
+            $("#tab_kladblok").show();
         }));
     });
-    div.append(item_ul);
-    $(".incidentDetails").append(div);
+    me.multipleDiv.append(me.multipleItemUl);
+    $(".incidentDetails").append(me.multipleDiv);
+    me.multipleDiv.show();
+    
 };
 
 IncidentDetailsWindow.prototype.getIncidentAdres = function(incident, isXml) {
