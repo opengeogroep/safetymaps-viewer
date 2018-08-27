@@ -75,7 +75,12 @@ IncidentFeatureSelector.prototype.findMatches = function() {
     var addressMatches = [];
     var addressesMatches = [];
     var selectiekaderMatches = [];
-
+    
+    // string only contained whitespace (ie. spaces, tabs or line breaks)
+    if (!huisletter.replace(/\s/g, '').length) {
+        huisletter = "";
+    }
+    
     me.matches = [];
 
     // Find main and additional addresses matches, only if features are loaded
