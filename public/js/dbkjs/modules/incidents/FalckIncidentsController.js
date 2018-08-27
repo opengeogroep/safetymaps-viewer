@@ -396,6 +396,9 @@ FalckIncidentsController.prototype.getBalkrechtsonderTitle = function() {
             dbkjs.util.htmlEncode(me.incidentDetailsWindow.getIncidentAdres(me.incident, false)) +
             " " + dbkjs.util.htmlEncode(me.incident.IncidentLocatie.Plaatsnaam);
 
+    /* 
+     * Requested by Dennis: dont show units in the rightbottom bar.
+     * 
     var displayEenheden = [];
     var extraCount = 0;
     $.each(me.incident.BetrokkenEenheden, function(i, e) {
@@ -414,6 +417,7 @@ FalckIncidentsController.prototype.getBalkrechtsonderTitle = function() {
             title += " <b>+" + extraCount + "</b>";
         }
     }
+    */
 
     return title;
 };
