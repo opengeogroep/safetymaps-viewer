@@ -48,9 +48,16 @@ dbkjs.modules.Observable.prototype.constructor = dbkjs.modules.Observable;
  */
 dbkjs.modules.FeaturesManager = function() {
     dbkjs.modules.Observable.call(this);
-    this.featureslist = $("<div><h3>Getekende symbolen</h3></div>")
+    this.featureslist = $("<div><h3 style='float:left;'>Getekende symbolen</h3></div>")
         .attr("id", "edit-features-list")
         .addClass("panel");
+        $('<a style="float:right;"></a>')
+        .attr({
+            'id': 'close-draw-window',
+            'href': '#'
+        })
+        .html('<i class="fa fa-close"></i> ' + i18n.t("dialogs.close"))
+        .appendTo(this.featureslist);
     var featurescontainer = $("<div class='features-container'><table class='table table-striped features-table'>" +
         "<thead>" +
         "<tr><td colspan='3'><a title='Delete all' href='#' class='btn btn-info btn-lg remove-all'><span class='glyphicon glyphicon-trash'></span></a>" +
@@ -106,6 +113,10 @@ dbkjs.modules.FeaturesManager = function() {
     this.preventEvent = false;
 
     this.featurestable = featurescontainer.find("tbody");
+    this.featureslist.on("click", "#close-draw-window", (function(){
+         this.featureslist.removeClass("visible").addClass("hidden");
+         this.propertiesGrid.removeClass("visible").addClass("hidden");
+    }).bind(this));
     this.featureslist.on("click", ".remove-feature, .remove-all", (function(e) {
         e.preventDefault();
         e.stopPropagation();
