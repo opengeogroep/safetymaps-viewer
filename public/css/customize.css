@@ -1,0 +1,7 @@
+/*
+ * Overwrite this file with CSS customizations for a particular deployment
+ */
+
+#zoom_extent {
+    display: none;
+}

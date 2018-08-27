@@ -256,7 +256,7 @@ IncidentDetailsWindow.prototype.getIncidentAdres = function(incident, isXml) {
     } else if (incident.IncidentNummer) {
         // Falck JSON
         var a = incident.IncidentLocatie;
-        return Mustache.render("{{NaamLocatie1}} {{Huisnummer}}{{Letter}} {{HnToevoeging}} {{HnAanduiding}} {{Paalnummer}}", a).trim();
+        return Mustache.render("{{NaamLocatie2}} {{NaamLocatie1}} {{Huisnummer}}{{Letter}} {{HnToevoeging}} {{HnAanduiding}} {{Paalnummer}}", a).trim();
     } else if(incident.Nummer) {
         // Pharos JSON
         var a = incident.IncidentAdres.Adres;
@@ -461,9 +461,6 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
     html += '<tr><td>Start incident: </td><td>' + d.format("dddd, D-M-YYYY HH:mm:ss")+'</td></tr>';
     var a = incident.IncidentLocatie;
     html += '<tr><td>Adres: </td><td>' + me.getIncidentAdres(incident, false) + '</td></tr>';
-    if(a.NaamLocatie2) {
-        html += '<tr><td></td><td>' + dbkjs.util.htmlEncode(a.NaamLocatie2) + '</td></tr>';
-    }
     html += '<tr><td>Postcode & Woonplaats: </td><td>' + (a.Postcode ? a.Postcode : "-") +  ', '+(a.Plaatsnaam ? a.Plaatsnaam : "-") + '</td></tr>';
     //html += '<tr><td>Woonplaats: </td><td>' + (a.Plaatsnaam ? a.Plaatsnaam : "-") + '</td></tr>';
 
