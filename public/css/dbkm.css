@@ -227,7 +227,7 @@ a {
 @media (max-width: 999px) {
     #foutknop {
         left: 20px;
-        bottom: 75px;
+        bottom: 0px;
         position: absolute;
     }
     #btn_care {
