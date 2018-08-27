@@ -130,7 +130,9 @@ FalckIncidentVehicleController.prototype.incidentFound = function (incidenten) {
             me.vehiclePositionLayer.layer2.setVisibility(true);
             for (var i = 0; i < incidenten.BetrokkenEenheden.length; i++) {
                 var eenheid = incidenten.BetrokkenEenheden[i];
-                betrokkenEenheden.push(eenheid.Roepnaam);
+                if(eenheid.IsActief){
+                    betrokkenEenheden.push(eenheid.Roepnaam);
+                }
             }
             me.getEenheidLocatieIncident(betrokkenEenheden);
         } else {
