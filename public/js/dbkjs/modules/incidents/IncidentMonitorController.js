@@ -148,20 +148,26 @@ IncidentMonitorController.prototype.checkFalckEnabledByAuthz = function() {
     var me = this;
     var d = $.Deferred();
 
-    $.ajax("webservice_enabled", { cache: false } )
-    .always(function(jqXHR) {
-        if(jqXHR.status === 404) {
-            console.log("Webservice enabled by authz!");
-            me.falck = true;
-            d.resolve();
-        } else if(jqXHR.status !== 403) {
-            console.log("Unexpected status: " + jqXHR + " " + jqXHR.statusText, jqXHR.responseText);
-            d.resolve();
-        } else {
-            console.log("Webservice not enabled by authz, webservice enabled by param: " + me.falck);
-            d.resolve();
-        }
-    });
+    var params = OpenLayers.Util.getParameters();
+    if(params.webservice === "false") {
+        me.falck = false;
+        d.resolve();
+    } else {
+        $.ajax("webservice_enabled", { cache: false } )
+        .always(function(jqXHR) {
+            if(jqXHR.status === 404) {
+                console.log("Webservice enabled by authz!");
+                me.falck = true;
+                d.resolve();
+            } else if(jqXHR.status !== 403) {
+                console.log("Unexpected status: " + jqXHR + " " + jqXHR.statusText, jqXHR.responseText);
+                d.resolve();
+            } else {
+                console.log("Webservice not enabled by authz, webservice enabled by param: " + me.falck);
+                d.resolve();
+            }
+        });
+    }
     return d.promise();
 };
 
