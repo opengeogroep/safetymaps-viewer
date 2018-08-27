@@ -274,37 +274,14 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
     html = '<table class="table table-hover">';
 
     var prio = incident.PRIORITEIT_INCIDENT_BRANDWEER;
-    html += '<tr><td colspan="2" style="font-weight: bold; text-align: center; color: ' + me.getPrioriteitColor(prio) + '">PRIO ' + prio + '</td></tr>';
+    html += '<tr><td colspan="2" style="font-weight: bold; text-align: center; color: ' + me.getPrioriteitColor(prio) + '">PRIO ' + prio
+            + '<sub style="font-size:10px; text-align: center; color:black;"> (' + incident.NR_INCIDENT + ')</sub>'
+            + '</td></tr>';
 
-    var columns = [
-        { property: 'DTG_START_INCIDENT', date: true, label: 'Start incident' },
-        { property: 'locatie', date: false, label: 'Adres' },
-        { property: 'POSTCODE', date: false, label: 'Postcode' },
-        { property: 'PLAATS_NAAM', date: false, label: 'Woonplaats' },
-        { property: 'PLAATS_NAAM_NEN', date: false, label: 'Woonplaats' }
-    ];
-    if(me.ghor) {
-        columns.push({ property: 'PRIORITEIT_INCIDENT_POLITIE', date: false, label: 'Prioriteit politie', separate: false});
-    }
-
-    $.each(columns, function(i, column) {
-        var p = incident[column.property];
-        if (!dbkjs.util.isJsonNull(p)) {
-            var v;
-            if(column.date) {
-                var d = AGSIncidentService.prototype.getAGSMoment(p);
-                v = d.format("dddd, D-M-YYYY HH:mm:ss") + (compareMode ? "" : " (" + d.fromNow() + ")");
-            } else {
-                v = dbkjs.util.htmlEncode(p);
-            }
-            if(column.separate) {
-                html += '<tr><td>&nbsp;</td><td></td></tr>';
-            }
-            html += '<tr><td><span>' + column.label + "</span>: </td><td>" + v + "</td></tr>";
-        }
-    });
-
-    html += '<tr><td>&nbsp;</td><td></td></tr>';
+    var d = AGSIncidentService.prototype.getAGSMoment(incident.DTG_START_INCIDENT);
+    html += '<tr><td>Start incident: </td><td>' + d.format("dddd, D-M-YYYY HH:mm:ss") + '</td></tr>';
+    html += '<tr><td>Adres:</td><td>' + incident.locatie + '</td></tr>';
+    html += '<tr><td>Postcode & Woonplaats:</td><td>' + incident.POSTCODE + ', ' + (incident.PLAATS_NAAM ? incident.PLAATS_NAAM : incident.PLAATS_NAAM_NEN) + '</td></tr>';
     html += '<tr><td>Melding classificatie:</td><td>' + dbkjs.util.htmlEncode(incident.classificatie) + '</td></tr>';
 
     if(!incident.karakteristiek || incident.karakteristiek.length === 0) {
@@ -314,6 +291,9 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
         html += '<tr class="detailed"><td colspan="2">Karakteristieken:<br/>';
         html += '<div class="table-responsive" style="margin: 0px 10px 0px 10px">';
         html += '<table class="table table-hover" style="width: auto">';
+        incident.karakteristiek.sort(function(l, r) {
+            return l.ACTUELE_KAR_WAARDE.localeCompare(r.ACTUELE_KAR_WAARDE);
+        });
         $.each(incident.karakteristiek, function(i, k) {
             if(!k.ACTUELE_KAR_WAARDE) {
                 return;
@@ -350,7 +330,7 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
                 eenhAmbu += span;
             }
         });
-        html += '<div id="brw"><b>Brandweereenheden</b><br/>' + eenhBrw + '</div>';
+        html += '<div id="brw"><b>Eenheden</b><br/>' + eenhBrw + '</div>';
         //html += '<div id="pol"><b>Politie</b><br/>' + eenhPol + '</div>';
         //html += '<div id="ambu"><b>Ambu</b><br/>' + eenhAmbu + '</div>';
         html += '</td></tr>';
@@ -466,6 +446,9 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
         html += '<tr class="detailed"><td colspan="2">Karakteristieken:<br/>';
         html += '<div class="table-responsive" style="margin: 0px 10px 0px 10px">';
         html += '<table class="table table-hover" style="width: auto">';
+        incident.Karakteristieken.sort(function(l, r) {
+            return l.Waarden.join(", ").localeCompare(r.Waarden.join(", "));
+        });
         $.each(incident.Karakteristieken, function(i, k) {
             html += "<tr><td>" + dbkjs.util.htmlEncode(k.Naam) + "</td><td>" + dbkjs.util.htmlEncode(k.Waarden.join(", ")) + "</td></tr>";
         });
