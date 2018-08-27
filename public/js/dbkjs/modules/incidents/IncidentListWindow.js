@@ -28,7 +28,6 @@ function IncidentListWindow() {
     SplitScreenWindow.call(this, "incidentList");
     var me = this;
     me.ghor = dbkjs.modules.incidents.options.ghor;
-    me.incidentCounterRegio = dbkjs.modules.incidents.options.incidentCounterRegio;
 
     me.createStyle();
 
@@ -130,31 +129,8 @@ IncidentListWindow.prototype.data = function(activeIncidents, inactiveIncidents,
     });
     d.appendTo(v);
 
-    if(me.incidentCounterRegio) {
-        var count = 0;
-        $.each(activeIncidents.concat(inactiveIncidents), function(index, incident) {
-            if(incident.BetrokkenEenheden) {
-                $.each(incident.BetrokkenEenheden, function(i2, eenheid) {
-                    if(eenheid.Roepnaam.indexOf(me.incidentCounterRegio) === 0) {
-                        count++;
-                        //console.log("Count incident  " + incident.IncidentId + " if eenheid " + eenheid.Roepnaam + " regio " + me.incidentCounterRegio + ", lokatie: " + incident.locatie);
-                        return false;
-                    }
-                });
-            }
-            if(incident.inzetEenheden) {
-                $.each(incident.inzetEenheden, function(i2, eenheid) {
-                    if(eenheid.ROEPNAAM_EENHEID.indexOf(me.incidentCounterRegio) === 0) {
-                        count++;
-                        //console.log("Count incident  " + incident.INCIDENT_ID + " if eenheid " + eenheid.ROEPNAAM_EENHEID + " regio " + me.incidentCounterRegio + ", lokatie: " + incident.locatie);
-                        return false;
-                    }
-                });
-            }
-
-        });
-        h = $("<div class='header'/>").html("Aantal incidenten met regio " + me.incidentCounterRegio + " gekoppelde eenheden: " + count);
-        h.appendTo(d);
+    if(dbkjs.modules.incidents.options.incidentListFooterFunction) {
+        dbkjs.modules.incidents.options.incidentListFooterFunction(v, activeIncidents, inactiveIncidents);
     }
 
     if(restoreScrollTop) {
