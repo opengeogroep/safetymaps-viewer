@@ -495,8 +495,8 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
             // Possibly update marker position
             me.markerLayer.addIncident(incident, false, true);
             me.markerLayer.setZIndexFix();
-
-            me.featureSelector.updateBalkRechtsonder();
+            
+            me.featureSelector.updateBalkRechtsonder(me.getBalkrechtsonderTitle());
         }
 
         // Check if position updated
@@ -506,12 +506,28 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
             oldY = oldIncident.IncidentLocatie.YCoordinaat;
         }
 
-        if(incident.IncidentLocatie
-        && (incident.IncidentLocatie.XCoordinaat !== oldX
-            || incident.IncidentLocatie.YCoordinaat !== oldY)) {
+        if(incident.IncidentLocatie && (incident.IncidentLocatie.XCoordinaat !== oldX || incident.IncidentLocatie.YCoordinaat !== oldY)) {
 
             // This function uses coords in me.incident, updated in previous if stmt
+            me.markerLayer.addIncident(incident, false, true);
+            me.markerLayer.setZIndexFix();
             me.zoomToIncident();
+            
+            var x = incident.IncidentLocatie.XCoordinaat;
+            var y = incident.IncidentLocatie.YCoordinaat;
+            var l = incident.IncidentLocatie;
+            var commonIncidentObject = {
+                postcode: l.Postcode,
+                woonplaats: l.Plaatsnaam,
+                huisnummer: l.Huisnummer,
+                huisletter: l.Letter,
+                toevoeging: l.HnToevoeging,
+                straat: l.NaamLocatie1,
+                x: x,
+                y: y
+            };
+            me.featureSelector.matchInfo = commonIncidentObject;
+            me.featureSelector.findAndSelectMatches(me.incidentDetailsWindow);
         }
     });
 };
