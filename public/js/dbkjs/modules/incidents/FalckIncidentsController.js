@@ -78,6 +78,9 @@ function FalckIncidentsController(incidents) {
             me.getVoertuignummers();
             me.setVoertuignummer(me.voertuignummer, true);
         }, 2000);
+        if(me.options.enableVehicleControl){
+            me.vehiclePositionLayer = dbkjs.modules.incidents.vehicleController.vehiclePositionLayer;
+        }
     });
 };
 
