@@ -13,8 +13,6 @@ function FalckIncidentVehicleController(controller) {
     me.vehiclePositionLayer = new VehiclePositionLayer(me.options);
 
     selectLayers.push(me.vehiclePositionLayer.layer);
-    //me.addSelectLayers(selectLayers);
-    me.getEenheidLocatie();
 
     /* window.setInterval(function () {
         if ((window.localStorage.getItem("VehiclePositionLayer.hidden") === "true")) {
@@ -104,7 +102,7 @@ FalckIncidentVehicleController.prototype.transformFeaturesForVehiclePositionLaye
             delete feat.attributes.incidentNummer;
             feat.attributes.Voertuigsoort = "";
             feat.attributes.Roepnummer = feat.attributes.id;
-            feat.attributes.Speed = feat.attributes.speed;
+            feat.attributes.Speed = (feat.attributes.speed === null) ? 0 : feat.attributes.speed;
             //feat.attributes.Speed = 35;
             feat.attributes.Direction = feat.attributes.heading;
             feat.geometry = new OpenLayers.Geometry.Point(feat.geometry.coordinates[0], feat.geometry.coordinates[1]);
