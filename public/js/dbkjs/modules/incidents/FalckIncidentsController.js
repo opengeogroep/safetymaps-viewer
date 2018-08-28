@@ -313,6 +313,7 @@ FalckIncidentsController.prototype.geenInzet = function(triggerEvent) {
 
     if(triggerEvent) {
         $(this).triggerHandler("end_incident");
+        dbkjs.modules.safetymaps_creator.unselectObject();
     }
 };
 
