@@ -304,7 +304,7 @@ FalckIncidentsController.prototype.geenInzet = function(triggerEvent) {
     this.disableIncidentUpdates();
     this.incidentId = null;
     this.incident = null;
-    this.incidentDetailsWindow.data("Er is momenteel geen incident waavoor dit voertuig is ingezet.");
+    this.incidentDetailsWindow.data("Er is momenteel geen incident waarvoor dit voertuig is ingezet.");
     this.incidentDetailsWindow.hide();
     this.markerLayer.clear();
     if(this.featureSelector) {
