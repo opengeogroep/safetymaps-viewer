@@ -326,6 +326,7 @@ dbkjs.modules.safetymaps_creator = {
             if(this.selectedClusterFeature && this.selectedClusterFeature.layer) {
                 dbkjs.selectControl.unselect(this.selectedClusterFeature);
             }
+            $("#creator_object_info").text(i18n.t("dialogs.noinfo"));
         }
         this.selectedObject = null;
         this.selectedClusterFeature = null;
