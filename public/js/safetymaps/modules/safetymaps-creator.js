@@ -346,6 +346,10 @@ dbkjs.modules.safetymaps_creator = {
                 ids.push(v.id);
             });
             this.clusteringLayer.setSelectedIds(ids);
+            
+            //Set the clusteringLayer always on top so its always clickable (sometimes polygon areas are drawn over a dbk feature)
+            dbkjs.map.raiseLayer(this.clusteringLayer.layer, dbkjs.map.layers.length);
+            
             $("#symbols tr").click(function(e){
                 if(e.delegateTarget.children[2].innerText === ""){
                     return;
