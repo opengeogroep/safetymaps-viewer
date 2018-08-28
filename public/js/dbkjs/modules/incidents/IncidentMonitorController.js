@@ -99,6 +99,13 @@ function IncidentMonitorController(incidents) {
 
     if(!me.ghor) {
         me.vehiclePositionLayer = new VehiclePositionLayer();
+
+        if(dbkjs.options.incidents.enableOngekoppeldeEenheden) {
+            $("#settingspanel_b").append('<hr/><label><input type="checkbox" ' + (me.vehiclePositionLayer.showMoving ? 'checked' : '') + ' onclick="dbkjs.modules.incidents.controller.vehiclePositionLayer.setShowMoving(event.target.checked)">Toon bewegende voertuigen niet gekoppeld aan incident (grijs)</label>');
+        } else {
+            me.vehiclePositionLayer.setShowMoving(false);
+        }
+
         selectLayers.push(me.vehiclePositionLayer.layer);
     } else {
         me.ghorFilterStandard = false;
