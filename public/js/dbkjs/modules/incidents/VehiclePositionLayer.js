@@ -111,11 +111,6 @@ function VehiclePositionLayer() {
 */
     $("#settingspanel_b").append('<hr/><label><input type="checkbox" ' + (this.visibility ? 'checked' : '') + ' onclick="dbkjs.modules.incidents.controller.vehiclePositionLayer.setVisibility(event.target.checked)">Toon voertuigposities</label>');
 
-    if(dbkjs.options.incidents.enableOngekoppeldeEenheden) {
-        $("#settingspanel_b").append('<hr/><label><input type="checkbox" ' + (this.showMoving ? 'checked' : '') + ' onclick="dbkjs.modules.incidents.controller.vehiclePositionLayer.setShowMoving(event.target.checked)">Toon bewegende voertuigen niet gekoppeld aan incident (grijs)</label>');
-    } else {
-        this.showMoving = false;
-    }
 }
 
 VehiclePositionLayer.prototype.setShowMoving = function(showMoving) {
