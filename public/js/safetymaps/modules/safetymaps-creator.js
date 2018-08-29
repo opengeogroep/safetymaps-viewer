@@ -275,7 +275,8 @@ dbkjs.modules.safetymaps_creator = {
         this.selectObjectById(feature.attributes.id, feature.attributes.apiObject.extent);
     },
 
-    selectObjectById: function(id, extent, isIncident = false) {
+    selectObjectById: function(id, extent, isIncident /*ES2015 = false */) {
+        isIncident = (typeof isIncident !== "undefined") ? isIncident : false;
         var me = this;
 
         // Unselect current, if any

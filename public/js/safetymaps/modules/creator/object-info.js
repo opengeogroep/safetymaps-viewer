@@ -337,7 +337,8 @@ safetymaps.creator.renderFloors = function(object) {
     return rows;
 };
 
-safetymaps.creator.renderSymbols = function(object, isFlamingo = false) {
+safetymaps.creator.renderSymbols = function(object, isFlamingo /*ES2015 = false */) {
+    isFlamingo = (typeof isFlamingo !== "undefined") ? isFlamingo : false;
 
     var rows = [];
     var symbolsWithoutInfo = [];
