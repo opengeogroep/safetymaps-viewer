@@ -554,6 +554,7 @@ AGSIncidentService.prototype.getIncident = function(incidentId, archief) {
     })
     .done(function(data, textStatus, jqXHR) {
         me.resolveAGSFeatures(d, data, jqXHR, function(f) {
+            f.archief = archief;
             return f;
         },
         function() {
