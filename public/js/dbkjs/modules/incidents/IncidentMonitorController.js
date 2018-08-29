@@ -52,7 +52,7 @@ function IncidentMonitorController(incidents) {
     });
 
     me.button = new AlertableButton("btn_incidentlist", "Incidentenlijst", "bell-o");
-    me.button.getElement().attr("data-sid", 0).appendTo('#btngrp_3');
+    me.button.getElement().attr("data-sid", 0).prependTo('#btngrp_3');
     $(me.button).on('click', function() {
         me.incidentListWindow.show();
     });
