@@ -436,7 +436,9 @@ safetymaps.creator.createHtmlTabDiv = function(id, label, content, tabContent, t
     }
 };
 
-safetymaps.creator.createInfoTabDiv = function(rows, id = "") {
+safetymaps.creator.createInfoTabDiv = function(rows, id /*ES2015 = ""*/) {
+    id = (typeof id !== 'undefined') ?  id : "";
+
     if(rows.length === 0) {
         return null;
     }
