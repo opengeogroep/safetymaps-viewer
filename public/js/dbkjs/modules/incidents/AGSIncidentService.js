@@ -32,7 +32,6 @@
  */
 function AGSIncidentService(url, vehiclePositionsUrl) {
     var me = this;
-    me.ghor = dbkjs.modules.incidents.options.ghor;
     me.url = url;
     me.vehiclePosUrl = vehiclePositionsUrl;
     if(!me.url) {
@@ -808,7 +807,7 @@ AGSIncidentService.prototype.getCurrentIncidents = function() {
         data: {
             f: "json",
             token: me.token,
-            where: me.ghor ? "(IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3) OR IND_DISC_INCIDENT LIKE '__A'" : "IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3",
+            where: "IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3",
             orderByFields: "DTG_START_INCIDENT DESC",
             outFields: "INCIDENT_ID,T_X_COORD_LOC,T_Y_COORD_LOC,DTG_START_INCIDENT,PRIORITEIT_INCIDENT_BRANDWEER,NAAM_LOCATIE1,HUIS_PAAL_NR,HUIS_NR_TOEV,HUISLETTER,NAAM_LOCATIE2,PLAATS_NAAM_NEN,BRW_MELDING_CL_ID"
         },
@@ -849,7 +848,7 @@ AGSIncidentService.prototype.getCurrentIncidents = function() {
                     if(inzetEenheid.INCIDENT_ID === incident.INCIDENT_ID) {
                         incident.inzetEenheden.push(inzetEenheid);
 
-                        if(inzetEenheid.T_IND_DISC_EENHEID === 'B' || (me.ghor && inzetEenheid.T_IND_DISC_EENHEID === 'A')) {
+                        if(inzetEenheid.T_IND_DISC_EENHEID === 'B') {
                             if(!inzetEenheid.DTG_EIND_ACTIE) {
                                 incident.actueleInzet = true;
                             } else {
@@ -900,7 +899,7 @@ AGSIncidentService.prototype.getArchivedIncidents = function(incidentsToFilter) 
     var dIncidents = $.Deferred();
     var table = "V_B_ARC_INCIDENT";
     var startIncidentCutoff = new moment().subtract(24, 'hours');
-    var filterPart1 = me.ghor ? "IND_DISC_INCIDENT LIKE '__A' " : "IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3 ";
+    var filterPart1 = "IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3 ";
     me.doAGSAjax({
         url: me.tableUrls[table] + "/query",
         dataType: "json",
