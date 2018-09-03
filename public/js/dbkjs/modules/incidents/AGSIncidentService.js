@@ -32,6 +32,7 @@
  */
 function AGSIncidentService(url, vehiclePositionsUrl) {
     var me = this;
+    me.initialized = false;
     me.url = url;
     me.vehiclePosUrl = vehiclePositionsUrl;
     if(!me.url) {
@@ -72,11 +73,28 @@ AGSIncidentService.prototype.initialize = function(tokenUrl, user, pass) {
             dInitialize.reject("Failure loading AGS incident service info: " + e);
         })
         .done(function() {
+            me.initialized = true;
             dInitialize.resolve();
             $(me).triggerHandler('initialized');
         });
     });
     return dInitialize.promise();
+};
+
+AGSIncidentService.prototype.whenInitialized = function() {
+    var me = this;
+    var d = $.Deferred();
+    if(this.initialized) {
+        console.log("AGS service whenInitialized: immediate resolve()");
+        d.resolve();
+    } else {
+        console.log("AGS service whenInitialized: set event handler");
+        $(me).on("initialized", function() {
+            console.log("AGS service whenInitialized: initialized event, resolve()");
+            d.resolve();
+        });
+    }
+    return d.promise();
 };
 
 /**
