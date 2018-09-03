@@ -28,8 +28,6 @@
 function IncidentDetailsWindow() {
     SplitScreenWindow.call(this, "incidentDetails");
 
-    this.ghor = dbkjs.modules.incidents.options.ghor;
-
     this.createStyle();
 
     $(this).on('elements_created', function() {
@@ -412,23 +410,10 @@ IncidentDetailsWindow.prototype.getIncidentKladblokDefaultHtml = function(kladbl
     }
     var kladblokHTML = "<table>";
     $.each(kladblok, function(i, k) {
-        var c = "";
         var ind = k.T_IND_DISC_KLADBLOK_REGEL;
-        if(ind.indexOf("B") !== -1) {
-            c += "brw ";
-        } else {
-            if(typeof dbkjs.options.incidents.kladblokP === "undefined" || !dbkjs.options.incidents.kladblokP) {
-                return;
-            }
+        if(ind.indexOf("B") === -1) {
+            return;
         }
-        if(ind.indexOf("P") !== -1) {
-            c += "pol ";
-        }
-        if(ind.indexOf("A") !== -1) {
-            c += "ambu ";
-        }
-//        kladblokHTML += "<span class='" + c + "'>" + AGSIncidentService.prototype.getAGSMoment(k.DTG_KLADBLOK_REGEL).format("HH:mm ") +
-//            dbkjs.util.htmlEncode(k.INHOUD_KLADBLOK_REGEL) + "</span><br>";
         kladblokHTML += "<tr><td>" + AGSIncidentService.prototype.getAGSMoment(k.DTG_KLADBLOK_REGEL).format("HH:mm") + "</td><td>" +
             dbkjs.util.htmlEncode(k.INHOUD_KLADBLOK_REGEL) + "</td></tr>";
     });
