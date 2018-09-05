@@ -101,6 +101,7 @@ FalckIncidentVehicleController.prototype.transformFeaturesForVehiclePositionLaye
             //feat.attributes.IncidentID=null;
             delete feat.attributes.incidentNummer;
             feat.attributes.Voertuigsoort = "";
+            feat.attributes.Voertuigsoort = (feat.attributes.inzetRol === null || !this.options.showInzetRol) ? "" : feat.attributes.inzetRol+" -";
             feat.attributes.Roepnummer = feat.attributes.id;
             feat.attributes.Speed = (feat.attributes.speed === null || !this.options.showSpeed) ? 0 : feat.attributes.speed;
             //feat.attributes.Speed = 35;
