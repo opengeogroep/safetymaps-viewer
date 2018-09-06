@@ -281,7 +281,8 @@ dbkjs.modules.safetymaps_creator = {
         this.selectObjectById(feature.attributes.id, feature.attributes.apiObject.extent);
     },
 
-    selectObjectById: function(id, extent, isIncident = false) {
+    selectObjectById: function(id, extent, isIncident /*ES2015 = false */) {
+        isIncident = (typeof isIncident !== "undefined") ? isIncident : false;
         var me = this;
 
         // Unselect current, if any
@@ -334,7 +335,8 @@ dbkjs.modules.safetymaps_creator = {
         $("#vectorclickpanel").hide();
     },
 
-    selectedObjectDetailsReceived: function(object,isIncident = false) {
+    selectedObjectDetailsReceived: function(object,isIncident /*ES2015 = false*/) {
+        isIncident = (typeof isIncident !== "undefined") ? isIncident : false;
         var me = this;
         try {
             this.objectLayers.addFeaturesForObject(object);
@@ -367,7 +369,8 @@ dbkjs.modules.safetymaps_creator = {
         }
     },
 
-    updateInfoWindow: function(object,isIncident = false) {
+    updateInfoWindow: function(object,isIncident /*ES2015 = false*/) {
+        isIncident = (typeof isIncident !== "undefined") ? isIncident : false;
         var me = this;
 
         var div = $('<div class="tabbable"></div>');

@@ -18,7 +18,7 @@
  *
  */
 
-/* global dbkjs, AGSIncidentService, OpenLayers */
+/* global dbkjs, AGSIncidentService, OpenLayers, Proj4js */
 
 /**
  * Controller for displaying all current incidents.
@@ -31,28 +31,32 @@
 function IncidentMonitorController(incidents) {
     var me = this;
     me.service = incidents.service;
-    me.ghor = incidents.options.ghor;
+    me.options = incidents.options;
 
     var params = OpenLayers.Util.getParameters();
-    me.falck = params.webservice === "true" || window.location.pathname === "/opl/";
-    me.toonZonderEenheden = incidents.options.toonZonderEenheden;
+    me.falck = me.options.falckService || params.webservice === "true" || window.location.pathname === "/opl/";
+    me.toonZonderEenheden = me.options.toonZonderEenheden;
 
-    me.kb = false;
-    $.ajax("kb", { cache: false } )
-    .always(function(jqXHR) {
-        if(jqXHR.status === 404) {
-            console.log("KB access!");
-            me.kb = true;
-            incidents.options.hideKladblok = true;
-        } else if(jqXHR.status !== 403) {
-            console.log("Unexpected status: " + jqXHR + " " + jqXHR.statusText, jqXHR.responseText);
-        } else {
-            console.log("No KB access!");
-        }
-    });
+    if(!me.options.checkKbAccessByAuthz) {
+        me.kb = true;
+    } else {
+        me.kb = false;
+        $.ajax("kb", { cache: false } )
+        .always(function(jqXHR) {
+            if(jqXHR.status === 404) {
+                console.log("KB access!");
+                me.kb = true;
+                me.options.hideKladblok = true;
+            } else if(jqXHR.status !== 403) {
+                console.log("Unexpected status: " + jqXHR + " " + jqXHR.statusText, jqXHR.responseText);
+            } else {
+                console.log("No KB access!");
+            }
+        });
+    }
 
     me.button = new AlertableButton("btn_incidentlist", "Incidentenlijst", "bell-o");
-    me.button.getElement().appendTo('#btngrp_3');
+    me.button.getElement().attr("data-sid", 0).prependTo('#btngrp_3');
     $(me.button).on('click', function() {
         me.incidentListWindow.show();
     });
@@ -97,32 +101,16 @@ function IncidentMonitorController(incidents) {
 
     var selectLayers = [];
 
-    if(!me.ghor) {
-        me.vehiclePositionLayer = new VehiclePositionLayer();
+    me.vehiclePositionLayer = new VehiclePositionLayer();
 
-        if(dbkjs.options.incidents.enableOngekoppeldeEenheden) {
-            $("#settingspanel_b").append('<hr/><label><input type="checkbox" ' + (me.vehiclePositionLayer.showMoving ? 'checked' : '') + ' onclick="dbkjs.modules.incidents.controller.vehiclePositionLayer.setShowMoving(event.target.checked)">Toon bewegende voertuigen niet gekoppeld aan incident (grijs)</label>');
-        } else {
-            me.vehiclePositionLayer.setShowMoving(false);
-        }
-
-        selectLayers.push(me.vehiclePositionLayer.layer);
+    if(me.options.eenheden && me.options.eenheden.enableOngekoppeldeEenheden) {
+        $("#settingspanel_b").append('<hr/><label><input type="checkbox" ' + (me.vehiclePositionLayer.showMoving ? 'checked' : '') + ' onclick="dbkjs.modules.incidents.controller.vehiclePositionLayer.setShowMoving(event.target.checked)">Toon bewegende voertuigen niet gekoppeld aan incident (grijs)</label>');
     } else {
-        me.ghorFilterStandard = false;
+        me.vehiclePositionLayer.setShowMoving(false);
+    }
 
-
-        $('<a></a>')
-        .attr({
-            'id': 'btn_standardfilter',
-            'class': 'btn btn-default navbar-btn',
-            'href': '#',
-            'title': 'Filter standaardincidenten'
-        })
-        .append('<i class="fa fa-filter" style="width: 27.5px"></i>')
-        .click(function(e) {
-            me.ghorFilterStandardClick();
-        })
-        .appendTo('#btngrp_3');
+    if(me.options.eenheden.type === "ags") {
+        selectLayers.push(me.vehiclePositionLayer.layer);
     }
 
     me.markerLayer = new IncidentVectorLayer(true);
@@ -138,37 +126,68 @@ function IncidentMonitorController(incidents) {
 
     me.archivedIncidents = [];
 
-    me.checkFalckEnabledByAuthz()
-            .always(function() {
-        $(me.service).on('initialized', function() {
+    if(me.options.ags && me.options.ags.agsLayers && me.options.ags.agsLayers.length > 0) {
+        me.service.whenInitialized().done(function() {
             me.addAGSLayers();
-            me.getIncidentList();
         });
+    }
 
-        window.setInterval(function() {
-            me.checkIncidentListOutdated();
-        }, 500);
-    });
+    if(me.falck) {
+        me.initIncidents();
+    } else {
+        if(me.options.checkFalckServiceEnabledByAuthz) {
+            me.checkFalckEnabledByAuthz()
+            .always(function() {
+                if(me.falck) {
+                    console.log("Falck service enabled by authz!");
+                    me.initIncidents();
+                } else {
+                    console.log("Falck not enabled by authz");
+                    me.service.whenInitialized().done(function() {
+                        me.initIncidents();
+                    });
+                }
+            });
+        } else {
+            me.service.whenInitialized().done(function() {
+                me.initIncidents();
+            });
+        }
+    }
 };
+
+IncidentMonitorController.prototype.initIncidents = function() {
+    var me = this;
+    me.getIncidentList();
+    window.setInterval(function() {
+        me.checkIncidentListOutdated();
+    }, 500);
+}
 
 IncidentMonitorController.prototype.checkFalckEnabledByAuthz = function() {
     var me = this;
     var d = $.Deferred();
 
-    $.ajax("webservice_enabled", { cache: false } )
-    .always(function(jqXHR) {
-        if(jqXHR.status === 404) {
-            console.log("Webservice enabled by authz!");
-            me.falck = true;
-            d.resolve();
-        } else if(jqXHR.status !== 403) {
-            console.log("Unexpected status: " + jqXHR + " " + jqXHR.statusText, jqXHR.responseText);
-            d.resolve();
-        } else {
-            console.log("Webservice not enabled by authz, webservice enabled by param: " + me.falck);
-            d.resolve();
-        }
-    });
+    var params = OpenLayers.Util.getParameters();
+    if(params.webservice === "false") {
+        me.falck = false;
+        d.resolve();
+    } else {
+        $.ajax("webservice_enabled", { cache: false } )
+        .always(function(jqXHR) {
+            if(jqXHR.status === 404) {
+                console.log("Webservice enabled by authz!");
+                me.falck = true;
+                d.resolve();
+            } else if(jqXHR.status !== 403) {
+                console.log("Unexpected status: " + jqXHR + " " + jqXHR.statusText, jqXHR.responseText);
+                d.resolve();
+            } else {
+                console.log("Webservice not enabled by authz, webservice enabled by param: " + me.falck);
+                d.resolve();
+            }
+        });
+    }
     return d.promise();
 };
 
@@ -180,14 +199,6 @@ IncidentMonitorController.prototype.addSelectLayers = function(layers) {
     dbkjs.selectControl.deactivate();
     dbkjs.selectControl.setLayer(layers);
     dbkjs.selectControl.activate();
-};
-
-IncidentMonitorController.prototype.ghorFilterStandardClick = function() {
-    var me = this;
-    me.ghorFilterStandard = !me.ghorFilterStandard;
-    $("a#btn_standardfilter").toggleClass("active", me.ghorFilterStandard).blur();
-
-    me.updateInterface();
 };
 
 IncidentMonitorController.prototype.setAllIncidentsRead = function() {
@@ -252,12 +263,12 @@ IncidentMonitorController.prototype.incidentRead = function(incidentId) {
 IncidentMonitorController.prototype.addAGSLayers = function() {
     var me = this;
 
-    $("#settingspanel_b").prepend('<label><input type="checkbox" ' + (me.ghor ? '' : 'checked' )+ ' onclick="dbkjs.modules.incidents.controller.setAGSLayersVisibility(event.target.checked)">Toon DBK\'s</label>');
+    $("#settingspanel_b").prepend('<label><input type="checkbox" checked onclick="dbkjs.modules.incidents.controller.setAGSLayersVisibility(event.target.checked)">Toon DBK\'s</label>');
 
     me.additionalLayers = [];
-    if(dbkjs.options.incidents.ags.agsLayers) {
-        $.each(dbkjs.options.incidents.ags.agsLayers, function(i, l) {
-            var layer = new OpenLayers.Layer.ArcGIS93Rest("DBK"+i, l.url, $.extend(l.params || {}, { transparent: "true", token: me.service.token }), { maxResolution: 0.42, visibility: !me.ghor });
+    if(me.options.ags.agsLayers) {
+        $.each(me.options.ags.agsLayers, function(i, l) {
+            var layer = new OpenLayers.Layer.ArcGIS93Rest("DBK"+i, l.url, $.extend(l.params || {}, { transparent: "true", token: me.service.token }), { maxResolution: 0.42, visibility: true });
             dbkjs.map.addLayer(layer);
             me.additionalLayers.push(layer);
         });
@@ -333,18 +344,7 @@ IncidentMonitorController.prototype.checkIncidentListOutdated = function() {
 
 IncidentMonitorController.prototype.incidentFilter = function(incident) {
     var me = dbkjs.modules.incidents.controller;
-    if(me.ghor) {
-        if(incident.inzetEenhedenStats.B.total === 0 && incident.inzetEenhedenStats.A.total === 0) {
-            return false;
-        }
-        if(me.ghorFilterStandard) {
-            return !incident.inzetEenhedenStats.standard;
-        } else {
-            return true;
-        }
-    } else {
-        return me.toonZonderEenheden || (incident.actueleInzet || incident.beeindigdeInzet || incident.inzetEenhedenStats.B.total !== 0);
-    }
+    return me.toonZonderEenheden || (incident.actueleInzet || incident.beeindigdeInzet || incident.inzetEenhedenStats.B.total !== 0);
 };
 
 IncidentMonitorController.prototype.updateInterface = function() {
@@ -429,7 +429,7 @@ IncidentMonitorController.prototype.getIncidentListAGS = function() {
     var me = this;
 
     var dCurrent = me.service.getCurrentIncidents();
-    var dArchived = me.service.getArchivedIncidents(dbkjs.options.incidents.cacheArchivedIncidents ? me.archivedIncidents : null);
+    var dArchived = me.service.getArchivedIncidents(me.options.cacheArchivedIncidents ? me.archivedIncidents : null);
 
     $.when(dCurrent, dArchived)
     .fail(function(e) {
@@ -545,7 +545,7 @@ IncidentMonitorController.prototype.normalizeIncidentFields = function(incident)
 IncidentMonitorController.prototype.processNewArchivedIncidents = function(archivedIncidents) {
     var me = this;
 
-    if(!dbkjs.options.incidents.cacheArchivedIncidents) {
+    if(!me.options.cacheArchivedIncidents) {
         me.archivedIncidents = archivedIncidents;
         return;
     }
@@ -580,16 +580,59 @@ IncidentMonitorController.prototype.updateMarkerLayer = function(incidents) {
 
 IncidentMonitorController.prototype.updateVehiclePositionLayer = function(incidents) {
     var me = this;
-    if(me.ghor) {
+
+    if(!me.options.eenheden) {
         return;
     }
 
-    var incidentIds = $.map(incidents, function(i) { return i.id; });
+    if(me.options.eenheden.type === "ags") {
+        var incidentIds = $.map(incidents, function(i) { return i.id; });
 
-    me.service.getVehiclePositions(incidentIds)
-    .done(function(features) {
-        me.vehiclePositionLayer.features(features);
-    });
+        me.service.getVehiclePositions(incidentIds)
+        .done(function(features) {
+            me.vehiclePositionLayer.features(features);
+        });
+    } else if(me.options.eenheden.type === "citygis_wfs") {
+
+        var roepnamen = [];
+        $.each(incidents, function(i, incident) {
+            $.each(incident.BetrokkenEenheden || [], function(j, eenheid) {
+                if(eenheid.IsActief && eenheid.Discipline === "B") {
+                    roepnamen.push(eenheid.Roepnaam);
+                }
+            });
+        });
+        console.log("actieve eenheden ", roepnamen);
+
+        $.ajax(me.options.eenheden.url)
+        .done(function(data) {
+            var features = new OpenLayers.Format.GeoJSON().read(data);
+
+            // Geometry useless, latitude and longitude switched
+            var vehicleFeatures = [];
+            var cutoff = new moment().subtract("2", "hours");
+            $.each(features, function(i, f) {
+                var p = new Proj4js.Point(f.attributes.longitude, f.attributes.latitude);
+                var t = Proj4js.transform(new Proj4js.Proj("EPSG:4326"), new Proj4js.Proj(dbkjs.options.projection.code), p);
+                var p = new OpenLayers.Geometry.Point(t.x, t.y);
+                var feature = new OpenLayers.Feature.Vector(p, {
+                    "Roepnummer": f.attributes.id,
+                    "Speed": f.attributes.speed,
+                    "time": new moment(f.attributes.time),
+                    "IncidentID": roepnamen.indexOf(f.attributes.id + "") !== -1 ? "1" : "",
+                    "Direction": f.attributes.headingDegrees,
+                    "Voertuigsoort": ""
+                });
+                if(feature.attributes.IncidentID !== "") {
+                    console.log("actieve eenheid, time " + feature.attributes.time.fromNow(), feature);
+                }
+                if(feature.attributes.time.isAfter(cutoff)) {
+                    vehicleFeatures.push(feature);
+                }
+            });
+            me.vehiclePositionLayer.features(vehicleFeatures);
+        });
+    }
 };
 
 IncidentMonitorController.prototype.enableIncidentUpdates = function() {

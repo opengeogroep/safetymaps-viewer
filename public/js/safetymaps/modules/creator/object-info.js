@@ -337,7 +337,8 @@ safetymaps.creator.renderFloors = function(object) {
     return rows;
 };
 
-safetymaps.creator.renderSymbols = function(object, isFlamingo = false) {
+safetymaps.creator.renderSymbols = function(object, isFlamingo /*ES2015 = false */) {
+    isFlamingo = (typeof isFlamingo !== "undefined") ? isFlamingo : false;
 
     var rows = [];
     var symbolsWithoutInfo = [];
@@ -435,7 +436,9 @@ safetymaps.creator.createHtmlTabDiv = function(id, label, content, tabContent, t
     }
 };
 
-safetymaps.creator.createInfoTabDiv = function(rows, id = "") {
+safetymaps.creator.createInfoTabDiv = function(rows, id /*ES2015 = ""*/) {
+    id = (typeof id !== 'undefined') ?  id : "";
+
     if(rows.length === 0) {
         return null;
     }

@@ -58,7 +58,7 @@ AlertableButton.prototype.setAlerted = function(alert) {
             }
         }, 1500);
     } else if(!alert && me.alerted) {
-        $(me.a).css({"color": 'black', "background-color": ""});
+        $(me.a).css({"color": '#333333', "background-color": ""});
         $(me.i).removeClass("fa-exclamation").addClass("fa-" + me.icon);
         window.clearInterval(me.exclamationFlashInterval);
         me.exclamationFlashInterval = null;
@@ -82,7 +82,7 @@ AlertableButton.prototype.setFotoAlert = function (alertFoto) {
                 }
             }, 1500);
         } else if (!alertFoto && me.fotoAlerted) {
-            $(me.a).css({"color": 'black', "background-color": ""});
+            $(me.a).css({"color": '#333333', "background-color": ""});
             $(me.i).removeClass("fa-camera").addClass("fa-" + me.icon);
             window.clearInterval(me.cameraFlashInterval);
             me.cameraFlashInterval = null;

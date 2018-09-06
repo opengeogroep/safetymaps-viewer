@@ -184,14 +184,17 @@ $.extend(dbkjs.modules.FeaturesManager.prototype, {
         var row = this.findRowByFeatureId(feature.id);
         row.find(".lbl span").html(feature.attributes.label);
     },
-    removeAllFeatures: function(buttonClicked = false) {
+    removeAllFeatures: function(buttonClicked /*ES2015 = false*/) {
+        buttonClicked = (typeof buttonClicked !== 'undefined') ?  buttonClicked : false;
         this.featurestable.children().remove();
         this.trigger("removeAllFeatures",[buttonClicked]);
     },
-    removeFeatureByRow: function(row,buttonClicked = false) {
+    removeFeatureByRow: function(row,buttonClicked /*ES2015 = false*/) {
+        buttonClicked = (typeof buttonClicked !== 'undefined') ?  buttonClicked : false;
         this.removeFeature(row.data("featureid"), row,buttonClicked);
     },
-    removeFeature: function(featureid, row,buttonClicked = false) {
+    removeFeature: function(featureid, row,buttonClicked /*ES2015 = false*/) {
+        buttonClicked = (typeof buttonClicked !== 'undefined') ?  buttonClicked : false;
         if(row) {
             row.remove();
         } else {
