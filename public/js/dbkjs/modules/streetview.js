@@ -111,7 +111,7 @@ dbkjs.modules.streetview = {
     },
     createDefaultMobileButton: function() {
         var me = this;
-        var div = $("<div/>").attr("style", "position: absolute; left: 20px; bottom: 143px; z-index: 3000");
+        var div = $("<div/>").attr("style", "position: absolute; left: 70px; bottom: 80px; z-index: 3000");
         var a = $("<a/>")
                 .attr("id", "streetview-a")
                 .attr("title", "Open StreetView")

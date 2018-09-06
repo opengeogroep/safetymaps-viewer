@@ -361,12 +361,12 @@ safetymaps.creator.renderSymbols = function(object, isFlamingo /*ES2015 = false 
             
             if (s.omschrijving === ""){
                 symbolsWithoutInfo.push([
-                    '<img id="'+s.id+'" style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'symbols/' + s.code + '.png' + '" alt="' + s.code + '" title="' + s.code + '">',
+                    '<img id="<id>'+s.id+'</id>" style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'symbols/' + s.code + '.png' + '" alt="' + s.code + '" title="' + s.code + '">',
                     i18n.t("symbol." + s.code),s.omschrijving // TODO get from safetymaps.creator.api.styles info
                 ]);
             } else {
                 rows.push([
-                    '<img id="'+s.id+'" style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'symbols/' + s.code + '.png' + '" alt="' + s.code + '" title="' + s.code + '">',
+                    '<img id="<id>'+s.id+'</id>" style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'symbols/' + s.code + '.png' + '" alt="' + s.code + '" title="' + s.code + '">',
                     i18n.t("symbol." + s.code),s.omschrijving // TODO get from safetymaps.creator.api.styles info
                 ]);
             }

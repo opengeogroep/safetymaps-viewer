@@ -45,9 +45,15 @@ dbkjs.modules.safetymaps_creator = {
         safetymaps.creator.api.imagePath = "js/safetymaps/modules/creator/assets/";
         safetymaps.creator.api.mediaPath = this.options.mediaPath;
         safetymaps.creator.api.fotoPath = this.options.fotoPath;
-
+        
+        //register only if there is a scaleLevel set in the DB
+        if (me.options.scaleLevel) {
+            dbkjs.map.events.register('zoomend', dbkjs.map, function () {
+                me.zoomChanged();
+            });
+        }
+        
         // Setup clustering layer
-
         me.clusteringLayer = new safetymaps.ClusteringLayer();
         $(me.clusteringLayer).on("object_cluster_selected", function(event, features) {
             me.clusterObjectClusterSelected(features);
@@ -93,9 +99,9 @@ dbkjs.modules.safetymaps_creator = {
         .done(function(viewerObjects) {
             me.viewerApiObjectsLoaded(viewerObjects);
         });
-
+               
         // Setup user interface for object info window
-
+       
         me.setupInterface();
     },
 
@@ -321,6 +327,7 @@ dbkjs.modules.safetymaps_creator = {
             if(this.selectedClusterFeature && this.selectedClusterFeature.layer) {
                 dbkjs.selectControl.unselect(this.selectedClusterFeature);
             }
+            $("#creator_object_info").text(i18n.t("dialogs.noinfo"));
         }
         this.selectedObject = null;
         this.selectedClusterFeature = null;
@@ -341,6 +348,10 @@ dbkjs.modules.safetymaps_creator = {
                 ids.push(v.id);
             });
             this.clusteringLayer.setSelectedIds(ids);
+            
+            //Set the clusteringLayer always on top so its always clickable (sometimes polygon areas are drawn over a dbk feature)
+            dbkjs.map.raiseLayer(this.clusteringLayer.layer, dbkjs.map.layers.length);
+            
             $("#symbols tr").click(function(e){
                 if(e.delegateTarget.children[2].innerText === ""){
                     return;
@@ -497,6 +508,17 @@ dbkjs.modules.safetymaps_creator = {
         if (e.feature.layer === this.objectLayers.layerCustomPolygon) {
             e.feature.layer.redraw();
         }
+    },
+    
+    zoomChanged: function(){
+        var me = this;
+        var scale = dbkjs.map.getScale();
+        if(scale > me.options.scaleLevel){
+            me.clusteringLayer.layer.setVisibility(false);
+        }else {
+            me.clusteringLayer.layer.setVisibility(true);
+        }
     }
+
 };
 
