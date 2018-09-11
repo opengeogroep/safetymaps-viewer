@@ -615,12 +615,13 @@ IncidentMonitorController.prototype.updateVehiclePositionLayer = function(incide
                 var p = new Proj4js.Point(f.attributes.longitude, f.attributes.latitude);
                 var t = Proj4js.transform(new Proj4js.Proj("EPSG:4326"), new Proj4js.Proj(dbkjs.options.projection.code), p);
                 var p = new OpenLayers.Geometry.Point(t.x, t.y);
+                // Speed and direction from service not reliable
                 var feature = new OpenLayers.Feature.Vector(p, {
                     "Roepnummer": f.attributes.id,
-                    "Speed": f.attributes.speed,
+                    "Speed": 0, // f.attributes.speed,
                     "time": new moment(f.attributes.time),
                     "IncidentID": roepnamen.indexOf(f.attributes.id + "") !== -1 ? "1" : "",
-                    "Direction": f.attributes.headingDegrees,
+                    "Direction": null, //f.attributes.headingDegrees,
                     "Voertuigsoort": ""
                 });
                 if(feature.attributes.IncidentID !== "") {

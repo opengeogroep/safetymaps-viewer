@@ -81,7 +81,12 @@ function VehiclePositionLayer() {
                 rotation: "${Direction}"
             }, {
                 context: {
-                    display: displayFunction
+                    display: function(feature) {
+                        if(feature.attributes.Direction === null) {
+                            return "none";
+                        }
+                        return displayFunction(feature);
+                    }
                 }
             })
         })
