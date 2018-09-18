@@ -39,14 +39,17 @@ function IncidentMonitorController(incidents) {
 
     if(!me.options.checkKbAccessByAuthz) {
         me.kb = true;
+        me.options.hideKladblok = false;
     } else {
         me.kb = false;
+        me.options.hideKladblok = true;
         $.ajax("kb", { cache: false } )
         .always(function(jqXHR) {
             if(jqXHR.status === 404) {
                 console.log("KB access!");
                 me.kb = true;
-                me.options.hideKladblok = true;
+                me.options.hideKladblok = false;
+                me.incidentDetailsWindow.renderDetailsScreen();
             } else if(jqXHR.status !== 403) {
                 console.log("Unexpected status: " + jqXHR + " " + jqXHR.statusText, jqXHR.responseText);
             } else {
