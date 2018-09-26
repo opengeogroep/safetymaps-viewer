@@ -358,7 +358,7 @@ dbkjs.modules.safetymaps_creator = {
                 }
                 dbkjs.selectControl.unselectAll();
                 var id  = e.delegateTarget.children[0].firstChild.id;
-                var f = me.objectLayers.layerSymbols.getFeaturesByAttribute("index",id);
+                var f = me.objectLayers.layerSymbols.getFeaturesByAttribute("index",/<id>(.*?)<\/id>/.exec(id)[1]);
                 dbkjs.selectControl.select(f[0]);
             });
         } catch(error) {

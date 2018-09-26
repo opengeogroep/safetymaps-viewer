@@ -105,6 +105,7 @@ dbkjs.activateClick = function () {
                 return;
             }
             var closeTouch = false;
+            e.xy = {x: e.lastTouches[0].clientX , y: e.lastTouches[0].clientY};
             if(touchmove !== null && touchmove.xy && e.xy) {
                 closeTouch = Math.abs(touchmove.xy.x - e.xy.x) < dbkjs.options.minTouchMoveEndDistance &&
                         Math.abs(touchmove.xy.y - e.xy.y) < dbkjs.options.minTouchMoveEndDistance;
