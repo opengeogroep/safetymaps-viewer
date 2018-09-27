@@ -440,7 +440,11 @@ dbkjs.modules.vrh_objects = {
         console.log(layer.name + " feature selected", e);
         if(layer === me.eventLayers.layerLocationPolygon) {
             var s = me.eventLayers.locationPolygonStyle[f.vlaksoort];
-            me.showFeatureInfo("Locatie", s.label, s.omschrijvi);
+            me.showFeatureInfo("Locatie", s.label, f.omschrijvi);
+            layer.redraw();
+        } else if(layer === me.eventLayers.layerRoutePolygon) {
+            var s = me.eventLayers.routePolygonStyle[f.vlaksoort];
+            me.showFeatureInfo("Route", s.label, f.vlakomschr);
             layer.redraw();
         } else if(layer === me.eventLayers.layerLocationSymbols) {
             var types = {
