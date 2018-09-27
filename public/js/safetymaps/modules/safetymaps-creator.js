@@ -45,9 +45,15 @@ dbkjs.modules.safetymaps_creator = {
         safetymaps.creator.api.imagePath = "js/safetymaps/modules/creator/assets/";
         safetymaps.creator.api.mediaPath = this.options.mediaPath;
         safetymaps.creator.api.fotoPath = this.options.fotoPath;
-
+        
+        //register only if there is a scaleLevel set in the DB
+        if (me.options.scaleLevel) {
+            dbkjs.map.events.register('zoomend', dbkjs.map, function () {
+                me.zoomChanged();
+            });
+        }
+        
         // Setup clustering layer
-
         me.clusteringLayer = new safetymaps.ClusteringLayer();
         $(me.clusteringLayer).on("object_cluster_selected", function(event, features) {
             me.clusterObjectClusterSelected(features);
@@ -93,9 +99,9 @@ dbkjs.modules.safetymaps_creator = {
         .done(function(viewerObjects) {
             me.viewerApiObjectsLoaded(viewerObjects);
         });
-
+               
         // Setup user interface for object info window
-
+       
         me.setupInterface();
     },
 
@@ -275,7 +281,8 @@ dbkjs.modules.safetymaps_creator = {
         this.selectObjectById(feature.attributes.id, feature.attributes.apiObject.extent);
     },
 
-    selectObjectById: function(id, extent, isIncident = false) {
+    selectObjectById: function(id, extent, isIncident /*ES2015 = false */) {
+        isIncident = (typeof isIncident !== "undefined") ? isIncident : false;
         var me = this;
 
         // Unselect current, if any
@@ -320,6 +327,7 @@ dbkjs.modules.safetymaps_creator = {
             if(this.selectedClusterFeature && this.selectedClusterFeature.layer) {
                 dbkjs.selectControl.unselect(this.selectedClusterFeature);
             }
+            $("#creator_object_info").text(i18n.t("dialogs.noinfo"));
         }
         this.selectedObject = null;
         this.selectedClusterFeature = null;
@@ -327,7 +335,8 @@ dbkjs.modules.safetymaps_creator = {
         $("#vectorclickpanel").hide();
     },
 
-    selectedObjectDetailsReceived: function(object,isIncident = false) {
+    selectedObjectDetailsReceived: function(object,isIncident /*ES2015 = false*/) {
+        isIncident = (typeof isIncident !== "undefined") ? isIncident : false;
         var me = this;
         try {
             this.objectLayers.addFeaturesForObject(object);
@@ -339,13 +348,17 @@ dbkjs.modules.safetymaps_creator = {
                 ids.push(v.id);
             });
             this.clusteringLayer.setSelectedIds(ids);
+            
+            //Set the clusteringLayer always on top so its always clickable (sometimes polygon areas are drawn over a dbk feature)
+            dbkjs.map.raiseLayer(this.clusteringLayer.layer, dbkjs.map.layers.length);
+            
             $("#symbols tr").click(function(e){
                 if(e.delegateTarget.children[2].innerText === ""){
                     return;
                 }
                 dbkjs.selectControl.unselectAll();
                 var id  = e.delegateTarget.children[0].firstChild.id;
-                var f = me.objectLayers.layerSymbols.getFeaturesByAttribute("index",id);
+                var f = me.objectLayers.layerSymbols.getFeaturesByAttribute("index",/<id>(.*?)<\/id>/.exec(id)[1]);
                 dbkjs.selectControl.select(f[0]);
             });
         } catch(error) {
@@ -356,7 +369,8 @@ dbkjs.modules.safetymaps_creator = {
         }
     },
 
-    updateInfoWindow: function(object,isIncident = false) {
+    updateInfoWindow: function(object,isIncident /*ES2015 = false*/) {
+        isIncident = (typeof isIncident !== "undefined") ? isIncident : false;
         var me = this;
 
         var div = $('<div class="tabbable"></div>');
@@ -494,6 +508,17 @@ dbkjs.modules.safetymaps_creator = {
         if (e.feature.layer === this.objectLayers.layerCustomPolygon) {
             e.feature.layer.redraw();
         }
+    },
+    
+    zoomChanged: function(){
+        var me = this;
+        var scale = dbkjs.map.getScale();
+        if(scale > me.options.scaleLevel){
+            me.clusteringLayer.layer.setVisibility(false);
+        }else {
+            me.clusteringLayer.layer.setVisibility(true);
+        }
     }
+
 };
 

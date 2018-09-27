@@ -337,7 +337,8 @@ safetymaps.creator.renderFloors = function(object) {
     return rows;
 };
 
-safetymaps.creator.renderSymbols = function(object, isFlamingo = false) {
+safetymaps.creator.renderSymbols = function(object, isFlamingo /*ES2015 = false */) {
+    isFlamingo = (typeof isFlamingo !== "undefined") ? isFlamingo : false;
 
     var rows = [];
     var symbolsWithoutInfo = [];
@@ -360,12 +361,12 @@ safetymaps.creator.renderSymbols = function(object, isFlamingo = false) {
             
             if (s.omschrijving === ""){
                 symbolsWithoutInfo.push([
-                    '<img id="'+s.id+'" style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'symbols/' + s.code + '.png' + '" alt="' + s.code + '" title="' + s.code + '">',
+                    '<img id="<id>'+s.id+'</id>" style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'symbols/' + s.code + '.png' + '" alt="' + s.code + '" title="' + s.code + '">',
                     i18n.t("symbol." + s.code),s.omschrijving // TODO get from safetymaps.creator.api.styles info
                 ]);
             } else {
                 rows.push([
-                    '<img id="'+s.id+'" style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'symbols/' + s.code + '.png' + '" alt="' + s.code + '" title="' + s.code + '">',
+                    '<img id="<id>'+s.id+'</id>" style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'symbols/' + s.code + '.png' + '" alt="' + s.code + '" title="' + s.code + '">',
                     i18n.t("symbol." + s.code),s.omschrijving // TODO get from safetymaps.creator.api.styles info
                 ]);
             }
@@ -435,7 +436,9 @@ safetymaps.creator.createHtmlTabDiv = function(id, label, content, tabContent, t
     }
 };
 
-safetymaps.creator.createInfoTabDiv = function(rows, id = "") {
+safetymaps.creator.createInfoTabDiv = function(rows, id /*ES2015 = ""*/) {
+    id = (typeof id !== 'undefined') ?  id : "";
+
     if(rows.length === 0) {
         return null;
     }

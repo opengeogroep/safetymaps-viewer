@@ -52,15 +52,17 @@ dbkjs.modules.incidents = {
         
         // Initialize AGS service if needed
         if(this.options.controller === "VoertuigInzetController" || this.options.incidentMonitor) {
-            this.service = new AGSIncidentService(this.options.ags.incidentsUrl, this.options.ags.vehiclePosUrl);
-            
-            this.service.initialize(this.options.ags.tokenUrl, this.options.ags.user, this.options.ags.password)
-            .fail(function(e) {
-                // Avoid map loading messages hiding our error message
-                window.setTimeout(function() {
-                    dbkjs.util.alert("Fout bij initialiseren meldingenservice", e, "alert-danger");
-                }, 3000);
-            });        
+            if(this.options.ags) {
+                this.service = new AGSIncidentService(this.options.ags.incidentsUrl, this.options.ags.vehiclePosUrl);
+
+                this.service.initialize(this.options.ags.tokenUrl, this.options.ags.user, this.options.ags.password)
+                .fail(function(e) {
+                    // Avoid map loading messages hiding our error message
+                    window.setTimeout(function() {
+                        dbkjs.util.alert("Fout bij initialiseren meldingenservice", e, "alert-danger");
+                    }, 3000);
+                });
+            }
         }
        
         if(this.options.incidentMonitor) {

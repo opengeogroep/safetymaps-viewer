@@ -699,7 +699,8 @@ dbkjs.modules.edit = {
         return b;
     },
 
-    addFeatureToFeatureManager: function(feature,save=true) {
+    addFeatureToFeatureManager: function(feature,save /*ES2015 =true */) {
+        save = (typeof save !== "undefined") ? save : true;
         this.featuresManager.addFeature(feature);
         this.setSelectedFeature(feature);
         if(save)this.saveFeatures();

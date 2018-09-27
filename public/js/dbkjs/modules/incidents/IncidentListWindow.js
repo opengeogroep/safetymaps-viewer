@@ -27,7 +27,6 @@
 function IncidentListWindow() {
     SplitScreenWindow.call(this, "incidentList");
     var me = this;
-    me.ghor = dbkjs.modules.incidents.options.ghor;
 
     me.createStyle();
 
@@ -111,7 +110,7 @@ IncidentListWindow.prototype.data = function(activeIncidents, inactiveIncidents,
     var h = $("<div class='header actueleInzet'/>")
             .html(activeIncidents.length === 0 ? "Geen actieve incidenten" :
                 (activeIncidents.length === 1 ? "&Eacute;&eacute;n actief incident" : activeIncidents.length + " actieve incidenten") +
-                " met actuele inzet " + (me.ghor ? "" : "brandweer") + "eenheden");
+                " met actuele inzet brandweereenheden");
 
     h.appendTo(d);
     me.listIncidents(d, activeIncidents, true, function(r, incident) {
@@ -128,6 +127,10 @@ IncidentListWindow.prototype.data = function(activeIncidents, inactiveIncidents,
         });
     });
     d.appendTo(v);
+
+    if(dbkjs.modules.incidents.options.incidentListFooterFunction) {
+        dbkjs.modules.incidents.options.incidentListFooterFunction(v, activeIncidents, inactiveIncidents);
+    }
 
     if(restoreScrollTop) {
         v.scrollTop(scrollTop);
@@ -171,11 +174,7 @@ IncidentListWindow.prototype.listIncidents = function(el, incidents, showInzetIn
         }
 
         $("<span class='time'/>").text(incident.start.format("D-M-YYYY HH:mm")).appendTo(r);
-        if(me.ghor) {
-            $("<span class='prio'/>").html(incident.PRIORITEIT_INCIDENT_POLITIE ? incident.PRIORITEIT_INCIDENT_POLITIE + " " : "&nbsp;&nbsp;").appendTo(r);
-        } else {
-            $("<span class='prio'/>").html(incident.prio ? incident.prio + " " : "&nbsp;&nbsp;").appendTo(r);
-        }
+        $("<span class='prio'/>").html(incident.prio ? incident.prio + " " : "&nbsp;&nbsp;").appendTo(r);
         $("<span class='locatie'/>").text(incident.locatie).appendTo(r);
         $("<span class='plaats'/>").text(incident.plaats || "-").appendTo(r);
 
@@ -250,25 +249,12 @@ IncidentListWindow.prototype.getIncidentEenhedenIcons = function(incident) {
     var htmlA = multiIcon("ambulance",iconsA.ambulance) + multiIcon("motorcycle",iconsA.motorcycle) + multiIcon("stethoscope",iconsA.stethoscope) + multiIcon("medkit",iconsA.medkit) ;
     var htmlB = multiIcon("ship",iconsB.ship) + multiIcon("bus",iconsB.bus) + multiIcon("cab",iconsB.cab) + multiIcon("motorcycle",iconsB.motorcycle);
 
-    if(me.ghor) {
-        html = htmlA;
-        if(incident.inzetEenhedenStats.standard) {
-            html = "<span style='color: grey'>" + html + "</span>";
-        }
-        if(incident.inzetEenhedenStats.B.total !== 0) {
-            html += "<span style='color: red'>" + multiIcon("fire-extinguisher",incident.inzetEenhedenStats.B.total) + "</span>";
-        }
-        if(incident.inzetEenhedenStats.P.total !== 0) {
-            html += "<span style='color: blue'>" + multiIcon("cab",incident.inzetEenhedenStats.P.total) + "</span>";
-        }
-    } else {
-        html = "<span style='color: red'>" + htmlB + "</span>";
-        if(incident.inzetEenhedenStats.P.total !== 0) {
-            html += "<span style='color: blue'>" + multiIcon("cab",incident.inzetEenhedenStats.P.total) + "</span>";
-        }
-        if(incident.inzetEenhedenStats.A.total !== 0) {
-            html += "<span style='color: orange'>" + htmlA /*multiIcon("ambulance",incident.inzetEenhedenStats.B.total)*/ + "</span>";
-        }
+    html = "<span style='color: red'>" + htmlB + "</span>";
+    if(incident.inzetEenhedenStats.P.total !== 0) {
+        html += "<span style='color: blue'>" + multiIcon("cab",incident.inzetEenhedenStats.P.total) + "</span>";
+    }
+    if(incident.inzetEenhedenStats.A.total !== 0) {
+        html += "<span style='color: orange'>" + htmlA + "</span>";
     }
     return html;
 };

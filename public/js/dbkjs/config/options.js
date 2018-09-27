@@ -50,5 +50,4 @@ dbkjs.options.featureInfoMaxScale = 2381.0976;
 
 dbkjs.options.minTouchMoveEndDistance = 5;
 
-$("#zoom_extent").hide();
 

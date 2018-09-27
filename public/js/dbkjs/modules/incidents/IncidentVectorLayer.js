@@ -22,8 +22,6 @@ function IncidentVectorLayer(enableLabels) {
     var me = this;
     me.enableLabels = enableLabels;
 
-    me.ghor = dbkjs.modules.incidents.options.ghor;
-
     // Layer name starts with _ to hide in support module layer list
     me.layer = new OpenLayers.Layer.Vector("_Incident vectors", {
         rendererOptions: { zIndexing: true },
@@ -54,7 +52,7 @@ function IncidentVectorLayer(enableLabels) {
 
     if(me.enableLabels) {
         me.hideLabel =  window.localStorage.getItem("IncidentVectorLayer.hideLabel") === "true";
-        $("#baselayerpanel_b").append('<hr/>');
+        $("#settingspanel_b").append('<hr/>');
         var l = $("<label/>");
         var input = $("<input type='checkbox' " + (me.hideLabel ? 'checked' : '') + ">");
         input.click(function(e) {
@@ -62,7 +60,7 @@ function IncidentVectorLayer(enableLabels) {
         });
         l.append(input);
         l.append("<span>Geen label tonen bij incidenten");
-        $("#baselayerpanel_b").append(l);
+        $("#settingspanel_b").append(l);
     }
 
 };
@@ -101,22 +99,7 @@ IncidentVectorLayer.prototype.addIncident = function(incident, gray, singleMarke
         me.y = y;
     }
 
-    var icon;
-    if(me.ghor) {
-        var b = incident.inzetEenhedenStats.B.total;
-        var a = incident.inzetEenhedenStats.A.total;
-        if(gray) {
-            icon = "images/bell-gray.png";
-        } else if(b !== 0 && a !== 0) {
-            icon = "images/bell-yellowred.png";
-        } else if(a !== 0) {
-            icon = "images/bell-yellow.png";
-        } else {
-            icon = "images/bell.png";
-        }
-    } else {
-        icon = !gray ? "images/bell.png" : "images/bell-gray.png";
-    }
+    var icon = !gray ? "images/bell.png" : "images/bell-gray.png";
 
     var classificatie = incident.classificaties;
     if(classificatie && classificatie.indexOf(",") !== -1) {
@@ -130,8 +113,7 @@ IncidentVectorLayer.prototype.addIncident = function(incident, gray, singleMarke
                 label: label,
                 incident: incident,
                 icon: icon,
-                incident_id: falck ? incident.IncidentNummer : incident.INCIDENT_ID,
-                opacity: me.ghor && incident.inzetEenhedenStats.standard ? 0.5 : 0
+                incident_id: falck ? incident.IncidentNummer : incident.INCIDENT_ID
             });
 
     this.layer.addFeatures(feature);

@@ -32,7 +32,7 @@
  */
 function AGSIncidentService(url, vehiclePositionsUrl) {
     var me = this;
-    me.ghor = dbkjs.modules.incidents.options.ghor;
+    me.initialized = false;
     me.url = url;
     me.vehiclePosUrl = vehiclePositionsUrl;
     if(!me.url) {
@@ -73,11 +73,28 @@ AGSIncidentService.prototype.initialize = function(tokenUrl, user, pass) {
             dInitialize.reject("Failure loading AGS incident service info: " + e);
         })
         .done(function() {
+            me.initialized = true;
             dInitialize.resolve();
             $(me).triggerHandler('initialized');
         });
     });
     return dInitialize.promise();
+};
+
+AGSIncidentService.prototype.whenInitialized = function() {
+    var me = this;
+    var d = $.Deferred();
+    if(this.initialized) {
+        console.log("AGS service whenInitialized: immediate resolve()");
+        d.resolve();
+    } else {
+        console.log("AGS service whenInitialized: set event handler");
+        $(me).on("initialized", function() {
+            console.log("AGS service whenInitialized: initialized event, resolve()");
+            d.resolve();
+        });
+    }
+    return d.promise();
 };
 
 /**
@@ -554,6 +571,7 @@ AGSIncidentService.prototype.getIncident = function(incidentId, archief) {
     })
     .done(function(data, textStatus, jqXHR) {
         me.resolveAGSFeatures(d, data, jqXHR, function(f) {
+            f.archief = archief;
             return f;
         },
         function() {
@@ -807,7 +825,7 @@ AGSIncidentService.prototype.getCurrentIncidents = function() {
         data: {
             f: "json",
             token: me.token,
-            where: me.ghor ? "(IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3) OR IND_DISC_INCIDENT LIKE '__A'" : "IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3",
+            where: "IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3",
             orderByFields: "DTG_START_INCIDENT DESC",
             outFields: "INCIDENT_ID,T_X_COORD_LOC,T_Y_COORD_LOC,DTG_START_INCIDENT,PRIORITEIT_INCIDENT_BRANDWEER,NAAM_LOCATIE1,HUIS_PAAL_NR,HUIS_NR_TOEV,HUISLETTER,NAAM_LOCATIE2,PLAATS_NAAM_NEN,BRW_MELDING_CL_ID"
         },
@@ -848,7 +866,7 @@ AGSIncidentService.prototype.getCurrentIncidents = function() {
                     if(inzetEenheid.INCIDENT_ID === incident.INCIDENT_ID) {
                         incident.inzetEenheden.push(inzetEenheid);
 
-                        if(inzetEenheid.T_IND_DISC_EENHEID === 'B' || (me.ghor && inzetEenheid.T_IND_DISC_EENHEID === 'A')) {
+                        if(inzetEenheid.T_IND_DISC_EENHEID === 'B') {
                             if(!inzetEenheid.DTG_EIND_ACTIE) {
                                 incident.actueleInzet = true;
                             } else {
@@ -899,7 +917,7 @@ AGSIncidentService.prototype.getArchivedIncidents = function(incidentsToFilter) 
     var dIncidents = $.Deferred();
     var table = "V_B_ARC_INCIDENT";
     var startIncidentCutoff = new moment().subtract(24, 'hours');
-    var filterPart1 = me.ghor ? "IND_DISC_INCIDENT LIKE '__A' " : "IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3 ";
+    var filterPart1 = "IND_DISC_INCIDENT LIKE '_B_' AND PRIORITEIT_INCIDENT_BRANDWEER <= 3 ";
     me.doAGSAjax({
         url: me.tableUrls[table] + "/query",
         dataType: "json",

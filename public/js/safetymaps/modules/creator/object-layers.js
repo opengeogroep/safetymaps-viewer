@@ -440,7 +440,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
             },{
                 context: {
                     myradius: function (feature) {
-                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,25, feature.attributes.radius);
+                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,14, feature.attributes.radius);
                     }
                 }
             }),
@@ -695,11 +695,11 @@ safetymaps.creator.CreatorObjectLayers.prototype.addSymbolFeatures = function(ob
 
 safetymaps.creator.CreatorObjectLayers.prototype.addDangerSymbolFeatures = function(object) {
     var wktParser = new OpenLayers.Format.WKT();
-
+    var prefix = "safetymaps_creatorDangerSymbolsId:";
     var features = [];
     $.each(object.danger_symbols || [], function(i, detail) {
         var f = wktParser.read(detail.location);
-        f.attributes.index = i;
+        f.attributes.index = prefix+i;
         f.attributes.description = detail.omschrijving;
         f.attributes.symbol = detail.symbol;
         f.attributes.geviCode = detail.gevi_code;

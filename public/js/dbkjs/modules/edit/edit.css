@@ -35,11 +35,11 @@
     position: absolute;
     opacity: 1.0;
     left: 80px;
-    bottom: 44px;
+    bottom: 120px;
     width: 60px;
     z-index: 2998;
     border-color: rgb(104,104,104);
-    height: 171px;
+    height: 120px;
     padding: 10px 5px;
     display: none;
 }

@@ -13,8 +13,6 @@ function FalckIncidentVehicleController(controller) {
     me.vehiclePositionLayer = new VehiclePositionLayer(me.options);
 
     selectLayers.push(me.vehiclePositionLayer.layer);
-    //me.addSelectLayers(selectLayers);
-    me.getEenheidLocatie();
 
     /* window.setInterval(function () {
         if ((window.localStorage.getItem("VehiclePositionLayer.hidden") === "true")) {
@@ -31,6 +29,10 @@ function FalckIncidentVehicleController(controller) {
             });
             $(dbkjs.modules.incidents.controller).on("incidents.vehicle.update", function(event, incident){
                me.incidentFound(incident); 
+            });
+            $(dbkjs.modules.incidents.controller).on("end_incident", function(event, incident){
+               me.vehiclePositionLayer.layer.destroyFeatures();
+               me.vehiclePositionLayer.layer2.destroyFeatures();  
             });
             $(dbkjs.modules.incidents.controller).on("voertuigNummerUpdated", function(event, incident){
                me.vehiclePositionLayer.layer.destroyFeatures();
@@ -99,8 +101,9 @@ FalckIncidentVehicleController.prototype.transformFeaturesForVehiclePositionLaye
             //feat.attributes.IncidentID=null;
             delete feat.attributes.incidentNummer;
             feat.attributes.Voertuigsoort = "";
+            feat.attributes.Voertuigsoort = (feat.attributes.inzetRol === null || !this.options.showInzetRol) ? "" : feat.attributes.inzetRol+" -";
             feat.attributes.Roepnummer = feat.attributes.id;
-            feat.attributes.Speed = feat.attributes.speed;
+            feat.attributes.Speed = (feat.attributes.speed === null || !this.options.showSpeed) ? 0 : feat.attributes.speed;
             //feat.attributes.Speed = 35;
             feat.attributes.Direction = feat.attributes.heading;
             feat.geometry = new OpenLayers.Geometry.Point(feat.geometry.coordinates[0], feat.geometry.coordinates[1]);
@@ -126,7 +129,9 @@ FalckIncidentVehicleController.prototype.incidentFound = function (incidenten) {
             me.vehiclePositionLayer.layer2.setVisibility(true);
             for (var i = 0; i < incidenten.BetrokkenEenheden.length; i++) {
                 var eenheid = incidenten.BetrokkenEenheden[i];
-                betrokkenEenheden.push(eenheid.Roepnaam);
+                if(eenheid.IsActief){
+                    betrokkenEenheden.push(eenheid.Roepnaam);
+                }
             }
             me.getEenheidLocatieIncident(betrokkenEenheden);
         } else {

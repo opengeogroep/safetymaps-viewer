@@ -18,24 +18,13 @@
  *
  */
 
-function VehiclePositionLayer(options) {
+function VehiclePositionLayer() {
     OpenLayers.Renderer.symbol.pointer = [1, -7, 0, -9, -1, -7, 1, -7];
 
     var me = this;
-        
-    me.options = $.extend({
-        enableOngekoppeldeEenheden: false
-    }, options);
-    
-    var controllerName = "dbkjs.modules.incidents.vehicleController.vehiclePositionLayer.setVisibility(event.target.checked)";
-    var panelName = "#settingspanel_b";
 
     this.showMoving = window.localStorage.getItem("VehiclePositionLayer.showMoving") === "true";
-    if(window.localStorage.getItem("VehiclePositionLayer.hidden") === null){
-        this.visibility =false;
-    }else{
-        this.visibility = !(window.localStorage.getItem("VehiclePositionLayer.hidden") === "true");
-    }
+    this.visibility = !(window.localStorage.getItem("VehiclePositionLayer.hidden") === "true");
 
     function displayFunction(feature) {
         if(!me.showMoving) {
@@ -62,14 +51,10 @@ function VehiclePositionLayer(options) {
             }, {
                 context: {
                     speed: function(feature) {
-                        if (me.options.showSpeed) {
-                            if (feature.attributes.Speed === 0) {
-                                return "";
-                            } else {
-                                return feature.attributes.Speed + "km/h";
-                            }
-                        }else {
+                        if(feature.attributes.Speed === 0) {
                             return "";
+                        } else {
+                            return feature.attributes.Speed + "km/h";
                         }
                     },
                     display: displayFunction,
@@ -96,7 +81,12 @@ function VehiclePositionLayer(options) {
                 rotation: "${Direction}"
             }, {
                 context: {
-                    display: displayFunction
+                    display: function(feature) {
+                        if(feature.attributes.Direction === null) {
+                            return "none";
+                        }
+                        return displayFunction(feature);
+                    }
                 }
             })
         })
@@ -124,13 +114,8 @@ function VehiclePositionLayer(options) {
     dbkjs.map.addControl(this.selectControl);
     this.selectControl.activate();
 */
-    //$(panelName).append('<hr/><label><input type="checkbox" ' + (this.visibility ? 'checked' : '') + ' onclick='+controllerName+'>Toon voertuigposities</label>');
+    $("#settingspanel_b").append('<hr/><label><input type="checkbox" ' + (this.visibility ? 'checked' : '') + ' onclick="dbkjs.modules.incidents.controller.vehiclePositionLayer.setVisibility(event.target.checked)">Toon voertuigposities</label>');
 
-    if(me.options.enableOngekoppeldeEenheden) {
-        $(panelName).append('<hr/><label><input type="checkbox" ' + (this.showMoving ? 'checked' : '') + ' onclick='+controllerName+'>Toon bewegende voertuigen niet gekoppeld aan incident (grijs)</label>');
-    } else {
-        this.showMoving = false;
-    }
 }
 
 VehiclePositionLayer.prototype.setShowMoving = function(showMoving) {

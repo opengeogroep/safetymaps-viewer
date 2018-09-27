@@ -78,6 +78,9 @@ function FalckIncidentsController(incidents) {
             me.getVoertuignummers();
             me.setVoertuignummer(me.voertuignummer, true);
         }, 2000);
+        if(me.options.enableVehicleControl){
+            me.vehiclePositionLayer = dbkjs.modules.incidents.vehicleController.vehiclePositionLayer;
+        }
     });
 };
 
@@ -301,7 +304,7 @@ FalckIncidentsController.prototype.geenInzet = function(triggerEvent) {
     this.disableIncidentUpdates();
     this.incidentId = null;
     this.incident = null;
-    this.incidentDetailsWindow.data("Er is momenteel geen incident waavoor dit voertuig is ingezet.");
+    this.incidentDetailsWindow.data("Er is momenteel geen incident waarvoor dit voertuig is ingezet.");
     this.incidentDetailsWindow.hide();
     this.markerLayer.clear();
     if(this.featureSelector) {
@@ -313,6 +316,8 @@ FalckIncidentsController.prototype.geenInzet = function(triggerEvent) {
 
     if(triggerEvent) {
         $(this).triggerHandler("end_incident");
+        dbkjs.modules.safetymaps_creator.unselectObject();
+        this.incidentDetailsWindow.hideMultipleFeatureMatches();
     }
 };
 
@@ -396,6 +401,9 @@ FalckIncidentsController.prototype.getBalkrechtsonderTitle = function() {
             dbkjs.util.htmlEncode(me.incidentDetailsWindow.getIncidentAdres(me.incident, false)) +
             " " + dbkjs.util.htmlEncode(me.incident.IncidentLocatie.Plaatsnaam);
 
+    /* 
+     * Requested by Dennis: dont show units in the rightbottom bar.
+     * 
     var displayEenheden = [];
     var extraCount = 0;
     $.each(me.incident.BetrokkenEenheden, function(i, e) {
@@ -414,6 +422,7 @@ FalckIncidentsController.prototype.getBalkrechtsonderTitle = function() {
             title += " <b>+" + extraCount + "</b>";
         }
     }
+    */
 
     return title;
 };
@@ -491,8 +500,8 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
             // Possibly update marker position
             me.markerLayer.addIncident(incident, false, true);
             me.markerLayer.setZIndexFix();
-
-            me.featureSelector.updateBalkRechtsonder();
+            
+            me.featureSelector.updateBalkRechtsonder(me.getBalkrechtsonderTitle());
         }
 
         // Check if position updated
@@ -502,12 +511,28 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
             oldY = oldIncident.IncidentLocatie.YCoordinaat;
         }
 
-        if(incident.IncidentLocatie
-        && (incident.IncidentLocatie.XCoordinaat !== oldX
-            || incident.IncidentLocatie.YCoordinaat !== oldY)) {
+        if(incident.IncidentLocatie && (incident.IncidentLocatie.XCoordinaat !== oldX || incident.IncidentLocatie.YCoordinaat !== oldY)) {
 
             // This function uses coords in me.incident, updated in previous if stmt
+            me.markerLayer.addIncident(incident, false, true);
+            me.markerLayer.setZIndexFix();
             me.zoomToIncident();
+            
+            var x = incident.IncidentLocatie.XCoordinaat;
+            var y = incident.IncidentLocatie.YCoordinaat;
+            var l = incident.IncidentLocatie;
+            var commonIncidentObject = {
+                postcode: l.Postcode,
+                woonplaats: l.Plaatsnaam,
+                huisnummer: l.Huisnummer,
+                huisletter: l.Letter,
+                toevoeging: l.HnToevoeging,
+                straat: l.NaamLocatie1,
+                x: x,
+                y: y
+            };
+            me.featureSelector.matchInfo = commonIncidentObject;
+            me.featureSelector.findAndSelectMatches(me.incidentDetailsWindow);
         }
     });
 };
