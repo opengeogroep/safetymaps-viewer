@@ -769,11 +769,14 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
         },
         styleMap: new OpenLayers.StyleMap({
             default: new OpenLayers.Style({
-                externalGraphic: me.imagePath + "/${type}.png",
+                externalGraphic: "${graphic}",
                 pointRadius: 14,
                 rotation: "${hoek}"
             },{
                 context: {
+                    graphic: function(feature) {
+                        return me.imagePath + "/" + feature.attributes.type + (feature.attributes.ballonteks ? "_i" : "") + ".png";
+                    }
                 }
             }),
             temporary: new OpenLayers.Style({pointRadius: me.options.graphicSizeHover}),
@@ -791,11 +794,14 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
         },
         styleMap: new OpenLayers.StyleMap({
             default: new OpenLayers.Style({
-                externalGraphic: me.imagePath + "/${soort}.png",
+                externalGraphic: "${graphic}",
                 pointRadius: 14,
                 rotation: "${hoek}"
             },{
                 context: {
+                    graphic: function(feature) {
+                        return me.imagePath + "/" + feature.attributes.soort + (feature.attributes.ballonteks ? "_i" : "") + ".png";
+                    }
                 }
             }),
             temporary: new OpenLayers.Style({pointRadius: me.options.graphicSizeHover}),
