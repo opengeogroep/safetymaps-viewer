@@ -425,12 +425,252 @@ dbkjs.modules.vrh_objects = {
         rows.push({l: "MOB naam",                               t: t.mob_telefo});
         safetymaps.creator.createHtmlTabDiv("functionarissen", "Functionarissen BRW", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
 
+        safetymaps.creator.createHtmlTabDiv("legenda", "Legenda", safetymaps.creator.createInfoTabDiv(me.createEventLegend()), tabContent, tabs);
+
         $("#vrh_object_info").html(div);
 
         if(!isIncident) {
             this.infoWindow.show();
         }
         this.infoWindowTabsResize();
+    },
+
+    createEventLegend: function() {
+        var me = this;
+
+        var rows = [];
+        var rowsWithoutInfo = [];
+
+        if(me.eventLayers.layerLocationPolygon.features.length > 0) {
+            rows.push([
+                "<b>Locatie vlak</b>",
+                "<b>Soort</b>",
+                "<b>Omschrijving</b>"
+            ]);
+
+            var soortenDisplayed = {};
+
+            $.each(me.eventLayers.layerLocationPolygon.features, function(i, f) {
+                var soort = f.attributes.vlaksoort;
+                var omschrijving = f.attributes.omschrijvi || null;
+                if(soortenDisplayed[soort] && omschrijving !== null) {
+                    return true;
+                }
+                soortenDisplayed[soort] = true;
+
+                var style = me.eventLayers.locationPolygonStyle[soort];
+
+                var tr = [
+                    "<div style='width: 150px; height: 40px; border: 2px solid " + style.stroke + "; background-color: " + style.fill + ";'></div>",
+                    style.label,
+                    omschrijving || ""
+                ];
+
+
+                if(omschrijving === null) {
+                    rowsWithoutInfo.push(tr);
+                } else {
+                    rows.push(tr);
+                }
+            });
+            rowsWithoutInfo.sort(function(lhs, rhs) {
+                return lhs[1].localeCompare(rhs[1]);
+            });
+            rows.push.apply(rows, rowsWithoutInfo);
+        }
+        rowsWithoutInfo = [];
+
+        if(me.eventLayers.layerRoutePolygon.features.length > 0) {
+            rows.push([
+                "<b>Route vlak</b>",
+                "<b>Soort</b>",
+                "<b>Omschrijving</b>"
+            ]);
+
+            var soortenDisplayed = {};
+
+            $.each(me.eventLayers.layerRoutePolygon.features, function(i, f) {
+                var soort = f.attributes.vlaksoort;
+                var omschrijving = f.attributes.vlakomschr || null;
+                if(soortenDisplayed[soort] && omschrijving !== null) {
+                    return true;
+                }
+                soortenDisplayed[soort] = true;
+
+                var style = me.eventLayers.routePolygonStyle[soort];
+
+                var tr = [
+                    "<div style='width: 150px; height: 40px; border: 2px solid " + style.stroke + "; background-color: " + style.fill + ";'></div>",
+                    style.label,
+                    omschrijving || ""
+                ];
+
+
+                if(omschrijving === null) {
+                    rowsWithoutInfo.push(tr);
+                } else {
+                    rows.push(tr);
+                }
+            });
+            rowsWithoutInfo.sort(function(lhs, rhs) {
+                return lhs[1].localeCompare(rhs[1]);
+            });
+            rows.push.apply(rows, rowsWithoutInfo);
+        }
+        rowsWithoutInfo = [];
+
+        if(me.eventLayers.layerLocationLine.features.length > 0) {
+            rows.push([
+                "<b>Locatie lijn</b>",
+                "<b>Soort</b>",
+                "<b>Omschrijving</b>"
+            ]);
+
+            var soortenDisplayed = {};
+
+            $.each(me.eventLayers.layerLocationLine.features, function(i, f) {
+                var soort = f.attributes.lijnsoort;
+                var omschrijving = f.attributes.lijnbeschr || null;
+                if(soortenDisplayed[soort] && omschrijving !== null) {
+                    return true;
+                }
+                soortenDisplayed[soort] = true;
+
+                var style = me.eventLayers.locationLineStyle[soort];
+
+                var tr = [
+                    "<img style='width: 40%' src='" + me.eventLayers.imagePath + '/lines/' + soort + ".png'>",
+                    style.label,
+                    omschrijving || ""
+                ];
+
+
+                if(omschrijving === null) {
+                    rowsWithoutInfo.push(tr);
+                } else {
+                    rows.push(tr);
+                }
+            });
+            rowsWithoutInfo.sort(function(lhs, rhs) {
+                return lhs[1].localeCompare(rhs[1]);
+            });
+            rows.push.apply(rows, rowsWithoutInfo);
+        }
+        rowsWithoutInfo = [];
+
+        if(me.eventLayers.layerRouteLine.features.length > 0) {
+            rows.push([
+                "<b>Route lijn</b>",
+                "<b>Soort</b>",
+                "<b>Omschrijving</b>"
+            ]);
+
+            var soortenDisplayed = {};
+
+            $.each(me.eventLayers.layerRouteLine.features, function(i, f) {
+                var soort = f.attributes.routetype;
+                var omschrijving = f.attributes.routebesch || null;
+                if(soortenDisplayed[soort] && omschrijving !== null) {
+                    return true;
+                }
+                soortenDisplayed[soort] = true;
+
+                var style = me.eventLayers.routeLineStyle[soort];
+
+                var tr = [
+                    "<img style='width: 40%' src='" + me.eventLayers.imagePath + '/lines/' + soort + ".png'>",
+                    style.label,
+                    omschrijving || ""
+                ];
+
+                if(omschrijving === null) {
+                    rowsWithoutInfo.push(tr);
+                } else {
+                    rows.push(tr);
+                }
+            });
+            rowsWithoutInfo.sort(function(lhs, rhs) {
+                return lhs[1].localeCompare(rhs[1]);
+            });
+            rows.push.apply(rows, rowsWithoutInfo);
+        }
+        rowsWithoutInfo = [];
+
+        if(me.eventLayers.layerLocationSymbols.features.length > 0) {
+            rows.push([
+                "<b>Locatie symbool</b>",
+                "<b>Soort</b>",
+                "<b>Omschrijving</b>"
+            ]);
+
+            var soortenDisplayed = {};
+
+            $.each(me.eventLayers.layerLocationSymbols.features, function(i, f) {
+                var soort = f.attributes.type;
+                var omschrijving = f.attributes.ballonteks || null;
+                if(soortenDisplayed[soort] && omschrijving !== null) {
+                    return true;
+                }
+                soortenDisplayed[soort] = true;
+
+                var label = me.eventLayers.locationSymbolTypes[soort];
+
+                var tr = [
+                    "<img style='width: 20%' src='" + me.eventLayers.imagePath + '/' + soort + ".png'>",
+                    label,
+                    omschrijving || ""
+                ];
+
+                if(omschrijving === null) {
+                    rowsWithoutInfo.push(tr);
+                } else {
+                    rows.push(tr);
+                }
+            });
+            rowsWithoutInfo.sort(function(lhs, rhs) {
+                return lhs[1].localeCompare(rhs[1]);
+            });
+            rows.push.apply(rows, rowsWithoutInfo);
+        }
+        rowsWithoutInfo = [];
+
+        if(me.eventLayers.layerRouteSymbols.features.length > 0) {
+            rows.push([
+                "<b>Route symbool</b>",
+                "<b>Soort</b>",
+                "<b>Omschrijving</b>"
+            ]);
+
+            var soortenDisplayed = {};
+
+            $.each(me.eventLayers.layerRouteSymbols.features, function(i, f) {
+                var soort = f.attributes.soort;
+                var omschrijving = f.attributes.ballonteks || null;
+                if(soortenDisplayed[soort] && omschrijving !== null) {
+                    return true;
+                }
+                soortenDisplayed[soort] = true;
+
+                var label = me.eventLayers.routeSymbolTypes[soort];
+                var tr = [
+                    "<img style='width: 20%' src='" + me.eventLayers.imagePath + '/' + soort + ".png'>",
+                    label,
+                    omschrijving || ""
+                ];
+
+                if(omschrijving === null) {
+                    rowsWithoutInfo.push(tr);
+                } else {
+                    rows.push(tr);
+                }
+            });
+            rowsWithoutInfo.sort(function(lhs, rhs) {
+                return lhs[1].localeCompare(rhs[1]);
+            });
+            rows.push.apply(rows, rowsWithoutInfo);
+        }
+
+        return rows;
     },
 
     eventLayerFeatureSelected: function(e) {
@@ -447,59 +687,11 @@ dbkjs.modules.vrh_objects = {
             me.showFeatureInfo("Route", s.label, f.vlakomschr);
             layer.redraw();
         } else if(layer === me.eventLayers.layerLocationSymbols) {
-            var types = {
-                "agg": "Aggegraat",
-                "dga": "Doorgang algemeen",
-                "dgh": "Doorgang hekwerk",
-                "dgn": "Doorgang nood",
-                "dgp": "Doorgang publiek",
-                "inf": "Informatiepunt",
-                "inv": "Invalideplaats",
-                "wck": "Kruis urinoir",
-                "lim": "Lichtmast",
-                "paa": "Parkeren auto",
-                "paf": "Parkeren fiets",
-                "pam": "Parkeren motor",
-                "pla": "Pijlaanduiding",
-                "wca": "Wc algemeen"
-            };
-            me.showFeatureInfo("Locatie", types[f.type] || "", f.ballonteks);
+
+            me.showFeatureInfo("Locatie", me.eventLayers.locationSymbolTypes[f.type] || "", f.ballonteks);
             layer.redraw();
         } else if(layer === me.eventLayers.layerRouteSymbols) {
-            var types = {
-                "afz": "Afzetting",
-                "amb": "Ambulance",
-                "bev": "Beveiliging",
-                "bkm": "Blokkade mobiel",
-                "bkv": "Blokkade vast",
-                "brb": "Boot reddingsbrigade",
-                "brw": "Brandweer",
-                "bwi": "Brandweeringang",
-                "cop": "Comprimeerpunt",
-                "doa": "Doorlaatpost algemeen",
-                "dov": "Doorlaatpost voetgangers",
-                "ehb": "Ehbo",
-                "ghr": "Ghor",
-                "hel": "Helicopter",
-                "hok": "Hoogwerkerkraan",
-                "mcb": "Mobiele commando BRW",
-                "mcg": "Mobiele commando GHOR",
-                "mcp": "Mobiele commando Politie",
-                "mcr": "Mobiele commando Rode Kruis",
-                "moa": "Motor Ambulance",
-                "mob": "Motor Brandweer",
-                "pol": "Politie",
-                "pos": "Politie servicepunt",
-                "poh": "Poller hulpdiensten",
-                "rok": "Rode Kruis",
-                "dpl": "Drinkplaats",
-                "siv": "Snelle interventie voertuig",
-                "tas": "Tankautospuit",
-                "ver": "Verkeersregelaar",
-                "vaf": "Vlag finish",
-                "vas": "Vlag start"
-            };
-            me.showFeatureInfo("Route", types[f.soort] || "", f.ballonteks);
+            me.showFeatureInfo("Route", me.eventLayers.routeSymbolTypes[f.soort] || "", f.ballonteks);
             layer.redraw();
         } else if(layer.name.startsWith("Event location lines")) {
             me.showFeatureInfo("Locatie", me.eventLayers.locationLineStyle[f.lijnsoort].label, f.lijnbeschr);

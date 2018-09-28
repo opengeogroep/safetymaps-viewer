@@ -760,7 +760,23 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
         })
     });
     this.layers.push(this.layerLabels);
-    
+
+    this.locationSymbolTypes = {
+        "agg": "Aggegraat",
+        "dga": "Doorgang algemeen",
+        "dgh": "Doorgang hekwerk",
+        "dgn": "Doorgang nood",
+        "dgp": "Doorgang publiek",
+        "inf": "Informatiepunt",
+        "inv": "Invalideplaats",
+        "wck": "Kruis urinoir",
+        "lim": "Lichtmast",
+        "paa": "Parkeren auto",
+        "paf": "Parkeren fiets",
+        "pam": "Parkeren motor",
+        "pla": "Pijlaanduiding",
+        "wca": "Wc algemeen"
+    };
     this.layerLocationSymbols = new OpenLayers.Layer.Vector("Event location symbols", {
         hover:true,
         maxResolution: 0.84,
@@ -786,6 +802,39 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
     this.layers.push(this.layerLocationSymbols);
     this.selectLayers.push(this.layerLocationSymbols);
 
+    me.routeSymbolTypes = {
+        "afz": "Afzetting",
+        "amb": "Ambulance",
+        "bev": "Beveiliging",
+        "bkm": "Blokkade mobiel",
+        "bkv": "Blokkade vast",
+        "brb": "Boot reddingsbrigade",
+        "brw": "Brandweer",
+        "bwi": "Brandweeringang",
+        "cop": "Comprimeerpunt",
+        "doa": "Doorlaatpost algemeen",
+        "dov": "Doorlaatpost voetgangers",
+        "ehb": "Ehbo",
+        "ghr": "Ghor",
+        "hel": "Helicopter",
+        "hok": "Hoogwerkerkraan",
+        "mcb": "Mobiele commando BRW",
+        "mcg": "Mobiele commando GHOR",
+        "mcp": "Mobiele commando Politie",
+        "mcr": "Mobiele commando Rode Kruis",
+        "moa": "Motor Ambulance",
+        "mob": "Motor Brandweer",
+        "pol": "Politie",
+        "pos": "Politie servicepunt",
+        "poh": "Poller hulpdiensten",
+        "rok": "Rode Kruis",
+        "dpl": "Drinkplaats",
+        "siv": "Snelle interventie voertuig",
+        "tas": "Tankautospuit",
+        "ver": "Verkeersregelaar",
+        "vaf": "Vlag finish",
+        "vas": "Vlag start"
+    };
     this.layerRouteSymbols = new OpenLayers.Layer.Vector("Event route symbols", {
         hover:true,
         maxResolution: 0.84,
