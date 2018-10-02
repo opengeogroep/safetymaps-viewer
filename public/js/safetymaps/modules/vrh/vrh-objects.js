@@ -453,7 +453,7 @@ dbkjs.modules.vrh_objects = {
             $.each(me.eventLayers.layerLocationPolygon.features, function(i, f) {
                 var soort = f.attributes.vlaksoort;
                 var omschrijving = f.attributes.omschrijvi || null;
-                if(soortenDisplayed[soort] && omschrijving !== null) {
+                if(soortenDisplayed[soort] && omschrijving === null) {
                     return true;
                 }
                 soortenDisplayed[soort] = true;
@@ -492,7 +492,7 @@ dbkjs.modules.vrh_objects = {
             $.each(me.eventLayers.layerRoutePolygon.features, function(i, f) {
                 var soort = f.attributes.vlaksoort;
                 var omschrijving = f.attributes.vlakomschr || null;
-                if(soortenDisplayed[soort] && omschrijving !== null) {
+                if(soortenDisplayed[soort] && omschrijving === null) {
                     return true;
                 }
                 soortenDisplayed[soort] = true;
@@ -531,7 +531,7 @@ dbkjs.modules.vrh_objects = {
             $.each(me.eventLayers.layerLocationLine.features, function(i, f) {
                 var soort = f.attributes.lijnsoort;
                 var omschrijving = f.attributes.lijnbeschr || null;
-                if(soortenDisplayed[soort] && omschrijving !== null) {
+                if(soortenDisplayed[soort] && omschrijving === null) {
                     return true;
                 }
                 soortenDisplayed[soort] = true;
@@ -570,7 +570,7 @@ dbkjs.modules.vrh_objects = {
             $.each(me.eventLayers.layerRouteLine.features, function(i, f) {
                 var soort = f.attributes.routetype;
                 var omschrijving = f.attributes.routebesch || null;
-                if(soortenDisplayed[soort] && omschrijving !== null) {
+                if(soortenDisplayed[soort] && omschrijving === null) {
                     return true;
                 }
                 soortenDisplayed[soort] = true;
@@ -608,7 +608,7 @@ dbkjs.modules.vrh_objects = {
             $.each(me.eventLayers.layerLocationSymbols.features, function(i, f) {
                 var soort = f.attributes.type;
                 var omschrijving = f.attributes.ballonteks || null;
-                if(soortenDisplayed[soort] && omschrijving !== null) {
+                if(soortenDisplayed[soort] && omschrijving === null) {
                     return true;
                 }
                 soortenDisplayed[soort] = true;
@@ -646,7 +646,7 @@ dbkjs.modules.vrh_objects = {
             $.each(me.eventLayers.layerRouteSymbols.features, function(i, f) {
                 var soort = f.attributes.soort;
                 var omschrijving = f.attributes.ballonteks || null;
-                if(soortenDisplayed[soort] && omschrijving !== null) {
+                if(soortenDisplayed[soort] && omschrijving === null) {
                     return true;
                 }
                 soortenDisplayed[soort] = true;
