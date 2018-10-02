@@ -440,7 +440,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
             },{
                 context: {
                     myradius: function (feature) {
-                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,14, feature.attributes.radius);
+                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,18, feature.attributes.radius);
                     }
                 }
             }),
