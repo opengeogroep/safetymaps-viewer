@@ -295,7 +295,12 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
                 fillColor: "${fillColor}",
                 strokeColor: "${strokeColor}",
                 strokeWidth: "${strokeWidth}",
-                strokeDashstyle: "${strokePattern}"
+                strokeDashstyle: "${strokePattern}",
+                label: "${label}",
+                fontColor: "black",
+                fontSize: "12px",
+                labelOutlineColor: "white",
+                labelOutlineWidth: 3
             }, {
                 context: {
                     fillColor: function(feature) {
@@ -313,7 +318,11 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
                     strokePattern: function(feature) {
                         var s = me.locationPolygonStyle[feature.attributes.vlaksoort];
                         return s ? s.strokePattern : "";
+                    },
+                    label: function(feature) {
+                        return feature.attributes["omschrijvi"] || "";
                     }
+
                 }
             }),
             temporary: new OpenLayers.Style({}),
@@ -380,7 +389,12 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
                 fillColor: "${fillColor}",
                 strokeColor: "${strokeColor}",
                 strokeWidth: "${strokeWidth}",
-                strokeDashstyle: "${strokePattern}"
+                strokeDashstyle: "${strokePattern}",
+                label: "${label}",
+                fontColor: "black",
+                fontSize: "12px",
+                labelOutlineColor: "white",
+                labelOutlineWidth: 3
             }, {
                 context: {
                     display: function(feature) {
@@ -402,6 +416,9 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
                     strokePattern: function(feature) {
                         var s = me.routePolygonStyle[feature.attributes.vlaksoort];
                         return s ? s.strokePattern : "";
+                    },
+                    label: function(feature) {
+                        return feature.attributes["vlakomschr"] || "";
                     }
                 }
             }),
@@ -787,11 +804,22 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
             default: new OpenLayers.Style({
                 externalGraphic: "${graphic}",
                 pointRadius: 14,
-                rotation: "${hoek}"
+                rotation: "${hoek}",
+                label: "${label}",
+                labelAlign: "lb",
+                labelXOffset: "10",
+                labelYOffset: "10",
+                fontColor: "black",
+                fontSize: "12px",
+                labelOutlineColor: "white",
+                labelOutlineWidth: 3
             },{
                 context: {
                     graphic: function(feature) {
                         return me.imagePath + "/" + feature.attributes.type + (feature.attributes.ballonteks ? "_i" : "") + ".png";
+                    },
+                    label: function(feature) {
+                        return feature.attributes["ballonteks"] || "";
                     }
                 }
             }),
@@ -845,11 +873,22 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
             default: new OpenLayers.Style({
                 externalGraphic: "${graphic}",
                 pointRadius: 14,
-                rotation: "${hoek}"
+                rotation: "${hoek}",
+                label: "${label}",
+                labelAlign: "lb",
+                labelXOffset: "10",
+                labelYOffset: "10",
+                fontColor: "black",
+                fontSize: "12px",
+                labelOutlineColor: "white",
+                labelOutlineWidth: 3
             },{
                 context: {
                     graphic: function(feature) {
                         return me.imagePath + "/" + feature.attributes.soort + (feature.attributes.ballonteks ? "_i" : "") + ".png";
+                    },
+                    label: function(feature) {
+                        return feature.attributes["ballonteks"] || "";
                     }
                 }
             }),
