@@ -18,6 +18,8 @@
  *
  */
 
+/* global dbkjs, SplitScreenWindow */
+
 /**
  * Window which shows list of current and historic events. Subclass of
  * SplitScreenWindow. Create only one instance as it always uses modal popup
@@ -32,17 +34,6 @@ function IncidentListWindow() {
 
     $(this).on('elements_created', function() {
         me.getView().html("Verbinden met incidentenservice...");
-
-        // Replace "<- Kaart" with button
-        me.getView().parent().find(".modal-popup-close").remove()
-
-        $("<button class='btn btn-primary' style='float: left; margin: 5px'><i class='fa fa-arrow-left'></i></button>")
-        .prependTo(me.getView().parent())
-        .click(function() {
-            me.hide();
-        });
-
-        me.getView().parent()
     });
 }
 
