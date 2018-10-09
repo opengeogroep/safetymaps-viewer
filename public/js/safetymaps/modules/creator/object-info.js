@@ -211,8 +211,8 @@ safetymaps.creator.renderOccupancy = function(object) {
                 days += '<span class="label label-' + (v[d] ? 'success' : 'default') + '">' + moment.weekdaysMin(j+1 % 7) + '</span>';
             });
             rows.push([
-                v.begintijd.substring(0,2) + ':' + v.begintijd.substring(3,5),
-                v.eindtijd.substring(0,2) + ':' + v.eindtijd.substring(3,5),
+                v.begintijd.substring(0,2) + ':' + v.begintijd.substring(2,4),
+                v.eindtijd.substring(0,2) + ':' + v.eindtijd.substring(2,4),
                 Number(v.aantal) || 0,
                 Number(v.aantal_nzr) || 0,
                 Mustache.escape(v.groep),
