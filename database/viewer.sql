@@ -7,7 +7,7 @@ create schema viewer;
 -- Used in cache key for ETag to refresh cache when schema of JSON results change,
 -- increase value when doing schema updates!
 create table viewer.schema_version(value integer);
-insert into viewer.schema_version(value) values(3);
+insert into viewer.schema_version(value) values(4);
 
 create or replace view viewer.viewer_object as
     select d."DBK_ID" as id,
@@ -56,7 +56,7 @@ create or replace view viewer.viewer_object_selectieadressen as
     select "DBK_ID" as id, 
         (select array_to_json(array_agg(row_to_json(r.*)))
          from (select na."Postcode" as pc, na."Plaats" as pl, na."Straatnaam" as sn, 
-                array_to_json(array_agg(distinct na."Huisnummer" || case when na."Huisletter" <> '' or na."Toevoeging" <> '' then '|' || na."Huisletter" || '|' || na."Toevoeging" else '' end)) as nrs
+                array_to_json(array_agg(distinct na."Huisnummer" || case when na."Huisletter" <> '' or na."Toevoeging" <> '' then '|' || COALESCE(na."Huisletter",'') || '|' || COALESCE(na."Toevoeging",'') else '' end)) as nrs
                 from wfs."AdresDBKneven" na
                 where na."DBK_ID" = t."DBK_ID"
                 group by na."Postcode", na."Plaats", na."Straatnaam") r
