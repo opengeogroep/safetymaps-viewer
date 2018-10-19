@@ -46,12 +46,14 @@ IncidentDetailsWindow.prototype.showError = function(e) {
 
 IncidentDetailsWindow.prototype.createStyle = function() {
     var me = this;
-    var css = '#eenheden div { margin: 3px; float: left } \
+    var css = '#eenheden div { margin: 3px; float: left; } \
 #eenheden div { border-left: 1px solid #ddd; padding-left: 8px; } \
 .incidentDetails .beeindigd { color: #a9a9a9; } \
-#tab_kladblok { clear: both; padding-top: 10px; white-space: pre-wrap; font-size: 16px; font-weight: bold; color: red } \
+#tab_kladblok { clear: both; padding-top: 10px; white-space: pre-wrap; font-size: 16px; font-weight: bold; color: red; } \
 table td { padding: 3px !important; } \
 #tab_kladblok table td { vertical-align: top; padding: 0px 0px 0px 3px !important; } \
+#tab_kladblok table tr.pol td { color: blue; } \
+#tab_kladblok table tr.ambu td { color: #e3ac04; } \
 ';
     head = document.getElementsByTagName('head')[0],
         style = document.createElement('style');
@@ -419,10 +421,16 @@ IncidentDetailsWindow.prototype.getIncidentKladblokDefaultHtml = function(kladbl
     var kladblokHTML = "<table>";
     $.each(kladblok, function(i, k) {
         var ind = k.T_IND_DISC_KLADBLOK_REGEL;
+        var disclass = "brw";
         if(ind.indexOf("B") === -1) {
-            return;
+            if(ind.indexOf("P") !== -1) {
+                disclass = "pol";
+            } else if(ind.indexOf("A") !== -1) {
+                disclass = "ambu";
+            }
+            console.log("Kladblok andere discipline: " + k.T_IND_DISC_KLADBLOK_REGEL +": " + k.INHOUD_KLADBLOK_REGEL);
         }
-        kladblokHTML += "<tr><td>" + AGSIncidentService.prototype.getAGSMoment(k.DTG_KLADBLOK_REGEL).format("HH:mm") + "</td><td>" +
+        kladblokHTML += "<tr class='" + disclass + "'><td>" + AGSIncidentService.prototype.getAGSMoment(k.DTG_KLADBLOK_REGEL).format("HH:mm") + "</td><td>" +
             dbkjs.util.htmlEncode(k.INHOUD_KLADBLOK_REGEL) + "</td></tr>";
     });
     return kladblokHTML + "</table>";
