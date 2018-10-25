@@ -28,14 +28,14 @@
 var safetymaps = safetymaps || {};
 safetymaps.vrh = safetymaps.vrh || {};
 
-safetymaps.vrh.EventLayers = function(options) {
+safetymaps.vrh.Events = function(options) {
     this.options = $.extend({
         graphicSizeHover: 26,
         graphicSizeSelect: 20
     }, options);
 };
 
-safetymaps.vrh.EventLayers.prototype.scalePattern = function(pattern, factor) {
+safetymaps.vrh.Events.prototype.scalePattern = function(pattern, factor) {
     if(!pattern || pattern.trim().length === 0) {
         return "";
     }
@@ -46,7 +46,7 @@ safetymaps.vrh.EventLayers.prototype.scalePattern = function(pattern, factor) {
     return values.join(" ");
 };
 
-safetymaps.vrh.EventLayers.prototype.createLayers = function() {
+safetymaps.vrh.Events.prototype.createLayers = function() {
     var me = this;
 
     this.imagePath = "js/safetymaps/modules/vrh/assets";
@@ -903,7 +903,7 @@ safetymaps.vrh.EventLayers.prototype.createLayers = function() {
     return this.layers;
 };
 
-safetymaps.vrh.EventLayers.prototype.removeAllFeatures = function(object) {
+safetymaps.vrh.Events.prototype.removeAllFeatures = function(object) {
     if(this.layers) {
         $.each(this.layers, function(i, layer) {
             layer.removeAllFeatures();
@@ -911,7 +911,7 @@ safetymaps.vrh.EventLayers.prototype.removeAllFeatures = function(object) {
     }
 };
 
-safetymaps.vrh.EventLayers.prototype.addFeaturesForObject = function(object) {
+safetymaps.vrh.Events.prototype.addFeaturesForObject = function(object) {
     var wktParser = new OpenLayers.Format.WKT();
 
     var wktReader = function(d) {
@@ -941,4 +941,349 @@ safetymaps.vrh.EventLayers.prototype.addFeaturesForObject = function(object) {
     this.layerRouteSymbols.addFeatures(object.route_punt.map(d => new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(d.x, d.y), d)));
 
     console.log("Added event layers", this.layers);
+};
+
+safetymaps.vrh.Events.prototype.updateInfoWindow = function(tab, object) {
+    var me = this;
+
+    var div = $('<div class="tabbable"></div>');
+
+    var tabContent = $('<div class="tab-content"></div>');
+    var tabs = $('<ul class="nav nav-pills"></ul>');
+    div.append(tabContent);
+    div.append(tabs);
+
+    var rows = [];
+
+    //rows.push({l: "Gemeente",                               t: t.gemeente});
+    //rows.push({l: "Begindatum",                             t: t.sbegin});
+    //rows.push({l: "Aanvrager",                              t: t.aanvrager});
+
+    var t = object.terrein;
+    rows.push({l: "Naam evenement",                         t: t.evnaam});
+    rows.push({l: "Locatie",                                t: t.locatie});
+    rows.push({l: "Adres",                                  t: t.adres});
+    rows.push({l: "Soort evenement",                        t: t.soort_even});
+    rows.push({l: "Contactpersoon organisatie",             t: t.contactper});
+    rows.push({l: "Programma",                              t: t.programma});
+    rows.push({l: "Bijzonderheden",                         t: t.bijzonderh});
+    safetymaps.creator.createHtmlTabDiv("algemeen", "Evenementgegevens algemeen", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+
+    rows = [];
+    rows.push({l: "Tijden",                                 t: t.tijden});
+    rows.push({l: "Aantal bezoekers",                       t: t.aantal_bez});
+    rows.push({l: "Personeel EHBO",                         t: t.personeel_});
+    rows.push({l: "Personeel security",                     t: t.personeel1});
+    rows.push({l: "Personeel BHV",                          t: t.personee_1});
+    rows.push({l: "Omroepinstallatie",                      t: t.omroepinst});
+    rows.push({l: "Veiligheidsplan",                        t: t.veiligheid});
+    rows.push({l: "Verzamelplaats",                         t: t.verzamelpl});
+    rows.push({l: "Bijzonderheden",                         t: t.bijzonde_1});
+    safetymaps.creator.createHtmlTabDiv("aanwezigheid", "Aanwezige personen", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+
+    rows = [];
+    rows.push({l: "Aantal tijdelijke bouwsels",             t: t.aantal_tij});
+    rows.push({l: "Herpositionering voertuigen",            t: t.herpositio});
+    rows.push({l: "OD uitrukvolgorde",                      t: t.od_uitrukv});
+    rows.push({l: "Locatie CoPI",                           t: t.locatie_co});
+    rows.push({l: "Toegangswegen",                          t: t.toegangswe});
+    rows.push({l: "Bijzonderheden evenement",               t: t.bijzonde_2});
+    safetymaps.creator.createHtmlTabDiv("gegevens", "Gegevens evenement", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+
+    rows = [];
+    rows.push({l: "Publieksprofiel",                        t: t.publiekspr});
+    rows.push({l: "Activiteiten profiel",                   t: t.activiteit});
+    rows.push({l: "Ruimtelijk profiel",                     t: t.ruimtelijk});
+    safetymaps.creator.createHtmlTabDiv("risico", "Risico-inventarisatie", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+
+    rows = [];
+    rows.push({l: "Voertuigen",                             t: t.voertuigen});
+    rows.push({l: "Functionarissen",                        t: t.functionar});
+    safetymaps.creator.createHtmlTabDiv("maatregelen", "Maatregelen", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+
+    rows = [];
+    rows.push({l: "Coördinatie ter plaatse",                t: t.coordinati});
+    rows.push({l: "Communicatie & verbindingen",              t: t.communicat});
+    rows.push({l: "Informatievoorziening",                  t: t.informatie});
+    rows.push({l: "Logistiek",                              t: t.logistiek});
+    safetymaps.creator.createHtmlTabDiv("leiding", "Leiding & Coördinatie", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+
+    rows = [];
+    rows.push({l: "Commandant van Dienst naam",             t: t.commandant});
+    rows.push({l: "Commandant van Dienst telefoon",         t: t.commanda_1});
+    rows.push({l: "Hoofd officier van Dienst naam",         t: t.hoofd_offi});
+    rows.push({l: "Hoofd officier van Dienst telefoon",     t: t.hoofd_of_1});
+    rows.push({l: "AC Brandweer naam",                      t: t.ac_brandwe});
+    rows.push({l: "AC Brandweer telefoon",                  t: t.ac_brand_1 });
+    rows.push({l: "Leider CoPI naam",                       t: t.leider_cop});
+    rows.push({l: "Leider CoPI telefoon",                   t: t.leider_c_1});
+    rows.push({l: "Officier van dienst naam",               t: t.officier_v });
+    rows.push({l: "Officier van dienst telefoon",           t: t.officier_1 });
+    rows.push({l: "Reserve Officier van dienst 1 naam",     t: t.reserve_of});
+    rows.push({l: "Reserve Officier van dienst 1 telefoon", t: t.reserve__1});
+    rows.push({l: "Reserve Officier van dienst 2 naam",     t: t.reserve__2});
+    rows.push({l: "Reserve Officier van dienst 2 telefoon", t: t.reserve__3});
+    rows.push({l: "AGS naam",                               t: t.ags_naam});
+    rows.push({l: "AGS telefoon",                           t: t.ags_telefo});
+    rows.push({l: "Woordvoerder naam",                      t: t.woordvoerd});
+    rows.push({l: "Woordvoerder telefoon",                  t: t.woordvoe_1});
+    rows.push({l: "HON naam",                               t: t.hon_naam});
+    rows.push({l: "HON telefoon",                           t: t.hon_telefo});
+    rows.push({l: "Centralist naam",                        t: t.centralist});
+    rows.push({l: "Centralist telefoon",                    t: t.centrali_1});
+    rows.push({l: "PID naam",                               t: t.pid_naam});
+    rows.push({l: "PID telefoon",                           t: t.pid_telefo});
+    rows.push({l: "Objectofficier naam",                    t: t.objectoffi });
+    rows.push({l: "Object officier telefoon",               t: t.objectof_1});
+    rows.push({l: "HIN naam",                               t: t.hin_naam});
+    rows.push({l: "HIN telefoon",                           t: t.hin_telefo});
+    rows.push({l: "Medewerker OV naam",                     t: t.medewerker});
+    rows.push({l: "Medewerker OV telefoon",                 t: t.medewerk_1});
+    rows.push({l: "Brandweer in de wijk naam",              t: t.brandweer_});
+    rows.push({l: "Brandweer in de wijk telefoon",          t: t.brandweer1});
+    rows.push({l: "MOB naam",                               t: t.mob_naam});
+    rows.push({l: "MOB naam",                               t: t.mob_telefo});
+    safetymaps.creator.createHtmlTabDiv("functionarissen", "Functionarissen BRW", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+
+    safetymaps.creator.createHtmlTabDiv("legenda", "Legenda", safetymaps.creator.createInfoTabDiv(me.createEventLegend()), tabContent, tabs);
+
+    tab.html(div);
+};
+
+safetymaps.vrh.Events.prototype.createEventLegend = function() {
+    var me = this;
+
+    var rows = [];
+    var rowsWithoutInfo = [];
+
+    if(me.layerLocationPolygon.features.length > 0) {
+        rows.push([
+            "<b>Locatie vlak</b>",
+            "<b>Soort</b>",
+            "<b>Omschrijving</b>"
+        ]);
+
+        var soortenDisplayed = {};
+
+        $.each(me.layerLocationPolygon.features, function(i, f) {
+            var soort = f.attributes.vlaksoort;
+            var omschrijving = f.attributes.omschrijvi || null;
+            if(soortenDisplayed[soort] && omschrijving === null) {
+                return true;
+            }
+            soortenDisplayed[soort] = true;
+
+            var style = me.locationPolygonStyle[soort];
+
+            var tr = [
+                "<div style='width: 150px; height: 40px; border: 2px solid " + style.stroke + "; background-color: " + style.fill + ";'></div>",
+                style.label,
+                omschrijving || ""
+            ];
+
+
+            if(omschrijving === null) {
+                rowsWithoutInfo.push(tr);
+            } else {
+                rows.push(tr);
+            }
+        });
+        rowsWithoutInfo.sort(function(lhs, rhs) {
+            return lhs[1].localeCompare(rhs[1]);
+        });
+        rows.push.apply(rows, rowsWithoutInfo);
+    }
+    rowsWithoutInfo = [];
+
+    if(me.layerRoutePolygon.features.length > 0) {
+        rows.push([
+            "<b>Route vlak</b>",
+            "<b>Soort</b>",
+            "<b>Omschrijving</b>"
+        ]);
+
+        var soortenDisplayed = {};
+
+        $.each(me.layerRoutePolygon.features, function(i, f) {
+            var soort = f.attributes.vlaksoort;
+            var omschrijving = f.attributes.vlakomschr || null;
+            if(soortenDisplayed[soort] && omschrijving === null) {
+                return true;
+            }
+            soortenDisplayed[soort] = true;
+
+            var style = me.routePolygonStyle[soort];
+
+            var tr = [
+                "<div style='width: 150px; height: 40px; border: 2px solid " + style.stroke + "; background-color: " + style.fill + ";'></div>",
+                style.label,
+                omschrijving || ""
+            ];
+
+
+            if(omschrijving === null) {
+                rowsWithoutInfo.push(tr);
+            } else {
+                rows.push(tr);
+            }
+        });
+        rowsWithoutInfo.sort(function(lhs, rhs) {
+            return lhs[1].localeCompare(rhs[1]);
+        });
+        rows.push.apply(rows, rowsWithoutInfo);
+    }
+    rowsWithoutInfo = [];
+
+    if(me.layerLocationLine.features.length > 0) {
+        rows.push([
+            "<b>Locatie lijn</b>",
+            "<b>Soort</b>",
+            "<b>Omschrijving</b>"
+        ]);
+
+        var soortenDisplayed = {};
+
+        $.each(me.layerLocationLine.features, function(i, f) {
+            var soort = f.attributes.lijnsoort;
+            var omschrijving = f.attributes.lijnbeschr || null;
+            if(soortenDisplayed[soort] && omschrijving === null) {
+                return true;
+            }
+            soortenDisplayed[soort] = true;
+
+            var style = me.locationLineStyle[soort];
+
+            var tr = [
+                "<img style='width: 40%' src='" + me.imagePath + '/lines/' + soort + ".png'>",
+                style.label,
+                omschrijving || ""
+            ];
+
+
+            if(omschrijving === null) {
+                rowsWithoutInfo.push(tr);
+            } else {
+                rows.push(tr);
+            }
+        });
+        rowsWithoutInfo.sort(function(lhs, rhs) {
+            return lhs[1].localeCompare(rhs[1]);
+        });
+        rows.push.apply(rows, rowsWithoutInfo);
+    }
+    rowsWithoutInfo = [];
+
+    if(me.layerRouteLine.features.length > 0) {
+        rows.push([
+            "<b>Route lijn</b>",
+            "<b>Soort</b>",
+            "<b>Omschrijving</b>"
+        ]);
+
+        var soortenDisplayed = {};
+
+        $.each(me.layerRouteLine.features, function(i, f) {
+            var soort = f.attributes.routetype;
+            var omschrijving = f.attributes.routebesch || null;
+            if(soortenDisplayed[soort] && omschrijving === null) {
+                return true;
+            }
+            soortenDisplayed[soort] = true;
+
+            var style = me.routeLineStyle[soort];
+
+            var tr = [
+                "<img style='width: 40%' src='" + me.imagePath + '/lines/' + soort + ".png'>",
+                style.label,
+                omschrijving || ""
+            ];
+
+            if(omschrijving === null) {
+                rowsWithoutInfo.push(tr);
+            } else {
+                rows.push(tr);
+            }
+        });
+        rowsWithoutInfo.sort(function(lhs, rhs) {
+            return lhs[1].localeCompare(rhs[1]);
+        });
+        rows.push.apply(rows, rowsWithoutInfo);
+    }
+    rowsWithoutInfo = [];
+
+    if(me.layerLocationSymbols.features.length > 0) {
+        rows.push([
+            "<b>Locatie symbool</b>",
+            "<b>Soort</b>",
+            "<b>Omschrijving</b>"
+        ]);
+
+        var soortenDisplayed = {};
+
+        $.each(me.layerLocationSymbols.features, function(i, f) {
+            var soort = f.attributes.type;
+            var omschrijving = f.attributes.ballonteks || null;
+            if(soortenDisplayed[soort] && omschrijving === null) {
+                return true;
+            }
+            soortenDisplayed[soort] = true;
+
+            var label = me.locationSymbolTypes[soort];
+
+            var tr = [
+                "<img style='width: 20%' src='" + me.imagePath + '/' + soort + ".png'>",
+                label,
+                omschrijving || ""
+            ];
+
+            if(omschrijving === null) {
+                rowsWithoutInfo.push(tr);
+            } else {
+                rows.push(tr);
+            }
+        });
+        rowsWithoutInfo.sort(function(lhs, rhs) {
+            return lhs[1].localeCompare(rhs[1]);
+        });
+        rows.push.apply(rows, rowsWithoutInfo);
+    }
+    rowsWithoutInfo = [];
+
+    if(me.layerRouteSymbols.features.length > 0) {
+        rows.push([
+            "<b>Route symbool</b>",
+            "<b>Soort</b>",
+            "<b>Omschrijving</b>"
+        ]);
+
+        var soortenDisplayed = {};
+
+        $.each(me.layerRouteSymbols.features, function(i, f) {
+            var soort = f.attributes.soort;
+            var omschrijving = f.attributes.ballonteks || null;
+            if(soortenDisplayed[soort] && omschrijving === null) {
+                return true;
+            }
+            soortenDisplayed[soort] = true;
+
+            var label = me.routeSymbolTypes[soort];
+            var tr = [
+                "<img style='width: 20%' src='" + me.imagePath + '/' + soort + ".png'>",
+                label,
+                omschrijving || ""
+            ];
+
+            if(omschrijving === null) {
+                rowsWithoutInfo.push(tr);
+            } else {
+                rows.push(tr);
+            }
+        });
+        rowsWithoutInfo.sort(function(lhs, rhs) {
+            return lhs[1].localeCompare(rhs[1]);
+        });
+        rows.push.apply(rows, rowsWithoutInfo);
+    }
+
+    return rows;
 };

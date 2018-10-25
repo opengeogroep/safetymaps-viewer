@@ -40,11 +40,11 @@ dbkjs.modules.vrh_objects = {
         this.options = $.extend({
             // default options here
             maxSearchResults: 30,
-            dbk: true,
-            evenementen: false,
+            dbks: true,
+            evenementen: true,
             waterveiligheid: true,
             filterEvDate: true
-        }, this.options);
+        }, /*this.options*/);
 
         if("off" === OpenLayers.Util.getParameters()["evfilter"]) {
             this.options.filterEvDate = false;
@@ -66,9 +66,11 @@ dbkjs.modules.vrh_objects = {
             me.clusterObjectSelected(feature);
         });
 
+        dbkjs.hoverControl.deactivate();
+        dbkjs.selectControl.deactivate();
+
         var layer = me.clusteringLayer.createLayer();
         dbkjs.map.addLayer(layer);
-        dbkjs.selectControl.deactivate();
         dbkjs.selectControl.layers.push(layer);
 
         // multi select, otherwise cluster will be deselected when clicking anywhere
@@ -80,53 +82,66 @@ dbkjs.modules.vrh_objects = {
 
         // Setup details layers
 
-        me.eventLayers = new safetymaps.vrh.EventLayers(dbkjs);
-        dbkjs.map.addLayers(me.eventLayers.createLayers());
-        dbkjs.hoverControl.deactivate();
-        $.each(me.eventLayers.selectLayers, function(i, l) {
+        me.events = new safetymaps.vrh.Events(this.options);
+        dbkjs.map.addLayers(me.events.createLayers());
+        $.each(me.events.selectLayers, function(i, l) {
             dbkjs.selectControl.layers.push(l);
             if(l.hover) dbkjs.hoverControl.layers.push(l);
             l.events.register("featureselected", me, me.eventLayerFeatureSelected);
             l.events.register("featureunselected", me, me.eventLayerFeatureUnselected);
         });
 
+        me.dbks = new safetymaps.vrh.Dbks(this.options);
+        dbkjs.map.addLayers(me.dbks.createLayers());
+        $.each(me.dbks.selectLayers, function(i, l) {
+            dbkjs.selectControl.layers.push(l);
+            if(l.hover) dbkjs.hoverControl.layers.push(l);
+            //l.events.register("featureselected", me, me.dbkLayerFeatureSelected);
+            //l.events.register("featureunselected", me, me.dbkLayerFeatureUnselected);
+        });
+
         dbkjs.hoverControl.activate();
         dbkjs.selectControl.activate();
-/*
-        safetymaps.vrh.api.getDbks()
-        .fail(function(msg) {
-            dbkjs.util.alert("Fout", msg, "alert-danger");
-        })
-        .done(function(dbkObjects) {
-            console.log("Got DBK objects", dbkObjects);
 
-            dbkObjects.sort(function(lhs, rhs) {
-                return lhs.naam.localeCompare(rhs.naam, dbkjsLang);
+        if(me.options.dbks) {
+            safetymaps.vrh.api.getDbks()
+            .fail(function(msg) {
+                dbkjs.util.alert("Fout", msg, "alert-danger");
+            })
+            .done(function(dbkObjects) {
+                console.log("Got DBK objects", dbkObjects);
+
+                dbkObjects.sort(function(lhs, rhs) {
+                    if(!lhs.naam || !rhs.naam) console.log("err", lhs, rhs);
+                    return lhs.naam.localeCompare(rhs.naam, dbkjsLang);
+                });
+                me.overviewObjects = me.overviewObjects.concat(dbkObjects);
+
+                var features = safetymaps.vrh.api.createDbkFeatures(dbkObjects);
+                me.clusteringLayer.addFeaturesToCluster(features);
             });
-            me.overviewObjects = me.overviewObjects.concat(dbkObjects);
+        }
 
-            var features = safetymaps.vrh.api.createDbkFeatures(dbkObjects);
-            me.clusteringLayer.addFeaturesToCluster(features);
-        });
-*/
-        safetymaps.vrh.api.getEvenementen()
-        .fail(function(msg) {
-            dbkjs.util.alert("Fout", msg, "alert-danger");
-        })
-        .done(function(evenementenObjects) {
-            console.log("Got event objects", evenementenObjects);
+        if(this.options.evenementen) {
+            safetymaps.vrh.api.getEvenementen()
+            .fail(function(msg) {
+                dbkjs.util.alert("Fout", msg, "alert-danger");
+            })
+            .done(function(evenementenObjects) {
+                console.log("Got event objects", evenementenObjects);
 
-            if(me.options.filterEvDate) {
-                evenementenObjects = evenementenObjects.filter(ev => !new moment(ev.sbegin).isAfter(new moment()));
-            }
-            evenementenObjects.sort(function(lhs, rhs) {
-                return lhs.evnaam.localeCompare(rhs.evnaam, dbkjsLang);
+                if(me.options.filterEvDate) {
+                    evenementenObjects = evenementenObjects.filter(ev => !new moment(ev.sbegin).isAfter(new moment()));
+                }
+                evenementenObjects.sort(function(lhs, rhs) {
+                    return lhs.evnaam.localeCompare(rhs.evnaam, dbkjsLang);
+                });
+                me.overviewObjects = me.overviewObjects.concat(evenementenObjects);
+
+                var features = safetymaps.vrh.api.createEvenementFeatures(evenementenObjects);
+                me.clusteringLayer.addFeaturesToCluster(features);
             });
-            me.overviewObjects = me.overviewObjects.concat(evenementenObjects);
-
-            var features = safetymaps.vrh.api.createEvenementFeatures(evenementenObjects);
-            me.clusteringLayer.addFeaturesToCluster(features);
-        });
+        }
 
         // Setup user interface for object info window
 
@@ -185,18 +200,20 @@ dbkjs.modules.vrh_objects = {
     createSearchConfig: function() {
         var me = this;
 
-        if(dbkjs.modules.search) {
+        if(dbkjs.modules.search && me.options.evenementen) {
             dbkjs.modules.search.addSearchConfig({
-                tabContents: "<i class='fa fa-calendar-alt'></i> Evenementen",
+                tabContents: "<i class='fa fa-calendar'></i> Evenementen",
                 placeholder: i18n.t("creator.search_placeholder"),
                 search: function(value) {
                     console.log("search event " + value);
                     var searchResults = [];
                     $.each(me.overviewObjects, function(i, o) {
-                        if(value === "" || o.evnaam.toLowerCase().indexOf(value) !== -1) {
-                            searchResults.push(o);
-                            if(searchResults.length === me.options.maxSearchResults) {
-                                return false;
+                        if(o.clusterFeature.attributes.type === "evenement") {
+                            if(value === "" || o.evnaam.toLowerCase().indexOf(value) !== -1) {
+                                searchResults.push(o);
+                                if(searchResults.length === me.options.maxSearchResults) {
+                                    return false;
+                                }
                             }
                         }
                     });
@@ -206,6 +223,34 @@ dbkjs.modules.vrh_objects = {
                     console.log("Search result selected", result);
 
                     me.selectObjectById("evenement",result.evnaam, result.extent);
+                }
+            }, true);
+        }
+
+        if(dbkjs.modules.search && me.options.dbks) {
+            dbkjs.modules.search.addSearchConfig({
+                tabContents: "<i class='fa fa-building'></i> DBK's",
+                placeholder: i18n.t("creator.search_placeholder"),
+                search: function(value) {
+                    console.log("search dbk " + value);
+                    var searchResults = [];
+                    $.each(me.overviewObjects, function(i, o) {
+                        if(o.clusterFeature.attributes.type === "dbk") {
+                            var searchVal = o.naam + " " + o.oms_nummer + " " + o.postcode + " " + o.straatnaam + " " + o.huisnummer + " " + o.plaats;
+                            if(value === "" || searchVal.toLowerCase().indexOf(value) !== -1) {
+                                searchResults.push(o);
+                                if(searchResults.length === me.options.maxSearchResults) {
+                                    return false;
+                                }
+                            }
+                        }
+                    });
+                    dbkjs.modules.search.showResults(searchResults, r => r.naam + (r.oms_nummer ? " (OMS " + r.oms_nummer + ")" : ""));
+                },
+                resultSelected: function(result) {
+                    console.log("Search result selected", result);
+
+                    me.selectObjectById("dbk", result.id, result.extent);
                 }
             }, true);
         }
@@ -257,7 +302,7 @@ dbkjs.modules.vrh_objects = {
         this.selectObjectById(feature.attributes.type, feature.attributes.id, feature.attributes.apiObject.extent);
     },
 
-    selectObjectById: function(type, id, extent, isIncident = false) {
+    selectObjectById: function(type, id, extent, isIncident) {
         var me = this;
 
         // Unselect current, if any
@@ -297,7 +342,8 @@ dbkjs.modules.vrh_objects = {
 
     unselectObject: function() {
         if(this.selectedObject) {
-            this.eventLayers.removeAllFeatures();
+            this.events.removeAllFeatures();
+            this.dbks.removeAllFeatures();
 
             if(this.selectedClusterFeature && this.selectedClusterFeature.layer) {
                 dbkjs.selectControl.unselect(this.selectedClusterFeature);
@@ -309,10 +355,21 @@ dbkjs.modules.vrh_objects = {
         $("#vectorclickpanel").hide();
     },
 
-    selectedObjectDetailsReceived: function(type, id, object,isIncident = false) {
+    selectedObjectDetailsReceived: function(type, id, object, isIncident) {
         try {
-            this.eventLayers.addFeaturesForObject(object);
-            this.updateInfoWindow(object,isIncident);
+            var tab = $("#vrh_object_info");
+            if(type === "evenement") {
+                this.events.addFeaturesForObject(object);
+                this.events.updateInfoWindow(tab, object);
+            } else if(type === "dbk") {
+                this.dbks.addFeaturesForObject(object);
+                this.dbks.updateInfoWindow(tab, object);
+            }
+            if(!isIncident) {
+                this.infoWindow.show();
+            }
+            this.infoWindowTabsResize();
+
             this.selectedObject = object;
             this.clusteringLayer.setSelectedIds([id]);
         } catch(error) {
@@ -323,381 +380,31 @@ dbkjs.modules.vrh_objects = {
         }
     },
 
-    updateInfoWindow: function(object,isIncident = false) {
-        var me = this;
-
-        var div = $('<div class="tabbable"></div>');
-
-        var tabContent = $('<div class="tab-content"></div>');
-        var tabs = $('<ul class="nav nav-pills"></ul>');
-        div.append(tabContent);
-        div.append(tabs);
-
-        var rows = [];
-
-        //rows.push({l: "Gemeente",                               t: t.gemeente});
-        //rows.push({l: "Begindatum",                             t: t.sbegin});
-        //rows.push({l: "Aanvrager",                              t: t.aanvrager});
-
-        var t = object.terrein;
-        rows.push({l: "Naam evenement",                         t: t.evnaam});
-        rows.push({l: "Locatie",                                t: t.locatie});
-        rows.push({l: "Adres",                                  t: t.adres});
-        rows.push({l: "Soort evenement",                        t: t.soort_even});
-        rows.push({l: "Contactpersoon organisatie",             t: t.contactper});
-        rows.push({l: "Programma",                              t: t.programma});
-        rows.push({l: "Bijzonderheden",                         t: t.bijzonderh});
-        safetymaps.creator.createHtmlTabDiv("algemeen", "Evenementgegevens algemeen", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
-
-        rows = [];
-        rows.push({l: "Tijden",                                 t: t.tijden});
-        rows.push({l: "Aantal bezoekers",                       t: t.aantal_bez});
-        rows.push({l: "Personeel EHBO",                         t: t.personeel_});
-        rows.push({l: "Personeel security",                     t: t.personeel1});
-        rows.push({l: "Personeel BHV",                          t: t.personee_1});
-        rows.push({l: "Omroepinstallatie",                      t: t.omroepinst});
-        rows.push({l: "Veiligheidsplan",                        t: t.veiligheid});
-        rows.push({l: "Verzamelplaats",                         t: t.verzamelpl});
-        rows.push({l: "Bijzonderheden",                         t: t.bijzonde_1});
-        safetymaps.creator.createHtmlTabDiv("aanwezigheid", "Aanwezige personen", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
-
-        rows = [];
-        rows.push({l: "Aantal tijdelijke bouwsels",             t: t.aantal_tij});
-        rows.push({l: "Herpositionering voertuigen",            t: t.herpositio});
-        rows.push({l: "OD uitrukvolgorde",                      t: t.od_uitrukv});
-        rows.push({l: "Locatie CoPI",                           t: t.locatie_co});
-        rows.push({l: "Toegangswegen",                          t: t.toegangswe});
-        rows.push({l: "Bijzonderheden evenement",               t: t.bijzonde_2});
-        safetymaps.creator.createHtmlTabDiv("gegevens", "Gegevens evenement", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
-
-        rows = [];
-        rows.push({l: "Publieksprofiel",                        t: t.publiekspr});
-        rows.push({l: "Activiteiten profiel",                   t: t.activiteit});
-        rows.push({l: "Ruimtelijk profiel",                     t: t.ruimtelijk});
-        safetymaps.creator.createHtmlTabDiv("risico", "Risico-inventarisatie", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
-
-        rows = [];
-        rows.push({l: "Voertuigen",                             t: t.voertuigen});
-        rows.push({l: "Functionarissen",                        t: t.functionar});
-        safetymaps.creator.createHtmlTabDiv("maatregelen", "Maatregelen", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
-
-        rows = [];
-        rows.push({l: "Coördinatie ter plaatse",                t: t.coordinati});
-        rows.push({l: "Communicatie & verbindingen",              t: t.communicat});
-        rows.push({l: "Informatievoorziening",                  t: t.informatie});
-        rows.push({l: "Logistiek",                              t: t.logistiek});
-        safetymaps.creator.createHtmlTabDiv("leiding", "Leiding & Coördinatie", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
-
-        rows = [];
-        rows.push({l: "Commandant van Dienst naam",             t: t.commandant});
-        rows.push({l: "Commandant van Dienst telefoon",         t: t.commanda_1});
-        rows.push({l: "Hoofd officier van Dienst naam",         t: t.hoofd_offi});
-        rows.push({l: "Hoofd officier van Dienst telefoon",     t: t.hoofd_of_1});
-        rows.push({l: "AC Brandweer naam",                      t: t.ac_brandwe});
-        rows.push({l: "AC Brandweer telefoon",                  t: t.ac_brand_1 });
-        rows.push({l: "Leider CoPI naam",                       t: t.leider_cop});
-        rows.push({l: "Leider CoPI telefoon",                   t: t.leider_c_1});
-        rows.push({l: "Officier van dienst naam",               t: t.officier_v });
-        rows.push({l: "Officier van dienst telefoon",           t: t.officier_1 });
-        rows.push({l: "Reserve Officier van dienst 1 naam",     t: t.reserve_of});
-        rows.push({l: "Reserve Officier van dienst 1 telefoon", t: t.reserve__1});
-        rows.push({l: "Reserve Officier van dienst 2 naam",     t: t.reserve__2});
-        rows.push({l: "Reserve Officier van dienst 2 telefoon", t: t.reserve__3});
-        rows.push({l: "AGS naam",                               t: t.ags_naam});
-        rows.push({l: "AGS telefoon",                           t: t.ags_telefo});
-        rows.push({l: "Woordvoerder naam",                      t: t.woordvoerd});
-        rows.push({l: "Woordvoerder telefoon",                  t: t.woordvoe_1});
-        rows.push({l: "HON naam",                               t: t.hon_naam});
-        rows.push({l: "HON telefoon",                           t: t.hon_telefo});
-        rows.push({l: "Centralist naam",                        t: t.centralist});
-        rows.push({l: "Centralist telefoon",                    t: t.centrali_1});
-        rows.push({l: "PID naam",                               t: t.pid_naam});
-        rows.push({l: "PID telefoon",                           t: t.pid_telefo});
-        rows.push({l: "Objectofficier naam",                    t: t.objectoffi });
-        rows.push({l: "Object officier telefoon",               t: t.objectof_1});
-        rows.push({l: "HIN naam",                               t: t.hin_naam});
-        rows.push({l: "HIN telefoon",                           t: t.hin_telefo});
-        rows.push({l: "Medewerker OV naam",                     t: t.medewerker});
-        rows.push({l: "Medewerker OV telefoon",                 t: t.medewerk_1});
-        rows.push({l: "Brandweer in de wijk naam",              t: t.brandweer_});
-        rows.push({l: "Brandweer in de wijk telefoon",          t: t.brandweer1});
-        rows.push({l: "MOB naam",                               t: t.mob_naam});
-        rows.push({l: "MOB naam",                               t: t.mob_telefo});
-        safetymaps.creator.createHtmlTabDiv("functionarissen", "Functionarissen BRW", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
-
-        safetymaps.creator.createHtmlTabDiv("legenda", "Legenda", safetymaps.creator.createInfoTabDiv(me.createEventLegend()), tabContent, tabs);
-
-        $("#vrh_object_info").html(div);
-
-        if(!isIncident) {
-            this.infoWindow.show();
-        }
-        this.infoWindowTabsResize();
-    },
-
-    createEventLegend: function() {
-        var me = this;
-
-        var rows = [];
-        var rowsWithoutInfo = [];
-
-        if(me.eventLayers.layerLocationPolygon.features.length > 0) {
-            rows.push([
-                "<b>Locatie vlak</b>",
-                "<b>Soort</b>",
-                "<b>Omschrijving</b>"
-            ]);
-
-            var soortenDisplayed = {};
-
-            $.each(me.eventLayers.layerLocationPolygon.features, function(i, f) {
-                var soort = f.attributes.vlaksoort;
-                var omschrijving = f.attributes.omschrijvi || null;
-                if(soortenDisplayed[soort] && omschrijving === null) {
-                    return true;
-                }
-                soortenDisplayed[soort] = true;
-
-                var style = me.eventLayers.locationPolygonStyle[soort];
-
-                var tr = [
-                    "<div style='width: 150px; height: 40px; border: 2px solid " + style.stroke + "; background-color: " + style.fill + ";'></div>",
-                    style.label,
-                    omschrijving || ""
-                ];
-
-
-                if(omschrijving === null) {
-                    rowsWithoutInfo.push(tr);
-                } else {
-                    rows.push(tr);
-                }
-            });
-            rowsWithoutInfo.sort(function(lhs, rhs) {
-                return lhs[1].localeCompare(rhs[1]);
-            });
-            rows.push.apply(rows, rowsWithoutInfo);
-        }
-        rowsWithoutInfo = [];
-
-        if(me.eventLayers.layerRoutePolygon.features.length > 0) {
-            rows.push([
-                "<b>Route vlak</b>",
-                "<b>Soort</b>",
-                "<b>Omschrijving</b>"
-            ]);
-
-            var soortenDisplayed = {};
-
-            $.each(me.eventLayers.layerRoutePolygon.features, function(i, f) {
-                var soort = f.attributes.vlaksoort;
-                var omschrijving = f.attributes.vlakomschr || null;
-                if(soortenDisplayed[soort] && omschrijving === null) {
-                    return true;
-                }
-                soortenDisplayed[soort] = true;
-
-                var style = me.eventLayers.routePolygonStyle[soort];
-
-                var tr = [
-                    "<div style='width: 150px; height: 40px; border: 2px solid " + style.stroke + "; background-color: " + style.fill + ";'></div>",
-                    style.label,
-                    omschrijving || ""
-                ];
-
-
-                if(omschrijving === null) {
-                    rowsWithoutInfo.push(tr);
-                } else {
-                    rows.push(tr);
-                }
-            });
-            rowsWithoutInfo.sort(function(lhs, rhs) {
-                return lhs[1].localeCompare(rhs[1]);
-            });
-            rows.push.apply(rows, rowsWithoutInfo);
-        }
-        rowsWithoutInfo = [];
-
-        if(me.eventLayers.layerLocationLine.features.length > 0) {
-            rows.push([
-                "<b>Locatie lijn</b>",
-                "<b>Soort</b>",
-                "<b>Omschrijving</b>"
-            ]);
-
-            var soortenDisplayed = {};
-
-            $.each(me.eventLayers.layerLocationLine.features, function(i, f) {
-                var soort = f.attributes.lijnsoort;
-                var omschrijving = f.attributes.lijnbeschr || null;
-                if(soortenDisplayed[soort] && omschrijving === null) {
-                    return true;
-                }
-                soortenDisplayed[soort] = true;
-
-                var style = me.eventLayers.locationLineStyle[soort];
-
-                var tr = [
-                    "<img style='width: 40%' src='" + me.eventLayers.imagePath + '/lines/' + soort + ".png'>",
-                    style.label,
-                    omschrijving || ""
-                ];
-
-
-                if(omschrijving === null) {
-                    rowsWithoutInfo.push(tr);
-                } else {
-                    rows.push(tr);
-                }
-            });
-            rowsWithoutInfo.sort(function(lhs, rhs) {
-                return lhs[1].localeCompare(rhs[1]);
-            });
-            rows.push.apply(rows, rowsWithoutInfo);
-        }
-        rowsWithoutInfo = [];
-
-        if(me.eventLayers.layerRouteLine.features.length > 0) {
-            rows.push([
-                "<b>Route lijn</b>",
-                "<b>Soort</b>",
-                "<b>Omschrijving</b>"
-            ]);
-
-            var soortenDisplayed = {};
-
-            $.each(me.eventLayers.layerRouteLine.features, function(i, f) {
-                var soort = f.attributes.routetype;
-                var omschrijving = f.attributes.routebesch || null;
-                if(soortenDisplayed[soort] && omschrijving === null) {
-                    return true;
-                }
-                soortenDisplayed[soort] = true;
-
-                var style = me.eventLayers.routeLineStyle[soort];
-
-                var tr = [
-                    "<img style='width: 40%' src='" + me.eventLayers.imagePath + '/lines/' + soort + ".png'>",
-                    style.label,
-                    omschrijving || ""
-                ];
-
-                if(omschrijving === null) {
-                    rowsWithoutInfo.push(tr);
-                } else {
-                    rows.push(tr);
-                }
-            });
-            rowsWithoutInfo.sort(function(lhs, rhs) {
-                return lhs[1].localeCompare(rhs[1]);
-            });
-            rows.push.apply(rows, rowsWithoutInfo);
-        }
-        rowsWithoutInfo = [];
-
-        if(me.eventLayers.layerLocationSymbols.features.length > 0) {
-            rows.push([
-                "<b>Locatie symbool</b>",
-                "<b>Soort</b>",
-                "<b>Omschrijving</b>"
-            ]);
-
-            var soortenDisplayed = {};
-
-            $.each(me.eventLayers.layerLocationSymbols.features, function(i, f) {
-                var soort = f.attributes.type;
-                var omschrijving = f.attributes.ballonteks || null;
-                if(soortenDisplayed[soort] && omschrijving === null) {
-                    return true;
-                }
-                soortenDisplayed[soort] = true;
-
-                var label = me.eventLayers.locationSymbolTypes[soort];
-
-                var tr = [
-                    "<img style='width: 20%' src='" + me.eventLayers.imagePath + '/' + soort + ".png'>",
-                    label,
-                    omschrijving || ""
-                ];
-
-                if(omschrijving === null) {
-                    rowsWithoutInfo.push(tr);
-                } else {
-                    rows.push(tr);
-                }
-            });
-            rowsWithoutInfo.sort(function(lhs, rhs) {
-                return lhs[1].localeCompare(rhs[1]);
-            });
-            rows.push.apply(rows, rowsWithoutInfo);
-        }
-        rowsWithoutInfo = [];
-
-        if(me.eventLayers.layerRouteSymbols.features.length > 0) {
-            rows.push([
-                "<b>Route symbool</b>",
-                "<b>Soort</b>",
-                "<b>Omschrijving</b>"
-            ]);
-
-            var soortenDisplayed = {};
-
-            $.each(me.eventLayers.layerRouteSymbols.features, function(i, f) {
-                var soort = f.attributes.soort;
-                var omschrijving = f.attributes.ballonteks || null;
-                if(soortenDisplayed[soort] && omschrijving === null) {
-                    return true;
-                }
-                soortenDisplayed[soort] = true;
-
-                var label = me.eventLayers.routeSymbolTypes[soort];
-                var tr = [
-                    "<img style='width: 20%' src='" + me.eventLayers.imagePath + '/' + soort + ".png'>",
-                    label,
-                    omschrijving || ""
-                ];
-
-                if(omschrijving === null) {
-                    rowsWithoutInfo.push(tr);
-                } else {
-                    rows.push(tr);
-                }
-            });
-            rowsWithoutInfo.sort(function(lhs, rhs) {
-                return lhs[1].localeCompare(rhs[1]);
-            });
-            rows.push.apply(rows, rowsWithoutInfo);
-        }
-
-        return rows;
-    },
-
     eventLayerFeatureSelected: function(e) {
         var me = this;
         var layer = e.feature.layer;
         var f = e.feature.attributes;
         console.log(layer.name + " feature selected", e);
-        if(layer === me.eventLayers.layerLocationPolygon) {
-            var s = me.eventLayers.locationPolygonStyle[f.vlaksoort];
+        if(layer === me.events.layerLocationPolygon) {
+            var s = me.events.locationPolygonStyle[f.vlaksoort];
             me.showFeatureInfo("Locatie", s.label, f.omschrijvi);
             layer.redraw();
-        } else if(layer === me.eventLayers.layerRoutePolygon) {
-            var s = me.eventLayers.routePolygonStyle[f.vlaksoort];
+        } else if(layer === me.events.layerRoutePolygon) {
+            var s = me.events.routePolygonStyle[f.vlaksoort];
             me.showFeatureInfo("Route", s.label, f.vlakomschr);
             layer.redraw();
-        } else if(layer === me.eventLayers.layerLocationSymbols) {
+        } else if(layer === me.events.layerLocationSymbols) {
 
-            me.showFeatureInfo("Locatie", me.eventLayers.locationSymbolTypes[f.type] || "", f.ballonteks);
+            me.showFeatureInfo("Locatie", me.events.locationSymbolTypes[f.type] || "", f.ballonteks);
             layer.redraw();
-        } else if(layer === me.eventLayers.layerRouteSymbols) {
-            me.showFeatureInfo("Route", me.eventLayers.routeSymbolTypes[f.soort] || "", f.ballonteks);
+        } else if(layer === me.events.layerRouteSymbols) {
+            me.showFeatureInfo("Route", me.events.routeSymbolTypes[f.soort] || "", f.ballonteks);
             layer.redraw();
         } else if(layer.name.startsWith("Event location lines")) {
-            me.showFeatureInfo("Locatie", me.eventLayers.locationLineStyle[f.lijnsoort].label, f.lijnbeschr);
+            me.showFeatureInfo("Locatie", me.events.locationLineStyle[f.lijnsoort].label, f.lijnbeschr);
             layer.redraw();
         } else if(layer.name.startsWith("Event route lines")) {
-            me.showFeatureInfo("Route", me.eventLayers.routeLineStyle[f.routetype].label, f.routebesch);
+            me.showFeatureInfo("Route", me.events.routeLineStyle[f.routetype].label, f.routebesch);
             layer.redraw();
         } else {
             $("#vectorclickpanel").hide();
