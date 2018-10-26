@@ -52,8 +52,29 @@ safetymaps.vrh.Dbks = function(options) {
 
     me.symbolPath = "js/safetymaps/modules/vrh/assets/dbks/";
     me.vrhSymbols = {
+        "Hellingbaan": "Hellingbaan",
+        "Tb02": "Brandslanghaspel",
+        "Tb1010": "Schacht/kanaal",
+        "Tb1010o": "Opstelplaats redvoertuig",
+        "Tb1011": "Gas detectiepaneel",
+        "Tbe01": "Sleutel of ring paal",
+        "Tbe02": "Poller",
+        "Tbe05": "Niet toegankelijk",
+        "Tbe06": "Parkeerplaats",
+        "Tb2024": "Afsluiter omloopleiding",
+        "Tb2025": "Afsluiter LPG",
+        "Tb4005": "Gesprinklerde ruimte",
+        "TbeBus": "Bussluis",
+        "TbeHoogte": "Doorrijhoogte",
+        "TbeRIJ": "Berijdbaar",
+        "Tn05": "Nooduitgang",
+        "Tn504": "Indicator/flitslicht",
+        "To02": "Slaapplaats",
+        "To03": "Noodstroom aggegraat",
+        "To04": "Brandweerinfokast",
         "To1001": "Trap",
-        "To02": "Slaapplaats"
+        "To1002": "Trap rond",
+        "To1003": "Trappenhuis"
     };
 };
 
@@ -108,27 +129,46 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
             default: new OpenLayers.Style({
                 externalGraphic: "${symbol}",
                 pointRadius: "${myradius}",
-                rotation: "-${rotation}"
+                rotation: "-${rotation}",
+                fontWeight: "bold",
+                fontSize: "${fontSize}",
+                label: "${label}"
             }, {
                 context: {
-                    symbol: function(feature) {
-                        var symbol = feature.attributes.code;
-                        if(feature.attributes.description.trim().length > 0) {
-                            symbol += "_i";
-                        }
-                        var path = safetymaps.creator.api.imagePath + 'symbols/';
-                        if(me.vrhSymbols[feature.attributes.code]) {
-                            path = me.symbolPath;
-                        }
-                        return path + symbol + '.png';
-                    },
                     myradius: function(feature) {
                         return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,14, feature.attributes.radius);
+                    },
+                    label: function(feature) {
+                        if(feature.attributes.code === "TbeHoogte") {
+                            return feature.attributes.bijzonderh;
+                        }
+                        return "";
+                    },
+                    fontSize: function(feature) {
+                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,12, feature.attributes.radius) + "px";
                     }
                 }
             }),
-            temporary: new OpenLayers.Style({pointRadius: me.options.graphicSizeHover}),
-            select: new OpenLayers.Style({pointRadius: me.options.graphicSizeSelect})
+            temporary: new OpenLayers.Style({
+                pointRadius: me.options.graphicSizeHover,
+                fontSize: "${fontSize}"
+            }, {
+                context: {
+                    fontSize: function(feature) {
+                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,18, feature.attributes.radius) + "px";
+                    }
+                }
+            }),
+            select: new OpenLayers.Style({
+                pointRadius: me.options.graphicSizeSelect,
+                fontSize: "${fontSize}"
+            }, {
+                context: {
+                    fontSize: function(feature) {
+                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,14, feature.attributes.radius) + "px";
+                    }
+                }
+            })
         })
     });
     this.layers.push(this.layerSymbols);
@@ -137,8 +177,17 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
     return this.layers;
 };
 
-safetymaps.vrh.Dbks.prototype.showFeatureInfo = function(title, label, description) {
-    dbkjs.modules.vrh_objects.showFeatureInfo(title, label, description);
+safetymaps.vrh.Dbks.prototype.showFeatureInfo = function(title, code, image, label, description) {
+
+    $('#vectorclickpanel_h').html('<span class="h4"><i class="fa fa-info-circle">&nbsp;' + title + '</span>');
+    var html = $('<div class="table-responsive"></div>');
+    var table = $('<table class="table table-hover"></table>');
+    table.append('<tr><th style="width: 20%">Symbool</th><th>' + i18n.t("name") + '</th><th>' + i18n.t("dialogs.information") + '</th></tr>');
+    table.append('<tr><td><img class="thumb" src="' + image + '" alt="' + code + '" title="' + code + '"></td><td>' + label + '</td><td>' + (description || "") + '</td></tr>');
+    html.append(table);
+    $('#vectorclickpanel_b').html('').append(html);
+    $('#vectorclickpanel').show();
+
 };
 
 safetymaps.vrh.Dbks.prototype.layerFeatureSelected = function(e) {
@@ -147,7 +196,7 @@ safetymaps.vrh.Dbks.prototype.layerFeatureSelected = function(e) {
     var f = e.feature.attributes;
     console.log(layer.name + " feature selected", e);
     if(layer === me.layerSymbols) {
-        me.showFeatureInfo("Brandweervoorziening", me.vrhSymbols[f.code] || i18n.t("symbol." + f.code) || "", f.omschrijvi);
+        me.showFeatureInfo("Brandweervoorziening", f.symboolcod, f.symbol_noi, me.vrhSymbols[f.code] || i18n.t("symbol." + f.code) || "", f.omschrijvi);
     } else {
         $("#vectorclickpanel").hide();
     }
@@ -162,6 +211,7 @@ safetymaps.vrh.Dbks.prototype.removeAllFeatures = function(object) {
 };
 
 safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
+    var me = this;
     var wktParser = new OpenLayers.Format.WKT();
 
     var wktReader = function(d) {
@@ -179,16 +229,40 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
             f.attributes.code = f.attributes.symboolcod.replace(/,/, "");
         }
         f.attributes.description = f.attributes.omschrijvi || "";
-        if(f.attributes.symboolhoe) {
-            f.attributes.rotation = 360-f.attributes.symboolhoe || 0;
+        f.attributes.rotation = 360-f.attributes.symboolhoe || 0;
+
+        var symbol = f.attributes.code;
+        var path = safetymaps.creator.api.imagePath + 'symbols/';
+        if(me.vrhSymbols[f.attributes.code]) {
+            path = me.symbolPath;
         }
+        f.attributes.symbol_noi = path + symbol + '.png';
+        if(f.attributes.description.trim().length > 0) {
+            symbol += "_i";
+        }
+        f.attributes.symbol = path + symbol + '.png';
+
         return f;
     };
 
     this.layerSymbols.addFeatures((object.brandweervoorziening || []).map(wktReader).map(vrhFeature));
     this.layerSymbols.addFeatures((object.toegang_pand || []).map(wktReader).map(vrhFeature));
+    this.layerSymbols.addFeatures((object.toegang_terrein|| []).map(wktReader).map(vrhFeature));
+    this.layerSymbols.addFeatures((object.opstelplaats || []).map(wktReader).map(function(f) {
+        // Voor deze laag betekent code Tb1,010 niet schacht/kanaal maar opstelplaats redvoertuig
+        if(f.attributes.symboolcod === "Tb1,010") {
+            f.attributes.symboolcod = "Tb1,010o";
+        }
+        return f;
+    }).map(vrhFeature));
+    this.layerSymbols.addFeatures((object.hellingbaan || []).map(wktReader).map(function(f) {
+        f.attributes.symboolcod = "Hellingbaan";
+        f.attributes.omschrijvi = f.attributes.bijzonderh;
+        return f;
+    }).map(vrhFeature));
 
-    // TODO opstelplaats, toegang_pand, toegang_terrein, gevaren
+
+    // TODO toegang_terrein, gevaren
 
 /*
     var terrein = wktReader(object.terrein);
