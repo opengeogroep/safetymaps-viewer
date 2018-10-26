@@ -49,6 +49,11 @@ safetymaps.vrh.Dbks = function(options) {
     });
 
     me.initLayers();
+
+    me.symbolPath = "js/safetymaps/modules/vrh/assets/dbks/";
+    me.vrhSymbols = {
+        "To02": "Slaapplaats"
+    };
 };
 
 safetymaps.vrh.Dbks.prototype.initLayers = function() {
@@ -110,7 +115,11 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
                         if(feature.attributes.description.trim().length > 0) {
                             symbol += "_i";
                         }
-                        return safetymaps.creator.api.imagePath + 'symbols/' + symbol + '.png';
+                        var path = safetymaps.creator.api.imagePath + 'symbols/';
+                        if(me.vrhSymbols[feature.attributes.code]) {
+                            path = me.symbolPath;
+                        }
+                        return path + symbol + '.png';
                     },
                     myradius: function(feature) {
                         return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,14, feature.attributes.radius);
@@ -137,7 +146,7 @@ safetymaps.vrh.Dbks.prototype.layerFeatureSelected = function(e) {
     var f = e.feature.attributes;
     console.log(layer.name + " feature selected", e);
     if(layer === me.layerSymbols) {
-        me.showFeatureInfo("Branweervoorziening", i18n.t("symbol." + f.code) || "", f.omschrijvi);
+        me.showFeatureInfo("Branweervoorziening", me.vrhSymbols[f.code] || i18n.t("symbol." + f.code) || "", f.omschrijvi);
     } else {
         $("#vectorclickpanel").hide();
     }

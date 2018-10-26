@@ -65,7 +65,7 @@ safetymaps.vrh.Events.prototype.initLayers = function() {
 safetymaps.vrh.Events.prototype.createLayers = function() {
     var me = this;
 
-    this.imagePath = "js/safetymaps/modules/vrh/assets";
+    this.imagePath = "js/safetymaps/modules/vrh/assets/events";
 
     this.layers = [];
     this.selectLayers = [];
