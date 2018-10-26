@@ -52,6 +52,7 @@ safetymaps.vrh.Dbks = function(options) {
 
     me.symbolPath = "js/safetymaps/modules/vrh/assets/dbks/";
     me.vrhSymbols = {
+        "To1001": "Trap",
         "To02": "Slaapplaats"
     };
 };
@@ -146,7 +147,7 @@ safetymaps.vrh.Dbks.prototype.layerFeatureSelected = function(e) {
     var f = e.feature.attributes;
     console.log(layer.name + " feature selected", e);
     if(layer === me.layerSymbols) {
-        me.showFeatureInfo("Branweervoorziening", me.vrhSymbols[f.code] || i18n.t("symbol." + f.code) || "", f.omschrijvi);
+        me.showFeatureInfo("Brandweervoorziening", me.vrhSymbols[f.code] || i18n.t("symbol." + f.code) || "", f.omschrijvi);
     } else {
         $("#vectorclickpanel").hide();
     }
@@ -173,12 +174,19 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
 
     this.layerPand.addFeatures(object.pand.map(wktReader));
 
-    this.layerSymbols.addFeatures($.each((object.brandweervoorziening || []).map(wktReader), function(i, bwvz) {
-        bwvz.attributes.code = bwvz.attributes.symboolcod.replace(/,/, "");
-        bwvz.attributes.description = bwvz.attributes.omschrijvi || "";
-        bwvz.attributes.rotation = 360-bwvz.attributes.symboolhoe || 0;
-        console.log("brandweervoorziening ", bwvz.attributes);
-    }));
+    var vrhFeature = function(f) {
+        if(f.attributes.symboolcod) {
+            f.attributes.code = f.attributes.symboolcod.replace(/,/, "");
+        }
+        f.attributes.description = f.attributes.omschrijvi || "";
+        if(f.attributes.symboolhoe) {
+            f.attributes.rotation = 360-f.attributes.symboolhoe || 0;
+        }
+        return f;
+    };
+
+    this.layerSymbols.addFeatures((object.brandweervoorziening || []).map(wktReader).map(vrhFeature));
+    this.layerSymbols.addFeatures((object.toegang_pand || []).map(wktReader).map(vrhFeature));
 
     // TODO opstelplaats, toegang_pand, toegang_terrein, gevaren
 
