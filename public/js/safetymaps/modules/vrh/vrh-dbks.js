@@ -76,6 +76,16 @@ safetymaps.vrh.Dbks = function(options) {
         "To1002": "Trap rond",
         "To1003": "Trappenhuis"
     };
+
+    me.vrhDangerSymbols = {
+        "Tw07": "Tw07",
+        "TwTemp": "Temperatuur",
+        "Tw21": "Niet blussen met water",
+        "Tw22": "Markering lab laag risico",
+        "Tw23": "Markering lab middel risico",
+        "Tw24": "Markering lab hoog risico"
+    };
+
 };
 
 safetymaps.vrh.Dbks.prototype.initLayers = function() {
@@ -136,7 +146,7 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
             }, {
                 context: {
                     myradius: function(feature) {
-                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,14, feature.attributes.radius);
+                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,18, feature.attributes.radius);
                     },
                     label: function(feature) {
                         if(feature.attributes.code === "TbeHoogte") {
@@ -174,11 +184,33 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
     this.layers.push(this.layerSymbols);
     this.selectLayers.push(this.layerSymbols);
 
+    this.layerDangerSymbols = new OpenLayers.Layer.Vector("DBK danger symbols", {
+        hover: true,
+        rendererOptions: {
+            zIndexing: true
+        },
+        styleMap: new OpenLayers.StyleMap({
+            default: new OpenLayers.Style({
+                externalGraphic: "${symbol}",
+                pointRadius: "${myradius}"
+            }, {
+                context: {
+                    myradius: function(feature) {
+                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,18, feature.attributes.radius);
+                    }
+                }
+            }),
+            temporary: new OpenLayers.Style({pointRadius: me.options.graphicSizeHover}),
+            select: new OpenLayers.Style({pointRadius: me.options.graphicSizeSelect})
+        })
+    });
+    this.layers.push(this.layerDangerSymbols);
+    this.selectLayers.push(this.layerDangerSymbols);
+
     return this.layers;
 };
 
 safetymaps.vrh.Dbks.prototype.showFeatureInfo = function(title, code, image, label, description) {
-
     $('#vectorclickpanel_h').html('<span class="h4"><i class="fa fa-info-circle">&nbsp;' + title + '</span>');
     var html = $('<div class="table-responsive"></div>');
     var table = $('<table class="table table-hover"></table>');
@@ -187,7 +219,19 @@ safetymaps.vrh.Dbks.prototype.showFeatureInfo = function(title, code, image, lab
     html.append(table);
     $('#vectorclickpanel_b').html('').append(html);
     $('#vectorclickpanel').show();
+};
 
+safetymaps.vrh.Dbks.prototype.showGevaarlijkeStof = function(title, f) {
+    $('#vectorclickpanel_h').html('<span class="h4"><i class="fa fa-info-circle">&nbsp;' + title + '</span>');
+    var html = $('<div class="table-responsive"></div>');
+    var table = $('<table class="table table-hover"></table>');
+    table.append('<tr><th width="100px">Symbool</th><th width="60px">Gevi</th><th>Naam</th><th>Hoeveelheid</th><th>Bijzonderheden</th><th>ERIC-kaart</th></tr>');
+    table.append('<tr><td><img class="thumb" src="' + f.symbol_noi + '" alt="' + f.symboolcod + '" title="' + f.symboolcod + '"></td>'
+        + '<td><div class="gevicode">' + f.gevi_code + '</div><div class="unnummer">' + f.vn_nummer + '</div></td>'
+        + '<td>' + f.stofnaam + '</td><td>' + f.hoeveelhei + '</td><td>' + f.description + '</td><td>' + f.eric_kaart + '</td></tr>');
+    html.append(table);
+    $('#vectorclickpanel_b').html('').append(html);
+    $('#vectorclickpanel').show();
 };
 
 safetymaps.vrh.Dbks.prototype.layerFeatureSelected = function(e) {
@@ -196,7 +240,13 @@ safetymaps.vrh.Dbks.prototype.layerFeatureSelected = function(e) {
     var f = e.feature.attributes;
     console.log(layer.name + " feature selected", e);
     if(layer === me.layerSymbols) {
-        me.showFeatureInfo("Brandweervoorziening", f.symboolcod, f.symbol_noi, me.vrhSymbols[f.code] || i18n.t("symbol." + f.code) || "", f.omschrijvi);
+        me.showFeatureInfo("Brandweervoorziening", f.symboolcod, f.symbol_noi, me.vrhSymbols[f.code] || i18n.t("symbol." + f.code) || "", f.description);
+    } else if(layer === me.layerDangerSymbols) {
+        if(f.stofnaam) {
+            me.showGevaarlijkeStof("Gevaarlijke stof", f);
+        } else {
+            me.showFeatureInfo("Gevaar", f.symboolcod, f.symbol_noi, me.vrhDangerSymbols[f.code] || i18n.t("symbol." + f.code) || "", f.description);
+        }
     } else {
         $("#vectorclickpanel").hide();
     }
@@ -261,30 +311,62 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
         return f;
     }).map(vrhFeature));
 
+    this.layerDangerSymbols.addFeatures((object.gevaren || []).map(wktReader).map(function(f) {
+        f.attributes.code = f.attributes.symboolcod;
 
-    // TODO toegang_terrein, gevaren
+        if(f.attributes.code === "Tw03") {
+            f.attributes.code = "TwTemp";
+        }
 
-/*
-    var terrein = wktReader(object.terrein);
-    this.layerTerrain.addFeatures([terrein]);
+        f.attributes.description = f.attributes.bijzonderh || "";
+        if(f.attributes.soort_geva) {
+            f.attributes.description += f.attributes.description !== "" ? ", " : "";
+            f.attributes.description += f.attributes.soort_geva;
+        }
+        if(f.attributes.locatie) {
+            f.attributes.description += f.attributes.description !== "" ? ", " : "";
+            f.attributes.description += "Locatie: " + f.attributes.locatie;
+        }
 
-    this.layerLocationPolygon.addFeatures(object.locatie_vlak.map(wktReader));
-    // TODO add label points, or text symbolizer for polygon?
-    this.layerLocationLine.addFeatures(object.locatie_lijn.map(wktReader));
-    this.layerLocationLine2.addFeatures(object.locatie_lijn.map(wktReader));
-    this.layerLocationLine3.addFeatures(object.locatie_lijn.map(wktReader));
+        var symbol = f.attributes.code;
+        var path = safetymaps.creator.api.imagePath + 'danger_symbols/';
+        if(me.vrhDangerSymbols[f.attributes.code]) {
+            path = me.symbolPath;
+        }
+        f.attributes.symbol_noi = path + symbol + '.png';
+        if(f.attributes.description.trim().length > 0) {
+            symbol += "_i";
+        }
+        f.attributes.symbol = path + symbol + '.png';
+        return f;
+    }));
 
-    this.layerRoutePolygon.addFeatures(object.route_vlak.map(wktReader));
-    // TODO add label points, or text symbolizer for polygon?
-    this.layerRouteLine.addFeatures(object.route_lijn.map(wktReader));
-    this.layerRouteLine2.addFeatures(object.route_lijn.map(wktReader));
-    this.layerRouteLine3.addFeatures(object.route_lijn.map(wktReader));
+    this.layerDangerSymbols.addFeatures((object.gevaarlijke_stoffen || []).map(wktReader).map(function(f) {
+        f.attributes.code = f.attributes.symboolcod;
 
-    this.layerLabels.addFeatures(object.teksten.map(d => new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(d.x, d.y), d)));
+        f.attributes.description = f.attributes.bijzonderh || "";
+        if(f.attributes.etiket && f.attributes.etiket !== '-') {
+            f.attributes.description += f.attributes.description !== "" ? ", " : "";
+            f.attributes.description += "Etiket: " + f.attributes.etiket;
+        }
+        if(f.attributes.ruimte) {
+            f.attributes.description += f.attributes.description !== "" ? ", " : "";
+            f.attributes.description += "Ruimte: " + f.attributes.ruimte;
+        }
 
-    this.layerLocationSymbols.addFeatures(object.locatie_punt.map(d => new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(d.x, d.y), d)));
-    this.layerRouteSymbols.addFeatures(object.route_punt.map(d => new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(d.x, d.y), d)));
-*/
+        var symbol = f.attributes.code;
+        var path = safetymaps.creator.api.imagePath + 'danger_symbols/';
+        if(me.vrhDangerSymbols[f.attributes.code]) {
+            path = me.symbolPath;
+        }
+        f.attributes.symbol_noi = path + symbol + '.png';
+        if(f.attributes.description.trim().length > 0) {
+            symbol += "_i";
+        }
+        f.attributes.symbol = path + symbol + '.png';
+        return f;
+    }));
+
     console.log("Added DBK layer features", this.layers);
 };
 

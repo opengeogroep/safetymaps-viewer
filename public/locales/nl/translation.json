@@ -198,6 +198,11 @@
         "Tbk7004": "Lift",
         "Tn06": "Verzamelplaats",
         "Tw01": "Gevaar",
-        "Tw02": "Electrische Spanning"
+        "Tw02": "Electrische Spanning",
+        "Tw10": "Laserstralen",
+        "Tw12": "Magnetisch veld",
+        "Tw14": "Vallen door hoogteverschil",
+        "Tw16": "Lage temperatuur of bevriezing",
+        "Tw28": "Accu's en klein chemisch materiaal"
     }
 }
