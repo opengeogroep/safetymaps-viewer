@@ -83,26 +83,13 @@ dbkjs.modules.vrh_objects = {
         // Setup details layers
 
         me.events = new safetymaps.vrh.Events(this.options);
-        dbkjs.map.addLayers(me.events.createLayers());
-        $.each(me.events.selectLayers, function(i, l) {
-            dbkjs.selectControl.layers.push(l);
-            if(l.hover) dbkjs.hoverControl.layers.push(l);
-            l.events.register("featureselected", me, me.eventLayerFeatureSelected);
-            l.events.register("featureunselected", me, me.eventLayerFeatureUnselected);
-        });
 
         me.dbks = new safetymaps.vrh.Dbks(this.options);
-        dbkjs.map.addLayers(me.dbks.createLayers());
-        $.each(me.dbks.selectLayers, function(i, l) {
-            dbkjs.selectControl.layers.push(l);
-            if(l.hover) dbkjs.hoverControl.layers.push(l);
-            //l.events.register("featureselected", me, me.dbkLayerFeatureSelected);
-            //l.events.register("featureunselected", me, me.dbkLayerFeatureUnselected);
-        });
 
         dbkjs.hoverControl.activate();
         dbkjs.selectControl.activate();
 
+        // XXX move to safetymaps.vrh.Dbks.init()
         if(me.options.dbks) {
             safetymaps.vrh.api.getDbks()
             .fail(function(msg) {
@@ -122,6 +109,7 @@ dbkjs.modules.vrh_objects = {
             });
         }
 
+        // XXX move to safetymaps.vrh.Events.init()
         if(this.options.evenementen) {
             safetymaps.vrh.api.getEvenementen()
             .fail(function(msg) {
@@ -200,6 +188,7 @@ dbkjs.modules.vrh_objects = {
     createSearchConfig: function() {
         var me = this;
 
+        // XXX move to safetymaps.vrh.Events.init()
         if(dbkjs.modules.search && me.options.evenementen) {
             dbkjs.modules.search.addSearchConfig({
                 tabContents: "<i class='fa fa-calendar'></i> Evenementen",
@@ -217,7 +206,9 @@ dbkjs.modules.vrh_objects = {
                             }
                         }
                     });
-                    dbkjs.modules.search.showResults(searchResults, r => r.evnaam);
+                    dbkjs.modules.search.showResults(searchResults, function(r) {
+                        return r.evnaam;
+                    });
                 },
                 resultSelected: function(result) {
                     console.log("Search result selected", result);
@@ -227,6 +218,7 @@ dbkjs.modules.vrh_objects = {
             }, true);
         }
 
+        // XXX move to safetymaps.vrh.Dbks.init()
         if(dbkjs.modules.search && me.options.dbks) {
             dbkjs.modules.search.addSearchConfig({
                 tabContents: "<i class='fa fa-building'></i> DBK's",
@@ -245,7 +237,16 @@ dbkjs.modules.vrh_objects = {
                             }
                         }
                     });
-                    dbkjs.modules.search.showResults(searchResults, r => r.naam + (r.oms_nummer ? " (OMS " + r.oms_nummer + ")" : ""));
+                    dbkjs.modules.search.showResults(searchResults, function(r) {
+                        var adres = (r.straatnaam || "")
+                                + (r.huisnummer ? " " + r.huisnummer : "")
+                                + (r.huisletter || "")
+                                + (r.toevoeging ? " " + r.toevoeging : "")
+                                + (r.plaats ? ", " + r.plaats : "");
+                        return r.naam 
+                                + (r.oms_nummer ? " (OMS " + r.oms_nummer + ")" : "")
+                                + (adres.trim().length > 0 ? ", " + adres : "");
+                    });
                 },
                 resultSelected: function(result) {
                     console.log("Search result selected", result);
@@ -377,37 +378,6 @@ dbkjs.modules.vrh_objects = {
             if(error.stack) {
                 console.log(error.stack);
             }
-        }
-    },
-
-    eventLayerFeatureSelected: function(e) {
-        var me = this;
-        var layer = e.feature.layer;
-        var f = e.feature.attributes;
-        console.log(layer.name + " feature selected", e);
-        if(layer === me.events.layerLocationPolygon) {
-            var s = me.events.locationPolygonStyle[f.vlaksoort];
-            me.showFeatureInfo("Locatie", s.label, f.omschrijvi);
-            layer.redraw();
-        } else if(layer === me.events.layerRoutePolygon) {
-            var s = me.events.routePolygonStyle[f.vlaksoort];
-            me.showFeatureInfo("Route", s.label, f.vlakomschr);
-            layer.redraw();
-        } else if(layer === me.events.layerLocationSymbols) {
-
-            me.showFeatureInfo("Locatie", me.events.locationSymbolTypes[f.type] || "", f.ballonteks);
-            layer.redraw();
-        } else if(layer === me.events.layerRouteSymbols) {
-            me.showFeatureInfo("Route", me.events.routeSymbolTypes[f.soort] || "", f.ballonteks);
-            layer.redraw();
-        } else if(layer.name.startsWith("Event location lines")) {
-            me.showFeatureInfo("Locatie", me.events.locationLineStyle[f.lijnsoort].label, f.lijnbeschr);
-            layer.redraw();
-        } else if(layer.name.startsWith("Event route lines")) {
-            me.showFeatureInfo("Route", me.events.routeLineStyle[f.routetype].label, f.routebesch);
-            layer.redraw();
-        } else {
-            $("#vectorclickpanel").hide();
         }
     },
 

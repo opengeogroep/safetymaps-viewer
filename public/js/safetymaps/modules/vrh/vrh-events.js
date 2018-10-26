@@ -23,7 +23,7 @@
  *
  */
 
- /* global safetymaps, OpenLayers, i18n */
+ /* global dbkjs, safetymaps, OpenLayers, i18n */
 
 var safetymaps = safetymaps || {};
 safetymaps.vrh = safetymaps.vrh || {};
@@ -33,6 +33,8 @@ safetymaps.vrh.Events = function(options) {
         graphicSizeHover: 26,
         graphicSizeSelect: 20
     }, options);
+
+    this.initLayers();
 };
 
 safetymaps.vrh.Events.prototype.scalePattern = function(pattern, factor) {
@@ -44,6 +46,20 @@ safetymaps.vrh.Events.prototype.scalePattern = function(pattern, factor) {
         values[i] *= factor;
     }
     return values.join(" ");
+};
+
+safetymaps.vrh.Events.prototype.initLayers = function() {
+    var me = this;
+
+    dbkjs.map.addLayers(me.createLayers());
+
+    $.each(me.selectLayers, function(i, l) {
+        dbkjs.selectControl.layers.push(l);
+        if(l.hover) dbkjs.hoverControl.layers.push(l);
+        l.events.register("featureselected", me, me.layerFeatureSelected);
+        l.events.register("featureunselected", me, dbkjs.modules.vrh_objects.objectLayerFeatureUnselected);
+    });
+
 };
 
 safetymaps.vrh.Events.prototype.createLayers = function() {
@@ -902,6 +918,42 @@ safetymaps.vrh.Events.prototype.createLayers = function() {
 
     return this.layers;
 };
+
+safetymaps.vrh.Events.prototype.showFeatureInfo = function(title, label, description) {
+    dbkjs.modules.vrh_objects.showFeatureInfo(title, label, description);
+};
+
+safetymaps.vrh.Events.prototype.layerFeatureSelected = function(e) {
+    var me = this;
+    var layer = e.feature.layer;
+    var f = e.feature.attributes;
+    console.log(layer.name + " feature selected", e);
+    if(layer === me.layerLocationPolygon) {
+        var s = me.locationPolygonStyle[f.vlaksoort];
+        me.showFeatureInfo("Locatie", s.label, f.omschrijvi);
+        layer.redraw();
+    } else if(layer === me.layerRoutePolygon) {
+        var s = me.routePolygonStyle[f.vlaksoort];
+        me.showFeatureInfo("Route", s.label, f.vlakomschr);
+        layer.redraw();
+    } else if(layer === me.layerLocationSymbols) {
+
+        me.showFeatureInfo("Locatie", me.locationSymbolTypes[f.type] || "", f.ballonteks);
+        layer.redraw();
+    } else if(layer === me.layerRouteSymbols) {
+        me.showFeatureInfo("Route", me.routeSymbolTypes[f.soort] || "", f.ballonteks);
+        layer.redraw();
+    } else if(layer.name.startsWith("Event location lines")) {
+        me.showFeatureInfo("Locatie", me.locationLineStyle[f.lijnsoort].label, f.lijnbeschr);
+        layer.redraw();
+    } else if(layer.name.startsWith("Event route lines")) {
+        me.showFeatureInfo("Route", me.routeLineStyle[f.routetype].label, f.routebesch);
+        layer.redraw();
+    } else {
+        $("#vectorclickpanel").hide();
+    }
+};
+
 
 safetymaps.vrh.Events.prototype.removeAllFeatures = function(object) {
     if(this.layers) {

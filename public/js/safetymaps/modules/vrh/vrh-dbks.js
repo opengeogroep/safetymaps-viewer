@@ -34,7 +34,10 @@ safetymaps.vrh.Dbks = function(options) {
         compartmentLabelMinSegmentLength: 7.5,
         compartmentLabelMinScale: 300,
         graphicSizeHover: 26,
-        graphicSizeSelect: 20
+        graphicSizeSelect: 20,
+        options: {
+            styleSizeAdjust: 0 // For safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue()
+        }
     }, options);
 
     me.luchtfotoLayer = null;
@@ -43,6 +46,21 @@ safetymaps.vrh.Dbks = function(options) {
             me.luchtfotoLayer = l;
             return false;
         }
+    });
+
+    me.initLayers();
+};
+
+safetymaps.vrh.Dbks.prototype.initLayers = function() {
+    var me = this;
+
+    dbkjs.map.addLayers(me.createLayers());
+
+    $.each(me.selectLayers, function(i, l) {
+        dbkjs.selectControl.layers.push(l);
+        if(l.hover) dbkjs.hoverControl.layers.push(l);
+        l.events.register("featureselected", me, me.layerFeatureSelected);
+        l.events.register("featureunselected", me, dbkjs.modules.vrh_objects.objectLayerFeatureUnselected);
     });
 };
 
@@ -73,7 +91,56 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
     });
     this.layers.push(this.layerPand);
 
+    // other polygons, lines...
+
+    this.layerSymbols = new OpenLayers.Layer.Vector("DBK symbols", {
+        hover: true,
+        rendererOptions: {
+            zIndexing: true
+        },
+        styleMap: new OpenLayers.StyleMap({
+            default: new OpenLayers.Style({
+                externalGraphic: "${symbol}",
+                pointRadius: "${myradius}",
+                rotation: "-${rotation}"
+            }, {
+                context: {
+                    symbol: function(feature) {
+                        var symbol = feature.attributes.code;
+                        if(feature.attributes.description.trim().length > 0) {
+                            symbol += "_i";
+                        }
+                        return safetymaps.creator.api.imagePath + 'symbols/' + symbol + '.png';
+                    },
+                    myradius: function(feature) {
+                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,14, feature.attributes.radius);
+                    }
+                }
+            }),
+            temporary: new OpenLayers.Style({pointRadius: me.options.graphicSizeHover}),
+            select: new OpenLayers.Style({pointRadius: me.options.graphicSizeSelect})
+        })
+    });
+    this.layers.push(this.layerSymbols);
+    this.selectLayers.push(this.layerSymbols);
+
     return this.layers;
+};
+
+safetymaps.vrh.Dbks.prototype.showFeatureInfo = function(title, label, description) {
+    dbkjs.modules.vrh_objects.showFeatureInfo(title, label, description);
+};
+
+safetymaps.vrh.Dbks.prototype.layerFeatureSelected = function(e) {
+    var me = this;
+    var layer = e.feature.layer;
+    var f = e.feature.attributes;
+    console.log(layer.name + " feature selected", e);
+    if(layer === me.layerSymbols) {
+        me.showFeatureInfo("Branweervoorziening", i18n.t("symbol." + f.code) || "", f.omschrijvi);
+    } else {
+        $("#vectorclickpanel").hide();
+    }
 };
 
 safetymaps.vrh.Dbks.prototype.removeAllFeatures = function(object) {
@@ -96,6 +163,16 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
     };
 
     this.layerPand.addFeatures(object.pand.map(wktReader));
+
+    this.layerSymbols.addFeatures($.each((object.brandweervoorziening || []).map(wktReader), function(i, bwvz) {
+        bwvz.attributes.code = bwvz.attributes.symboolcod.replace(/,/, "");
+        bwvz.attributes.description = bwvz.attributes.omschrijvi || "";
+        bwvz.attributes.rotation = 360-bwvz.attributes.symboolhoe || 0;
+        console.log("brandweervoorziening ", bwvz.attributes);
+    }));
+
+    // TODO opstelplaats, toegang_pand, toegang_terrein, gevaren
+
 /*
     var terrein = wktReader(object.terrein);
     this.layerTerrain.addFeatures([terrein]);
