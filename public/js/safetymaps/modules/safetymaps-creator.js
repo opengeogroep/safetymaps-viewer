@@ -380,7 +380,7 @@ dbkjs.modules.safetymaps_creator = {
         $("#creator_object_info").html(div);
 
         $("#tab_pane_floors tr").click(function(e) {
-            var floor = e.currentTarget.firstChild.innerText;
+            var floor = e.currentTarget.firstChild.innerText.trim();
             console.log("click floor " + floor, e);
 
             $.each(object.verdiepingen, function(i, v) {
