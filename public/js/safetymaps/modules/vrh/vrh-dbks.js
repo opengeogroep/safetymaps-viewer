@@ -318,12 +318,12 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
             f.attributes.code = "TwTemp";
         }
 
-        f.attributes.description = f.attributes.bijzonderh || "";
-        if(f.attributes.soort_geva) {
+        f.attributes.description = f.attributes.bijzonderh && f.attributes.bijzonderh.trim() !== "-" ? f.attributes.bijzonderh : "";
+        if(f.attributes.soort_geva && f.attributes.soort_geva.trim() !== "-") {
             f.attributes.description += f.attributes.description !== "" ? ", " : "";
             f.attributes.description += f.attributes.soort_geva;
         }
-        if(f.attributes.locatie) {
+        if(f.attributes.locatie && f.attributes.locatie.trim() !== "-") {
             f.attributes.description += f.attributes.description !== "" ? ", " : "";
             f.attributes.description += "Locatie: " + f.attributes.locatie;
         }
@@ -344,12 +344,12 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
     this.layerDangerSymbols.addFeatures((object.gevaarlijke_stoffen || []).map(wktReader).map(function(f) {
         f.attributes.code = f.attributes.symboolcod;
 
-        f.attributes.description = f.attributes.bijzonderh || "";
-        if(f.attributes.etiket && f.attributes.etiket !== '-') {
+        f.attributes.description = f.attributes.bijzonderh && f.attributes.bijzonderh.trim() !== "-" ? f.attributes.bijzonderh : "";
+        if(f.attributes.etiket && f.attributes.etiket.trim() !== "-") {
             f.attributes.description += f.attributes.description !== "" ? ", " : "";
             f.attributes.description += "Etiket: " + f.attributes.etiket;
         }
-        if(f.attributes.ruimte) {
+        if(f.attributes.ruimte && f.attributes.ruimte.trim() !== "-") {
             f.attributes.description += f.attributes.description !== "" ? ", " : "";
             f.attributes.description += "Ruimte: " + f.attributes.ruimte;
         }
