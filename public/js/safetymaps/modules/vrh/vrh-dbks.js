@@ -139,7 +139,7 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
             default: new OpenLayers.Style({
                 externalGraphic: "${symbol}",
                 pointRadius: "${myradius}",
-                rotation: "-${rotation}",
+                rotation: "${rotation}",
                 fontWeight: "bold",
                 fontSize: "${fontSize}",
                 label: "${label}"
@@ -207,6 +207,29 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
     this.layers.push(this.layerDangerSymbols);
     this.selectLayers.push(this.layerDangerSymbols);
 
+    this.layerLabels = new OpenLayers.Layer.Vector("DBK labels", {
+        rendererOptions: {
+            zIndexing: true
+        },
+        styleMap: new OpenLayers.StyleMap({
+            'default': new OpenLayers.Style({
+                fontSize: "${size}",
+                label: "${tekst}",
+                rotation: "${rotation}",
+                labelOutlineColor: "#ffffff",
+                labelOutlineWidth: 1
+            }, {
+                context: {
+                    size: function(feature) {
+                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,14,feature.attributes.symboolgro);
+                    }
+                }
+            })
+        })
+    });
+    this.layers.push(this.layerLabels);
+    this.selectLayers.push(this.layerLabels); // Alleen om bovenop andere lagen te komen
+
     return this.layers;
 };
 
@@ -214,8 +237,8 @@ safetymaps.vrh.Dbks.prototype.showFeatureInfo = function(title, code, image, lab
     $('#vectorclickpanel_h').html('<span class="h4"><i class="fa fa-info-circle">&nbsp;' + title + '</span>');
     var html = $('<div class="table-responsive"></div>');
     var table = $('<table class="table table-hover"></table>');
-    table.append('<tr><th style="width: 20%">Symbool</th><th>' + i18n.t("name") + '</th><th>' + i18n.t("dialogs.information") + '</th></tr>');
-    table.append('<tr><td><img class="thumb" src="' + image + '" alt="' + code + '" title="' + code + '"></td><td>' + label + '</td><td>' + (description || "") + '</td></tr>');
+    table.append('<tr><th style="width: 110px">Symbool</th><th>' + i18n.t("name") + '</th><th>' + i18n.t("dialogs.information") + '</th></tr>');
+    table.append('<tr><td><img class="thumb" src="' + image + '" alt="' + code + '" title="' + code + '"></td><td style="width: 20%">' + label + '</td><td>' + (description || "") + '</td></tr>');
     html.append(table);
     $('#vectorclickpanel_b').html('').append(html);
     $('#vectorclickpanel').show();
@@ -279,7 +302,10 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
             f.attributes.code = f.attributes.symboolcod.replace(/,/, "");
         }
         f.attributes.description = f.attributes.omschrijvi || "";
-        f.attributes.rotation = 360-f.attributes.symboolhoe || 0;
+        if(f.attributes.bijzonderh && f.attributes.bijzonderh.trim() !== "-") {
+            f.attributes.description += "; " + f.attributes.bijzonderh;
+        }
+        f.attributes.rotation = -(360-f.attributes.symboolhoe) || 0;
 
         var symbol = f.attributes.code;
         var path = safetymaps.creator.api.imagePath + 'symbols/';
@@ -320,11 +346,11 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
 
         f.attributes.description = f.attributes.bijzonderh && f.attributes.bijzonderh.trim() !== "-" ? f.attributes.bijzonderh : "";
         if(f.attributes.soort_geva && f.attributes.soort_geva.trim() !== "-") {
-            f.attributes.description += f.attributes.description !== "" ? ", " : "";
+            f.attributes.description += f.attributes.description !== "" ? "; " : "";
             f.attributes.description += f.attributes.soort_geva;
         }
         if(f.attributes.locatie && f.attributes.locatie.trim() !== "-") {
-            f.attributes.description += f.attributes.description !== "" ? ", " : "";
+            f.attributes.description += f.attributes.description !== "" ? "; " : "";
             f.attributes.description += "Locatie: " + f.attributes.locatie;
         }
 
@@ -364,6 +390,11 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
             symbol += "_i";
         }
         f.attributes.symbol = path + symbol + '.png';
+        return f;
+    }));
+
+    this.layerLabels.addFeatures((object.teksten || []).map(wktReader).map(function(f) {
+        f.attributes.rotation = f.attributes.symboolhoe-90 || 0;
         return f;
     }));
 
