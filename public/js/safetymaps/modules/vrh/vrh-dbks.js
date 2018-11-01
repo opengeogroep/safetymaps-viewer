@@ -86,6 +86,37 @@ safetymaps.vrh.Dbks = function(options) {
         "Tw24": "Markering lab hoog risico"
     };
 
+    me.vrhCompartimenteringStyles = {
+        "Tbk5,002": {
+            "name": "60 minuten brandwerende scheiding",
+            "color": "#5da03b",
+            "thickness": 4,
+            "pattern": "1.2 1.2",
+            "label": "60'"
+        },
+        "Tbk5,003": {
+            "name": "30 minuten brandwerende scheiding",
+            "color": "#c1001f",
+            "thickness": 2,
+            "pattern": "3 1",
+            "label": "30'"
+        },
+        "Tbk5,120": {
+            "name": "> 120 minuten brandwerende scheiding",
+            "color": "#ff0000",
+            "thickness": 4,
+            "pattern": "",
+            "label": ">120'"
+        },
+        "Tbk5,000": {
+            "name": "Rookwerende scheiding",
+            "color": "#009cdd",
+            "thickness": 2,
+            "pattern": "2 1",
+            "label": null
+        }
+    };
+
 };
 
 safetymaps.vrh.Dbks.prototype.initLayers = function() {
@@ -128,7 +159,77 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
     });
     this.layers.push(this.layerPand);
 
-    // other polygons, lines...
+    this.layerFireCompartmentation = new OpenLayers.Layer.Vector("DBK brandcompartiment", {
+        hover:false,
+        rendererOptions: {
+            zIndexing: true
+        },
+        styleMap: new OpenLayers.StyleMap({
+            default: new OpenLayers.Style({
+                strokeColor: "${color}",
+                strokeWidth: "${width}",
+                strokeLinecap: "butt",
+                strokeDashstyle: "${dashstyle}"
+            }, {
+                context: {
+                    color: function(feature) {
+                        if(feature.attributes.style && feature.attributes.style.color)return feature.attributes.style.color;
+                        else return "#000000";
+                    },
+                    width: function(feature) {
+                        // TODO: scaling
+                        if(feature.attributes.style && feature.attributes.style.thickness)return feature.attributes.style.thickness;
+                        else return 2;
+                    },
+                    dashstyle: function(feature) {
+                        if(feature.attributes.style && feature.attributes.style.pattern)return safetymaps.creator.CreatorObjectLayers.prototype.scalePattern(feature.attributes.style.pattern, 3);
+                        else return safetymaps.creator.CreatorObjectLayers.prototype.scalePattern("", 3);
+                    }
+                }
+            }),
+
+            select: new OpenLayers.Style({strokeWidth: 7, strokeColor:"#FF00FF"})
+        })
+    });
+    this.layers.push(this.layerFireCompartmentation);
+    this.selectLayers.push(this.layerFireCompartmentation);
+
+    this.layerFireCompartmentationLabels = new OpenLayers.Layer.Vector("DBK brandcompartiment labels", {
+        minScale: me.options.compartmentLabelMinScale,
+        rendererOptions: {
+            zIndexing: true
+        },
+        styleMap: new OpenLayers.StyleMap({
+            'default': new OpenLayers.Style({
+                fontSize: "16",
+                label: "${label}",
+                fontColor: "${color}",
+                labelSelect: false,
+                rotation: "${rotation}",
+                labelOutlineColor: "#ffffff",
+                labelOutlineWidth: 2,
+                labelAlign: "cb",
+                labelXOffset: "${labelXOffset}",
+                labelYOffset: "${labelYOffset}"
+            }, {
+                context: {
+                    label: function(feature) {
+                        return feature.attributes.style.label;
+                    },
+                    color: function(feature) {
+                        return feature.attributes.style.color;
+                    },
+                    labelYOffset: function(feature) {
+                        return Math.sin(feature.attributes.theta + Math.PI/2) * 5;
+                    },
+                    labelXOffset: function(feature) {
+                        return Math.cos(feature.attributes.theta + Math.PI/2) * 5;
+                    }
+                }
+            })
+        })
+    });
+    this.layers.push(this.layerFireCompartmentationLabels);
 
     this.layerSymbols = new OpenLayers.Layer.Vector("DBK symbols", {
         hover: true,
@@ -233,12 +334,24 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
     return this.layers;
 };
 
-safetymaps.vrh.Dbks.prototype.showFeatureInfo = function(title, code, image, label, description) {
+safetymaps.vrh.Dbks.prototype.showFeatureInfo = function(title, code, image, label, description, labelStyle) {
     $('#vectorclickpanel_h').html('<span class="h4"><i class="fa fa-info-circle">&nbsp;' + title + '</span>');
     var html = $('<div class="table-responsive"></div>');
     var table = $('<table class="table table-hover"></table>');
-    table.append('<tr><th style="width: 110px">Symbool</th><th>' + i18n.t("name") + '</th><th>' + i18n.t("dialogs.information") + '</th></tr>');
-    table.append('<tr><td><img class="thumb" src="' + image + '" alt="' + code + '" title="' + code + '"></td><td style="width: 20%">' + label + '</td><td>' + (description || "") + '</td></tr>');
+    var row = '<tr>';
+    table.append(row);
+    if(image) {
+        row += '<th style="width: 110px">Symbool</th>';
+    }
+    row += ('<th>' + i18n.t("name") + '</th><th>' + i18n.t("dialogs.information") + '</th></tr>');
+    table.append(row);
+    row = '<tr>';
+    if(image) {
+        row += '<td><img class="thumb" src="' + image + '" alt="' + code + '" title="' + code + '"></td>';
+    }
+    labelStyle = labelStyle || "width: 20%";
+    row += '<td style="' + labelStyle + '">' + label + '</td><td>' + (description || "") + '</td></tr>';
+    table.append(row);
     html.append(table);
     $('#vectorclickpanel_b').html('').append(html);
     $('#vectorclickpanel').show();
@@ -270,6 +383,8 @@ safetymaps.vrh.Dbks.prototype.layerFeatureSelected = function(e) {
         } else {
             me.showFeatureInfo("Gevaar", f.symboolcod, f.symbol_noi, me.vrhDangerSymbols[f.code] || i18n.t("symbol." + f.code) || "", f.description);
         }
+    } else if(layer === me.layerFireCompartmentation) {
+        me.showFeatureInfo("Brandcompartiment", null, null, f.style.name, f.bijzonderh, " ");
     } else {
         $("#vectorclickpanel").hide();
     }
@@ -296,6 +411,24 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
     };
 
     this.layerPand.addFeatures(object.pand.map(wktReader));
+
+    this.layerFireCompartmentation.addFeatures((object.compartimentering || []).map(wktReader).map(function(f) {
+        f.attributes.style = me.vrhCompartimenteringStyles[f.attributes.symboolcod];
+        if(!f.attributes.style) {
+            console.log("Ongeldige symboolcode voor brandcompartiment: " + f.attributes.symboolcod);
+        }
+
+        if(f.attributes.style.label) {
+            var labelPoints = safetymaps.utils.geometry.createMultiLineStringLabelPointFeatures(f.geometry, me.options.compartmentLabelMinSegmentLength);
+
+            me.layerFireCompartmentationLabels.addFeatures(labelPoints.map(function(labelFeature) {
+                labelFeature.attributes.style = f.attributes.style;
+                return labelFeature;
+            }));
+        }
+
+        return f;
+    }));
 
     var vrhFeature = function(f) {
         if(f.attributes.symboolcod) {

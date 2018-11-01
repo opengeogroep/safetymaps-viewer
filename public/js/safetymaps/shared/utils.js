@@ -22,6 +22,8 @@
   * For common use by safetymaps-viewer and safetymaps-flamingo
   */
 
+ /* global OpenLayers, jsts */
+
 var safetymaps = safetymaps || {};
 safetymaps.utils = {};
 safetymaps.utils.geometry = {};
@@ -50,6 +52,37 @@ safetymaps.utils.geometry.getLastLineSegmentAngle = function(lineGeometry) {
     var beforeEnd = vertices[idx];
 
     return safetymaps.utils.geometry.getAngle(beforeEnd, end);
+};
+
+safetymaps.utils.geometry.createMultiLineStringLabelPointFeatures = function(line, minSegmentLength) {
+    var features = [];
+
+    // MultiLineString geometry
+    for(var j = 0; j < line.components.length; j++) {
+        for(var k = 0; k < line.components[j].components.length-1; k++) {
+            var start = line.components[j].components[k];
+            var end = line.components[j].components[k+1];
+
+            if(start.distanceTo(end) < minSegmentLength) {
+                continue;
+            }
+
+            var midx = start.x + (end.x - start.x)/2;
+            var midy = start.y + (end.y - start.y)/2;
+
+            var opposite = (end.y - start.y);
+            var adjacent = (end.x - start.x);
+            var theta = Math.atan2(opposite, adjacent);
+            var angle = -theta * (180/Math.PI);
+
+            var labelPoint = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(midx, midy), {
+                rotation: angle,
+                theta: theta
+            });
+            features.push(labelPoint);
+        }
+    }
+    return features;
 };
 
 safetymaps.utils.geometry.getAngle = function(p1, p2) {
