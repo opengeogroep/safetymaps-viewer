@@ -117,6 +117,38 @@ safetymaps.vrh.Dbks = function(options) {
         }
     };
 
+    me.vrhLineStyles = {
+        "Default": {
+            color1: "#000"
+        },
+        "Binnenmuur": {
+            color1: "#000"
+        },
+        "Blusleiding": {
+            color1: "#0070ff"
+        },
+        "Inzetdiepte": {
+            color1: "#ffff00"
+        },
+        "Hekwerk": {
+            color1: "#000",
+            color2: "#000",
+            thickness: 2,
+            type_viewer: "track"
+        },
+        "Schadecirkel": {
+            color1: "#f00",
+            pattern: "1 2"
+        },
+        "Schadecircel": {
+            color1: "#f00",
+            pattern: "1 2"
+        },
+        "Vluchtroute": {
+            color1: "#000"
+        }
+    };
+
 };
 
 safetymaps.vrh.Dbks.prototype.initLayers = function() {
@@ -138,7 +170,7 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
     this.layers = [];
     this.selectLayers = [];
 
-    this.layerPand = new OpenLayers.Layer.Vector("DBK Pand", {
+    this.layerPand = new OpenLayers.Layer.Vector("DBK Panden", {
         rendererOptions: {
             zIndexing: true
         },
@@ -159,7 +191,7 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
     });
     this.layers.push(this.layerPand);
 
-    this.layerFireCompartmentation = new OpenLayers.Layer.Vector("DBK brandcompartiment", {
+    this.layerFireCompartmentation = new OpenLayers.Layer.Vector("DBK brandcompartimenten", {
         hover:false,
         rendererOptions: {
             zIndexing: true
@@ -230,6 +262,111 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
         })
     });
     this.layers.push(this.layerFireCompartmentationLabels);
+
+    this.layerLines1 = new OpenLayers.Layer.Vector("DBK lines 1", {
+        hover: false,
+        rendererOptions: {
+            zIndexing: true
+        },
+        styleMap: new OpenLayers.StyleMap({
+            default: new OpenLayers.Style({
+                strokeColor: "${color}",
+                strokeDashstyle: "${dashstyle}",
+                fillColor: "${color}",
+                strokeWidth: "${strokeWidth}",
+                graphicName: "${graphicName}",
+                rotation: "${rotation}",
+                pointRadius: 5
+            }, {
+                context: {
+                    color: function(feature) {
+                        return feature.attributes.style.color1 || "#000000";
+                    },
+                    strokeWidth: function(feature) {
+                        if (feature.attributes.style.type_viewer) {
+                            var type = feature.attributes.style.type_viewer;
+                            if(type === "doubletrack" || type === "tube") {
+                                return feature.attributes.style.thickness + 2;
+                            } else {
+                                return feature.attributes.style.thickness;
+                            }
+                        } else {
+                            return 2;
+                        }
+                    },
+                    dashstyle: function(feature) {
+                        if(feature.attributes.style.pattern) {
+                            return safetymaps.creator.CreatorObjectLayers.prototype.scalePattern(feature.attributes.style.pattern, 5);
+                        } else {
+                            return "";
+                        }
+                    },
+                    graphicName: function(feature) {
+                        return feature.attributes.style.type_viewer === "arrow" ? "triangle" : "";
+                    }
+                }
+            })
+        })
+    });
+    this.layers.push(this.layerLines1);
+    this.layerLines2 = new OpenLayers.Layer.Vector("DBK lines 2", {
+        hover: false,
+        rendererOptions: {
+            zIndexing: true
+        },
+        styleMap: new OpenLayers.StyleMap({
+            default: new OpenLayers.Style({
+                strokeColor: "${color}",
+                strokeLinecap: "butt",
+                strokeWidth: "${strokeWidth}",
+                strokeDashstyle: "${dashstyle}"
+            }, {
+                context: {
+                    color: function(feature) {
+                        return feature.attributes.style.color2 || "#000";
+                    },
+                    strokeWidth: function(feature) {
+                        return feature.attributes.style.thickness || 2;
+                    },
+                    dashstyle: function(feature) {
+                        if(feature.attributes.style.type_viewer === "tube") {
+                            return safetymaps.creator.CreatorObjectLayers.prototype.scalePattern("8 8", 1);
+                        }
+                        return "";
+                    }
+                }
+            })
+        })
+    });
+    this.layers.push(this.layerLines2);
+
+    this.layerLines3 = new OpenLayers.Layer.Vector("DBK lines 3", {
+        hover: false,
+        rendererOptions: {
+            zIndexing: true
+        },
+        styleMap: new OpenLayers.StyleMap({
+            default: new OpenLayers.Style({
+                strokeColor: "${color}",
+                strokeWidth: "${strokeWidth}",
+                strokeDashstyle: "${dashstyle}",
+                strokeLinecap: "butt"
+            }, {
+                context: {
+                    color: function(feature) {
+                        return feature.attributes.style.color1 || "#000000";
+                    },
+                    strokeWidth: function(feature) {
+                        return (feature.attributes.style.thickness || 2) + 6;
+                    },
+                    dashstyle: function(feature) {
+                        return safetymaps.creator.CreatorObjectLayers.prototype.scalePattern("1 20", 1);
+                    }
+                }
+            })
+        })
+    });
+    this.layers.push(this.layerLines3);
 
     this.layerSymbols = new OpenLayers.Layer.Vector("DBK symbols", {
         hover: true,
@@ -430,7 +567,61 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
         return f;
     }));
 
-    var vrhFeature = function(f) {
+    var lineFeatures2 = [];
+    var lineFeatures3 = [];
+    var lineFeatures1 = (object.aanpijling || []).map(wktReader).map(function(f) {
+        f.attributes.style = {
+            type_viewer: "line",
+            color1: "#000",
+            thickness: 2
+        };
+        return f;
+    });
+    lineFeatures1 = lineFeatures1.concat((object.slagboom || []).map(wktReader).map(function(f) {
+        f.attributes.description = "";
+        f.attributes.style = {
+            type_viewer: "tube",
+            color1: "#f00",
+            color2: "#fff",
+            thickness: 2
+        };
+        lineFeatures2.push(f.clone());
+        return f;
+    }));
+    lineFeatures1 = lineFeatures1.concat((object.overige_lijnen || []).map(wktReader).map(function(f) {
+        f.attributes.style = me.vrhLineStyles[f.attributes.type] || me.vrhLineStyles["Default"];
+        if(f.attributes.style) {
+            if(["doubletrack", "tube"].indexOf(f.attributes.style.type_viewer) !== -1) {
+                lineFeatures2.push(f.clone());
+            }
+            if(["doubletrack", "track"].indexOf(f.attributes.style.type_viewer) !== -1) {
+                lineFeatures3.push(f.clone());
+            }
+        }
+        return f;
+    }));
+    lineFeatures1 = lineFeatures1.concat((object.aanrijroute || []).map(wktReader).map(function(f) {
+        f.attributes.style = {
+            color1: "#000",
+            type_viewer: "arrow"
+        };
+        // Create two geometries: one line and a point at the end of the
+        // line to display the arrow
+        var vertices = f.geometry.getVertices();
+        var end = vertices[vertices.length - 1];
+
+        // Rotation for triangle graphic rendered at end of line
+        f.attributes.rotation = 90 - safetymaps.utils.geometry.getLastLineSegmentAngle(f.geometry);
+
+        f.geometry = new OpenLayers.Geometry.Collection([f.geometry, end]);
+        return f;
+    }));
+
+    this.layerLines1.addFeatures(lineFeatures1);
+    this.layerLines2.addFeatures(lineFeatures2);
+    this.layerLines3.addFeatures(lineFeatures3);
+
+    var vrhSymbol = function(f) {
         if(f.attributes.symboolcod) {
             f.attributes.code = f.attributes.symboolcod.replace(/,/, "");
         }
@@ -454,21 +645,21 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
         return f;
     };
 
-    this.layerSymbols.addFeatures((object.brandweervoorziening || []).map(wktReader).map(vrhFeature));
-    this.layerSymbols.addFeatures((object.toegang_pand || []).map(wktReader).map(vrhFeature));
-    this.layerSymbols.addFeatures((object.toegang_terrein|| []).map(wktReader).map(vrhFeature));
+    this.layerSymbols.addFeatures((object.brandweervoorziening || []).map(wktReader).map(vrhSymbol));
+    this.layerSymbols.addFeatures((object.toegang_pand || []).map(wktReader).map(vrhSymbol));
+    this.layerSymbols.addFeatures((object.toegang_terrein|| []).map(wktReader).map(vrhSymbol));
     this.layerSymbols.addFeatures((object.opstelplaats || []).map(wktReader).map(function(f) {
         // Voor deze laag betekent code Tb1,010 niet schacht/kanaal maar opstelplaats redvoertuig
         if(f.attributes.symboolcod === "Tb1,010") {
             f.attributes.symboolcod = "Tb1,010o";
         }
         return f;
-    }).map(vrhFeature));
+    }).map(vrhSymbol));
     this.layerSymbols.addFeatures((object.hellingbaan || []).map(wktReader).map(function(f) {
         f.attributes.symboolcod = "Hellingbaan";
         f.attributes.omschrijvi = f.attributes.bijzonderh;
         return f;
-    }).map(vrhFeature));
+    }).map(vrhSymbol));
 
     this.layerDangerSymbols.addFeatures((object.gevaren || []).map(wktReader).map(function(f) {
         f.attributes.code = f.attributes.symboolcod;
