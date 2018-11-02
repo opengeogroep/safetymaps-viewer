@@ -44,7 +44,7 @@ dbkjs.modules.vrh_objects = {
             evenementen: true,
             waterveiligheid: true,
             filterEvDate: true
-        }, /*this.options*/);
+        }/*, this.options*/);
 
         if("off" === OpenLayers.Util.getParameters()["evfilter"]) {
             this.options.filterEvDate = false;
@@ -104,8 +104,8 @@ dbkjs.modules.vrh_objects = {
                 });
                 me.overviewObjects = me.overviewObjects.concat(dbkObjects);
 
-                var features = safetymaps.vrh.api.createDbkFeatures(dbkObjects);
-                me.clusteringLayer.addFeaturesToCluster(features);
+                me.features = me.features.concat(safetymaps.vrh.api.createDbkFeatures(dbkObjects));
+                me.clusteringLayer.addFeaturesToCluster(me.features);
             });
         }
 
@@ -119,15 +119,17 @@ dbkjs.modules.vrh_objects = {
                 console.log("Got event objects", evenementenObjects);
 
                 if(me.options.filterEvDate) {
-                    evenementenObjects = evenementenObjects.filter(ev => !new moment(ev.sbegin).isAfter(new moment()));
+                    evenementenObjects = evenementenObjects.filter(function(ev) {
+                        return !new moment(ev.sbegin).isAfter(new moment());
+                    });
                 }
                 evenementenObjects.sort(function(lhs, rhs) {
                     return lhs.evnaam.localeCompare(rhs.evnaam, dbkjsLang);
                 });
                 me.overviewObjects = me.overviewObjects.concat(evenementenObjects);
 
-                var features = safetymaps.vrh.api.createEvenementFeatures(evenementenObjects);
-                me.clusteringLayer.addFeaturesToCluster(features);
+                me.features = me.features.concat(safetymaps.vrh.api.createEvenementFeatures(evenementenObjects));
+                me.clusteringLayer.addFeaturesToCluster(me.features);
             });
         }
 
@@ -284,7 +286,7 @@ dbkjs.modules.vrh_objects = {
     getClusterLink: function (feature) {
         var me = this;
         var v = {
-            name: feature.attributes.apiObject.naam,
+            name: feature.attributes.apiObject.naam ? feature.attributes.apiObject.naam : feature.attributes.apiObject.evnaam,
             oms: feature.attributes.apiObject.oms_nummer,
             id: feature.attributes.apiObject.id
         };
