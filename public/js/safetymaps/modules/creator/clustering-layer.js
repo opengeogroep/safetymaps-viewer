@@ -141,6 +141,7 @@ safetymaps.ClusteringLayer.prototype.setSelectedIds = function(ids) {
     this.layer.redraw();
 };
 
+/* XXX Apparently works as replace instead of add! */
 safetymaps.ClusteringLayer.prototype.addFeaturesToCluster = function (features) {
     this.layer.addFeatures(features);
 };
