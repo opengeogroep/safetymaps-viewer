@@ -943,10 +943,10 @@ safetymaps.vrh.Events.prototype.layerFeatureSelected = function(e) {
     } else if(layer === me.layerRouteSymbols) {
         me.showFeatureInfo("Route", me.routeSymbolTypes[f.soort] || "", f.ballonteks);
         layer.redraw();
-    } else if(layer.name.startsWith("Event location lines")) {
+    } else if(layer.name.indexOf("Event location lines") === 0) {
         me.showFeatureInfo("Locatie", me.locationLineStyle[f.lijnsoort].label, f.lijnbeschr);
         layer.redraw();
-    } else if(layer.name.startsWith("Event route lines")) {
+    } else if(layer.name.indexOf("Event route lines") === 0) {
         me.showFeatureInfo("Route", me.routeLineStyle[f.routetype].label, f.routebesch);
         layer.redraw();
     } else {
@@ -987,10 +987,16 @@ safetymaps.vrh.Events.prototype.addFeaturesForObject = function(object) {
     this.layerRouteLine2.addFeatures(object.route_lijn.map(wktReader));
     this.layerRouteLine3.addFeatures(object.route_lijn.map(wktReader));
 
-    this.layerLabels.addFeatures(object.teksten.map(d => new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(d.x, d.y), d)));
+    this.layerLabels.addFeatures(object.teksten.map(function(d) {
+        return new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(d.x, d.y), d);
+    }));
 
-    this.layerLocationSymbols.addFeatures(object.locatie_punt.map(d => new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(d.x, d.y), d)));
-    this.layerRouteSymbols.addFeatures(object.route_punt.map(d => new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(d.x, d.y), d)));
+    this.layerLocationSymbols.addFeatures(object.locatie_punt.map(function(d) {
+        return new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(d.x, d.y), d);
+    }));
+    this.layerRouteSymbols.addFeatures(object.route_punt.map(function(d) {
+        return new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(d.x, d.y), d);
+    }));
 
     console.log("Added event layers", this.layers);
 };
@@ -1126,6 +1132,9 @@ safetymaps.vrh.Events.prototype.createEventLegend = function() {
             soortenDisplayed[soort] = true;
 
             var style = me.locationPolygonStyle[soort];
+            if(!style) {
+                return true;
+            }
 
             var tr = [
                 "<div style='width: 150px; height: 40px; border: 2px solid " + style.stroke + "; background-color: " + style.fill + ";'></div>",
@@ -1165,6 +1174,9 @@ safetymaps.vrh.Events.prototype.createEventLegend = function() {
             soortenDisplayed[soort] = true;
 
             var style = me.routePolygonStyle[soort];
+            if(!style) {
+                return true;
+            }
 
             var tr = [
                 "<div style='width: 150px; height: 40px; border: 2px solid " + style.stroke + "; background-color: " + style.fill + ";'></div>",
@@ -1204,6 +1216,9 @@ safetymaps.vrh.Events.prototype.createEventLegend = function() {
             soortenDisplayed[soort] = true;
 
             var style = me.locationLineStyle[soort];
+            if(!style) {
+                return true;
+            }
 
             var tr = [
                 "<img style='width: 40%' src='" + me.imagePath + '/lines/' + soort + ".png'>",
@@ -1243,6 +1258,9 @@ safetymaps.vrh.Events.prototype.createEventLegend = function() {
             soortenDisplayed[soort] = true;
 
             var style = me.routeLineStyle[soort];
+            if(!style) {
+                return true;
+            }
 
             var tr = [
                 "<img style='width: 40%' src='" + me.imagePath + '/lines/' + soort + ".png'>",
@@ -1281,6 +1299,9 @@ safetymaps.vrh.Events.prototype.createEventLegend = function() {
             soortenDisplayed[soort] = true;
 
             var label = me.locationSymbolTypes[soort];
+            if(!label) {
+                return true;
+            }
 
             var tr = [
                 "<img style='width: 20%' src='" + me.imagePath + '/' + soort + ".png'>",
@@ -1319,6 +1340,10 @@ safetymaps.vrh.Events.prototype.createEventLegend = function() {
             soortenDisplayed[soort] = true;
 
             var label = me.routeSymbolTypes[soort];
+            if(!label) {
+                return true;
+            }
+
             var tr = [
                 "<img style='width: 20%' src='" + me.imagePath + '/' + soort + ".png'>",
                 label,
