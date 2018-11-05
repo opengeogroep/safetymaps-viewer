@@ -737,10 +737,6 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(tab, object) {
 
     var rows = [];
 
-    //rows.push({l: "Gemeente",                               t: t.gemeente});
-    //rows.push({l: "Begindatum",                             t: t.sbegin});
-    //rows.push({l: "Aanvrager",                              t: t.aanvrager});
-
     var o = object;
 
     var p = o.pand[0];
@@ -752,8 +748,24 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(tab, object) {
         return true;
     });
 
-    rows.push({l: "OMS nummer",                                t: p.oms_nummer});
-    rows.push({l: "Naam",                                   t: o.naam});
+    var adres = (p.adres || "") + (p.plaats ? "<br>" + p.plaats : "");
+
+    rows.push({l: "OMS nummer",                     t: p.oms_nummer});
+    rows.push({l: "Naam",                           t: o.naam});
+    rows.push({l: "Adres",                          html: adres});
+    if(p.oppervlakt) {
+        rows.push({l: "Oppervlakte",                html: Number(p.oppervlakt).toFixed(0) + " m&sup2;"});
+    }
+    rows.push({l: "Bouwjaar",                       t: p.bouwjaar});
+    rows.push({l: "Gebruik",                        t: p.gebruiksdo});
+    rows.push({l: "Laagste bouwlaag / verdieping",  t: p.bouwlageno});
+    rows.push({l: "Hoogste bouwlaag (verdieping)",  t: p.bouwlagenb === 0 ? "0" : p.bouwlagenb + " (" + (p.bouwlagenb-1) + ")"});
+    rows.push({l: "Afwijkende binnendekking",       t: p.afwijkende});
+    rows.push({l: "Aanvullende info binnendekking", t: p.binnendekk});
+    rows.push({l: "Risicoklasse",                   t: p.risicoklas});
+    rows.push({l: "Inzetprocedure",                 t: p.inzetproce});
+    rows.push({l: "Aanvalsplan",                    t: p.aanvalspla});
+
     safetymaps.creator.createHtmlTabDiv("algemeen", "Algemeen", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
 
     rows = [];
