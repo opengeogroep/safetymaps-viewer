@@ -193,6 +193,11 @@ OpenLayers.Strategy.Cluster.prototype.cluster = function (event) {
     }
 },
 
+safetymaps.utils.setBrokenImage = function(image) {
+  
+    image.src =safetymaps.creator.api.imagePath+"missing.gif";
+},
+
 safetymaps.utils.getAbsoluteUrl = (function() {
 	var a;
 

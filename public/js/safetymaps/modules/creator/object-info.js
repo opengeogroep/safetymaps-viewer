@@ -247,7 +247,7 @@ safetymaps.creator.renderMedia = function(object) {
                 );
             } else if(path.match(/(jpeg|gif|jpg|png)$/i)) {
                 image_carousel_inner.append('<div class="item ' + active + '"><img class="img-full" style="width: 100%" src="' + path +
-                        '"><div class="carousel-caption"><h3>' +  m.filename + '</h3></div></div>');
+                        '"onerror="safetymaps.utils.setBrokenImage(this)"><div class="carousel-caption"><h3>' +  m.filename + '</h3></div></div>');
             } else {
                 image_carousel_inner.append('<div class="item ' + active + '"><img src="'+safetymaps.creator.api.imagePath+'missing.gif"><div class="carousel-caption"><a href="' + m.filename +
                         '" target="_blank"><h1><i class="fa fa-external-link fa-3"></i></h1><h2>' +
