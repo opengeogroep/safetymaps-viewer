@@ -658,6 +658,7 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
     this.layerSymbols.addFeatures((object.hellingbaan || []).map(wktReader).map(function(f) {
         f.attributes.symboolcod = "Hellingbaan";
         f.attributes.omschrijvi = f.attributes.bijzonderh;
+        delete f.attributes.bijzonderh;
         return f;
     }).map(vrhSymbol));
 
@@ -770,7 +771,85 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(tab, object) {
 
     rows = [];
 
-//    safetymaps.creator.createHtmlTabDiv("legenda", "Legenda", safetymaps.creator.createInfoTabDiv(me.createEventLegend()), tabContent, tabs);
+    rows.push(["<b>Moment</b>", "<b>Aantal</b>", "<b>Groep</b>"]);
+    rows.push(["Dag", p.personeel_, "Personeel"]);
+    rows.push(["Dag", p.bezoekers_, "Bezoekers"]);
+    rows.push(["Dag", p.slaapplaat, "Slaapplaatsen"]);
+    rows.push(["Dag", p.bhv_dag, "BHV"]);
+    rows.push(["Nacht", p.personeel1, "Personeel"]);
+    rows.push(["Nacht", p.bezoekers1, "Bezoekers"]);
+    rows.push(["Nacht", p.slaappla_1, "Slaapplaatsen"]);
+    rows.push(["Nacht", p.bhv_nacht, "BHV"]);
+    rows.push(["Weekend", p.personee_1, "Personeel"]);
+    rows.push(["Weekend", p.bezoeker_1, "Bezoekers"]);
+    rows.push(["Weekend", p.slaappla_2, "Slaapplaatsen"]);
+    rows.push(["Weekend", p.bhv_weeken, "BHV"]);
+
+    rows.push("<tr><td colspan='3'>Personeel: " + Mustache.escape(p.personee_2) + "</td></tr>");
+    rows.push("<tr><td colspan='3'>Bezoekers: " + Mustache.escape(p.bezoeker_2) + "</td></tr>");
+    rows.push("<tr><td colspan='3'>Slaapplaatsen: " + Mustache.escape(p.slaappla_3) + "</td></tr>");
+    rows.push("<tr><td colspan='3'>BHV: " + Mustache.escape(p.bhv_omsch) + "</td></tr>");
+    rows.push("<tr><td colspan='3'>Bijzonderheid aanwezigheid: " + Mustache.escape(p.bijzonde_1) + "</td></tr>");
+    rows.push("<tr><td colspan='3'>Verzamelplaats: " + Mustache.escape(p.verzamelpl) + "</td></tr>");
+
+    safetymaps.creator.createHtmlTabDiv("verblijf", "Verblijf", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+
+    rows = [];
+
+    rows.push("<tr><td colspan='2'>Sleutelbuisklus</td><td>" + Mustache.escape(o.sleutelbui) + "</td></tr>");
+    rows.push("<tr><td colspan='2'>Compartimenten</td><td>" + Mustache.escape(p.compartime) + "</td></tr>");
+    rows.push("<tr><td colspan='2'>WTS locatie</td><td>" + Mustache.escape(o.wts_locati) + "</td></tr>");
+    rows.push("<tr><td colspan='2'>Automatische blusinstallatie</td><td>" + Mustache.escape(o.automatisc) + "</td></tr>");
+    rows.push("<tr><td colspan='2'>Rook- en warmteafvoerinstallatie</td><td>" + Mustache.escape(o.rookwarmte) + "</td></tr>");
+    rows.push("<tr><td colspan='2'>Overdruk/stuwdrukinstallatie</td><td>" + Mustache.escape(o.overdrukst) + "</td></tr>");
+
+    rows.push(["<b>Symbool</b>", "<b>Naam</b>", "<b>Informatie</b>"]);
+
+    $.each(me.layerSymbols.features.concat(me.layerDangerSymbols.features), function(i, f) {
+        if(f.attributes.stofnaam) {
+            return true;
+        }
+        rows.push([
+            "<img class='thumb' style='' src='" + f.attributes.symbol_noi + "' alt='" + f.attributes.code + "' title='" + f.attributes.code + "'>",
+            me.vrhSymbols[f.attributes.code] || me.vrhDangerSymbols[f.attributes.code] || i18n.t("symbol." + f.attributes.code),
+            f.attributes.description
+        ]);
+    });
+
+    safetymaps.creator.createHtmlTabDiv("brandweer", "Brandweer", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+
+    rows = [];
+
+    rows.push(["<b>Symbool</b>", "<b>Gevi</b>", "<b>Naam</b>", "<b>Hoeveelheid</b>", "<b>Bijzonderheden</b>", "<b>ERIC-kaart</b>"]);
+
+    $.each(me.layerDangerSymbols.features, function(i, f) {
+        if(!f.attributes.stofnaam) {
+            return true;
+        }
+        var a = f.attributes;
+        rows.push(
+                '<tr><td width="100px"><img class="thumb" src="' + a.symbol_noi + '" alt="' + a.symboolcod + '" title="' + a.symboolcod + '"></td>' +
+                '<td><div class="gevicode">' + a.gevi_code + '</div><div class="unnummer">' + a.vn_nummer + '</div></td>' +
+                '<td>' + a.stofnaam + '</td><td>' + a.hoeveelhei + '</td><td>' + a.description + '</td><td>' + a.eric_kaart + '</td></tr>'
+        );
+    });
+
+    safetymaps.creator.createHtmlTabDiv("gevaarlijke_stoffen", "Gevaarlijke stoffen", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+
+    rows = [];
+
+    rows.push({l: "Gebouwconstructie", t: p.gebouwcons});
+    rows.push({l: "Dakconstructie", t: p.dakconstru});
+    rows.push({l: "Bijzondere bouwkundige constructie", t: p.bijz_bouwk});
+    rows.push({l: "Liften", t: p.liften});
+    rows.push("<tr><td colspan='2'>" + Mustache.escape(o.bijzonderh) + "</td></tr>");
+    rows.push("<tr><td colspan='2'>" + Mustache.escape(p.bijzonderh) + "</td></tr>");
+    rows.push("<tr><td colspan='2'>" + Mustache.escape(p.bijz_heden) + "</td></tr>");
+    rows.push("<tr><td colspan='2'>" + Mustache.escape(p.bijz_hed_1) + "</td></tr>");
+    rows.push("<tr><td colspan='2'>" + Mustache.escape(p.bijz_hed_2) + "</td></tr>");
+    rows.push({l: "Bijzonderheden afsluiters", t: o.bijzonde_1});
+
+    safetymaps.creator.createHtmlTabDiv("gebouw", "Gebouw", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
 
     tab.html(div);
 };

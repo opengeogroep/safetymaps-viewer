@@ -454,6 +454,8 @@ safetymaps.creator.createInfoTabDiv = function(rows, id /*ES2015 = ""*/) {
                 tr += "<td>" + row[j] + "</td>";
             }
             table.append(tr + "</tr>");
+        } if(typeof row === "string" && row.indexOf("<tr") === 0) {
+            table.append(row);
         } else {
             // Row for 2 column table row: l for first label column (escaped) and t (non-escaped) or html (escaped) for second value column
             if((row.hasOwnProperty("t") && row.t !== null && typeof row.t !== "undefined") || row.html) {
