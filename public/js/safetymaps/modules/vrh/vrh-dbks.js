@@ -772,36 +772,39 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(tab, object) {
     rows = [];
 
     rows.push(["<b>Moment</b>", "<b>Aantal</b>", "<b>Groep</b>"]);
-    rows.push(["Dag", p.personeel_, "Personeel"]);
-    rows.push(["Dag", p.bezoekers_, "Bezoekers"]);
-    rows.push(["Dag", p.slaapplaat, "Slaapplaatsen"]);
-    rows.push(["Dag", p.bhv_dag, "BHV"]);
-    rows.push(["Nacht", p.personeel1, "Personeel"]);
-    rows.push(["Nacht", p.bezoekers1, "Bezoekers"]);
-    rows.push(["Nacht", p.slaappla_1, "Slaapplaatsen"]);
-    rows.push(["Nacht", p.bhv_nacht, "BHV"]);
-    rows.push(["Weekend", p.personee_1, "Personeel"]);
-    rows.push(["Weekend", p.bezoeker_1, "Bezoekers"]);
-    rows.push(["Weekend", p.slaappla_2, "Slaapplaatsen"]);
-    rows.push(["Weekend", p.bhv_weeken, "BHV"]);
+    var v;
+    v = p.personeel_; if(v) rows.push(["Dag", v, "Personeel"]);
+    v = p.bezoekers_; if(v) rows.push(["Dag", v, "Bezoekers"]);
+    v = p.slaapplaat; if(v) rows.push(["Dag", v, "Slaapplaatsen"]);
+    v = p.bhv_dag;    if(v) rows.push(["Dag", v, "BHV"]);
+    v = p.personeel1; if(v) rows.push(["Nacht", v, "Personeel"]);
+    v = p.bezoekers1; if(v) rows.push(["Nacht", v, "Bezoekers"]);
+    v = p.slaappla_1; if(v) rows.push(["Nacht", v, "Slaapplaatsen"]);
+    v = p.bhv_nacht;  if(v) rows.push(["Nacht", v, "BHV"]);
+    v = p.personee_1; if(v) rows.push(["Weekend", v, "Personeel"]);
+    v = p.bezoeker_1; if(v) rows.push(["Weekend", v, "Bezoekers"]);
+    v = p.slaappla_2; if(v) rows.push(["Weekend", v, "Slaapplaatsen"]);
+    v = p.bhv_weeken; if(v) rows.push(["Weekend", v, "BHV"]);
 
-    rows.push("<tr><td colspan='3'>Personeel: " + Mustache.escape(p.personee_2) + "</td></tr>");
-    rows.push("<tr><td colspan='3'>Bezoekers: " + Mustache.escape(p.bezoeker_2) + "</td></tr>");
-    rows.push("<tr><td colspan='3'>Slaapplaatsen: " + Mustache.escape(p.slaappla_3) + "</td></tr>");
-    rows.push("<tr><td colspan='3'>BHV: " + Mustache.escape(p.bhv_omsch) + "</td></tr>");
-    rows.push("<tr><td colspan='3'>Bijzonderheid aanwezigheid: " + Mustache.escape(p.bijzonde_1) + "</td></tr>");
-    rows.push("<tr><td colspan='3'>Verzamelplaats: " + Mustache.escape(p.verzamelpl) + "</td></tr>");
+    v = p.personee_2; if(v) rows.push("<tr><td colspan='3'>Personeel: " + Mustache.escape(v) + "</td></tr>");
+    v = p.bezoeker_2; if(v) rows.push("<tr><td colspan='3'>Bezoekers: " + Mustache.escape(v) + "</td></tr>");
+    v = p.slaappla_3; if(v) rows.push("<tr><td colspan='3'>Slaapplaatsen: " + Mustache.escape(v) + "</td></tr>");
+    v = p.bhv_omsch; if(v) rows.push("<tr><td colspan='3'>BHV: " + Mustache.escape(v) + "</td></tr>");
+    v = p.bijzonde_1; if(v) rows.push("<tr><td colspan='3'>Bijzonderheid aanwezigheid: " + Mustache.escape(v) + "</td></tr>");
+    v = p.verzamelpl; if(v) rows.push("<tr><td colspan='3'>Verzamelplaats: " + Mustache.escape(v) + "</td></tr>");
 
-    safetymaps.creator.createHtmlTabDiv("verblijf", "Verblijf", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+    if(rows !== 1) {
+        safetymaps.creator.createHtmlTabDiv("verblijf", "Verblijf", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+    }
 
     rows = [];
 
-    rows.push("<tr><td colspan='2'>Sleutelbuisklus</td><td>" + Mustache.escape(o.sleutelbui) + "</td></tr>");
-    rows.push("<tr><td colspan='2'>Compartimenten</td><td>" + Mustache.escape(p.compartime) + "</td></tr>");
-    rows.push("<tr><td colspan='2'>WTS locatie</td><td>" + Mustache.escape(o.wts_locati) + "</td></tr>");
-    rows.push("<tr><td colspan='2'>Automatische blusinstallatie</td><td>" + Mustache.escape(o.automatisc) + "</td></tr>");
-    rows.push("<tr><td colspan='2'>Rook- en warmteafvoerinstallatie</td><td>" + Mustache.escape(o.rookwarmte) + "</td></tr>");
-    rows.push("<tr><td colspan='2'>Overdruk/stuwdrukinstallatie</td><td>" + Mustache.escape(o.overdrukst) + "</td></tr>");
+    v = o.sleutelbui; if(v) rows.push("<tr><td colspan='2'>Sleutelbuisklus</td><td>" + Mustache.escape(v) + "</td></tr>");
+    v = p.compartime; if(v) rows.push("<tr><td colspan='2'>Compartimenten</td><td>" + Mustache.escape(v) + "</td></tr>");
+    v = o.wts_locati; if(v) rows.push("<tr><td colspan='2'>WTS locatie</td><td>" + Mustache.escape(v) + "</td></tr>");
+    v = o.automatisc; if(v) rows.push("<tr><td colspan='2'>Automatische blusinstallatie</td><td>" + Mustache.escape(v) + "</td></tr>");
+    v = o.rookwarmte; if(v) rows.push("<tr><td colspan='2'>Rook- en warmteafvoerinstallatie</td><td>" + Mustache.escape(v) + "</td></tr>");
+    v = o.overdrukst; if(v) rows.push("<tr><td colspan='2'>Overdruk/stuwdrukinstallatie</td><td>" + Mustache.escape(v) + "</td></tr>");
 
     rows.push(["<b>Symbool</b>", "<b>Naam</b>", "<b>Informatie</b>"]);
 
@@ -816,7 +819,9 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(tab, object) {
         ]);
     });
 
-    safetymaps.creator.createHtmlTabDiv("brandweer", "Brandweer", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+    if(rows.length !== 1) {
+        safetymaps.creator.createHtmlTabDiv("brandweer", "Brandweer", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+    }
 
     rows = [];
 
@@ -834,7 +839,9 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(tab, object) {
         );
     });
 
-    safetymaps.creator.createHtmlTabDiv("gevaarlijke_stoffen", "Gevaarlijke stoffen", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+    if(rows.length !== 1) {
+        safetymaps.creator.createHtmlTabDiv("gevaarlijke_stoffen", "Gevaarlijke stoffen", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+    }
 
     rows = [];
 
@@ -842,11 +849,11 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(tab, object) {
     rows.push({l: "Dakconstructie", t: p.dakconstru});
     rows.push({l: "Bijzondere bouwkundige constructie", t: p.bijz_bouwk});
     rows.push({l: "Liften", t: p.liften});
-    rows.push("<tr><td colspan='2'>" + Mustache.escape(o.bijzonderh) + "</td></tr>");
-    rows.push("<tr><td colspan='2'>" + Mustache.escape(p.bijzonderh) + "</td></tr>");
-    rows.push("<tr><td colspan='2'>" + Mustache.escape(p.bijz_heden) + "</td></tr>");
-    rows.push("<tr><td colspan='2'>" + Mustache.escape(p.bijz_hed_1) + "</td></tr>");
-    rows.push("<tr><td colspan='2'>" + Mustache.escape(p.bijz_hed_2) + "</td></tr>");
+    v = o.bijzonderh; if(v) rows.push("<tr><td colspan='2'>" + Mustache.escape(v) + "</td></tr>");
+    v = p.bijzonderh; if(v) rows.push("<tr><td colspan='2'>" + Mustache.escape(v) + "</td></tr>");
+    v = p.bijz_heden; if(v) rows.push("<tr><td colspan='2'>" + Mustache.escape(v) + "</td></tr>");
+    v = p.bijz_hed_1; if(v) rows.push("<tr><td colspan='2'>" + Mustache.escape(v) + "</td></tr>");
+    v = p.bijz_hed_2; if(v) rows.push("<tr><td colspan='2'>" + Mustache.escape(v) + "</td></tr>");
     rows.push({l: "Bijzonderheden afsluiters", t: o.bijzonde_1});
 
     safetymaps.creator.createHtmlTabDiv("gebouw", "Gebouw", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
