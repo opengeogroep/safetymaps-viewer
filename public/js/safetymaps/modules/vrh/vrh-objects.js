@@ -40,7 +40,7 @@ dbkjs.modules.vrh_objects = {
         this.options = $.extend({
             // default options here
             maxSearchResults: 30,
-            dbks: true,
+            dbks: false,
             evenementen: true,
             waterveiligheid: true,
             filterEvDate: true
@@ -48,6 +48,10 @@ dbkjs.modules.vrh_objects = {
 
         if("off" === OpenLayers.Util.getParameters()["evfilter"]) {
             this.options.filterEvDate = false;
+        }
+
+        if("on" === OpenLayers.Util.getParameters()["dbks"]) {
+            this.options.dbks = true;
         }
 
         // Setup API
