@@ -58,30 +58,36 @@ function IncidentMonitorController(incidents) {
         });
     }
 
-    me.button = new AlertableButton("btn_incidentlist", "Incidentenlijst", "bell-o");
-    me.button.getElement().attr("data-sid", 0).prependTo('#btngrp_3');
+    me.button = new AlertableButton("btn_incidentlist", "Incidentenlijst", me.options.voertuigIM ? "list" : "bell-o");
+    if(me.options.voertuigIM) {
+        me.button.getElement().insertAfter('#btn_incident');
+    } else {
+        me.button.getElement().attr("data-sid", 0).prependTo('#btngrp_3');
+    }
     $(me.button).on('click', function() {
         me.incidentListWindow.show();
     });
 
-    $('<a></a>')
-    .attr({
-        'id': 'btn_openreset',
-        'class': 'btn btn-default navbar-btn',
-        'href': '#',
-        'title': 'Reset'
-    })
-    .append('<i class="fa fa-repeat" style="width: 27.5px"></i>')
-    .click(function(e) {
-        me.getIncidentList();
-        me.incidentDetailsWindow.hide();
-        if(me.selectedIncidentMarker) {
-            me.markerLayer.removeMarker(me.selectedIncidentMarker);
-            me.selectedIncidentMarker = null;
-        }
-        $("#zoom_extent").click();
-    })
-    .appendTo('#btngrp_3');
+    if(!me.options.voertuigIM) {
+        $('<a></a>')
+        .attr({
+            'id': 'btn_openreset',
+            'class': 'btn btn-default navbar-btn',
+            'href': '#',
+            'title': 'Reset'
+        })
+        .append('<i class="fa fa-repeat" style="width: 27.5px"></i>')
+        .click(function(e) {
+            me.getIncidentList();
+            me.incidentDetailsWindow.hide();
+            if(me.selectedIncidentMarker) {
+                me.markerLayer.removeMarker(me.selectedIncidentMarker);
+                me.selectedIncidentMarker = null;
+            }
+            $("#zoom_extent").click();
+        })
+        .appendTo('#btngrp_3');
+    }
 
     me.incidentListWindow = new IncidentListWindow();
     me.incidentListWindow.createElements("Incidenten");
@@ -102,28 +108,31 @@ function IncidentMonitorController(incidents) {
         me.disableIncidentUpdates();
     });
 
-    var selectLayers = [];
 
-    me.vehiclePositionLayer = new VehiclePositionLayer();
+    if(!me.options.voertuigIM) {
+        var selectLayers = [];
 
-    if(me.options.eenheden && me.options.eenheden.enableOngekoppeldeEenheden) {
-        $("#settingspanel_b").append('<hr/><label><input type="checkbox" ' + (me.vehiclePositionLayer.showMoving ? 'checked' : '') + ' onclick="dbkjs.modules.incidents.controller.vehiclePositionLayer.setShowMoving(event.target.checked)">Toon bewegende voertuigen niet gekoppeld aan incident (grijs)</label>');
-    } else {
-        me.vehiclePositionLayer.setShowMoving(false);
+        me.vehiclePositionLayer = new VehiclePositionLayer();
+
+        if(me.options.eenheden && me.options.eenheden.enableOngekoppeldeEenheden) {
+            $("#settingspanel_b").append('<hr/><label><input type="checkbox" ' + (me.vehiclePositionLayer.showMoving ? 'checked' : '') + ' onclick="dbkjs.modules.incidents.controller.vehiclePositionLayer.setShowMoving(event.target.checked)">Toon bewegende voertuigen niet gekoppeld aan incident (grijs)</label>');
+        } else {
+            me.vehiclePositionLayer.setShowMoving(false);
+        }
+
+        if(me.options.eenheden.type === "ags") {
+            selectLayers.push(me.vehiclePositionLayer.layer);
+        }
+
+        me.markerLayer = new IncidentVectorLayer(true);
+        selectLayers.push(me.markerLayer.layer);
+        $(me.markerLayer).on('click', function(e, obj) {
+            me.selectIncident(obj);
+        });
+        me.marker = null;
+
+        me.addSelectLayers(selectLayers);
     }
-
-    if(me.options.eenheden.type === "ags") {
-        selectLayers.push(me.vehiclePositionLayer.layer);
-    }
-
-    me.markerLayer = new IncidentVectorLayer(true);
-    selectLayers.push(me.markerLayer.layer);
-    $(me.markerLayer).on('click', function(e, obj) {
-        me.selectIncident(obj);
-    });
-    me.marker = null;
-
-    me.addSelectLayers(selectLayers);
 
     me.failedUpdateTries = 0;
 
@@ -162,10 +171,22 @@ function IncidentMonitorController(incidents) {
 IncidentMonitorController.prototype.initIncidents = function() {
     var me = this;
     me.getIncidentList();
-    window.setInterval(function() {
+    me.updateInterval = window.setInterval(function() {
         me.checkIncidentListOutdated();
     }, 500);
+};
+
+IncidentMonitorController.prototype.enable = function() {
+    $("#btn_incidentlist").show();
+    this.initIncidents();
 }
+
+IncidentMonitorController.prototype.disable = function() {
+    this.disableIncidentUpdates();
+    window.clearInterval(this.updateInterval);
+    window.clearTimeout(this.getIncidentListTimeout);
+    $("#btn_incidentlist").hide();
+};
 
 IncidentMonitorController.prototype.checkFalckEnabledByAuthz = function() {
     var me = this;
@@ -319,7 +340,7 @@ IncidentMonitorController.prototype.selectIncident = function(obj) {
     me.incident = obj.incident;
     me.incidentId = me.incident.INCIDENT_ID || me.incident.IncidentNummer;
     console.log("Select incident " + me.incidentId + ", addMarker=" + obj.addMarker);
-    if(obj.addMarker) {
+    if(obj.addMarker && me.markerLayer) {
         me.selectedIncidentMarker = me.markerLayer.addIncident(me.incident, true);
     }
     me.incidentDetailsWindow.data("Ophalen incidentgegevens...");
@@ -449,7 +470,9 @@ IncidentMonitorController.prototype.getIncidentListAGS = function() {
         if(me.failedUpdateTries > me.UPDATE_TRIES) {
             var msg = "Kan incidentenlijst niet ophalen na " + me.failedUpdateTries + " pogingen: " + e;
             dbkjs.gui.showError(msg);
-            me.button.setIcon("bell-slash");
+            if(!me.options.voertuigIM) {
+                me.button.setIcon("bell-slash");
+            }
             me.incidentListWindow.showError(msg);
         }
     })
@@ -460,7 +483,9 @@ IncidentMonitorController.prototype.getIncidentListAGS = function() {
         }, me.UPDATE_INTERVAL_MS);
 
         me.failedUpdateTries = 0;
-        me.button.setIcon("bell-o");
+        if(!me.options.voertuigIM) {
+            me.button.setIcon("bell-o");
+        }
         $('#systeem_meldingen').hide(); // XXX
         $.each(currentIncidents.concat(archivedIncidents), function(i, incident) {
             me.normalizeIncidentFields(incident);
@@ -497,7 +522,9 @@ IncidentMonitorController.prototype.getIncidentListFalck = function() {
         if(me.failedUpdateTries > me.UPDATE_TRIES) {
             var msg = "Kan incidentenlijst niet ophalen na " + me.failedUpdateTries + " pogingen: " + e;
             dbkjs.gui.showError(msg);
-            me.button.setIcon("bell-slash");
+            if(!me.options.voertuigIM) {
+                me.button.setIcon("bell-slash");
+            }
             me.incidentListWindow.showError(msg);
         }
     })
@@ -508,7 +535,9 @@ IncidentMonitorController.prototype.getIncidentListFalck = function() {
         }, me.UPDATE_INTERVAL_MS);
 
         me.failedUpdateTries = 0;
-        me.button.setIcon("bell-o");
+        if(!me.options.voertuigIM) {
+            me.button.setIcon("bell-o");
+        }
         $('#systeem_meldingen').hide(); // XXX
 
         me.incidents = data;
@@ -569,6 +598,9 @@ IncidentMonitorController.prototype.processNewArchivedIncidents = function(archi
 
 IncidentMonitorController.prototype.updateMarkerLayer = function(incidents) {
     var me = this;
+    if(!me.markerLayer) {
+        return;
+    }
     me.markerLayer.clear();
     $.each(incidents, function(i, incident) {
         if(incident.actueleInzet) {

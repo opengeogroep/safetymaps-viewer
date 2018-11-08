@@ -33,8 +33,14 @@ function FalckIncidentsController(incidents) {
 
     me.options = $.extend({
         incidentsUrl: "gms",
-        incidentMonitorCode: null
+        incidentMonitorCode: null,
+        falckService: true,
+        voertuigIM: true
     }, me.options);
+
+    if(OpenLayers.Util.getParameters().im !== "on") {
+        me.options.incidentMonitorCode = null;
+    }
 
     me.button = new AlertableButton("btn_incident", "Incident", "bell-o");
     me.button.getElement().prependTo('.layertoggle-btn-group');
@@ -89,7 +95,23 @@ function FalckIncidentsController(incidents) {
 };
 
 FalckIncidentsController.prototype.checkIncidentMonitor = function() {
-    this.incidentMonitor = this.options.incidentMonitorCode && this.options.incidentMonitorCode === this.incidentMonitorCode;
+    var me = this;
+
+    me.incidentMonitor = me.options.incidentMonitorCode && me.options.incidentMonitorCode === me.incidentMonitorCode;
+
+    if(me.incidentMonitor) {
+        if(me.incidentMonitorController) {
+            me.incidentMonitorController.enable();
+        } else {
+            dbkjs.options.incidents = { };
+
+            me.incidentMonitorController = new IncidentMonitorController(me);
+        }
+    } else {
+        if(me.incidentMonitorController) {
+            me.incidentMonitorController.disable();
+        }
+    }
 };
 
 /**
