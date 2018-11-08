@@ -384,7 +384,7 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
             }, {
                 context: {
                     myradius: function(feature) {
-                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,18, feature.attributes.radius);
+                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,20, feature.attributes.radius);
                     },
                     label: function(feature) {
                         if(feature.attributes.code === "TbeHoogte") {
@@ -434,7 +434,7 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
             }, {
                 context: {
                     myradius: function(feature) {
-                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,18, feature.attributes.radius);
+                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,20, feature.attributes.radius);
                     }
                 }
             }),
@@ -793,7 +793,7 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(tab, object) {
     v = p.bijzonde_1; if(v) rows.push("<tr><td colspan='3'>Bijzonderheid aanwezigheid: " + Mustache.escape(v) + "</td></tr>");
     v = p.verzamelpl; if(v) rows.push("<tr><td colspan='3'>Verzamelplaats: " + Mustache.escape(v) + "</td></tr>");
 
-    if(rows !== 1) {
+    if(rows.length !== 1) {
         safetymaps.creator.createHtmlTabDiv("verblijf", "Verblijf", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
     }
 
