@@ -100,12 +100,8 @@ dbkjs.modules.vrh_objects = {
                 dbkjs.util.alert("Fout", msg, "alert-danger");
             })
             .done(function(dbkObjects) {
-                console.log("Got DBK objects", dbkObjects);
+                console.log("Got " + dbkObjects.length + " DBK objects");
 
-                dbkObjects.sort(function(lhs, rhs) {
-                    if(!lhs.naam || !rhs.naam) console.log("err", lhs, rhs);
-                    return lhs.naam.localeCompare(rhs.naam, dbkjsLang);
-                });
                 me.overviewObjects = me.overviewObjects.concat(dbkObjects);
 
                 me.features = me.features.concat(safetymaps.vrh.api.createDbkFeatures(dbkObjects));
@@ -120,16 +116,14 @@ dbkjs.modules.vrh_objects = {
                 dbkjs.util.alert("Fout", msg, "alert-danger");
             })
             .done(function(evenementenObjects) {
-                console.log("Got event objects", evenementenObjects);
+                console.log("Got " + evenementenObjects.length + " event objects");
 
                 if(me.options.filterEvDate) {
                     evenementenObjects = evenementenObjects.filter(function(ev) {
                         return !new moment(ev.sbegin).isAfter(new moment());
                     });
                 }
-                evenementenObjects.sort(function(lhs, rhs) {
-                    return lhs.evnaam.localeCompare(rhs.evnaam, dbkjsLang);
-                });
+
                 me.overviewObjects = me.overviewObjects.concat(evenementenObjects);
 
                 me.features = me.features.concat(safetymaps.vrh.api.createEvenementFeatures(evenementenObjects));
