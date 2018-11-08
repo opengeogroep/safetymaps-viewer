@@ -32,7 +32,8 @@ function FalckIncidentsController(incidents) {
     me.options = incidents.options;
 
     me.options = $.extend({
-        incidentsUrl: "gms"
+        incidentsUrl: "gms",
+        incidentMonitorCode: null
     }, me.options);
 
     me.button = new AlertableButton("btn_incident", "Incident", "bell-o");
@@ -57,6 +58,9 @@ function FalckIncidentsController(incidents) {
     me.marker = null;
 
     me.voertuignummer = window.localStorage.getItem("voertuignummer");
+
+    me.incidentMonitorCode = window.localStorage.getItem("imcode");
+    me.checkIncidentMonitor();
 
     me.xml = null;
 
@@ -84,26 +88,70 @@ function FalckIncidentsController(incidents) {
     });
 };
 
+FalckIncidentsController.prototype.checkIncidentMonitor = function() {
+    this.incidentMonitor = this.options.incidentMonitorCode && this.options.incidentMonitorCode === this.incidentMonitorCode;
+};
+
 /**
  * Add controls to configuration window.
  */
 FalckIncidentsController.prototype.addConfigControls = function() {
     var me = this;
-    var incidentSettings = $("<div><h4>Meldkamerkoppeling</h4><p/>" +
-            "<div class='container' style='width: 400px; margin-left: 0px'>" +
-            "<div class='row'>" +
-                "<div class='col-xs-4'>Voertuignummer:</div>" +
-                "<div class='col-xs-6'><input type='text' disabled id='input_voertuignummer'></div>" +
-                "<div class='col-xs-2'><button class='btn btn-primary' id='btn_enable_voertuignummer'>Wijzigen</button></div>" +
+
+    var incidentCodeHtml = "";
+    if(me.options.incidentMonitorCode) {
+
+        incidentCodeHtml =
+                "<div><h4>Incidentmonitor</h4><p/>" +
+                    "<div class='container' style='width: 400px; margin-left: 0px'>" +
+                        "<div class='row'>" +
+                            "<div class='col-xs-4'>Activatiecode:</div>" +
+                            "<div class='col-xs-6'><input id='input_incidentmonitorcode' type='password' disabled autocapitalize='none'></div>" +
+                            "<div class='col-xs-2'><input type='button' class='btn btn-primary' id='btn_incidentmonitorcode' value='Wijzigen'></div>" +
+                        "</div>" +
+                    "</div>" +
+                "</div>";
+    }
+
+    var incidentSettings = $(
+            "<div><h4>Meldkamerkoppeling</h4><p/>" +
+                "<div class='container' style='width: 400px; margin-left: 0px'>" +
+                    "<div class='row'>" +
+                        "<div class='col-xs-4'>Voertuignummer:</div>" +
+                        "<div class='col-xs-6'><input type='text' disabled id='input_voertuignummer'></div>" +
+                        "<div class='col-xs-2'><button class='btn btn-primary' id='btn_enable_voertuignummer'>Wijzigen</button></div>" +
+                    "</div>" +
+                    "<div class='row ' id='cfg_voertuignummercode' style='visibility: hidden; margin-top: 10px'>" +
+                        "<div class='col-xs-4'>Beveiligingscode:</div>" +
+                        "<div class='col-xs-6'><input id='cfg_input_code' type='password' autocapitalize='none'></div>" +
+                        "<div class='col-xs-2'><button class='btn btn-primary' id='cfg_btn_codeok'>OK</button></div>" +
+                    "</div>" +
+                "</div>" +
             "</div>" +
-            "<div class='row ' id='cfg_voertuignummercode' style='visibility: hidden; margin-top: 10px'>" +
-                "<div class='col-xs-4'>Beveiligingscode:</div>" +
-                "<div class='col-xs-6'><input id='cfg_input_code' type='password' autocapitalize='none'></div>" +
-                "<div class='col-xs-2'><button class='btn btn-primary' id='cfg_btn_codeok'>OK</button></div>" +
-            "</div>" +
-            "</div>" +
+            incidentCodeHtml +
             "<hr>");
     incidentSettings.insertAfter($("#settingspanel_b hr:last"));
+
+    if(me.options.incidentMonitorCode) {
+        $("#input_incidentmonitorcode").addClass(me.incidentMonitor ? "check" : "cross");
+
+        $("#btn_incidentmonitorcode").click(function() {
+            var btn = $("#btn_incidentmonitorcode");
+            var input = $("#input_incidentmonitorcode");
+            if(btn.val() === "OK") {
+                me.incidentMonitorCode = input.val();
+                window.localStorage.setItem("imcode", me.incidentMonitorCode);
+                me.checkIncidentMonitor();
+                input.addClass(me.incidentMonitor ? "check" : "cross");
+                input.attr("disabled", "true");
+                btn.val("Wijzigen");
+            } else {
+                btn.val("OK");
+                input.removeClass("check").removeClass("cross")
+                input.removeAttr("disabled").focus();
+            }
+        });
+    }
 
     function enableVoertuignummerInput() {
         var input = $("#input_voertuignummer");
