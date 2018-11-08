@@ -64,7 +64,18 @@ dbkjs.modules.incidents = {
                 });
             }
         }
-       
+        
+        //if localstorage is not holding the voertuignummer try to get the voertuignummer from the url
+        var vrtg = window.localStorage.getItem("voertuignummer");
+        if (vrtg === null || vrtg === "") {
+            var url = window.location.href;
+            if (url.indexOf('?vtg=') !== -1 || url.indexOf('&vtg=') !== -1) {
+                url.replace(/[?&]+(vtg)=([^&]*)/gi, function (m, key, value) {
+                    window.localStorage.setItem("voertuignummer", value);
+                });
+            }
+        }
+        
         if(this.options.incidentMonitor) {
             this.controller = new IncidentMonitorController(this);
         } else if(this.options.controller === "PharosIncidentsController") {
