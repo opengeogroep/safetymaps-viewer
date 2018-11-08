@@ -64,7 +64,16 @@ dbkjs.modules.incidents = {
                 });
             }
         }
-       
+        
+        //if localstorage is not holding the voertuignummer try to get the voertuignummer from the url
+        var vrtg = window.localStorage.getItem("voertuignummer");
+        if (!vrtg) {
+            var params = OpenLayers.Util.getParameters();
+            if (params.vtg) {
+                window.localStorage.setItem("voertuignummer", params.vtg);
+            }
+        }
+        
         if(this.options.incidentMonitor) {
             this.controller = new IncidentMonitorController(this);
         } else if(this.options.controller === "PharosIncidentsController") {
