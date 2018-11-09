@@ -18,6 +18,8 @@
  *
  */
 
+/* global dbkjs, safetymaps, OpenLayers, IncidentDetailsWindow */
+
 /**
  * Controller for displaying incident info from Falck service.
  *
@@ -169,7 +171,7 @@ FalckIncidentsController.prototype.addConfigControls = function() {
                 btn.val("Wijzigen");
             } else {
                 btn.val("OK");
-                input.removeClass("check").removeClass("cross")
+                input.removeClass("check").removeClass("cross");
                 input.removeAttr("disabled").focus();
             }
         });
@@ -241,7 +243,6 @@ FalckIncidentsController.prototype.getVoertuignummers = function() {
         });
     });
 };
-
 
 /**
  * Change voertuignummer, persist in browser local storage. Start getting inzet
@@ -354,7 +355,7 @@ FalckIncidentsController.prototype.getVoertuigIncidenten = function(nummer) {
         dataType: "json"
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
-        p.reject(AGSIncidentService.prototype.getAjaxError(jqXHR, textStatus, errorThrown));
+        p.reject(safetymaps.utils.getAjaxError(jqXHR, textStatus, errorThrown));
     })
     .done(function(data) {
         data = data[0];
