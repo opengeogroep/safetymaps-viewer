@@ -112,16 +112,18 @@ function IncidentMonitorController(incidents) {
 
     var selectLayers = [];
 
-    me.vehiclePositionLayer = new VehiclePositionLayer();
+    if(me.options.eenheden) {
+        me.vehiclePositionLayer = new VehiclePositionLayer();
 
-    if(me.options.eenheden && me.options.eenheden.enableOngekoppeldeEenheden) {
-        $("#settingspanel_b").append('<hr/><label><input type="checkbox" ' + (me.vehiclePositionLayer.showMoving ? 'checked' : '') + ' onclick="dbkjs.modules.incidents.controller.vehiclePositionLayer.setShowMoving(event.target.checked)">Toon bewegende voertuigen niet gekoppeld aan incident (grijs)</label>');
-    } else {
-        me.vehiclePositionLayer.setShowMoving(false);
-    }
+        if(me.options.eenheden.enableOngekoppeldeEenheden) {
+            $("#settingspanel_b").append('<hr/><label><input type="checkbox" ' + (me.vehiclePositionLayer.showMoving ? 'checked' : '') + ' onclick="dbkjs.modules.incidents.controller.vehiclePositionLayer.setShowMoving(event.target.checked)">Toon bewegende voertuigen niet gekoppeld aan incident (grijs)</label>');
+        } else {
+            me.vehiclePositionLayer.setShowMoving(false);
+        }
 
-    if(me.options.eenheden && me.options.eenheden.type === "ags") {
-        selectLayers.push(me.vehiclePositionLayer.layer);
+        if(me.options.eenheden.type === "ags") {
+            selectLayers.push(me.vehiclePositionLayer.layer);
+        }
     }
 
     me.markerLayer = new IncidentVectorLayer(true);
