@@ -108,12 +108,21 @@ FalckIncidentsController.prototype.checkIncidentMonitor = function() {
             dbkjs.options.incidents = { };
 
             me.incidentMonitorController = new IncidentMonitorController(me);
+            $(me.incidentMonitorController).on("incident_selected", function() { me.incidentMonitorIncidentSelected.apply(me, arguments); });
         }
     } else {
         if(me.incidentMonitorController) {
             me.incidentMonitorController.disable();
         }
     }
+};
+
+FalckIncidentsController.prototype.incidentMonitorIncidentSelected = function(event, click) {
+    var me = this;
+
+    console.log("IM incident selected", arguments);
+    me.inzetIncident(click.incident.IncidentNummer, true);
+
 };
 
 /**
@@ -314,15 +323,21 @@ FalckIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
         me.getInzetInfo();
     }, 30000);
 
+    if(me.incidentMonitorController) {
+        me.incidentMonitorController.markerLayer.layer.setVisibility(true);
+    }
+
     if(typeof inzetInfo === "string") {
         var msg = "Kan meldkamerinfo niet ophalen: " + inzetInfo;
         dbkjs.gui.showError(msg);
         me.button.setIcon("bell-slash");
         me.incidentDetailsWindow.showError(msg);
     } else if(inzetInfo === null || inzetInfo.length === 0) {
-        me.incidentDetailsWindow.showError("Geen actief incident voor voertuig(en) " + me.voertuignummer + ". Laatst informatie opgehaald op " + new moment().format("LLL") + ".");
+        if(!me.incidentFromIncidentList) {
+            me.incidentDetailsWindow.showError("Geen actief incident voor voertuig(en) " + me.voertuignummer + ". Laatst informatie opgehaald op " + new moment().format("LLL") + ".");
+        }
 
-        if(me.incidentId) {
+        if(me.incidentId && !me.incidentFromIncidentList) {
             $("#zoom_extent").click();
 
             // Wait for layer loading messages to clear...
@@ -335,10 +350,14 @@ FalckIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
             me.geenInzet(true);
         }
     } else {
+        if(me.incidentMonitorController) {
+            me.incidentMonitorController.markerLayer.layer.setVisibility(false);
+        }
+
         $('#systeem_meldingen').hide();
         //me.button.setIcon("bell-o");
         var incidenten = inzetInfo;
-        me.inzetIncident(incidenten[incidenten.length-1]);
+        me.inzetIncident(incidenten[incidenten.length-1], false);
     }
 };
 
@@ -392,20 +411,28 @@ FalckIncidentsController.prototype.geenInzet = function(triggerEvent) {
     }
 };
 
-FalckIncidentsController.prototype.inzetIncident = function(incidentId) {
+FalckIncidentsController.prototype.inzetIncident = function(incidentId, fromIncidentList) {
     var me = this;
     if(incidentId !== me.incidentId) {
         me.geenInzet(false);
 
         me.incidentId = incidentId;
+        me.incidentFromIncidentList = fromIncidentList;
+
+        me.incidentDetailsWindow.getTitleElement().text("Incident " + (fromIncidentList ? " uit lijst" : ""));
 
         $.ajax(me.options.incidentsUrl + "/incident/" + incidentId, {
-            dataType: "json"
+            dataType: "json",
+            data: {
+                extended: fromIncidentList
+            }
         })
         .fail(function(e) {
             var msg = "Kan incidentinfo niet ophalen: " + e;
             dbkjs.gui.showError(msg);
-            me.button.setIcon("bell-slash");
+            if(!me.incidentFromIncidentList) {
+                me.button.setIcon("bell-slash");
+            }
             me.incidentDetailsWindow.showError(msg);
         })
         .done(function(incident) {
@@ -413,8 +440,13 @@ FalckIncidentsController.prototype.inzetIncident = function(incidentId) {
             me.incident = incident;
             console.log("Got incident data", incident);
             me.incidentDetailsWindow.data(incident, true);
-            me.markerLayer.addIncident(incident, false, true);
-            me.markerLayer.setZIndexFix(); 
+
+            if(!me.incidentFromIncidentList) {
+                me.markerLayer.addIncident(incident, false, true);
+                me.markerLayer.setZIndexFix();
+            } else {
+                me.incidentMonitorController.markerLayer.layer.setVisibility(true);
+            }
             
             //dbkjs.protocol.jsonDBK.deselect();
             me.zoomToIncident();
@@ -439,11 +471,17 @@ FalckIncidentsController.prototype.inzetIncident = function(incidentId) {
 
             me.incidentDetailsWindow.show();
             me.enableIncidentUpdates();
+            if(!me.incidentFromIncidentList) {
+                me.button.setIcon("bell");
+            }
 
-            me.button.setIcon("bell");
-
+            console.log("NEW INCIDENT EVENT");
             $(me).triggerHandler("new_incident", [commonIncidentObject,incident]);
         });
+    } else {
+        if(me.incidentFromIncidentList) {
+            me.incidentDetailsWindow.show();
+        }
     }
 };
 
@@ -532,7 +570,10 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
     }
 
     $.ajax(me.options.incidentsUrl + "/incident/" + incidentId, {
-        dataType: "json"
+        dataType: "json",
+        data: {
+            extended: me.incidentFromIncidentList
+        }
     })
     .fail(function(e) {
         var msg = "Kan incidentinfo niet updaten: " + e;
@@ -553,12 +594,16 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
         me.normalizeIncidentFields(incident);
         var oldIncident = me.incident;
         me.incident = incident;
-        me.button.setIcon("bell");
-
         $(me).triggerHandler("incidents.vehicle.update",[incident]);
 
         // Always update window, updates moment.fromNow() times
         me.incidentDetailsWindow.data(incident, true, true);
+
+        if(me.incidentFromIncidentList) {
+            return;
+        }
+
+        me.button.setIcon("bell");
 
         // Check if updated, enable alert state if true
         var oldIncidentHtml = me.incidentDetailsWindow.getIncidentHtmlFalck(oldIncident, true, true);
@@ -567,7 +612,7 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
             if(!me.incidentDetailsWindow.isVisible()) {
                 me.button.setAlerted(true);
             }
-            
+
             // Possibly update marker position
             me.markerLayer.addIncident(incident, false, true);
             me.markerLayer.setZIndexFix();
@@ -588,7 +633,7 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
             me.markerLayer.addIncident(incident, false, true);
             me.markerLayer.setZIndexFix();
             me.zoomToIncident();
-            
+
             var x = incident.IncidentLocatie.XCoordinaat;
             var y = incident.IncidentLocatie.YCoordinaat;
             var l = incident.IncidentLocatie;

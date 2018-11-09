@@ -98,41 +98,40 @@ function IncidentMonitorController(incidents) {
         me.selectIncident(obj);
     });
 
-    me.incidentDetailsWindow = new IncidentDetailsWindow();
-    me.incidentDetailsWindow.createElements("Incident");
-    me.incidentDetailsWindow.setSplitScreen($(window).width() > 700);
-    $(window).on('resize', function() {
-        me.incidentDetailsWindow.setSplitScreen($(window).width() > 700);
-    });
-    $(me.incidentDetailsWindow).on('hide', function() {
-        me.disableIncidentUpdates();
-    });
-
-
     if(!me.options.voertuigIM) {
-        var selectLayers = [];
-
-        me.vehiclePositionLayer = new VehiclePositionLayer();
-
-        if(me.options.eenheden && me.options.eenheden.enableOngekoppeldeEenheden) {
-            $("#settingspanel_b").append('<hr/><label><input type="checkbox" ' + (me.vehiclePositionLayer.showMoving ? 'checked' : '') + ' onclick="dbkjs.modules.incidents.controller.vehiclePositionLayer.setShowMoving(event.target.checked)">Toon bewegende voertuigen niet gekoppeld aan incident (grijs)</label>');
-        } else {
-            me.vehiclePositionLayer.setShowMoving(false);
-        }
-
-        if(me.options.eenheden.type === "ags") {
-            selectLayers.push(me.vehiclePositionLayer.layer);
-        }
-
-        me.markerLayer = new IncidentVectorLayer(true);
-        selectLayers.push(me.markerLayer.layer);
-        $(me.markerLayer).on('click', function(e, obj) {
-            me.selectIncident(obj);
+        me.incidentDetailsWindow = new IncidentDetailsWindow();
+        me.incidentDetailsWindow.createElements("Incident");
+        me.incidentDetailsWindow.setSplitScreen($(window).width() > 700);
+        $(window).on('resize', function() {
+            me.incidentDetailsWindow.setSplitScreen($(window).width() > 700);
         });
-        me.marker = null;
-
-        me.addSelectLayers(selectLayers);
+        $(me.incidentDetailsWindow).on('hide', function() {
+            me.disableIncidentUpdates();
+        });
     }
+
+    var selectLayers = [];
+
+    me.vehiclePositionLayer = new VehiclePositionLayer();
+
+    if(me.options.eenheden && me.options.eenheden.enableOngekoppeldeEenheden) {
+        $("#settingspanel_b").append('<hr/><label><input type="checkbox" ' + (me.vehiclePositionLayer.showMoving ? 'checked' : '') + ' onclick="dbkjs.modules.incidents.controller.vehiclePositionLayer.setShowMoving(event.target.checked)">Toon bewegende voertuigen niet gekoppeld aan incident (grijs)</label>');
+    } else {
+        me.vehiclePositionLayer.setShowMoving(false);
+    }
+
+    if(me.options.eenheden && me.options.eenheden.type === "ags") {
+        selectLayers.push(me.vehiclePositionLayer.layer);
+    }
+
+    me.markerLayer = new IncidentVectorLayer(true);
+    selectLayers.push(me.markerLayer.layer);
+    $(me.markerLayer).on('click', function(e, obj) {
+        me.selectIncident(obj);
+    });
+    me.marker = null;
+
+    me.addSelectLayers(selectLayers);
 
     me.failedUpdateTries = 0;
 
@@ -178,6 +177,7 @@ IncidentMonitorController.prototype.initIncidents = function() {
 
 IncidentMonitorController.prototype.enable = function() {
     $("#btn_incidentlist").show();
+    this.markerLayer.layer.setVisibility(true);
     this.initIncidents();
 };
 
@@ -186,6 +186,7 @@ IncidentMonitorController.prototype.disable = function() {
     window.clearInterval(this.updateInterval);
     window.clearTimeout(this.getIncidentListTimeout);
     $("#btn_incidentlist").hide();
+    this.markerLayer.layer.setVisibility(false);
 };
 
 IncidentMonitorController.prototype.checkFalckEnabledByAuthz = function() {
@@ -343,12 +344,18 @@ IncidentMonitorController.prototype.selectIncident = function(obj) {
     if(obj.addMarker && me.markerLayer) {
         me.selectedIncidentMarker = me.markerLayer.addIncident(me.incident, true);
     }
+    me.incidentRead(me.incidentId);
+
+    if(me.options.voertuigIM) {
+        $(me).triggerHandler("incident_selected", [obj]);
+        return;
+    }
+
     me.incidentDetailsWindow.data("Ophalen incidentgegevens...");
     me.updateIncident(me.incidentId, me.incident.archief, false);
     $("#t_twitter_title").text("Twitter");
     $("#tab_twitter").html("");
     me.incidentDetailsWindow.show();
-    me.incidentRead(me.incidentId);
     me.zoomToIncident();
     if(!obj.addMarker) {
         me.enableIncidentUpdates();
