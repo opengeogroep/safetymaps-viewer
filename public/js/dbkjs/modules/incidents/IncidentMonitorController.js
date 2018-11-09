@@ -179,7 +179,7 @@ IncidentMonitorController.prototype.initIncidents = function() {
 IncidentMonitorController.prototype.enable = function() {
     $("#btn_incidentlist").show();
     this.initIncidents();
-}
+};
 
 IncidentMonitorController.prototype.disable = function() {
     this.disableIncidentUpdates();
@@ -447,7 +447,7 @@ IncidentMonitorController.prototype.getIncidentList = function() {
     } else {
         me.getIncidentListAGS();
     }
-}
+};
 
 IncidentMonitorController.prototype.getIncidentListAGS = function() {
     var me = this;
@@ -962,7 +962,7 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
         dataType: "json",
         data: params
     }).fail(function(jqXHR, textStatus, errorThrown) {
-        $("#t_twitter_title").text("Twitter (!)")
+        $("#t_twitter_title").text("Twitter (!)");
         $("#tab_twitter").text(me.service.getAjaxError(jqXHR, textStatus, errorThrown));
     }).done(function(data) {
         console.log("Twitter search response", data);
@@ -1007,7 +1007,7 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
                             displayedTweets.push(status.text);
                             var p2 = new Proj4js.Point(status.geo.coordinates[1], status.geo.coordinates[0]);
                             var t2 = Proj4js.transform(new Proj4js.Proj("EPSG:4326"), new Proj4js.Proj(dbkjs.options.projection.code), p2);
-                            var distance = Math.sqrt(Math.pow(t2.x - pos.x, 2) + Math.pow(t2.y - pos.y, 2))
+                            var distance = Math.sqrt(Math.pow(t2.x - pos.x, 2) + Math.pow(t2.y - pos.y, 2));
                             console.log("Tweet " + status.text + " at " + t2.x + "," + t2.y + ", distance " + distance + "m");
                             var el = $("<div id='tweet_" + status.id + "'>Afstand: " + Math.round(distance) + " meter</div>");
                             el.appendTo("#tab_twitter");
