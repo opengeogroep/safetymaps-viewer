@@ -40,10 +40,6 @@ function FalckIncidentsController(incidents) {
         voertuigIM: true
     }, me.options);
 
-    if(OpenLayers.Util.getParameters().im !== "on") {
-        me.options.incidentMonitorCode = null;
-    }
-
     me.button = new AlertableButton("btn_incident", "Incident", "bell-o");
     me.button.getElement().prependTo('.layertoggle-btn-group');
 
