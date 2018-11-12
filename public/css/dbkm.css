@@ -689,3 +689,17 @@ input[type="radio"], input[type="checkbox"] {
     font-weight: bold;
     font-size: 14px;
 }
+
+ input.check {
+    background-image: url("../images/check.png");
+    background-repeat: no-repeat;
+    background-position: right;
+    background-size: 16px;
+}
+
+ input.cross {
+    background-image: url("../images/cross.png");
+    background-repeat: no-repeat;
+    background-position: right;
+    background-size: 16px;
+}
