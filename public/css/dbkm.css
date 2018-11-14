@@ -703,3 +703,38 @@ input[type="radio"], input[type="checkbox"] {
     background-position: right;
     background-size: 16px;
 }
+
+/* Kaartlagen vinkje ipv blauwe achtergrond */
+#overlaypanel_div .panel-heading.active {
+    color: #428bca;
+    background-color: white;
+    padding-left: 0px;
+}
+
+#overlaypanel_div .panel-heading {
+    padding-left: 14px;
+}
+
+#overlaypanel_div .panel-heading.active .panel-title:before {
+    content: "\f00c ";
+    display: inline-block; font-family: FontAwesome;
+}
+
+/* Ondergrond vinkje ipv blauwe achtergrond */
+#baselayerpanel_ul li a {
+    padding-left: 18px;
+}
+
+#baselayerpanel_ul li.active a {
+    padding-left: 0px;
+    color: #428bca;
+    background-color: white;
+}
+#baselayerpanel_ul li.active a:hover {
+    color: #428bca;
+    background-color: #eeeeee;
+}
+#baselayerpanel_ul li.active a:before {
+    content: "\f00c ";
+    display: inline-block; font-family: FontAwesome;
+}

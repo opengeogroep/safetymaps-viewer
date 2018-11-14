@@ -335,6 +335,14 @@ $(document).ready(function () {
         overlaypanelPopup.getView().append($('#tmp_overlaypanel .tabbable'));
         $('#tmp_overlaypanel').remove();
 
+        $(dbkjs).one("dbkjs_init_complete", function() {
+            $("#baselayerpanel_b").prepend("<div style='padding-bottom: 5px'><h4>Ondergrond:</h4></div>");
+            $("#baselayerpanel_b").append("<div style='padding-top: 10px; padding-bottom: 5px'><h4>Kaartlagen:</h4></div>");
+
+            $("#overlaypanel_div").parent().appendTo("#baselayerpanel_b");
+            $("#tb01").remove();
+        });
+
         $('#tb01, #tb02').on('click', function (e) {
             e.preventDefault();
             var panelId = $(this).attr('href').replace('#', '');
