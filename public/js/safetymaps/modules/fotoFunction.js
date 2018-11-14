@@ -33,18 +33,17 @@ dbkjs.modules.fotoFunction = {
             me.initCarousel();
             if (dbkjs.modules.incidents && dbkjs.modules.incidents.controller) {
                 $(dbkjs.modules.incidents.controller).on("new_incident", function (event, commonIncident, incident) {
+                    me.resetCarousel();
                     me.getFotoForIncident(incident, true);
                 });
                 $(dbkjs.modules.incidents.controller).on("incidents.vehicle.update", function (event, incident) {
                     me.getFotoForIncident(incident, false);
                 });
                 $(dbkjs.modules.incidents.controller).on("voertuigNummerUpdated", function (bool) {
-                    me.carouselItems = [];
                     me.resetCarousel();
                     dbkjs.modules.incidents.controller.button.setFotoAlert(false);
                 });
                 $(dbkjs.modules.incidents.controller).on("end_incident", function () {
-                    me.carouselItems = [];
                     me.resetCarousel();
                     dbkjs.modules.incidents.controller.button.setFotoAlert(false);
                 });
@@ -190,7 +189,6 @@ dbkjs.modules.fotoFunction = {
         if (data.length > 0 && data.length > me.carouselItems.length) { // photo added
             me.addMultiplePicturesToCarousel(data);
         } else if(data.length >= 0 && data.length < me.carouselItems.length){ // photo deleted
-           me.carouselItems = [];
            me.resetCarousel();
            me.addMultiplePicturesToCarousel(data);
            $('.item').first().addClass('active');
@@ -267,6 +265,7 @@ dbkjs.modules.fotoFunction = {
 
     resetCarousel: function () {
         var me = this;
+        me.carouselItems = [];
         me.image_carousel = $('<div id="foto_carousel" class="carousel slide" data-interval="false"></div>');
         me.image_carousel_inner = $('<div class="carousel-inner"></div>');
         me.image_carousel_nav = $('<ol class="carousel-indicators"></ol>');
