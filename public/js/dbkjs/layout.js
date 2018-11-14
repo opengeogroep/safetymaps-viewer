@@ -29,13 +29,13 @@ dbkjs.layout = {
         _obj.settingsDialog('#settingspanel_b');
     },
     settingsDialog: function (parent) {
-        $(parent).append("<h4>" + i18n.t("settings.layout") + "</h4>");
-        $(parent).append('<label><input type="checkbox" id="checkbox_scaleStyle">' + i18n.t("settings.scaleStyle") +
-                '</label>');
-/*
-        $(parent).append('<p><div class="row"><div class="col-xs-12">' +
+        $(parent).append("<h4 id='h_settings_layout'>" + i18n.t("settings.layout") + "</h4>");
+
+        $(parent).append('<p><div id="row_layout_settings" class="row"><div class="col-xs-12">' +
                 '<label><input type="checkbox" id="checkbox_scaleStyle">' + i18n.t("settings.scaleStyle") +
-                '</label></div></div></p>' +
+                '</label></div></div></p>');
+/*
+        $(parent).append(
                 '<p><hr/><div class="row"><div class="col-xs-12">' +
                 '<p style="padding-bottom: 15px">' + i18n.t('settings.styleSizeAdjust') + '</p>' +
                 '<input id="slider_styleSizeAdjust" style="width: 210px" data-slider-id="styleSizeAdjustSlider" type="text" ' +
@@ -52,20 +52,14 @@ dbkjs.layout = {
             dbkjs.options.styleSizeAdjust = e.value;
             dbkjs.redrawScaledLayers();
         });
+*/
 
         $("#checkbox_scaleStyle").prop("checked", dbkjs.options.styleScaleAdjust);
         $("#checkbox_scaleStyle").on('change', function(e) {
             dbkjs.options.styleScaleAdjust = e.target.checked;
-            dbkjs.redrawScaledLayers();
-        });
-*/      
-        $("#checkbox_scaleStyle").prop("checked", dbkjs.options.styleScaleAdjust);
-        $("#checkbox_scaleStyle").on('change', function(e) {
-            dbkjs.options.styleScaleAdjust = e.target.checked;
         });
         
-        
-        $(parent).append("<hr><h4>" + i18n.t("settings.version") + "</h4><br>");
+        $(parent).append("<hr id='h_settings_version'><h4>" + i18n.t("settings.version") + "</h4><br>");
         $(parent).append('<p><strong>' + dbkjs.options.APPLICATION + '</strong> ' + dbkjs.options.VERSION + '</p>');
         if(dbkjs.options.CONFIG !== "_CONFIG_") {
             $(parent).append('<p>' + i18n.t("settings.version_deploy") + ': ' + dbkjs.options.CONFIG + '</p>');

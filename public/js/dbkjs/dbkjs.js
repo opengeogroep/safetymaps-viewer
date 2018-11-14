@@ -372,7 +372,7 @@ $(document).ready(function () {
                 // Add config option to enable / disable split screen
 
 
-                $($("#settingspanel_b div.row")[0]).append('<div class="col-xs-12"><label><input type="checkbox" id="checkbox_splitScreen" ' + (dbkjs.options.splitScreenChecked ? 'checked' : '') + '>Toon informatie naast de kaart</label></div>');
+                $("#row_layout_settings").append('<div class="col-xs-12"><label><input type="checkbox" id="checkbox_splitScreen" ' + (dbkjs.options.splitScreenChecked ? 'checked' : '') + '>Toon informatie naast de kaart</label></div>');
 
                 $("#checkbox_splitScreen").on('change', function (e) {
                     dbkjs.options.splitScreenChecked = e.target.checked;

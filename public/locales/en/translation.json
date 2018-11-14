@@ -1,7 +1,7 @@
 {
     "name": "Name",
     "settings": {
-        "layout": "Layout settings",
+        "layout": "Layout",
         "scaleStyle": "Scale icons based on zoom",
         "styleSizeAdjust": "Adjust icon size",
         "version": "Version",

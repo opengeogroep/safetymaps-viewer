@@ -1,7 +1,7 @@
 {
     "name": "Naam",
     "settings": {
-        "layout": "Layout instellingen",
+        "layout": "Layout",
         "scaleStyle": "Schaal iconen op basis van zoomniveau",
         "styleSizeAdjust": "Grootte van iconen aanpassen:",
         "version": "Versie",
