@@ -55,7 +55,6 @@ IncidentFeatureSelector.prototype.findAndSelectMatches = function(incidentDetail
     var matches = me.matches;
     if(matches.length === 1) {
         console.log("Selecting match", matches[0]);
-        //dbkjs.protocol.jsonDBK.process(matches[0], null, true);
         dbkjs.modules.safetymaps_creator.selectObjectById(matches[0].attributes.apiObject.id,matches[0].attributes.apiObject.extent,true);
     } else if(me.matches.length > 1) {
         incidentDetailsWindow.setMultipleFeatureMatches(matches, new OpenLayers.LonLat(me.matchInfo.x, me.matchInfo.y));

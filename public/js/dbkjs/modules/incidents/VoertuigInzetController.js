@@ -32,6 +32,7 @@
 function VoertuigInzetController(incidents) {
     var me = this;
     me.service = incidents.service;
+    me.options = incidents.options;
 
     me.button = new AlertableButton("btn_incident", "Incident", "bell-o");
     me.button.getElement().prependTo('.layertoggle-btn-group');
@@ -61,9 +62,9 @@ function VoertuigInzetController(incidents) {
         me.zoomToIncident();
         me.incidentDetailsWindow.show();
         if(me.featureSelector.matches.length === 1) {
-            dbkjs.protocol.jsonDBK.process(me.featureSelector.matches[0], null, true);
+            dbkjs.modules.safetymaps_creator.selectObjectById(me.featureSelector.matches[0].attributes.apiObject.id,me.featureSelector.matches[0].attributes.apiObject.extent,true);
         } else {
-            dbkjs.protocol.jsonDBK.deselect();
+            dbkjs.modules.safetymaps_creator.unselectObject();
             me.incidentDetailsWindow.showMultipleFeatureMatches();
         }
     });
@@ -82,13 +83,62 @@ function VoertuigInzetController(incidents) {
 VoertuigInzetController.prototype.addConfigControls = function() {
     var me = this;
     $(dbkjs).one('dbkjs_init_complete', function() {
-        var incidentSettings = $("<div><h4>Meldkamerkoppeling</h4><p/>" +
-                "<div class='row'><div class='col-xs-12'>Voertuignummer: <input type='text' id='input_voertuignummer'>" +
-                "</div></div><p/><p/><hr>");
+        var incidentSettings = $(
+                "<div><h4>Meldkamerkoppeling</h4><p/>" +
+                    "<div class='container' style='width: 400px; margin-left: 0px'>" +
+                        "<div class='row'>" +
+                            "<div class='col-xs-4'>Voertuignummer:</div>" +
+                            "<div class='col-xs-6'><input type='text' disabled id='input_voertuignummer'></div>" +
+                            "<div class='col-xs-2'><button class='btn btn-primary' id='btn_enable_voertuignummer'>Wijzigen</button></div>" +
+                        "</div>" +
+                        "<div class='row ' id='cfg_voertuignummercode' style='visibility: hidden; margin-top: 10px'>" +
+                            "<div class='col-xs-4'>Beveiligingscode:</div>" +
+                            "<div class='col-xs-6'><input id='cfg_input_code' type='password' autocapitalize='none'></div>" +
+                            "<div class='col-xs-2'><button class='btn btn-primary' id='cfg_btn_codeok'>OK</button></div>" +
+                        "</div>" +
+                    "</div>" +
+                "</div>" +
+                "<hr>");
+
         incidentSettings.insertAfter($("#settingspanel_b hr:last"));
+
+        function enableVoertuignummerInput() {
+            var input = $("#input_voertuignummer");
+            input.removeAttr("disabled");
+            input.css("background-color", "");
+            input.focus();
+        }
+
+        $("#btn_enable_voertuignummer").on('click', function() {
+            var input = $("#input_voertuignummer");
+            if(input.prop("disabled")) {
+                if(!me.options.voertuignummerCode) {
+                    enableVoertuignummerInput();
+                } else {
+                    $("#cfg_voertuignummercode").css("visibility", "visible");
+                    $("#cfg_input_code").focus();
+                    $("#btn_enable_voertuignummer").hide();
+                }
+            } else {
+                enableVoertuignummerInput();
+            }
+        });
+
+        $("#cfg_btn_codeok").on('click', function() {
+            if($("#cfg_input_code").val() !== me.options.voertuignummerCode) {
+                alert('Ongeldige code');
+            } else {
+                enableVoertuignummerInput();
+                $("#cfg_voertuignummercode").css("visibility", "hidden");
+                $("#cfg_input_code").val("");
+            }
+        });
 
         $("#settingspanel").on('hidden.bs.modal', function() {
             me.setVoertuignummer($("#input_voertuignummer").val());
+            $("#input_voertuignummer").attr("disabled", "disabled");
+            $("#input_voertuignummer").css("background-color", "transparent");
+            $("#btn_enable_voertuignummer").show();
         });
 
         $("#input_voertuignummer").val(me.voertuignummer);
@@ -247,7 +297,7 @@ VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
             me.markerLayer.addIncident(incident, false, true);
             me.markerLayer.setZIndexFix();
 
-            dbkjs.protocol.jsonDBK.deselect();
+            dbkjs.modules.safetymaps_creator.unselectObject();
             me.zoomToIncident();
 
             var x = incident.T_X_COORD_LOC;

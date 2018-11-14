@@ -331,7 +331,10 @@ dbkjs.modules.safetymaps_creator = {
         }
         this.selectedObject = null;
         this.selectedClusterFeature = null;
-        this.clusteringLayer.setSelectedIds([]);
+        // Check if called before initialized
+        if(this.clusteringLayer) { 
+            this.clusteringLayer.setSelectedIds([]);
+        }
         $("#vectorclickpanel").hide();
     },
 

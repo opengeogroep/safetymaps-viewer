@@ -230,7 +230,6 @@ IncidentDetailsWindow.prototype.showMultipleFeatureMatches = function() {
             if(me.incidentLonLat) {
                 dbkjs.map.setCenter(me.incidentLonLat, dbkjs.options.zoom);
             }
-            //dbkjs.protocol.jsonDBK.process(m, null, true);
             dbkjs.modules.safetymaps_creator.selectObjectById(m.attributes.apiObject.id,m.attributes.apiObject.extent, true);
             $(".incidentDetails .detailed").show();
             $("#tab_kladblok").show();
