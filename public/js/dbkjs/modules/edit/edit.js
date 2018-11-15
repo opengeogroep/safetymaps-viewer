@@ -409,7 +409,9 @@ dbkjs.modules.edit = {
                 this.featuresManager.updateFeature(this.selectedFeature);
                 //this.saveFeatures();
             }, this).on("propertyChanged",function(e){
-                this.allowedToRead = true;
+                if(!$("#edit-features-list").is(':visible')){
+                    this.allowedToRead = true;
+                }
                 this.saveFeatures();                   
             }, this)
             .on("featureOver", function(featureid) {
