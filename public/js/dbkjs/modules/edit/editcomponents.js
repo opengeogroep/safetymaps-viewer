@@ -114,8 +114,9 @@ dbkjs.modules.FeaturesManager = function() {
 
     this.featurestable = featurescontainer.find("tbody");
     this.featureslist.on("click", "#close-draw-window", (function(){
-         this.featureslist.removeClass("visible").addClass("hidden");
-         this.propertiesGrid.removeClass("visible").addClass("hidden");
+        dbkjs.modules.edit.featuresManager.hideFeaturesList();
+        this.featureslist.removeClass("visible").addClass("hidden");
+        this.propertiesGrid.removeClass("visible").addClass("hidden");
     }).bind(this));
     this.featureslist.on("click", ".remove-feature, .remove-all", (function(e) {
         e.preventDefault();
@@ -154,9 +155,11 @@ dbkjs.modules.FeaturesManager = function() {
 dbkjs.modules.FeaturesManager.prototype = Object.create(dbkjs.modules.Observable.prototype);
 $.extend(dbkjs.modules.FeaturesManager.prototype, {
     showFeaturesList: function() {
+        dbkjs.modules.edit.allowedToRead = false;
         this.featureslist.removeClass("hidden").addClass("visible");
     },
     hideFeaturesList: function() {
+        dbkjs.modules.edit.allowedToRead = true;
         this.featureslist.removeClass("visible").addClass("hidden");
     },
     showPropertiesGrid: function() {
