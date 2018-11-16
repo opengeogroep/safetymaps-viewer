@@ -18,34 +18,47 @@
  *
  */
 
-/* global dbkjs, OpenLayers, Mustache */
+/* global dbkjs, safetymaps, OpenLayers, Mustache */
 
 /**
  * Select feature matching an incident and shared interface stuff
  *
- * @param {Object} incident The incident to find a feature for
- * @param {Object} matchInfo Object with the following properties to find features for:
- *  x, y, straat, huisnummer, postcode, woonplaats, huisletter, huistoevoeging
  * @param {boolean} matchHuisletter Find matches with exact BAG huisletter only
  * @param {boolean} matchToevoeging Find matches with exact BAG toevoeging only
  * @returns {FeatureSelector}
  */
-function IncidentFeatureSelector(incident, matchInfo, matchHuisletter, matchToevoeging) {
+function IncidentFeatureSelector(matchHuisletter, matchToevoeging) {
     var me = this;
 
-    me.incident = incident;
-    me.matchInfo = matchInfo;
     me.matchHuisletter = matchHuisletter;
     me.matchToevoeging = matchToevoeging;
     me.matches = [];
-}
 
-IncidentFeatureSelector.prototype.findAndSelectMatches = function(incidentDetailsWindow) {
+    me.providers = [];
+};
+
+IncidentFeatureSelector.prototype.addFeatureProvider = function(provider) {
+    if(typeof provider.isLoading !== "function" || typeof provider.findIncidentMatches !== "function") {
+        console.error("IncidentFeatureSelector: cannot add invalid feature provider", provider);
+    } else {
+        this.providers.push(provider);
+    }
+};
+
+/**
+ * Wait for feature providers to be loaded, then find matches, and select a single
+ * match or display multiple matches in window.
+ *
+ * @param {Object} matchInfo Object with the following properties to find features for:
+ *  x, y, straat, huisnummer, postcode, woonplaats, huisletter, huistoevoeging
+ *  @param {Object} incidentDetailsWindow window to display matches in
+ */
+IncidentFeatureSelector.prototype.findAndSelectMatches = function(matchInfo, incidentDetailsWindow) {
     var me = this;
-    if(!me.findMatches()) {
-        console.log("Waiting for features to be loaded before selecting incident DBK");
+    if(!me.findMatches(matchInfo)) {
+        // TODO: use events instead of timeout
         window.setTimeout(function() {
-            me.findAndSelectMatches(incidentDetailsWindow);
+            me.findAndSelectMatches(matchInfo, incidentDetailsWindow);
         }, 1000);
         return;
     }
@@ -54,122 +67,66 @@ IncidentFeatureSelector.prototype.findAndSelectMatches = function(incidentDetail
 
     var matches = me.matches;
     if(matches.length === 1) {
-        console.log("Selecting match", matches[0]);
-        dbkjs.modules.safetymaps_creator.selectObjectById(matches[0].attributes.apiObject.id,matches[0].attributes.apiObject.extent,true);
+        console.log("IncidentFeatureSelector: Selecting single match", matches[0]);
+        safetymaps.selectObject(matches[0], false);
     } else if(me.matches.length > 1) {
         incidentDetailsWindow.setMultipleFeatureMatches(matches, new OpenLayers.LonLat(me.matchInfo.x, me.matchInfo.y));
     }
 };
 
-IncidentFeatureSelector.prototype.findMatches = function() {
+/**
+ * Returns false if feature providers are not loaded or true if they are (or failed to
+ * load) and this.matches contains feature matches for the matchInfo.
+ *
+ * @param {Object} matchInfo Object with the following properties to find features for:
+ *  x, y, straat, huisnummer, postcode, woonplaats, huisletter, huistoevoeging
+ *  @return {boolean} If all providers are loaded and this.matches contains matches, or
+ *    false if not all providers are loaded
+ */
+IncidentFeatureSelector.prototype.findMatches = function(matchInfo) {
     var me = this;
 
-    var postcode = me.matchInfo.postcode;
-    var huisnummer = me.matchInfo.huisnummer;
-    var huisletter = me.matchInfo.huisletter ? me.matchInfo.huisletter : "";
-    var toevoeging = me.matchInfo.toevoeging ? me.matchInfo.toevoeging : "";
-    var woonplaats = me.matchInfo.woonplaats;
-    var straat = me.matchInfo.straat;
+    me.matchInfo = matchInfo;
 
-    var addressMatches = [];
-    var addressesMatches = [];
-    var selectiekaderMatches = [];
-    
-    // string only contained whitespace (ie. spaces, tabs or line breaks)
-    if (!huisletter.replace(/\s/g, '').length) {
-        huisletter = "";
-    }
-    
+    var x = me.matchInfo.x;
+    var y = me.matchInfo.y;
+    var postcode = matchInfo.postcode;
+    var huisnummer = matchInfo.huisnummer;
+    var huisletter = matchInfo.huisletter && matchInfo.huisletter.trim().length > 0 ? matchInfo.huisletter : "";
+    var toevoeging = matchInfo.toevoeging && matchInfo.toevoeging.trim().length > 0 ? matchInfo.toevoeging : "";
+    var woonplaats = matchInfo.woonplaats;
+    var straat = matchInfo.straat;
+
     me.matches = [];
 
-    // Find main and additional addresses matches, only if features are loaded
-
-    if(!dbkjs.modules.safetymaps_creator.features || dbkjs.modules.safetymaps_creator.features.length === 0) {
-        console.log("Features not loaded, can't search for feature matching incident");
-        return false;
-    } else if(dbkjs.modules.waterongevallen.enabled && !dbkjs.modules.waterongevallen.loaded) {
-        console.log("VRH Waterongevallen not loaded, waiting");
-        return false;
-    } else {
-        console.log("Searching feature for incident address " + straat + " " + huisnummer + huisletter + " " + toevoeging + ", " + postcode + " " + woonplaats, me.matchInfo);
-
-        var dbk = null;
-        $.each(dbkjs.modules.safetymaps_creator.features, function(index, f) {
-            if($.isArray(f.attributes.adres)) {
-                $.each(f.attributes.adres, function(index, fa) {
-                    if(fa) {
-                        var matchPostcode = fa.postcode && postcode === fa.postcode;                       
-                        var matchHuisnummer = fa.huisnummer && huisnummer === fa.huisnummer;
-                        fa.huisletter = fa.huisletter ? fa.huisletter : "";
-                        var matchHuisletter = !me.matchHuisletter || (fa.huisletter === huisletter);
-                        var matchToevoeging = !me.matchToevoeging || (fa.toevoeging === toevoeging);
-                        var matchWoonplaats = woonplaats && fa.woonplaatsNaam && fa.woonplaatsNaam.toLowerCase().indexOf(woonplaats.toLowerCase()) !== -1;
-                        var matchStraat = straat && fa.openbareRuimteNaam && fa.openbareRuimteNaam.toLowerCase().indexOf(straat.toLowerCase()) !== -1;
-
-                        if((matchPostcode || (matchWoonplaats && matchStraat)) && matchHuisnummer && matchHuisletter && matchToevoeging) {
-                            console.log("Main address matches feature", f);
-                            addressMatches.push(f);
-                            // No need to check additional addresses for this feature
-                            return false;
-                        }
-                    }
-                });
-            }
-
-            if($.isArray(f.attributes.adressen)) {
-                $.each(f.attributes.adressen, function(i, a) {
-                    var matchPostcode = a.pc && a.pc === postcode;
-                    // Exacte matches vanwege BAG, geen toLowerCase() / indexOf() nodig
-                    var matchWoonplaats = a.pl && a.pl === woonplaats;
-                    var matchStraat = a.sn && a.sn === straat;
-                    if(matchPostcode || (matchWoonplaats && matchStraat) && a.nrs) {
-                        console.log("Checking nummers for match DBK " + f.attributes.formeleNaam + ", " + a.pc + " " + a.pl);
-                        $.each(a.nrs, function(j, n) {
-                            var parts = n.split("|");
-                            var matchHuisnummer = Number(parts[0]) === huisnummer;
-                            var fHuisletter = parts.length > 1 ? parts[1] : "";
-                            var fToevoeging = parts.length > 2 ? parts[2] : "";
-                            var matchHuisletter = !me.matchHuisletter || (fHuisletter === huisletter);
-                            var matchToevoeging = !me.matchToevoeging || (fToevoeging === toevoeging);
-
-                            if(matchHuisnummer && matchHuisletter && matchToevoeging) {
-                                console.log("Matched DBK with BAG adres/nevenadres at nummer " + n, f);
-                                addressesMatches.push(f);
-                                // No need to check additional addresses for this feature
-                                return false;
-                            }
-                        });
-                    }
-                });
-            }
-        });
-
-        // Zoek naar WO DBK's op basis van selectiepolygoon
-        if(me.matchInfo.x && me.matchInfo.y) {
-            var point = new OpenLayers.Geometry.Point(me.matchInfo.x, me.matchInfo.y);
-
-            $.each(dbkjs.modules.safetymaps_creator.features, function(index, f) {
-                if(f.attributes.selectionPolygon) {
-                    $.each(f.attributes.selectionPolygon.components, function(j, c) {
-                        if(c.containsPoint(point)) {
-                            console.log("Incident XY inside feature selectiekader", f);
-                            selectiekaderMatches.push(f);
-                        }
-                    });
-                }
-            });
-        } else {
-            console.log("No XY coordinates in incident, cannot match selectiekader");
-        }
-
-        me.matches = addressMatches.slice();
-        $.each(addressesMatches.concat(selectiekaderMatches), function(i, m) {
-            if(me.matches.indexOf(m) === -1) {
-                me.matches.push(m);
-            }
-        });
-        console.log("Main adress matches: " + addressMatches.length + ", BAG adres/nevenadres matches: " + addressesMatches.length + ", selectiekader matches: " + selectiekaderMatches.length + ", total unique incident matches: " + me.matches.length, me.matches);
+    if(me.providers.length === 0) {
+        console.log("IncidentFeatureSelector: no providers");
+        return true;
     }
+
+    var loading = false;
+    $.each(me.providers, function(i, p) {
+        if(p.isLoading()) {
+            loading = true;
+            console.log("IncidentFeatureSelector: provider " + p.getName() + " still loading, waiting to select features for incident");
+            return false;
+        }
+    });
+    if(loading) {
+        return false;
+    }
+
+    console.log("IncidentFeatureSelector: searching for incident at (" + x + ", " + y + "), address " + straat + " " + huisnummer + huisletter + " " + toevoeging + ", " + postcode + " " + woonplaats);
+    $.each(me.providers, function(i, p) {
+        try {
+            var providerMatches = p.findIncidentMatches(me.matchHuisletter, me.matchToevoeging, x, y, postcode, huisnummer, huisletter, toevoeging, woonplaats, straat);
+            console.log("IncidentFeatureSelector: provider " + p.getName() + " returned " + providerMatches.length + " matches");
+            me.matches = me.matches.concat(providerMatches);
+        } catch(e) {
+            console.log("IncidentFeatureSelector: provider " + p.getName() + " threw error", e);
+        }
+    });
+
     return true;
 };
 

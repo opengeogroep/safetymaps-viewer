@@ -54,12 +54,6 @@ dbkjs.modules.vrh_objects = {
             this.options.dbks = true;
         }
 
-        // Setup API
-
-//        safetymaps.creator.api.basePath = "";
-//        safetymaps.creator.api.imagePath = "js/safetymaps/modules/creator/assets/";
-//        safetymaps.creator.api.mediaPath = "../media/";
-
         // Setup clustering layer
 
         me.clusteringLayer = new safetymaps.ClusteringLayer();
@@ -98,15 +92,19 @@ dbkjs.modules.vrh_objects = {
             safetymaps.vrh.api.getDbks()
             .fail(function(msg) {
                 dbkjs.util.alert("Fout", msg, "alert-danger");
+                me.dbks.loading = false;
             })
             .done(function(dbkObjects) {
                 console.log("Got " + dbkObjects.length + " DBK objects");
+                me.dbks.loading = false;
 
                 me.overviewObjects = me.overviewObjects.concat(dbkObjects);
 
                 me.features = me.features.concat(safetymaps.vrh.api.createDbkFeatures(dbkObjects));
                 me.clusteringLayer.addFeaturesToCluster(me.features);
             });
+        } else {
+            me.dbks.loading = false;
         }
 
         // XXX move to safetymaps.vrh.Events.init()
@@ -114,9 +112,11 @@ dbkjs.modules.vrh_objects = {
             safetymaps.vrh.api.getEvenementen()
             .fail(function(msg) {
                 dbkjs.util.alert("Fout", msg, "alert-danger");
+                me.events.loading = false;
             })
             .done(function(evenementenObjects) {
                 console.log("Got " + evenementenObjects.length + " event objects");
+                me.events.loading = false;
 
                 if(me.options.filterEvDate) {
                     evenementenObjects = evenementenObjects.filter(function(ev) {
@@ -129,13 +129,16 @@ dbkjs.modules.vrh_objects = {
                 me.features = me.features.concat(safetymaps.vrh.api.createEvenementFeatures(evenementenObjects));
                 me.clusteringLayer.addFeaturesToCluster(me.features);
             });
+        } else {
+            me.events.loading = false;
         }
 
         // Setup user interface for object info window
 
         me.setupInterface();
 
-        me.createSearchConfig();
+        me.addSearchConfig();
+        me.addFeatureProvider();
     },
 
     setupInterface: function() {
@@ -185,7 +188,7 @@ dbkjs.modules.vrh_objects = {
         view.find(".tab-content").css("height", tabContentHeight);
     },
 
-    createSearchConfig: function() {
+    addSearchConfig: function() {
         var me = this;
 
         // XXX move to safetymaps.vrh.Events.init()
@@ -255,6 +258,103 @@ dbkjs.modules.vrh_objects = {
                 }
             }, true);
         }
+    },
+
+    addFeatureProvider: function() {
+        var me = this;
+
+        $(safetymaps).on("object_deselect", function() {
+            me.unselectObject();
+        });
+
+        $(safetymaps).on("object_select", function(event, clusterFeature) {
+            me.selectObjectById(clusterFeature.attributes.type, clusterFeature.attributes.id, null, true);
+        });
+
+        $(dbkjs).one("dbkjs_init_complete", function() {
+            if(dbkjs.modules.incidents && dbkjs.modules.incidents.featureSelector) {
+                dbkjs.modules.incidents.featureSelector.addFeatureProvider({
+                    getName: function() {
+                        return "VRH DBK's en events";
+                    },
+                    isLoading: function() {
+                        return me.dbks.loading || me.events.loading;
+                    },
+                    findIncidentMatches: function(matchHuisletter, matchToevoeging, x, y, postcode, huisnummer, huisletter, toevoeging, woonplaats, straat) {
+                        return me.findIncidentMatches(matchHuisletter, matchToevoeging, x, y, postcode, huisnummer, huisletter, toevoeging, woonplaats, straat);
+                    }
+                });
+            }
+        });
+    },
+
+    findIncidentMatches: function (exactMatchHuisletter, exactMatchToevoeging, x, y, postcode, huisnummer, huisletter, toevoeging, woonplaats, straat) {
+        var me = this;
+        var matches = [];
+
+        $.each(me.overviewObjects, function(i, o) {
+            if(o.clusterFeature.attributes.type === "dbk") {
+                var continueAdressenSearch = true;
+
+                var matchPostcode = o.postcode && o.postcode === postcode;
+                var matchHuisnummer = o.huisnummer && o.huisnummer === huisnummer;
+                var matchHuisletter = !exactMatchHuisletter || (o.huisletter === huisletter);
+                var matchToevoeging = !exactMatchToevoeging || (o.toevoeging === toevoeging);
+                var matchWoonplaats = woonplaats && o.plaats && woonplaats === o.plaats;
+                var matchStraat = straat && o.straatnaam && straat === o.straatnaam;
+
+                if((matchPostcode || (matchWoonplaats && matchStraat)) && matchHuisnummer && matchHuisletter && matchToevoeging) {
+                    console.log("VRH DBK adres match", o);
+                    matches.push(o.clusterFeature);
+                    return;
+                }
+
+                $.each(o.selectieadressen || [], function(i, a) {
+                    var matchPostcode = a.pc && a.pc === postcode;
+                    var matchWoonplaats = a.pl && a.pl === woonplaats;
+                    var matchStraat = a.sn && a.sn === straat;
+
+                    if(matchPostcode || (matchWoonplaats && matchStraat) && a.nrs) {
+                        console.log("VRH DBK check selectieadres nummers voor DBK " + o.naam + ", " + a.pc + " " + a.pl);
+                        $.each(a.nrs, function(j, n) {
+                            var parts = n.split("|");
+                            var matchHuisnummer = Number(parts[0]) === huisnummer;
+                            var fHuisletter = parts.length > 1 ? parts[1] : "";
+                            var fToevoeging = parts.length > 2 ? parts[2] : "";
+                            var matchHuisletter = !exactMatchHuisletter || (fHuisletter === huisletter);
+                            var matchToevoeging = !exactMatchToevoeging || (fToevoeging === toevoeging);
+
+                            if(matchHuisnummer && matchHuisletter && matchToevoeging) {
+                                console.log("VRH DBK match selectieadres op nummer " + n, o);
+                                matches.push(o.clusterFeature);
+                                // No need to check additional addresses for this feature
+                                continueAdressenSearch = false;
+                                return false;
+                            }
+                        });
+                    }
+                    return continueAdressenSearch;
+                });
+                if(!continueAdressenSearch) {
+                    return;
+                }
+            }
+
+            // Naast o.clusterFeature.attributes.type "dbk" ook voor "evenement"
+
+            if(x && y && o.clusterFeature.attributes.selectionPolygon) {
+                var point = new OpenLayers.Geometry.Point(x, y);
+
+                $.each(o.clusterFeature.attributes.selectionPolygon.components, function(j, c) {
+                    if(c.containsPoint(point)) {
+                    console.log("VRH " + o.clusterFeature.attributes.type + " " + o.clusterFeature.attributes.label + ": incident inside selectiekader");
+                        matches.push(o.clusterFeature);
+                    }
+                });
+            }
+        });
+
+        return matches;
     },
 
     clusterObjectClusterSelected: function (feature) {

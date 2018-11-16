@@ -18,6 +18,7 @@
  *
  */
 
+/* global safetymaps, OpenLayers, dbkjs */
 /**
  * Controller for displaying incident info for a specific voertuig when it is
  * ingezet.
@@ -33,6 +34,8 @@ function VoertuigInzetController(incidents) {
     var me = this;
     me.service = incidents.service;
     me.options = incidents.options;
+
+    me.featureSelector = incidents.featureSelector;
 
     me.button = new AlertableButton("btn_incident", "Incident", "bell-o");
     me.button.getElement().prependTo('.layertoggle-btn-group');
@@ -58,13 +61,14 @@ function VoertuigInzetController(incidents) {
 
     me.addConfigControls();
 
+    // XXX to common object (IncidentFeatureSelector?)
     $('.dbk-title').on('click', function() {
         me.zoomToIncident();
         me.incidentDetailsWindow.show();
         if(me.featureSelector.matches.length === 1) {
-            dbkjs.modules.safetymaps_creator.selectObjectById(me.featureSelector.matches[0].attributes.apiObject.id,me.featureSelector.matches[0].attributes.apiObject.extent,true);
+            safetymaps.selectObject(me.featureSelector.matches[0], false);
         } else {
-            dbkjs.modules.safetymaps_creator.unselectObject();
+            safetymaps.deselectObject();
             me.incidentDetailsWindow.showMultipleFeatureMatches();
         }
     });
@@ -268,7 +272,9 @@ VoertuigInzetController.prototype.geenInzet = function(triggerEvent) {
     this.button.setIcon("bell-o");
 
     if(triggerEvent) {
-        $(me).triggerHandler("end_incident");
+        $(this).triggerHandler("end_incident");
+        safetymaps.deselectObject();
+        this.incidentDetailsWindow.hideMultipleFeatureMatches();
     }
 };
 
@@ -312,10 +318,8 @@ VoertuigInzetController.prototype.inzetIncident = function(incidentId) {
                 x: x,
                 y: y
             };
-            me.featureSelector = new IncidentFeatureSelector(incident, commonIncidentObject, true, false);
-
+            me.featureSelector.findAndSelectMatches(commonIncidentObject, me.incidentDetailsWindow);
             me.featureSelector.updateBalkRechtsonder();
-            me.featureSelector.findAndSelectMatches(me.incidentDetailsWindow);
 
             me.incidentDetailsWindow.show();
 

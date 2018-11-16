@@ -18,7 +18,7 @@
  *
  */
 
-/* global dbkjs, Mustache, SplitScreenWindow, ModalWindow, AGSIncidentService */
+/* global dbkjs, safetymaps, Mustache, SplitScreenWindow, ModalWindow, AGSIncidentService */
 
 /**
  * Window which shows incident details. Subclass of SplitScreenWindow. Create
@@ -224,16 +224,23 @@ IncidentDetailsWindow.prototype.showMultipleFeatureMatches = function() {
             "iconWidth" : m.attributes.width,
             "iconHeight" : m.attributes.height
         };
-        me.multipleItemUl.append($('<li><a href="#"><img src="' + info.icon + '" style="width: 25px; margin-right: 10px">' + (m.attributes.apiObject.locatie || m.attributes.apiObject.formele_naam) + (m.attributes.apiObject.informele_naam ? ' (' + m.attributes.apiObject.informele_naam + ')' : '') + '</a></li>').on('click', function(e) {
-            e.preventDefault();
-            me.hideMultipleFeatureMatches();
-            if(me.incidentLonLat) {
-                dbkjs.map.setCenter(me.incidentLonLat, dbkjs.options.zoom);
-            }
-            dbkjs.modules.safetymaps_creator.selectObjectById(m.attributes.apiObject.id,m.attributes.apiObject.extent, true);
-            $(".incidentDetails .detailed").show();
-            $("#tab_kladblok").show();
-        }));
+        me.multipleItemUl.append(
+                $('<li><a href="#"><img src="' + info.icon + '" style="width: 25px; margin-right: 10px">' + (m.attributes.label || m.attributes.apiObject.locatie || m.attributes.apiObject.formele_naam) + (m.attributes.apiObject.informele_naam ? ' (' + m.attributes.apiObject.informele_naam + ')' : '') + '</a></li>')
+                .on('click', function(e) {
+                    e.preventDefault();
+                    me.hideMultipleFeatureMatches();
+
+                    if(me.incidentLonLat) {
+                        dbkjs.map.setCenter(me.incidentLonLat, dbkjs.options.zoom);
+                        safetymaps.selectObject(m, false);
+                    } else {
+                        safetymaps.selectObject(m, true);
+                    }
+
+                    $(".incidentDetails .detailed").show();
+                    $("#tab_kladblok").show();
+                })
+        );
     });
     me.multipleDiv.append(me.multipleItemUl);
     $(".incidentDetails").append(me.multipleDiv);
@@ -427,7 +434,7 @@ IncidentDetailsWindow.prototype.getIncidentKladblokDefaultHtml = function(kladbl
             } else if(ind.indexOf("A") !== -1) {
                 disclass = "ambu";
             }
-            console.log("Kladblok andere discipline: " + k.T_IND_DISC_KLADBLOK_REGEL +": " + k.INHOUD_KLADBLOK_REGEL);
+            //console.log("Kladblok andere discipline: " + k.T_IND_DISC_KLADBLOK_REGEL +": " + k.INHOUD_KLADBLOK_REGEL);
         }
         kladblokHTML += "<tr class='" + disclass + "'><td>" + AGSIncidentService.prototype.getAGSMoment(k.DTG_KLADBLOK_REGEL).format("HH:mm") + "</td><td>" +
             dbkjs.util.htmlEncode(k.INHOUD_KLADBLOK_REGEL) + "</td></tr>";

@@ -18,7 +18,7 @@
  *
  */
 
-/* global dbkjs, Mustache, SplitScreenWindow, ModalWindow, OpenLayers, Proj4js */
+/* global dbkjs, safetymaps, Mustache, SplitScreenWindow, ModalWindow, OpenLayers, Proj4js */
 
 /**
  * Controller for displaying incident info from PharosFalck application.
@@ -30,6 +30,8 @@
  */
 function PharosIncidentsController(incidents) {
     var me = this;
+
+    me.featureSelector = incidents.featureSelector;
 
     me.button = new AlertableButton("btn_incident", "Incident", "bell-o");
     me.button.getElement().prependTo('.layertoggle-btn-group');
@@ -53,13 +55,14 @@ function PharosIncidentsController(incidents) {
 
     me.xml = null;
 
+    // XXX to common object (IncidentFeatureSelector?)
     $('.dbk-title').on('click', function() {
         me.zoomToIncident();
         me.incidentDetailsWindow.show();
         if(me.featureSelector.matches.length === 1) {
-            dbkjs.modules.safetymaps_creator.selectObjectById(me.featureSelector.matches[0].attributes.apiObject.id,me.featureSelector.matches[0].attributes.apiObject.extent,true);
+            safetymaps.selectObject(me.featureSelector.matches[0], false);
         } else {
-            dbkjs.modules.safetymaps_creator.unselectObject();
+            safetymaps.deselectObject();
             me.incidentDetailsWindow.showMultipleFeatureMatches();
         }
     });
@@ -140,7 +143,7 @@ PharosIncidentsController.prototype.zoomToIncident = function() {
 PharosIncidentsController.prototype.newIncident = function() {
     var me = this;
 
-    dbkjs.modules.safetymaps_creator.unselectObject();
+    safetymaps.deselectObject();
     me.zoomToIncident();
 
     var pos = this.getIncidentOpenLayersLonLat();
@@ -155,10 +158,8 @@ PharosIncidentsController.prototype.newIncident = function() {
         x: pos.lon,
         y: pos.lat
     };
-    me.featureSelector = new IncidentFeatureSelector(me.data.Gms, commonIncidentObject, true, false);
-
+    me.featureSelector.findAndSelectMatches(commonIncidentObject, me.incidentDetailsWindow);
     me.featureSelector.updateBalkRechtsonder();
-    me.featureSelector.findAndSelectMatches(me.incidentDetailsWindow);
 
     me.incidentDetailsWindow.show();
 

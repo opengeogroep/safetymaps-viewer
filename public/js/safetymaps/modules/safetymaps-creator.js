@@ -28,6 +28,7 @@ dbkjs.modules.safetymaps_creator = {
     selectedClusterFeature: null,
     infoWindow: null,
     features:[],
+    loading: null,
 
     register: function() {
         var me = this;
@@ -90,10 +91,15 @@ dbkjs.modules.safetymaps_creator = {
         dbkjs.hoverControl.activate();
         dbkjs.selectControl.activate();
 
+        me.loading = true;
         var pViewerObjects = safetymaps.creator.api.getViewerObjectMapOverview();
         var pStyles = safetymaps.creator.api.getStyles();
 
-        $.when(pViewerObjects, pStyles).fail(function(msg) {
+        $.when(pViewerObjects, pStyles)
+        .always(function() {
+            me.loading = false;
+        })
+        .fail(function(msg) {
             console.log("Error initializing SafetyMaps Creator module: " + msg);
         })
         .done(function(viewerObjects) {
@@ -103,6 +109,8 @@ dbkjs.modules.safetymaps_creator = {
         // Setup user interface for object info window
        
         me.setupInterface();
+
+        me.addFeatureProvider();
     },
 
     setupInterface: function() {
@@ -197,10 +205,10 @@ dbkjs.modules.safetymaps_creator = {
         this.features = safetymaps.creator.api.createViewerObjectFeatures(this.viewerApiObjects);
         this.clusteringLayer.addFeaturesToCluster(this.features);
         
-        this.createSearchConfig();
+        this.addSearchConfig();
     },
 
-    createSearchConfig: function() {
+    addSearchConfig: function() {
         var me = this;
 
         if(dbkjs.modules.search) {
@@ -234,6 +242,103 @@ dbkjs.modules.safetymaps_creator = {
                 }
             }, true);
         }
+    },
+
+    addFeatureProvider: function() {
+        var me = this;
+
+        $(safetymaps).on("object_deselect", function() {
+            me.unselectObject();
+        });
+
+        $(safetymaps).on("object_select", function(event, clusterFeature) {
+            me.selectObjectById(clusterFeature.attributes.id, null, true);
+        });
+
+        $(dbkjs).one("dbkjs_init_complete", function() {
+            if(dbkjs.modules.incidents && dbkjs.modules.incidents.featureSelector) {
+                dbkjs.modules.incidents.featureSelector.addFeatureProvider({
+                    getName: function() {
+                        return "SafetyMaps Creator objects";
+                    },
+                    isLoading: function() {
+                        return me.loading;
+                    },
+                    findIncidentMatches: function(matchHuisletter, matchToevoeging, x, y, postcode, huisnummer, huisletter, toevoeging, woonplaats, straat) {
+                        return me.findIncidentMatches(matchHuisletter, matchToevoeging, x, y, postcode, huisnummer, huisletter, toevoeging, woonplaats, straat);
+                    }
+                });
+            }
+        });
+    },
+
+    findIncidentMatches: function(exactMatchHuisletter, exactMatchToevoeging, x, y, postcode, huisnummer, huisletter, toevoeging, woonplaats, straat) {
+        var me = this;
+        var matches = [];
+
+        $.each(me.features, function(i, f) {
+
+            var o = f.attributes.apiObject;
+            var matchPostcode = o.postcode && o.postcode === postcode;
+            var matchHuisnummer = o.huisnummer && o.huisnummer === huisnummer;
+            var matchHuisletter = !exactMatchHuisletter || (o.huisletter === huisletter);
+            var matchToevoeging = !exactMatchToevoeging || (o.toevoeging === toevoeging);
+            var matchWoonplaats = woonplaats && o.plaats && woonplaats === o.plaats;
+            var matchStraat = straat && o.straatnaam && straat === o.straatnaam;
+
+            if((matchPostcode || (matchWoonplaats && matchStraat)) && matchHuisnummer && matchHuisletter && matchToevoeging) {
+                console.log("Creator object adres match", o);
+                matches.push(f);
+                return;
+            }
+
+            var continueAdressenSearch = true;
+            $.each(o.selectieadressen || [], function(i, a) {
+                var matchPostcode = a.pc && a.pc === postcode;
+                var matchWoonplaats = a.pl && a.pl === woonplaats;
+                var matchStraat = a.sn && a.sn === straat;
+
+
+                if(matchPostcode || (matchWoonplaats && matchStraat) && a.nrs) {
+                    console.log("Creator object check selectieadres nummers voor DBK " + o.naam + ", " + a.pc + " " + a.pl);
+                    $.each(a.nrs, function(j, n) {
+                        var parts = n.split("|");
+                        var matchHuisnummer = Number(parts[0]) === huisnummer;
+                        var fHuisletter = parts.length > 1 ? parts[1] : "";
+                        var fToevoeging = parts.length > 2 ? parts[2] : "";
+                        var matchHuisletter = !exactMatchHuisletter || (fHuisletter === huisletter);
+                        var matchToevoeging = !exactMatchToevoeging || (fToevoeging === toevoeging);
+
+                        if(matchHuisnummer && matchHuisletter && matchToevoeging) {
+                            console.log("Creator object match selectieadres op nummer " + n, o);
+                            matches.push(f);
+                            // No need to check additional addresses for this feature
+                            continueAdressenSearch = false;
+                            return false;
+                        }
+                    });
+                }
+                return continueAdressenSearch;
+            });
+            if(!continueAdressenSearch) {
+                return;
+            }
+
+            // Naast o.clusterFeature.attributes.type "dbk" ook voor "evenement"
+
+            if(x && y && f.attributes.selectionPolygon) {
+                var point = new OpenLayers.Geometry.Point(x, y);
+
+                $.each(o.clusterFeature.attributes.selectionPolygon.components, function(j, c) {
+                    if(c.containsPoint(point)) {
+                    console.log("Creator object " + f.attributes.type + " " + f.attributes.label + ": incident inside selectiekader");
+                        matches.push(o.clusterFeature);
+                    }
+                });
+            }
+        });
+
+        return matches;
     },
 
     clusterObjectClusterSelected: function (feature) {

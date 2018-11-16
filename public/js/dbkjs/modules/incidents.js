@@ -25,6 +25,7 @@ dbkjs.modules.incidents = {
     id: "dbk.module.incidents",
     service: null,
     controller: null,
+    featureSelector: null,
     options: null,
     register: function() {
         if(!this.options) {
@@ -32,8 +33,12 @@ dbkjs.modules.incidents = {
         }
 
         this.options = $.extend({
-            controller: "MDTController"
+            controller: "MDTController",
+            featureExactMatchHuisletter: true,
+            featureExactMatchToevoeging: false
         }, this.options);
+
+        this.featureSelector = new IncidentFeatureSelector(this.options.featureExactMatchHuisletter, this.options.featureExactMatchToevoeging);
 
         // Controller can be changed using URL parameter
 

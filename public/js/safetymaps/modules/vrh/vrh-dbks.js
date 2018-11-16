@@ -40,6 +40,8 @@ safetymaps.vrh.Dbks = function(options) {
         }
     }, options);
 
+    me.loading = true;
+
     me.luchtfotoLayer = null;
     $.each(dbkjs.map.layers, function(i, l) {
         if(l.name.toLowerCase().indexOf("luchtfoto") !== -1) {
@@ -47,8 +49,6 @@ safetymaps.vrh.Dbks = function(options) {
             return false;
         }
     });
-
-    me.initLayers();
 
     me.symbolPath = "js/safetymaps/modules/vrh/assets/dbks/";
     me.vrhSymbols = {
@@ -149,6 +149,7 @@ safetymaps.vrh.Dbks = function(options) {
         }
     };
 
+    me.initLayers();
 };
 
 safetymaps.vrh.Dbks.prototype.initLayers = function() {

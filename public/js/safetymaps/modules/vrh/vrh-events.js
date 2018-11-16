@@ -29,12 +29,16 @@ var safetymaps = safetymaps || {};
 safetymaps.vrh = safetymaps.vrh || {};
 
 safetymaps.vrh.Events = function(options) {
-    this.options = $.extend({
+    var me = this;
+
+    me.options = $.extend({
         graphicSizeHover: 26,
         graphicSizeSelect: 20
     }, options);
 
-    this.initLayers();
+    me.loading = true;
+
+    me.initLayers();
 };
 
 safetymaps.vrh.Events.prototype.scalePattern = function(pattern, factor) {

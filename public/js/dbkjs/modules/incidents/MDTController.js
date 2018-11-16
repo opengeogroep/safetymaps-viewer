@@ -18,6 +18,8 @@
  *
  */
 
+/* global dbkjs, OpenLayers, safetymaps */
+
 /**
  * Controller for displaying incident info from MDT koppeling CityGIS Navigator
  * version 0.1 combined with Falck tool to write MDT XML to /gms.xml.
@@ -29,6 +31,8 @@
  */
 function MDTController(incidents) {
     var me = this;
+
+    me.featureSelector = incidents.featureSelector;
 
     me.button = new AlertableButton("btn_incident", "Incident", "bell-o");
     me.button.getElement().prependTo('.layertoggle-btn-group');
@@ -52,13 +56,14 @@ function MDTController(incidents) {
 
     me.xml = null;
 
+    // XXX to common object (IncidentFeatureSelector?)
     $('.dbk-title').on('click', function() {
         me.zoomToIncident();
         me.incidentDetailsWindow.show();
         if(me.featureSelector.matches.length === 1) {
-            dbkjs.modules.safetymaps_creator.selectObjectById(me.featureSelector.matches[0].attributes.apiObject.id,me.featureSelector.matches[0].attributes.apiObject.extent,true);
+            safetymaps.selectObject(me.featureSelector.matches[0], false);
         } else {
-            dbkjs.modules.safetymaps_creator.unselectObject();
+            safetymaps.deselectObject();
             me.incidentDetailsWindow.showMultipleFeatureMatches();
         }
     });
@@ -119,7 +124,7 @@ MDTController.prototype.zoomToIncident = function() {
 MDTController.prototype.newIncident = function() {
     var me = this;
 
-    dbkjs.modules.safetymaps_creator.unselectObject();
+    safetymaps.deselectObject();
     me.zoomToIncident();
 
     var x = $(this.xml).find("IncidentLocatie XYCoordinaten XCoordinaat").text();
@@ -135,10 +140,8 @@ MDTController.prototype.newIncident = function() {
         x: x,
         y: y
     };
-    me.featureSelector = new IncidentFeatureSelector(me.xml, commonIncidentObject, true, false);
-
+    me.featureSelector.findAndSelectMatches(commonIncidentObject, me.incidentDetailsWindow);
     me.featureSelector.updateBalkRechtsonder();
-    me.featureSelector.findAndSelectMatches(me.incidentDetailsWindow);
 
     me.incidentDetailsWindow.show();
 

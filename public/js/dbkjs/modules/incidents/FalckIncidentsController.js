@@ -40,6 +40,8 @@ function FalckIncidentsController(incidents) {
         voertuigIM: true
     }, me.options);
 
+    me.featureSelector = incidents.featureSelector;
+
     me.button = new AlertableButton("btn_incident", "Incident", "bell-o");
     me.button.getElement().prependTo('.layertoggle-btn-group');
 
@@ -68,13 +70,14 @@ function FalckIncidentsController(incidents) {
 
     me.xml = null;
 
+    // XXX to common object (IncidentFeatureSelector?)
     $('.dbk-title').on('click', function() {
         me.zoomToIncident();
         me.incidentDetailsWindow.show();
         if(me.featureSelector.matches.length === 1) {
-            dbkjs.modules.safetymaps_creator.selectObjectById(me.featureSelector.matches[0].attributes.apiObject.id,me.featureSelector.matches[0].attributes.apiObject.extent,true);
+            safetymaps.selectObject(me.featureSelector.matches[0], false);
         } else {
-            dbkjs.modules.safetymaps_creator.unselectObject();
+            safetymaps.deselectObject();
             me.incidentDetailsWindow.showMultipleFeatureMatches();
         }
     });
@@ -115,6 +118,7 @@ FalckIncidentsController.prototype.checkIncidentMonitor = function() {
 FalckIncidentsController.prototype.incidentMonitorIncidentSelected = function(event, click) {
     var me = this;
 
+    safetymaps.deselectObject();
     console.log("IM incident selected", arguments);
     me.inzetIncident(click.incident.IncidentNummer, true);
 
@@ -401,7 +405,7 @@ FalckIncidentsController.prototype.geenInzet = function(triggerEvent) {
 
     if(triggerEvent) {
         $(this).triggerHandler("end_incident");
-        dbkjs.modules.safetymaps_creator.unselectObject();
+        safetymaps.deselectObject();
         this.incidentDetailsWindow.hideMultipleFeatureMatches();
     }
 };
@@ -458,10 +462,8 @@ FalckIncidentsController.prototype.inzetIncident = function(incidentId, fromInci
                 x: x,
                 y: y
             };
-            me.featureSelector = new IncidentFeatureSelector(incident, commonIncidentObject, true, false);
-
+            me.featureSelector.findAndSelectMatches(commonIncidentObject, me.incidentDetailsWindow);
             me.featureSelector.updateBalkRechtsonder(me.getBalkrechtsonderTitle());
-            me.featureSelector.findAndSelectMatches(me.incidentDetailsWindow);
 
             me.incidentDetailsWindow.show();
             me.enableIncidentUpdates();
@@ -469,7 +471,6 @@ FalckIncidentsController.prototype.inzetIncident = function(incidentId, fromInci
                 me.button.setIcon("bell");
             }
 
-            console.log("NEW INCIDENT EVENT");
             $(me).triggerHandler("new_incident", [commonIncidentObject,incident]);
         });
     } else {
@@ -641,8 +642,7 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
                 x: x,
                 y: y
             };
-            me.featureSelector.matchInfo = commonIncidentObject;
-            me.featureSelector.findAndSelectMatches(me.incidentDetailsWindow);
+            me.featureSelector.findAndSelectMatches(commonIncidentObject, me.incidentDetailsWindow);
         }
     });
 };
