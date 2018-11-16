@@ -720,6 +720,10 @@ input[type="radio"], input[type="checkbox"] {
     display: inline-block; font-family: FontAwesome;
 }
 
+#overlaypanel_div i.fa-info-circle {
+    display: none;
+}
+
 /* Ondergrond vinkje ipv blauwe achtergrond */
 #baselayerpanel_ul li a {
     padding-left: 18px;
