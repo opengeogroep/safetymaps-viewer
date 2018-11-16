@@ -7,7 +7,7 @@ create schema viewer;
 -- Used in cache key for ETag to refresh cache when schema of JSON results change,
 -- increase value when doing schema updates!
 create table viewer.schema_version(value integer);
-insert into viewer.schema_version(value) values(4);
+insert into viewer.schema_version(value) values(5);
 
 create or replace view viewer.viewer_object as
     select d."DBK_ID" as id,
@@ -181,58 +181,58 @@ create or replace view viewer.viewer_object_details as
         -- AfwijkendeBinnendekking
         (select array_to_json(array_agg(row_to_json(r.*))) as array_to_json
         from (select "AlternatiefComm" as alternatief, "Dekking" as dekking, "Aanvullendeinformatie" as aanvullende_informatie, st_astext(the_geom) as location
-            from wfs."AfwijkendeBinnendekking" where "DBK_ID" = vo.id) r
+            from wfs."AfwijkendeBinnendekking" where "DBK_ID" = vo.id and the_geom is not null) r
         ) as communication_coverage,
         
         -- Brandweervoorziening
         (select array_to_json(array_agg(row_to_json(r.*))) as array_to_json
         from (select "Code" as code, "Rotatie" as rotation, "Omschrijving" as omschrijving, "Picturename" as picture, st_astext(the_geom) as location
-            from wfs."Brandweervoorziening" where "DBK_ID" = vo.id) r
+            from wfs."Brandweervoorziening" where "DBK_ID" = vo.id and the_geom is not null) r
         ) as symbols,
 
         -- Brandcompartiment
         (select array_to_json(array_agg(row_to_json(r.*))) as array_to_json
         from (select "Soort" as style, "Omschrijving" as omschrijving, "Label" as label, st_astext(the_geom) as line
-            from wfs."Brandcompartiment" where "DBK_ID" = vo.id) r
+            from wfs."Brandcompartiment" where "DBK_ID" = vo.id and the_geom is not null) r
         ) as fire_compartmentation,
         
         -- Gebied
-        (select st_astext(the_geom) from wfs."Gebied" where "DBK_ID" = vo.id limit 1) as select_area,
+        (select st_astext(the_geom) from wfs."Gebied" where "DBK_ID" = vo.id and the_geom is not null limit 1) as select_area,
 
         -- Custom_Polygon
         (select array_to_json(array_agg(row_to_json(r.*))) as array_to_json
         from (select "Soort" as style, "Omschrijving" as omschrijving, st_astext(the_geom) as polygon
             from wfs."Custom_Polygon" 
             left join wfs.type_custom_polygon t on (t.code = "Soort") -- left join voor soort, onbekende soort komt ook mee
-            where "DBK_ID" = vo.id
+            where "DBK_ID" = vo.id and the_geom is not null
             order by t.sort_order) r
         ) as custom_polygons,      
         
         -- GevaarlijkeStof
         (select array_to_json(array_agg(row_to_json(r.*))) as array_to_json
         from (select "Omschrijving" as omschrijving, "Symbol" as symbol, "GEVIcode" as gevi_code, "UNnr" as un_nr, "Hoeveelheid" as hoeveelheid, "NaamStof" as naam_stof, st_astext(the_geom) as location
-            from wfs."GevaarlijkeStof" where "DBK_ID" = vo.id) r
+            from wfs."GevaarlijkeStof" where "DBK_ID" = vo.id and the_geom is not null) r
         ) as danger_symbols,
         
         -- Hulplijn
         (select array_to_json(array_agg(row_to_json(r.*))) as array_to_json
         from (select "Type" as style, "Omschrijving" as omschrijving, st_astext(the_geom) as line
-            from wfs."Hulplijn" where "DBK_ID" = vo.id) r
+            from wfs."Hulplijn" where "DBK_ID" = vo.id and the_geom is not null) r
         ) as lines,        
         
         -- Polygon
-        (select array_to_json(array_agg(st_astext(the_geom))) from wfs."Polygon" where "DBK_ID" = vo.id) as buildings, 
+        (select array_to_json(array_agg(st_astext(the_geom))) from wfs."Polygon" where "DBK_ID" = vo.id and the_geom is not null) as buildings, 
         
         -- TekstObject
         (select array_to_json(array_agg(row_to_json(r.*))) as array_to_json
         from (select "Tekst" as text, "Rotatie" as rotation, "LabelSize" as size, st_astext(the_geom) as location
-            from wfs."TekstObject" where "DBK_ID" = vo.id) r
+            from wfs."TekstObject" where "DBK_ID" = vo.id and the_geom is not null) r
         ) as labels,         
         
         -- ToegangTerrein    
         (select array_to_json(array_agg(row_to_json(r.*))) as array_to_json
         from (select "Primair" as style, "NaamRoute" as naam, "Omschrijving" as omschrijving, st_astext(the_geom) as line
-            from wfs."ToegangTerrein" where "DBK_ID" = vo.id) r
+            from wfs."ToegangTerrein" where "DBK_ID" = vo.id and the_geom is not null) r
         ) as approach_routes            
         
     from viewer.viewer_object vo
