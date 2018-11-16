@@ -258,7 +258,7 @@ $.extend(dbkjs.modules.FeaturesManager.prototype, {
             me.trigger("propertyUpdated", [ prop ]);
         });
         var propGrid = this.propertiesGrid;
-        propGrid.on("mouseup touchend", function(e){
+        propGrid.on("mouseup touchend change", function(e){
             console.log(e);
             me.trigger("propertyChanged", [e]);
         });
