@@ -252,7 +252,7 @@ IncidentDetailsWindow.prototype.getIncidentAdres = function(incident, isXml) {
     if(isXml) {
         // MDT XML
         var adres = $(incident).find("IncidentLocatie Adres");
-        return Mustache.render("{{#x}}Straat{{/x}} {{#x}}Huisnummer{{/x}}{{#x}}HnToevoeging{{/x}} {{#x}}HnAanduiding{{/x}}", {
+        return Mustache.render("{{{#x}}}HnAanduiding{{{/x}}} {{{#x}}}Straat{{{/x}}} {{{#x}}}Huisnummer{{{/x}}}{{{#x}}}HnToevoeging{{{/x}}}", {
             x: function() {
                 return function(text, render) {
                     return render($(adres).find(text).text());
@@ -262,11 +262,11 @@ IncidentDetailsWindow.prototype.getIncidentAdres = function(incident, isXml) {
     } else if (incident.IncidentNummer) {
         // Falck JSON
         var a = incident.IncidentLocatie;
-        return Mustache.render("{{NaamLocatie2}} {{HnAanduiding}} {{NaamLocatie1}} {{Huisnummer}}{{Letter}} {{HnToevoeging}} {{Paalnummer}}", a).trim();
+        return Mustache.render("{{{NaamLocatie2}}} {{{HnAanduiding}}} {{{NaamLocatie1}}} {{{Huisnummer}}}{{{Letter}}} {{{HnToevoeging}}} {{{Paalnummer}}}", a).trim();
     } else if(incident.Nummer) {
         // Pharos JSON
         var a = incident.IncidentAdres.Adres;
-        return Mustache.render("{{Straat}} {{Huisnummer}} {{HuisnummerToevg}}", a).trim();
+        return Mustache.render("{{{Straat}}} {{{Huisnummer}}} {{{HuisnummerToevg}}}", a).trim();
     } else {
         // Oracle GMS replica AGS JSON
         return incident.T_GUI_LOCATIE;
