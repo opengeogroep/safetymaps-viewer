@@ -262,7 +262,7 @@ IncidentDetailsWindow.prototype.getIncidentAdres = function(incident, isXml) {
     } else if (incident.IncidentNummer) {
         // Falck JSON
         var a = incident.IncidentLocatie;
-        return Mustache.render("{{NaamLocatie2}} {{NaamLocatie1}} {{Huisnummer}}{{Letter}} {{HnToevoeging}} {{HnAanduiding}} {{Paalnummer}}", a).trim();
+        return Mustache.render("{{NaamLocatie2}} {{HnAanduiding}} {{NaamLocatie1}} {{Huisnummer}}{{Letter}} {{HnToevoeging}} {{Paalnummer}}", a).trim();
     } else if(incident.Nummer) {
         // Pharos JSON
         var a = incident.IncidentAdres.Adres;
