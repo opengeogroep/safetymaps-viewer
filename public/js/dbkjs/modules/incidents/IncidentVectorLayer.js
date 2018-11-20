@@ -106,7 +106,7 @@ IncidentVectorLayer.prototype.addIncident = function(incident, gray, singleMarke
         var classificaties = classificatie.split(",");
         classificatie = classificaties[0] + ", " + classificaties[1];
     }
-    var label = "P" + incident.prio + " " + dbkjs.util.htmlEncode(classificatie) + " – " + incident.locatie + " " + incident.plaats;
+    var label = "P" + incident.prio + " " + classificatie + " – " + incident.locatie + " " + incident.plaats;
     var feature = new OpenLayers.Feature.Vector(
             new OpenLayers.Geometry.Point(x, y),
             {
