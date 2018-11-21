@@ -208,6 +208,11 @@
         "symbolRotation": "Rotation",
         "symbolWidth": "Bredde",
         "symbolPicker": "Symbolvælger",
-        "symbolcreator": "Vælg først et symbol ved at klikke på +"
+        "symbolcreator": "Vælg først et symbol ved at klikke på +",
+        "confirmDelete": "Er du sikker på at alle funktioner kan fjernes? Dette gælder også for alle andre kunstnere og seere.!",
+        "alert": "Vælg først et symbol",
+        "symbol": "Symbol",
+        "line": "Linje",
+        "area": "Område"
     }
 }

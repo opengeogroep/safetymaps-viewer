@@ -217,6 +217,11 @@
         "symbolRotation": "Rotatie",
         "symbolWidth": "Breedte",
         "symbolPicker": "Symbolenkiezer",
-        "symbolcreator": "Selecteer eerst een symbool door op de + te klikken"
+        "symbolcreator": "Selecteer eerst een symbool door op de + te klikken",
+        "confirmDelete": "Weet u zeker dat alle features verwijderd mogen worden? Dit geld ook voor alle andere tekenaars en kijkers.!",
+        "alert": "Selecteer eerst een symbool",
+        "symbol": "Symbool",
+        "line": "Lijn",
+        "area": "Gebied"
     }
 }
