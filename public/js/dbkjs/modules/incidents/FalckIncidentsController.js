@@ -443,6 +443,7 @@ FalckIncidentsController.prototype.inzetIncident = function(incidentId, fromInci
         })
         .done(function(incident) {
             incident = incident[0];
+            me.normalizeIncidentFields(incident);
             me.incident = incident;
             console.log("Got incident data", incident);
             me.incidentDetailsWindow.data(incident, true);
@@ -452,6 +453,8 @@ FalckIncidentsController.prototype.inzetIncident = function(incidentId, fromInci
                 me.markerLayer.setZIndexFix();
             } else {
                 me.incidentMonitorController.markerLayer.layer.setVisibility(true);
+
+                me.incidentFromIncidentListWasActive = incident.Actueel && !incident.beeindigdeInzet;
             }
             
             me.zoomToIncident();
@@ -594,6 +597,12 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
         }
         incident = incident[0];
         me.normalizeIncidentFields(incident);
+
+        if(me.incidentFromIncidentList && me.incidentFromIncidentListWasActive) {
+            if(!incident.Actueel || incident.beeindigdeInzet) {
+                me.geenInzet(true);
+            }
+        }
         var oldIncident = me.incident;
         me.incident = incident;
         $(me).triggerHandler("incidents.vehicle.update",[incident]);
