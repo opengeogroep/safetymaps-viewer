@@ -374,7 +374,7 @@ dbkjs.modules.edit = {
                 this.layer.removeAllFeatures();
                 this.selectedFeature = null;
                 if(buttonClicked){
-                    if(confirm('Weet u zeker dat alle features verwijderd mogen worden? Dit geld ook voor alle andere tekenaars en kijkers.!')){
+                    if(confirm(i18n.t("edit.confirmDelete"))){
                         this.saveFeatures();
                     } else {
                         //do nothing
@@ -615,7 +615,7 @@ dbkjs.modules.edit = {
         if(this.mode === "point") {
             var symbol = me.symbolmanager.getActiveSymbol();
             if(!symbol) {
-                alert("Selecteer eerst een symbool");
+                alert(i18n.t("edit.alert"));
                 return;
             }
             var feature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(lonLat.lon, lonLat.lat), this.getFeatureAttributes());
@@ -817,9 +817,9 @@ dbkjs.modules.edit = {
                 .attr("role", "group")
                 .appendTo("#edit-symbol-container");
 
-        group.append(this.createFilterButton("Symbool", "point"));
-        group.append(this.createFilterButton("Lijn", "line"));
-        group.append(this.createFilterButton("Gebied", "area"));
+        group.append(this.createFilterButton(i18n.t("edit.symbol"), "point"));
+        group.append(this.createFilterButton(i18n.t("edit.line"), "line"));
+        group.append(this.createFilterButton(i18n.t("edit.area"), "area"));
 
         $("<div class='container properties-container'>" +
                 "<div class='row'>" +
