@@ -196,6 +196,7 @@ dbkjs.gotOrganisation = function () {
     dbkjs.sortModuleButtons();
     dbkjs.layers.loadFromWMSGetCapabilities();
     dbkjs.finishMap();
+    dbkjs.initialized = true;
     $(dbkjs).trigger('dbkjs_init_complete');
 };
 
@@ -368,10 +369,8 @@ $(document).ready(function () {
         if(dbkjs.options.enableSplitScreen) {
             $(".main-button-group").css({paddingRight: "10px", width: "auto", float: "right", right: "0%"});
 
-            var addSplitscreenOption = function() {
+            $(dbkjs).one("dbkjs_init_complete", function() {
                 // Add config option to enable / disable split screen
-
-
                 $("#row_layout_settings").append('<div class="col-xs-12"><label><input type="checkbox" id="checkbox_splitScreen" ' + (dbkjs.options.splitScreenChecked ? 'checked' : '') + '>Toon informatie naast de kaart</label></div>');
 
                 $("#checkbox_splitScreen").on('change', function (e) {
@@ -383,18 +382,7 @@ $(document).ready(function () {
                 $("#c_settings").on('click', function(e) {
                     $(dbkjs).triggerHandler('modal_popup_show', {popupName: 'settings'});
                 });
-            };
-
-            // XXX timing dependent for #settingspanel_b div.row appears, not
-            // only dbkjs_init_compelete...
-            var check = function() {
-                if($("#settingspanel_b div.row").length === 0) {
-                    window.setTimeout(check, 500);
-                } else {
-                    addSplitscreenOption();
-                }
-            };
-            $(dbkjs).bind('dbkjs_init_complete', check);
+            });
         }
 
         // Added touchstart event to trigger click on. There was some weird behaviour combined with FastClick,
