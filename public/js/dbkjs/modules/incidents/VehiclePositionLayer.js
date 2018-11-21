@@ -114,9 +114,15 @@ function VehiclePositionLayer() {
     dbkjs.map.addControl(this.selectControl);
     this.selectControl.activate();
 */
-    $("#settingspanel_b").append('<hr/><label><input type="checkbox" ' + (this.visibility ? 'checked' : '') + ' onclick="dbkjs.modules.incidents.controller.vehiclePositionLayer.setVisibility(event.target.checked)">Toon voertuigposities</label>');
 
-}
+    // Add config option
+    $(dbkjs).one("dbkjs_init_complete", function() {
+        $("#row_layout_settings").append('<div class="col-xs-12"><label><input type="checkbox" id="checkbox_showvehicles" ' + (me.visibility ? 'checked' : '') + '>Toon voertuigposities</label></div>');
+        $("#checkbox_showvehicles").on('change', function (e) {
+            me.setVisibility(e.target.checked);
+        });
+    });
+};
 
 VehiclePositionLayer.prototype.setShowMoving = function(showMoving) {
     this.showMoving = showMoving;

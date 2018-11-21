@@ -52,15 +52,17 @@ function IncidentVectorLayer(enableLabels) {
 
     if(me.enableLabels) {
         me.hideLabel =  window.localStorage.getItem("IncidentVectorLayer.hideLabel") === "true";
-        $("#settingspanel_b").append('<hr/>');
-        var l = $("<label/>");
-        var input = $("<input type='checkbox' " + (me.hideLabel ? 'checked' : '') + ">");
-        input.click(function(e) {
-            me.setHideLabel(e.target.checked);
-        });
-        l.append(input);
-        l.append("<span>Geen label tonen bij incidenten");
-        $("#settingspanel_b").append(l);
+        function addConfig() {
+            $("#row_layout_settings").append('<div class="col-xs-12"><label><input type="checkbox" id="checkbox_hideincidentlabel" ' + (me.hideLabel ? 'checked' : '') + '>Geen label tonen bij incidenten</label></div>');
+            $("#checkbox_hideincidentlabel").on('change', function (e) {
+                me.setHideLabel(e.target.checked);
+            });
+        };
+        if(dbkjs.initialized) {
+            addConfig();
+        } else {
+            $(dbkjs).one("dbkjs_init_complete", function() { addConfig(); });
+        }
     }
 
 };
