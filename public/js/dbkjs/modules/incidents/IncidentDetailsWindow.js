@@ -48,6 +48,7 @@ IncidentDetailsWindow.prototype.createStyle = function() {
     var me = this;
     var css = '#eenheden div { margin: 3px; float: left; } \
 #eenheden div { border-left: 1px solid #ddd; padding-left: 8px; } \
+#eenheden {white-space:normal;}\
 .incidentDetails .beeindigd { color: #a9a9a9; } \
 #tab_kladblok { clear: both; padding-top: 10px; white-space: pre-wrap; font-size: 16px; font-weight: bold; color: red; } \
 table td { padding: 3px !important; } \
