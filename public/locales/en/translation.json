@@ -5,11 +5,16 @@
         "scaleStyle": "Scale icons based on zoom",
         "styleSizeAdjust": "Adjust icon size",
         "version": "Version",
-        "version_deploy": "Customizations version"
+        "version_deploy": "Customizations version",
+        "title": "Settings"
     },
     "map": {
         "measureDistance": "Measure distance",
         "measureArea": "Measure area"
+    },
+    "measure": {
+        "distance": "Distance",
+        "area": "Area"
     },
     "dialogs": {
         "clickinfo": "Click information",
@@ -34,6 +39,11 @@
     },
     "connectionmonitor": {
         "button": "Connection status"
+    },
+    "photo": {
+        "savePictureTitle": "Save picture",
+        "photoButton": "Photo mode",
+        "savePhotoButton": "Save"
     },
     "creator": {
         "search": "Safety map",

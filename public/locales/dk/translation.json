@@ -5,11 +5,16 @@
         "scaleStyle": "Skaler symboler på baggrund af målestok",
         "styleSizeAdjust": "Juster symbol størrelse",
         "version": "Version",
-        "version_deploy": "Specialtilpasning version"
+        "version_deploy": "Specialtilpasning version",
+        "title": "indstillinger"
     },
     "map": {
         "measureDistance": "Mål afstand",
         "measureArea": "Mål areal"
+    },
+    "measure": {
+        "distance": "To do, translate",
+        "area": "To do, translate"
     },
     "dialogs": {
         "clickinfo": "Klik information",
@@ -59,9 +64,9 @@
         "usage": "Risikoklasse",
         "usage_specific": "Specifikt brug",
         "level": "Niveau",
-        "lowestLevel": "Laveste niveau",
-        "highestLevel": "Højeste niveau",
-        "floor": "etage",
+        "lowestLevel": "Laveste etage",
+        "highestLevel": "Højeste etage",
+        "floor": "Sal",
         "floors": "Etager",
         "contact_role": "Rolle",
         "contact_name": "Navn",
@@ -169,6 +174,44 @@
         "Tbk7004": "Elevator",
         "Tn06": "Forsamlingsstation",
         "Tw01": "Særlig egenskab",
-        "Tw02": "Elektrisk kasse"
+        "Tw02": "Elektrisk kasse",
+        "DK01": "Blitz",		
+        "DK02": "Stigrør",		
+        "DK03": "Brandmandselevator",		
+        "DK06": "Nøgleboks ",		
+        "DK08_ABA": "Central udstyr ABA",		
+        "DK08_ABV": "Central udstyr ABV",		
+        "DK08_AVA": "Central udstyr AVA",		
+        "DK08_AVS": "Central udstyr AVS",		
+        "DK08_OTV": "Central udstyr OTV",		
+        "DK08_RL": "Central udstyr RL",		
+        "DK09": "Adgangsvej Beredskabet",		
+        "DK10": "Sprinklercentral",		
+        "DK11_CO2": "Ventil CO2",		
+        "DK11_GAS": "Ventil GAS",		
+        "DK11_O2": "Ventil O2",		
+        "DK11_VAND": "Ventil VAND",		
+        "DK12": "Strøm",		
+        "DK13": "Brandhane",		
+        "DK17": "Pullerter",		
+        "DK18": "Spærring",		
+        "DK19_ABA": "Udløser tryk ABA",		
+        "DK19_ABV": "Udløser tryk ABV",		
+        "DK19_OTV": "Udløser tryk OTV",		
+        "DK19_RL": "Udløser tryk RL",		
+        "DK20": "Flugtvej",		
+        "DK21": "Slæbested",		
+        "DK22": "Brandmandspanel",		
+        "DK25": "Bredde portåbninger",		
+        "DK26": "Højde portåbninger"
+    },
+    "edit":{
+        "drawnSymbol": "Tegne symboler",
+        "symbolLabel": "Etiket",
+        "symbolSize": "Størrelse",
+        "symbolRotation": "Rotation",
+        "symbolWidth": "Bredde",
+        "symbolPicker": "Symbolvælger",
+        "symbolcreator": "Vælg først et symbol ved at klikke på +"
     }
 }

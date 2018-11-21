@@ -5,12 +5,17 @@
         "scaleStyle": "Schaal iconen op basis van zoomniveau",
         "styleSizeAdjust": "Grootte van iconen aanpassen:",
         "version": "Versie",
-        "version_deploy": "Versie speciale aanpassingen"
+        "version_deploy": "Versie speciale aanpassingen",
+        "title": "Instellingen"
     },
     "map": {
         "measureDistance": "Meet afstand",
         "measureArea": "Meet oppervlakte",
         "permalink": "Snelkoppeling"
+    },
+    "measure": {
+        "distance": "Afstand",
+        "area": "Oppervlakte"
     },
     "dialogs": {
         "clickinfo": "Klik informatie",
@@ -30,7 +35,7 @@
         "button": "Zoeken",
         "title": "Zoeken"
     },
-"email": {
+    "email": {
         "title": "Melding",
         "new": "Nieuwe melding",
         "annotation": "Melding",
@@ -41,15 +46,15 @@
         "remarks": "Opmerking",
         "sender": "Afzender",
         "send": "Verstuur",
-        "sent":"Melding is verstuurd.",
-        "error":"Er is iets fout gegaan.",
+        "sent": "Melding is verstuurd.",
+        "error": "Er is iets fout gegaan.",
         "email": "E-mail",
         "link": "Link naar de melding",
         "phone": "Telefoon",
         "kindregards": "Met vriendelijke groet",
         "team": "de opendispatcher applicatie",
         "help": "Versleep het symbool op de kaart om aan te geven waar de fout is geconstateerd of waar de melding over gaat.",
-        "generalmessage":"Algemene melding",
+        "generalmessage": "Algemene melding",
         "construction": "Gebouw constructie"
     },
     "geolocate": {
@@ -58,7 +63,7 @@
     "connectionmonitor": {
         "button": "Verbindingsstatus"
     }, 
-    "photo":{
+    "photo": {
         "savePictureTitle": "Gemaakte foto opslaan",
         "photoButton": "Fotofunctionaliteit",
         "savePhotoButton": "Foto Opslaan"
@@ -204,5 +209,14 @@
         "Tw14": "Vallen door hoogteverschil",
         "Tw16": "Lage temperatuur of bevriezing",
         "Tw28": "Accu's en klein chemisch materiaal"
+    },
+    "edit": {
+        "drawnSymbol": "Getekende symbolen",
+        "symbolLabel": "Label",
+        "symbolSize": "Grootte",
+        "symbolRotation": "Rotatie",
+        "symbolWidth": "Breedte",
+        "symbolPicker": "Symbolenkiezer",
+        "symbolcreator": "Selecteer eerst een symbool door op de + te klikken"
     }
 }
