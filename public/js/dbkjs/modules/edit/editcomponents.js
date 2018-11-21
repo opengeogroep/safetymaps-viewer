@@ -48,7 +48,7 @@ dbkjs.modules.Observable.prototype.constructor = dbkjs.modules.Observable;
  */
 dbkjs.modules.FeaturesManager = function() {
     dbkjs.modules.Observable.call(this);
-    this.featureslist = $("<div><h3 style='float:left;'>Getekende symbolen</h3></div>")
+    this.featureslist = $("<div><h3 style='float:left;'>"+i18n.t("edit.drawnSymbol")+"</h3></div>")
         .attr("id", "edit-features-list")
         .addClass("panel");
         $('<a style="float:right;"></a>')
@@ -63,7 +63,7 @@ dbkjs.modules.FeaturesManager = function() {
         "<tr><td colspan='3'><a title='Delete all' href='#' class='btn btn-info btn-lg remove-all'><span class='glyphicon glyphicon-trash'></span></a>" +
             "<div style='float: right;'><a title='Save all' href='#' class='btn btn-info btn-lg save-all'><i class='fa fa-save'></i></a> &nbsp; <a title='Load' href='#' class='btn btn-info btn-lg load-all'><i class='fa fa-upload'></i></a></div>" +
         "</td></tr>" +
-        "<tr><td>Symb.</td><td colspan='2'>Label</td></tr>" +
+        "<tr><td>Symb.</td><td colspan='2'>"+i18n.t("edit.symbolLabel")+"</td></tr>" +
         "</thead>" +
         "<tbody></tbody>" +
         "</table></div>");
@@ -73,7 +73,7 @@ dbkjs.modules.FeaturesManager = function() {
     this.propertiesGrid = $("<div class='panel sub-panel' id='edit-symbol-properties'>" +
         "<div class='row prop-radius' style=\"display: none;\">" +
             "<div class='col-md-3'>" +
-                "<label for='symbolRadiusSlider'>Grootte:</label>" +
+                "<label for='symbolRadiusSlider'>"+i18n.t("edit.symbolSize")+":</label>" +
             "</div>" +
             "<div class='col-md-9' style=\"padding-left: 25px;\">" +
                 '<input id="symbolRadiusSlider" name="radius" type="text" />' +
@@ -81,7 +81,7 @@ dbkjs.modules.FeaturesManager = function() {
         "</div>" +
         "<div class='row prop-rotation' style=\"display: none;\">" +
             "<div class='col-md-3'>" +
-                "<label for='symbolRotationSlider'>Rotatie:</label>" +
+                "<label for='symbolRotationSlider'>"+i18n.t("edit.symbolRotation")+":</label>" +
             "</div>" +
             "<div class='col-md-9' style=\"padding-left: 25px;\">" +
                 '<input id="symbolRotationSlider" name="rotation" type="text" />' +
@@ -89,7 +89,7 @@ dbkjs.modules.FeaturesManager = function() {
         "</div>" +
         "<div class='row prop-triangleFactor' style=\"display: none;\">" +
             "<div class='col-md-3'>" +
-                "<label for='triangleFactor'>Breedte:</label>" +
+                "<label for='triangleFactor'>"+i18n.t("edit.symbolWidth")+":</label>" +
             "</div>" +
             "<div class='col-md-9' style=\"padding-left: 25px;\">" +
                 '<input id="triangleFactor" name="triangleFactor" type="text" />' +
@@ -97,7 +97,7 @@ dbkjs.modules.FeaturesManager = function() {
         "</div>" +
         "<div class='row prop-label' style=\"display: none;\">" +
             "<div class='col-md-3'>" +
-                "<label for='label'>Label:</label>" +
+                "<label for='label'>"+i18n.t("edit.symbolLabel")+":</label>" +
             "</div>" +
             "<div class='col-md-9'>" +
                 "<input type='text' name='label' id='label' class='form-control'>" +
@@ -343,7 +343,7 @@ $.extend(dbkjs.modules.SymbolManager.prototype, {
     createSymbolPicker: function() {
         var symbolpicker = dbkjs.util.createDialog(
             'symbolpicker',
-            'Symbolenkiezer'
+            i18n.t("edit.symbolPicker")
         );
         var html = [];
         for(var i = 0; i < this.symbolTree.length; i++) {
@@ -414,7 +414,7 @@ $.extend(dbkjs.modules.SymbolManager.prototype, {
         var symbol;
         // Reverse order because buttons are prepended
         if(this.recentlyUsed[type].length === 0) {
-            this.quickSelectContainer.prepend("<span class='empty-message type-" + type + "'>Selecteer eerst een symbool door op de + te klikken</span>");
+            this.quickSelectContainer.prepend("<span class='empty-message type-" + type + "'>"+i18n.t("edit.symbolcreator")+"</span>");
         }
         for(var i = this.recentlyUsed[type].length - 1; i >= 0; i--) {
             symbol = this.getSymbol(this.recentlyUsed[type][i]);
