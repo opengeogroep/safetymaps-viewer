@@ -12,10 +12,6 @@
         "measureDistance": "Mål afstand",
         "measureArea": "Mål areal"
     },
-    "measure": {
-        "distance": "To do, translate",
-        "area": "To do, translate"
-    },
     "dialogs": {
         "clickinfo": "Klik information",
         "busyloading": "Indlæser",
