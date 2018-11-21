@@ -46,7 +46,7 @@ IncidentListWindow.prototype.createStyle = function() {
         //'.incidentList .list .incident.even { background-color: #; } ' +
         '.incidentList .list .incident.odd { background-color: #ECECEC; } ' +
         '.incidentList .list div.incident:hover { background-color: #DCE0E8; cursor: pointer; cursor: hand; } ' +
-        '.incidentList .list .incident { width: 100%; white-space: nowrap; min-width: 900px; } ' +
+        '.incidentList .list .incident { width: 100%; white-space: nowrap; min-width: 900px; line-height: 20pt; } ' +
         '.incidentList .list .incident span { padding: 0px 2px 2px 0px; vertical-align: top; display: inline-block; overflow: hidden; text-overflow: ellipsis; } ' +
         '.incidentList .list .incident span.prio::before { content: "PRIO " } ' +
         '.incidentList .list .incident span.locatie { width: 35% } ' +
