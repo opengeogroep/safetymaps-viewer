@@ -106,6 +106,13 @@ FalckIncidentsController.prototype.checkIncidentMonitor = function() {
             dbkjs.options.incidents = { };
 
             me.incidentMonitorController = new IncidentMonitorController(me);
+            me.incidentMonitorController.incidentListWindow.setSplitScreen(false);
+
+            $(dbkjs).on("setting_changed_splitscreen", function() {
+                // Incident list always fullscreen independent of global setting
+                me.incidentMonitorController.incidentListWindow.setSplitScreen(false);
+            });
+
             $(me.incidentMonitorController).on("incident_selected", function() { me.incidentMonitorIncidentSelected.apply(me, arguments); });
         }
     } else {
