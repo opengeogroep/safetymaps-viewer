@@ -325,7 +325,7 @@ $(document).ready(function () {
             return val;
         });
         OpenLayers.Lang.setCode(dbkjsLang);
-
+        $('#settings_title').text(i18n.t("settings.title"));
         // We are removing / moving some existing DIVS from HTML to convert prev. popups to fullscreen modal popups
         $('#baselayerpanel').remove();
         $('#overlaypanel').attr('id', 'tmp_overlaypanel');
