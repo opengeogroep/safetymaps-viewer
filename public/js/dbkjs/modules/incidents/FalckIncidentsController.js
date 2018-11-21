@@ -594,11 +594,9 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
         // Always update window, updates moment.fromNow() times
         me.incidentDetailsWindow.data(incident, true, true);
 
-        if(me.incidentFromIncidentList) {
-            return;
+        if(!me.incidentFromIncidentList) {
+            me.button.setIcon("bell");
         }
-
-        me.button.setIcon("bell");
 
         // Check if updated, enable alert state if true
         var oldIncidentHtml = me.incidentDetailsWindow.getIncidentHtmlFalck(oldIncident, true, true);
