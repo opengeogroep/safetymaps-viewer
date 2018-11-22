@@ -137,7 +137,7 @@ dbkjs.modules.safetymaps_creator = {
                 .text(i18n.t("dialogs.noinfo"))
         );
 
-        // Put tabs at the bottom after width transition has ended
+        // Resize PDF embed div after width transition has ended
         var resizeFunction = function() {
             me.infoWindowTabsResize();
         };
@@ -190,8 +190,7 @@ dbkjs.modules.safetymaps_creator = {
 
     infoWindowTabsResize: function() {
         var view = this.infoWindow.getView();
-        var tabContentHeight = view.height() - view.find(".nav-pills").height();
-        view.find(".tab-content").css("height", tabContentHeight);
+        var tabContentHeight = view.find(".tab-content").height();
 
         view.find(".pdf-embed").css("height", tabContentHeight - 28);
     },

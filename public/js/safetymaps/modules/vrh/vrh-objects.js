@@ -164,28 +164,6 @@ dbkjs.modules.vrh_objects = {
                 .attr({'id': 'vrh_object_info'})
                 .text(i18n.t("dialogs.noinfo"))
         );
-
-
-        // Put tabs at the bottom after width transition has ended
-        var resizeFunction = function() {
-            me.infoWindowTabsResize();
-        };
-        $(window).resize(resizeFunction);
-
-        $(me.infoWindow).on("show", function() {
-            var event = dbkjs.util.getTransitionEvent();
-            if(event) {
-                me.infoWindow.getView().parent().on(event, resizeFunction);
-            } else {
-                resizeFunction();
-            }
-        });
-    },
-
-    infoWindowTabsResize: function() {
-        var view = this.infoWindow.getView();
-        var tabContentHeight = view.height() - view.find(".nav-pills").height();
-        view.find(".tab-content").css("height", tabContentHeight);
     },
 
     addSearchConfig: function() {
