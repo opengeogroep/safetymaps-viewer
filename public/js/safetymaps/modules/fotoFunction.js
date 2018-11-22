@@ -22,6 +22,7 @@ dbkjs.modules.fotoFunction = {
         var me = this;
 
         this.options = $.extend({
+            showGallery: false,
             keyupTimeout: 100,
             minSearchLength: 3
         }, this.options);
@@ -49,6 +50,9 @@ dbkjs.modules.fotoFunction = {
                 });
             }
         });
+        if(me.options.showGallery){
+            $("fotoConnector").removeAttr("capture");
+        }
     },
 
     createButton: function () {
