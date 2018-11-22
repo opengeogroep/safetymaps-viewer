@@ -344,16 +344,7 @@ FalckIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
         }
 
         if(me.incidentId && !me.incidentFromIncidentList) {
-            $("#zoom_extent").click();
-
-            // Wait for layer loading messages to clear...
-            window.setTimeout(function() {
-                dbkjs.util.alert('Melding', 'Inzet beeindigd');
-                window.setTimeout(function() {
-                    $('#systeem_meldingen').hide();
-                }, 10000);
-            }, 3000);
-            me.geenInzet(true);
+            me.inzetBeeindigd('Inzet beeindigd');
         }
     } else {
         if(me.incidentMonitorController) {
@@ -394,6 +385,20 @@ FalckIncidentsController.prototype.getVoertuigIncidenten = function(nummer) {
         p.resolve(incidenten);
     });
     return p;
+};
+
+FalckIncidentsController.prototype.inzetBeeindigd = function(melding) {
+    var me = this;
+    $("#zoom_extent").click();
+
+    // Wait for layer loading messages to clear...
+    window.setTimeout(function() {
+        dbkjs.util.alert('Melding', 'Inzet beeindigd');
+        window.setTimeout(function() {
+            $('#systeem_meldingen').hide();
+        }, 10000);
+    }, 3000);
+    me.geenInzet(true);
 };
 
 FalckIncidentsController.prototype.geenInzet = function(triggerEvent) {
@@ -600,7 +605,7 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
 
         if(me.incidentFromIncidentList && me.incidentFromIncidentListWasActive) {
             if(!incident.Actueel || incident.beeindigdeInzet) {
-                me.geenInzet(true);
+                me.inzetBeeindigd('Incident (of brandweerinzet) beeindigd');
             }
         }
         var oldIncident = me.incident;
