@@ -51,7 +51,7 @@ dbkjs.modules.fotoFunction = {
             }
         });
         if(me.options.showGallery){
-            $("fotoConnector").removeAttr("capture");
+            $("#fotoConnector").removeAttr("capture");
         }
     },
 
