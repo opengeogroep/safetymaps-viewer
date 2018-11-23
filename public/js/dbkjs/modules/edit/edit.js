@@ -730,7 +730,7 @@ dbkjs.modules.edit = {
 
         // me.loadStylesheet();
 
-        this.mainEditButton = new dbkjs.modules.EditButton("edit", "Tekenen", "#mapc1map1", "fa-pencil-square-o", {
+        this.mainEditButton = new dbkjs.modules.EditButton("edit", i18n.t("edit.drawMode"), "#mapc1map1", "fa-pencil-square-o", {
             divClass: "edit-button"
         }).on("activate", function() {
             me.activate();
@@ -749,7 +749,7 @@ dbkjs.modules.edit = {
                 .appendTo("#mapc1map1");
 
         if (me.options.showMeasureButtons) {
-            me.measureDistanceButton = new dbkjs.modules.EditButton("measureDistance", "Meet afstand", me.editBox, "fa-arrows-v fa-rotate-45")
+            me.measureDistanceButton = new dbkjs.modules.EditButton("measureDistance", i18n.t("map.measureDistance"), me.editBox, "fa-arrows-v fa-rotate-45")
                     .on("activate", function (btn) {
                         me.deactivateButtons(btn);
                         dbkjs.modules.measure.toggleMeasureDistance(true);
@@ -757,7 +757,7 @@ dbkjs.modules.edit = {
                     .on("deactivate", function () {
                         dbkjs.modules.measure.toggleMeasureDistance(false);
                     });
-            me.measureAreaButton = new dbkjs.modules.EditButton("measureArea", "Meet oppervlakte", me.editBox, "fa-bookmark-o fa-rotate-45")
+            me.measureAreaButton = new dbkjs.modules.EditButton("measureArea", i18n.t("map.measureArea"), me.editBox, "fa-bookmark-o fa-rotate-45")
                     .on("activate", function (btn) {
                         me.deactivateButtons(btn);
                         dbkjs.modules.measure.toggleMeasureArea(true);
@@ -769,7 +769,7 @@ dbkjs.modules.edit = {
         }
 
         // Create edit mode buttons
-        me.plusButton = new dbkjs.modules.EditButton("plus", "Nieuw", me.editBox, "fa-plus")
+        me.plusButton = new dbkjs.modules.EditButton("plus", i18n.t("edit.new"), me.editBox, "fa-plus")
             .on("activate", function(btn) {
                 me.deactivateButtons(btn);
                 me.properties.show();
@@ -790,7 +790,7 @@ dbkjs.modules.edit = {
                 me.featuresManager.hidePropertiesGrid();
             });
 
-        me.selectButton = new dbkjs.modules.EditButton("select", "Selecteer", me.editBox, "fa-mouse-pointer")
+        me.selectButton = new dbkjs.modules.EditButton("select", i18n.t("edit.select"), me.editBox, "fa-mouse-pointer")
             .on("activate", function(btn) {
                 me.deactivateButtons(btn);
                 me.featuresManager.showFeaturesList();
@@ -840,7 +840,7 @@ dbkjs.modules.edit = {
     
     setViewerMode: function() {
         var me = this;
-        this.mainEditButton = new dbkjs.modules.EditButton("edit", "Lezen", "#mapc1map1", "fa fa-eye", {
+        this.mainEditButton = new dbkjs.modules.EditButton("edit", i18n.t("edit.readMode"), "#mapc1map1", "fa fa-eye", {
             divClass: "edit-button"
         }).on("activate", function() {
             me.activateView();
