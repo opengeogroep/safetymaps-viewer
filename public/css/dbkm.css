@@ -750,3 +750,19 @@ input[type="radio"], input[type="checkbox"] {
     flex: 1;
     overflow: auto;
 }
+
+#vrh_object_info .tabbable {
+    position: absolute;
+    top: 0;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+#vrh_object_info .tabbable .tab-content {
+    flex: 1;
+    overflow: auto;
+}
+
