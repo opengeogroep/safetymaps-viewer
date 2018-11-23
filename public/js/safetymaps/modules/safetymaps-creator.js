@@ -35,6 +35,7 @@ dbkjs.modules.safetymaps_creator = {
 
         this.options = $.extend({
             // default options here
+            autoUpdateInterval: 5*1000*60,// every 5 min
             maxSearchResults: 30,
             mediaPath: "../media/",
             fotoPath: "../foto/"
@@ -104,8 +105,23 @@ dbkjs.modules.safetymaps_creator = {
         })
         .done(function(viewerObjects) {
             me.viewerApiObjectsLoaded(viewerObjects);
+            me.addSearchConfig();
         });
-               
+        
+        me.autoUpdate = window.setInterval(function () {
+            var pViewerObjects = safetymaps.creator.api.getViewerObjectMapOverview();
+            $.when(pViewerObjects)
+                .always(function () {
+                        me.loading = false;
+                    })
+                .fail(function (msg) {
+                        console.log("Error initializing SafetyMaps Creator module: " + msg);
+                    })
+                .done(function (viewerObjects) {
+                        me.viewerApiObjectsLoaded(viewerObjects);
+                });
+        }, me.options.autoUpdateInterval);
+        
         // Setup user interface for object info window
        
         me.setupInterface();
@@ -204,7 +220,6 @@ dbkjs.modules.safetymaps_creator = {
         this.features = safetymaps.creator.api.createViewerObjectFeatures(this.viewerApiObjects);
         this.clusteringLayer.addFeaturesToCluster(this.features);
         
-        this.addSearchConfig();
     },
 
     addSearchConfig: function() {
