@@ -49,6 +49,10 @@ AlertableButton.prototype.setAlerted = function(alert) {
         $(me.a).css({"color": 'white', "background-color": 'red'});
         var $i = $(me.i);
         $i.removeClass("fa-" + me.icon).addClass("fa-exclamation");
+        if(me.fotoAlerted){ // clear foto alert if it was active
+            window.clearInterval(me.cameraFlashInterval); 
+            me.fotoAlerted = false;
+        }
         window.clearInterval(me.exclamationFlashInterval);
         me.exclamationFlashInterval = window.setInterval(function() {
             if($i.hasClass("fa-" + me.icon)) {
@@ -87,7 +91,7 @@ AlertableButton.prototype.setFotoAlert = function (alertFoto) {
             window.clearInterval(me.cameraFlashInterval);
             me.cameraFlashInterval = null;
         }
-    }
+    } else if(me.alerted && alertFoto){return;} 
     me.fotoAlerted = alertFoto;
 };
 
