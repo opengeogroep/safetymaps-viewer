@@ -99,7 +99,7 @@ safetymaps.creator.api = {
             feature.attributes.symbol = me.imagePath + symbol;
             feature.attributes.width = width;
             feature.attributes.height = height;
-            feature.attributes.adres = [apiObject];
+            feature.attributes.type = apiObject.symbool;
             if(apiObject.selectieadressen){
                 feature.attributes.adressen = apiObject.selectieadressen;
             }
