@@ -34,9 +34,9 @@ dbkjs.modules.measure = {
         }, _obj.options);
 
         if(_obj.options.showButtons) {
-            $('#btngrp_3').append('<a id="btn_measure_distance" class="btn btn-default navbar-btn" href="#" title="' +
+            $('#btngrp_3').append('<a id="btn_measure_distance" data-sid="'+_obj.options.indexD+'" class="btn btn-default navbar-btn" href="#" title="' +
                     i18n.t('map.measureDistance') + '"><i class="fa fa-arrows-v fa-rotate-45"></i></a>');
-            $('#btngrp_3').append('<a id="btn_measure_area" class="btn btn-default navbar-btn" href="#" title="' +
+            $('#btngrp_3').append('<a id="btn_measure_area" data-sid="'+_obj.options.indexA+'" class="btn btn-default navbar-btn" href="#" title="' +
                     i18n.t('map.measureArea') + '"><i class="fa fa-bookmark-o fa-rotate-45"></i></a>');
         }
 
