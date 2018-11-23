@@ -297,8 +297,8 @@ dbkjs.modules.safetymaps_creator = {
             var o = f.attributes.apiObject;
             var matchPostcode = o.postcode && o.postcode === postcode;
             var matchHuisnummer = o.huisnummer && o.huisnummer === huisnummer;
-            var matchHuisletter = !exactMatchHuisletter || (o.huisletter === huisletter);
-            var matchToevoeging = !exactMatchToevoeging || (o.toevoeging === toevoeging);
+            var matchHuisletter = !exactMatchHuisletter || ((o.huisletter  || "") === huisletter);
+            var matchToevoeging = !exactMatchToevoeging || ((o.toevoeging || "") === toevoeging);
             var matchWoonplaats = woonplaats && o.plaats && woonplaats === o.plaats;
             var matchStraat = straat && o.straatnaam && straat === o.straatnaam;
 
@@ -316,7 +316,7 @@ dbkjs.modules.safetymaps_creator = {
 
 
                 if(matchPostcode || (matchWoonplaats && matchStraat) && a.nrs) {
-                    console.log("Creator object check selectieadres nummers voor DBK " + o.naam + ", " + a.pc + " " + a.pl);
+                    console.log("Creator object check selectieadres nummers voor DBK " + o.informele_naam + ", " + a.pc + " " + a.pl);
                     $.each(a.nrs, function(j, n) {
                         var parts = n.split("|");
                         var matchHuisnummer = Number(parts[0]) === huisnummer;
