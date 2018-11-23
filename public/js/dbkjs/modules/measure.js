@@ -160,9 +160,9 @@ dbkjs.modules.measure = {
         var measure = event.measure;
         var out = "";
         if (order === 1) {
-            out += "Afstand: " + measure.toFixed(3) + " " + units;
+            out += i18n.t("measure.distance")+": " + measure.toFixed(3) + " " + units;
         } else {
-            out += "Oppervlakte: " + measure.toFixed(3) + " " + units + "<sup>2</" + "sup>";
+            out += i18n.t("measure.area")+": " + measure.toFixed(3) + " " + units + "<sup>2</" + "sup>";
         }
         $('#measure').show();
         $('#measure').html(out);

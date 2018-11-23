@@ -6,11 +6,21 @@
         "styleSizeAdjust": "Juster symbol størrelse",
         "version": "Version",
         "version_deploy": "Specialtilpasning version",
-        "title": "indstillinger"
+        "title": "indstillinger",
+        "showInformation": "Vis oplysninger ud for kortet"
     },
     "map": {
         "measureDistance": "Mål afstand",
         "measureArea": "Mål areal"
+    },
+    "measure": {
+        "distance": "Afstand",
+        "area": "Overflade"
+    },
+    "layer":{
+        "basic": "Grundlag",
+        "background": "Baggrund",
+        "layers": "Kortlag"
     },
     "dialogs": {
         "clickinfo": "Klik information",
@@ -38,6 +48,7 @@
     },
     "creator": {
         "search": "Safety map",
+        "queryAddress": "Adresse",
         "search_placeholder": "Indtast navn her...",
         "button": "Objekt information",
         "general": "Generelt",
@@ -201,7 +212,7 @@
         "DK25": "Bredde portåbninger",		
         "DK26": "Højde portåbninger"
     },
-    "edit":{
+    "edit": {
         "drawnSymbol": "Tegne symboler",
         "symbolLabel": "Etiket",
         "symbolSize": "Størrelse",
@@ -213,6 +224,10 @@
         "alert": "Vælg først et symbol",
         "symbol": "Symbol",
         "line": "Linje",
-        "area": "Område"
+        "area": "Område",
+        "new": "Ny",
+        "select": "Vælg",
+        "drawMode" : "Tegne",
+        "readMode" :"Læse"
     }
 }

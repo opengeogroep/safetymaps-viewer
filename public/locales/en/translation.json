@@ -6,7 +6,8 @@
         "styleSizeAdjust": "Adjust icon size",
         "version": "Version",
         "version_deploy": "Customizations version",
-        "title": "Settings"
+        "title": "Settings",
+        "showInformation": "Show details next to the map"
     },
     "map": {
         "measureDistance": "Measure distance",
@@ -15,6 +16,11 @@
     "measure": {
         "distance": "Distance",
         "area": "Area"
+    },
+    "layer":{
+        "basic": "Basic",
+        "background": "Background",
+        "layers": "Layers"
     },
     "dialogs": {
         "clickinfo": "Click information",
@@ -47,6 +53,7 @@
     },
     "creator": {
         "search": "Safety map",
+        "queryAddress": "Address",
         "search_placeholder": "Type name here...",
         "button": "Object information",
         "general": "General",
@@ -180,5 +187,23 @@
         "Tn06": "Evacuation assembly point",
         "Tw01": "Alert",
         "Tw02": "Electric box"
+    },
+    "edit": {
+        "drawnSymbol": "Drawn symbols",
+        "symbolLabel": "Label",
+        "symbolSize": "Size",
+        "symbolRotation": "Rotation",
+        "symbolWidth": "Width",
+        "symbolPicker": "Symbolpicker",
+        "symbolcreator": "First select a symbol by clicking on the +",
+        "confirmDelete": "Are you sure that all features can be removed? This also applies to all other artists and viewers.",
+        "alert": "First select a symbol",
+        "symbol": "Symbol",
+        "line": "Line",
+        "area": "Area",
+        "new": "New",
+        "select": "Select",
+        "drawMode" : "Draw",
+        "readMode" :"Read"
     }
 }
