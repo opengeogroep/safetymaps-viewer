@@ -96,6 +96,7 @@ dbkjs.modules.fotoFunction = {
                 })
                 .append("<i class='fa fa-save'></i> "+i18n.t("photo.savePhotoButton"))
                 .click(function (e) {
+                    $("#btn_fotoSave").attr("disabled","disabled");
                     e.preventDefault();
                     me.savePicture();
                 });
@@ -110,6 +111,7 @@ dbkjs.modules.fotoFunction = {
     takePicture: function () {
         console.log("foto aan het maken..");
         var me = this;
+        $("#btn_fotoSave").removeAttr("disabled");
         $("#fotoConnector").click();
         $('#fotoConnector').change(function (event) {
             me.showPicture(event);
@@ -164,11 +166,13 @@ dbkjs.modules.fotoFunction = {
                 var response = JSON.parse(xhr.responseText);
                 console.log(response.message);
                 //me.carouselItems.push(me.fileName);
+                $("#btn_fotoSave").removeAttr("disabled");
                 me.popup.hide();
                 if(me.incidentNr){
                     me.addSinglePictureToCarousel();
                 }
             } else {
+                $("#btn_fotoSave").removeAttr("disabled");
                 alert('An error occurred! wiht status code: ' + xhr.status);
             }
         };
