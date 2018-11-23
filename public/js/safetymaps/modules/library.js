@@ -80,14 +80,15 @@ dbkjs.modules.library = {
         var me = this;
         me.initLibraryPopup();
         
-        var realpath = safetymaps.creator.api.mediaPath+ "bibliotheek/" + item.Documentnaam;
+        var realpath = "../media/" + "bibliotheek/" + item.Documentnaam;
+        var url = safetymaps.utils.getAbsoluteUrl(realpath);
         me.libraryPopup.getView().html("");
         me.libraryPopup.getView().append('<h3 class="pdf-heading" style="margin: 0; text-align: center; height: 28px"><a href="' + realpath + '" target="_blank">' + item.Omschrijving + ' (' + item.Documentnaam + ')</a></h3>' +
                 '<div class="pdf-embed" id="pdf_embed_library"/>');
         me.libraryPopup.show();
 
         // Add cache buster to avoid unexpected server response (206) on iOS 10 safari webapp
-        PDFObject.embed(realpath + "?t=" + new Date().getTime(), $("#pdf_embed_library"), {
+        PDFObject.embed(url + "?t=" + new Date().getTime(), $("#pdf_embed_library"), {
             // Use custom built pdf.js with src/core/network.js function
             // PDFNetworkStreamFullRequestReader_validateRangeRequestCapabilities
             // always returning false to also avoid 206 error
