@@ -393,7 +393,7 @@ FalckIncidentsController.prototype.inzetBeeindigd = function(melding) {
 
     // Wait for layer loading messages to clear...
     window.setTimeout(function() {
-        dbkjs.util.alert('Melding', 'Inzet beeindigd');
+        dbkjs.util.alert('Melding', melding);
         window.setTimeout(function() {
             $('#systeem_meldingen').hide();
         }, 10000);
