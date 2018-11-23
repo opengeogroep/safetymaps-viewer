@@ -521,7 +521,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
                 html += ", ";
             }
             var eta ="";
-            if(inzet.ETA !== null || inzet.ETA === ""){
+            if(!compareMode && inzet.ETA !== null || inzet.ETA === ""){
                 eta = me.calculateETA(inzet.ETA[0],false);
             }
             
@@ -549,7 +549,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
                 html += "<td align='right'>" + (inzet.InzetRol ? inzet.InzetRol : "") + "</td>";
                 html += "<td>" + inzet.Roepnaam + "</td>";
                 html += "<td>" + (inzet.BrwKazerne ? inzet.BrwKazerne : "") + "</td>";
-                html += "<td>" + (inzet.ETA !== null && inzet.ETA.length > 0 ? me.calculateETA(inzet.ETA[0], true) : "") + "</td>";
+                html += "<td>" + (!compareMode && inzet.ETA !== null && inzet.ETA.length > 0 ? me.calculateETA(inzet.ETA[0], true) : "") + "</td>";
                 html += "</tr>";
             }
         });
