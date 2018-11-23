@@ -214,9 +214,6 @@ dbkjs.modules.safetymaps_creator = {
     viewerApiObjectsLoaded: function(data) {
         this.viewerApiObjects = data;
 
-        this.viewerApiObjects.sort(function(lhs, rhs) {
-            return lhs.formele_naam.localeCompare(rhs.formele_naam, dbkjsLang);
-        });
         this.features = safetymaps.creator.api.createViewerObjectFeatures(this.viewerApiObjects);
         this.clusteringLayer.addFeaturesToCluster(this.features);
         

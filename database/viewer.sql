@@ -7,7 +7,7 @@ create schema viewer;
 -- Used in cache key for ETag to refresh cache when schema of JSON results change,
 -- increase value when doing schema updates!
 create table viewer.schema_version(value integer);
-insert into viewer.schema_version(value) values(5);
+insert into viewer.schema_version(value) values(6);
 
 create or replace view viewer.viewer_object as
     select d."DBK_ID" as id,
@@ -114,7 +114,8 @@ create or replace view viewer.viewer_object_map as
     ) r
     where 
         -- alleen objecten die op kaart kunnen worden geplaatst
-        coalesce(pand_centroid, selectiekader_centroid) is not null;
+        coalesce(pand_centroid, selectiekader_centroid) is not null
+	order by formele_naam;
 comment on view viewer.viewer_object_map is 'View met informatie objecten voor in de opstartkaart van de viewer';        
 
 create or replace view viewer.viewer_object_details as
