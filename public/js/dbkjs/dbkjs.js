@@ -326,7 +326,9 @@ $(document).ready(function () {
             return val;
         });
         OpenLayers.Lang.setCode(dbkjsLang);
+        $('#c_settings').attr("title",i18n.t("settings.title"));
         $('#settings_title').text(i18n.t("settings.title"));
+        $('#tb02').attr("title",i18n.t("layer.layers"));
         // We are removing / moving some existing DIVS from HTML to convert prev. popups to fullscreen modal popups
         $('#baselayerpanel').remove();
         $('#overlaypanel').attr('id', 'tmp_overlaypanel');
@@ -337,8 +339,9 @@ $(document).ready(function () {
         $('#tmp_overlaypanel').remove();
 
         $(dbkjs).one("dbkjs_init_complete", function() {
-            $("#baselayerpanel_b").prepend("<div style='padding-bottom: 5px'><h4>Ondergrond:</h4></div>");
-            $("#baselayerpanel_b").append("<div style='padding-top: 10px; padding-bottom: 5px'><h4>Kaartlagen:</h4></div>");
+            $('#layer_basic').text(i18n.t("layer.basic"));
+            $("#baselayerpanel_b").prepend("<div style='padding-bottom: 5px'><h4>"+i18n.t("layer.background")+":</h4></div>");
+            $("#baselayerpanel_b").append("<div style='padding-top: 10px; padding-bottom: 5px'><h4>"+i18n.t("layer.layers")+":</h4></div>");
 
             $("#overlaypanel_div").parent().appendTo("#baselayerpanel_b");
             $("#tb01").remove();
@@ -371,7 +374,7 @@ $(document).ready(function () {
 
             $(dbkjs).one("dbkjs_init_complete", function() {
                 // Add config option to enable / disable split screen
-                $("#row_layout_settings").append('<div class="col-xs-12"><label><input type="checkbox" id="checkbox_splitScreen" ' + (dbkjs.options.splitScreenChecked ? 'checked' : '') + '>Toon informatie naast de kaart</label></div>');
+                $("#row_layout_settings").append('<div class="col-xs-12"><label><input type="checkbox" id="checkbox_splitScreen" ' + (dbkjs.options.splitScreenChecked ? 'checked' : '') + '>'+i18n.t("settings.showInformation")+'</label></div>');
 
                 $("#checkbox_splitScreen").on('change', function (e) {
                     dbkjs.options.splitScreenChecked = e.target.checked;
