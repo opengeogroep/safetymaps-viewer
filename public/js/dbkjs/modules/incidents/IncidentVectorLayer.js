@@ -28,8 +28,8 @@ function IncidentVectorLayer(enableLabels) {
         styleMap: new OpenLayers.StyleMap({
             "default": new OpenLayers.Style({
                 externalGraphic: "${icon}",
-                graphicWidth: 22,
-                graphicHeight: 22,
+                graphicWidth: 26,
+                graphicHeight: 26,
                 label: "${label}",
                 fontColor: "black",
                 fontSize: "12px",

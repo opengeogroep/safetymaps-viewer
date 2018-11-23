@@ -25,7 +25,7 @@ function IncidentMarkerLayer() {
     });
     dbkjs.map.addLayer(this.layer);
 
-    this.size = new OpenLayers.Size(22,22);
+    this.size = new OpenLayers.Size(26,26);
     this.offset = new OpenLayers.Pixel(-(this.size.w/2), -this.size.h);
 };
 
