@@ -6,7 +6,8 @@
         "styleSizeAdjust": "Grootte van iconen aanpassen:",
         "version": "Versie",
         "version_deploy": "Versie speciale aanpassingen",
-        "title": "Instellingen"
+        "title": "Instellingen",
+        "showInformation": "Toon informatie naast de kaart"
     },
     "map": {
         "measureDistance": "Meet afstand",
@@ -16,6 +17,11 @@
     "measure": {
         "distance": "Afstand",
         "area": "Oppervlakte"
+    },
+    "layer":{
+        "basic": "Basis",
+        "background": "Ondergrond",
+        "layers": "Kaartlagen"
     },
     "dialogs": {
         "clickinfo": "Klik informatie",
@@ -222,6 +228,10 @@
         "alert": "Selecteer eerst een symbool",
         "symbol": "Symbool",
         "line": "Lijn",
-        "area": "Gebied"
+        "area": "Gebied",
+        "new": "Nieuw",
+        "select": "Selecteer",
+        "drawMode" : "Tekenen",
+        "readMode" :"Lezen"
     }
 }
