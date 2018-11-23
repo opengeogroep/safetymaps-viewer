@@ -87,7 +87,6 @@ FalckIncidentVehicleController.prototype.getEenheidLocatieIncident = function (b
 FalckIncidentVehicleController.prototype.updateVehicles = function (features) {
     var me = this;
     var transformedFeatures = me.transformFeaturesForVehiclePositionLayer(features);
-    console.log("transformedEenheden: ", transformedFeatures);
     me.vehiclePositionLayer.features(transformedFeatures);
 };
 
