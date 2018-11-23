@@ -5,8 +5,8 @@
  */
 
 
-dbkjs.modules.librarySearch = {
-    id: "dbk.module.librarySearch",
+dbkjs.modules.library = {
+    id: "dbk.module.library",
     library: null,
 
     register: function () {
@@ -80,7 +80,7 @@ dbkjs.modules.librarySearch = {
         var me = this;
         me.initLibraryPopup();
         
-        var realpath = location.origin+ "/bibliotheek/" + item.Documentnaam;
+        var realpath = safetymaps.creator.api.mediaPath+ "bibliotheek/" + item.Documentnaam;
         me.libraryPopup.getView().html("");
         me.libraryPopup.getView().append('<h3 class="pdf-heading" style="margin: 0; text-align: center; height: 28px"><a href="' + realpath + '" target="_blank">' + item.Omschrijving + ' (' + item.Documentnaam + ')</a></h3>' +
                 '<div class="pdf-embed" id="pdf_embed_library"/>');
