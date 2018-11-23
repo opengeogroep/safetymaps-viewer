@@ -66,7 +66,6 @@ dbkjs.modules.safetymaps_creator = {
 
         var layer = me.clusteringLayer.createLayer();
         dbkjs.map.addLayer(layer);
-        dbkjs.selectControl.deactivate();
         dbkjs.selectControl.layers.push(layer);
 
         // multi select, otherwise cluster will be deselected when clicking anywhere
@@ -81,17 +80,23 @@ dbkjs.modules.safetymaps_creator = {
         me.objectLayers = new safetymaps.creator.CreatorObjectLayers(dbkjs);
         dbkjs.map.addLayers(me.objectLayers.createLayers());
 
-        dbkjs.hoverControl.deactivate();
         $.each(me.objectLayers.selectLayers, function(i, l) {
             dbkjs.selectControl.layers.push(l);
             if(l.hover) dbkjs.hoverControl.layers.push(l);
             l.events.register("featureselected", me, me.objectLayerFeatureSelected);
             l.events.register("featureunselected", me, me.objectLayerFeatureUnselected);
         });
-
-        dbkjs.hoverControl.activate();
-        dbkjs.selectControl.activate();
-
+ 
+        //Set the clusteringLayer always on top so its always clickable (sometimes polygon areas are drawn over a dbk feature)
+        //wait for event so all layers have been initialized
+        $(dbkjs).one("dbkjs_init_complete", function(){
+            dbkjs.map.raiseLayer(me.clusteringLayer.layer, dbkjs.map.layers.length);
+            dbkjs.hoverControl.deactivate(); // deactivate is necessary here...
+            dbkjs.hoverControl.activate();
+            dbkjs.selectControl.deactivate(); // deactivate is necessary here...
+            dbkjs.selectControl.activate(); 
+        });
+        
         me.loading = true;
         var pViewerObjects = safetymaps.creator.api.getViewerObjectMapOverview();
         var pStyles = safetymaps.creator.api.getStyles();
@@ -467,10 +472,7 @@ dbkjs.modules.safetymaps_creator = {
                 ids.push(v.id);
             });
             this.clusteringLayer.setSelectedIds(ids);
-            
-            //Set the clusteringLayer always on top so its always clickable (sometimes polygon areas are drawn over a dbk feature)
-            dbkjs.map.raiseLayer(this.clusteringLayer.layer, dbkjs.map.layers.length);
-            
+                       
             $("#symbols tr").click(function(e){
                 if(e.delegateTarget.children[2].innerText === ""){
                     return;
