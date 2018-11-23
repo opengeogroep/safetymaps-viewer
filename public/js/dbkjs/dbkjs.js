@@ -206,8 +206,11 @@ dbkjs.sortModuleButtons = function(){
             m.setAttribute("data-sid",99);
         }       
     });
-    $('#btngrp_3 a').sort(function(a,b){
-        return a.dataset.sid > b.dataset.sid;
+    $('#btngrp_3 a').detach().sort(function(a,b){
+        var astts = $(a).data('sid');
+        var bstts = $(b).data('sid');
+        //return astts - bstts;
+        return (astts > bstts) ? (astts > bstts) ? 1 : 0 : -1;
     }).appendTo("#btngrp_3");
 };
 dbkjs.zoomToFixedMapResolutionForBounds = function(bounds) {
