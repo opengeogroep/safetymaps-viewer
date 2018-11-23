@@ -606,6 +606,7 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
         if(me.incidentFromIncidentList && me.incidentFromIncidentListWasActive) {
             if(!incident.Actueel || incident.beeindigdeInzet) {
                 me.inzetBeeindigd('Incident (of brandweerinzet) beeindigd');
+                return;
             }
         }
         var oldIncident = me.incident;
