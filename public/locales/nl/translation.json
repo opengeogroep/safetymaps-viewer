@@ -77,6 +77,7 @@
     "creator": {
         "search": "Safety map",
         "queryAddress": "Adres",
+        "library": "Bibliotheek",
         "search_placeholder": "Vul naam in...",
         "button": "Objectinformatie",
         "general": "Algemeen",

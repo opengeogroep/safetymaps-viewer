@@ -54,6 +54,7 @@
     "creator": {
         "search": "Safety map",
         "queryAddress": "Address",
+        "library": "Library",
         "search_placeholder": "Type name here...",
         "button": "Object information",
         "general": "General",

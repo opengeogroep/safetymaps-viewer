@@ -21,7 +21,7 @@ dbkjs.modules.library = {
         me.initData();
 
         dbkjs.modules.search.addSearchConfig({
-            tabContents: "<i class='fa fa-file-pdf-o'></i> " + i18n.t("creator.librarySearch"),
+            tabContents: "<i class='fa fa-file-pdf-o'></i> " + i18n.t("creator.library"),
             placeholder: i18n.t("creator.search_placeholder"),
             search: function (value) {
                 console.log("search library " + value);

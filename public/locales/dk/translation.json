@@ -49,6 +49,7 @@
     "creator": {
         "search": "Safety map",
         "queryAddress": "Adresse",
+        "library": "Bibliotek",
         "search_placeholder": "Indtast navn her...",
         "button": "Objekt information",
         "general": "Generelt",
