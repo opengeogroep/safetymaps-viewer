@@ -736,7 +736,7 @@ input[type="radio"], input[type="checkbox"] {
     display: inline-block; font-family: FontAwesome;
 }
 
-.tabbable {
+#creator_object_info .tabbable {
     position: absolute;
     top: 0;
     bottom: 10px;
@@ -746,7 +746,7 @@ input[type="radio"], input[type="checkbox"] {
     flex-direction: column;
 }
 
-.tabbable .tab-content {
+#creator_object_info .tabbable .tab-content {
     flex: 1;
     overflow: auto;
 }
