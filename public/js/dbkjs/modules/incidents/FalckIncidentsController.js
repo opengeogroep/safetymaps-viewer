@@ -646,9 +646,11 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
 
         if(incident.IncidentLocatie && (incident.IncidentLocatie.XCoordinaat !== oldX || incident.IncidentLocatie.YCoordinaat !== oldY)) {
 
-            // This function uses coords in me.incident, updated in previous if stmt
-            me.markerLayer.addIncident(incident, false, true);
-            me.markerLayer.setZIndexFix();
+            if(!me.incidentFromIncidentList) {
+                // This function uses coords in me.incident, updated in previous if stmt
+                me.markerLayer.addIncident(incident, false, true);
+                me.markerLayer.setZIndexFix();
+            }
             me.zoomToIncident();
 
             var x = incident.IncidentLocatie.XCoordinaat;
