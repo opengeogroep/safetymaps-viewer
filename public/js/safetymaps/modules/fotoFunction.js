@@ -1,9 +1,4 @@
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
+/* global dbkjs, safetymaps */
 
 dbkjs.modules.fotoFunction = {
     id: "dbk.module.fotoFunction",
@@ -24,7 +19,8 @@ dbkjs.modules.fotoFunction = {
         this.options = $.extend({
             showGallery: false,
             keyupTimeout: 100,
-            minSearchLength: 3
+            minSearchLength: 3,
+            path: "foto/"
         }, this.options);
 
         me.createButton();
@@ -211,7 +207,7 @@ dbkjs.modules.fotoFunction = {
         $.each(data, function (i, object) {
             if (!me.objectIsinList(me.carouselItems, object.filename)) {
                 me.carouselItems.push(object.filename);
-                var path = safetymaps.creator.api.fotoPath + object.filename;
+                var path = safetymaps.utils.getAbsoluteUrl(me.options.path + object.filename);
                 var info = (object.omschrijving === "" ? "" : object.omschrijving);
                 me.image_carousel_inner.append('<div class="item"><img class="img-full" style="width: 100%" src="' + path +
                         '"><div class="carousel-caption"><h3>' + info + '</h3></div></div>');
@@ -223,7 +219,7 @@ dbkjs.modules.fotoFunction = {
     addSinglePictureToCarousel: function () {
         var me = this;
         var i;
-        var path = safetymaps.creator.api.fotoPath + me.fileName;
+        var path = safetymaps.utils.getAbsoluteUrl(me.options.path + me.fileName);
         var info = $("#input_textfield").val();
         if(me.carouselItems.length === 0){
             i = 0;
