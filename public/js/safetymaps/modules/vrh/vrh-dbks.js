@@ -809,16 +809,38 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(tab, object) {
 
     rows.push(["<b>Symbool</b>", "<b>Naam</b>", "<b>Informatie</b>"]);
 
+    var rowsWithInfo = [];
+    var rowsWithoutInfo = [];
+    var codesDisplayed = {};
+
     $.each(me.layerSymbols.features.concat(me.layerDangerSymbols.features), function(i, f) {
         if(f.attributes.stofnaam) {
             return true;
         }
-        rows.push([
-            "<img class='thumb' style='' src='" + f.attributes.symbol_noi + "' alt='" + f.attributes.code + "' title='" + f.attributes.code + "'>",
-            me.vrhSymbols[f.attributes.code] || me.vrhDangerSymbols[f.attributes.code] || i18n.t("symbol." + f.attributes.code),
-            f.attributes.description
-        ]);
+        var code = f.attributes.code;
+        var description = f.attributes.description || "";
+        if(codesDisplayed[f.attributes.code] && description.length === 0) {
+            return true;
+        }
+        codesDisplayed[f.attributes.code] = true;
+
+        var tr =[
+            "<img class='legend_symbol' src='" + f.attributes.symbol_noi + "' alt='" + code + "' title='" + code + "'>",
+            me.vrhSymbols[code] || me.vrhDangerSymbols[code] || i18n.t("symbol." + code),
+            description
+        ];
+        if(description.length === 0) {
+            rowsWithoutInfo.push(tr);
+        } else {
+            rowsWithInfo.push(tr);
+        }
     });
+    function legendTrSort(lhs, rhs) {
+        return lhs[1].localeCompare(rhs[1]);
+    };
+    rowsWithInfo.sort(legendTrSort);
+    rowsWithoutInfo.sort(legendTrSort);
+    rows = rows.concat(rowsWithInfo).concat(rowsWithoutInfo);
 
     if(rows.length !== 1) {
         safetymaps.creator.createHtmlTabDiv("brandweer", "Brandweer", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
@@ -834,7 +856,7 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(tab, object) {
         }
         var a = f.attributes;
         rows.push(
-                '<tr><td width="100px"><img class="thumb" src="' + a.symbol_noi + '" alt="' + a.symboolcod + '" title="' + a.symboolcod + '"></td>' +
+                '<tr><td width="100px"><img class="legend_symbol" src="' + a.symbol_noi + '" alt="' + a.symboolcod + '" title="' + a.symboolcod + '"></td>' +
                 '<td><div class="gevicode">' + a.gevi_code + '</div><div class="unnummer">' + a.vn_nummer + '</div></td>' +
                 '<td>' + a.stofnaam + '</td><td>' + a.hoeveelhei + '</td><td>' + a.description + '</td><td>' + a.eric_kaart + '</td></tr>'
         );

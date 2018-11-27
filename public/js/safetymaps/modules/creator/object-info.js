@@ -344,7 +344,8 @@ safetymaps.creator.renderSymbols = function(object, isFlamingo /*ES2015 = false 
     isFlamingo = (typeof isFlamingo !== "undefined") ? isFlamingo : false;
 
     var rows = [];
-    var symbolsWithoutInfo = [];
+    var rowsWithInfo = [];
+    var rowsWithoutInfo = [];
     if(object.symbols || object.communication_coverage) {
         rows.push([
             "<b>" + i18n.t("creator.symbol_icon") + "</b>",
@@ -361,27 +362,30 @@ safetymaps.creator.renderSymbols = function(object, isFlamingo /*ES2015 = false 
                     return true;
             }
             symbolsDisplayed[s.code] = true;
-            
+
+            var tr = [
+                '<img id="<id>'+s.id+'</id>" class="legend_symbol" src="' + safetymaps.creator.api.imagePath + 'symbols/' + s.code + '.png' + '" alt="' + s.code + '" title="' + s.code + '">',
+                i18n.t("symbol." + s.code),s.omschrijving // TODO get from safetymaps.creator.api.styles info
+            ];
             if (s.omschrijving === ""){
-                symbolsWithoutInfo.push([
-                    '<img id="<id>'+s.id+'</id>" style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'symbols/' + s.code + '.png' + '" alt="' + s.code + '" title="' + s.code + '">',
-                    i18n.t("symbol." + s.code),s.omschrijving // TODO get from safetymaps.creator.api.styles info
-                ]);
+                rowsWithoutInfo.push(tr);
             } else {
-                rows.push([
-                    '<img id="<id>'+s.id+'</id>" style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'symbols/' + s.code + '.png' + '" alt="' + s.code + '" title="' + s.code + '">',
-                    i18n.t("symbol." + s.code),s.omschrijving // TODO get from safetymaps.creator.api.styles info
-                ]);
+                rowsWithInfo.push(tr);
             }
         });
-        rows.push.apply(rows,symbolsWithoutInfo);
+        function legendTrSort(lhs, rhs) {
+            return lhs[1].localeCompare(rhs[1]);
+        };
+        rowsWithInfo.sort(legendTrSort);
+        rowsWithoutInfo.sort(legendTrSort);
+        rows = rows.concat(rowsWithInfo).concat(rowsWithoutInfo);;
         if(object.communication_coverage) {
             rows.push([
-                '<img style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'coverage.png">',
+                '<img class="legend_symbol" src="' + safetymaps.creator.api.imagePath + 'coverage.png">',
                 i18n.t("creator.symbol_communication_coverage"),""
             ]);
             rows.push([
-                '<img style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'no_coverage.png">',
+                '<img class="legend_symbol" src="' + safetymaps.creator.api.imagePath + 'no_coverage.png">',
                 i18n.t("creator.symbol_no_communication_coverage"), ""
             ]);
         }
@@ -409,7 +413,7 @@ safetymaps.creator.renderDangerSymbols = function(object) {
 
             var symbolName = i18n.t("danger_symbol." + ds.symbol);
             rows.push([
-                '<img style="width: 20%" src="' + safetymaps.creator.api.imagePath + 'danger_symbols/' + ds.symbol + '.png' + '" alt="' + symbolName + '" title="' + symbolName + '">',
+                '<img class="legend_symbol" src="' + safetymaps.creator.api.imagePath + 'danger_symbols/' + ds.symbol + '.png' + '" alt="' + symbolName + '" title="' + symbolName + '">',
                 '<div class="gevicode">' + ds.gevi_code + '</div><div class="unnummer">' + ds.un_nr + '</div>',
                 Mustache.escape(ds.naam_stof),
                 Mustache.escape(ds.hoeveelheid),

@@ -1225,7 +1225,7 @@ safetymaps.vrh.Events.prototype.createEventLegend = function() {
             }
 
             var tr = [
-                "<img style='width: 40%' src='" + me.imagePath + '/lines/' + soort + ".png'>",
+                "<img src='" + me.imagePath + '/lines/' + soort + ".png'>",
                 style.label,
                 omschrijving || ""
             ];
@@ -1267,7 +1267,7 @@ safetymaps.vrh.Events.prototype.createEventLegend = function() {
             }
 
             var tr = [
-                "<img style='width: 40%' src='" + me.imagePath + '/lines/' + soort + ".png'>",
+                "<img src='" + me.imagePath + '/lines/' + soort + ".png'>",
                 style.label,
                 omschrijving || ""
             ];
@@ -1308,7 +1308,7 @@ safetymaps.vrh.Events.prototype.createEventLegend = function() {
             }
 
             var tr = [
-                "<img style='width: 20%' src='" + me.imagePath + '/' + soort + ".png'>",
+                "<img class='legend_symbol' src='" + me.imagePath + '/' + soort + ".png'>",
                 label,
                 omschrijving || ""
             ];
@@ -1349,7 +1349,7 @@ safetymaps.vrh.Events.prototype.createEventLegend = function() {
             }
 
             var tr = [
-                "<img style='width: 20%' src='" + me.imagePath + '/' + soort + ".png'>",
+                "<img class='legend_symbol' src='" + me.imagePath + '/' + soort + ".png'>",
                 label,
                 omschrijving || ""
             ];

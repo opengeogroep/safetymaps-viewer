@@ -766,3 +766,6 @@ input[type="radio"], input[type="checkbox"] {
     overflow: auto;
 }
 
+img.legend_symbol {
+    width: 50px;
+}
