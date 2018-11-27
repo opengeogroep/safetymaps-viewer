@@ -447,7 +447,6 @@ dbkjs.modules.vrh_objects = {
             if(!isIncident) {
                 this.infoWindow.show();
             }
-            this.infoWindowTabsResize();
 
             this.selectedObject = object;
             this.clusteringLayer.setSelectedIds([id]);
