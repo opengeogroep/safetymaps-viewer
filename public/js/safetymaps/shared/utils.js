@@ -126,7 +126,7 @@ OpenLayers.Strategy.Cluster.prototype.cluster = function (event) {
                     if (feature.attributes.apiObject.selectiekader) {
                         var theGeom = wktParser.read(feature.attributes.apiObject.selectiekader).geometry;
                         if (screenBounds.intersectsBounds(theGeom.getBounds())) {
-                            console.log("feature point outside screen but selectiekader inside", feature);
+                            //console.log("feature point outside screen but selectiekader inside", feature);
                             if (!gf) gf = new jsts.geom.GeometryFactory();
                             var buf = 50 * this.layer.map.getResolution();
                             var smallerScreenBounds = gf.createLinearRing([
@@ -142,7 +142,7 @@ OpenLayers.Strategy.Cluster.prototype.cluster = function (event) {
                             ]);
                             var newLocation = line.intersection(smallerScreenBounds);
                             var w = new jsts.io.WKTWriter();
-                            console.log("smallerScreenBounds", w.write(smallerScreenBounds), "line", w.write(line), "newLocation",w.write(newLocation), newLocation);
+                            //console.log("smallerScreenBounds", w.write(smallerScreenBounds), "line", w.write(line), "newLocation",w.write(newLocation), newLocation);
                             feature.originalGeometry = feature.geometry;
                             feature.geometry = new OpenLayers.Geometry.Point(newLocation.getX(), newLocation.getY());
 
