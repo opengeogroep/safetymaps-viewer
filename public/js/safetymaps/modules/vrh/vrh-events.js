@@ -958,7 +958,6 @@ safetymaps.vrh.Events.prototype.layerFeatureSelected = function(e) {
     }
 };
 
-
 safetymaps.vrh.Events.prototype.removeAllFeatures = function(object) {
     if(this.layers) {
         $.each(this.layers, function(i, layer) {
@@ -1116,7 +1115,10 @@ safetymaps.vrh.Events.prototype.createEventLegend = function() {
     var me = this;
 
     var rows = [];
-    var rowsWithoutInfo = [];
+    var rowsWithInfo = [], rowsWithoutInfo = [];
+    function legendTrSort(lhs, rhs) {
+        return lhs[1].localeCompare(rhs[1]);
+    };
 
     if(me.layerLocationPolygon.features.length > 0) {
         rows.push([
@@ -1150,13 +1152,12 @@ safetymaps.vrh.Events.prototype.createEventLegend = function() {
             if(omschrijving === null) {
                 rowsWithoutInfo.push(tr);
             } else {
-                rows.push(tr);
+                rowsWithInfo.push(tr);
             }
         });
-        rowsWithoutInfo.sort(function(lhs, rhs) {
-            return lhs[1].localeCompare(rhs[1]);
-        });
-        rows.push.apply(rows, rowsWithoutInfo);
+        rowsWithInfo.sort(legendTrSort);
+        rowsWithoutInfo.sort(legendTrSort);
+        rows = rows.concat(rowsWithInfo).concat(rowsWithoutInfo);
     }
     rowsWithoutInfo = [];
 
@@ -1192,13 +1193,12 @@ safetymaps.vrh.Events.prototype.createEventLegend = function() {
             if(omschrijving === null) {
                 rowsWithoutInfo.push(tr);
             } else {
-                rows.push(tr);
+                rowsWithInfo.push(tr);
             }
         });
-        rowsWithoutInfo.sort(function(lhs, rhs) {
-            return lhs[1].localeCompare(rhs[1]);
-        });
-        rows.push.apply(rows, rowsWithoutInfo);
+        rowsWithInfo.sort(legendTrSort);
+        rowsWithoutInfo.sort(legendTrSort);
+        rows = rows.concat(rowsWithInfo).concat(rowsWithoutInfo);
     }
     rowsWithoutInfo = [];
 
@@ -1234,13 +1234,12 @@ safetymaps.vrh.Events.prototype.createEventLegend = function() {
             if(omschrijving === null) {
                 rowsWithoutInfo.push(tr);
             } else {
-                rows.push(tr);
+                rowsWithInfo.push(tr);
             }
         });
-        rowsWithoutInfo.sort(function(lhs, rhs) {
-            return lhs[1].localeCompare(rhs[1]);
-        });
-        rows.push.apply(rows, rowsWithoutInfo);
+        rowsWithInfo.sort(legendTrSort);
+        rowsWithoutInfo.sort(legendTrSort);
+        rows = rows.concat(rowsWithInfo).concat(rowsWithoutInfo);
     }
     rowsWithoutInfo = [];
 
@@ -1275,13 +1274,12 @@ safetymaps.vrh.Events.prototype.createEventLegend = function() {
             if(omschrijving === null) {
                 rowsWithoutInfo.push(tr);
             } else {
-                rows.push(tr);
+                rowsWithInfo.push(tr);
             }
         });
-        rowsWithoutInfo.sort(function(lhs, rhs) {
-            return lhs[1].localeCompare(rhs[1]);
-        });
-        rows.push.apply(rows, rowsWithoutInfo);
+        rowsWithInfo.sort(legendTrSort);
+        rowsWithoutInfo.sort(legendTrSort);
+        rows = rows.concat(rowsWithInfo).concat(rowsWithoutInfo);
     }
     rowsWithoutInfo = [];
 
@@ -1316,13 +1314,12 @@ safetymaps.vrh.Events.prototype.createEventLegend = function() {
             if(omschrijving === null) {
                 rowsWithoutInfo.push(tr);
             } else {
-                rows.push(tr);
+                rowsWithInfo.push(tr);
             }
         });
-        rowsWithoutInfo.sort(function(lhs, rhs) {
-            return lhs[1].localeCompare(rhs[1]);
-        });
-        rows.push.apply(rows, rowsWithoutInfo);
+        rowsWithInfo.sort(legendTrSort);
+        rowsWithoutInfo.sort(legendTrSort);
+        rows = rows.concat(rowsWithInfo).concat(rowsWithoutInfo);
     }
     rowsWithoutInfo = [];
 
@@ -1357,13 +1354,12 @@ safetymaps.vrh.Events.prototype.createEventLegend = function() {
             if(omschrijving === null) {
                 rowsWithoutInfo.push(tr);
             } else {
-                rows.push(tr);
+                rowsWithInfo.push(tr);
             }
         });
-        rowsWithoutInfo.sort(function(lhs, rhs) {
-            return lhs[1].localeCompare(rhs[1]);
-        });
-        rows.push.apply(rows, rowsWithoutInfo);
+        rowsWithInfo.sort(legendTrSort);
+        rowsWithoutInfo.sort(legendTrSort);
+        rows = rows.concat(rowsWithInfo).concat(rowsWithoutInfo);
     }
 
     return rows;
