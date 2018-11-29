@@ -42,7 +42,7 @@ dbkjs.modules.vrh_objects = {
             maxSearchResults: 30,
             dbks: false,
             evenementen: true,
-            waterveiligheid: true,
+            waterongevallen: true,
             filterEvDate: true
         }/*, this.options*/);
 
@@ -82,6 +82,8 @@ dbkjs.modules.vrh_objects = {
 
         me.events = new safetymaps.vrh.Events(this.options);
 
+        me.waterongevallen = new safetymaps.vrh.Waterongevallen(this.options);
+
         me.dbks = new safetymaps.vrh.Dbks(this.options);
 
         dbkjs.hoverControl.activate();
@@ -105,6 +107,26 @@ dbkjs.modules.vrh_objects = {
             });
         } else {
             me.dbks.loading = false;
+        }
+
+        // XXX move to safetymaps.vrh.Waterongevallen.init()
+        if(me.options.waterongevallen) {
+            safetymaps.vrh.api.getWaterongevallen()
+            .fail(function(msg) {
+                dbkjs.util.alert("Fout", msg, "alert-danger");
+                me.waterongevallen.loading = false;
+            })
+            .done(function(woObjects) {
+                console.log("Got " + woObjects.length + " waterongevallen objects");
+                me.waterongevallen.loading = false;
+
+                me.overviewObjects = me.overviewObjects.concat(woObjects);
+
+                me.features = me.features.concat(safetymaps.vrh.api.createWaterongevallenFeatures(woObjects));
+                me.clusteringLayer.addFeaturesToCluster(me.features);
+            });
+        } else {
+            me.waterongevallen.loading = false;
         }
 
         // XXX move to safetymaps.vrh.Events.init()
@@ -195,6 +217,44 @@ dbkjs.modules.vrh_objects = {
                     console.log("Search result selected", result);
 
                     me.selectObjectById("evenement",result.evnaam, result.extent);
+                }
+            }, true);
+        }
+
+        // XXX move to safetymaps.vrh.Events.init()
+        if(dbkjs.modules.search && me.options.waterongevallen) {
+            dbkjs.modules.search.addSearchConfig({
+                tabContents: "<i class='fa fa-life-buoy'></i> Waterongevallen",
+                placeholder: "WO-kaartnaam",
+                search: function(value) {
+                    console.log("search wo " + value);
+                    var searchResults = [];
+                    $.each(me.overviewObjects, function(i, o) {
+                        if(o.clusterFeature.attributes.type === "wbbk") {
+                            if(value === "" || o.locatie.toLowerCase().indexOf(value) !== -1) {
+                                searchResults.push(o);
+                                if(searchResults.length === me.options.maxSearchResults) {
+                                    return false;
+                                }
+                            }
+                        }
+                    });
+                    dbkjs.modules.search.showResults(searchResults, function(r) {
+                        var s = r.locatie;
+                        if(r.adres || r.plaatsnaam) {
+                            var p = [];
+                            if(r.adres) p.push(r.adres);
+                            if(r.plaatsnaam) p.push(r.plaatsnaam);
+
+                            s += " (" + p.join(", ") + ")";
+                        }
+                        return s;
+                    });
+                },
+                resultSelected: function(result) {
+                    console.log("Search result selected", result);
+
+                    me.selectObjectById("wbbk",result.id, result.extent);
                 }
             }, true);
         }
@@ -423,6 +483,7 @@ dbkjs.modules.vrh_objects = {
         if(this.selectedObject) {
             this.events.removeAllFeatures();
             this.dbks.removeAllFeatures();
+            this.waterongevallen.removeAllFeatures();
 
             if(this.selectedClusterFeature && this.selectedClusterFeature.layer) {
                 dbkjs.selectControl.unselect(this.selectedClusterFeature);
@@ -443,6 +504,9 @@ dbkjs.modules.vrh_objects = {
             } else if(type === "dbk") {
                 this.dbks.addFeaturesForObject(object);
                 this.dbks.updateInfoWindow(tab, object);
+            } else if(type === "wbbk") {
+                this.waterongevallen.addFeaturesForObject(object);
+                this.waterongevallen.updateInfoWindow(tab, object);
             }
             if(!isIncident) {
                 this.infoWindow.show();

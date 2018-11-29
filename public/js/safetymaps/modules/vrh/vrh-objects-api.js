@@ -169,6 +169,7 @@ safetymaps.vrh.api = {
         var data = {};
         data[type] = true;
         data.id = id;
+        data.wkt = true;
         $.ajax("api/vrh", {
             dataType: "json",
             data: data
@@ -184,6 +185,63 @@ safetymaps.vrh.api = {
             }
         });
         return d.promise();
+    },
+
+    getWaterongevallen: function() {
+        var d = $.Deferred();
+
+        var msg = "Fout bij laden WO gegevens: ";
+        $.ajax("api/vrh", {
+            dataType: "json",
+            data: {
+                wbbks: true,
+                wkt: true
+            }
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            d.reject(msg + safetymaps.utils.getAjaxError(jqXHR, textStatus, errorThrown));
+        })
+        .done(function(data, textStatus, jqXHR) {
+            if(data.success) {
+                d.resolve(data.results);
+            } else {
+                d.reject(msg + data.error);
+            }
+        });
+        return d.promise();
+    },
+
+    createWaterongevallenFeatures: function(data) {
+        var me = this;
+
+        var wktParser = new OpenLayers.Format.WKT();
+
+        var features = [];
+        $.each(data, function(i, apiObject) {
+            var feature = wktParser.read(apiObject.geometry);
+            feature.attributes = {
+                id: apiObject.id,
+                apiObject: apiObject,
+                minClusteringResolution: 0
+            };
+            var symbol = "js/safetymaps/modules/creator/assets/wo.png";
+            var width = 40;
+            var height = 40;
+
+            feature.attributes.label = apiObject.locatie;
+            feature.attributes.symbol = me.imagePath + symbol;
+            feature.attributes.width = width;
+            feature.attributes.height = height;
+            feature.attributes.type = "wbbk";
+            if(apiObject.selectiekader) {
+                var selectiekaderFeature = wktParser.read(apiObject.selectiekader);
+                feature.attributes.selectionPolygon = selectiekaderFeature.geometry;
+                feature.attributes.minClusteringResolution = 2.5833;
+            }
+            apiObject.clusterFeature = feature;
+            features.push(feature);
+        });
+        return features;
     }
 };
 
