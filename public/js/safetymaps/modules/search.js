@@ -69,6 +69,7 @@
             this.createPopup();
         }
         this.popup.show();
+        this.activeConfig.search(this.searchInput.val());
         this.searchInput.focus();
     },
 
