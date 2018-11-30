@@ -103,7 +103,6 @@ safetymaps.ClusteringLayer.prototype.createLayer = function () {
                         } else if (feature.layer.map.getScale() > me.options.minLabelScale) {
                             return "";                        
                         } else if(me.selectedIds.indexOf(feature.attributes.id) !== -1) {
-                            console.log("selected cluster feature", feature.attributes);
                             return "";
                         } else {
                             return feature.attributes.label || "";
@@ -121,7 +120,6 @@ safetymaps.ClusteringLayer.prototype.createLayer = function () {
                             return 1;
                         }
                         if(me.selectedIds.indexOf(feature.attributes.id) !== -1) {
-                            console.log("selected cluster feature", feature.attributes);
                             return 0.01;
                         }
                         return 1;
