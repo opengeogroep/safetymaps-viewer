@@ -164,7 +164,6 @@ dbkjs.Layer = dbkjs.Class({
 
             this.div.append(dv_panel_content);
             $(parent).append(this.div);
-            $(parent).sortable({handle: '.panel'});
             if (this.layer) {
                 if (this.layer.getVisibility()) {
                     dv_panel_heading.addClass('active');

@@ -181,7 +181,7 @@ dbkjs.gotOrganisation = function () {
         });
         enabled = enabled || dbkjs.options.additionalModules && $.inArray(name, dbkjs.options.additionalModules) > -1;
 
-        if(enabled && module.register && name !== "ealgps") {
+        if(enabled && module.register) {
             try {
                 module.register();
             } catch(e) {

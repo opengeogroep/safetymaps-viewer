@@ -34,25 +34,6 @@ dbkjs.layout = {
         $(parent).append('<p><div id="row_layout_settings" class="row"><div class="col-xs-12">' +
                 '<label><input type="checkbox" id="checkbox_scaleStyle">' + i18n.t("settings.scaleStyle") +
                 '</label></div></div></p>');
-/*
-        $(parent).append(
-                '<p><hr/><div class="row"><div class="col-xs-12">' +
-                '<p style="padding-bottom: 15px">' + i18n.t('settings.styleSizeAdjust') + '</p>' +
-                '<input id="slider_styleSizeAdjust" style="width: 210px" data-slider-id="styleSizeAdjustSlider" type="text" ' +
-                ' data-slider-min="' + (dbkjs.options.styleSizeMin ? dbkjs.options.styleSizeMin : '-4') + '" ' +
-                ' data-slider-max="' + (dbkjs.options.styleSizeMax ? dbkjs.options.styleSizeMax : '10') + '" data-slider-step="1"/>' +
-                '</div></div></p><hr>'
-                );
-
-        $("#slider_styleSizeAdjust").slider({
-            value: dbkjs.options.styleSizeAdjust,
-            tooltip: "always"
-        });
-        $("#slider_styleSizeAdjust").on('slide', function(e) {
-            dbkjs.options.styleSizeAdjust = e.value;
-            dbkjs.redrawScaledLayers();
-        });
-*/
 
         $("#checkbox_scaleStyle").prop("checked", dbkjs.options.styleScaleAdjust);
         $("#checkbox_scaleStyle").on('change', function(e) {

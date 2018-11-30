@@ -82,7 +82,7 @@ dbkjs.modules.connectionmonitor = {
             }, 8000);
         }
     },
-    // Call when other module (gms or ealgps) does regular Ajax requests and
+    // Call when other module (gms or geolocate) does regular Ajax requests and
     // calls onConnectionError() or onConnectionOK() so this module does not
     // have to do it
     cancelConnectivityCheck: function() {
