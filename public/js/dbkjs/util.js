@@ -74,12 +74,7 @@ if (!String.prototype.repeat) {
 
 var dbkjs = dbkjs || {};
 window.dbkjs = dbkjs;
-$.browser = {};
-$.browser.mozilla = /mozilla/.test(navigator.userAgent.toLowerCase()) && !/webkit    /.test(navigator.userAgent.toLowerCase());
-$.browser.webkit = /webkit/.test(navigator.userAgent.toLowerCase());
-$.browser.opera = /opera/.test(navigator.userAgent.toLowerCase());
-$.browser.msie = /msie/.test(navigator.userAgent.toLowerCase());
-$.browser.device = (/android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase()));
+
 dbkjs.argParser =
     OpenLayers.Class(OpenLayers.Control.ArgParser, {
         setMap: function (map) {
@@ -242,115 +237,6 @@ dbkjs.Permalink =
     },
     CLASS_NAME: "dbkjs.Permalink"
 });
-
-/**
- * Override Cluster strategy to only create clusters for features within map
- * bounds, and thus also recluster on panning.
- *
- * http://acuriousanimal.com/blog/2012/10/09/improved-performance-on-the-animatedcluster-for-openlayers/
- * http://acuriousanimal.com/blog/2013/02/08/animatedcluster-pan-related-bug-fixed/
- */
-
-/*
-OpenLayers.Strategy.Cluster.prototype.cluster = function(event) {
-    var gf;
-    if ((!event || event.zoomChanged || (event.type === "moveend" && !event.zoomChanged)) && this.features) {
-        this.resolution = this.layer.map.getResolution();
-        var clusters = [];
-        var feature, clustered, cluster;
-        var screenBounds = this.layer.map.getExtent();
-        if(screenBounds === null) {
-            return;
-        }
-        for (var i = 0; i < this.features.length; ++i) {
-            feature = this.features[i];
-            if(feature.originalGeometry) {
-                feature.geometry = feature.originalGeometry;
-                delete feature.originalGeometry;
-            }
-            if(feature.geometry && !dbkjs.modules.feature.isFiltered(feature)) {
-                if(!screenBounds.intersectsBounds(feature.geometry.getBounds())) {
-
-                    if(feature.attributes.selectiekader && screenBounds.intersectsBounds(feature.attributes.selectiekader.getBounds())) {
-                        console.log("feature point outside screen but selectiekader inside", feature);
-
-                        if(!gf) gf = new jsts.geom.GeometryFactory();
-
-                        var buf = 50 * dbkjs.map.getResolution();
-                        var smallerScreenBounds = gf.createLinearRing([
-                            new jsts.geom.Coordinate(screenBounds.left + buf, screenBounds.bottom + buf),
-                            new jsts.geom.Coordinate(screenBounds.left + buf, screenBounds.top - buf),
-                            new jsts.geom.Coordinate(screenBounds.right - buf, screenBounds.top - buf),
-                            new jsts.geom.Coordinate(screenBounds.right - buf, screenBounds.bottom + buf),
-                            new jsts.geom.Coordinate(screenBounds.left + buf, screenBounds.bottom + buf)
-                        ]);
-                        var line = gf.createLineString([
-                            new jsts.geom.Coordinate(dbkjs.map.getCenter().lon, dbkjs.map.getCenter().lat),
-                            new jsts.geom.Coordinate(feature.geometry.x, feature.geometry.y)
-                        ]);
-                        var newLocation = line.intersection(smallerScreenBounds);
-                        var w = new jsts.io.WKTWriter();
-                        console.log("smallerScreenBounds", w.write(smallerScreenBounds), "line", w.write(line), "newLocation",w.write(newLocation), newLocation);
-
-                        feature.originalGeometry = feature.geometry;
-                        feature.geometry = new OpenLayers.Geometry.Point(newLocation.getX(), newLocation.getY());
-
-                    } else {
-                        continue;
-                    }
-                }
-                clustered = false;
-
-                function dontCluster(feature) {
-                    return dbkjs.map.getScale() < 6275 && feature.attributes.typeFeature !== "Object";
-                }
-                if(!dontCluster(feature)) {
-                    for (var j = clusters.length-1; j >= 0; --j) {
-                        cluster = clusters[j];
-                        if(cluster.cluster.length === 1 && dontCluster(cluster.cluster[0])) {
-                            // Don't cluster WO features
-                            continue;
-                        }
-                        if(this.shouldCluster(cluster, feature)) {
-                            this.addToCluster(cluster, feature);
-                            clustered = true;
-                            break;
-                        }
-                    }
-                }
-                if(!clustered) {
-                    clusters.push(this.createCluster(this.features[i]));
-                }
-            }
-        }
-        this.clustering = true;
-        this.layer.removeAllFeatures();
-        this.clustering = false;
-        if(clusters.length > 0) {
-            if(this.threshold > 1) {
-                var clone = clusters.slice();
-                clusters = [];
-                var candidate;
-                for (var k = 0, len = clone.length; k < len; ++k) {
-                    candidate = clone[k];
-                    if (candidate.attributes.count < this.threshold) {
-                        Array.prototype.push.apply(clusters, candidate.cluster);
-                    } else {
-                        clusters.push(candidate);
-                    }
-                }
-            }
-            this.clustering = true;
-            // A legitimate feature addition could occur during this
-            // addFeatures call.  For clustering to behave well, features
-            // should be removed from a layer before requesting a new batch.
-            this.layer.addFeatures(clusters);
-            this.clustering = false;
-        }
-        this.clusters = clusters;
-    }
-};
-*/
 
 /**
  * Override drawText function on openlayers SVG.js
@@ -527,31 +413,6 @@ OpenLayers.Control.SelectFeature.prototype.unselectAll = function(options) {
 dbkjs.util = {
     layersLoading: [],
     modalPopupStore: {},
-    /**
-     * script to toggle overlayes on/off
-     *
-     * @param {<OpenLayers.Layer>} obj
-     */
-    toggleOverlay: function (obj) {
-        var layers = dbkjs.map.getLayersByName(obj.name);
-        if (layers.length === 1) {
-            if (obj.checked === true) {
-                layers[0].setVisibility(true);
-            } else {
-                layers[0].setVisibility(false);
-            }
-        } else {
-            dbkjs.util.alert(i18n.t('dialogs.layerNotFound'));
-        }
-    },
-    setModalTitle: function (modal_id, title) {
-        if (title instanceof $) {
-            $('#' + modal_id).find('div.modal-header').first().html(title);
-        } else if (typeof (title) === "string") {
-            $('#' + modal_id).find('div.modal-header').first().html('<h4 class="modal-title">' + title + '</h4>');
-        }
-
-    },
     onClick: function (e) {
         $('#wmsclickpanel').hide();
         console.log("onclick ", e.type, e.xy);
@@ -568,31 +429,6 @@ dbkjs.util = {
         } else {
             return false;
         }
-    },
-    pad: function (num, size) {
-        var s = num + "";
-        while (s.length < size)
-            s = "0" + s;
-        return s;
-    },
-    parseSeconds: function (duration) {
-        //duration is a momentjs object
-        var x = duration.asSeconds();
-        var hr = Math.floor(x / 3600);
-        var min = Math.floor((x - (hr * 3600)) / 60);
-        var sec = Math.floor(x - (hr * 3600) - (min * 60));
-        if (min < 10) {
-            min = '0' + min;
-        }
-        if (sec < 10) {
-            sec = '0' + sec;
-        }
-        if (hr > 0) {
-            hr += ':';
-        } else {
-            hr = '';
-        }
-        return hr + min + ':' + sec;
     },
     /**
      *
@@ -611,162 +447,6 @@ dbkjs.util = {
             }
         }
         return returnval;
-    },
-    convertOlToJstsGeom: function (olGeom) {
-        var result = null;
-        if (typeof olGeom !== 'undefined') {
-            var jstsConverter = new jsts.io.WKTReader();
-            var wktGeom = olGeom.toString();
-            var jstsGeom = jstsConverter.read(wktGeom);
-            if (jstsGeom !== null) {
-                result = jstsGeom;
-            }
-        }
-        return result;
-    },
-    convertJstsToOlGeom: function (jstsGeom) {
-        var result = null;
-        if (typeof jstsGeom !== 'undefined') {
-            var jstsConverter = new jsts.io.WKTWriter();
-            var olConverter = new OpenLayers.Format.WKT();
-            var wktGeom = jstsConverter.write(jstsGeom);
-            var olGeom = olConverter.read(wktGeom);
-            if (olGeom !== null) {
-                result = olGeom;
-            }
-        }
-        return result;
-    },
-    getFeaturesForBuffer: function (vLayer, buffer) {
-        var result = [];
-        var i;
-        for (i = 0; i < vLayer.features.length; i++) {
-            var feat = vLayer.features[i];
-            var jstsGeom = convertOlToJstsGeom(feat.geometry);
-            if (buffer.intersects(jstsGeom)) {
-                if (typeof (feat.cluster) !== "undefined") {
-                    var j;
-                    for (j = 0; j < feat.cluster.length; j++) {
-                        result.push(feat.cluster[j]);
-                    }
-                } else {
-                    result.push(feat);
-                }
-            }
-        }
-        return result;
-    },
-    getFeaturesForLine: function (vLayer, jstsLine, bufdist) {
-        var result = [];
-        var i;
-        for (i = 0; i < vLayer.features.length; i++) {
-            var feat = vLayer.features[i];
-            var jstsGeom = convertOlToJstsGeom(feat.geometry);
-            if (jstsLine.distance(jstsGeom) < bufdist) {
-                if (typeof (feat.cluster) !== "undefined") {
-                    var j;
-                    for (j = 0; j < feat.cluster.length; j++) {
-                        result.push(feat.cluster[j]);
-                    }
-                } else {
-                    result.push(feat);
-                }
-            }
-        }
-        return result;
-    },
-    touchEnabled: function () {
-        if ("ontouchstart" in document.documentElement) {
-            return true;
-        } else {
-            return false;
-        }
-    },
-    mediaError: function (e) {
-        var msg = $($(e).parent().find('p')[0]);
-        if (msg) {
-            msg.html('<a href="' + e.src + '">' + e.src + '</a><br>' + i18n.t('dialogs.invalidImage'));
-        }
-        e.src = "images/missing.gif";
-        e.onerror = "";
-        return true;
-    },
-    createPriority: function (incidentnr, description, prio) {
-        description = dbkjs.util.isJsonNull(description) ? '' : '<i>' + description + '</i>';
-        incidentnr = dbkjs.util.isJsonNull(incidentnr) ? '' : '<strong>' + incidentnr + '</strong>';
-        var labelclass = "label-default";
-        if (prio) {
-            if (prio === "Prio 1") {
-                labelclass = "label-danger";
-            }
-            if (prio === "Prio 2") {
-                labelclass = "label-warning";
-            }
-        }
-        return $.trim(incidentnr + ' <span class="label ' + labelclass + '">' + prio + '</span>' + ' ' + description);
-
-    },
-    createNorm: function (name, real, norm) {
-        name = dbkjs.util.isJsonNull(name) ? '' : '<i>' + name + '</i>';
-        if (real === 0 || norm === 0) {
-            return '';
-        } else {
-            var diff = Math.abs(real - norm);
-            if (real - norm > 0) {
-                sign = '+';
-            } else {
-                sign = '-';
-            }
-            if (real > norm) {
-                if (real - norm > 300) {
-                    labelclass = "label-danger";
-                    color = "#D9534F";
-                } else {
-                    labelclass = "label-warning";
-                    color = "#F0AD4E";
-                }
-            } else {
-                labelclass = "label-success";
-                color = "#5CB85C";
-            }
-            var output = '<tr><td colspan="2">Situatie: ' + name + ' - norm: ' + dbkjs.util.parseSeconds(moment.duration(norm, "seconds")) + '<td></tr>';
-            output += '<tr><td colspan="2">Berekende opkomsttijd: <span class="label ' + labelclass + '">' + dbkjs.util.parseSeconds(moment.duration(real, "seconds")) + '</span><i style="color:' + color + ';"> ' + sign + dbkjs.util.parseSeconds(moment.duration(diff, "seconds")) + '</i><td></tr>';
-            return output;
-        }
-    },
-    createClassification: function (c1, c2, c3) {
-        lc1 = dbkjs.util.isJsonNull(c1) ? '' : '<li><a href="#">' + c1 + '</a></li>';
-        lc2 = dbkjs.util.isJsonNull(c2) ? '' : '<li><a href="#">' + c2 + '</a></li>';
-        lc3 = dbkjs.util.isJsonNull(c3) ? '' : '<li><a href="#">' + c3 + '</a></li>';
-        return '<ol class="breadcrumb classification">' +
-                lc1 + lc2 + lc3 +
-                '</ol>';
-    },
-    createAddress: function (city, municipality, street, housenr, housenradd, housename, zipcode) {
-        city = dbkjs.util.isJsonNull(city) ? '' : city;
-        municipality = dbkjs.util.isJsonNull(municipality) ? '' : municipality;
-        street = dbkjs.util.isJsonNull(street) ? '' : street;
-        housenr = dbkjs.util.isJsonNull(housenr) ? '' : housenr;
-        housenr = housenr !== 0 ? housenr : '';
-        housenradd = dbkjs.util.isJsonNull(housenradd) ? '' : housenradd;
-        housename = dbkjs.util.isJsonNull(housename) ? '' : '<strong>' + housename + '</strong><br>';
-        zipcode = dbkjs.util.isJsonNull(zipcode) ? '' : zipcode;
-        municipality = (city === municipality) ? '' : municipality;
-        var addressline1 = $.trim(street + ' ' + housenr + '  ' + housenradd);
-        var addressline2 = $.trim(zipcode + '  ' + city + ' ' + municipality);
-        var address_set = dbkjs.util.isJsonNull(addressline1) ? addressline2 : addressline1 + '<br>' + addressline2;
-        var address = $('<address>' +
-                housename +
-                address_set +
-                '</address>');
-        return address;
-    },
-    createListGroup: function (item_array) {
-        var listgroup = $('<ul class="list-group"></ul>');
-        $.each(item_array, function (item_idx, item) {
-            listgroup.append('<li class="list-group-item">' + item + '</li>');
-        });
-        return listgroup;
     },
     loadingStart: function (layer) {
         var arr_index = $.inArray(layer.name, this.layersLoading);
@@ -861,93 +541,6 @@ dbkjs.util = {
             return '';
         }
     },
-    /**
-     * Change the title for a panel
-     *
-     * @param {string} title
-     * @param {string} dialogid
-     */
-    changeDialogTitle: function (title, dialogid) {
-        var dialog;
-        if (!dialogid) {
-            //asume it is the infopanel.
-            dialog = $('#infopanel_h');
-        } else {
-            dialog = $(dialogid + '_h');
-        }
-        if (title) {
-            $(dialog.children('span')[0]).html(title);
-        }
-    },
-    /**
-     *
-     * @param {string} id (optional)
-     * @returns {jQuery.DOMElement} the new table element for tabular object
-     */
-    createTabbable: function (id) {
-        if (!id) {
-            id = OpenLayers.Util.createUniqueID("dbkjs_tabbable_");
-        }
-        var tabbable = $('<div id="' + id + '" class="tabbable"></div>');
-        var ul = $('<ul class="nav nav-tabs"></ul>');
-        var tab = $('<div class="tab-content"></div>');
-        // @todo voor nu alleen tabs boven. Wellicht in de toekomst wat flexibeler maken
-        tabbable.append(ul);
-        tabbable.append(tab);
-        return tabbable;
-    },
-    /**
-     * Return the tab_content id placeholder so chained functions have a
-     * reference. Can be used with an existing id to change a tab.
-     *
-     * @param {string} parent_id
-     * @param {string} tab_title
-     * @param {string} tab_content
-     * @param {boolean} active tab on/off
-     * @param {string} id (optional)
-     * @returns {string}
-     */
-    appendTab: function (parent_id, tab_title, tab_content, active, id) {
-        var parent_ul = $('#' + parent_id + ' ul').first();
-        var parent_tab = $('#' + parent_id + ' .tab-content').first();
-
-        var li;
-        var ref;
-        var pane;
-        if (!id) {
-            id = OpenLayers.Util.createUniqueID("dbkjs.tab_pane_");
-        }
-
-        li = $('#' + id + '_tab');
-        pane = $('#' + id);
-        if (li.length === 0) {
-            li = $('<li id="' + id + '_tab"></li>');
-            ref = $('<a href="#' + id + '" data-toggle="tab"></a>');
-            li.append(ref);
-            parent_ul.append(li);
-        }
-        ref = li.children().first();
-        if (pane.length === 0) {
-            pane = $('<div class="tab-pane active" id="' + id + '"></div>');
-            parent_tab.append(pane);
-        }
-        ref.html(tab_title);
-        pane.html(tab_content);
-        if (active) {
-            //Remove the active states from the other tabs
-            parent_ul.children().removeClass('active');
-            parent_tab.children().removeClass('active');
-            li.addClass('active');
-            pane.addClass('active');
-        }
-        return id;
-    },
-    removeTab: function (parent_id, id) {
-        $('#' + id + '_tab').remove();
-        $('#' + id).remove();
-        $('#' + parent_id + ' ul').first().children().first().addClass('active');
-        $('#' + parent_id + ' .tab-content').first().children().first().addClass('active');
-    },
     createDialog: function (id, title, styleoptions) {
         if (!styleoptions) {
             styleoptions = '';
@@ -967,57 +560,6 @@ dbkjs.util = {
         });
         return dialog;
     },
-    createModal: function (id, title, styleoptions) {
-        var modal_wrapper = $('<div class="modal fade" id="' + id + '"></div>');
-        var modal_dialog = $('<div class="modal-dialog"></div>');
-        var modal_content = $('<div class="modal-content"></div>');
-        var modal_header = $('<div id="' + id + '_h" class="modal-header"><h4 class="modal-title">' + title + '</h4></div>');
-        var modal_body = $('<div id="' + id + '_b" class="modal-body"></div>');
-        modal_content.append(modal_header);
-        modal_content.append(modal_body);
-        modal_wrapper.append(modal_dialog.append(modal_content));
-        modal_wrapper.modal('hide');
-        return modal_wrapper;
-    },
-    exportTableToCSV: function ($table, filename) {
-        var $rows = $table.find('tr:has(td)'),
-                // Temporary delimiter characters unlikely to be typed by keyboard
-                // This is to avoid accidentally splitting the actual contents
-                tmpColDelim = String.fromCharCode(11), // vertical tab character
-                tmpRowDelim = String.fromCharCode(0), // null character
-
-                // actual delimiter characters for CSV format
-                colDelim = '","',
-                rowDelim = '"\r\n"',
-                // Grab text from table into CSV formatted string
-                csv = '"' + $rows.map(function (i, row) {
-                    var $row = $(row),
-                            $cols = $row.find('td');
-                    return $cols.map(function (j, col) {
-                        var $col = $(col),
-                                text = $col.text();
-                        return text.replace('"', '""'); // escape double quotes
-
-                    }).get().join(tmpColDelim);
-                }).get().join(tmpRowDelim)
-                .split(tmpRowDelim).join(rowDelim)
-                .split(tmpColDelim).join(colDelim) + '"',
-                // Data URI
-                csvData = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csv);
-        $(this)
-                .attr({
-                    'download': filename,
-                    'href': csvData,
-                    'target': '_blank'
-                });
-    },
-    padspaces: function (num, field) {
-        var n = '' + num;
-        var w = n.length;
-        var l = field.length;
-        var pad = w < l ? l - w : 0;
-        return n + field.substr(0, pad);
-    },
     strip: function (html) {
         var tmp = document.createElement("DIV");
         tmp.innerHTML = html;
@@ -1029,9 +571,6 @@ dbkjs.util = {
     nl2br: function (s) {
         return s === null ? null : s.replace(/\n/g, "<br>");
     },
-    endsWith: function (str, suffix) {
-        return str.indexOf(suffix, str.length - suffix.length) !== -1;
-    },
     renderHTML: function (text) {
         var rawText = this.strip(text);
         var urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
@@ -1042,32 +581,6 @@ dbkjs.util = {
                 return '<a href="' + url + '" target="_blank">' + url + '</a>' + '<br/>';
             }
         });
-    },
-    // Get the outerHtml of an element.
-    outerHtml: function (element) {
-        return element.clone().wrap('<p>').parent().html();
-    },
-    bearing: function (pt1, pt2) {
-        var bx = 0;
-        var by = 1;
-        var ax = pt2.x - pt1.x;
-        var ay = pt2.y - pt1.y;
-        var angle_rad = Math.acos((ax * bx + ay * by) / Math.sqrt(ax * ax + ay * ay));
-        var angle = 360 / (2 * Math.PI) * angle_rad;
-        if (ax < 0) {
-            return 360 - angle;
-        } else {
-            return angle;
-        }
-    },
-    extendBounds: function(bounds, margin) {
-        margin = margin || 50;
-        var boundCoords = bounds.toArray();
-        return OpenLayers.Bounds.fromArray([
-            boundCoords[0] - margin,
-            boundCoords[1] - margin,
-            boundCoords[2] + margin,
-            boundCoords[3] + margin]);
     },
     createModalPopup: function (options) {
         // Init default options
@@ -1151,25 +664,6 @@ dbkjs.util = {
         }
         return this.modalPopupStore[name];
     },
-    isMultitouchCapableBrowser: function () {
-        var _browser = {}, uagent = navigator.userAgent.toLowerCase();
-        try {
-            _browser.opera = /mozilla/.test(uagent) && /applewebkit/.test(uagent) && /chrome/.test(uagent) && /safari/.test(uagent) && /opr/.test(uagent);
-            _browser.safari = /applewebkit/.test(uagent) && /safari/.test(uagent) && !/chrome/.test(uagent);
-            _browser.firefox = /mozilla/.test(uagent) && /firefox/.test(uagent);
-            _browser.chrome = /webkit/.test(uagent) && /chrome/.test(uagent);
-            _browser.msie = /msie/.test(uagent);
-            _browser.browsername = _browser.opera ? 'opr' : _browser.safari ? 'safari' : _browser.firefox ? 'firefox' : _browser.chrome ? 'chrome' : 'msie';
-            _browser.version = uagent.match(new RegExp("(" + _browser.browsername + ")( |/)([0-9]+)"))[3];
-            _browser.touchevents = (('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch);
-            // For now just Firefox and IE below version 11 are regarded as not multitouch capable
-            if (!_browser.touchevents || (_browser.msie && _browser.version <= 11) || _browser.firefox) {
-                return false;
-            }
-            return true;
-        } catch (e) {}
-        return true;
-    },
     configureLayers: function () {
         for (var i = 0, len = dbkjs.map.layers.length; i < len; i++) {
             if (dbkjs.map.layers[i].isBaseLayer && dbkjs.map.layers[i].visibility) {
@@ -1177,9 +671,6 @@ dbkjs.util = {
                 dbkjs.map.raiseLayer(dbkjs.map.layers[i], -1000);
             }
         }
-    },
-    gcd: function (a, b) {
-        return (b === 0) ? a : dbkjs.util.gcd(b, a % b);
     },
     getTransitionEvent: function() {
         var el = document.createElement('fakeelement');
@@ -1196,6 +687,7 @@ dbkjs.util = {
          }
          return null;
     },
+    /* XXX unused */
     mustachei18n: function(obj) {
         if(!obj) {
             obj = {};
