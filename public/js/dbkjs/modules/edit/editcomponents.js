@@ -259,7 +259,6 @@ $.extend(dbkjs.modules.FeaturesManager.prototype, {
         });
         var propGrid = this.propertiesGrid;
         propGrid.on("mouseup touchend change", function(e){
-            console.log(e);
             me.trigger("propertyChanged", [e]);
         });
     }
