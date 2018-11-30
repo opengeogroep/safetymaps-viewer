@@ -83,13 +83,8 @@ create or replace view viewer.viewer_object_map as
                 union all select the_geom from wfs."Polygon" where "DBK_ID" = vo.id
                 union all select the_geom from wfs."Brandweervoorziening" where "DBK_ID" = vo.id
                 union all select the_geom from wfs."Custom_Polygon" where "DBK_ID" = vo.id
---                union all select the_geom from wfs."Hulplijn" where "DBK_ID" = vo.id
--- negeer hulplijnen, soms buiten beeld:
-/* select vo.formele_naam , vo.informele_naam,"DBK_ID", "Omschrijving", st_astext(the_geom)
-from wfs."Hulplijn"
-join viewer.viewer_object vo on (id = "DBK_ID")
-where not the_geom @ st_geomfromewkt('SRID=28992;POLYGON ((10425.156 357829.15, 10425.156 422663.23, 77733.07 422663.23, 77733.07 357829.15, 10425.156 357829.15))');
-*/
+                -- ignore, sometimes outside screen due to unintended edits
+                --union all select the_geom from wfs."Hulplijn" where "DBK_ID" = vo.id
                 union all select the_geom from wfs."ToegangTerrein" where "DBK_ID" = vo.id
                 -- Geen AfwijkendeBinnendekking, Brandcompartiment of GevaarlijkeStof (vaak binnen pand)
             ) e) as extent,
