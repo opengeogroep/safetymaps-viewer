@@ -619,19 +619,6 @@ input[type="radio"], input[type="checkbox"] {
     overflow: auto;
 }
 
-#p2000 .melding {
-    clear: left;
-    height: 50px;
-}
-#p2000 .tijd {
-    clear: left;
-}
-
-#p2000 .titel {
-    font-weight: bold;
-    font-size: 14px;
-}
-
  input.check {
     background-image: url("../images/check.png");
     background-repeat: no-repeat;
