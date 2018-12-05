@@ -308,7 +308,7 @@ safetymaps.vrh.Waterongevallen.prototype.addFeaturesForObject = function(object)
 safetymaps.vrh.Waterongevallen.prototype.updateInfoWindow = function(tab, object) {
     var me = this;
 
-    var div = $('<div class="tabbable"></div>');
+    var div = $('<div class="tabbable tabs-bottom"></div>');
 
     var tabContent = $('<div class="tab-content"></div>');
     var tabs = $('<ul class="nav nav-pills"></ul>');

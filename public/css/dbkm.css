@@ -668,7 +668,7 @@ input[type="radio"], input[type="checkbox"] {
     display: inline-block; font-family: FontAwesome;
 }
 
-#creator_object_info .tabbable {
+.tabbable.tabs-bottom {
     position: absolute;
     top: 0;
     bottom: 10px;
@@ -678,22 +678,7 @@ input[type="radio"], input[type="checkbox"] {
     flex-direction: column;
 }
 
-#creator_object_info .tabbable .tab-content {
-    flex: 1;
-    overflow: auto;
-}
-
-#vrh_object_info .tabbable {
-    position: absolute;
-    top: 0;
-    bottom: 10px;
-    left: 10px;
-    right: 10px;
-    display: flex;
-    flex-direction: column;
-}
-
-#vrh_object_info .tabbable .tab-content {
+.tabbable.tabs-bottom .tab-content {
     flex: 1;
     overflow: auto;
 }

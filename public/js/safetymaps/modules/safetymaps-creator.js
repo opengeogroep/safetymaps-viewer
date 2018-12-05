@@ -492,7 +492,7 @@ dbkjs.modules.safetymaps_creator = {
         isIncident = (typeof isIncident !== "undefined") ? isIncident : false;
         var me = this;
 
-        var div = $('<div class="tabbable"></div>');
+        var div = $('<div class="tabbable tabs-bottom"></div>');
 
         safetymaps.creator.renderInfoTabs(object, div);
 
