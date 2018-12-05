@@ -51,7 +51,6 @@ function FalckIncidentsController(incidents) {
     });
 
     me.incidentDetailsWindow = new IncidentDetailsWindow();
-    me.incidentDetailsWindow.createElements("Incident");
     $(me.incidentDetailsWindow).on('show', function() {
         me.button.setAlerted(false);
         me.button.setFotoAlert(false);
@@ -430,7 +429,7 @@ FalckIncidentsController.prototype.inzetIncident = function(incidentId, fromInci
         me.incidentId = incidentId;
         me.incidentFromIncidentList = fromIncidentList;
 
-        me.incidentDetailsWindow.getTitleElement().text("Incident " + (fromIncidentList ? " uit lijst" : ""));
+        me.incidentDetailsWindow.setTitle("Incident " + (fromIncidentList ? " uit lijst" : ""));
 
         $.ajax(me.options.incidentsUrl + "/incident/" + incidentId, {
             dataType: "json",

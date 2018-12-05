@@ -85,6 +85,7 @@ safetymaps.infoWindow = {
         } else {
             this.commonWindow = new SplitScreenWindow("commonInfoWindow");
             this.commonWindow.createElements(); // no title
+            this.commonWindow.showSingleTab = true;
             this.createTabElements(this.commonWindow);
         }
     },
@@ -202,10 +203,8 @@ safetymaps.infoWindow = {
             window.tabContent.find("#tab_" + tabId).addClass("active");
             window.tabs.find("#tab_li_" + tabId).addClass("active");
 
-            if(this.separateWindowMode && !window.showSingleTab) {
-                if(window.tabs.find("li").length === 1) {
-                    window.tabs.hide();
-                }
+            if(!window.showSingleTab && window.tabs.find("li").length === 1) {
+                window.tabs.hide();
             } else {
                 window.tabs.show();
             }

@@ -37,5 +37,7 @@ dbkjs.options = {
     featureInfoMaxScale: 2381.0976,
 
     // No feature info when moved more than this distance in pixels
-    minTouchMoveEndDistance: 5
+    minTouchMoveEndDistance: 5,
+
+    separateWindowMode: OpenLayers.Util.getParameters().separateWindow === "true"
 };

@@ -100,7 +100,6 @@ function IncidentMonitorController(incidents) {
 
     if(!me.options.voertuigIM) {
         me.incidentDetailsWindow = new IncidentDetailsWindow();
-        me.incidentDetailsWindow.createElements("Incident");
         me.incidentDetailsWindow.setSplitScreen($(window).width() > 700);
         $(window).on('resize', function() {
             me.incidentDetailsWindow.setSplitScreen($(window).width() > 700);

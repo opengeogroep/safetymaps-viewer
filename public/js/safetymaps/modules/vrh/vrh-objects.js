@@ -174,8 +174,8 @@ dbkjs.modules.vrh_objects = {
         $("#btn_object_info")
         .attr("title", i18n.t("creator.button"))
         .click(function() {
-            safetymaps.infoWindow.showTab(me.infoWindow.getName(), "algemeen");
-            me.infoWindow.toggle();
+            // TODO wat indien niets geselecteerd?
+            safetymaps.infoWindow.showTab(me.infoWindow.getName(), "algemeen", true);
         });
 
         me.infoWindow = safetymaps.infoWindow.addWindow("creator_object_info", "Object informatie");
@@ -501,7 +501,7 @@ dbkjs.modules.vrh_objects = {
                 this.waterongevallen.updateInfoWindow(this.infoWindow.getName(), object);
             }
             if(!isIncident) {
-                this.infoWindow.show();
+                safetymaps.infoWindow.showTab(this.infoWindow.getName(), "algemeen", true);
             }
 
             this.selectedObject = object;

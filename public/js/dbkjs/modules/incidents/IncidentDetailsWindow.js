@@ -26,21 +26,39 @@
  * @returns {IncidentDetailsWindow}
  */
 function IncidentDetailsWindow() {
-    SplitScreenWindow.call(this, "incidentDetails");
+    this.window = safetymaps.infoWindow.addWindow("incident", "Incident", false);
+    this.div = $("<div></div>");
+    safetymaps.infoWindow.addTab("incident", "incident", "Incident", "incident", this.div, "first");
 
     this.createStyle();
+};
 
-    $(this).on('elements_created', function() {
-        var v = ModalWindow.prototype.getView.call(this);
-        v.html("Bezig...");
-        this.renderDetailsScreen();
-    });
-}
-
-IncidentDetailsWindow.prototype = Object.create(SplitScreenWindow.prototype);
 IncidentDetailsWindow.prototype.constructor = IncidentDetailsWindow;
 
+IncidentDetailsWindow.prototype.show = function() {
+    safetymaps.infoWindow.showTab("incident", "incident", true);
+    $(this).triggerHandler("show");
+};
+
+IncidentDetailsWindow.prototype.hide = function() {
+    this.window.hide();
+    $(this).triggerHandler("hide");
+};
+
+IncidentDetailsWindow.prototype.setTitle = function(title) {
+    this.window.getTitleElement().text(title);
+};
+
+IncidentDetailsWindow.prototype.isVisible = function() {
+    return this.window.isVisible();
+};
+
+IncidentDetailsWindow.prototype.setSplitScreen = function(splitScreen) {
+    this.window.setSplitScreen(splitScreen);
+};
+
 IncidentDetailsWindow.prototype.showError = function(e) {
+    console.log("incidentDetails error: " + e);
     this.data(e);
 };
 
@@ -69,13 +87,17 @@ table td { padding: 3px !important; } \
 };
 
 IncidentDetailsWindow.prototype.renderDetailsScreen = function() {
-    var v = this.getView();
+    if(this.rendered) {
+        return;
+    }
+    this.rendered = true;
+
     var renderKladblok = !dbkjs.modules.incidents.options.hideKladblok;
     var renderTwitter = !!dbkjs.modules.incidents.options.showTwitter;
     var showFoto = dbkjs.modules.incidents.options.showFoto;
     var html = '<div style="width: 100%" class="table-responsive incidentDetails"></div>';
     html += this.renderKladblokTwitter(renderKladblok, renderTwitter, showFoto);
-    v.html(html);
+    this.div.html(html);
     this.addTabClickListener();
 };
 
@@ -101,9 +123,8 @@ IncidentDetailsWindow.prototype.renderKladblokTwitter = function(showKladblok, s
 };
 
 IncidentDetailsWindow.prototype.addTabClickListener = function() {
-    var v = this.getView();
     // Init tabs
-    v.on("click", ".tab-button", function() {
+    this.div.on("click", ".tab-button", function() {
         var tabbutton = $(this);
         var tab = tabbutton.attr("id");
         if(tab) {
@@ -124,10 +145,11 @@ IncidentDetailsWindow.prototype.addTabClickListener = function() {
  * @returns {undefined}
  */
 IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScrollTop, isXml) {
-    var v = this.getView();
-    var scrollTop = v.scrollTop();
+    this.renderDetailsScreen();
 
-    v.css("-webkit-overflow-scrolling", "touch");
+    var scrollTop = this.div.scrollTop();
+
+    this.div.css("-webkit-overflow-scrolling", "touch");
 
     var format = "";
     if(typeof incident === "string") {
@@ -168,14 +190,14 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
 
     $(".incident_tabs").toggle(format !== "string");
 
-    v.find(".incidentDetails").html(table);
-    v.find("#tab_kladblok").html(kladblok);
+    this.div.find(".incidentDetails").html(table);
+    this.div.find("#tab_kladblok").html(kladblok);
     if(this.showFeatureMatches) {
         this.showMultipleFeatureMatches();
     }
 
     if(restoreScrollTop) {
-        v.scrollTop(scrollTop);
+        this.div.scrollTop(scrollTop);
     }
 };
 

@@ -43,7 +43,6 @@ function MDTController(incidents) {
     });
 
     me.incidentDetailsWindow = new IncidentDetailsWindow();
-    me.incidentDetailsWindow.createElements("Incident");
     $(me.incidentDetailsWindow).on('show', function() {
         me.button.setAlerted(false);
     });

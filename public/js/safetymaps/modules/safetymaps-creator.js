@@ -143,8 +143,8 @@ dbkjs.modules.safetymaps_creator = {
         $("#btn_object_info")
         .attr("title", i18n.t("creator.button"))
         .click(function() {
-            safetymaps.infoWindow.showTab(me.infoWindow.getName(), "general");
-            me.infoWindow.toggle();
+            // TODO indien niets geselecteerd?
+            safetymaps.infoWindow.showTab(me.infoWindow.getName(), "general", true);
         });
 
         me.infoWindow = safetymaps.infoWindow.addWindow("vrh_object_info", "Object informatie");
