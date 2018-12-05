@@ -390,6 +390,7 @@ $(document).ready(function () {
                 });
             });
         }
+        safetymaps.infoWindow.initialize(dbkjs.options.separateWindowMode);
 
         // Added touchstart event to trigger click on. There was some weird behaviour combined with FastClick,
         // this seems to fix the issue

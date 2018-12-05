@@ -129,11 +129,15 @@ safetymaps.infoWindow = {
      * @param {string} tabId DOM id for tab
      * @param {string} label the label for the a element
      * @param {string} clazz CSS class for the tab
-     * @param {string} div tab contents
+     * @param {string} div tab contents, set to falsy for no-op
      * @param {string} position Position in tab list, either first, last or undefined/null (meaning in order of calling addTab())
      */
     addTab: function(windowId, tabId, label, clazz, div, position) {
         var window = this.separateWindowMode ? this.windows[windowId] : this.commonWindow;
+
+        if(!div) {
+            return;
+        }
 
         if(window) {
             //console.log("infoWindow: window " + windowId + ", add tab " + tabId + " (class " + clazz + ")" + (position ? ", position " + position : ""));
@@ -220,8 +224,5 @@ safetymaps.infoWindow = {
 
     // TODO: replace /api/organisation.json for global settings
 
-    // TODO: other event, after settings and i18n init
-    $(dbkjs).one("dbkjs_init_complete", function() {
-        safetymaps.infoWindow.initialize(dbkjs.options.separateWindowMode);
-    });
+    //safetymaps.infoWindow.initialize(dbkjs.options.separateWindowMode);
 })();
