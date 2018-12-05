@@ -17,37 +17,25 @@ dbkjs.options = {
     originalScale: 595.2744,
     // User style value adjustment (before scaling)
     styleSizeAdjust: 0,
-
-    alwaysShowDbkFeature: true,
-
     noLineScaling: true,
+    // Scale the extent of the object by 140% to set map extent when zooming to object
+    //objectZoomExtentScale: 1.4,
+    // Comment the line above and uncomment this line to zoom to the extent of the
+    // object buffered with a fixed number of meters(/projection units)
+    objectZoomExtentBuffer: 50,
 
-    featureLabelResolution: 6.72,
+    // Always use pdf.js instead of browser PDF support
+    forcePDFJS: true,
 
-    dbkLayersMinResolution: 0,
+    // Interface
+    showZoomButtons: true,
+    enableSplitScreen: true,
+    splitScreenChecked: true,
+    splitScreenSwitch: true,
 
-    forcePDFJS: true
+    // No feature info above this scale
+    featureInfoMaxScale: 2381.0976,
+
+    // No feature info when moved more than this distance in pixels
+    minTouchMoveEndDistance: 5
 };
-
-dbkjs.options.searchTabs = true;
-
-// Scale the extent of the object by 140% to set map extent when zooming to object
-//dbkjs.options.objectZoomExtentScale = 1.4;
-
-// Comment the line above and uncomment this line to zoom to the extent of the
-// object buffered with a fixed number of meters(/projection units)
-dbkjs.options.objectZoomExtentBuffer = 50;
-
-dbkjs.options.showZoomButtons = true;
-
-dbkjs.options.enableSplitScreen = true;
-dbkjs.options.splitScreenChecked = true;
-dbkjs.options.splitScreenSwitch = true;
-
-dbkjs.options.autoFeatureUpdateInterval = 3600000;
-
-dbkjs.options.featureInfoMaxScale = 2381.0976;
-
-dbkjs.options.minTouchMoveEndDistance = 5;
-
-
