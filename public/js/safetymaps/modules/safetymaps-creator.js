@@ -143,18 +143,11 @@ dbkjs.modules.safetymaps_creator = {
         $("#btn_object_info")
         .attr("title", i18n.t("creator.button"))
         .click(function() {
+            safetymaps.infoWindow.showTab(me.infoWindow.getName(), "general");
             me.infoWindow.toggle();
         });
 
-        // Window for object info tabs
-        me.infoWindow = new SplitScreenWindow("Creator object info");
-        me.infoWindow.createElements();
-
-        me.infoWindow.getView().append(
-                $('<div></div>')
-                .attr({'id': 'creator_object_info'})
-                .text(i18n.t("dialogs.noinfo"))
-        );
+        me.infoWindow = safetymaps.infoWindow.addWindow("vrh_object_info", "Object informatie");
 
         // Resize PDF embed div after width transition has ended
         var resizeFunction = function() {
@@ -492,11 +485,7 @@ dbkjs.modules.safetymaps_creator = {
         isIncident = (typeof isIncident !== "undefined") ? isIncident : false;
         var me = this;
 
-        var div = $('<div class="tabbable tabs-bottom"></div>');
-
-        safetymaps.creator.renderInfoTabs(object, div);
-
-        $("#creator_object_info").html(div);
+        safetymaps.creator.renderInfoTabs(object, this.infoWindow.getName());
 
         $("#tab_pane_floors tr").click(function(e) {
             var floor = e.currentTarget.firstChild.innerText.trim();
@@ -509,7 +498,9 @@ dbkjs.modules.safetymaps_creator = {
             });
         });
 
-        if(!isIncident)this.infoWindow.show();
+        if(!isIncident) {
+            safetymaps.infoWindow.showTab(me.infoWindow.getName(), "general", true);
+        }
         this.infoWindowTabsResize();
 
     },

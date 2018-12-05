@@ -28,43 +28,40 @@
 var safetymaps = safetymaps || {};
 safetymaps.creator = safetymaps.creator || {};
 
-safetymaps.creator.renderInfoTabs = function(object, div) {
+safetymaps.creator.renderInfoTabs = function(object, windowId) {
 
-    var tabContent = $('<div class="tab-content"></div>');
-    var tabs = $('<ul class="nav nav-pills"></ul>');
-    div.append(tabContent);
-    div.append(tabs);
+    safetymaps.infoWindow.removeTabs(windowId, "info");
 
     var rows;
 
     rows = safetymaps.creator.renderGeneral(object);
-    safetymaps.creator.createHtmlTabDiv("general", i18n.t("creator.general"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+    safetymaps.infoWindow.addTab(windowId, "general", i18n.t("creator.general"), "info", safetymaps.creator.createInfoTabDiv(rows));
 
     detailTabs = safetymaps.creator.renderDetails(object);
     $.each(detailTabs, function(i, detailTab) {
-        safetymaps.creator.createHtmlTabDiv("details_" + i, detailTab.name, safetymaps.creator.createInfoTabDiv(detailTab.rows), tabContent, tabs);
+        safetymaps.infoWindow.addTab(windowId, "details_" + i, detailTab.name, "info", safetymaps.creator.createInfoTabDiv(detailTab.rows));
     });
 
     rows = safetymaps.creator.renderContacts(object);
-    safetymaps.creator.createHtmlTabDiv("contacts", i18n.t("creator.contacts"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+    safetymaps.infoWindow.addTab(windowId, "contacts", i18n.t("creator.contacts"), "info", safetymaps.creator.createInfoTabDiv(rows));
 
     rows = safetymaps.creator.renderOccupancy(object);
-    safetymaps.creator.createHtmlTabDiv("occupancy", i18n.t("creator.occupancy"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+    safetymaps.infoWindow.addTab(windowId, "occupancy", i18n.t("creator.occupancy"), "info", safetymaps.creator.createInfoTabDiv(rows));
 
     var content = safetymaps.creator.renderMedia(object);
-    safetymaps.creator.createHtmlTabDiv("media", i18n.t("creator.media"), content, tabContent, tabs);
+    safetymaps.infoWindow.addTab(windowId, "media", i18n.t("creator.media"), "info", content);
 
     safetymaps.creator.embedPDFs(content);
 
     rows = safetymaps.creator.renderDangerSymbols(object);
-    safetymaps.creator.createHtmlTabDiv("danger_symbols", i18n.t("creator.danger_symbols"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+    safetymaps.infoWindow.addTab(windowId, "danger_symbols", i18n.t("creator.danger_symbols"), "info", safetymaps.creator.createInfoTabDiv(rows));
 
     rows = safetymaps.creator.renderFloors(object);
-    safetymaps.creator.createHtmlTabDiv("floors", i18n.t("creator.floors"), safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+    safetymaps.infoWindow.addTab(windowId, "floors", i18n.t("creator.floors"), "info", safetymaps.creator.createInfoTabDiv(rows));
     
     if(!dbkjs.modules.safetymaps_creator.options.hideBrandweervoorziening){
         rows = safetymaps.creator.renderSymbols(object);
-        safetymaps.creator.createHtmlTabDiv("symbols", i18n.t("creator.symbols"), safetymaps.creator.createInfoTabDiv(rows,"symbols"), tabContent, tabs);
+        safetymaps.infoWindow.addTab(windowId, "symbols", i18n.t("creator.symbols"), "info", safetymaps.creator.createInfoTabDiv(rows));
     }
 };
 
@@ -426,21 +423,6 @@ safetymaps.creator.renderDangerSymbols = function(object) {
 };
 
 safetymaps.creator.renderObjectFeatureInfoTab = function(object, div) {
-};
-
-safetymaps.creator.createHtmlTabDiv = function(id, label, content, tabContent, tabs) {
-
-    if(content !== null) {
-        id = 'tab_pane_' + id;
-
-        // Make tab active when no contents yet
-        var active = tabContent.find("div").length === 0;
-
-        var bv_div = $('<div class="tab-pane ' + (active ? "active" : "") + '" id="' + id + '"></div>');
-        bv_div.append(content);
-        tabContent.append(bv_div);
-        tabs.append('<li class="' + (active ? "active" : "") + '"><a data-toggle="tab" href="#' + id + '">' + label + '</a></li>');
-    }
 };
 
 safetymaps.creator.createInfoTabDiv = function(rows, id /*ES2015 = ""*/) {

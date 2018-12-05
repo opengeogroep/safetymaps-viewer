@@ -174,18 +174,11 @@ dbkjs.modules.vrh_objects = {
         $("#btn_object_info")
         .attr("title", i18n.t("creator.button"))
         .click(function() {
+            safetymaps.infoWindow.showTab(me.infoWindow.getName(), "algemeen");
             me.infoWindow.toggle();
         });
 
-        // Window for object info tabs
-        me.infoWindow = new SplitScreenWindow("Object info");
-        me.infoWindow.createElements();
-
-        me.infoWindow.getView().append(
-                $('<div></div>')
-                .attr({'id': 'vrh_object_info'})
-                .text(i18n.t("dialogs.noinfo"))
-        );
+        me.infoWindow = safetymaps.infoWindow.addWindow("creator_object_info", "Object informatie");
     },
 
     addSearchConfig: function() {
@@ -497,16 +490,15 @@ dbkjs.modules.vrh_objects = {
 
     selectedObjectDetailsReceived: function(type, id, object, isIncident) {
         try {
-            var tab = $("#vrh_object_info");
             if(type === "evenement") {
                 this.events.addFeaturesForObject(object);
-                this.events.updateInfoWindow(tab, object);
+                this.events.updateInfoWindow(this.infoWindow.getName(), object);
             } else if(type === "dbk") {
                 this.dbks.addFeaturesForObject(object);
-                this.dbks.updateInfoWindow(tab, object);
+                this.dbks.updateInfoWindow(this.infoWindow.getName(), object);
             } else if(type === "wbbk") {
                 this.waterongevallen.addFeaturesForObject(object);
-                this.waterongevallen.updateInfoWindow(tab, object);
+                this.waterongevallen.updateInfoWindow(this.infoWindow.getName(), object);
             }
             if(!isIncident) {
                 this.infoWindow.show();

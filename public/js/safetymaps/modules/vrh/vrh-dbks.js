@@ -727,15 +727,10 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
     console.log("Added DBK layer features", this.layers);
 };
 
-safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(tab, object) {
+safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object) {
     var me = this;
 
-    var div = $('<div class="tabbable tabs-bottom"></div>');
-
-    var tabContent = $('<div class="tab-content"></div>');
-    var tabs = $('<ul class="nav nav-pills"></ul>');
-    div.append(tabContent);
-    div.append(tabs);
+    safetymaps.infoWindow.removeTabs(windowId, "info");
 
     var rows = [];
 
@@ -767,8 +762,7 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(tab, object) {
     rows.push({l: "Risicoklasse",                   t: p.risicoklas});
     rows.push({l: "Inzetprocedure",                 t: p.inzetproce});
     rows.push({l: "Aanvalsplan",                    t: p.aanvalspla});
-
-    safetymaps.creator.createHtmlTabDiv("algemeen", "Algemeen", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+    safetymaps.infoWindow.addTab(windowId, "algemeen", "Algemeen", "info", safetymaps.creator.createInfoTabDiv(rows));
 
     rows = [];
 
@@ -795,7 +789,7 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(tab, object) {
     v = p.verzamelpl; if(v) rows.push("<tr><td colspan='3'>Verzamelplaats: " + Mustache.escape(v) + "</td></tr>");
 
     if(rows.length !== 1) {
-        safetymaps.creator.createHtmlTabDiv("verblijf", "Verblijf", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+        safetymaps.infoWindow.addTab(windowId, "verblijf", "Verblijf", "info", safetymaps.creator.createInfoTabDiv(rows));
     }
 
     rows = [];
@@ -843,7 +837,7 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(tab, object) {
     rows = rows.concat(rowsWithInfo).concat(rowsWithoutInfo);
 
     if(rows.length !== 1) {
-        safetymaps.creator.createHtmlTabDiv("brandweer", "Brandweer", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+        safetymaps.infoWindow.addTab(windowId, "brandweer", "Brandweer", "info", safetymaps.creator.createInfoTabDiv(rows));
     }
 
     rows = [];
@@ -863,7 +857,7 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(tab, object) {
     });
 
     if(rows.length !== 1) {
-        safetymaps.creator.createHtmlTabDiv("gevaarlijke_stoffen", "Gevaarlijke stoffen", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
+        safetymaps.infoWindow.addTab(windowId, "gevaarlijke_stoffen", "Gevaarlijke stoffen", "info", safetymaps.creator.createInfoTabDiv(rows));
     }
 
     rows = [];
@@ -879,7 +873,5 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(tab, object) {
     v = p.bijz_hed_2; if(v) rows.push("<tr><td colspan='2'>" + Mustache.escape(v) + "</td></tr>");
     rows.push({l: "Bijzonderheden afsluiters", t: o.bijzonde_1});
 
-    safetymaps.creator.createHtmlTabDiv("gebouw", "Gebouw", safetymaps.creator.createInfoTabDiv(rows), tabContent, tabs);
-
-    tab.html(div);
+    safetymaps.infoWindow.addTab(windowId, "gebouw", "Gebouw", "info", safetymaps.creator.createInfoTabDiv(rows));
 };
