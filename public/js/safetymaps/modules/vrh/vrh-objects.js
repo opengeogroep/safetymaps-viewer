@@ -40,18 +40,14 @@ dbkjs.modules.vrh_objects = {
         this.options = $.extend({
             // default options here
             maxSearchResults: 30,
-            dbks: false,
+            dbks: true,
             evenementen: true,
             waterongevallen: true,
             filterEvDate: true
-        }/*, this.options*/);
+        }, this.options);
 
         if("off" === OpenLayers.Util.getParameters()["evfilter"]) {
             this.options.filterEvDate = false;
-        }
-
-        if("on" === OpenLayers.Util.getParameters()["dbks"]) {
-            this.options.dbks = true;
         }
 
         // Setup clustering layer
