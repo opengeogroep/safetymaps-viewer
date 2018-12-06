@@ -666,7 +666,7 @@ IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInze
         var date = $(incident).find("XmlMsgKop MsgDate").text();
         var time = $(incident).find("XmlMsgKop MsgTime").text();
         if(date !== "" && time !== "") {
-            d = moment(date + " " + time);
+            d = moment(date + " " + time, "DD-MM-YYYY HH:mm:ss");
         }
     }
     var v = d === null ? "" : d.format("dddd, D-M-YYYY HH:mm:ss") + (compareMode ? "" : " (" + d.fromNow() + ")");
