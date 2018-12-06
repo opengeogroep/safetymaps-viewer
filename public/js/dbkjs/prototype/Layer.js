@@ -90,11 +90,24 @@ dbkjs.Layer = dbkjs.Class({
                         params,
                         options
                         );
-                //TODO: sometimes legends fail, need to investigate why and how to handle errors
-                var legend = url +
-                        "TRANSPARENT=true&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetLegendGraphic&EXCEPTIONS=application%2F" +
-                        "vnd.ogc.se_xml&FORMAT=image%2Fpng&LAYER=" +
-                        ly.params.LAYERS;
+
+                var legends = [];
+                $.each(ly.params.LAYERS.split(","), function(i, layer) {
+                    legends.push(
+                        OpenLayers.Util.urlAppend(
+                            url,
+                            OpenLayers.Util.getParameterString({
+                                "TRANSPARENT": "true",
+                                "SERVICE": "WMS",
+                                "VERSION": "1.1.1",
+                                "REQUEST": "GetLegendGraphic",
+                                "EXCEPTIONS": "application/vnd.ogc.se_xml",
+                                "FORMAT": "image/png",
+                                "LAYER": layer
+                            })
+                        )
+                    );
+                });
                 ly.events.register("loadstart", ly, function () {
                     dbkjs.util.loadingStart(ly);
                 });
@@ -175,7 +188,16 @@ dbkjs.Layer = dbkjs.Class({
                         //click on the info sign
                         //check to see if the legend is there already
                         if ($('#legend_' + that.id).length === 0) {
-                            dv_panel_content.append('<img id="legend_' + that.id + '" src="' + (metadata.legend ? metadata.legend : legend) + '"/>');
+                            if(metadata.legend) {
+                                dv_panel_content.append('<img id="legend_' + that.id + '" src="' + metadata.legend + '"/>');
+                            } else {
+                                var html = "<div id='legend_" + that.id + "'>";
+                                $.each(legends, function(i, legend) {
+                                    html += (i > 0 ? "<br>" : "") + '<img src="' + legend + '"/>'
+                                });
+                                html += "</div>";
+                                dv_panel_content.append(html);
+                            }
                         }
                         return;
                     }
