@@ -18,13 +18,13 @@
  *
  */
 
-/* global OpenLayers, Mustache, i18n, Proj4js, safetymaps */
+/* global OpenLayers, Mustache, i18n, Proj4js, safetymaps, vrh */
 
 var dbkjs = dbkjs || {};
 window.dbkjs = dbkjs;
 dbkjs.modules = dbkjs.modules || {};
-dbkjs.modules.waterwinning = {
-    id: "dbk.module.waterwinning",
+dbkjs.modules.vrh_waterwinning = {
+    id: "dbk.module.vrh_waterwinning",
     options: null,
     infoWindow: null,
     div: null,
@@ -47,7 +47,7 @@ dbkjs.modules.waterwinning = {
         me.div = $('<i> '+ i18n.t("dialogs.noinfo") + '</i>' );
         safetymaps.infoWindow.addTab("waterwinning", "waterwinning", "Waterwinning", "waterwinning", me.div, "last");
 
-        if(window.location.hostname.endsWith(".local")) {
+        if(vrh.isDev) {
             this.options.url = "api/vrh/waterwinning.json";
         } else {
             // Keep same protocol, http://localhost/... onboard and https://vrh-safetymaps.nl/...
