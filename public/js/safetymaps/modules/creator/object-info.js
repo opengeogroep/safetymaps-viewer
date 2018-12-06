@@ -361,7 +361,7 @@ safetymaps.creator.renderSymbols = function(object, isFlamingo /*ES2015 = false 
             symbolsDisplayed[s.code] = true;
 
             var tr = [
-                '<img id="<id>'+s.id+'</id>" class="legend_symbol" src="' + safetymaps.creator.api.imagePath + 'symbols/' + s.code + '.png' + '" alt="' + s.code + '" title="' + s.code + '">',
+                '<img id="'+s.id+'" class="legend_symbol" src="' + safetymaps.creator.api.imagePath + 'symbols/' + s.code + '.png' + '" alt="' + s.code + '" title="' + s.code + '">',
                 i18n.t("symbol." + s.code),s.omschrijving // TODO get from safetymaps.creator.api.styles info
             ];
             if (s.omschrijving === ""){
@@ -410,7 +410,7 @@ safetymaps.creator.renderDangerSymbols = function(object) {
 
             var symbolName = i18n.t("danger_symbol." + ds.symbol);
             rows.push([
-                '<img class="legend_symbol" src="' + safetymaps.creator.api.imagePath + 'danger_symbols/' + ds.symbol + '.png' + '" alt="' + symbolName + '" title="' + symbolName + '">',
+                '<img id="'+ds.id+'" class="legend_symbol" src="' + safetymaps.creator.api.imagePath + 'danger_symbols/' + ds.symbol + '.png' + '" alt="' + symbolName + '" title="' + symbolName + '">',
                 '<div class="gevicode">' + ds.gevi_code + '</div><div class="unnummer">' + ds.un_nr + '</div>',
                 Mustache.escape(ds.naam_stof),
                 Mustache.escape(ds.hoeveelheid),
