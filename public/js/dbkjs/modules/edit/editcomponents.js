@@ -71,7 +71,7 @@ dbkjs.modules.FeaturesManager = function() {
     this.featureslist.appendTo("body");
 
     this.propertiesGrid = $("<div class='panel sub-panel' id='edit-symbol-properties'>" +
-        "<div class='row prop-radius' style=\"display: none;\">" +
+        "<div class='row row-edit prop-radius' style=\"display: none;\">" +
             "<div class='col-md-3'>" +
                 "<label for='symbolRadiusSlider'>"+i18n.t("edit.symbolSize")+":</label>" +
             "</div>" +
@@ -79,7 +79,7 @@ dbkjs.modules.FeaturesManager = function() {
                 '<input id="symbolRadiusSlider" name="radius" type="text" />' +
             "</div>" +
         "</div>" +
-        "<div class='row prop-rotation' style=\"display: none;\">" +
+        "<div class='row row-edit prop-rotation' style=\"display: none;\">" +
             "<div class='col-md-3'>" +
                 "<label for='symbolRotationSlider'>"+i18n.t("edit.symbolRotation")+":</label>" +
             "</div>" +
@@ -87,7 +87,7 @@ dbkjs.modules.FeaturesManager = function() {
                 '<input id="symbolRotationSlider" name="rotation" type="text" />' +
             "</div>" +
         "</div>" +
-        "<div class='row prop-triangleFactor' style=\"display: none;\">" +
+        "<div class='row row-edit prop-triangleFactor' style=\"display: none;\">" +
             "<div class='col-md-3'>" +
                 "<label for='triangleFactor'>"+i18n.t("edit.symbolWidth")+":</label>" +
             "</div>" +
@@ -95,7 +95,7 @@ dbkjs.modules.FeaturesManager = function() {
                 '<input id="triangleFactor" name="triangleFactor" type="text" />' +
             "</div>" +
         "</div>" +
-        "<div class='row prop-label' style=\"display: none;\">" +
+        "<div class='row row-edit prop-label' style=\"display: none;\">" +
             "<div class='col-md-3'>" +
                 "<label for='label'>"+i18n.t("edit.symbolLabel")+":</label>" +
             "</div>" +

@@ -78,6 +78,9 @@
     overflow: hidden;
     margin-top: 5px
 }
+.row-edit{
+    margin-right:0px;
+}
 
 #symbolpicker {
     bottom:0;
