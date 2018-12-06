@@ -108,9 +108,7 @@ html, body {
     background-color: #428bca;
     color: #FFF;
 }
-#btn-grp-search {
-    line-height: 0 !important;
-}
+
 .panel-collapse > img {
     padding-left: 1.8em;
 }
