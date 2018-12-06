@@ -33,6 +33,7 @@ safetymaps.vrh.Dbks = function(options) {
     me.options = $.extend({
         compartmentLabelMinSegmentLength: 7.5,
         compartmentLabelMinScale: 300,
+        graphicSize: 15,
         graphicSizeHover: 26,
         graphicSizeSelect: 20,
         options: {
@@ -385,7 +386,7 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
             }, {
                 context: {
                     myradius: function(feature) {
-                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,20, feature.attributes.radius);
+                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me, me.options.graphicSize);
                     },
                     label: function(feature) {
                         if(feature.attributes.code === "TbeHoogte") {
@@ -399,20 +400,26 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
                 }
             }),
             temporary: new OpenLayers.Style({
-                pointRadius: me.options.graphicSizeHover,
+                pointRadius: "${myradius}",
                 fontSize: "${fontSize}"
             }, {
                 context: {
+                    myradius: function(feature) {
+                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me, me.options.graphicSizeHover);
+                    },
                     fontSize: function(feature) {
                         return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,18, feature.attributes.radius) + "px";
                     }
                 }
             }),
             select: new OpenLayers.Style({
-                pointRadius: me.options.graphicSizeSelect,
+                pointRadius: "${myradius}",
                 fontSize: "${fontSize}"
             }, {
                 context: {
+                    myradius: function(feature) {
+                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me, me.options.graphicSizeSelect);
+                    },
                     fontSize: function(feature) {
                         return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,14, feature.attributes.radius) + "px";
                     }
@@ -435,12 +442,28 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
             }, {
                 context: {
                     myradius: function(feature) {
-                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,20, feature.attributes.radius);
+                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me, me.options.graphicSize);
                     }
                 }
             }),
-            temporary: new OpenLayers.Style({pointRadius: me.options.graphicSizeHover}),
-            select: new OpenLayers.Style({pointRadius: me.options.graphicSizeSelect})
+            temporary: new OpenLayers.Style({
+                pointRadius: "${myradius}"
+            }, {
+                context: {
+                    myradius: function(feature) {
+                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me, me.options.graphicSizeHover);
+                    }
+                }
+            }),
+            select: new OpenLayers.Style({
+                pointRadius: "${myradius}"
+            }, {
+                context: {
+                    myradius: function(feature) {
+                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me, me.options.graphicSizeSelect);
+                    }
+                }
+            })
         })
     });
     this.layers.push(this.layerDangerSymbols);

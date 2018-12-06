@@ -45,6 +45,8 @@ dbkjs.modules.vrh_objects = {
             waterongevallen: true,
             filterEvDate: true
         }, this.options);
+        this.options.options = dbkjs.options;
+        this.options.map = dbkjs.map;
 
         if("off" === OpenLayers.Util.getParameters()["evfilter"]) {
             this.options.filterEvDate = false;
