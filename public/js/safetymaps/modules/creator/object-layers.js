@@ -707,6 +707,8 @@ safetymaps.creator.CreatorObjectLayers.prototype.addDangerSymbolFeatures = funct
         f.attributes.amount = detail.hoeveelheid;
         f.attributes.substance_name = detail.naam_stof;
         features.push(f);
+        detail.id= prefix+i;
+        object.danger_symbols[i] = detail;
     });
     this.layerDangerSymbols.addFeatures(features);
     if(features.length > 0) console.log("added danger symbols", features);
