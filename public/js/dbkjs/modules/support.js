@@ -31,7 +31,8 @@ dbkjs.modules.support = {
         _obj.options = $.extend({
             hideGeneralSubject: false,
             hideTel: false,
-            subjectSplit: ","
+            subjectSplit: ",",
+            savedUntilBackInStation: false
         }, _obj.options);
 
         _obj.layer = new OpenLayers.Layer.Vector("Support");
@@ -112,7 +113,7 @@ dbkjs.modules.support = {
         });
         layerarray.sort();
         var p = $('<form id="support-form"  class="form-horizontal" role="form"></form>');
-        $("#supportpanel_b").prepend('<p id="email_help"><i>' + i18n.t('email.help') +'</i></p>');
+        $("#supportpanel_b").prepend('<p id="email_help"><i>' + i18n.t('email.help') + ' ' + (_obj.options.savedUntilBackInStation ? i18n.t('email.savedUntilBackInStation') : '') + '</i></p>');
         var laag_input = $('<div class="form-group"></div>');
         var select = $('<select name="subject" class="form-control"></select>');
         if(!_obj.options.hideGeneralSubject) {

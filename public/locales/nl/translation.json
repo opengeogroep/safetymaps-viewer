@@ -60,6 +60,7 @@
         "kindregards": "Met vriendelijke groet",
         "team": "de opendispatcher applicatie",
         "help": "Versleep het symbool op de kaart om aan te geven waar de fout is geconstateerd of waar de melding over gaat.",
+        "savedUntilBackInStation": "Meldingen worden bewaard en verstuurd bij terugkeer in kazerne.",
         "generalmessage": "Algemene melding",
         "construction": "Gebouw constructie"
     },
