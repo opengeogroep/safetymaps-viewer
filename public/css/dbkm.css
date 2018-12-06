@@ -194,12 +194,7 @@ a {
 .btn_5px {
     margin-bottom: 5px !important;
 }
-#noordpijl {
-    position: absolute;
-    left: 20px;
-    bottom: 40px;
-    z-index: 3000;
-}
+
 .panel {
     opacity: 0.9;
 }

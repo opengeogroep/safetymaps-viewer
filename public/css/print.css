@@ -7,7 +7,7 @@ body {
     -moz-transform:rotate(-90deg) scale(.58,.58);    
 }
 
-.main-button-group #noordpijl #zoom_buttons #edit .modal-popup {
+.main-button-group #zoom_buttons #edit .modal-popup {
     display: none !important;
 }
 
