@@ -383,6 +383,18 @@ dbkjs.modules.vrh_objects = {
             }
         });
 
+        matches.sort(function(lhs, rhs) {
+            var typeOrder = ["dbk", "evenement", "wbbk"];
+            var lhsOrder = typeOrder.indexOf(lhs.attributes.type);
+            var rhsOrder = typeOrder.indexOf(rhs.attributes.type);
+
+            if(lhsOrder === rhsOrder) {
+                return lhs.attributes.label.localeCompare(rhs.attributes.label);
+            } else {
+                return lhsOrder - rhsOrder;
+            }
+        });
+
         return matches;
     },
 
