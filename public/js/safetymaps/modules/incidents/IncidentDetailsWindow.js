@@ -29,8 +29,6 @@ function IncidentDetailsWindow() {
     this.window = safetymaps.infoWindow.addWindow("incident", "Incident", false);
     this.div = $("<div></div>");
     safetymaps.infoWindow.addTab("incident", "incident", "Incident", "incident", this.div, "first");
-
-    this.createStyle();
 };
 
 IncidentDetailsWindow.prototype.constructor = IncidentDetailsWindow;
@@ -60,30 +58,6 @@ IncidentDetailsWindow.prototype.setSplitScreen = function(splitScreen) {
 IncidentDetailsWindow.prototype.showError = function(e) {
     console.log("incidentDetails error: " + e);
     this.data(e);
-};
-
-IncidentDetailsWindow.prototype.createStyle = function() {
-    var me = this;
-    var css = '#eenheden div { margin: 3px; float: left; } \
-#eenheden div { border-left: 1px solid #ddd; padding-left: 8px; } \
-#eenheden {white-space:normal;}\
-.incidentDetails .beeindigd { color: #a9a9a9; } \
-#tab_kladblok { clear: both; padding-top: 10px; white-space: pre-wrap; font-size: 16px; font-weight: bold; color: red; } \
-table td { padding: 3px !important; } \
-#tab_kladblok table td { vertical-align: top; padding: 0px 0px 0px 3px !important; } \
-#tab_kladblok table tr.pol td { color: blue; } \
-#tab_kladblok table tr.ambu td { color: #e3ac04; } \
-';
-    head = document.getElementsByTagName('head')[0],
-        style = document.createElement('style');
-
-    style.type = 'text/css';
-    if(style.styleSheet) {
-        style.styleSheet.cssText = css;
-    } else {
-        style.appendChild(document.createTextNode(css));
-    }
-    head.appendChild(style);
 };
 
 IncidentDetailsWindow.prototype.renderDetailsScreen = function() {
@@ -248,7 +222,7 @@ IncidentDetailsWindow.prototype.showMultipleFeatureMatches = function() {
             "iconHeight" : m.attributes.height
         };
         me.multipleItemUl.append(
-                $('<li><a href="#"><img src="' + info.icon + '" style="width: 25px; margin-right: 10px">' + (m.attributes.label || m.attributes.apiObject.locatie || m.attributes.apiObject.formele_naam) + (m.attributes.apiObject.informele_naam ? ' (' + m.attributes.apiObject.informele_naam + ')' : '') + '</a></li>')
+                $('<li class="object"><a href="#"><img src="' + info.icon + '">' + (m.attributes.label || m.attributes.apiObject.locatie || m.attributes.apiObject.formele_naam) + (m.attributes.apiObject.informele_naam ? ' (' + m.attributes.apiObject.informele_naam + ')' : '') + '</a></li>')
                 .on('click', function(e) {
                     e.preventDefault();
                     me.hideMultipleFeatureMatches();

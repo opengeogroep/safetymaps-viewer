@@ -507,7 +507,7 @@ safetymaps.vrh.Dbks.prototype.showFeatureInfo = function(title, code, image, lab
     table.append(row);
     row = '<tr>';
     if(image) {
-        row += '<td><img class="thumb" src="' + image + '" alt="' + code + '" title="' + code + '"></td>';
+        row += '<td><img src="' + image + '" alt="' + code + '" title="' + code + '"></td>';
     }
     labelStyle = labelStyle || "width: 20%";
     row += '<td style="' + labelStyle + '">' + label + '</td><td>' + (description || "") + '</td></tr>';
@@ -522,7 +522,7 @@ safetymaps.vrh.Dbks.prototype.showGevaarlijkeStof = function(title, f) {
     var html = $('<div class="table-responsive"></div>');
     var table = $('<table class="table table-hover"></table>');
     table.append('<tr><th width="100px">Symbool</th><th width="60px">Gevi</th><th>Naam</th><th>Hoeveelheid</th><th>Bijzonderheden</th><th>ERIC-kaart</th></tr>');
-    table.append('<tr><td><img class="thumb" src="' + f.symbol_noi + '" alt="' + f.symboolcod + '" title="' + f.symboolcod + '"></td>'
+    table.append('<tr><td><img src="' + f.symbol_noi + '" alt="' + f.symboolcod + '" title="' + f.symboolcod + '"></td>'
         + '<td><div class="gevicode">' + f.gevi_code + '</div><div class="unnummer">' + f.vn_nummer + '</div></td>'
         + '<td>' + f.stofnaam + '</td><td>' + f.hoeveelhei + '</td><td>' + f.description + '</td><td>' + f.eric_kaart + '</td></tr>');
     html.append(table);

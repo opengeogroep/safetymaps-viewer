@@ -79,7 +79,7 @@
             title: i18n.t("search.title")
         });
 
-        var div = $("<div></div>").addClass("input-group input-group-lg");
+        var div = $("<div></div>").addClass("input-group input-group-lg").css("width", "100%");
 
         this.searchTabs = $("<ul id='search_tabs' class='nav nav-pills' style='margin-bottom: 10px'></ul>");
         this.searchInput = $("<input id='search_input' autocomplete='off' class='form-control' placeholder=''>");

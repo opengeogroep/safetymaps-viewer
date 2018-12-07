@@ -41,6 +41,13 @@ dbkjs.modules.incidents = {
 
         this.featureSelector = new IncidentFeatureSelector(this.options.featureExactMatchHuisletter, this.options.featureExactMatchToevoeging);
 
+        $("body").append("<a id='incident_bottom_right' class='btn btn-default'></a>");
+        $(window).on("resize orientationchange", function() {
+            // Calculate the max width so bottom left buttons not overlapped
+            var maxWidth = $("body").outerWidth() - $("#bottom_left_buttons").offset().left - $("#bottom_left_buttons").outerWidth() - 20;
+            $('#incident_bottom_right').css("max-width", maxWidth + "px");
+        });
+
         // Controller can be changed using URL parameter
 
         var params = OpenLayers.Util.getParameters();

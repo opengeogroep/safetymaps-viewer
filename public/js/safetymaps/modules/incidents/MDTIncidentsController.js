@@ -55,7 +55,7 @@ function MDTIncidentsController(incidents) {
     me.xml = null;
 
     // XXX to common object (IncidentFeatureSelector?)
-    $('.dbk-title').on('click', function() {
+    $('#incident_bottom_right').on('click', function() {
         me.zoomToIncident();
         me.incidentDetailsWindow.show();
         if(me.featureSelector.matches.length === 1) {

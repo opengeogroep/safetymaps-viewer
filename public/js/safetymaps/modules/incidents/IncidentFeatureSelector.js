@@ -138,13 +138,13 @@ IncidentFeatureSelector.prototype.updateBalkRechtsonder = function(titleOverride
             me.matchInfo
         );
     }
-    $('.dbk-title')
+    $('#incident_bottom_right')
         .html(me.title)
         .css('visibility', 'visible');
 };
 
 IncidentFeatureSelector.prototype.hideBalkRechtsonder = function() {
-    $('.dbk-title')
+    $('#incident_bottom_right')
         .text("")
         .css('visibility', 'hidden');
 };

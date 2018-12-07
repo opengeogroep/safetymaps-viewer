@@ -15,13 +15,12 @@ body {
     display: none !important;
 }
 
-#mapc1map1 {
+#map {
     left: 0;
     top: 0;
     width: 500px;
     height: 500px;
     display: block;
-    visiblity: visible;
 }
 
 * {

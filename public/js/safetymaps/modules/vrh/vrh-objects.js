@@ -409,6 +409,7 @@ dbkjs.modules.vrh_objects = {
             item_ul.append(me.getClusterLink(me.currentCluster[i]));
         }
         $("#creator_cluster_list").append(item_ul);
+        dbkjs.util.getModalPopup("creator_cluster_list").getView().scrollTop(0);
 
         dbkjs.util.getModalPopup("creator_cluster_list").setHideCallback(function () {
             if (me.clusteringLayer.layer.selectedFeatures.length === 0) {
@@ -423,12 +424,7 @@ dbkjs.modules.vrh_objects = {
 
     getClusterLink: function (feature) {
         var me = this;
-        var v = {
-            name: feature.attributes.apiObject.naam ? feature.attributes.apiObject.naam : feature.attributes.apiObject.evnaam,
-            oms: feature.attributes.apiObject.oms_nummer,
-            id: feature.attributes.apiObject.id
-        };
-        var link = $(Mustache.render('<li><a id="{{id}}" href="#">{{name}}{{#oms}} (OMS: {{oms}}){{/oms}}</a></li>', v));
+        var link = $(Mustache.render('<li class="object"><a id="{{id}}" href="#"><img src="{{symbol}}">{{label}}</a></li>', feature.attributes));
         $(link).click(function () {
             dbkjs.util.getModalPopup("creator_cluster_list").hide();
             me.clusterObjectSelected(feature);

@@ -212,7 +212,7 @@ dbkjs.modules.edit = {
                     if (jqXHR.status === 404) {
                         console.log("Edit-allowed");
                     } else if (jqXHR.status !== 403) {
-                        console.log("Unexpected status: " + jqXHR + " " + jqXHR.statusText, jqXHR.responseText)
+                        console.log("Edit-allowed check unexpected status: " + jqXHR.status + " " + jqXHR.statusText, jqXHR.responseText)
                     } else {
                         console.log("Edit-not allowed");
                         me.setViewerMode();
@@ -731,23 +731,25 @@ dbkjs.modules.edit = {
 
         // me.loadStylesheet();
 
-        this.mainEditButton = new dbkjs.modules.EditButton("edit", i18n.t("edit.drawMode"), "#mapc1map1", "fa-pencil-square-o", {
-            divClass: "edit-button"
-        }).on("activate", function() {
+        this.mainEditButton = new dbkjs.modules.EditButton("edit", i18n.t("edit.drawMode"), "#bottom_left_buttons", "fa-pencil-square-o", "edit-button", true)
+        .on("activate", function() {
             me.activate();
         }).on("deactivate", function() {
             me.deactivate();
         });
 
+        var editBottom = $(window).height() - $("#edit").offset().top - $("#edit").outerHeight();
         me.editTriangle = $("<div/>")
                 .attr("id", "edit-triangle")
+                .css("bottom", editBottom + 4)
                 .addClass("triangle-left")
-                .appendTo("#mapc1map1");
+                .appendTo("#map");
 
         me.editBox = $("<div/>")
                 .attr("id", "edit-box")
+                .css("bottom", editBottom - 32)
                 .addClass(["edit-box", "panel", (me.options.showMeasureButtons ? "with-measure-buttons" : "")].join(" "))
-                .appendTo("#mapc1map1");
+                .appendTo("#map");
 
         if (me.options.showMeasureButtons) {
             me.measureDistanceButton = new dbkjs.modules.EditButton("measureDistance", i18n.t("map.measureDistance"), me.editBox, "fa-arrows-v fa-rotate-45")
@@ -774,14 +776,14 @@ dbkjs.modules.edit = {
             .on("activate", function(btn) {
                 me.deactivateButtons(btn);
                 me.properties.show();
-                $("#mapc1map1").css("cursor", "crosshair");
+                $("#map").css("cursor", "crosshair");
                 me.catchClick = true;
                 me.reenableCurrentMode();
                 me.featuresManager.showPropertiesGrid();
             })
             .on("deactivate", function() {
                 me.properties.hide();
-                $("#mapc1map1").css("cursor", "auto");
+                $("#map").css("cursor", "auto");
                 me.catchClick = false;
                 me.disablePointMode();
                 me.disableLineMode();
@@ -841,9 +843,9 @@ dbkjs.modules.edit = {
     
     setViewerMode: function() {
         var me = this;
-        this.mainEditButton = new dbkjs.modules.EditButton("edit", i18n.t("edit.readMode"), "#mapc1map1", "fa fa-eye", {
-            divClass: "edit-button"
-        }).on("activate", function() {
+        $("#edit").hide();
+        this.mainEditButton = new dbkjs.modules.EditButton("edit", i18n.t("edit.readMode"), "#bottom_left_buttons", "fa fa-eye", "edit-button", true)
+        .on("activate", function() {
             me.activateView();
         }).on("deactivate", function() {
             me.deactivateView();

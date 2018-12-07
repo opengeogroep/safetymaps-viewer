@@ -30,8 +30,6 @@ function IncidentListWindow() {
     SplitScreenWindow.call(this, "incidentList");
     var me = this;
 
-    me.createStyle();
-
     $(this).on('elements_created', function() {
         me.getView().html("Verbinden met incidentenservice...");
     });
@@ -39,43 +37,6 @@ function IncidentListWindow() {
 
 IncidentListWindow.prototype = Object.create(SplitScreenWindow.prototype);
 IncidentListWindow.prototype.constructor = IncidentListWindow;
-
-IncidentListWindow.prototype.createStyle = function() {
-    // Create style
-    var css = '.incidentList .header { font-size: 18px; margin: 5px 0px 5px 0px } ' +
-        //'.incidentList .list .incident.even { background-color: #; } ' +
-        '.incidentList .list .incident.odd { background-color: #ECECEC; } ' +
-        '.incidentList .list div.incident:hover { background-color: #DCE0E8; cursor: pointer; cursor: hand; } ' +
-        '.incidentList .list .incident { width: 100%; white-space: nowrap; min-width: 900px; line-height: 20pt; } ' +
-        '.incidentList .list .incident span { padding: 0px 2px 2px 0px; vertical-align: top; display: inline-block; overflow: hidden; text-overflow: ellipsis; } ' +
-        '.incidentList .list .incident span.prio::before { content: "PRIO " } ' +
-        '.incidentList .list .incident span.locatie { width: 35% } ' +
-        '.incidentList .list .incident span.classificatie { width: 30%; } ' +
-        '.incidentList .list .incident span.plaats { width: 130px; } ' +
-        '@media (max-width: 1000px) { \n\
-.incidentList .list .incident span.fromNow { display: none; } \n\
-.incidentList .list .incident span.classificatie { width: 35% } \n\
-.incidentList .list .incident span.locatie { } \n\
-.incidentList .list .incident span.prio::before { content: " P" } \n\
-} ' +
-        '@media (max-width: 900px) { \n\
-.incidentList .list .incident span.locatie { } \n\
-} ' +
-        '@media (max-width: 600px) { \n\
-.incidentList .list .incident span.locatie { width: 25% } \n\
-} ';
-
-    var head = document.getElementsByTagName('head')[0];
-    var style = document.createElement('style');
-
-    style.type = 'text/css';
-    if(style.styleSheet) {
-        style.styleSheet.cssText = css;
-    } else {
-        style.appendChild(document.createTextNode(css));
-    }
-    head.appendChild(style);
-};
 
 IncidentListWindow.prototype.showError = function(e) {
     this.getView().html("");
@@ -165,9 +126,9 @@ IncidentListWindow.prototype.listIncidents = function(el, incidents, showInzetIn
         }
 
         $("<span class='time'/>").text(incident.start.format("D-M-YYYY HH:mm")).appendTo(r);
-        $("<span class='prio'/>").html(incident.prio ? incident.prio + " " : "&nbsp;&nbsp;").appendTo(r);
         $("<span class='locatie'/>").text(incident.locatie).appendTo(r);
         $("<span class='plaats'/>").text(incident.plaats || "-").appendTo(r);
+        $("<span class='prio prio" + incident.prio + "'/>").text(incident.prio || "").appendTo(r);
 
         var classificaties = incident.classificaties || "";
         var icons = me.getIncidentEenhedenIcons(incident);

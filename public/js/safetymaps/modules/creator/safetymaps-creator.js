@@ -359,6 +359,7 @@ dbkjs.modules.safetymaps_creator = {
             item_ul.append(me.getClusterLink(me.currentCluster[i]));
         }
         $("#creator_cluster_list").append(item_ul);
+        dbkjs.util.getModalPopup("creator_cluster_list").getView().scrollTop(0);
 
         dbkjs.util.getModalPopup("creator_cluster_list").setHideCallback(function () {
             if (me.clusteringLayer.layer.selectedFeatures.length === 0) {
@@ -374,10 +375,12 @@ dbkjs.modules.safetymaps_creator = {
     getClusterLink: function (feature) {
         var me = this;
         var v = {
-            name: feature.attributes.apiObject.formele_naam+" ("+feature.attributes.apiObject.informele_naam+")",
-            id: feature.attributes.apiObject.id
+            label: feature.attributes.apiObject.formele_naam+" ("+feature.attributes.apiObject.informele_naam+")",
+            id: feature.attributes.id,
+            symbol: feature.attributes.symbol
         };
-        var link = $(Mustache.render('<li><a id="{{id}}" href="#">{{name}}</a></li>', v));
+        var link = $(Mustache.render('<li class="object"><a id="{{id}}" href="#"><img src="{{symbol}}">{{label}}</a></li>', v));
+
         $(link).click(function () {
             dbkjs.util.getModalPopup("creator_cluster_list").hide();
             me.clusterObjectSelected(feature);
@@ -548,14 +551,14 @@ dbkjs.modules.safetymaps_creator = {
             var table = $('<table class="table table-hover"></table>');
 
             table.append('<tr>' +
-                    '<th style="width: 30%">' + i18n.t("creator.symbol_" + (f.coverage ? "" : "no_") + "communication_coverage") + '</th>' +
+                    '<th style="width: 110px">' + i18n.t("creator.symbol_" + (f.coverage ? "" : "no_") + "communication_coverage") + '</th>' +
                     '<th>' + i18n.t("dialogs.information") + '</th>' +
                     '<th>' + i18n.t("creator.communication_alternative") + '</th>' +
                     '</tr>'
                     );
             var img = safetymaps.creator.api.imagePath + (f.coverage ? "coverage" : "no_coverage") + ".png";
             table.append(
-                    '<tr><td><img class="thumb" src="' + img + '"></td>' +
+                    '<tr><td><img src="' + img + '"></td>' +
                     '<td>' + Mustache.escape(f.info) + '</td>' +
                     '<td>' + Mustache.escape(f.alternative) + '</td>' +
                     '</tr>'
@@ -565,10 +568,10 @@ dbkjs.modules.safetymaps_creator = {
             console.log("symbol selected", e);
 
             var table = $('<table class="table table-hover"></table>');
-            table.append('<tr><th style="width: 30%">' + i18n.t("symbol." + f.code) + '</th><th>' + i18n.t("dialogs.information") + '</th></tr>');
+            table.append('<tr><th style="width: 110px">' + i18n.t("symbol." + f.code) + '</th><th>' + i18n.t("dialogs.information") + '</th></tr>');
             var img = safetymaps.creator.api.imagePath + 'symbols/' + f.code + '.png';
             table.append(
-                    '<tr><td><img class="thumb" src="' + img + '" alt="' + f.code + '" title="' + f.code + '"></td>' +
+                    '<tr><td><img src="' + img + '" alt="' + f.code + '" title="' + f.code + '"></td>' +
                     '<td>' + Mustache.escape(f.description) + '</td></tr>'
             );
             me.showFeatureInfo(i18n.t("creator.symbols"), table);
@@ -586,8 +589,8 @@ dbkjs.modules.safetymaps_creator = {
             );
 
             table.append(Mustache.render('<tr>' +
-                '<td><img style="width: 20%" src="{{img}}" alt="{{symbolName}}" title="{{symbolName}}"></td>' +
-                '<td><div class="gevicode">{{f.geviCode}}</div><div class="unnummer">{{f.unNr}}</div></td>' +
+                '<td><img style="width: 100px" src="{{img}}" alt="{{symbolName}}" title="{{symbolName}}"></td>' +
+                '<td style="width: 66px"><div class="gevicode">{{f.geviCode}}</div><div class="unnummer">{{f.unNr}}</div></td>' +
                 '<td>{{f.substance_name}}</td>' +
                 '<td>{{f.amount}}</td>' +
                 '<td>{{f.description}}</td>' +

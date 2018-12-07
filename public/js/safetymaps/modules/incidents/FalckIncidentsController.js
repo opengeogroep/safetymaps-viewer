@@ -43,7 +43,7 @@ function FalckIncidentsController(incidents) {
     me.featureSelector = incidents.featureSelector;
 
     me.button = new AlertableButton("btn_incident", "Incident", "bell-o");
-    me.button.getElement().prependTo('.layertoggle-btn-group');
+    me.button.getElement().prependTo('#btngrp_object');
 
     $(me.button).on('click', function() {
         me.incidentDetailsWindow.show();
@@ -70,7 +70,7 @@ function FalckIncidentsController(incidents) {
     me.xml = null;
 
     // XXX to common object (IncidentFeatureSelector?)
-    $('.dbk-title').on('click', function() {
+    $('#incident_bottom_right').on('click', function() {
         me.zoomToIncident();
         me.incidentDetailsWindow.show();
         if(me.featureSelector.matches.length === 1) {

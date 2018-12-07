@@ -111,29 +111,24 @@ dbkjs.modules.streetview = {
     },
     createDefaultMobileButton: function() {
         var me = this;
-        var div = $("<div/>")
-                .attr("id", "streetview")
-                .attr("style", "position: absolute; left: 70px; bottom: 80px; z-index: 3000");
         var a = $("<a/>")
                 .attr("id", "streetview-a")
                 .attr("title", "Open StreetView")
                 .addClass("btn btn-default olButton")
-                .attr("style", "display: block; font-size: 24px")
                 .on("click", function() {
                     if(me.active) {
                         dbkjs.modules.streetview.deactivate();
                     } else {
-                        $("#mapc1map1").attr("style", "cursor: crosshair");
+                        $("#map").attr("style", "cursor: crosshair");
                         $("#streetview-a").addClass("btn-primary");
                         dbkjs.modules.streetview.activate();
                     }
                 });
         $("<i/>").addClass("fa fa-street-view").appendTo(a);
-        a.appendTo(div);
-        div.appendTo("#mapc1map1");
+        a.prependTo("#bottom_left_buttons");
 
         $(dbkjs.modules.streetview).on('deactivate', function() {
-            $("#mapc1map1").attr("style", "");
+            $("#map").attr("style", "");
             $("#streetview-a").removeClass("btn-primary");
         });
     }

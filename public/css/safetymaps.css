@@ -1,0 +1,527 @@
+/*
+ *  Copyright (c) 2014-2018 2014 Milo van der Linden (milo@dogodigi.net), B3Partners (info@b3partners.nl)
+ *
+ *  This file is part of safetymaps-viewer.
+ *
+ *  safetymaps-viewer is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  safetymaps-viewer is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with safetymaps-viewer. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #cccccc;
+}
+
+#map {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    -ms-touch-action: none;
+}
+
+#bottom_left_buttons {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    width: 48px;
+    z-index: 3000;
+}
+
+#bottom_left_buttons a.btn {
+    margin-top: 12px;
+    width: 48px;
+    font-size: 24px;
+}
+
+.dialog {
+    width: 100%;
+    z-index: 300;
+    position: absolute;
+}
+
+.main-button-group {
+    overflow: hidden;
+    position: absolute;
+    width: 100%;
+    z-index: 1;
+}
+.main-button-group .btn {
+    width: 54px;
+    margin-left: -6px;
+    font-size: 35px;
+}
+.btn-group {
+    z-index: 1001;
+}
+
+@media (max-width: 999px) {
+    .main-button-group .btn {
+        width: 46px;
+        height: 46px;
+        font-size: 28px;
+        margin-top: 4px;
+        margin-bottom: 0px;
+        padding: 4px 8px;
+    }
+    .main-button-group .btn img {
+        max-height: 36px;
+    }
+}
+
+@media (max-width: 780px) {
+    .main-button-group .btn {
+        width: 40px;
+        height: 40px;
+        font-size: 24px;
+        margin-top: 2px;
+        margin-bottom: 0px;
+        padding: 2px 4px;
+    }
+    .main-button-group .btn img {
+        max-height: 30px;
+    }
+}
+
+/* OpenLayers */
+
+.olDragDown {
+    cursor: move;
+}
+.olControlDragFeatureActive.olControlDragFeatureOver.olDragDown {
+    cursor: -moz-grabbing;
+}
+.olControlZoom {
+    display: none;
+}
+.olImageLoadError {
+    display: none !important;
+}
+
+/* Prevent the text contents of draggable elements from being selectable. */
+[draggable] {
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+    /* Required to make elements draggable in old WebKit */
+    -khtml-user-drag: element;
+    -webkit-user-drag: element;
+}
+
+*:not(input):not(textarea) {
+  -webkit-user-select: none; /* disable selection/Copy of UIWebView */
+  -webkit-touch-callout: none; /* disable the IOS popup when long-press on a link */
+}
+
+.panel {
+    opacity: 0.9;
+}
+
+h4 {
+    padding-right: 1em;
+    margin-bottom: 0 !important;
+    margin-top: 0 !important;
+}
+
+.has-error {
+    border-color: #a94442 !important;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075) !important;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075) !important;
+}
+
+#systeem_meldingen {
+    position:absolute;
+    width:400px;
+    margin-left:-200px;
+    bottom:0;
+    left:50%;
+    z-index:10000;
+    margin-bottom: 0 !important;
+}
+
+/* Modal popups */
+
+.close {
+    font-size: 2em !important;
+}
+
+.modal-popup .panel-heading {
+    display: block;
+    padding: 10px 15px;
+    cursor: pointer;
+    color: #428bca;
+}
+.modal-popup .panel-heading .panel-title {
+    font-weight: normal;
+    font-size: 1em;
+}
+.modal-popup .panel-heading.active {
+    background-color: #428bca;
+    color: #FFF;
+}
+
+.modal-popup {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    width: 0px;
+    overflow: hidden;
+
+    -webkit-transition: width .25s;
+    transition: width .25s;
+
+    z-index: 10000;
+    background-color: #FFFFFF;
+}
+
+.modal-popup-active {
+    width: 100%;
+}
+
+.modal-popup-close {
+    float: right;
+    color: #428bca;
+    font-size: 16px;
+    padding: 15px;
+    display: block;
+    height: 55px;
+}
+
+.modal-popup-close:hover {
+    text-decoration: none;
+}
+
+.modal-popup-switch {
+    float: right;
+    color: #428bca; 
+    font-size: 16px;
+    padding: 15px;
+    display: block;
+    height: 55px;
+}
+
+.modal-popup-switch:hover {
+    text-decoration: none;
+}
+
+.modal-popup-title {
+    height: 55px;
+    padding: 15px;
+    overflow: hidden;
+    font-size: 16px;
+}
+
+.modal-popup-view {
+    padding: 0 15px 15px 15px;
+    overflow: auto;
+    position: absolute;
+    top: 55px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+}
+
+/* Mobile: bigger fonts everywhere */
+
+.modal-popup .btn {
+    font-size: 18px !important;
+}
+
+.table, .nav {
+    font-size: 18px;
+}
+
+/* Panel with info about vector feature clicked on */
+
+#vectorclickpanel {
+    z-index: 1002;
+}
+#vectorclickpanel img {
+    height: 45px;
+    width: auto !important;
+}
+#vectorclickpanel .panel-body {
+    padding: 0 20px;
+}
+#vectorclickpanel .panel-footer {
+    padding: 0;
+}
+
+/* Settings */
+
+/* jquery.typeahead */
+.tt-suggestion {
+    line-height: 1 !important;
+}
+
+input[type="radio"], input[type="checkbox"] {
+    line-height: normal;
+    margin: 0 1em 0 0 !important;
+}
+
+input.check {
+    background-image: url("../images/check.png");
+    background-repeat: no-repeat;
+    background-position: right;
+    background-size: 16px;
+}
+
+input.cross {
+    background-image: url("../images/cross.png");
+    background-repeat: no-repeat;
+    background-position: right;
+    background-size: 16px;
+}
+
+/* Info window with tabs at the bottom */
+
+.tabbable.tabs-bottom {
+    position: absolute;
+    top: 0;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.tabbable.tabs-bottom .tab-content {
+    flex: 1;
+    overflow: auto;
+}
+
+/* Layers window */
+
+/* Visible layers checkmark instead of blue background */
+#overlaypanel_div .panel-heading.active {
+    color: #428bca;
+    background-color: white;
+    padding-left: 0px;
+}
+
+#overlaypanel_div .panel-heading {
+    padding-left: 14px;
+}
+
+#overlaypanel_div .panel-heading.active .panel-title:before {
+    content: "\f00c ";
+    display: inline-block; font-family: FontAwesome;
+}
+
+/* Visible baselayer checkmark instead of blue background */
+#baselayerpanel_ul li a {
+    padding-left: 18px;
+}
+
+#baselayerpanel_ul li.active a {
+    padding-left: 0px;
+    color: #428bca;
+    background-color: white;
+}
+
+#baselayerpanel_ul li.active a:hover {
+    color: #428bca;
+    background-color: #eeeeee;
+}
+
+#baselayerpanel_ul li.active a:before {
+    content: "\f00c ";
+    display: inline-block; font-family: FontAwesome;
+}
+
+/* div with legend img */
+#overlaypanel_div .panel-collapse div {
+    padding-left: 1.8em;
+}
+/* p with layer metadata */
+#overlaypanel_div .panel-collapse > p {
+    margin-left: 1.8em;
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid #cccccc;
+}
+
+/* Module: measure */
+
+#measure {
+    background: white;
+    border-radius: 5px 0 0 0;
+    right: 8px;
+    bottom: 8px;
+    position: absolute;
+    text-align: right;
+    padding: 6px 12px;
+    margin-right: 8px;
+    border: 1px solid black;
+    border-radius: 4px;
+    font-size: 18px !important;
+    font-weight: bold !important;
+}
+
+/* Module: support */
+
+#supportpanel {
+    margin-bottom: 0;
+    max-height: 40%;
+    overflow: auto;
+}
+
+/* Module: creator_objects/vrh_objects */
+
+.gevicode {
+    font-size: 14px;
+    border: 3px solid #000000;
+    background-color: #FF6600;
+    font-weight: bold;
+    text-align: center;
+}
+.unnummer {
+    font-size: 14px;
+    border-bottom: 3px solid #000000;
+    border-right: 3px solid #000000;
+    border-left: 3px solid #000000;
+    background-color: #FF6600;
+    font-weight: bold;
+    text-align: center;
+}
+
+img.legend_symbol {
+    width: 50px;
+}
+
+/* Cluster object list / incident feature list */
+li.object {
+    height: 45px;
+}
+li.object img {
+    width: 25px;
+    margin-right: 10px;
+}
+
+/* Module: incidents */
+
+#incident_bottom_right {
+    position: absolute;
+    bottom: 20px;
+    right: 10px;
+    visibility: hidden;
+    font-size: 16px !important;
+    line-height: 34px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+/* Incident details window */
+
+#eenheden div {
+    margin: 3px;
+    float: left;
+    border-left: 1px solid #ddd;
+    padding-left: 8px;
+}
+#eenheden {
+    white-space: normal;
+}
+.incidentDetails .beeindigd {
+    color: #a9a9a9;
+}
+.incidentDetails table td {
+    padding: 3px !important;
+}
+
+#tab_kladblok {
+    clear: both;
+    padding-top: 10px;
+    white-space: pre-wrap;
+    font-size: 16px;
+    font-weight: bold;
+    color: red;
+}
+#tab_kladblok table td {
+    vertical-align: top;
+    padding: 0px 0px 0px 3px !important;
+}
+#tab_kladblok table tr.pol td {
+    color: blue;
+}
+#tab_kladblok table tr.ambu td {
+    color: #e3ac04;
+}
+
+/* Incident list window */
+
+.incidentList .header {
+    font-size: 18px;
+    margin: 5px 0px 5px 0px
+}
+.incidentList .list .incident.odd {
+    background-color: #ECECEC;
+}
+.incidentList .list div.incident:hover {
+    background-color: #DCE0E8;
+    cursor: pointer;
+    cursor: hand;
+}
+.incidentList .list .incident {
+    width: 100%;
+    white-space: nowrap;
+    min-width: 900px;
+    line-height: 20pt;
+}
+.incidentList .list .incident span {
+    padding: 0px 5px 2px 0px;
+    vertical-align: top;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.incidentList .list .incident span.locatie {
+    width: 35%;
+}
+.incidentList .list .incident span.classificatie {
+    width: 30%;
+}
+.incidentList .list .incident span.plaats {
+    width: 130px;
+}
+.incidentList .list .incident span.prio::before {
+    content: "PRIO ";
+}.incidentList .list .incident span.prio {
+    color: green;
+}
+.incidentList .list .incident span.prio.prio1 {
+    color: red;
+}
+.incidentList .list .incident span.prio.prio2 {
+    color: orange;
+}
+
+@media (max-width: 1000px) {
+    .incidentList .list .incident span.fromNow { display: none; }
+    .incidentList .list .incident span.classificatie { width: 35% }
+    .incidentList .list .incident span.locatie { }
+    .incidentList .list .incident span.prio::before { content: " P" }
+}
+@media (max-width: 900px) {
+    .incidentList .list .incident span.locatie { }
+}
+@media (max-width: 600px) {
+    .incidentList .list .incident span.locatie { width: 25% }
+}

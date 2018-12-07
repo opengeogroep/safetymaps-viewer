@@ -51,18 +51,15 @@ dbkjs.modules.support = {
 
         if (dbkjs.options.organisation.support) {
 
-            var div = $("<div id='btn_support'/>").attr("style", "position: absolute; width: 48px; left: 20px; bottom: 20px; z-index: 3000");
             var a = $("<a/>")
                     .attr("id", "foutknop-mobile")
                     .attr("title", dbkjs.options.organisation.support.button)
                     .addClass("btn btn-default olButton")
-                    .attr("style", "display: block; font-size: 24px")
                     .on("click", function() {
                         _obj.open();
                     });
             $("<i/>").addClass("fa fa-at").appendTo(a);
-            a.appendTo(div);
-            div.appendTo("#mapc1map1");
+            a.appendTo("#bottom_left_buttons");
 
             _obj.supportpanel = dbkjs.util.createDialog('supportpanel', '<i class="fa fa-envelope-o"></i> ' + dbkjs.options.organisation.support.button, 'bottom:0;left:0;');
             $('body').append(_obj.supportpanel);

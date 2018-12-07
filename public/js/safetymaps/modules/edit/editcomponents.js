@@ -510,11 +510,10 @@ dbkjs.modules.SymbolManager.prototype.constructor = dbkjs.modules.SymbolManager;
  * @returns {dbkjs.modules.EditButton}
  * @constructor
  */
-dbkjs.modules.EditButton = function(id, title, parent, iclass, conf) {
+dbkjs.modules.EditButton = function(id, title, parent, iclass, divClass, prepend) {
     dbkjs.modules.Observable.call(this);
     this.active = false;
     this.id = id;
-    conf = conf || {};
     this.div = $("<div></div>")
         .attr("id", id || "")
         .addClass("edit-button-container");
@@ -524,9 +523,13 @@ dbkjs.modules.EditButton = function(id, title, parent, iclass, conf) {
         .on("click", this.click.bind(this));
     $("<i/>").addClass("fa " + iclass || "").appendTo(this.a);
     this.a.appendTo(this.div);
-    this.div.appendTo(parent);
-    if(conf.divClass) {
-        this.div.addClass(conf.divClass);
+    if(prepend) {
+        this.div.prependTo(parent);
+    } else {
+        this.div.appendTo(parent);
+    }
+    if(divClass) {
+        this.div.addClass(divClass);
     }
     return this;
 };

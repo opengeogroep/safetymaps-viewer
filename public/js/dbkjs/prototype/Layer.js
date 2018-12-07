@@ -179,7 +179,6 @@ dbkjs.Layer = dbkjs.Class({
             if (this.layer) {
                 if (this.layer.getVisibility()) {
                     dv_panel_heading.addClass('active');
-                    dv_panel_heading.addClass('layActive');
                 }
                 var that = this;
                 dv_panel_heading.click(function (e) {
@@ -204,11 +203,9 @@ dbkjs.Layer = dbkjs.Class({
                     if (!dv_panel_heading.hasClass('active')) {
                         that.layer.setVisibility(true);
                         dv_panel_heading.addClass('active');
-                        dv_panel_heading.addClass('layActive');
                     } else {
                         that.layer.setVisibility(false);
                         dv_panel_heading.removeClass('active');
-                        dv_panel_heading.removeClass('layActive');
                     }
                 });
             }

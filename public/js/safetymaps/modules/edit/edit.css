@@ -14,7 +14,6 @@
 
     position: absolute;
     left: 62px;
-    bottom: 180px;
     z-index: 2999;
     display: none;
 }
@@ -48,10 +47,13 @@
     height: 230px;
 }
 
-.edit-button-container {
+.edit-button-container a {
+    font-size: 24px;
+    height: 48px;
     width: 48px;
 }
 
+/*
 .edit-button-container a {
     display: block;
     font-size: 24px;
@@ -63,7 +65,7 @@
     left: 20px;
     bottom: 180px;
 }
-
+*/
 .edit-box .edit-button-container {
     margin-bottom: 5px;
 }

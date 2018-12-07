@@ -117,7 +117,7 @@ dbkjs.modules.brandkranen = {
         me.brandkranen.redraw();
         table.append($(Mustache.render(
         '<tr>' +
-            '<td><img class="thumb" src="{{img}}" alt="{{f.symboolcod}}" title="{{f.symboolcod}}"></td>' +
+            '<td style="width: 110px"><img src="{{img}}" alt="{{f.symboolcod}}" title="{{f.symboolcod}}"></td>' +
             '<td>Capaciteit: ' + cap + ' </td>' +
             '<td>Adres: {{adres}} </td>' +
             

@@ -18,7 +18,7 @@ dbkjs.options.projection = {
 dbkjs.options.map = {
     options: {
         theme: null,
-        div: 'mapc1map1',
+        div: 'map',
         projection: new OpenLayers.Projection("EPSG:28992"),
         resolutions: [3440.64, 1720.32, 860.16, 430.08, 215.04, 107.52, 53.76, 26.88, 13.44, 6.72, 3.36, 1.68, 0.84, 0.42, 0.210, 0.105, 0.0525, 0.02625, 0.013125, 0.0065625],
         xy_precision: 3,
