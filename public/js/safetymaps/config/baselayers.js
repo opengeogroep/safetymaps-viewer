@@ -4,7 +4,7 @@ dbkjs.options.baselayers = [
             "Openbasiskaart",
             "https://openbasiskaart.nl/mapcache/tms/",
             {
-                layername: 'osm-nb@rd', type: "png", serviceVersion: '1.0.0',
+                layername: 'osm@rd', type: "png", serviceVersion: '1.0.0',
                 metadata:{pl:"00"},
                 gutter: 0, buffer: 0,
                 isBaseLayer: true, transitionEffect: 'resize',
