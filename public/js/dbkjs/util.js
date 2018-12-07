@@ -1,33 +1,25 @@
-/*!
- *  Copyright (c) 2014 Milo van der Linden (milo@dogodigi.net)
+/*
+ *  Copyright (c) 2014-2018 2014 Milo van der Linden (milo@dogodigi.net), B3Partners (info@b3partners.nl)
  *
- *  This file is part of opendispatcher/safetymapsDBK
+ *  This file is part of safetymaps-viewer.
  *
- *  opendispatcher is free software: you can redistribute it and/or modify
+ *  safetymaps-viewer is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  opendispatcher is distributed in the hope that it will be useful,
+ *  safetymaps-viewer is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with opendispatcher. If not, see <http://www.gnu.org/licenses/>.
- *
+ *  along with safetymaps-viewer. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* global OpenLayers, i18n, jsts, moment */
+/* global dbkjs, safetymaps, OpenLayers, Proj4js, jsts, moment, i18n, Mustache, PDFObject */
 
-Array.prototype.unique = function () {
-    return this.filter(
-            function (a) {
-                return !this[a] ? this[a] = true : false;
-            }, {}
-    );
-};
-
+/* MDN Polyfill */
 if (!String.prototype.repeat) {
   String.prototype.repeat = function(count) {
     'use strict';
@@ -408,7 +400,7 @@ OpenLayers.Control.SelectFeature.prototype.unselectAll = function(options) {
            }
        }
    }
-}
+};
 
 dbkjs.util = {
     layersLoading: [],
@@ -513,6 +505,9 @@ dbkjs.util = {
             }
             alert.hide();
         }
+    },
+    showError: function(errMsg) {
+        dbkjs.util.alert(i18n.t("error"), ' ' + errMsg, 'alert-danger');
     },
     alert: function (title, tekst, type) {
         if (!type) {
@@ -680,7 +675,7 @@ dbkjs.util = {
             'MozTransition': 'transitionend',
             'WebkitTransition': 'webkitTransitionEnd'
         };
-        for (t in transitions) {
+        for (var t in transitions) {
              if (el.style[t] !== undefined) {
                  return transitions[t];
              }

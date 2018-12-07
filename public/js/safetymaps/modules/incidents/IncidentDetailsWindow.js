@@ -1,24 +1,24 @@
 /*
- *  Copyright (c) 2015 B3Partners (info@b3partners.nl)
+ *  Copyright (c) 2015-2018 B3Partners (info@b3partners.nl)
  *
- *  This file is part of safetymapDBK
+ *  This file is part of safetymaps-viewer.
  *
- *  safetymapDBK is free software: you can redistribute it and/or modify
+ *  safetymaps-viewer is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  safetymapDBK is distributed in the hope that it will be useful,
+ *  safetymaps-viewer is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with safetymapDBK. If not, see <http://www.gnu.org/licenses/>.
- *
+ *  along with safetymaps-viewer. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* global dbkjs, safetymaps, Mustache, SplitScreenWindow, ModalWindow, AGSIncidentService */
+/* global dbkjs, safetymaps, OpenLayers, Proj4js, jsts, moment, i18n, Mustache, PDFObject */
+/* global SplitScreenWindow, ModalWindow, AGSIncidentService */
 
 /**
  * Window which shows incident details. Subclass of SplitScreenWindow. Create
@@ -618,7 +618,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlPharos = function(incident, compa
     row(m.format("DD MMMM YYYY HH:mm:ss") + (compareMode ? "" : " (" + m.fromNow() + ")"), "Start incident");
     var a = incident.IncidentAdres;
     if(a && a.Adres) {
-        var s = (e(a.Adres.Straat) + " " + e(a.Adres.Huisnummer) + e(a.Adres.HuisnummerToevg)).trim()
+        var s = (e(a.Adres.Straat) + " " + e(a.Adres.Huisnummer) + e(a.Adres.HuisnummerToevg)).trim();
         row(s, "Adres");
     }
     row(e(a.Aanduiding), "");

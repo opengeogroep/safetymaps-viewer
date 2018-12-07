@@ -1,5 +1,6 @@
 {
     "name": "Navn",
+    "error": "Fejl",
     "settings": {
         "layout": "Layout indstillinger",
         "scaleStyle": "Skaler symboler på baggrund af målestok",

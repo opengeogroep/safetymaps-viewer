@@ -51,10 +51,10 @@ dbkjs.modules.brandkranen = {
             data: {},
             dataType: "json"
         }).fail(function(jqXHR, textStatus, errorThrown) {
-            dbkjs.gui.showError("Fout bij inladen brandkranen: " + errorThrown);
+            dbkjs.util.showError("Fout bij inladen brandkranen: " + errorThrown);
         }).done(function(data) {
             if(!data.success) {
-                dbkjs.gui.showError("Fout bij inladen brandkranen: " + data.error);
+                dbkjs.util.showError("Fout bij inladen brandkranen: " + data.error);
                 return;
             }
             var features = data.brandkranen_wml;
@@ -215,7 +215,7 @@ dbkjs.modules.brandkranen = {
                                 postfix = "_s";
                             }
                             var img = feature.attributes.soort === "Bovengronds" ? "Tb4001" : "Tb4002";
-                            return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + "images/nen1414/" + img + postfix + ".png" : imagesBase64["images/nen1414/" + img + postfix + ".png"];
+                            return "images/nen1414/" + img + postfix + ".png";
                         },
                         label: function(feature) {
                             if(dbkjs.map.getScale() > 4000) {
@@ -233,7 +233,7 @@ dbkjs.modules.brandkranen = {
                     context: {
                         myicon: function(feature) {
                             var img = feature.attributes.soort === "Bovengronds" ? "Tb4001" : "Tb4002";
-                            return typeof imagesBase64 === 'undefined' ? dbkjs.basePath + "images/nen1414/" + img + "_s.png" : imagesBase64["images/nen1414/" + img + "_s.png"];
+                            return "images/nen1414/" + img + "_s.png";
                         }
                     }
                 }),

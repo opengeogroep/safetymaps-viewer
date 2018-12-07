@@ -1,24 +1,23 @@
-/*!
- *  Copyright (c) 2014 Milo van der Linden (milo@dogodigi.net)
+/*
+ *  Copyright (c) 2014-2018 2014 Milo van der Linden (milo@dogodigi.net), B3Partners (info@b3partners.nl)
  *
- *  This file is part of opendispatcher/safetymapsDBK
+ *  This file is part of safetymaps-viewer.
  *
- *  opendispatcher is free software: you can redistribute it and/or modify
+ *  safetymaps-viewer is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  opendispatcher is distributed in the hope that it will be useful,
+ *  safetymaps-viewer is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with opendispatcher. If not, see <http://www.gnu.org/licenses/>.
- *
+ *  along with safetymaps-viewer. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* global OpenLayers, i18n, Proj4js, dbkjsLang, moment */
+/* global dbkjs, safetymaps, OpenLayers, Proj4js, jsts, moment, i18n, Mustache, PDFObject */
 
 var dbkjs = dbkjs || {};
 window.dbkjs = dbkjs;
@@ -27,9 +26,6 @@ dbkjs.overlays = dbkjs.overlays || [];
 dbkjs.map = dbkjs.map || null;
 
 dbkjs.init = function () {
-
-    dbkjs.setPaths();
-
     if (!dbkjs.map) {
         dbkjs.map = new OpenLayers.Map(dbkjs.options.map.options);
     }
@@ -38,36 +34,10 @@ dbkjs.init = function () {
 
     dbkjs.mapcontrols.createMapControls();
 
-    dbkjs.mapcontrols.registerMapEvents(dbkjs.layers.createBaseLayers());
+    dbkjs.layers.createBaseLayers();
 
     dbkjs.showStatus = false;
-
 };
-
-dbkjs.setPaths = function() {
-
-    dbkjs.basePath = safetymaps.utils.getAbsoluteUrl("");
-    // ensure basePath always ends with '/', remove 'index.html' if exists
-    if(dbkjs.basePath.charAt(dbkjs.basePath.length - 1) !== '/') {
-        dbkjs.basePath = dbkjs.basePath.substring(0, dbkjs.basePath.lastIndexOf('/')+1);
-    }
-
-    // Wordt gebruikt in:
-    // - dbkjs.challengeAuth()
-    // - feature.js - get()
-    // - jsonDBK.js - getGebied()
-    // - jsonDBK.js - getObject()
-    if (!dbkjs.dataPath) {
-        dbkjs.dataPath = 'api/';
-    }
-
-    // Wordt gebruikt in:
-    // - jsonDBK.js - constructMedia()
-    if (!dbkjs.mediaPath) {
-        dbkjs.mediaPath = dbkjs.basePath + 'media/';
-    }
-};
-
 
 /**
  * Function to update the visibility for baseLayers
@@ -128,7 +98,7 @@ dbkjs.getOrganisation = function() {
     var params = {srid: dbkjs.options.projection.srid};
     $.ajax({
         dataType: "json",
-        url: dbkjs.dataPath + 'organisation.json',
+        url: 'api/organisation.json',
         data: params,
         cache: false
     })
@@ -228,7 +198,7 @@ dbkjs.zoomToFixedMapResolutionForBounds = function(bounds) {
         console.log("orig res: " + res + ", higher map resolution at index " + zoomIndex + ", res " + dbkjs.map.options.resolutions[zoomIndex]);
         dbkjs.map.setCenter(dbkjs.map.getCenter(), zoomIndex);
     }
-}
+};
 
 dbkjs.finishMap = function () {
     //find the div that contains the baseLayer.name
@@ -275,7 +245,7 @@ dbkjs.finishMap = function () {
                         );
             } else if (dbkjs.options.organisation.area.geometry.type === "Polygon") {
                 var geom = new OpenLayers.Format.GeoJSON().read(dbkjs.options.organisation.area.geometry, "Geometry");
-                dbkjs.zoomToFixedMapResolutionForBounds(geom.getBounds())
+                dbkjs.zoomToFixedMapResolutionForBounds(geom.getBounds());
             }
         } else {
             dbkjs.map.zoomToMaxExtent();
@@ -328,7 +298,6 @@ $(document).ready(function () {
             }
             return val;
         });
-        OpenLayers.Lang.setCode(dbkjsLang);
         $('#c_settings').attr("title",i18n.t("settings.title"));
         $('#settings_title').text(i18n.t("settings.title"));
         $('#tb02').attr("title",i18n.t("layer.layers"));

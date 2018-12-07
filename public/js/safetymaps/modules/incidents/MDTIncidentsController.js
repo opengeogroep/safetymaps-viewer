@@ -1,24 +1,23 @@
 /*
- *  Copyright (c) 2016 B3Partners (info@b3partners.nl)
+ *  Copyright (c) 2016-2018 B3Partners (info@b3partners.nl)
  *
- *  This file is part of safetymapDBK
+ *  This file is part of safetymaps-viewer.
  *
- *  safetymapDBK is free software: you can redistribute it and/or modify
+ *  safetymaps-viewer is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  safetymapDBK is distributed in the hope that it will be useful,
+ *  safetymaps-viewer is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with safetymapDBK. If not, see <http://www.gnu.org/licenses/>.
- *
+ *  along with safetymaps-viewer. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* global dbkjs, OpenLayers, safetymaps */
+/* global dbkjs, safetymaps, OpenLayers, Proj4js, jsts, moment, i18n, Mustache, PDFObject */
 
 /**
  * Controller for displaying incident info from MDT koppeling CityGIS Navigator
@@ -27,9 +26,9 @@
  * Events:
  *
  * @param {Object} incidents dbk module
- * @returns {MDTController}
+ * @returns {MDTIncidentsController}
  */
-function MDTController(incidents) {
+function MDTIncidentsController(incidents) {
     var me = this;
 
     me.featureSelector = incidents.featureSelector;
@@ -74,7 +73,7 @@ function MDTController(incidents) {
     });
 };
 
-MDTController.prototype.getMDTInfo = function() {
+MDTIncidentsController.prototype.getMDTInfo = function() {
     var me = this;
 
     $.ajax("/gms.xml", { dataType: "xml", cache: false })
@@ -112,7 +111,7 @@ MDTController.prototype.getMDTInfo = function() {
     });
 };
 
-MDTController.prototype.zoomToIncident = function() {
+MDTIncidentsController.prototype.zoomToIncident = function() {
     if(this.xml) {
         var x = $(this.xml).find("IncidentLocatie XYCoordinaten XCoordinaat").text();
         var y = $(this.xml).find("IncidentLocatie XYCoordinaten YCoordinaat").text();
@@ -120,7 +119,7 @@ MDTController.prototype.zoomToIncident = function() {
     }
 };
 
-MDTController.prototype.newIncident = function() {
+MDTIncidentsController.prototype.newIncident = function() {
     var me = this;
 
     safetymaps.deselectObject();
@@ -147,7 +146,7 @@ MDTController.prototype.newIncident = function() {
     $(me).triggerHandler("new_incident", [commonIncidentObject]);
 };
 
-MDTController.prototype.markerClick = function() {
+MDTIncidentsController.prototype.markerClick = function() {
     this.incidentDetailsWindow.show();
     this.zoomToIncident();
 };

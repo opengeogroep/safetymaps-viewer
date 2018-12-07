@@ -1,24 +1,24 @@
 /*
- *  Copyright (c) 2016 B3Partners (info@b3partners.nl)
+ *  Copyright (c) 2016-2018 B3Partners (info@b3partners.nl)
  *
- *  This file is part of safetymapDBK
+ *  This file is part of safetymaps-viewer.
  *
- *  safetymapDBK is free software: you can redistribute it and/or modify
+ *  safetymaps-viewer is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  safetymapDBK is distributed in the hope that it will be useful,
+ *  safetymaps-viewer is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with safetymapDBK. If not, see <http://www.gnu.org/licenses/>.
- *
+ *  along with safetymaps-viewer. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* global dbkjs, safetymaps, OpenLayers, IncidentDetailsWindow */
+/* global dbkjs, safetymaps, OpenLayers, Proj4js, jsts, moment, i18n, Mustache, PDFObject */
+/* global IncidentDetailsWindow */
 
 /**
  * Controller for displaying incident info from Falck service.
@@ -334,7 +334,7 @@ FalckIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
 
     if(typeof inzetInfo === "string") {
         var msg = "Kan meldkamerinfo niet ophalen: " + inzetInfo;
-        dbkjs.gui.showError(msg);
+        dbkjs.util.showError(msg);
         me.button.setIcon("bell-slash");
         me.incidentDetailsWindow.showError(msg);
     } else if(inzetInfo === null || inzetInfo.length === 0) {
@@ -439,7 +439,7 @@ FalckIncidentsController.prototype.inzetIncident = function(incidentId, fromInci
         })
         .fail(function(e) {
             var msg = "Kan incidentinfo niet ophalen: " + e;
-            dbkjs.gui.showError(msg);
+            dbkjs.util.showError(msg);
             if(!me.incidentFromIncidentList) {
                 me.button.setIcon("bell-slash");
             }
@@ -586,7 +586,7 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
     })
     .fail(function(e) {
         var msg = "Kan incidentinfo niet updaten: " + e;
-        dbkjs.gui.showError(msg);
+        dbkjs.util.showError(msg);
         me.incidentDetailsWindow.showError(msg);
         // Leave incidentDetailsWindow contents with old info
     })

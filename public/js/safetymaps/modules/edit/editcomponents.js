@@ -172,7 +172,7 @@ $.extend(dbkjs.modules.FeaturesManager.prototype, {
         this.featurestable.append(
             ['<tr class="feature-row" data-featureid="', feature.id,'">',
                 "<td class='symbol'>",
-                '<img src="', dbkjs.basePath, feature.attributes.image, '" />',
+                '<img src="', feature.attributes.image, '" />',
                 "</td>",
                 "<td class='lbl'>",
                 "<span>", feature.attributes.label, "</span>",

@@ -1,24 +1,24 @@
 /*
- *  Copyright (c) 2015 B3Partners (info@b3partners.nl)
+ *  Copyright (c) 2015-2018 B3Partners (info@b3partners.nl)
  *
- *  This file is part of safetymapDBK
+ *  This file is part of safetymaps-viewer.
  *
- *  safetymapDBK is free software: you can redistribute it and/or modify
+ *  safetymaps-viewer is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  safetymapDBK is distributed in the hope that it will be useful,
+ *  safetymaps-viewer is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with safetymapDBK. If not, see <http://www.gnu.org/licenses/>.
- *
+ *  along with safetymaps-viewer. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* global dbkjs, AGSIncidentService, OpenLayers, Proj4js */
+/* global dbkjs, safetymaps, OpenLayers, Proj4js, jsts, moment, i18n, Mustache, PDFObject */
+/* global AGSIncidentService, FalckIncidentsController */
 
 /**
  * Controller for displaying all current incidents.
@@ -477,7 +477,7 @@ IncidentMonitorController.prototype.getIncidentListAGS = function() {
         // Only show error after number of failed tries
         if(me.failedUpdateTries > me.UPDATE_TRIES) {
             var msg = "Kan incidentenlijst niet ophalen na " + me.failedUpdateTries + " pogingen: " + e;
-            dbkjs.gui.showError(msg);
+            dbkjs.util.showError(msg);
             if(!me.options.voertuigIM) {
                 me.button.setIcon("bell-slash");
             }
@@ -529,7 +529,7 @@ IncidentMonitorController.prototype.getIncidentListFalck = function() {
         // Only show error after number of failed tries
         if(me.failedUpdateTries > me.UPDATE_TRIES) {
             var msg = "Kan incidentenlijst niet ophalen na " + me.failedUpdateTries + " pogingen: " + e;
-            dbkjs.gui.showError(msg);
+            dbkjs.util.showError(msg);
             if(!me.options.voertuigIM) {
                 me.button.setIcon("bell-slash");
             }
@@ -727,8 +727,8 @@ IncidentMonitorController.prototype.updateIncidentFalck = function(incidentId, a
         cache: false
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
-        var msg = "Kan incidentinfo niet updaten: " + AGSIcidentService.prototype.getAjaxError(jqXHR, textStatus, errorThrown);
-        dbkjs.gui.showError(msg);
+        var msg = "Kan incidentinfo niet updaten: " + AGSIncidentService.prototype.getAjaxError(jqXHR, textStatus, errorThrown);
+        dbkjs.util.showError(msg);
         // Leave incidentDetailsWindow contents with old info
 
     })
@@ -762,7 +762,7 @@ IncidentMonitorController.prototype.updateIncidentAGS = function(incidentId, arc
     me.service.getAllIncidentInfo(incidentId, archief, false, !me.kb)
     .fail(function(e) {
         var msg = "Kan incidentinfo niet updaten: " + e;
-        dbkjs.gui.showError(msg);
+        dbkjs.util.showError(msg);
         // Leave incidentDetailsWindow contents with old info
     })
     .done(function(incident) {

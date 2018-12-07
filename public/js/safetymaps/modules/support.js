@@ -1,24 +1,23 @@
-/*!
- *  Copyright (c) 2014 Milo van der Linden (milo@dogodigi.net)
+/*
+ *  Copyright (c) 2014-2018 2014 Milo van der Linden (milo@dogodigi.net), B3Partners (info@b3partners.nl)
  *
- *  This file is part of opendispatcher/safetymapsDBK
+ *  This file is part of safetymaps-viewer.
  *
- *  opendispatcher is free software: you can redistribute it and/or modify
+ *  safetymaps-viewer is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  opendispatcher is distributed in the hope that it will be useful,
+ *  safetymaps-viewer is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with opendispatcher. If not, see <http://www.gnu.org/licenses/>.
- *
+ *  along with safetymaps-viewer. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* global OpenLayers, dbkjs, i18n */
+/* global dbkjs, safetymaps, OpenLayers, Proj4js, jsts, moment, i18n, Mustache, PDFObject */
 
 var dbkjs = dbkjs || {};
 window.dbkjs = dbkjs;
@@ -200,7 +199,7 @@ dbkjs.modules.support = {
                     data.name = 'Voertuigviewer';
                 }
                 var url = (dbkjs.options.urls && dbkjs.options.urls.annotation ? dbkjs.options.urls.annotation
-                        : dbkjs.basePath + 'api/annotation/');
+                        : 'api/annotation/');
                 jQuery.ajax({
                     type: "POST",
                     url: url,

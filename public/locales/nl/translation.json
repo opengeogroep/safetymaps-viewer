@@ -1,5 +1,6 @@
 {
     "name": "Naam",
+    "error": "Fout",
     "settings": {
         "layout": "Layout",
         "scaleStyle": "Schaal iconen op basis van zoomniveau",

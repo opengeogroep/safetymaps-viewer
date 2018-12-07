@@ -1,9 +1,23 @@
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/*
+ *  Copyright (c) 2018 B3Partners (info@b3partners.nl)
+ *
+ *  This file is part of safetymaps-viewer.
+ *
+ *  safetymaps-viewer is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  safetymaps-viewer is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with safetymaps-viewer. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* global dbkjs, safetymaps, OpenLayers, Proj4js, jsts, moment, i18n, Mustache, PDFObject */
 
 dbkjs.modules.library = {
     id: "dbk.module.library",
@@ -38,7 +52,7 @@ dbkjs.modules.library = {
             },
             resultSelected: function (result) {
                 console.log("Library search result selected ", result);
-                me.showLibraryItem(result)
+                me.showLibraryItem(result);
             }
         }, false);
 
@@ -80,7 +94,7 @@ dbkjs.modules.library = {
         var me = this;
         me.initLibraryPopup();
         
-        var realpath = "../media/" + "bibliotheek/" + item.Documentnaam;
+        var realpath = "media/bibliotheek/" + item.Documentnaam;
         var url = safetymaps.utils.getAbsoluteUrl(realpath);
         me.libraryPopup.getView().html("");
         me.libraryPopup.getView().append('<h3 class="pdf-heading" style="margin: 0; text-align: center; height: 28px"><a href="' + realpath + '" target="_blank">' + item.Omschrijving + ' (' + item.Documentnaam + ')</a></h3>' +

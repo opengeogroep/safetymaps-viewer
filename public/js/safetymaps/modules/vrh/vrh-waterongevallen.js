@@ -1,7 +1,7 @@
 /*
  *  Copyright (c) 2018 B3Partners (info@b3partners.nl)
  *
- *  This file is part of safetymaps-viewer
+ *  This file is part of safetymaps-viewer.
  *
  *  safetymaps-viewer is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,15 +14,14 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with safetymapDBK. If not, see <http://www.gnu.org/licenses/>.
- *
+ *  along with safetymaps-viewer. If not, see <http://www.gnu.org/licenses/>.
  */
+
+/* global dbkjs, safetymaps, OpenLayers, Proj4js, jsts, moment, i18n, Mustache, PDFObject */
 
 /*
  * OpenLayers2 layers for displaying Waterongevallen objects.
  */
-
- /* global dbkjs, safetymaps, OpenLayers, i18n */
 
 var safetymaps = safetymaps || {};
 safetymaps.vrh = safetymaps.vrh || {};

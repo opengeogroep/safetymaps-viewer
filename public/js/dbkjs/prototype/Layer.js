@@ -1,24 +1,23 @@
-/*!
- *  Copyright (c) 2014 Milo van der Linden (milo@dogodigi.net)
+/*
+ *  Copyright (c) 2014-2018 2014 Milo van der Linden (milo@dogodigi.net), B3Partners (info@b3partners.nl)
  *
- *  This file is part of opendispatcher/safetymapsDBK
+ *  This file is part of safetymaps-viewer.
  *
- *  opendispatcher is free software: you can redistribute it and/or modify
+ *  safetymaps-viewer is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  opendispatcher is distributed in the hope that it will be useful,
+ *  safetymaps-viewer is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with opendispatcher. If not, see <http://www.gnu.org/licenses/>.
- *
+ *  along with safetymaps-viewer. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* global OpenLayers */
+/* global dbkjs, safetymaps, OpenLayers, Proj4js, jsts, moment, i18n, Mustache, PDFObject */
 
 var dbkjs = dbkjs || {};
 window.dbkjs = dbkjs;
@@ -193,7 +192,7 @@ dbkjs.Layer = dbkjs.Class({
                             } else {
                                 var html = "<div id='legend_" + that.id + "'>";
                                 $.each(legends, function(i, legend) {
-                                    html += (i > 0 ? "<br>" : "") + '<img src="' + legend + '"/>'
+                                    html += (i > 0 ? "<br>" : "") + '<img src="' + legend + '"/>';
                                 });
                                 html += "</div>";
                                 dv_panel_content.append(html);
@@ -294,7 +293,7 @@ dbkjs.Layer = dbkjs.Class({
         console.log("Feature info for layer "+ _obj.layer.name + ": "+ features.length + " features returned");//, response.responseText);
         if (features.length > 0) {
             var title = _obj.layer.name.split("\\");
-            dbkjs.gui.detailsPanelUpdateTitle(title[title.length-1]);
+            $('#vectorclickpanel_h').html('<span class="h4"><i class="fa fa-info-circle"></i>&nbsp;' + title[title.length-1] + '</span>');
             var html = '<div class="table-responsive"><table class="table table-hover">';
             for (var feat in features) {
                 for (var j in features[feat].attributes) {
