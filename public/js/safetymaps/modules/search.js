@@ -17,9 +17,9 @@
  *  along with safetymaps-viewer. If not, see <http://www.gnu.org/licenses/>.
  */
 
- /* global safetymaps, dbkjs, OpenLayers, i18n, Mustache */
+/* global dbkjs, safetymaps, OpenLayers, Proj4js, jsts, moment, i18n, Mustache, PDFObject */
 
- dbkjs.modules.search = {
+dbkjs.modules.search = {
     id: "dbk.module.search",
     button: null,
     popup: null,
