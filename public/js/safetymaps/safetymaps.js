@@ -194,6 +194,21 @@ safetymaps.infoWindow = {
     },
 
     showTab: function(windowId, tabId, showWindow) {
+
+        // Allows calling with windowId and tabId combined using 2 or 3 arguments:
+        // showTab("mywindow", "mytab", true);
+        // showTab("mywindow/mytab", true);
+        if(windowId.indexOf("/") !== -1) {
+            var s = windowId.split("/");
+            windowId = s[0];
+            if(typeof tabId === "boolean") {
+                showWindow = tabId;
+            }
+            tabId = s[1];
+            showWindow = !!showWindow;
+            console.log("showTab shorthand windowId=" + windowId + ",tabId=" + tabId + ",showWindow=" + showWindow);
+        }
+
         var window = this.separateWindowMode ? this.windows[windowId] : this.commonWindow;
         if(window) {
             //console.log("infoWindow: show tab " + tabId);
