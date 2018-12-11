@@ -28,53 +28,6 @@
         var me = this;
 
         this.options = $.extend({
-
-            buttons: [{
-                "id": "basis",
-                "label": "Basisgegevens",
-                "icon": "fa-bus",
-                "active": true,
-                css: {
-                    "background-color": "green",
-                    "color": "white"
-                },
-                wmsLayers: ["Basis"]
-            },{
-                "id": "brandweergegevens",
-                "label": "Brandweergegevens",
-                "img": "images/brwzw.png",
-                "style": "width: 32px; margin-bottom: 6px",
-                "active": false,
-                "showTab": "creator_object_info/brandweer",
-                css: {
-                    "background-color": "red",
-                    "color": "white"
-                },
-                wmsLayers: ["Brandweer"]
-            },{
-                "id": "waterwinning",
-                "label": "Waterwinning",
-                "img": "images/brandkraan.png",
-                "style": "height: 36px; margin-bottom: 5px",
-                "active": false,
-                "showTab": "waterwinning/waterwinning",
-                css: {
-                    "background-color": "#2D2DFF",
-                    "color": "white"
-                },
-                wmsLayers: ["Water"]
-            },{
-                "id": "gebouw",
-                "label": "Gebouwgegevens",
-                "icon": "fa-industry",
-                "active": false,
-                "showTab": "creator_object_info/gebouw",
-                css: {
-                    "background-color": "black",
-                    "color": "white"
-                },
-                wmsLayers: ["Gebouw"]
-            }]
         }, this.options);
 
         me.createButtons();
