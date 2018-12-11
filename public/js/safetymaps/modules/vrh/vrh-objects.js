@@ -158,6 +158,34 @@ dbkjs.modules.vrh_objects = {
 
         me.addSearchConfig();
         me.addFeatureProvider();
+
+        // Listen for toggler events
+        me.buttonStates = {};
+        $(dbkjs).on("dbkjs_init_complete", function() {
+            if(dbkjs.modules.toggler) {
+                $(dbkjs.modules.toggler).on("button_change", function(e, button, active) {
+                    me.togglerButtonChanged(button, active);
+                });
+            }
+        });
+    },
+
+    togglerButtonChanged: function(button, active) {
+        var me = this;
+        me.buttonStates[button] = active;
+
+        var basis = me.buttonStates.basis;
+        me.dbks.layerLabels.setVisibility(basis);
+
+        var brandweergegevens = me.buttonStates.brandweergegevens;
+        me.dbks.layerFireCompartmentation.setVisibility(brandweergegevens);
+        me.dbks.layerFireCompartmentationLabels.setVisibility(brandweergegevens);
+        me.dbks.layerDangerSymbols.setVisibility(brandweergegevens);
+
+        me.dbks.layerLines1.redraw();
+        me.dbks.layerLines2.redraw();
+        me.dbks.layerLines3.redraw();
+        me.dbks.layerSymbols.redraw();
     },
 
     setupInterface: function() {

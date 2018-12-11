@@ -76,6 +76,50 @@ safetymaps.vrh.Dbks = function(options) {
         "To1002": "Trap rond",
         "To1003": "Trappenhuis"
     };
+    me.buttonSymbols = {};
+    me.buttonSymbols.basis = [
+        "TbeRIJ", "TbeBus", "TbeHoogte", "Tbe05", "Tbe06", "Tbe02", "Tbe01", "Tn504", "To04", "Tb1010o",
+        "Tb1008",  // Opstelplaats 1e TS
+        "Tb1004a", // BMC
+        "Tb1004",  // Brandweerpaneel
+        "Tb1005",  // Nevenpaneel
+        "Tb1001"   // Brandweeringang
+    ];
+    me.buttonSymbols.brandweergegevens = [
+        "Tbk5001", // Brandweerlift
+        "Tb1002",  // Overige ingangen / neveningang
+        "Tb1009",  // Opstelplaats overige blusvoertuigen
+        "Tb2005"   // Schakelaar rook-/warmteafvoer
+    ];
+    me.buttonSymbols.waterwinning = [
+        "Tb2024",  // Afsluiter omloopleiding
+        "Tb2026",  // Afsluiter schuimvormend middel
+        "Tb2023",  // Afsluiter sprinkler
+        "Tb02",    // Brandslanghaspel
+        "Tb1007a", // Droge blusleiding afnamepunt
+        "Tb4024",  // Gas blusinstallatie / Blussysteem kooldioxide
+        "Tb1011",  // Gas detectiepaneel
+        "Tb4005"   // Gesprinklerde ruimte
+    ];
+    me.buttonSymbols.gebouw = [
+        "Tbk7004", // Lift
+        "Tn05",     // Nooduitgang
+        "To1001",  // Trap
+        "To1002",  // Trap rond
+        "To1003",  // Trappenhuis
+        "Tb2025",  // Afsluiter LPG
+        "Tb2021",  // Afsluiter gas
+        "Tb2022",  // Afsluiter water
+        "Tb2043",  // Noodstop
+        "To03",     // Noodstroom aggegraat
+        "Tb1010",  // Schacht/kanaal
+        "Tb2002",  // Noodschakelaar CV
+        "Tb2001",  // Noodschakelaar neon
+        "Tb2003",  // Schakelaar elektriciteit
+        "Tb2004",  // Schakelaar luchtbehandeling
+        "To02",     // Slaapplaats
+        "Hellingbaan"
+    ];
 
     me.vrhDangerSymbols = {
         "Tw07": "Tw07",
@@ -147,6 +191,13 @@ safetymaps.vrh.Dbks = function(options) {
         "Vluchtroute": {
             color1: "#000"
         }
+    };
+    me.lineButtons = {
+        "Hekwerk": "basis",
+        "Schadecirkel": "basis",
+        "Schadecircel": "basis",
+        "Blusleiding": "waterwinning",
+        "Binnenmuur": "gebouw"
     };
 
     me.initLayers();
@@ -264,6 +315,18 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
     });
     this.layers.push(this.layerFireCompartmentationLabels);
 
+    lineDisplay = function(feature) {
+        if(feature.attributes.button) {
+            return dbkjs.modules.vrh_objects.buttonStates[feature.attributes.button] ? "visible" : "none";
+        }
+        if(feature.attributes.type && me.lineButtons[feature.attributes.type]) {
+            var button = me.lineButtons[feature.attributes.type];
+            var visible = dbkjs.modules.vrh_objects.buttonStates[button];
+            return visible ? "visible" : "none";
+        }
+        return "visible";
+    };
+
     this.layerLines1 = new OpenLayers.Layer.Vector("DBK lines 1", {
         hover: false,
         rendererOptions: {
@@ -277,7 +340,8 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
                 strokeWidth: "${strokeWidth}",
                 graphicName: "${graphicName}",
                 rotation: "${rotation}",
-                pointRadius: 5
+                pointRadius: 5,
+                display: "${display}"
             }, {
                 context: {
                     color: function(feature) {
@@ -304,7 +368,8 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
                     },
                     graphicName: function(feature) {
                         return feature.attributes.style.type_viewer === "arrow" ? "triangle" : "";
-                    }
+                    },
+                    display: lineDisplay
                 }
             })
         })
@@ -320,7 +385,8 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
                 strokeColor: "${color}",
                 strokeLinecap: "butt",
                 strokeWidth: "${strokeWidth}",
-                strokeDashstyle: "${dashstyle}"
+                strokeDashstyle: "${dashstyle}",
+                display: "${display}"
             }, {
                 context: {
                     color: function(feature) {
@@ -334,7 +400,8 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
                             return safetymaps.creator.CreatorObjectLayers.prototype.scalePattern("8 8", 1);
                         }
                         return "";
-                    }
+                    },
+                    display: lineDisplay
                 }
             })
         })
@@ -351,7 +418,8 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
                 strokeColor: "${color}",
                 strokeWidth: "${strokeWidth}",
                 strokeDashstyle: "${dashstyle}",
-                strokeLinecap: "butt"
+                strokeLinecap: "butt",
+                display: "${display}"
             }, {
                 context: {
                     color: function(feature) {
@@ -362,7 +430,8 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
                     },
                     dashstyle: function(feature) {
                         return safetymaps.creator.CreatorObjectLayers.prototype.scalePattern("1 20", 1);
-                    }
+                    },
+                    display: lineDisplay
                 }
             })
         })
@@ -381,7 +450,8 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
                 rotation: "${rotation}",
                 fontWeight: "bold",
                 fontSize: "${fontSize}",
-                label: "${label}"
+                label: "${label}",
+                display: "${display}"
             }, {
                 context: {
                     myradius: function(feature) {
@@ -395,6 +465,21 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
                     },
                     fontSize: function(feature) {
                         return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,12, feature.attributes.radius) + "px";
+                    },
+                    display: function(feature) {
+                        if(me.buttonSymbols.basis.indexOf(feature.attributes.code) !== -1) {
+                            return dbkjs.modules.vrh_objects.buttonStates.basis ? "visible" : "none";
+                        }
+                        if(me.buttonSymbols.brandweergegevens.indexOf(feature.attributes.code) !== -1) {
+                            return dbkjs.modules.vrh_objects.buttonStates.brandweergegevens ? "visible" : "none";
+                        }
+                        if(me.buttonSymbols.waterwinning.indexOf(feature.attributes.code) !== -1) {
+                            return dbkjs.modules.vrh_objects.buttonStates.waterwinning ? "visible" : "none";
+                        }
+                        if(me.buttonSymbols.gebouw.indexOf(feature.attributes.code) !== -1) {
+                            return dbkjs.modules.vrh_objects.buttonStates.gebouw ? "visible" : "none";
+                        }
+                        return "visible";
                     }
                 }
             }),
@@ -593,6 +678,7 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
     var lineFeatures2 = [];
     var lineFeatures3 = [];
     var lineFeatures1 = (object.aanpijling || []).map(wktReader).map(function(f) {
+        f.attributes.button = "basis";
         f.attributes.style = {
             type_viewer: "line",
             color1: "#000",
@@ -601,6 +687,7 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
         return f;
     });
     lineFeatures1 = lineFeatures1.concat((object.slagboom || []).map(wktReader).map(function(f) {
+        f.attributes.button = "basis";
         f.attributes.description = "";
         f.attributes.style = {
             type_viewer: "tube",
@@ -624,6 +711,7 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
         return f;
     }));
     lineFeatures1 = lineFeatures1.concat((object.aanrijroute || []).map(wktReader).map(function(f) {
+        f.attributes.button = "basis";
         f.attributes.style = {
             color1: "#000",
             type_viewer: "arrow"
