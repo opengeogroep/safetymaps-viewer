@@ -38,11 +38,13 @@ dbkjs.modules.vrh_waterwinning = {
         var me = this;
 
         // Button to open waterwinning window
-        $("#btngrp_object").append($('<a id="btn_waterwinning" href="#" title="Waterwinning" style="background-color: rgb(45, 45, 255); color: white" class="btn navbar-btn btn-default"><img src="images/brandkraan.png" style="height: 36px; margin-bottom: 5px"></a>'));
-        $("#btn_waterwinning")
-        .click(function() {
-            safetymaps.infoWindow.showTab(me.infoWindow.getName(), "waterwinning", true);
-        });
+        if(me.options.button) {
+            $("#btngrp_object").append($('<a id="btn_waterwinning" href="#" title="Waterwinning" style="background-color: rgb(45, 45, 255); color: white" class="btn navbar-btn btn-default"><img src="images/brandkraan.png" style="height: 36px; margin-bottom: 5px"></a>'));
+            $("#btn_waterwinning")
+            .click(function() {
+                safetymaps.infoWindow.showTab(me.infoWindow.getName(), "waterwinning", true);
+            });
+        }
 
         me.infoWindow = safetymaps.infoWindow.addWindow("waterwinning", "Waterwinning");
         me.div = $('<i> '+ i18n.t("dialogs.noinfo") + '</i>' );
@@ -127,32 +129,36 @@ dbkjs.modules.vrh_waterwinning = {
             me.routingFeatures.push(new OpenLayers.Feature.Vector(geom, {}, style));
 
             if(destination.route) {
-                console.log("vrh-waterwinning: using route for waterwinning point", destination);
-                if(destination.route.data.features) {
-                    geom = new OpenLayers.Format.GeoJSON().read(destination.route.data.features[0].geometry)[0].geometry;
+                if(!destination.route.success) {
+                    console.log("vrh-waterwinning: route not available for destination: " + destination.route.error, destination);
                 } else {
-                    geom = new OpenLayers.Format.GeoJSON().read(destination.route.data.paths[0].points)[0].geometry;
-                }
-                //console.log("vrh-waterwinning: line to point", geom);
-                var points = geom.getVertices();
-                var reprojected = [];
-                reprojected.push(new OpenLayers.Geometry.Point(me.incident.x, me.incident.y));
-                for(var i = 0; i < points.length; i++) {
-                    var p = new Proj4js.Point(points[i].x, points[i].y);
-                    var t = Proj4js.transform(new Proj4js.Proj("EPSG:4326"), new Proj4js.Proj(dbkjs.options.projection.code), p);
-                    reprojected.push(new OpenLayers.Geometry.Point(t.x, t.y));
-                }
-                geom = new OpenLayers.Geometry.LineString(reprojected);
-                //console.log("vrh-waterwinning: reprojected line to point", geom);
-                var style = {strokeColor: "red", strokeOpacity: 0.5, strokeWidth: 10};
-                me.routingFeatures.push(new OpenLayers.Feature.Vector(geom, {}, style));
+                    console.log("vrh-waterwinning: using route for destination", destination);
+                    if(destination.route.data.features) {
+                        geom = new OpenLayers.Format.GeoJSON().read(destination.route.data.features[0].geometry)[0].geometry;
+                    } else {
+                        geom = new OpenLayers.Format.GeoJSON().read(destination.route.data.paths[0].points)[0].geometry;
+                    }
+                    //console.log("vrh-waterwinning: line to point", geom);
+                    var points = geom.getVertices();
+                    var reprojected = [];
+                    reprojected.push(new OpenLayers.Geometry.Point(me.incident.x, me.incident.y));
+                    for(var i = 0; i < points.length; i++) {
+                        var p = new Proj4js.Point(points[i].x, points[i].y);
+                        var t = Proj4js.transform(new Proj4js.Proj("EPSG:4326"), new Proj4js.Proj(dbkjs.options.projection.code), p);
+                        reprojected.push(new OpenLayers.Geometry.Point(t.x, t.y));
+                    }
+                    geom = new OpenLayers.Geometry.LineString(reprojected);
+                    //console.log("vrh-waterwinning: reprojected line to point", geom);
+                    var style = {strokeColor: "red", strokeOpacity: 0.5, strokeWidth: 10};
+                    me.routingFeatures.push(new OpenLayers.Feature.Vector(geom, {}, style));
 
-                var lastRoutePoint = reprojected[reprojected.length-1];
-                var coords = [new OpenLayers.Geometry.Point(lastRoutePoint.x, lastRoutePoint.y), new OpenLayers.Geometry.Point(destination.x, destination.y)];
-                // Line from end of route to incident
-                me.routingFeatures.push(new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString(coords), {}, {
-                    strokeColor: "red", strokeOpacity: 0.8, strokeWidth: 3, strokeDashstyle: "dash"
-                }));
+                    var lastRoutePoint = reprojected[reprojected.length-1];
+                    var coords = [new OpenLayers.Geometry.Point(lastRoutePoint.x, lastRoutePoint.y), new OpenLayers.Geometry.Point(destination.x, destination.y)];
+                    // Line from end of route to incident
+                    me.routingFeatures.push(new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString(coords), {}, {
+                        strokeColor: "red", strokeOpacity: 0.8, strokeWidth: 3, strokeDashstyle: "dash"
+                    }));
+                }
             }
 
             this.Layer.addFeatures(me.routingFeatures);
