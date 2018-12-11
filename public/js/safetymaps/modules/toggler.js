@@ -101,7 +101,7 @@
             var layers = me.findButtonLayers(button);
             $.each(layers.organisation, function(j, l) {
                 //console.log("toggler: hiding legend for " + l.name + " gid " + l.gid);
-                //$("div[data-layer-gid=" + l.gid + "]").parent().hide();
+                $("div[data-layer-gid=" + l.gid + "]").parent().hide();
             });
         });
     },
