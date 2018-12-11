@@ -38,7 +38,7 @@ function AGSIncidentsController(incidents) {
     me.featureSelector = incidents.featureSelector;
 
     me.button = new AlertableButton("btn_incident", "Incident", "bell-o");
-    me.button.getElement().prependTo('.layertoggle-btn-group');
+    me.button.getElement().prependTo('#btngrp_object');
 
     $(me.button).on('click', function() {
         me.incidentDetailsWindow.show();
