@@ -131,7 +131,7 @@ IncidentListWindow.prototype.listIncidents = function(el, incidents, showInzetIn
         $("<span class='prio prio" + incident.prio + "'/>").text(incident.prio || "").appendTo(r);
 
         var classificaties = incident.classificaties || "";
-        var icons = me.getIncidentEenhedenIcons(incident);
+        var icons = me.getIncidentEenhedenIcons(incident, incident.prio);
 
         $("<span class='classificatie'/>").html(icons + classificaties).appendTo(r);
         $("<span class='fromNow'/>").text(incident.start.fromNow()).appendTo(r);
@@ -144,7 +144,7 @@ IncidentListWindow.prototype.listIncidents = function(el, incidents, showInzetIn
     d.appendTo(el);
 };
 
-IncidentListWindow.prototype.getIncidentEenhedenIcons = function(incident) {
+IncidentListWindow.prototype.getIncidentEenhedenIcons = function(incident, prio) {
     var me = this;
     var html = "";
 
@@ -201,12 +201,12 @@ IncidentListWindow.prototype.getIncidentEenhedenIcons = function(incident) {
     var htmlA = multiIcon("ambulance",iconsA.ambulance) + multiIcon("motorcycle",iconsA.motorcycle) + multiIcon("stethoscope",iconsA.stethoscope) + multiIcon("medkit",iconsA.medkit) ;
     var htmlB = multiIcon("ship",iconsB.ship) + multiIcon("bus",iconsB.bus) + multiIcon("cab",iconsB.cab) + multiIcon("motorcycle",iconsB.motorcycle);
 
-    html = "<span style='color: red'>" + htmlB + "</span>";
+    html = "<span class='eenh disc_b prio" + prio + "'>" + htmlB + "</span>";
     if(incident.inzetEenhedenStats.P.total !== 0) {
-        html += "<span style='color: blue'>" + multiIcon("cab",incident.inzetEenhedenStats.P.total) + "</span>";
+        html += "<span class='eenh disc_p prio" + prio + "'>" + multiIcon("cab",incident.inzetEenhedenStats.P.total) + "</span>";
     }
     if(incident.inzetEenhedenStats.A.total !== 0) {
-        html += "<span style='color: orange'>" + htmlA + "</span>";
+        html += "<span class='eenh disc_a prio" + prio + "'>" + htmlA + "</span>";
     }
     return html;
 };

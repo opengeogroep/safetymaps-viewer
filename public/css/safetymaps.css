@@ -512,6 +512,19 @@ li.object img {
 .incidentList .list .incident span.prio.prio2 {
     color: orange;
 }
+.incidentList .list .incident span.eenh.disc_b {
+    color: red;
+}
+.incidentList .list .incident span.eenh.disc_b.prio2 {
+    color: orange;
+}
+.incidentList .list .incident span.eenh.disc_p {
+    color: blue;
+}
+.incidentList .list .incident span.eenh.disc_a {
+    color: yellow;
+}
+
 
 @media (max-width: 1000px) {
     .incidentList .list .incident span.fromNow { display: none; }
