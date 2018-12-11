@@ -54,7 +54,7 @@ dbkjs.modules.vrh_waterwinning = {
             // Keep same protocol, http://localhost/... onboard and https://vrh-safetymaps.nl/...
             // for online
             this.options.url = window.location.protocol + this.options.url.substring(this.options.url.indexOf("//"));
-            console.log("Using waterwinning URL: " + this.options.url);
+            console.log("vrh-waterwinning: using URL " + this.options.url);
         }
 
         me.createLayer();
@@ -127,13 +127,13 @@ dbkjs.modules.vrh_waterwinning = {
             me.routingFeatures.push(new OpenLayers.Feature.Vector(geom, {}, style));
 
             if(destination.route) {
-                console.log("Using route for waterwinning point", destination);
+                console.log("vrh-waterwinning: using route for waterwinning point", destination);
                 if(destination.route.data.features) {
                     geom = new OpenLayers.Format.GeoJSON().read(destination.route.data.features[0].geometry)[0].geometry;
                 } else {
                     geom = new OpenLayers.Format.GeoJSON().read(destination.route.data.paths[0].points)[0].geometry;
                 }
-                console.log("Line to point", geom);
+                //console.log("vrh-waterwinning: line to point", geom);
                 var points = geom.getVertices();
                 var reprojected = [];
                 reprojected.push(new OpenLayers.Geometry.Point(me.incident.x, me.incident.y));
@@ -143,7 +143,7 @@ dbkjs.modules.vrh_waterwinning = {
                     reprojected.push(new OpenLayers.Geometry.Point(t.x, t.y));
                 }
                 geom = new OpenLayers.Geometry.LineString(reprojected);
-                console.log("Reprojected line to point", geom);
+                //console.log("vrh-waterwinning: reprojected line to point", geom);
                 var style = {strokeColor: "red", strokeOpacity: 0.5, strokeWidth: 10};
                 me.routingFeatures.push(new OpenLayers.Feature.Vector(geom, {}, style));
 
@@ -180,12 +180,12 @@ dbkjs.modules.vrh_waterwinning = {
             }
         })
         .fail(function(error) {
-            console.log("error requesting waterwinning data", arguments);
+            console.log("vrh-waterwinning: error requesting data", arguments);
             me.div.html("<i>Fout bij ophalen gegevens: " + Mustache.escape(error) + "</i>");
         });
     },
     renderData: function(data) {
-        console.log("rendering waterwinning data", data);
+        console.log("vrh-waterwinning: rendering data", data);
 
         var me = this;
         var ww_table_div = $('<div class="table-responsive"></div>');
@@ -318,7 +318,7 @@ dbkjs.modules.vrh_waterwinning = {
                     dbkjs.map.zoomOut();
                 }
             if(i>25){
-                console.log("points are not found");
+                console.log("vrh-waterwinning: points are not found");
                 pointsInScreen = true;
             }
         }
@@ -328,7 +328,7 @@ dbkjs.modules.vrh_waterwinning = {
     requestData:function(incident){
         var me = this;
         var d = $.Deferred();
-        console.log("requesting waterwinning data", incident);
+        console.log("vrh-waterwinning: requesting data", incident);
 
         $.ajax(me.options.url, {
             data: {
