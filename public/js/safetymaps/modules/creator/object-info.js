@@ -49,8 +49,16 @@ safetymaps.creator.renderInfoTabs = function(object, windowId) {
 
     var content = safetymaps.creator.renderMedia(object);
     safetymaps.infoWindow.addTab(windowId, "media", i18n.t("creator.media"), "info", content);
-
-    safetymaps.creator.embedPDFs(content);
+    if (content) {
+        //check if first item in carousel is pdf; Render if true
+        if ($("#media_carousel").find('.active').find('.pdf-embed').length !== 0) {
+            safetymaps.creator.embedPDFs($("#media_carousel").find('.active'));
+        }
+        //embed pdf's only if they are requested
+        $("#media_carousel").bind('slide.bs.carousel', function (e) {
+            safetymaps.creator.embedPDFs(e.relatedTarget);
+        });
+    }
 
     rows = safetymaps.creator.renderDangerSymbols(object);
     safetymaps.infoWindow.addTab(windowId, "danger_symbols", i18n.t("creator.danger_symbols"), "info", safetymaps.creator.createInfoTabDiv(rows));
