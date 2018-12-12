@@ -63,6 +63,7 @@ html, body {
 }
 .main-button-group .btn {
     width: 54px;
+    height: 50px;
     margin-left: -6px;
     font-size: 35px;
 }
@@ -524,7 +525,6 @@ li.object img {
 .incidentList .list .incident span.eenh.disc_a {
     color: yellow;
 }
-
 
 @media (max-width: 1000px) {
     .incidentList .list .incident span.fromNow { display: none; }
