@@ -102,7 +102,10 @@ FalckIncidentsController.prototype.checkIncidentMonitor = function() {
         if(me.incidentMonitorController) {
             me.incidentMonitorController.enable();
         } else {
-            dbkjs.options.incidents = { };
+            dbkjs.options.incidents = {
+                /* XXX */
+                incidentListFunction: dbkjs.options.incidents.incidentListFunction
+            };
 
             me.incidentMonitorController = new IncidentMonitorController(me);
             me.incidentMonitorController.incidentListWindow.setSplitScreen(false);
