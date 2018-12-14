@@ -140,8 +140,8 @@ safetymaps.vrh.api = {
                 minClusteringResolution: 0
             };
             var symbol = "js/safetymaps/modules/creator/assets/event.png";
-            var width = 85;
-            var height = 65;
+            var width = 33;
+            var height = 35;
 
             feature.attributes.label = apiObject.evnaam;
             feature.attributes.symbol = me.imagePath + symbol;

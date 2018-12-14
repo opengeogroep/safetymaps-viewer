@@ -90,7 +90,7 @@ safetymaps.creator.api = {
                         symbol = "wo.png"; width = 40; height = 40;
                         break;
                     case "evenement":
-                        symbol = "event.png"; width = 85; height = 65;
+                        symbol = "event.png"; width = 33; height = 35;
                         break;
                 }
             }
