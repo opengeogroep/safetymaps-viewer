@@ -29,7 +29,9 @@ dbkjs.modules.incidents = {
     featureSelector: null,
     options: null,
     register: function() {
-        if(!this.options) {
+        // useJsOptions is for using options defined in js object dbkjs.options.incidents instead of db
+        // module options, for simultaneous use with older version...
+        if(!this.options || this.options.useJsOptions) {
             this.options = dbkjs.options.incidents;
         }
 
