@@ -23,6 +23,7 @@ dbkjs.modules.search = {
     id: "dbk.module.search",
     button: null,
     popup: null,
+    first: null,
     searchTabs: null,
     searchInput: null,
     searchConfigs: null,
@@ -35,10 +36,12 @@ dbkjs.modules.search = {
 
         this.options = $.extend({
             keyupTimeout: 100,
-            minSearchLength: 3
+            minSearchLength: 3,
+            defaultTab: null
         }, this.options);
 
         me.searchConfigs = [];
+        me.first = true;
 
         me.createButton();
         me.createPopup();
@@ -63,9 +66,26 @@ dbkjs.modules.search = {
         me.button.appendTo('#btngrp_3');
     },
 
+    activateDefaultConfig: function() {
+        var me = this;
+        if(me.options.defaultTab) {
+            var defIndex = -1;
+            $.each(me.searchConfigs, function(i, c) {
+                if(c.name === me.options.defaultTab) {
+                    defIndex = i;
+                    return false;
+                }
+            });
+            if(defIndex !== -1) {
+                me.activateSearch(defIndex);
+            }
+        }
+    },
+
     showPopup: function() {
-        if(this.popup === null) {
-            this.createPopup();
+        if(this.first) {
+            this.first = false;
+            this.activateDefaultConfig();
         }
         this.popup.show();
         this.activeConfig.search(this.searchInput.val());
@@ -131,6 +151,9 @@ dbkjs.modules.search = {
 
     activateSearch: function(index) {
         this.activeConfig = this.searchConfigs[index];
+
+        $("#search_tabs li").removeClass("active");
+        $("#search_tabs li[x-search-index=" + index + "]").addClass("active");
 
         this.searchInput.val("");
         $(this.searchInput).attr("placeholder", this.activeConfig.placeholder);
