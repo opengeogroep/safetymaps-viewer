@@ -485,7 +485,7 @@ dbkjs.modules.safetymaps_creator = {
 
         safetymaps.creator.renderInfoTabs(object, this.infoWindow.getName());
 
-        $("#tab_pane_floors tr").click(function(e) {
+        $("#tab_floors tr").click(function(e) {
             var floor = e.currentTarget.firstChild.innerText.trim();
             console.log("click floor " + floor, e);
 
