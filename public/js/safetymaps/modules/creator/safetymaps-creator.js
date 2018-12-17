@@ -53,7 +53,11 @@ dbkjs.modules.safetymaps_creator = {
         }
         
         // Setup clustering layer
-        me.clusteringLayer = new safetymaps.ClusteringLayer();
+        me.clusteringLayer = new safetymaps.ClusteringLayer({
+            filterFunction: function(feature) {
+                return me.hiddenTypes.indexOf(feature.attributes.type) === -1;
+            }
+        });
         $(me.clusteringLayer).on("object_cluster_selected", function(event, features) {
             me.clusterObjectClusterSelected(features);
         });
@@ -129,7 +133,33 @@ dbkjs.modules.safetymaps_creator = {
         me.setupInterface();
 
         me.addFeatureProvider();
+
+        // Listen for toggler events
+        me.hiddenTypes = [];
+        $(dbkjs).on("dbkjs_init_complete", function() {
+            if(dbkjs.modules.toggler) {
+                $(dbkjs.modules.toggler).on("button_change", function(e, button, active, config) {
+                    me.togglerButtonChanged(button, active, config);
+                });
+            }
+        });
     },
+
+    togglerButtonChanged: function(button, active, config) {
+        var me = this;
+        if(typeof config.creatorType === "undefined") {
+            return;
+        }
+        var i = me.hiddenTypes.indexOf(config.creatorType);
+        if(active && i !== -1) {
+            me.hiddenTypes.splice(i, 1);
+        } else if(!active && i === -1) {
+            me.hiddenTypes.push(config.creatorType);
+        }
+        console.log("Hidden object types: " + me.hiddenTypes);
+        me.clusteringLayer.redraw();
+    },
+
 
     setupInterface: function() {
         var me = this;

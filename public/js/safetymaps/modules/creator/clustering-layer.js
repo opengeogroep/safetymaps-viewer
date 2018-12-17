@@ -42,6 +42,7 @@ safetymaps.ClusteringLayer = function (options) {
             width: 51,
             height: 56
         },
+        filterFunction: null,
         minLabelScale: 4000
     }, options);
 
@@ -58,6 +59,7 @@ safetymaps.ClusteringLayer.prototype.createLayer = function () {
             new OpenLayers.Strategy.Cluster(me.options.clusterStrategy)
         ],
         options: {
+            filterFunction: me.options.filterFunction
         },
         styleMap: new OpenLayers.StyleMap({
             'default': new OpenLayers.Style({
@@ -135,6 +137,10 @@ safetymaps.ClusteringLayer.prototype.createLayer = function () {
 safetymaps.ClusteringLayer.prototype.setSelectedIds = function(ids) {
     console.log("Selected object ids: ", ids);
     this.selectedIds = ids;
+    this.layer.redraw();
+};
+
+safetymaps.ClusteringLayer.prototype.redraw = function() {
     this.layer.redraw();
 };
 

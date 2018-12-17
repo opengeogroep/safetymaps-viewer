@@ -46,7 +46,6 @@
     createButtons: function() {
         var me = this;
         $.each(me.options.buttons, function(i, button) {
-
             var i;
             if(button.img) {
                 i = $("<img/>")
@@ -148,14 +147,14 @@
             safetymaps.infoWindow.showTab(button.showTab, true);
         }
 
-        $(this).triggerHandler("button_change", [button.id, true]);
+        $(this).triggerHandler("button_change", [button.id, true, button]);
     },
     
     deactivateButton: function(button) {
         console.log("toggler: deactivate ", button.label);
         button.a.removeClass("on");
         this.setButtonWmsVisibility(button);
-        $(this).triggerHandler("button_change", [button.id, false]);
+        $(this).triggerHandler("button_change", [button.id, false, button]);
     },
 
     setButtonWmsVisibility: function(button) {

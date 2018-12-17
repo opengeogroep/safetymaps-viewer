@@ -108,6 +108,7 @@ safetymaps.utils.geometry.getAngle = function(p1, p2) {
 OpenLayers.Strategy.Cluster.prototype.cluster = function (event) {
     var wktParser = new OpenLayers.Format.WKT();
     var gf;
+    var filterFunction = this.layer.options.filterFunction;
     if ((!event || event.zoomChanged || (event.type === "moveend" && !event.zoomChanged)) && this.features) {
         var screenBounds = this.layer.map.getExtent();
         var resolution = this.layer.map.getResolution();
@@ -119,6 +120,9 @@ OpenLayers.Strategy.Cluster.prototype.cluster = function (event) {
             if (feature.originalGeometry) {
                 feature.geometry = feature.originalGeometry;
                 delete feature.originalGeometry;
+            }
+            if(filterFunction && !filterFunction(feature)) {
+                continue;
             }
             if (feature.geometry) {
                 if (!screenBounds.intersectsBounds(feature.geometry.getBounds())) {

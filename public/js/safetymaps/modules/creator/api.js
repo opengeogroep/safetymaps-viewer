@@ -84,13 +84,16 @@ safetymaps.creator.api = {
                 width = 21;
                 height = 38;
             }
+            feature.attributes.type = "Object";
             if(apiObject.symbool) {
                 switch(apiObject.symbool.toLowerCase()) {
                     case "waterongevallen":
                         symbol = "wo.png"; width = 40; height = 40;
+                        feature.attributes.type = "Waterongevallen";
                         break;
                     case "evenement":
                         symbol = "event.png"; width = 33; height = 35;
+                        feature.attributes.type = "Evenement";
                         break;
                 }
             }
@@ -98,7 +101,6 @@ safetymaps.creator.api = {
             feature.attributes.symbol = me.imagePath + symbol;
             feature.attributes.width = width;
             feature.attributes.height = height;
-            feature.attributes.type = apiObject.symbool;
             if(apiObject.selectieadressen){
                 feature.attributes.adressen = apiObject.selectieadressen;
             }
