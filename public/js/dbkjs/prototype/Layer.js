@@ -41,7 +41,8 @@ dbkjs.Layer = dbkjs.Class({
             singleTile: true,
             buffer: 0,
             isBaseLayer: false,
-            visibility: false
+            visibility: false,
+            gid: gid
         };
 
         params = OpenLayers.Util.extend(defaultparams, params);
