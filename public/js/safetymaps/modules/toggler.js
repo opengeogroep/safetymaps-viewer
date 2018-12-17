@@ -28,6 +28,7 @@
         var me = this;
 
         this.options = $.extend({
+            resetToDefaultOnIncident: true,
             buttons: [],
             wmsLayers: [],
             typeParams: {}
@@ -144,10 +145,12 @@
     listenToIncidents: function() {
         var me = this;
 
-        if(dbkjs.modules.incidents && dbkjs.modules.incidents.controller) {
-            $(dbkjs.modules.incidents.controller).on("new_incident", function() {
-                me.resetToDefault();
-            });
+        if(me.options.resetToDefaultOnIncident) {
+            if(dbkjs.modules.incidents && dbkjs.modules.incidents.controller) {
+                $(dbkjs.modules.incidents.controller).on("new_incident", function() {
+                    me.resetToDefault();
+                });
+            }
         }
     },
 
