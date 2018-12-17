@@ -28,6 +28,8 @@
         var me = this;
 
         this.options = $.extend({
+            buttons: [],
+            wmsLayers: []
         }, this.options);
 
         me.createButtons();
@@ -43,7 +45,7 @@
 
     createButtons: function() {
         var me = this;
-        $.each(me.options.buttons || [], function(i, button) {
+        $.each(me.options.buttons, function(i, button) {
 
             var i;
             if(button.img) {
@@ -81,7 +83,7 @@
     findButtonLayers: function(button) {
         var organisationLayers = [];
         var olLayers = [];
-        $.each(button.wmsLayers || [], function(i, layer) {
+        $.each(button.wmsLayers, function(i, layer) {
             $.each(dbkjs.options.organisation.wms, function(j, wms) {
                 if(wms.name === layer || wms.abstract === layer) {
                     organisationLayers.push(wms);
@@ -97,7 +99,7 @@
 
     hideLegends: function() {
         var me = this;
-        $.each(me.options.buttons || [], function(i, button) {
+        $.each(me.options.buttons, function(i, button) {
             var layers = me.findButtonLayers(button);
             $.each(layers.organisation, function(j, l) {
                 //console.log("toggler: hiding legend for " + l.name + " gid " + l.gid);
