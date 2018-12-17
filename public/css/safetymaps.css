@@ -557,3 +557,10 @@ a.btn.on:after {
     background-color: #fcf424;
     border: 2px solid #555;
 }
+
+.topleft_status {
+    position: absolute;
+    left: 0;
+    top: 0;
+    text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white;
+}

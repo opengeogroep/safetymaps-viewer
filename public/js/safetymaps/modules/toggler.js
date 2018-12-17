@@ -29,13 +29,16 @@
 
         this.options = $.extend({
             buttons: [],
-            wmsLayers: []
+            wmsLayers: [],
+            typeParams: {}
         }, this.options);
 
         me.createButtons();
 
         $(dbkjs).one("dbkjs_init_complete", function() {
             me.hideLegends();
+
+            me.checkTypeParams();
 
             me.listenToIncidents();
 
@@ -77,6 +80,37 @@
                 toggle.css(button.css);
             }
         });
+    },
+
+    checkTypeParams: function() {
+        var me = this;
+        var type = null;
+        var typeParam = OpenLayers.Util.getParameters().type;
+        $.each(me.options.typeParams, function(param, config) {
+            if(param === typeParam || (typeof typeParam === "undefined" && config.default)) {
+                type = param;
+
+                if(config.showMeasureButtons && dbkjs.modules.measure) {
+                    dbkjs.modules.measure.createButtons();
+                    dbkjs.sortModuleButtons();
+                }
+
+                if(config.buttonsActive && dbkjs.modules.toggler) {
+                    // Change defaults
+                    $.each(dbkjs.modules.toggler.options.buttons, function(i, button) {
+                        button.active = config.buttonsActive.indexOf(button.id) !== -1;
+                    });
+                    dbkjs.modules.toggler.resetToDefault();
+                }
+
+                $.each(config.hideWmsLayers || [], function(i, wmsLayer) {
+                    dbkjs.hideOverlayLayer(wmsLayer);
+                });
+            }
+        });
+        if(type) {
+            $("body").append("<span class='topleft_status'>" + type + "</span>");
+        }
     },
 
     findButtonLayers: function(button) {
