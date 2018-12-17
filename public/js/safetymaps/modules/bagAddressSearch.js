@@ -42,15 +42,16 @@
             search: function(value) {
                 if(value.trim().length === 0) {
                     dbkjs.modules.search.showResults([]);
+                } else {
+                    $.ajax("api/autocomplete/"+value, {
+                        term: value
+                    })
+                    .done(function(data) {
+                        dbkjs.modules.search.showResults(data, function(a) {
+                            return Mustache.render("{{display_name}}", a);
+                        }, true);
+                    });
                 }
-                $.ajax("api/autocomplete/"+value, {
-                    term: value
-                })
-                .done(function(data) {
-                    dbkjs.modules.search.showResults(data, function(a) {
-                        return Mustache.render("{{display_name}}", a);
-                    }, true);
-                });
             },
             resultSelected: function(result) {
                 console.log("bag adddress search result selected " + result.lon + ", " + result.lat, result);
