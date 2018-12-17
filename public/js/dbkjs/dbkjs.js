@@ -58,6 +58,14 @@ dbkjs.toggleBaseLayer = function (nr) {
     }
 };
 
+dbkjs.hideOverlayLayer = function(name) {
+    var l = dbkjs.map.getLayersByName(name);
+    if(l.length > 0) {
+        l[0].setVisibility(false);
+        $(".panel-heading[data-layer-gid=" + l[0].gid + "]").removeClass("active");
+    }
+};
+
 dbkjs.activateClick = function () {
     dbkjs.map.events.register('click', dbkjs.map, dbkjs.util.onClick);
 
