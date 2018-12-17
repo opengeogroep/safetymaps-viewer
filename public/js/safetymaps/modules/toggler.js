@@ -83,7 +83,7 @@
     findButtonLayers: function(button) {
         var organisationLayers = [];
         var olLayers = [];
-        $.each(button.wmsLayers, function(i, layer) {
+        $.each(button.wmsLayers || [], function(i, layer) {
             $.each(dbkjs.options.organisation.wms, function(j, wms) {
                 if(wms.name === layer || wms.abstract === layer) {
                     organisationLayers.push(wms);
