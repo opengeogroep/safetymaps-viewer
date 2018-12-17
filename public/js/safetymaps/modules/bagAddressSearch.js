@@ -40,6 +40,9 @@
             tabContents: "<i class='fa fa-home'></i> " + i18n.t("creator.queryAddress"),
             placeholder: i18n.t("creator.search_placeholder"),
             search: function(value) {
+                if(value.trim().length === 0) {
+                    dbkjs.modules.search.showResults([]);
+                }
                 $.ajax("api/autocomplete/"+value, {
                     term: value
                 })
