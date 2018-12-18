@@ -98,12 +98,7 @@ dbkjs.modules.measure = {
             "measurepartial": _obj.handleMeasurements
         });
         dbkjs.map.addControl(_obj.area_control);
-        $('#btn_measure_distance').click(function() {
-            _obj.toggleMeasureDistance();
-        });
-        $('#btn_measure_area').click(function() {
-            _obj.toggleMeasureArea();
-        });
+
     },
 
     createButtons: function() {
@@ -113,6 +108,12 @@ dbkjs.modules.measure = {
                     i18n.t('map.measureDistance') + '"><i class="fa fa-arrows-v fa-rotate-45"></i></a>');
             $('#btngrp_3').append('<a id="btn_measure_area" data-sid="'+_obj.options.indexA+'" class="btn btn-default navbar-btn" href="#" title="' +
                     i18n.t('map.measureArea') + '"><i class="fa fa-bookmark-o fa-rotate-45"></i></a>');
+            $('#btn_measure_distance').click(function() {
+                _obj.toggleMeasureDistance();
+            });
+            $('#btn_measure_area').click(function() {
+                _obj.toggleMeasureArea();
+            });
         }
     },
 
