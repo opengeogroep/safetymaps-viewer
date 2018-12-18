@@ -87,9 +87,13 @@ safetymaps.creator.renderGeneral = function(object) {
     var result = [
         {l: i18n.t("creator.formal_name"), t: object.formele_naam},
         {l: i18n.t("creator.informal_name"), t: object.informele_naam},
-        {l: i18n.t("creator.adress"), html: Mustache.render("{{straatnaam}} {{huisnummer}} {{huisletter}} {{toevoeging}}<br>{{postcode}} {{plaats}}", object)},
-        //{l: i18n.t("creator.check_date"), t: new moment(object.datum_controle).format("LL")},
-        {l: i18n.t("creator.modified_date"), t: new moment(object.datum_actualisatie).format("LLLL")},
+        {l: i18n.t("creator.adress"), html: Mustache.render("{{straatnaam}} {{huisnummer}} {{huisletter}} {{toevoeging}}<br>{{postcode}} {{plaats}}", object)}
+    ];
+    if(object.datum_controle){
+        result.push({l: i18n.t("creator.check_date"), t: new moment(object.datum_controle).format("LL")});
+    }
+    result = result.concat([
+        //{l: i18n.t("creator.modified_date"), t: new moment(object.datum_actualisatie).format("LLLL")},
         {l: i18n.t("creator.emergencyResponderPresent"), html:
                 '<span class="label label-' + (object.bhv_aanwezig ? 'success' : 'warning') + '">' +
                 i18n.t("creator.emergencyResponderPresent" + (object.bhv_aanwezig ? 'Yes' : 'No')) + '</span>'},
@@ -101,10 +105,7 @@ safetymaps.creator.renderGeneral = function(object) {
         {l: i18n.t("creator.level"), t: object.bouwlaag},
         {l: i18n.t("creator.lowestLevel") + " (" + i18n.t("creator.floor") + ")", t: lowestFloor},
         {l: i18n.t("creator.highestLevel") + " (" + i18n.t("creator.floor") + ")", t: highestFloor}
-    ];
-    if(object.datum_controle){
-        result.splice(3,0,{l: i18n.t("creator.check_date"), t: new moment(object.datum_controle).format("LL")});
-    }
+    ]);
     return result;
 };
 
