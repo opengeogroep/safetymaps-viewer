@@ -45,7 +45,7 @@ dbkjs.modules.brandkranen = {
     },
     loadBrandkranen: function() {
         var me = this;
-        var url = dbkjs.options.onboard ? "api/brandkranen.json" : (dbkjs.options.serverUrlPrefix ? dbkjs.options.serverUrlPrefix : "") + "action/vrln/";
+        var url = "api/vrln/brandkranen.json";
         $.ajax(url, {
             method: "GET",
             data: {},
