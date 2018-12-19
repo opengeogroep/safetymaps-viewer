@@ -4,6 +4,7 @@
     "settings": {
         "layout": "Layout indstillinger",
         "scaleStyle": "Skaler symboler på baggrund af målestok",
+        "hiDPI": "Høj opløsning",
         "styleSizeAdjust": "Juster symbol størrelse",
         "version": "Version",
         "version_deploy": "Specialtilpasning version",

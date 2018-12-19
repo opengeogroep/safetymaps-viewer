@@ -39,5 +39,15 @@ dbkjs.options = {
     // No feature info when moved more than this distance in pixels
     minTouchMoveEndDistance: 5,
 
-    separateWindowMode: OpenLayers.Util.getParameters().separateWindow === "true"
+    separateWindowMode: OpenLayers.Util.getParameters().separateWindow === "true",
+
+    // Enable hiDPI
+    enableHiDPI: true,
+    // Use HiDPI by default if available (checkbox state saved in local storage)
+    defaultHiDPI: true,
+    // Enable HiDPI for WMS layers in HiDPI by default, when false set hiDPI=true
+    // per layer.options to enable. You may need to set MAXSIZE for MapServer or increase
+    // GeoServer image buffer size. Only enabled when URL contains "geoserver" or "mapserv",
+    // as we know the GetMap parameter for scaled rendering
+    defaultOverlayHiDPI: true
 };

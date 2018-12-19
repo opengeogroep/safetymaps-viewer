@@ -211,6 +211,8 @@ dbkjs.Layer = dbkjs.Class({
                 });
             }
         } else {
+            // TODO test if this still works with HiDPI stuff
+
             if (metadata) {
                 if (metadata.abstract) {
                     dv_panel_content.append('<p>' + metadata.abstract + '</p>');
@@ -225,7 +227,7 @@ dbkjs.Layer = dbkjs.Class({
             var _li = $('<li class="bl"><a href="#">' + name + '</a></li>');
             $('#baselayerpanel_ul').append(_li);
             _li.click(function () {
-                dbkjs.toggleBaseLayer($(this).index());
+                dbkjs.layers.toggleBaseLayer($(this).index());
                 dbkjs.util.getModalPopup('baselayerpanel').hide();
             });
         }

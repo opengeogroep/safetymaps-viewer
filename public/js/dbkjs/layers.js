@@ -22,6 +22,129 @@
 var dbkjs = dbkjs || {};
 window.dbkjs = dbkjs;
 dbkjs.layers = {
+    checkHiDPI: function() {
+        dbkjs.layers.hiDPIAvailable = dbkjs.options.enableHiDPI && (OpenLayers.Util.getParameters()["hiDPI"] === "true" || window.devicePixelRatio > 1);
+        dbkjs.layers.hiDPI = false;
+
+        var baselayersLowDPI = [];
+        dbkjs.options.baselayersHiDPI = [];
+
+        $.each(dbkjs.options.baselayers, function(i, layer) {
+            if(!layer.options.hiDPI) {
+                baselayersLowDPI.push(layer);
+            }
+        });
+        $.each(baselayersLowDPI, function(i, layer) {
+            // Find high DPI layer in original baselayers with the same name
+            $.each(dbkjs.options.baselayers, function(j, orgConfigLayer) {
+                if(orgConfigLayer !== layer && orgConfigLayer.options.hiDPI && orgConfigLayer.name === layer.name) {
+                    //console.log("Found HiDPI baselayer " + layer.name);
+                    dbkjs.options.baselayersHiDPI[i] = orgConfigLayer;
+                    return false;
+                }
+            });
+        });
+        dbkjs.options.baselayers = baselayersLowDPI;
+
+        if(dbkjs.layers.hiDPIAvailable) {
+            OpenLayers.Layer.WMS.prototype.getURL = function (bounds) {
+                bounds = this.adjustBounds(bounds);
+
+                var imageSize = this.getImageSize(bounds);
+                var newParams = {};
+                // WMS 1.3 introduced axis order
+                var reverseAxisOrder = this.reverseAxisOrder();
+                newParams.BBOX = this.encodeBBOX ?
+                    bounds.toBBOX(null, reverseAxisOrder) :
+                    bounds.toArray(reverseAxisOrder);
+
+                newParams.WIDTH = imageSize.w;
+                newParams.HEIGHT = imageSize.h;
+
+                var hiDPI = false;
+                if(dbkjs.layers.hiDPI) {
+                    hiDPI = this.options.hiDPI;
+                    if(!hiDPI && dbkjs.options.defaultOverlayHiDPI) {
+                        // Use HiDPI by default if we can figure out the parameter
+                        // to draw scaled up. We know this for GeoServer and MapServer
+                        hiDPI = this.url.indexOf("/geoserver") || this.url.indexOf("/mapserv");
+                    }
+                }
+                // Double WIDTH and HEIGHT for high resolution if layer configured it works
+                if(hiDPI) {
+                    newParams.WIDTH = imageSize.w * 2;
+                    newParams.HEIGHT = imageSize.h * 2;
+
+                    // Add custom parameter for high DPI or defaults for GeoServer and MapServer
+                    if(this.options.hiDPIParam && this.options.hiDPIParam.indexOf("=") !== -1) {
+                        var paramName = this.options.hiDPIParam.split("=",1)[0];
+                        newParams[paramName] = this.options.hiDPIParam.substring(paramName.length + 1);
+                    } else if(this.url.indexOf("/geoserver") !== -1) {
+                        newParams.format_options = "dpi:180";
+                    } else if(this.url.indexOf("/mapserv") !== -1) {
+                        newParams.map_resolution = 144;
+                    }
+                    //console.log("HiDPI layer " + this.name + " request: " + this.getFullRequestString(newParams));
+                }
+                var requestString = this.getFullRequestString(newParams);
+                return requestString;
+            };
+
+            // TODO ArcGIS93Rest
+
+            $(dbkjs).one("dbkjs_init_complete", function() {
+                $("#row_layout_settings").append('<div class="col-xs-12"><label><input type="checkbox" id="checkbox_hidpi">' + i18n.t("settings.hiDPI") + '</label></div>');
+                $("#checkbox_hidpi").prop("checked", dbkjs.layers.hiDPI);
+                $("#checkbox_hidpi").on('change', function(e) {
+                    dbkjs.layers.setHiDPI(e.target.checked);
+                });
+            });
+
+            dbkjs.layers.hiDPI = (window.localStorage.getItem("hiDPI") === null && dbkjs.options.defaultHiDPI) || window.localStorage.getItem("hiDPI") === "true";
+        }
+    },
+
+    setHiDPI: function(enabled) {
+        if(!dbkjs.layers.hiDPIAvailable) {
+            return;
+        }
+        if(dbkjs.layers.hiDPI === enabled) {
+            return;
+        }
+        var previouslyEnabled = dbkjs.layers.hiDPI;
+
+        window.localStorage.setItem("hiDPI", enabled);
+        $("#checkbox_hidpi").prop("checked", enabled);
+        dbkjs.layers.hiDPI = enabled;
+
+        $.each(dbkjs.options.baselayersHiDPI, function(i, l) {
+            if(l) {
+                var lowDPILayer = dbkjs.options.baselayers[i];
+                var hiDPILayer = l;
+
+                var visible = previouslyEnabled ? hiDPILayer.visibility : lowDPILayer.visibility;
+
+                if(visible) {
+                    //console.log("Switch visible layer " + lowDPILayer.name + " to " + (enabled ? "hi DPI" : "low DPI"));
+                    lowDPILayer.setVisibility(!enabled);
+                    hiDPILayer.setVisibility(enabled);
+                    dbkjs.map.setBaseLayer(enabled ? hiDPILayer : lowDPILayer);
+                }
+            }
+        });
+
+        // Redraw overlay HiDPI layers
+        $.each(dbkjs.map.layers, function(i, layer) {
+            if(layer.CLASS_NAME === "OpenLayers.Layer.WMS") {
+                // WMS layer will double WIDTH and HEIGHT in overwritten
+                // OpenLayers.Layer.WMS.prototype.getURL()
+                layer.mergeNewParams();
+            }
+
+            // TODO ArcGIS93Rest
+        });
+    },
+
     createBaseLayers: function() {
         var baselayer_ul = $('<ul id="baselayerpanel_ul" class="nav nav-pills nav-stacked">');
         $.each(dbkjs.options.baselayers, function(bl_index, bl) {
@@ -33,14 +156,48 @@ dbkjs.layers = {
             bl.events.register("loadend", bl, function() {
                 dbkjs.util.loadingEnd(bl);
             });
+            if(dbkjs.options.baselayersHiDPI[bl_index]) {
+                //console.log("Add HiDPI layer " + bl.name);
+                dbkjs.map.addLayer(dbkjs.options.baselayersHiDPI[bl_index]);
+            }
             dbkjs.map.addLayer(bl);
+            if(bl_index === 0 && dbkjs.options.baselayersHiDPI[bl_index] && !dbkjs.layers.hiDPI) {
+                //console.log("HiDPI not active, set low DPI layer visible");
+                dbkjs.options.baselayersHiDPI[bl_index].setVisibility(false);
+                bl.setVisibility(true);
+                dbkjs.map.setBaseLayer(bl);
+            }
             _li.on('click',function() {
-                dbkjs.toggleBaseLayer(bl_index);
+                dbkjs.layers.toggleBaseLayer(bl_index);
                 dbkjs.util.getModalPopup('baselayerpanel').hide();
             });
         });
         $('#baselayerpanel_b').append(baselayer_ul);
         return baselayer_ul;
+    },
+
+    /**
+     * Function to update the visibility for baseLayers
+     * @param {integer} nr
+     */
+    toggleBaseLayer: function (nr) {
+        var layerbuttons = $(".bl");
+        var i;
+        for (i = 0; i < layerbuttons.length; i++) {
+            var layer = dbkjs.options.baselayers[i];
+            if(dbkjs.layers.hiDPI && dbkjs.options.baselayersHiDPI[i]) {
+                layer = dbkjs.options.baselayersHiDPI[i];
+                console.log("Set HiDPI layer " + layer.name + " visibility: " + (i === nr));
+            }
+            if (i !== nr) {
+                $(layerbuttons[i]).removeClass("active", true);
+                layer.setVisibility(false);
+            } else {
+                $(layerbuttons[nr]).addClass("active", true);
+                layer.setVisibility(true);
+                dbkjs.map.setBaseLayer(layer);
+            }
+        }
     },
 
     loadFromWMSGetCapabilities: function () {

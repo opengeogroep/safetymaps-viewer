@@ -4,6 +4,7 @@
     "settings": {
         "layout": "Layout",
         "scaleStyle": "Scale icons based on zoom",
+        "hiDPI": "High resolution",
         "styleSizeAdjust": "Adjust icon size",
         "version": "Version",
         "version_deploy": "Customizations version",

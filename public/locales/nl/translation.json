@@ -4,6 +4,7 @@
     "settings": {
         "layout": "Layout",
         "scaleStyle": "Schaal iconen op basis van zoomniveau",
+        "hiDPI": "Hoge resolutie",
         "styleSizeAdjust": "Grootte van iconen aanpassen:",
         "version": "Versie",
         "version_deploy": "Versie speciale aanpassingen",

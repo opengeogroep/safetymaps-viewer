@@ -34,28 +34,11 @@ dbkjs.init = function () {
 
     dbkjs.mapcontrols.createMapControls();
 
+    dbkjs.layers.checkHiDPI();
+
     dbkjs.layers.createBaseLayers();
 
     dbkjs.showStatus = false;
-};
-
-/**
- * Function to update the visibility for baseLayers
- * @param {integer} nr
- */
-dbkjs.toggleBaseLayer = function (nr) {
-    var layerbuttons = $(".bl");
-    var i;
-    for (i = 0; i < layerbuttons.length; i++) {
-        if (i !== nr) {
-            $(layerbuttons[i]).removeClass("active", true);
-            dbkjs.options.baselayers[i].setVisibility(false);
-        } else {
-            $(layerbuttons[nr]).addClass("active", true);
-            dbkjs.options.baselayers[nr].setVisibility(true);
-            dbkjs.map.setBaseLayer(dbkjs.options.baselayers[nr]);
-        }
-    }
 };
 
 dbkjs.hideOverlayLayer = function(name) {
