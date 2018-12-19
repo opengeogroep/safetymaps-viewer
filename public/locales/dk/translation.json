@@ -40,7 +40,8 @@
     },
     "search": {
         "button": "Søg",
-        "title": "Søg"
+        "title": "Søg",
+        "library": "Bibliotek"
     },
     "geolocate": {
         "button": "Find min position"
@@ -51,7 +52,6 @@
     "creator": {
         "search": "Safety map",
         "queryAddress": "Adresse",
-        "library": "Bibliotek",
         "search_placeholder": "Indtast navn her...",
         "button": "Objekt information",
         "general": "Generelt",

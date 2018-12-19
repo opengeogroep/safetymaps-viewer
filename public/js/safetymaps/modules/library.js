@@ -35,7 +35,7 @@ dbkjs.modules.library = {
         me.initData();
 
         dbkjs.modules.search.addSearchConfig({
-            tabContents: "<i class='fa fa-file-pdf-o'></i> " + i18n.t("creator.library"),
+            tabContents: "<i class='fa fa-file-pdf-o'></i> " + i18n.t("search.library"),
             placeholder: i18n.t("creator.search_placeholder"),
             search: function (value) {
                 console.log("search library " + value);
@@ -66,7 +66,7 @@ dbkjs.modules.library = {
         }
         me.libraryPopup = dbkjs.util.createModalPopup({
             name: 'library',
-            title: i18n.t("search.search") + ' | ' + i18n.t("search.library"),
+            title: i18n.t("search.title") + ' | ' + i18n.t("search.library"),
             hideCallback: function () {
                 //me.libraryPopup.getView().html("");
             }
