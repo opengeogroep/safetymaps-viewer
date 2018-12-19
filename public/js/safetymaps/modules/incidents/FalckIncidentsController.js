@@ -104,7 +104,7 @@ FalckIncidentsController.prototype.checkIncidentMonitor = function() {
         } else {
             dbkjs.options.incidents = {
                 /* XXX */
-                incidentListFunction: dbkjs.options.incidents.incidentListFunction
+                incidentListFunction: dbkjs.options.incidents ? dbkjs.options.incidents.incidentListFunction : null
             };
 
             me.incidentMonitorController = new IncidentMonitorController(me);
