@@ -36,12 +36,12 @@ dbkjs.modules.brandkranen = {
         this.options = $.extend({
             // add default options here
         }, this.options);
-        this.init();
 
         // wait to load brandkranen until after dbk features loaded
-         $(dbkjs).one("dbkjs_init_complete", function() {
+        $(dbkjs).one("dbkjs_init_complete", function() {
+            me.createLayers();
             me.loadBrandkranen();
-         });
+        });
     },
     loadBrandkranen: function() {
         var me = this;
@@ -168,9 +168,6 @@ dbkjs.modules.brandkranen = {
             }
         }
         this.brandkranen.redraw();
-    },
-    init: function() {
-        this.createLayers();
     },
     createLayers: function() {
         var me = this;
