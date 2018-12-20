@@ -67,7 +67,7 @@ function MDTIncidentsController(incidents) {
     });
 
     $(dbkjs).one("dbkjs_init_complete", function() {
-        window.setTimeout(function() {
+        me.timeout = window.setTimeout(function() {
             me.getMDTInfo();
         }, 1000);
     });
@@ -78,9 +78,9 @@ MDTIncidentsController.prototype.getMDTInfo = function() {
 
     $.ajax("/gms.xml", { dataType: "xml", cache: false })
     .always(function() {
-        window.setTimeout(function() {
+        me.timeout = window.setTimeout(function() {
             me.getMDTInfo();
-        }, 3000);
+        }, 5000);
     })
     .done(function(xml, textStatus, jqXHR) {
         var first = me.xml === null;
