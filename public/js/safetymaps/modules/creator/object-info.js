@@ -433,8 +433,8 @@ safetymaps.creator.renderDangerSymbols = function(object) {
 safetymaps.creator.renderObjectFeatureInfoTab = function(object, div) {
 };
 
-safetymaps.creator.createInfoTabDiv = function(rows, id /*ES2015 = ""*/) {
-    id = (typeof id !== 'undefined') ?  id : "";
+safetymaps.creator.createInfoTabDiv = function(rows, id, classes) {
+    id = id || "";
 
     if(rows.length === 0) {
         return null;
@@ -448,7 +448,8 @@ safetymaps.creator.createInfoTabDiv = function(rows, id /*ES2015 = ""*/) {
             // Row of escaped cell values
             var tr = "<tr>";
             for(var j = 0; j < row.length; j++) {
-                tr += "<td>" + row[j] + "</td>";
+                var td = classes && classes[j] ? "<td class='" + classes[j] + "'>" : "<td>";
+                tr += td + row[j] + "</td>";
             }
             table.append(tr + "</tr>");
         } if(typeof row === "string" && row.indexOf("<tr") === 0) {
@@ -456,7 +457,10 @@ safetymaps.creator.createInfoTabDiv = function(rows, id /*ES2015 = ""*/) {
         } else {
             // Row for 2 column table row: l for first label column (escaped) and t (non-escaped) or html (escaped) for second value column
             if((row.hasOwnProperty("t") && row.t !== null && typeof row.t !== "undefined") || row.html) {
-                table.append('<tr><td>' + row.l + '</td><td>' + (row.html ? row.html : Mustache.escape(row.t)) + '</td></tr>');
+                var tdl = classes && classes[0] ? "<td class='" + classes[0] + "'>" : "<td>";
+                var tdt = classes && classes[1] ? "<td class='" + classes[1] + "'>" : "<td>";
+
+                table.append('<tr>' + tdl + row.l + '</td>' + tdt + (row.html ? row.html : Mustache.escape(row.t)) + '</td></tr>');
             }
         }     
     });

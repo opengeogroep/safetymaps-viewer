@@ -1022,7 +1022,7 @@ safetymaps.vrh.Events.prototype.updateInfoWindow = function(windowId, object) {
     rows.push({l: "Contactpersoon organisatie",             t: t.contactper});
     rows.push({l: "Programma",                              t: t.programma});
     rows.push({l: "Bijzonderheden",                         t: t.bijzonderh});
-    safetymaps.infoWindow.addTab(windowId, "algemeen", "Evenementgegevens algemeen", "info", safetymaps.creator.createInfoTabDiv(rows));
+    safetymaps.infoWindow.addTab(windowId, "algemeen", "Evenementgegevens algemeen", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
 
     rows = [];
     rows.push({l: "Tijden",                                 t: t.tijden});
@@ -1034,7 +1034,7 @@ safetymaps.vrh.Events.prototype.updateInfoWindow = function(windowId, object) {
     rows.push({l: "Veiligheidsplan",                        t: t.veiligheid});
     rows.push({l: "Verzamelplaats",                         t: t.verzamelpl});
     rows.push({l: "Bijzonderheden",                         t: t.bijzonde_1});
-    safetymaps.infoWindow.addTab(windowId, "aanwezigheid", "Aanwezige personen", "info", safetymaps.creator.createInfoTabDiv(rows));
+    safetymaps.infoWindow.addTab(windowId, "aanwezigheid", "Aanwezige personen", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
 
     rows = [];
     rows.push({l: "Aantal tijdelijke bouwsels",             t: t.aantal_tij});
@@ -1043,25 +1043,25 @@ safetymaps.vrh.Events.prototype.updateInfoWindow = function(windowId, object) {
     rows.push({l: "Locatie CoPI",                           t: t.locatie_co});
     rows.push({l: "Toegangswegen",                          t: t.toegangswe});
     rows.push({l: "Bijzonderheden evenement",               t: t.bijzonde_2});
-    safetymaps.infoWindow.addTab(windowId, "gegevens", "Gegevens evenement", "info", safetymaps.creator.createInfoTabDiv(rows));
+    safetymaps.infoWindow.addTab(windowId, "gegevens", "Gegevens evenement", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
 
     rows = [];
     rows.push({l: "Publieksprofiel",                        t: t.publiekspr});
     rows.push({l: "Activiteiten profiel",                   t: t.activiteit});
     rows.push({l: "Ruimtelijk profiel",                     t: t.ruimtelijk});
-    safetymaps.infoWindow.addTab(windowId, "risico", "Risico-inventarisatie", "info", safetymaps.creator.createInfoTabDiv(rows));
+    safetymaps.infoWindow.addTab(windowId, "risico", "Risico-inventarisatie", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
 
     rows = [];
     rows.push({l: "Voertuigen",                             t: t.voertuigen});
     rows.push({l: "Functionarissen",                        t: t.functionar});
-    safetymaps.infoWindow.addTab(windowId, "maatregelen", "Maatregelen", "info", safetymaps.creator.createInfoTabDiv(rows));
+    safetymaps.infoWindow.addTab(windowId, "maatregelen", "Maatregelen", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
 
     rows = [];
     rows.push({l: "Coördinatie ter plaatse",                t: t.coordinati});
     rows.push({l: "Communicatie & verbindingen",              t: t.communicat});
     rows.push({l: "Informatievoorziening",                  t: t.informatie});
     rows.push({l: "Logistiek",                              t: t.logistiek});
-    safetymaps.infoWindow.addTab(windowId, "leiding", "Leiding & Coördinatie", "info", safetymaps.creator.createInfoTabDiv(rows));
+    safetymaps.infoWindow.addTab(windowId, "leiding", "Leiding & Coördinatie", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
 
     rows = [];
     rows.push({l: "Commandant van Dienst naam",             t: t.commandant});
@@ -1098,9 +1098,9 @@ safetymaps.vrh.Events.prototype.updateInfoWindow = function(windowId, object) {
     rows.push({l: "Brandweer in de wijk telefoon",          t: t.brandweer1});
     rows.push({l: "MOB naam",                               t: t.mob_naam});
     rows.push({l: "MOB naam",                               t: t.mob_telefo});
-    safetymaps.infoWindow.addTab(windowId, "functionarissen", "Functionarissen BRW", "info", safetymaps.creator.createInfoTabDiv(rows));
+    safetymaps.infoWindow.addTab(windowId, "functionarissen", "Functionarissen BRW", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
 
-    safetymaps.infoWindow.addTab(windowId, "legenda", "Legenda", "info", safetymaps.creator.createInfoTabDiv(me.createEventLegend()));
+    safetymaps.infoWindow.addTab(windowId, "legenda", "Legenda", "info", safetymaps.creator.createInfoTabDiv(me.createEventLegend(), null, ["leftlabel", "leftlabel"]));
 };
 
 safetymaps.vrh.Events.prototype.createEventLegend = function() {

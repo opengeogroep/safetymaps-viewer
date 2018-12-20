@@ -289,10 +289,10 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
             + '<sub style="font-size:10px; text-align: center; color:black;"> (' + incident.NR_INCIDENT + ')</sub>'
             + '</td></tr>';
 
-    html += '<tr><td>Start incident: </td><td>' + incident.start.format("dddd, D-M-YYYY HH:mm:ss") + '</td></tr>';
-    html += '<tr><td>Adres:</td><td>' + incident.locatie + '</td></tr>';
-    html += '<tr><td>Postcode &amp; Woonplaats:</td><td>' + (incident.POSTCODE ? incident.POSTCODE + ', ' : "") + (incident.PLAATS_NAAM ? incident.PLAATS_NAAM : incident.PLAATS_NAAM_NEN) + '</td></tr>';
-    html += '<tr><td>Melding classificatie:</td><td>' + dbkjs.util.htmlEncode(incident.classificatie) + '</td></tr>';
+    html += '<tr><td class="leftlabel">Start incident: </td><td>' + incident.start.format("dddd, D-M-YYYY HH:mm:ss") + '</td></tr>';
+    html += '<tr><td class="leftlabel">Adres:</td><td>' + incident.locatie + '</td></tr>';
+    html += '<tr><td class="leftlabel">Postcode &amp; Woonplaats:</td><td>' + (incident.POSTCODE ? incident.POSTCODE + ', ' : "") + (incident.PLAATS_NAAM ? incident.PLAATS_NAAM : incident.PLAATS_NAAM_NEN) + '</td></tr>';
+    html += '<tr><td class="leftlabel">Melding classificatie:</td><td>' + dbkjs.util.htmlEncode(incident.classificatie) + '</td></tr>';
 
     if(!incident.karakteristiek || incident.karakteristiek.length === 0) {
         html += '<tr class="detailed"><td>Karakteristieken:</td><td>';
@@ -472,15 +472,15 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
     var d = new moment(incident.BrwDisciplineGegevens.StartDTG);
 
     html += '<tr><td colspan="2" style="font-weight: bold; text-align: center; color: ' + me.getPrioriteitColor(m.Prioriteit) + '">PRIO ' + m.Prioriteit + '<sub style="font-size:10px; text-align: center; color:black;"> ('+incident.IncidentNummer+')</sub></td></tr>';
-    //html += '<tr><td>Start incident: </td><td>' + d.format("dddd, D-M-YYYY HH:mm:ss")  + (compareMode ? "" : " (" + d.fromNow() + ")") + '</td></tr>';
-    html += '<tr><td>Start incident: </td><td>' + d.format("dddd, D-M-YYYY HH:mm:ss")+'</td></tr>';
+    //html += '<tr><td class="leftlabel">Start incident: </td><td>' + d.format("dddd, D-M-YYYY HH:mm:ss")  + (compareMode ? "" : " (" + d.fromNow() + ")") + '</td></tr>';
+    html += '<tr><td class="leftlabel">Start incident: </td><td>' + d.format("dddd, D-M-YYYY HH:mm:ss")+'</td></tr>';
     var a = incident.IncidentLocatie;
-    html += '<tr><td>Adres: </td><td>' + me.getIncidentAdres(incident, false) + '</td></tr>';
-    html += '<tr><td>Postcode &amp; Woonplaats: </td><td>' + (a.Postcode && a.Postcode.trim().length > 0 ? a.Postcode +  ', ' : "") +(a.Plaatsnaam ? a.Plaatsnaam : "-") + '</td></tr>';
+    html += '<tr><td class="leftlabel">Adres: </td><td>' + me.getIncidentAdres(incident, false) + '</td></tr>';
+    html += '<tr><td class="leftlabel">Postcode &amp; Woonplaats: </td><td>' + (a.Postcode && a.Postcode.trim().length > 0 ? a.Postcode +  ', ' : "") +(a.Plaatsnaam ? a.Plaatsnaam : "-") + '</td></tr>';
     //html += '<tr><td>Woonplaats: </td><td>' + (a.Plaatsnaam ? a.Plaatsnaam : "-") + '</td></tr>';
 
     //html += '<tr><td>&nbsp;</td><td></td></tr>';
-    html += '<tr><td>Melding classificatie:</td><td>' + me.getIncidentClassificatiesFalck(incident) + '</td></tr>';
+    html += '<tr><td class="leftlabel">Melding classificatie:</td><td>' + me.getIncidentClassificatiesFalck(incident) + '</td></tr>';
 
     if(!incident.Karakteristieken || incident.Karakteristieken.length === 0) {
         html += '<tr class="detailed"><td>Karakteristieken:</td><td>';
@@ -574,7 +574,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlPharos = function(incident, compa
 
     function row(val, caption) {
         if(!dbkjs.util.isJsonNull(val)) {
-            html += '<tr><td>' + caption + ':</td><td>' + val + '</td></tr>';
+            html += '<tr><td class="leftlabel">' + caption + ':</td><td>' + val + '</td></tr>';
         }
     }
 
@@ -628,7 +628,7 @@ IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInze
     var prio = $(incident).find("Prioriteit").text();
     html += '<tr><td colspan="2" style="font-weight: bold; text-align: center; color: ' + me.getPrioriteitColor(prio) + '">PRIO ' + prio + '</td></tr>';
 
-    var template = "{{#separator}}<tr><td>&nbsp;</td><td></td></tr>{{/separator}}<tr><td><span>{{label}}</span>: </td><td>{{value}}</td></tr>";
+    var template = "{{#separator}}<tr><td>&nbsp;</td><td></td></tr>{{/separator}}<tr><td class='leftlabel'><span>{{label}}</span>: </td><td>{{value}}</td></tr>";
 
     //html += Mustache.render(template, { label: "Nummer", value: $(incident).find("IncidentNr").text()});
 

@@ -312,6 +312,18 @@ input.cross {
     overflow: auto;
 }
 
+/* Info window table */
+
+table th {
+    font-style: normal;
+}
+
+table td.leftlabel {
+    width: 1px;
+    white-space: nowrap;
+    padding-right: 20px !important;
+}
+
 /* Layers window */
 
 /* Visible layers checkmark instead of blue background */

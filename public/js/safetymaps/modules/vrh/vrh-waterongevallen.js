@@ -317,7 +317,7 @@ safetymaps.vrh.Waterongevallen.prototype.updateInfoWindow = function(windowId, o
     rows.push({l: "Adres",          t: t.adres});
     rows.push({l: "Plaatsnaam",     t: t.plaatsnaam});
     rows.push({l: "Gebruik boot",   t: t.gebruik_bo});
-    safetymaps.infoWindow.addTab(windowId, "algemeen", "Algemeen", "info", safetymaps.creator.createInfoTabDiv(rows));
+    safetymaps.infoWindow.addTab(windowId, "algemeen", "Algemeen", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
 
     rows = [];
     rows.push({l: "Beroepsvaart",   t: t.beroepsvaa});
@@ -327,7 +327,7 @@ safetymaps.vrh.Waterongevallen.prototype.updateInfoWindow = function(windowId, o
     rows.push({l: "Zwemmers",       t: t.zwemmers});
     rows.push({l: "Bijzonderheden", t: t.bijzonde_1});
     rows.push({l: "",               t: t.bijzonde_4});
-    safetymaps.infoWindow.addTab(windowId, "gebruikwater", "Gebruik water", "info", safetymaps.creator.createInfoTabDiv(rows));
+    safetymaps.infoWindow.addTab(windowId, "gebruikwater", "Gebruik water", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
 
     rows = [];
     rows.push({l: "Stroming",                   t: t.stroming});
@@ -343,7 +343,7 @@ safetymaps.vrh.Waterongevallen.prototype.updateInfoWindow = function(windowId, o
     rows.push({l: "Gemalen",                    t: t.gemalen});
     rows.push({l: "Bijzondere gevaren",         t: t.bijzondere});
     rows.push({l: "",                           t: t.bijzonde_5});
-    safetymaps.infoWindow.addTab(windowId, "risicogegevens", "Risicogegevens", "info", safetymaps.creator.createInfoTabDiv(rows));
+    safetymaps.infoWindow.addTab(windowId, "risicogegevens", "Risicogegevens", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
 
     rows = [];
     rows.push({l: "Duikongeval",            t: t.duikongeva});
@@ -353,10 +353,10 @@ safetymaps.vrh.Waterongevallen.prototype.updateInfoWindow = function(windowId, o
     rows.push({l: "Havendienst",            t: t.havendiens});
     rows.push({l: "Bijzonderheden",         t: t.bijzonde_2});
     rows.push({l: "",                       t: t.bijzonde_6});
-    safetymaps.infoWindow.addTab(windowId, "noodprocedure", "Noodprocedure", "info", safetymaps.creator.createInfoTabDiv(rows));
+    safetymaps.infoWindow.addTab(windowId, "noodprocedure", "Noodprocedure", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
 
     safetymaps.infoWindow.addTab(windowId, "duikinstructie", "Duikinstructie", "info",
-            "<table border='1' cellpadding='2' style='width: 100%'><tr><td>Werktijd (Normaal verbruik)</td><td>30</td><td>27</td><td>25</td><td>23</td><td>21</td><td>19</td><td>18</td><td>17</td><td>16</td><td>15</td><td>14</td><td>13</td><td>12</td><td>11</td><td>11</td></tr>" +
+            "<table border='1' cellpadding='2' style='width: 100%'><tr><td class='leftlabel'>Werktijd (Normaal verbruik)</td><td>30</td><td>27</td><td>25</td><td>23</td><td>21</td><td>19</td><td>18</td><td>17</td><td>16</td><td>15</td><td>14</td><td>13</td><td>12</td><td>11</td><td>11</td></tr>" +
             "<tr><td>Werktijd (hoog verbruik)</td><td>15</td><td>14</td><td>12</td><td>11</td><td>10</td><td>9</td><td>9</td><td>8</td><td>7</td><td>7</td><td>6</td><td>5</td><td>5</td><td>5</td><td>4</td></tr>" +
             "<tr><td>Diepte</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td></tr>" +
             "</table><br>"
@@ -365,9 +365,9 @@ safetymaps.vrh.Waterongevallen.prototype.updateInfoWindow = function(windowId, o
     rows = [];
     rows.push({l: "Bijzonderheden", t: t.bijzonderh});
     rows.push({l: "",               t: t.bijzonde_3});
-    safetymaps.infoWindow.addTab(windowId, "bijzonderheden", "Bijzonderheden", "info", safetymaps.creator.createInfoTabDiv(rows));
+    safetymaps.infoWindow.addTab(windowId, "bijzonderheden", "Bijzonderheden", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
 
-    safetymaps.infoWindow.addTab(windowId, "symbolen", "Symbolen", "info",  safetymaps.creator.createInfoTabDiv(me.createLegend()));
+    safetymaps.infoWindow.addTab(windowId, "symbolen", "Symbolen", "info",  safetymaps.creator.createInfoTabDiv(me.createLegend(), null, ["leftlabel", "leftlabel"]));
 };
 
 safetymaps.vrh.Waterongevallen.prototype.createLegend = function() {

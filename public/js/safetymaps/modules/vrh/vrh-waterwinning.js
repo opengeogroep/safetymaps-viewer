@@ -234,8 +234,8 @@ dbkjs.modules.vrh_waterwinning = {
             }
             var eigenTerrein = ww.tabel === "brandkranen_eigen_terrein" ? "<br>Brandkraan eigen terrein" : "";
             var myrow = $('<tr id="wwrow_' + fid + '">' +
-                    '<td><img style="width: 42px" src="' + img + '"></td>' +
-                    '<td style="color:rgba(0,0,0,0.5)">' + routeDist + ww.distance.toFixed() + 'm' + '</td>' +
+                    '<td class="leftlabel"><img style="width: 42px" src="' + img + '"></td>' +
+                    '<td class="leftlabel" style="color:rgba(0,0,0,0.5)">' + routeDist + ww.distance.toFixed() + 'm' + '</td>' +
                     '<td>' + (ww.info ? ww.info : '') + eigenTerrein + '</i></td> +'
                     + '</tr>'
             ).click(function (e) {
