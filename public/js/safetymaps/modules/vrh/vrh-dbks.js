@@ -921,29 +921,42 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object) {
     rows = [];
     var rowsWithInfo = [];
     var rowsWithoutInfo = [];
-    var codesDisplayed = {};
-    $.each(me.layerSymbols.features.concat(me.layerDangerSymbols.features), function(i, f) {
-        if(f.attributes.stofnaam) {
-            return true;
-        }
-        var code = f.attributes.code;
-        var description = f.attributes.description || "";
-        if(codesDisplayed[f.attributes.code] && description.length === 0) {
-            return true;
-        }
-        codesDisplayed[f.attributes.code] = true;
 
-        var tr =[
-            "<img class='legend_symbol' src='" + f.attributes.symbol_noi + "' alt='" + code + "' title='" + code + "'>",
-            me.vrhSymbols[code] || me.vrhDangerSymbols[code] || i18n.t("symbol." + code),
-            description
-        ];
-        if(description.length === 0) {
-            rowsWithoutInfo.push(tr);
-        } else {
-            rowsWithInfo.push(tr);
-        }
-    });
+    symbolFeaturesLegend(me.layerSymbols, "symbol", me.vrhSymbols);
+    symbolFeaturesLegend(me.layerDangerSymbols, "danger_symbol", me.vrhDangerSymbols);
+
+    function symbolFeaturesLegend(layer, idPrefix, symbolCodeInfo) {
+        var codesDisplayed = {};
+        $.each(layer.features, function(i, f) {
+            if(f.attributes.stofnaam) {
+                return true;
+            }
+            var code = f.attributes.code;
+            var description = f.attributes.description || "";
+            if(codesDisplayed[f.attributes.code] && description.length === 0) {
+                return true;
+            }
+            codesDisplayed[f.attributes.code] = true;
+
+            // Determine id for click/hover event handler:
+            // See call to dbkjs.modules.vrh_objects.addLegendTrEventHandler()
+            var id = idPrefix + "_idx_" + i;
+            if(description.length === 0) {
+                id = idPrefix + "_attr_" + code;
+            }
+
+            var tr = [
+                "<img id='" + id + "' class='legend_symbol' src='" + f.attributes.symbol_noi + "' alt='" + code + "' title='" + code + "'>",
+                symbolCodeInfo[code] || i18n.t("symbol." + code),
+                description
+            ];
+            if(description.length === 0) {
+                rowsWithoutInfo.push(tr);
+            } else {
+                rowsWithInfo.push(tr);
+            }
+        });
+    }
     function legendTrSort(lhs, rhs) {
         return lhs[1].localeCompare(rhs[1]);
     };
@@ -953,13 +966,17 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object) {
     if(rows.length > 0) {
         rows.unshift(["<b>Symbool</b>", "<b>Naam</b>", "<b>Informatie</b>"]);
     }
-    div2 = safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel", "leftlabel"]);
+    div2 = safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]);
     if(div) {
         div.append(div2);
     } else {
         div = div2;
     }
     safetymaps.infoWindow.addTab(windowId, "brandweer", "Brandweer", "info", div);
+    dbkjs.modules.vrh_objects.addLegendTrEventHandler("tab_brandweer", {
+        "symbol": me.layerSymbols,
+        "danger_symbol": me.layerDangerSymbols
+    }, "code");
 
     rows = [];
     $.each(me.layerDangerSymbols.features, function(i, f) {
@@ -968,7 +985,7 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object) {
         }
         var a = f.attributes;
         rows.push(
-                '<tr><td width="100px"><img class="legend_symbol" src="' + a.symbol_noi + '" alt="' + a.symboolcod + '" title="' + a.symboolcod + '"></td>' +
+                '<tr><td width="100px"><img id="gevaarlijke_stof_idx_' + i + '" class="legend_symbol" src="' + a.symbol_noi + '" alt="' + a.symboolcod + '" title="' + a.symboolcod + '"></td>' +
                 '<td><div class="gevicode">' + a.gevi_code + '</div><div class="unnummer">' + a.vn_nummer + '</div></td>' +
                 '<td>' + a.stofnaam + '</td><td>' + a.hoeveelhei + '</td><td>' + a.description + '</td><td>' + a.eric_kaart + '</td></tr>'
         );
@@ -977,6 +994,7 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object) {
         rows.unshift(["<b>Symbool</b>", "<b>Gevi</b>", "<b>Naam</b>", "<b>Hoeveelheid</b>", "<b>Bijzonderheden</b>", "<b>ERIC-kaart</b>"]);
     }
     safetymaps.infoWindow.addTab(windowId, "gevaarlijke_stoffen", "Gevaarlijke stoffen", "info", safetymaps.creator.createInfoTabDiv(rows));
+    dbkjs.modules.vrh_objects.addLegendTrEventHandler("tab_gevaarlijke_stoffen", {"gevaarlijke_stof" : me.layerDangerSymbols});
 
     rows = [];
     rows.push({l: "Gebouwconstructie", t: p.gebouwcons});

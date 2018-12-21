@@ -215,6 +215,7 @@ dbkjs.modules.vrh_objects = {
                 tabContents: "<i class='fa fa-calendar'></i> Evenementen",
                 placeholder: i18n.t("creator.search_placeholder"),
                 search: function(value) {
+                    value = value.toLowerCase();
                     console.log("search event " + value);
                     var searchResults = [];
                     $.each(me.overviewObjects, function(i, o) {
@@ -245,6 +246,7 @@ dbkjs.modules.vrh_objects = {
                 tabContents: "<i class='fa fa-life-buoy'></i> Waterongevallen",
                 placeholder: "WO-kaartnaam",
                 search: function(value) {
+                    value = value.toLowerCase();
                     console.log("search wo " + value);
                     var searchResults = [];
                     $.each(me.overviewObjects, function(i, o) {
@@ -283,6 +285,7 @@ dbkjs.modules.vrh_objects = {
                 tabContents: "<i class='fa fa-building'></i> DBK's",
                 placeholder: i18n.t("creator.search_placeholder"),
                 search: function(value) {
+                    value = value.toLowerCase();
                     console.log("search dbk " + value);
                     var searchResults = [];
                     $.each(me.overviewObjects, function(i, o) {
@@ -560,6 +563,59 @@ dbkjs.modules.vrh_objects = {
 
     objectLayerFeatureUnselected: function (e) {
         $("#vectorclickpanel").hide();
+    },
+
+    addLegendTrEventHandler: function(tabId, layerByIdPrefix, attribute) {
+        var me = this;
+
+        $("#" + tabId + " tr").on("mouseover click", function(e) {
+
+            // Find ID on the <img> element child of the tr
+            // For rows with info, select only that feature: [idPrefix]_idx_[index]
+            // For rows without info (only one row per code), select all features
+            // with that code: [idPrefix]_code_[code]
+            var img = $(e.currentTarget).find("img");
+            var legendImgId = img ? img.attr("id") : null;
+
+            if(legendImgId) {
+                var selectFeatures = me.getLegendTrSelectFeatures(legendImgId, layerByIdPrefix, attribute);
+                if(selectFeatures !== null) {
+                    dbkjs.selectControl.unselectAll();
+
+                    $.each(selectFeatures, function(i, feature) {
+                        if(feature.getVisibility()) {
+                            dbkjs.selectControl.select(feature);
+                        }
+                    });
+                }
+            }
+        });
+    },
+
+    getLegendTrSelectFeatures: function(legendImgId, layerByIdPrefix, attributeSearch) {
+        var id, layer;
+        $.each(layerByIdPrefix, function(prefix, layerForPrefix) {
+            if(legendImgId.startsWith(prefix)) {
+                id = legendImgId.substring(prefix.length);
+                layer = layerForPrefix;
+            }
+        });
+
+        var selectFeatures;
+        if(!id || !layer) {
+            return null;
+        } else if(id.startsWith("_idx_")) {
+            var idx = Number(id.substring("_idx_".length));
+            selectFeatures = [layer.features[idx]];
+        } else if(id.startsWith("_attr_")) {
+            var code = id.substring("_attr_".length);
+            selectFeatures = layer.features.filter(function(f) {
+                return f.attributes[attributeSearch] === code;
+            });
+        }
+        //console.log("Features to select for layer " + layer.name + " for legend id " + legendImgId + ": ", selectFeatures.map(function(f) { return f.attributes[attributeSearch]; }));
+        return selectFeatures;
     }
+
 };
 

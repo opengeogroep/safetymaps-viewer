@@ -368,6 +368,9 @@ safetymaps.vrh.Waterongevallen.prototype.updateInfoWindow = function(windowId, o
     safetymaps.infoWindow.addTab(windowId, "bijzonderheden", "Bijzonderheden", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
 
     safetymaps.infoWindow.addTab(windowId, "symbolen", "Symbolen", "info",  safetymaps.creator.createInfoTabDiv(me.createLegend(), null, ["leftlabel", "leftlabel"]));
+    dbkjs.modules.vrh_objects.addLegendTrEventHandler("tab_symbolen", {
+        "symbool" : me.layerSymbolen
+    }, "symboolcod");
 };
 
 safetymaps.vrh.Waterongevallen.prototype.createLegend = function() {
@@ -399,8 +402,9 @@ safetymaps.vrh.Waterongevallen.prototype.createLegend = function() {
             }
             codesDisplayed[code] = true;
 
+            var id = "symbool_" + (description !== null ? "idx_" + i : "attr_" + code);
             var tr = [
-                "<img class='legend_symbol' src='" + me.imagePath + '/' + code + ".png'>",
+                "<img id='" + id + "' class='legend_symbol' src='" + me.imagePath + '/' + code + ".png'>",
                 me.symbolen[code],
                 description || ""
             ];

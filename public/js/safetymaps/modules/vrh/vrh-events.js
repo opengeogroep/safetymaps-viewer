@@ -1101,6 +1101,10 @@ safetymaps.vrh.Events.prototype.updateInfoWindow = function(windowId, object) {
     safetymaps.infoWindow.addTab(windowId, "functionarissen", "Functionarissen BRW", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
 
     safetymaps.infoWindow.addTab(windowId, "legenda", "Legenda", "info", safetymaps.creator.createInfoTabDiv(me.createEventLegend(), null, ["leftlabel", "leftlabel"]));
+    dbkjs.modules.vrh_objects.addLegendTrEventHandler("tab_legenda", {
+        "location_symbol" : me.layerLocationSymbols,
+        "route_symbol": me.layerRouteSymbols
+    }, "type");
 };
 
 safetymaps.vrh.Events.prototype.createEventLegend = function() {
@@ -1296,9 +1300,9 @@ safetymaps.vrh.Events.prototype.createEventLegend = function() {
             if(!label) {
                 return true;
             }
-
+            var id = "location_symbol_" + (omschrijving !== null ? "idx_" + i : "attr_" + soort);
             var tr = [
-                "<img class='legend_symbol' src='" + me.imagePath + '/' + soort + ".png'>",
+                "<img id='" + id + "' class='legend_symbol' src='" + me.imagePath + '/' + soort + ".png'>",
                 label,
                 omschrijving || ""
             ];
@@ -1326,6 +1330,7 @@ safetymaps.vrh.Events.prototype.createEventLegend = function() {
 
         $.each(me.layerRouteSymbols.features, function(i, f) {
             var soort = f.attributes.soort;
+            f.attributes.type = soort;
             var omschrijving = f.attributes.ballonteks || null;
             if(soortenDisplayed[soort] && omschrijving === null) {
                 return true;
@@ -1337,8 +1342,9 @@ safetymaps.vrh.Events.prototype.createEventLegend = function() {
                 return true;
             }
 
+            var id = "route_symbol_" + (omschrijving !== null ? "idx_" + i : "attr_" + soort);
             var tr = [
-                "<img class='legend_symbol' src='" + me.imagePath + '/' + soort + ".png'>",
+                "<img id='" + id + "' class='legend_symbol' src='" + me.imagePath + '/' + soort + ".png'>",
                 label,
                 omschrijving || ""
             ];
