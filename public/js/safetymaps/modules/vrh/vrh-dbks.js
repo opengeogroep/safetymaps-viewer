@@ -865,8 +865,8 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object) {
     }
     rows.push({l: "Bouwjaar",                       t: p.bouwjaar});
     rows.push({l: "Gebruik",                        t: p.gebruiksdo});
-    rows.push({l: "Laagste bouwlaag / verdieping",  t: p.bouwlageno});
-    rows.push({l: "Hoogste bouwlaag (verdieping)",  t: p.bouwlagenb === 0 ? "0" : p.bouwlagenb + " (" + (p.bouwlagenb-1) + ")"});
+    rows.push({l: "Laagste bouwlaag",               t: p.bouwlageno});
+    rows.push({l: "Hoogste bouwlaag",               t: p.bouwlagenb});
     rows.push({l: "Afwijkende binnendekking",       t: p.afwijkende});
     rows.push({l: "Aanvullende info binnendekking", t: p.binnendekk});
     rows.push({l: "Risicoklasse",                   t: p.risicoklas});
