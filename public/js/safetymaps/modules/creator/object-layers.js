@@ -190,16 +190,12 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
                     label: function(feature) {
                         if(feature.attributes.label){
                             return feature.attributes.label;
-                        } else {
-                            return "";
+                        } else if (feature.attributes.style) {
+                            var code = feature.attributes.style.code;
+                            code = code.replace(" minuten", "′");
+                            return code;
                         }
-                        /*
-                        if (feature.attributes.style) {
-                            var def = feature.attributes.style["en"];
-                            var local = feature.attributes.style[dbkjsLang];
-                            return local && local !== "" ? local : def;
-                        }
-                        */
+                        return "";
                     },
                     labelYOffset: function(feature) {
                         return Math.sin(feature.attributes.theta + Math.PI/2) * 5;
