@@ -278,8 +278,6 @@ dbkjs.modules.vrh_waterwinning = {
         }
         $("#wwrow_ww_0").click();
         dbkjs.map.setLayerIndex(this.Layer,99);
-
-        //dbkjs.protocol.jsonDBK.addMouseoverHandler("#wwlist",me.Layer);
     },
     mapClickTest: function(e) {
         var me = this;
