@@ -37,7 +37,8 @@ dbkjs.modules.search = {
         this.options = $.extend({
             keyupTimeout: 100,
             minSearchLength: 3,
-            defaultTab: null
+            defaultTab: null,
+            focusOnShow: false // Whether to focus on input field on popup show, may scroll input field out of view on iOS
         }, this.options);
 
         me.searchConfigs = [];
@@ -89,7 +90,9 @@ dbkjs.modules.search = {
         }
         this.popup.show();
         this.activeConfig.search(this.searchInput.val());
-        this.searchInput.focus();
+        if(this.options.focusOnShow) {
+            this.searchInput.focus();
+        }
     },
 
     createPopup: function() {
