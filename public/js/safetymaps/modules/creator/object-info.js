@@ -368,8 +368,12 @@ safetymaps.creator.renderSymbols = function(object, isFlamingo /*ES2015 = false 
             }
             symbolsDisplayed[s.code] = true;
 
+            var id = s.id;
+            if(!isFlamingo) {
+                id = "symbol_" + (s.omschrijving !== "" ? "idx_" + i : "attr_" + s.code);
+            }
             var tr = [
-                '<img id="'+s.id+'" class="legend_symbol" src="' + safetymaps.creator.api.imagePath + 'symbols/' + s.code + '.png' + '" alt="' + s.code + '" title="' + s.code + '">',
+                '<img id="' + id + '" class="legend_symbol" src="' + safetymaps.creator.api.imagePath + 'symbols/' + s.code + '.png' + '" alt="' + s.code + '" title="' + s.code + '">',
                 i18n.t("symbol." + s.code),s.omschrijving // TODO get from safetymaps.creator.api.styles info
             ];
             if (s.omschrijving === ""){

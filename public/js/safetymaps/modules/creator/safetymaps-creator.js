@@ -484,6 +484,12 @@ dbkjs.modules.safetymaps_creator = {
         var me = this;
 
         safetymaps.creator.renderInfoTabs(object, this.infoWindow.getName());
+        dbkjs.modules.vrh_objects.addLegendTrEventHandler("tab_danger_symbols", {
+            "safetymaps_creatorDangerSymbolsId:" : me.objectLayers.layerDangerSymbols
+        });
+        dbkjs.modules.vrh_objects.addLegendTrEventHandler("tab_symbols", {
+            "symbol" : me.objectLayers.layerSymbols
+        }, "code");
 
         $("#tab_floors tr").click(function(e) {
             var floor = e.currentTarget.firstChild.innerText.trim();
@@ -616,6 +622,62 @@ dbkjs.modules.safetymaps_creator = {
         if (e.feature.layer === this.objectLayers.layerCustomPolygon) {
             e.feature.layer.redraw();
         }
+    },
+
+    addLegendTrEventHandler: function(tabId, layerByIdPrefix, attribute) {
+        var me = this;
+
+        $("#" + tabId + " tr").on("mouseover click", function(e) {
+
+            // Find ID on the <img> element child of the tr
+            // For rows with info, select only that feature: [idPrefix]_idx_[index]
+            // For rows without info (only one row per code), select all features
+            // with that code: [idPrefix]_code_[code]
+            var img = $(e.currentTarget).find("img");
+            var legendImgId = img ? img.attr("id") : null;
+
+            if(legendImgId) {
+                var selectFeatures = me.getLegendTrSelectFeatures(legendImgId, layerByIdPrefix, attribute);
+                if(selectFeatures !== null) {
+                    dbkjs.selectControl.unselectAll();
+
+                    $.each(selectFeatures, function(i, feature) {
+                        if(feature.getVisibility()) {
+                            dbkjs.selectControl.select(feature);
+                        }
+                    });
+                }
+            }
+        });
+    },
+
+    getLegendTrSelectFeatures: function(legendImgId, layerByIdPrefix, attributeSearch) {
+        var prefix, id, layer;
+        $.each(layerByIdPrefix, function(thePrefix, layerForPrefix) {
+            if(legendImgId.startsWith(thePrefix)) {
+                prefix = thePrefix;
+                id = legendImgId.substring(prefix.length);
+                layer = layerForPrefix;
+            }
+        });
+
+        var selectFeatures;
+        if(!id || !layer) {
+            return null;
+        } else if(prefix.endsWith(":")) {
+            var idx = Number(id);
+            selectFeatures = [layer.features[idx]];
+        } else if(id.startsWith("_idx_")) {
+            var idx = Number(id.substring("_idx_".length));
+            selectFeatures = [layer.features[idx]];
+        } else if(id.startsWith("_attr_")) {
+            var code = id.substring("_attr_".length);
+            selectFeatures = layer.features.filter(function(f) {
+                return f.attributes[attributeSearch] === code;
+            });
+        }
+        console.log("Features to select for layer " + layer.name + " for legend id " + legendImgId + ": ", selectFeatures.map(function(f) { return f.attributes[attributeSearch]; }));
+        return selectFeatures;
     },
     
     zoomChanged: function(){
