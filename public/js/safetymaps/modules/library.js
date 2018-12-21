@@ -38,6 +38,7 @@ dbkjs.modules.library = {
             tabContents: "<i class='fa fa-file-pdf-o'></i> " + i18n.t("search.library"),
             placeholder: i18n.t("creator.search_placeholder"),
             search: function (value) {
+                value = value.toLowerCase();
                 console.log("search library " + value);
                 var searchResults = [];
                 $.each(me.library, function (i, l) {
