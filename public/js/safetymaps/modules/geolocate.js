@@ -197,6 +197,9 @@ dbkjs.modules.geolocate = {
     },
     getNmea: function() {
         var _obj = dbkjs.modules.geolocate;
+        if(!_obj.activated) {
+            return;
+        }
         $.ajax("/nmea.json", {
             cache: false,
             dataType: "json"
@@ -204,7 +207,7 @@ dbkjs.modules.geolocate = {
         .always(function() {
             window.setTimeout(function() {
                 _obj.getNmea();
-            }, _obj.options.nmeaUpdateInterval);
+            }, _obj.options.updateInterval);
         })
         .done(function(nmea) {
             if(!_obj.activated) {
@@ -235,6 +238,78 @@ dbkjs.modules.geolocate = {
             }
         });
     },
+    pharosToLonLat: function(gps) {
+        var lon = gps.Longitude, lat = gps.Latitude;
+
+        // Converteer van radialen naar graden
+        lon = (lon / (3.14159265359 / 180)) / 100000000;
+        lat = (lat / (3.14159265359 / 180)) / 100000000;
+
+        return new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), dbkjs.map.getProjectionObject());
+    },
+    getPharosPosition: function() {
+        var _obj = dbkjs.modules.geolocate;
+        if(!_obj.activated) {
+            return;
+        }
+        $.ajax("/eal/Gps.json", {
+            dataType: "json",
+            cache: false,
+            ifModified: true
+        })
+        .always(function() {
+            window.setTimeout(function() {
+                _obj.getPharosPosition();
+            }, _obj.options.updateInterval);
+        })
+        .done(function(data, textStatus) {
+            var monitor = dbkjs.modules.connectionmonitor;
+            if(monitor) {
+                monitor.cancelConnectivityCheck();
+                monitor.onConnectionOK();
+            }
+            if(textStatus === "notmodified") {
+                return;
+            }
+
+            var oldSequence = _obj.ealGps ? _obj.ealGps.Sequence : null;
+            var oldLatLon = _obj.ealGps && _obj.ealGps.Gps ? _obj.ealGps.Gps.Latitude + "," + _obj.ealGps.Gps.Longitude : null;
+            _obj.ealGps = data.EAL2OGG;
+            var gps = _obj.ealGps.Gps;
+            if(_obj.ealGps.Sequence !== oldSequence) {
+                if(_obj.options.debug) console.log("geolocate pharos: new GPS data sequence = " + _obj.ealGps.Sequence, gps);
+                if(gps.Validity !== "0") {
+                    if(_obj.options.debug) console.log("geolocate pharos: no valid GPS fix");
+                    _obj.locationlost();
+                } else {
+                    if(oldLatLon === null || gps.Latitude + "," + gps.Longitude !== oldLatLon) {
+
+                        var pos = _obj.pharosToLonLat(gps);
+                        if(_obj.options.debug) console.log("geolocate pharos: new or updated position at map position " + pos.lon + ", " + pos.lat);
+
+                        _obj.position = pos;
+                        _obj.locationupdated({
+                            position: {
+                                coords: {
+                                    accuracy: 50
+                                }
+                            },
+                            point: new OpenLayers.Geometry.Point(pos.lon, pos.lat)
+                        });
+                    }
+                }
+            }
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            console.log("geolocate pharos: ajax failure: " + jqXHR.status + " " + textStatus);
+            var monitor = dbkjs.modules.connectionmonitor;
+
+            if(monitor) {
+                monitor.cancelConnectivityCheck();
+                monitor.onConnectionError();
+            }
+        });
+    },
     register: function(){
         var _obj = dbkjs.modules.geolocate;
 
@@ -244,7 +319,8 @@ dbkjs.modules.geolocate = {
             showMarker: false,
             button: "activate",
             activateOnStart: false,
-            nmeaUpdateInterval: 5000
+            updateInterval: 5000,
+            debug: true
         }, _obj.options);
 
         if(_obj.options.provider === "geolocate") {
@@ -277,9 +353,9 @@ dbkjs.modules.geolocate = {
             _obj.provider = {
                 activate: function() {
                     if(!_obj.activated) {
+                        _obj.activated = true;
                         _obj.getNmea();
                     }
-                    _obj.activated = true;
                 },
                 deactivate: function() {
                     _obj.activated = false;
@@ -287,6 +363,24 @@ dbkjs.modules.geolocate = {
                     _obj.firstGeolocation = true;
                 }
             };
+        } else if(_obj.options.provider === "pharos") {
+            _obj.activated = false;
+
+            _obj.provider = {
+                activate: function() {
+                    if(!_obj.activated) {
+                        _obj.activated = true;
+                        _obj.getPharosPosition();
+                    }
+                },
+                deactivate: function() {
+                    _obj.activated = false;
+                    _obj.position = null;
+                    _obj.firstGeolocation = true;
+                }
+            };
+        } else {
+            throw "geolocate: unknown provider: " + _obj.options.provider;
         }
 
         $('#btngrp_3').append('<a id="btn_geolocate" data-sid="'+_obj.options.index+'" class="btn btn-default navbar-btn" href="#" title="' + i18n.t('geolocate.button') + '"><i class="fa fa-crosshairs"></i></a>');
