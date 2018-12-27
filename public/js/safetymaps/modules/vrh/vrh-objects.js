@@ -42,13 +42,14 @@ dbkjs.modules.vrh_objects = {
             dbks: true,
             evenementen: true,
             waterongevallen: true,
-            filterEvDate: true
+            evFilter: "huidig"
         }, this.options);
         this.options.options = dbkjs.options;
         this.options.map = dbkjs.map;
 
-        if("off" === OpenLayers.Util.getParameters()["evfilter"]) {
-            this.options.filterEvDate = false;
+        var evfilter = OpenLayers.Util.getParameters()["evfilter"];
+        if(["alle","ooktoekomstig"].indexOf(evfilter) !== -1) {
+            this.options.evFilter = evfilter;
         }
 
         // Setup clustering layer
@@ -137,10 +138,20 @@ dbkjs.modules.vrh_objects = {
                 console.log("Got " + evenementenObjects.length + " event objects");
                 me.events.loading = false;
 
-                if(me.options.filterEvDate) {
+                if(me.options.evFilter !== "alle") {
+                    var now = new moment();
+                    var countBefore = evenementenObjects.length;
                     evenementenObjects = evenementenObjects.filter(function(ev) {
-                        return !new moment(ev.sbegin).isAfter(new moment());
+                        // Evenementen tonen tot 4 weken na sbegin
+                        var beginDatum = new moment(ev.sbegin);
+                        var eindDatum = beginDatum.clone().add(4, "weeks");
+                        var filter = (me.options.evFilter === "ooktoekomstig" || beginDatum.isBefore(now)) && eindDatum.isAfter(now);
+                        if(filter) {
+                            console.log("Tonen evenement " + ev.evnaam + " begindatum " + beginDatum.format("LLLL") + ", einddatum niet meer dan 4 weken geleden: " + eindDatum.format("LLLL"));
+                        }
+                        return filter;
                     });
+                    console.log(countBefore - evenementenObjects.length + " evenementen gefiltered, aantal zichtbaar: " + evenementenObjects.length);
                 }
 
                 me.overviewObjects = me.overviewObjects.concat(evenementenObjects);
