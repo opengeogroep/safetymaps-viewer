@@ -80,9 +80,27 @@ dbkjs.layers = {
                         var paramName = this.options.hiDPIParam.split("=",1)[0];
                         newParams[paramName] = this.options.hiDPIParam.substring(paramName.length + 1);
                     } else if(this.url.indexOf("/geoserver") !== -1) {
+                        // https://docs.geoserver.org/latest/en/user/services/wms/vendor.html#format-options
+
+                        // Note: drops this.params.format_options and assumes
+                        // default low dpi is 90.
+                        // TODO: parse format_options and double DPI if exists or
+                        // add dpi:180 if not and keep other format_options
+
                         newParams.format_options = "dpi:180";
                     } else if(this.url.indexOf("/mapserv") !== -1) {
-                        newParams.map_resolution = 144;
+                        var defaultDPI = 72;
+                        // If map_resolution set in this.params, use that
+                        for(var p in this.params) {
+                            if(p.toLowerCase() === "map_resolution") {
+                                try {
+                                    defaultDPI = Number(this.params[p]);
+                                    break;
+                                } catch(e) {
+                                }
+                            }
+                        }
+                        newParams.map_resolution = Number(defaultDPI * 2).toFixed();
                     }
                     //console.log("HiDPI layer " + this.name + " request: " + this.getFullRequestString(newParams));
                 }
