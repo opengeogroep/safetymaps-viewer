@@ -261,7 +261,10 @@ dbkjs.Layer = dbkjs.Class({
                     srs: this.layer.params.SRS
                 };
                 if(this.layer.options.featureInfoRadius) {
+                    // MapServer vendor specific https://mapserver.org/ogc/wms_server.html#index-124
                     params.radius = this.layer.options.featureInfoRadius;
+                    // GeoServer vendor specific https://docs.geoserver.org/latest/en/user/services/wms/vendor.html#buffer
+                    params.buffer = this.layer.options.featureInfoRadius;
                 }
 
                 // handle the wms 1.3 vs wms 1.1 madness
