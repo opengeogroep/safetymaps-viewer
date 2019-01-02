@@ -190,12 +190,9 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
                     label: function(feature) {
                         if(feature.attributes.label){
                             return feature.attributes.label;
-                        } else if (feature.attributes.style) {
-                            var code = feature.attributes.style.code;
-                            code = code.replace(" minuten", "′");
-                            return code;
+                        } else {
+                            return "";
                         }
-                        return "";
                     },
                     labelYOffset: function(feature) {
                         return Math.sin(feature.attributes.theta + Math.PI/2) * 5;
