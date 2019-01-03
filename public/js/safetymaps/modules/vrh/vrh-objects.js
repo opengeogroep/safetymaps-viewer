@@ -53,6 +53,15 @@ dbkjs.modules.vrh_objects = {
             this.options.evFilter = evfilter;
         }
 
+        // Setup details layers
+
+        me.events = new safetymaps.vrh.Events(this.options);
+
+        me.waterongevallen = new safetymaps.vrh.Waterongevallen(this.options);
+
+        me.dbks = new safetymaps.vrh.Dbks(this.options);
+
+
         // Setup clustering layer
 
         me.clusteringLayer = new safetymaps.ClusteringLayer();
@@ -76,14 +85,6 @@ dbkjs.modules.vrh_objects = {
             dbkjs.selectControl.multiselectlayers = [];
         }
         dbkjs.selectControl.multiselectlayers.push(layer);
-
-        // Setup details layers
-
-        me.events = new safetymaps.vrh.Events(this.options);
-
-        me.waterongevallen = new safetymaps.vrh.Waterongevallen(this.options);
-
-        me.dbks = new safetymaps.vrh.Dbks(this.options);
 
         dbkjs.hoverControl.activate();
         dbkjs.selectControl.activate();
