@@ -606,6 +606,9 @@ dbkjs.modules.safetymaps_creator = {
 
         } else {
             console.log(layer.name + " feature selected", e);
+            // Feature from layer that has no actual event for selecting but is
+            // selectable for correct z-ordering of the layer: deselect feature immediately
+            dbkjs.selectControl.unselect(e.feature);
         }
     },
 

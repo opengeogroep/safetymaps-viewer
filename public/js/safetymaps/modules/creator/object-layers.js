@@ -205,6 +205,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
         })
     });
     this.layers.push(this.layerFireCompartmentationLabels);
+    this.selectLayers.push(this.layerFireCompartmentationLabels);
 
     this.layerLines1 = new OpenLayers.Layer.Vector("Creator lines 1", {
         hover: false,
@@ -262,6 +263,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
         })
     });
     this.layers.push(this.layerLines1);
+    this.selectLayers.push(this.layerLines1);
     this.layerLines2 = new OpenLayers.Layer.Vector("Creator lines 2", {
         hover: false,
         rendererOptions: {
@@ -294,6 +296,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
         })
     });
     this.layers.push(this.layerLines2);
+    this.selectLayers.push(this.layerLines2);
     
     this.layerLines3 = new OpenLayers.Layer.Vector("Creator lines 3", {
         hover: false,
@@ -324,6 +327,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
         })
     });
     this.layers.push(this.layerLines3);
+    this.selectLayers.push(this.layerLines2);
     
     this.layerApproachRoutes = new OpenLayers.Layer.Vector("Creator approach routes", {
         rendererOptions: {
@@ -362,6 +366,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
         })
     });
     this.layers.push(this.layerApproachRoutes);
+    this.selectLayers.push(this.layerApproachRoutes);
 
     this.layerCommunicationCoverage = new OpenLayers.Layer.Vector("Creator communication coverage", {
         hover:true,
@@ -464,6 +469,7 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
         })
     });
     this.layers.push(this.layerLabels);
+    this.selectLayers.push(this.layerLabels);
 
     return this.layers;
 };
