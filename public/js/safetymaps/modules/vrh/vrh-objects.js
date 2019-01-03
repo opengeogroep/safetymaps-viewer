@@ -42,7 +42,8 @@ dbkjs.modules.vrh_objects = {
             dbks: true,
             evenementen: true,
             waterongevallen: true,
-            evFilter: "huidig"
+            evFilter: "huidig",
+            evFilterShowNrOfWeeksAfterBegin: 1
         }, this.options);
         this.options.options = dbkjs.options;
         this.options.map = dbkjs.map;
@@ -144,10 +145,10 @@ dbkjs.modules.vrh_objects = {
                     evenementenObjects = evenementenObjects.filter(function(ev) {
                         // Evenementen tonen tot 4 weken na sbegin
                         var beginDatum = new moment(ev.sbegin);
-                        var eindDatum = beginDatum.clone().add(4, "weeks");
+                        var eindDatum = beginDatum.clone().add(me.options.evFilterShowNrOfWeeksAfterBegin, "weeks");
                         var filter = (me.options.evFilter === "ooktoekomstig" || beginDatum.isBefore(now)) && eindDatum.isAfter(now);
                         if(filter) {
-                            console.log("Tonen evenement " + ev.evnaam + " begindatum " + beginDatum.format("LLLL") + ", einddatum niet meer dan 4 weken geleden: " + eindDatum.format("LLLL"));
+                            console.log("Tonen evenement " + ev.evnaam + " begindatum " + beginDatum.format("LLLL") + ", einddatum niet meer dan " + me.options.evFilterShowNrOfWeeksAfterBegin + " weken geleden: " + eindDatum.format("LLLL"));
                         }
                         return filter;
                     });
