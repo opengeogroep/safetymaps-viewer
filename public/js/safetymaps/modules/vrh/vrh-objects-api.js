@@ -137,7 +137,7 @@ safetymaps.vrh.api = {
             feature.attributes = {
                 id: apiObject.evnaam,
                 apiObject: apiObject,
-                minClusteringResolution: 0
+                minClusteringResolution: Infinity
             };
             var symbol = "js/safetymaps/modules/creator/assets/event.png";
             var width = 33;
@@ -151,7 +151,6 @@ safetymaps.vrh.api = {
             if(apiObject.selectiekader) {
                 var selectiekaderFeature = wktParser.read(apiObject.selectiekader);
                 feature.attributes.selectionPolygon = selectiekaderFeature.geometry;
-                feature.attributes.minClusteringResolution = 2.5833;
             }
             apiObject.clusterFeature = feature;
             features.push(feature);
