@@ -105,12 +105,46 @@ safetymaps.utils.geometry.getAngle = function(p1, p2) {
     return angle;
 };
 
+function getNonInterfaceObscuredBounds(layer) {
+    var gf = new jsts.geom.GeometryFactory();
+    var resolution = layer.map.getResolution();
+    var buf = 50 * resolution;
+    var topBuf = buf;
+    var leftBuf = buf;
+    var el = $("#btngrp_object");
+    if(el.length === 1) {
+        topBuf = (el.position().top + el.outerHeight(true) + 25) * resolution;
+    }
+    var el = $("#bottom_left_buttons");
+    if(el.length === 1) {
+        leftBuf = (el.position().left + el.outerWidth(true) + 30) * resolution;
+    }
+    var screenBounds = layer.map.getExtent();
+    var newScreenBounds = new OpenLayers.Bounds([screenBounds.left + leftBuf, screenBounds.bottom + buf, screenBounds.right - buf, screenBounds.top - topBuf]);
+
+    var newBoundsGeom = gf.createLinearRing([
+        new jsts.geom.Coordinate(screenBounds.left + leftBuf, screenBounds.bottom + buf),
+        new jsts.geom.Coordinate(screenBounds.left + leftBuf, screenBounds.top - topBuf),
+        new jsts.geom.Coordinate(screenBounds.right - buf, screenBounds.top - topBuf),
+        new jsts.geom.Coordinate(screenBounds.right - buf, screenBounds.bottom + buf),
+        new jsts.geom.Coordinate(screenBounds.left + leftBuf, screenBounds.bottom + buf)
+    ]);
+    //var screenBoundsWkt = new OpenLayers.Format.WKT().write(new OpenLayers.Feature.Vector(screenBounds.toGeometry()));
+    //console.log("Screen bounds are: " + screenBoundsWkt + ", non interface obscured bounds: " + new jsts.io.WKTWriter().write(newBoundsGeom));
+    return {
+        bounds: newScreenBounds,
+        jtsGeometry: newBoundsGeom
+    };
+};
+
 OpenLayers.Strategy.Cluster.prototype.cluster = function (event) {
     var wktParser = new OpenLayers.Format.WKT();
-    var gf;
+    var gf = new jsts.geom.GeometryFactory();
     var filterFunction = this.layer.options.filterFunction;
     if ((!event || event.zoomChanged || (event.type === "moveend" && !event.zoomChanged)) && this.features) {
         var screenBounds = this.layer.map.getExtent();
+        var nonInterfaceObscuredBounds = getNonInterfaceObscuredBounds(this.layer);
+
         var resolution = this.layer.map.getResolution();
         this.resolution = resolution;
         var clusters = [];
@@ -126,27 +160,18 @@ OpenLayers.Strategy.Cluster.prototype.cluster = function (event) {
                 continue;
             }
             if (feature.geometry) {
-                if (!screenBounds.intersectsBounds(feature.geometry.getBounds())) {
+                if (!nonInterfaceObscuredBounds.bounds.intersectsBounds(feature.geometry.getBounds())) {
                     if (feature.attributes.apiObject.selectiekader) {
                         var theGeom = wktParser.read(feature.attributes.apiObject.selectiekader).geometry;
                         if (screenBounds.intersectsBounds(theGeom.getBounds())) {
                             //console.log("feature point outside screen but selectiekader inside", feature);
-                            if (!gf) gf = new jsts.geom.GeometryFactory();
-                            var buf = 50 * this.layer.map.getResolution();
-                            var smallerScreenBounds = gf.createLinearRing([
-                                new jsts.geom.Coordinate(screenBounds.left + buf, screenBounds.bottom + buf),
-                                new jsts.geom.Coordinate(screenBounds.left + buf, screenBounds.top - buf),
-                                new jsts.geom.Coordinate(screenBounds.right - buf, screenBounds.top - buf),
-                                new jsts.geom.Coordinate(screenBounds.right - buf, screenBounds.bottom + buf),
-                                new jsts.geom.Coordinate(screenBounds.left + buf, screenBounds.bottom + buf)
-                            ]);
                             var line = gf.createLineString([
                                 new jsts.geom.Coordinate(this.layer.map.getCenter().lon, this.layer.map.getCenter().lat),
                                 new jsts.geom.Coordinate(feature.geometry.x, feature.geometry.y)
                             ]);
-                            var newLocation = line.intersection(smallerScreenBounds);
-                            var w = new jsts.io.WKTWriter();
-                            //console.log("smallerScreenBounds", w.write(smallerScreenBounds), "line", w.write(line), "newLocation",w.write(newLocation), newLocation);
+                            var newLocation = line.intersection(nonInterfaceObscuredBounds.jtsGeometry);
+                            //var w = new jsts.io.WKTWriter();
+                            //console.log("object " + feature.attributes.label + " bound intersect line: " + w.write(line) + ", display point: " + w.write(newLocation));
                             feature.originalGeometry = feature.geometry;
                             feature.geometry = new OpenLayers.Geometry.Point(newLocation.getX(), newLocation.getY());
 
