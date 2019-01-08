@@ -31,12 +31,13 @@ dbkjs.mapcontrols = {
         }));
 
         $("#zoom_buttons").toggle(dbkjs.options.showZoomButtons);
-        if(dbkjs.options.showZoomButtons) {
-            dbkjs.map.addControl(new OpenLayers.Control.Zoom({
-                    zoomInId: "zoom_in",
-                    zoomOutId: "zoom_out"
-                })
-            );
+        if (dbkjs.options.showZoomButtons) {
+            $("#zoom_in").on("click", function () {
+                dbkjs.map.zoomIn();
+            });
+            $("#zoom_out").on("click", function () {
+                dbkjs.map.zoomOut();
+            });
         }
 
         if(window.location.search.indexOf("res=true") !== -1) {
