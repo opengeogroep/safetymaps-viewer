@@ -248,7 +248,7 @@ dbkjs.modules.vrh_objects = {
                 resultSelected: function(result) {
                     console.log("Search result selected", result);
 
-                    me.selectObjectById("evenement",result.evnaam, result.extent);
+                    me.selectObjectById("evenement",result.id, result.extent);
                 }
             }, true);
         }
@@ -263,7 +263,7 @@ dbkjs.modules.vrh_objects = {
                     console.log("search wo " + value);
                     var searchResults = [];
                     $.each(me.overviewObjects, function(i, o) {
-                        if(o.clusterFeature.attributes.type === "wbbk") {
+                        if(o.clusterFeature.attributes.type === "waterongevallenkaart") {
                             if(value === "" || o.locatie.toLowerCase().indexOf(value) !== -1) {
                                 searchResults.push(o);
                                 if(searchResults.length === me.options.maxSearchResults) {
@@ -287,7 +287,7 @@ dbkjs.modules.vrh_objects = {
                 resultSelected: function(result) {
                     console.log("Search result selected", result);
 
-                    me.selectObjectById("wbbk",result.id, result.extent);
+                    me.selectObjectById("waterongevallenkaart",result.id, result.extent);
                 }
             }, true);
         }
@@ -427,7 +427,7 @@ dbkjs.modules.vrh_objects = {
         });
 
         matches.sort(function(lhs, rhs) {
-            var typeOrder = ["dbk", "evenement", "wbbk"];
+            var typeOrder = ["dbk", "evenement", "waterongevallenkaart"];
             var lhsOrder = typeOrder.indexOf(lhs.attributes.type);
             var rhsOrder = typeOrder.indexOf(rhs.attributes.type);
 
@@ -545,7 +545,7 @@ dbkjs.modules.vrh_objects = {
             } else if(type === "dbk") {
                 this.dbks.addFeaturesForObject(object);
                 this.dbks.updateInfoWindow(this.infoWindow.getName(), object);
-            } else if(type === "wbbk") {
+            } else if(type === "waterongevallenkaart") {
                 this.waterongevallen.addFeaturesForObject(object);
                 this.waterongevallen.updateInfoWindow(this.infoWindow.getName(), object);
             }

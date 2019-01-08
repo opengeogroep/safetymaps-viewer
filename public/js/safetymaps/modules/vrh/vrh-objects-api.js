@@ -37,7 +37,7 @@ safetymaps.vrh.api = {
         var d = $.Deferred();
 
         var msg = "Fout bij laden DBK gegevens: ";
-        $.ajax("api/vrh", {
+        $.ajax("api/vrh/dbks.json", {
             dataType: "json",
             data: {
                 dbks: true
@@ -103,8 +103,8 @@ safetymaps.vrh.api = {
     getEvenementen: function() {
         var d = $.Deferred();
 
-        var msg = "Fout bij laden DBK gegevens: ";
-        $.ajax("api/vrh", {
+        var msg = "Fout bij laden evenementgegevens: ";
+        $.ajax("api/vrh/evenementen.json", {
             dataType: "json",
             data: {
                 evenementen: true
@@ -135,7 +135,7 @@ safetymaps.vrh.api = {
         $.each(data, function(i, apiObject) {
             var feature = wktParser.read(apiObject.centroid);
             feature.attributes = {
-                id: apiObject.evnaam,
+                id: apiObject.id,
                 apiObject: apiObject,
                 minClusteringResolution: Infinity
             };
@@ -158,43 +158,12 @@ safetymaps.vrh.api = {
         return features;
     },
 
-    getObjectDetails: function(type, id) {
-        var me = this;
-
-        var d = $.Deferred();
-
-        var msg = "Fout bij laden " + type + " gegevens: ";
-        var data = {};
-        data[type] = true;
-        data.id = id;
-        data.wkt = true;
-        $.ajax("api/vrh", {
-            dataType: "json",
-            data: data
-        })
-        .fail(function(jqXHR, textStatus, errorThrown) {
-            d.reject(msg + safetymaps.utils.getAjaxError(jqXHR, textStatus, errorThrown));
-        })
-        .done(function(data, textStatus, jqXHR) {
-            if(data.success) {
-                d.resolve(data.results);
-            } else {
-                d.reject(msg + data.error);
-            }
-        });
-        return d.promise();
-    },
-
     getWaterongevallen: function() {
         var d = $.Deferred();
 
         var msg = "Fout bij laden WO gegevens: ";
-        $.ajax("api/vrh", {
-            dataType: "json",
-            data: {
-                wbbks: true,
-                wkt: true
-            }
+        $.ajax("api/vrh/waterongevallen.json", {
+            dataType: "json"
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             d.reject(msg + safetymaps.utils.getAjaxError(jqXHR, textStatus, errorThrown));
@@ -230,7 +199,7 @@ safetymaps.vrh.api = {
             feature.attributes.symbol = me.imagePath + symbol;
             feature.attributes.width = width;
             feature.attributes.height = height;
-            feature.attributes.type = "wbbk";
+            feature.attributes.type = "waterongevallenkaart";
             if(apiObject.selectiekader) {
                 var selectiekaderFeature = wktParser.read(apiObject.selectiekader);
                 feature.attributes.selectionPolygon = selectiekaderFeature.geometry;
@@ -240,6 +209,28 @@ safetymaps.vrh.api = {
             features.push(feature);
         });
         return features;
+    },
+
+    getObjectDetails: function(type, id) {
+        var me = this;
+
+        var d = $.Deferred();
+
+        var msg = "Fout bij laden " + type + " gegevens: ";
+        $.ajax("api/vrh/" + type + "/" + id + ".json", {
+            dataType: "json"
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            d.reject(msg + safetymaps.utils.getAjaxError(jqXHR, textStatus, errorThrown));
+        })
+        .done(function(data, textStatus, jqXHR) {
+            if(data.success) {
+                d.resolve(data.results);
+            } else {
+                d.reject(msg + data.error);
+            }
+        });
+        return d.promise();
     }
 };
 
