@@ -39,9 +39,8 @@ safetymaps.vrh.api = {
         var msg = "Fout bij laden DBK gegevens: ";
         $.ajax("api/vrh/dbks.json", {
             dataType: "json",
-            data: {
-                dbks: true
-            }
+            cache: true,
+            ifModified: true
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             d.reject(msg + safetymaps.utils.getAjaxError(jqXHR, textStatus, errorThrown));
@@ -105,10 +104,7 @@ safetymaps.vrh.api = {
 
         var msg = "Fout bij laden evenementgegevens: ";
         $.ajax("api/vrh/evenementen.json", {
-            dataType: "json",
-            data: {
-                evenementen: true
-            }
+            dataType: "json"
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             d.reject(msg + safetymaps.utils.getAjaxError(jqXHR, textStatus, errorThrown));
