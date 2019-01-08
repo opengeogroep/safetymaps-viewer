@@ -655,7 +655,8 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
         return f;
     };
 
-    this.layerPand.addFeatures(object.pand.map(wktReader));
+    this.layerPand.addFeatures([wktReader(object.hoofdpand)]);
+    this.layerPand.addFeatures((object.subpanden || []).map(wktReader));
 
     this.layerFireCompartmentation.addFeatures((object.compartimentering || []).map(wktReader).map(function(f) {
         f.attributes.style = me.vrhCompartimenteringStyles[f.attributes.symboolcod];
@@ -738,7 +739,10 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
         }
         f.attributes.description = f.attributes.omschrijvi || "";
         if(f.attributes.bijzonderh && f.attributes.bijzonderh.trim() !== "-") {
-            f.attributes.description += "; " + f.attributes.bijzonderh;
+            if(f.attributes.description.length > 0) {
+                f.attributes.description += "; ";
+            }
+            f.attributes.description += f.attributes.bijzonderh;
         }
         f.attributes.rotation = -(360-f.attributes.symboolhoe) || 0;
 
@@ -846,14 +850,7 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object) {
 
     var o = object;
 
-    var p = o.pand[0];
-    $.each(o.pand, function(i, pand) {
-        if(pand.hoofd_sub === "Hoofdpand") {
-            p = pand;
-            return false;
-        }
-        return true;
-    });
+    var p = o.hoofdpand;
 
     var adres = (p.adres || "") + (p.plaats ? "<br>" + p.plaats : "");
 
