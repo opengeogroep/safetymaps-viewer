@@ -42,11 +42,10 @@ safetymaps.vrh.Dbks = function(options) {
 
     me.loading = true;
 
-    me.luchtfotoLayer = null;
+    me.luchtfotoLayers = [];
     $.each(dbkjs.map.layers, function(i, l) {
         if(l.name.toLowerCase().indexOf("luchtfoto") !== -1) {
-            me.luchtfotoLayer = l;
-            return false;
+            me.luchtfotoLayers.push(l);
         }
     });
 
@@ -235,7 +234,14 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
             }, {
                 context: {
                     fillOpacity: function(feature) {
-                        return me.luchtfotoLayer && me.luchtfotoLayer.visibility ? 0.3 : 1;
+                        var opacity = 1;
+                        $.each(me.luchtfotoLayers, function(i, l) {
+                            if(l.getVisibility()) {
+                                opacity = 0.3;
+                                return false;
+                            }
+                        });
+                        return opacity;
                     }
                 }
             })
