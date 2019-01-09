@@ -161,6 +161,40 @@ dbkjs.gotOrganisation = function () {
     $(dbkjs).trigger('dbkjs_init_complete');
 };
 
+dbkjs.layoutButtonGroup = function() {
+    $(window).on("resize", dbkjs.resizeButtonGroup);
+    $(dbkjs).on("modal_popup_show", dbkjs.resizeButtonGroup);
+    $(dbkjs).on("modal_popup_hide", dbkjs.resizeButtonGroup);
+    dbkjs.resizeButtonGroup();
+};
+
+dbkjs.resizeButtonGroup = function(e, modalPopupArgs) {
+    var clazz = "";
+
+    var splitScreen = modalPopupArgs && modalPopupArgs.isSplitScreen;
+    if(splitScreen) {
+        clazz = "medium";
+    }
+
+    var width = $(window).width();
+    if(width < 1000) {
+        clazz = "medium";
+
+        if(splitScreen) {
+            clazz = "small";
+        }
+    }
+    if(width < 780) {
+        clazz = "small";
+    }
+
+    var el = $(".main-button-group");
+    el.removeClass("medium");
+    el.removeClass("small");
+    el.addClass(clazz);
+    console.log("button group size: " + clazz);
+};
+
 dbkjs.sortModuleButtons = function(){
     $.each($("#btngrp_3")[0].children, function(i,m){
         if($(m).data("sid") === undefined){
@@ -247,6 +281,11 @@ dbkjs.finishMap = function () {
 };
 
 $(document).ready(function () {
+    if($(window).width() < dbkjs.options.minSplitScreenWidth) {
+        dbkjs.options.splitScreenChecked = false;
+    }
+    dbkjs.layoutButtonGroup();
+
     // Make sure i18n is initialized
     i18n.init({
         lng: dbkjsLang, fallbackLng: 'en', debug: false, postProcess: "doReplacements"

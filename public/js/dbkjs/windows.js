@@ -110,6 +110,7 @@ ModalWindow.prototype.hide = function() {
         this.popup.css('width', '0%');
         this.visible = false;
         $(this).triggerHandler('hide');
+        $(dbkjs).trigger('modal_popup_hide', {popupName: this.name});
     }
 };
 
@@ -222,6 +223,7 @@ SplitScreenWindow.prototype.hide = function(noMapAdjust) {
 
         this.visible = false;
         $(this).triggerHandler('hide');
+        $(dbkjs).trigger('modal_popup_hide', {popupName: this.name});
     }
 };
 
