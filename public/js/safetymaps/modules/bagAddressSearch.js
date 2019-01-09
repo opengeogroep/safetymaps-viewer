@@ -21,7 +21,7 @@
 
  dbkjs.modules.bagAddressSearch = {
     id: "dbk.module.bagAddressSearch",
-
+    url: "api/autocomplete/",
     register: function() {
         var me = this;
         
@@ -43,7 +43,7 @@
                 if(value.trim().length === 0) {
                     dbkjs.modules.search.showResults([]);
                 } else {
-                    $.ajax("api/autocomplete/"+value, {
+                    $.ajax(me.url + value, {
                         term: value
                     })
                     .done(function(data) {
