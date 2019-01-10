@@ -168,21 +168,13 @@ dbkjs.layoutButtonGroup = function() {
     dbkjs.resizeButtonGroup();
 };
 
-dbkjs.resizeButtonGroup = function(e, modalPopupArgs) {
+dbkjs.resizeButtonGroup = function(e) {
     var clazz = "";
 
-    var splitScreen = modalPopupArgs && modalPopupArgs.isSplitScreen;
-    if(splitScreen) {
-        clazz = "medium";
-    }
+    var width = $("#map").width();
 
-    var width = $(window).width();
     if(width < 1000) {
         clazz = "medium";
-
-        if(splitScreen) {
-            clazz = "small";
-        }
     }
     if(width < 780) {
         clazz = "small";
@@ -192,7 +184,7 @@ dbkjs.resizeButtonGroup = function(e, modalPopupArgs) {
     el.removeClass("medium");
     el.removeClass("small");
     el.addClass(clazz);
-    console.log("button group size: " + clazz);
+    //console.log("button group size: " + clazz);
 };
 
 dbkjs.sortModuleButtons = function(){
