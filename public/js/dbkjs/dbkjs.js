@@ -163,8 +163,7 @@ dbkjs.gotOrganisation = function () {
 
 dbkjs.layoutButtonGroup = function() {
     $(window).on("resize", dbkjs.resizeButtonGroup);
-    $(dbkjs).on("modal_popup_show", dbkjs.resizeButtonGroup);
-    $(dbkjs).on("modal_popup_hide", dbkjs.resizeButtonGroup);
+    window.setInterval(dbkjs.resizeButtonGroup, 300);
     dbkjs.resizeButtonGroup();
 };
 
@@ -173,18 +172,21 @@ dbkjs.resizeButtonGroup = function(e) {
 
     var width = $("#map").width();
 
-    if(width < 1000) {
+    if(width < 800) {
         clazz = "medium";
     }
-    if(width < 780) {
+    if(width < 600) {
         clazz = "small";
     }
 
     var el = $(".main-button-group");
-    el.removeClass("medium");
-    el.removeClass("small");
-    el.addClass(clazz);
-    //console.log("button group size: " + clazz);
+
+    if(!el.hasClass(clazz)) {
+        console.log("map width " + width + ", button group size: " + clazz);
+        el.removeClass("medium");
+        el.removeClass("small");
+        el.addClass(clazz);
+    }
 };
 
 dbkjs.sortModuleButtons = function(){
