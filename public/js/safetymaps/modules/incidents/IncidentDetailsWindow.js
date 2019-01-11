@@ -118,7 +118,7 @@ IncidentDetailsWindow.prototype.addTabClickListener = function() {
  * @param {boolean} restoreScrollTop
  * @returns {undefined}
  */
-IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScrollTop, isXml) {
+IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScrollTop, isXmlOrFormatName) {
     this.renderDetailsScreen();
 
     var scrollTop = this.div.scrollTop();
@@ -128,11 +128,11 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
     var format = "";
     if(typeof incident === "string") {
         format = "string";
-    } else if(isXml) {
+    } else if(isXmlOrFormatName === true) {
         format = "xml";
     } else if(typeof incident.IncidentNummer !== 'undefined') {
         format = "falck";
-    } else if(typeof incident.Nummer !== 'undefined') {
+    } else if(typeof incident.Nummer !== 'undefined' || isXmlOrFormatName === "pharos") {
         format = "pharos";
     } else {
         format = "vrh";
@@ -154,7 +154,7 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
             kladblok = this.getIncidentKladblokHtml(format, incident);
             break;
         case "pharos":
-            table = this.getIncidentHtmlPharos(incident, false);
+            table = this.getIncidentHtmlPharos(incident, showInzet, false);
             kladblok = this.getIncidentKladblokHtml(format, incident);
             break;
         default:
@@ -260,10 +260,9 @@ IncidentDetailsWindow.prototype.getIncidentAdres = function(incident, isXml) {
         // Falck JSON
         var a = incident.IncidentLocatie;
         return Mustache.render("{{{NaamLocatie2}}} {{{HnAanduiding}}} {{{NaamLocatie1}}} {{{Huisnummer}}}{{{Letter}}} {{{HnToevoeging}}} {{{Paalnummer}}}", a).trim();
-    } else if(incident.Nummer) {
-        // Pharos JSON
-        var a = incident.IncidentAdres.Adres;
-        return Mustache.render("{{{Straat}}} {{{Huisnummer}}} {{{HuisnummerToevg}}}", a).trim();
+    } else if(incident.nummer && incident.xml) {
+        // Pharos
+        return Mustache.render("{{locatie}} {{aanduiding}} {{straat}} {{huisnummer}}{{huisletter}} {{toevoeging}} {{paalnummer}}", incident).trim();
     } else {
         // Oracle GMS replica AGS JSON
         return incident.T_GUI_LOCATIE;
@@ -409,7 +408,9 @@ IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incid
             });
             break;
         case "pharos":
-            kladblokHTML = dbkjs.util.nl2br(incident.Kladblok);
+            $.each(incident.kladblokregels, function(i, k) {
+                kladblokHTML += "<tr><td>" + k.tijd.format("HH:mm") + "</td><td>" + dbkjs.util.htmlEncode(k.tekst) + "</td></tr>";
+            });
             break;
         default:
             kladblokHTML = this.getIncidentKladblokDefaultHtml(incident.kladblok);
@@ -520,7 +521,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
             if(!compareMode && inzet.ETA !== null || inzet.ETA === ""){
                 eta = me.calculateETA(inzet.ETA[0],false);
             }
-            
+
             html += (inzet.IsActief ? '<span>' : '<span class="beeindigd">' ) + dbkjs.util.htmlEncode(inzet.Roepnaam+""+eta)+'</span>';
         });
         html += "<span class='beeindigd'> (Klik voor meer info)</span>";
@@ -529,7 +530,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
                 $('#allEenheden').show();
                 $('#eenheden').hide();
         });
-        
+
         html += '</td></tr>';
         html += '<tr class="detailed"><td style="display:'+showAllEenheden+';" colspan="2" id="allEenheden">';
         html += 'Eenheden: <span style="color: #A9A9A9">(Klik voor minder info)</span><br/><table>';
@@ -565,43 +566,47 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
     return html;
 };
 
-IncidentDetailsWindow.prototype.getIncidentHtmlPharos = function(incident, compareMode) {
+IncidentDetailsWindow.prototype.getIncidentHtmlPharos = function(incident, showInzet, compareMode) {
     var me = this;
 
     html = '<table class="table table-hover">';
-    var prio = incident.Prioriteit;
-    html += '<tr><td colspan="2" style="font-weight: bold; text-align: center; color: ' + me.getPrioriteitColor(prio) + '">PRIO ' + prio + '</td></tr>';
 
-    function row(val, caption) {
-        if(!dbkjs.util.isJsonNull(val)) {
-            html += '<tr><td class="leftlabel">' + caption + ':</td><td>' + val + '</td></tr>';
-        }
+    html += '<tr><td colspan="2" style="font-weight: bold; text-align: center; color: ' + me.getPrioriteitColor(incident.prioriteit) + '">PRIO ' + incident.prioriteit + '<sub style="font-size:10px; text-align: center; color:black;"> ('+incident.nummer+')</sub></td></tr>';
+    html += '<tr><td class="leftlabel">Start incident: </td><td>' + incident.startTijd.format("dddd, D-M-YYYY HH:mm:ss")+'</td></tr>';
+    html += '<tr><td class="leftlabel">Adres: </td><td>' + me.getIncidentAdres(incident, false) + '</td></tr>';
+    html += '<tr><td class="leftlabel">Woonplaats: </td><td>' + (incident.woonplaats || "-") + '</td></tr>';
+    html += '<tr><td class="leftlabel">Melding classificatie:</td><td>' + incident.classificaties.join(", ") + '</td></tr>';
+
+    if(incident.karakteristieken.length === 0) {
+        html += '<tr class="detailed"><td>Karakteristieken:</td><td>';
+        html += "<h4>-</h4>";
+    } else {
+        html += '<tr class="detailed"><td colspan="2">Karakteristieken:<br/>';
+        html += '<div class="table-responsive" style="margin: 0px 10px 0px 10px">';
+        html += '<table class="table table-hover" style="width: auto">';
+        incident.karakteristieken.sort(function(l, r) {
+            return l.naam.localeCompare(r.naam);
+        });
+        $.each(incident.karakteristieken, function(i, k) {
+            html += "<tr><td>" + dbkjs.util.htmlEncode(k.naam) + "</td><td>" + dbkjs.util.htmlEncode(k.waarde) + "</td></tr>";
+        });
+        html += '</table><div/>';
     }
+    html += '</td></tr>';
 
-    var me = this;
-    var e = function(s) {
-        if(s) {
-            return dbkjs.util.htmlEncode(s);
-        } else {
-            return "";
-        }
-    };
+    if(showInzet) {
+        html += '<tr class="detailed"><td colspan="2" id="eenheden">';
+        html += "Eenheden: ";
 
-    //row(e(incident.Nummer), "Nummer");
-    var m = moment(incident.Tijd);
-    row(m.format("DD MMMM YYYY HH:mm:ss") + (compareMode ? "" : " (" + m.fromNow() + ")"), "Start incident");
-    var a = incident.IncidentAdres;
-    if(a && a.Adres) {
-        var s = (e(a.Adres.Straat) + " " + e(a.Adres.Huisnummer) + e(a.Adres.HuisnummerToevg)).trim();
-        row(s, "Adres");
+        $.each(incident.eenheden, function(i, eenheid) {
+            if(i!==0){
+                html += ", ";
+            }
+            html += (eenheid.eindeActieTijd ? '<span class="beeindigd">' : '<span>') + eenheid.naam +'</span>';
+        });
+
+        html += '</td></tr>';
     }
-    row(e(a.Aanduiding), "");
-    row(e(a.Adres.Postcode), "Postcode");
-    row(e(a.Adres.Plaats), "Woonplaats");
-
-    html += '<tr><td>&nbsp;</td><td></td></tr>';
-    row(e(incident.Classificatie ? incident.Classificatie.replace(/,/g, ", ") : null), "Classificatie");
-    row(e(incident.Karakterestiek), "Karakteristiek"); // sic
 
     if(compareMode) {
         html += me.getIncidentKladblokHtml("pharos", incident);

@@ -51,7 +51,7 @@ function PharosIncidentsController(incidents) {
     });
     me.marker = null;
 
-    me.xml = null;
+    me.incident = null;
 
     // XXX to common object (IncidentFeatureSelector?)
     $('#incident_bottom_right').on('click', function() {
@@ -75,93 +75,134 @@ function PharosIncidentsController(incidents) {
 PharosIncidentsController.prototype.getPharosInfo = function() {
     var me = this;
 
-    $.ajax("/eal/Gms.json", { dataType: "json", cache: false })
+    $.ajax("/eal/falck.xml", { dataType: "xml", cache: false })
     .always(function() {
         window.setTimeout(function() {
             me.getPharosInfo();
-        }, 3000);
+        }, 5000);
     })
     .done(function(response, textStatus, jqXHR) {
-        var first = me.data === null;
-        me.data = response.EAL2OGG;
-        if(!me.data) {
-            me.incidentDetailsWindow.data("Geen incidentinformatie: " + JSON.stringify(response));
-        } else if(!me.data.Gms) {
-            me.incidentDetailsWindow.data("Geen actief incident");
+
+        var first = me.incident === null;
+
+        me.incident = me.parsePharosFalckXML(response);
+
+        if(!me.incident.nummer) {
+            me.incidentDetailsWindow.data("Geen incidentinformatie: " + Mustache.escape(new XMLSerializer().serializetoString(response)));
             return;
         }
-        // null -> geen incident
-        me.incidentDetailsWindow.data(me.data.Gms, true, true);
-        var newHtml = me.incidentDetailsWindow.getIncidentHtmlPharos(me.data.Gms, true);
-        var newId = me.data.Gms.Nummer;
-        me.markerLayer.addIncident(me.getIncidentOpenLayersLonLat(), false, true);
+
+        me.incidentDetailsWindow.data(me.incident, true, true, "pharos");
+        var newHtml = me.incidentDetailsWindow.getIncidentHtmlPharos(me.incident, true, true);
+        var newNummer = me.incident.nummer;
+        me.markerLayer.addIncident(me.incident.lonlat, false, true);
         me.markerLayer.setZIndexFix();
         if(first) {
             me.newIncident();
             me.button.setAlerted(true);
         } else {
             if(me.html !== newHtml) {
+                console.log("incidents: pharos updated falck.xml incident data", me.incident);
                 $(dbkjs).trigger("incidents.updated");
                 me.button.setAlerted(true);
             }
-            if(me.incidentId !== newId) {
+            if(me.incidentNummer !== newNummer) {
                 me.newIncident();
             }
         }
         me.html = newHtml;
-        me.incidentId = newId;
+        me.incidentNummer = newNummer;
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
-        me.xml = null;
+        me.incident = null; // Don't reset incidentNummer, may be intermittent failure
         me.incidentDetailsWindow.showError("Fout bij ophalen incidentinformatie: " + textStatus);
     });
 };
 
-PharosIncidentsController.prototype.getIncidentOpenLayersLonLat = function() {
-    var me = this;
-    var lon = me.data.Gms.IncidentAdres.Positie.X, lat = me.data.Gms.IncidentAdres.Positie.Y;
+PharosIncidentsController.prototype.parsePharosFalckXML = function(xml) {
 
-    lon = lon / 100000;
-    lat = lat / 100000;
+    var loc = $(xml).find("IncidentLocatie");
+    var incident = {
+        nummer: $(xml).find("IncidentNummer").text(),
+        x: $(loc).find("XCoordinaat").text(),
+        y: $(loc).find("YCoordinaat").text(),
+        startTijd: moment($(xml).find("BrwDisciplineGegevens StartDTG").text()),
+        prioriteit: $(xml).find("BrwDisciplineGegevens Prioriteit").text(),
+        classificaties: [],
+        straat: $(loc).find("NaamLocatie1").text(),
+        locatie: $(loc).find("NaamLocatie2").text(),
+        huisnummer: Number($(loc).find("Huisnummer").text()),
+        huisletter: $(loc).find("Letter").text(),
+        toevoeging: $(loc).find("HnToevoeging").text(),
+        aanduiding: $(loc).find("HnAanduiding").text(),
+        paalnummer: $(loc).find("Paalnummer").text(),
+        woonplaats: $(loc).find("Plaatsnaam").text(),
+        kladblokregels: [],
+        karakteristieken: [],
+        eenheden: [],
+        xml: xml
+    };
+    incident.lonlat = new OpenLayers.LonLat(incident.x, incident.y);
 
-    var p = new Proj4js.Point(lon, lat);
-    var t = Proj4js.transform(new Proj4js.Proj("WGS84"), new Proj4js.Proj("EPSG:28992"), p);
-    lon = t.x;
-    lat = t.y;
-    return new OpenLayers.LonLat(lon, lat);
+    var mcx = [ $(xml).find("BrwDisciplineGegevens Meldingsclassificatie1").text(),
+            $(xml).find("BrwDisciplineGegevens Meldingsclassificatie2").text(),
+            $(xml).find("BrwDisciplineGegevens Meldingsclassificatie3").text()];;
+    $.each(mcx, function(i, m) { if(m !== "") { incident.classificaties.push(m); } });
+
+    var kbs = $(xml).find("Kladblokregels Kladblokregel");
+    $.each(kbs, function(idx, kbr) {
+        incident.kladblokregels.push({
+            tijd: moment($(kbr).find("DTG").text()),
+            index: idx,
+            tekst: $(kbr).find("Inhoud").text()
+        });
+    });
+    incident.kladblokregels.sort(function(lhs, rhs) {
+        if(lhs.tijd.isSame(rhs.tijd)) {
+            return lhs.index - rhs.index;
+        } else {
+            return lhs.tijd.isBefore(rhs.tijd) ? -1 : 1;
+        }
+    });
+    $.each($(xml).find("Karakteristieken Karakteristiek"), function(idx, karakteristiek) {
+        incident.karakteristieken.push({
+            naam: $(karakteristiek).find("Naam").text(),
+            waarde: $(karakteristiek).find("Waarde").text()
+        });
+    });
+
+    $.each($(xml).find("Eenheden Eenheid"), function(idx, eenheid) {
+        incident.eenheden.push({
+            naam: $(eenheid).find("Naam").text(),
+            eindeActieTijd: $(eenheid).find("EindeActieDTG").text(),
+            status: Number($(eenheid).find("StatusCode").text())
+        });
+    });
+
+    return incident;
 };
 
 PharosIncidentsController.prototype.zoomToIncident = function() {
-    if(this.data && this.data.Gms) {
-        var pos = this.getIncidentOpenLayersLonLat();
-        dbkjs.map.setCenter(pos, dbkjs.options.zoom);
+    var me = this;
+    if(me.incident && me.incident.x && me.incident.y) {
+        dbkjs.map.setCenter(me.incident.lonlat, dbkjs.options.zoom);
     }
 };
 
 PharosIncidentsController.prototype.newIncident = function() {
     var me = this;
 
+    console.log("incidents: pharos new falck.xml incident data", me.incident);
+
     safetymaps.deselectObject();
     me.zoomToIncident();
 
-    var pos = this.getIncidentOpenLayersLonLat();
-    var adres = this.data.Gms.IncidentAdres.Adres;
-    var commonIncidentObject = {
-        postcode: adres.Postcode,
-        woonplaats: adres.Plaats,
-        huisnummer: Number(adres.Huisnummer),
-        huisletter: adres.HuisnummerToevg,
-        toevoeging: null,
-        straat: adres.Straat,
-        x: pos.lon,
-        y: pos.lat
-    };
-    me.featureSelector.findAndSelectMatches(commonIncidentObject, me.incidentDetailsWindow);
+    me.featureSelector.findAndSelectMatches(me.incident, me.incidentDetailsWindow);
     me.featureSelector.updateBalkRechtsonder();
 
     me.incidentDetailsWindow.show();
 
-    $(me).triggerHandler("new_incident", [commonIncidentObject]);
+    $(me).triggerHandler("new_incident", [me.incident]);
 };
 
 PharosIncidentsController.prototype.markerClick = function() {
