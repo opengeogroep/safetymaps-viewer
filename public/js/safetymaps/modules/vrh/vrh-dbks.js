@@ -875,6 +875,15 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object) {
     rows.push({l: "Risicoklasse",                   t: p.risicoklas});
     rows.push({l: "Inzetprocedure",                 t: p.inzetproce});
     rows.push({l: "Aanvalsplan",                    t: p.aanvalspla});
+
+
+    if(p.extra_info && (!p.datum_ei_1 || new moment(p.datum_ei_1).isBefore()) && (!p.eind_datum || new moment(p.eind_datum).isAfter())) {
+        rows.push({l: "Extra info 1 " + (p.bron_ei_1 ? "(Bron: " + p.bron_ei_1 + ")" : ""), t: p.extra_info});
+    }
+    if(p.extra_in_1 && (!p.datum_ei_2 || new moment(p.datum_ei_2).isBefore()) && (!p.eind_dat_1 || new moment(p.eind_dat_1).isAfter())) {
+        rows.push({l: "Extra info 2 " + (p.bron_ei_2 ? "(Bron: " + p.bron_ei_2 + ")" : ""), t: p.extra_in_1});
+    }
+
     safetymaps.infoWindow.addTab(windowId, "algemeen", "Algemeen", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
 
     rows = [];
