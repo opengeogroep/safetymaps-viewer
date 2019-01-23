@@ -182,7 +182,7 @@ dbkjs.resizeButtonGroup = function(e) {
     var el = $(".main-button-group");
 
     if(!el.hasClass(clazz)) {
-        console.log("map width " + width + ", button group size: " + clazz);
+        //console.log("map width " + width + ", button group size: " + clazz);
         el.removeClass("medium");
         el.removeClass("small");
         el.addClass(clazz);
