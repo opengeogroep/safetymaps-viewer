@@ -32,10 +32,10 @@ dbkjs.options.baselayers = [
             }
     ),
     new OpenLayers.Layer.TMS(
-            'Luchtfoto 2017 (PDOK)',
+            'Luchtfoto (PDOK)',
             'https://geodata.nationaalgeoregister.nl/luchtfoto/rgb/tms/',
             {
-                layername: '2017_ortho25/EPSG:28992',
+                layername: 'Actueel_ortho25/EPSG:28992',
                 isBaseLayer: true,
                 displayInLayerSwitcher: true,
                 type: 'png',
@@ -49,10 +49,10 @@ dbkjs.options.baselayers = [
     // For performance it is better to render aerophoto as 512x512 tiles if you control
     // the tile server
     new OpenLayers.Layer.TMS(
-            'Luchtfoto 2017 (PDOK)',
+            'Luchtfoto (PDOK)',
             'https://geodata.nationaalgeoregister.nl/luchtfoto/rgb/tms/',
             {
-                layername: '2017_ortho25/EPSG:28992',
+                layername: 'Actueel_ortho25/EPSG:28992',
                 hiDPI: true,
                 isBaseLayer: true,
                 displayInLayerSwitcher: true,
