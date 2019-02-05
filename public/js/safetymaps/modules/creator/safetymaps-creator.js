@@ -492,14 +492,11 @@ dbkjs.modules.safetymaps_creator = {
         }, "code");
 
         $("#tab_floors tr").click(function(e) {
-            var floor = e.currentTarget.firstChild.innerText.trim();
-            console.log("click floor " + floor, e);
-
-            $.each(object.verdiepingen, function(i, v) {
-                if(v.id !== object.id && v.bouwlaag === floor) {
-                    me.selectObjectById(v.id);
-                }
-            });
+            var v = object.verdiepingen[$(e.currentTarget).index()-1];
+            console.log("Click floor index " + $(e.currentTarget).index(), v);
+            if(v.id !== object.id) {
+                me.selectObjectById(v.id);
+            }
         });
 
         if(!isIncident) {
