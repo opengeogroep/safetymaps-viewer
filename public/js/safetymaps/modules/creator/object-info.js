@@ -236,7 +236,7 @@ safetymaps.creator.renderMedia = function(object) {
     if(object.media) {
         var carouselId = "media_carousel";
         image_carousel = $('<div id="' + carouselId + '" class="carousel slide" data-interval="false"></div>');
-        var image_carousel_inner = $('<div class="carousel-inner"></div>');
+        var image_carousel_inner = $('<div class="carousel-inner" style="background-color: #4f4f4f;"></div>');
         var image_carousel_nav = $('<ol class="carousel-indicators"></ol>');
 
         $.each(object.media, function(i, m) {
@@ -246,7 +246,7 @@ safetymaps.creator.renderMedia = function(object) {
             if(path.match(/pdf$/i)) {
                 image_carousel_inner.append(
                     '<div class="item ' + active + '">' +
-                        '<h3 class="pdf-heading" style="margin: 0; text-align: center; height: 28px">' + m.filename + '</h3>' +
+                        '<h3 class="pdf-heading" style="margin: 0 15%; text-align: center; height: 28px; color: #d7d7d7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis ">' + m.filename + '</h3>' +
                         '<div class="pdf-embed" id="pdf_embed_' + i + '" data-url="' + path + '"/>' +
                     '</div>'
                 );
