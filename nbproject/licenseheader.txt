@@ -1,7 +1,7 @@
 <#if licenseFirst??>
 ${licenseFirst}
 </#if>
-${licensePrefix}Copyright (c) 2018 B3Partners (info@b3partners.nl)
+${licensePrefix}Copyright (c) 2019 B3Partners (info@b3partners.nl)
 ${licensePrefix}
 ${licensePrefix}This file is part of safetymaps-viewer.
 ${licensePrefix}
