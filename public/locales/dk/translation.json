@@ -105,7 +105,9 @@
         "danger_symbol_quantity": "Mængde",
         "danger_symbol_information": "Information",
         "area": "Area",
-        "fire_compartment": "Fire compartment"
+        "fire_compartment": "Fire compartment",
+        "approach_route": "Adgangsvej",
+        "approach_route_name": "Navn"
     },
     "symbol": {
         "Falck1": "Trappe",

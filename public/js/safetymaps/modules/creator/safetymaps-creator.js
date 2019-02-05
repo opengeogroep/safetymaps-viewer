@@ -604,6 +604,12 @@ dbkjs.modules.safetymaps_creator = {
             }));
             me.showFeatureInfo(i18n.t("creator.danger_symbols"), table);
 
+        } else if(layer === me.objectLayers.layerApproachRoutes) {
+            console.log("approach route selected", e);
+            var table = $('<table class="table table-hover"></table>');
+            table.append('<tr><td>' + i18n.t("creator.approach_route_name") + '</th><th>' + i18n.t("dialogs.information") + '</th></tr>');
+            table.append(Mustache.render('<tr><td>{{name}}</td><td>{{description}}</td></tr>', f));
+            me.showFeatureInfo(i18n.t("creator.approach_route"), table);
         } else {
             console.log(layer.name + " feature selected", e);
             // Feature from layer that has no actual event for selecting but is

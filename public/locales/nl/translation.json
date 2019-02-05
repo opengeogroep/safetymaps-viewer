@@ -134,7 +134,9 @@
         "danger_symbol_quantity": "Hoeveelheid",
         "danger_symbol_information": "Informatie",
         "area": "Area",
-        "fire_compartment": "Brandcompartiment"
+        "fire_compartment": "Brandcompartiment",
+        "approach_route": "Toegangsweg",
+        "approach_route_name": "Naam"
     },
     "symbol": {
         "Falck1": "Trap",

@@ -110,7 +110,9 @@
         "danger_symbol_quantity": "Quantity",
         "danger_symbol_information": "Information",
         "area": "Area",
-        "fire_compartment": "Fire compartment"
+        "fire_compartment": "Fire compartment",
+        "approach_route": "Approach route",
+        "approach_route_name": "Name"
     },
     "symbol": {
         "Falck1": "Straight stairs",

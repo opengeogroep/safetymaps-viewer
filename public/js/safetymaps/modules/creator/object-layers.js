@@ -362,7 +362,9 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
                         return 0;
                     }
                 }
-            })
+            }),
+            temporary: new OpenLayers.Style({strokeWidth: 2.5}),
+            select: new OpenLayers.Style({strokeWidth: 2.5})
         })
     });
     this.layers.push(this.layerApproachRoutes);
