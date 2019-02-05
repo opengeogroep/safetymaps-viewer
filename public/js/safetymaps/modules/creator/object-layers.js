@@ -464,7 +464,8 @@ safetymaps.creator.CreatorObjectLayers.prototype.createLayers = function() {
             }, {
                 context: {
                     size: function(feature) {
-                        return safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue(me,14,feature.attributes.size);
+                        // Always scale labels
+                        return (feature.attributes.size || 14) * (595.2744 / dbkjs.map.getScale());
                     }
                 }
             })
