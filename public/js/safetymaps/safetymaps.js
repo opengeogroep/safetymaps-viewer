@@ -238,4 +238,5 @@ safetymaps.infoWindow = {
     // TODO: replace /api/organisation.json for global settings
 
     //safetymaps.infoWindow.initialize(dbkjs.options.separateWindowMode);
+    //safetymaps.layerWindow.initialize();
 })();

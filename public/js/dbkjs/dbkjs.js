@@ -295,37 +295,8 @@ $(document).ready(function () {
         });
         $('#c_settings').attr("title",i18n.t("settings.title"));
         $('#settings_title').text(i18n.t("settings.title"));
-        $('#tb02').attr("title",i18n.t("layer.layers"));
-        // We are removing / moving some existing DIVS from HTML to convert prev. popups to fullscreen modal popups
-        $('#baselayerpanel').remove();
-        $('#overlaypanel').attr('id', 'tmp_overlaypanel');
-        var baseLayerPopup = dbkjs.util.createModalPopup({name: 'baselayerpanel'});
-        baseLayerPopup.getView().append($('<div></div>').attr({'id': 'baselayerpanel_b'}));
-        var overlaypanelPopup = dbkjs.util.createModalPopup({name: 'overlaypanel'});
-        overlaypanelPopup.getView().append($('#tmp_overlaypanel .tabbable'));
-        $('#tmp_overlaypanel').remove();
 
-        $(dbkjs).one("dbkjs_init_complete", function() {
-            $('#layer_basic').text(i18n.t("layer.basic"));
-            $("#baselayerpanel_b").prepend("<div style='padding-bottom: 5px'><h4>"+i18n.t("layer.background")+":</h4></div>");
-            $("#baselayerpanel_b").append("<div style='padding-top: 10px; padding-bottom: 5px'><h4>"+i18n.t("layer.layers")+":</h4></div>");
-
-            $("#overlaypanel_div").parent().appendTo("#baselayerpanel_b");
-            $("#tb01").remove();
-        });
-
-        $('#tb01, #tb02').on('click', function (e) {
-            e.preventDefault();
-            var panelId = $(this).attr('href').replace('#', '');
-            if (panelId === 'baselayerpanel') {
-                $.each(dbkjs.options.baselayers, function (bl_index, bl) {
-                    if (bl.getVisibility()) {
-                        $('#bl' + bl_index).addClass('active');
-                    }
-                });
-            }
-            dbkjs.util.getModalPopup(panelId).show();
-        });
+        safetymaps.layerWindow.initialize();
 
         $('body').append(dbkjs.util.createDialog('vectorclickpanel', '<i class="icon-info-sign"></i> ' + i18n.t("dialogs.clickinfo"), 'left:0;bottom:0;margin-bottom:0px;position:fixed'));
         $("#vectorclickpanel").on('click', function() {
@@ -346,11 +317,6 @@ $(document).ready(function () {
                 $("#checkbox_splitScreen").on('change', function (e) {
                     dbkjs.options.splitScreenChecked = e.target.checked;
                     $(dbkjs).triggerHandler('setting_changed_splitscreen', dbkjs.options.splitScreenChecked);
-                });
-
-                // Hide all modal popups when settings is opened
-                $("#c_settings").on('click', function(e) {
-                    $(dbkjs).triggerHandler('modal_popup_show', {popupName: 'settings'});
                 });
             });
         }

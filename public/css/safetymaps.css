@@ -185,7 +185,7 @@ h4 {
     -webkit-transition: width .25s;
     transition: width .25s;
 
-    z-index: 10000;
+    z-index: 1030; /* modal-backdrop 1040, modal 1050 */
     background-color: #FFFFFF;
 }
 
