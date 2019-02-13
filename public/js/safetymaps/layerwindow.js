@@ -17,7 +17,7 @@
  *  along with safetymaps-viewer. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* global dbkjs, safetymaps, OpenLayers, Proj4js, jsts, moment, i18n, Mustache, PDFObject */
+/* global dbkjs, safetymaps, OpenLayers, Proj4js, jsts, moment, i18n, Mustache, PDFObject, SplitScreenWindow */
 
 /**
  * Layer switching window
@@ -31,9 +31,34 @@ safetymaps.layerWindow = {
     initialize: function() {
         var me = this;
 
+
         //console.log("layerWindow: initialize");
 
         this.window = new SplitScreenWindow("layerWindow");
+
+        var reshowWindowName, reshowWindow;
+        this.window.show = function() {
+            reshowWindowName = null;
+
+            if(dbkjs.options.reopenWindowAfterLayerWindowClose) {
+                $(dbkjs).one('modal_popup_hide', function(e, params) {
+                    console.log("Opening layer window, this open popup will be reopened when layer window closed: " + params.popupName);
+                    reshowWindowName = params.popupName;
+                    reshowWindow = params.window;
+                });
+            }
+
+            SplitScreenWindow.prototype.show.call(this);
+        };
+        this.window.hide = function() {
+            var visible = this.isVisible();
+            SplitScreenWindow.prototype.hide.call(this);
+            if(visible && reshowWindowName && reshowWindowName !== "layerWindow") {
+                console.log("Layer window closed, reshowing window: " + reshowWindowName);
+                reshowWindow.show();
+            }
+        };
+
         this.window.createElements();
 
         this.window.getView().append($("<div id='baselayerpanel_b'></div>"));

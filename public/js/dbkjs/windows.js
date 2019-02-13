@@ -98,7 +98,7 @@ ModalWindow.prototype.isVisible = function() {
 
 ModalWindow.prototype.show = function() {
     // Event should cause other modal popups to hide
-    $(dbkjs).trigger('modal_popup_show', {popupName: this.name});
+    $(dbkjs).trigger('modal_popup_show', {popupName: this.name, window: this});
 
     this.popup.css('width', '100%');
     this.visible = true;
@@ -110,7 +110,7 @@ ModalWindow.prototype.hide = function() {
         this.popup.css('width', '0%');
         this.visible = false;
         $(this).triggerHandler('hide');
-        $(dbkjs).trigger('modal_popup_hide', {popupName: this.name});
+        $(dbkjs).trigger('modal_popup_hide', {popupName: this.name, window: this});
     }
 };
 
@@ -223,7 +223,7 @@ SplitScreenWindow.prototype.hide = function(noMapAdjust) {
 
         this.visible = false;
         $(this).triggerHandler('hide');
-        $(dbkjs).trigger('modal_popup_hide', {popupName: this.name});
+        $(dbkjs).trigger('modal_popup_hide', {popupName: this.name, window: this});
     }
 };
 
@@ -237,7 +237,7 @@ SplitScreenWindow.prototype.show = function() {
         // Event should cause other modal popups to hide
         // isSplitScreen means split screen dialog is shown, if other split
         // screen window is open do not adjust map width
-        $(dbkjs).trigger('modal_popup_show', { popupName: this.name, isSplitScreen:  true});
+        $(dbkjs).trigger('modal_popup_show', { popupName: this.name, isSplitScreen:  true, window: this});
 
         // XXX move to dbkjs event 'split_screen_show';
         $(".main-button-group").css({right: "45%"});

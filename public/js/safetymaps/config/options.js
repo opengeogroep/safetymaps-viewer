@@ -44,6 +44,8 @@ dbkjs.options = {
 
     separateWindowMode: OpenLayers.Util.getParameters().separateWindow === "true",
 
+    reopenWindowAfterLayerWindowClose: true,
+
     // Enable hiDPI
     enableHiDPI: true,
     // Use HiDPI by default if available (checkbox state saved in local storage)
