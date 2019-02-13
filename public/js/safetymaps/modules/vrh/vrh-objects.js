@@ -43,7 +43,8 @@ dbkjs.modules.vrh_objects = {
             evenementen: true,
             waterongevallen: true,
             evFilter: "huidig",
-            evFilterShowNrOfWeeksAfterBegin: 1
+            evFilterShowDaysBeforeBegin: 3,
+            evFilterShowDaysAfterBegin: 3
         }, this.options);
         this.options.options = dbkjs.options;
         this.options.map = dbkjs.map;
@@ -144,13 +145,25 @@ dbkjs.modules.vrh_objects = {
                     var now = new moment();
                     var countBefore = evenementenObjects.length;
                     evenementenObjects = evenementenObjects.filter(function(ev) {
-                        // Evenementen tonen tot 4 weken na sbegin
+                        // Evenementen tonen van instelbaar aantal dagen voor en na sbegin
                         var beginDatum = new moment(ev.sbegin);
-                        var eindDatum = beginDatum.clone().add(me.options.evFilterShowNrOfWeeksAfterBegin, "weeks");
-                        var filter = (me.options.evFilter === "ooktoekomstig" || beginDatum.isBefore(now)) && eindDatum.isAfter(now);
+                        var beginDatumAdjusted = beginDatum.clone().subtract(me.options.evFilterShowDaysBeforeBegin, "days");
+                        var eindDatum = beginDatum.clone().add(me.options.evFilterShowDaysAfterBegin, "days");
+                        var filter = (me.options.evFilter === "ooktoekomstig" || beginDatumAdjusted.isBefore(now)) && eindDatum.isAfter(now);
+/*
                         if(filter) {
-                            console.log("Tonen evenement " + ev.evnaam + " begindatum " + beginDatum.format("LLLL") + ", einddatum niet meer dan " + me.options.evFilterShowNrOfWeeksAfterBegin + " weken geleden: " + eindDatum.format("LLLL"));
+                            console.log("Tonen evenement " + ev.evnaam + " begindatum " + beginDatum.format("LLLL") + " (check datum " + beginDatumAdjusted.format("LLLL") + "), einddatum niet meer dan " + me.options.evFilterShowDaysAfterBegin + " dagen geleden: " + eindDatum.format("LLLL"));
+                        } else {
+                            var s = "Verbergen evenement " + ev.evnaam + " begindatum " + beginDatum.format("LLLL");
+                            if(me.options.evFilter !== "ooktoekomstig" && beginDatumAdjusted.isAfter(now)) {
+                                s += " startdatum is meer dan 3 dagen in de toekomst (tijdstip wanner evenement getoond wordt: " + beginDatumAdjusted.format("LLLL");
+                            }
+                            if(eindDatum.isBefore(now)) {
+                                s += " startdatum is meer dan 3 dagen geleden (tijdstip tot wanneer evenement werd getoond: " + eindDatum.format("LLLL");
+                            }
+                            console.log(s);
                         }
+*/
                         return filter;
                     });
                     console.log(countBefore - evenementenObjects.length + " evenementen gefiltered, aantal zichtbaar: " + evenementenObjects.length);
