@@ -172,10 +172,10 @@ dbkjs.resizeButtonGroup = function(e) {
 
     var width = $("#map").width();
 
-    if(width < 800) {
+    if(width < dbkjs.options.maxMapWidthMediumButtons) {
         clazz = "medium";
     }
-    if(width < 600) {
+    if(width < dbkjs.options.maxMapWidthSmallButtons) {
         clazz = "small";
     }
 

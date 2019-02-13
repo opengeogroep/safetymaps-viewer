@@ -33,6 +33,8 @@ dbkjs.options = {
     minSplitScreenWidth: 1000,
     splitScreenChecked: true,
     splitScreenSwitch: true,
+    maxMapWidthMediumButtons: 800,
+    maxMapWidthSmallButtons: 600,
 
     // No feature info above this scale
     featureInfoMaxScale: 2381.0976,
