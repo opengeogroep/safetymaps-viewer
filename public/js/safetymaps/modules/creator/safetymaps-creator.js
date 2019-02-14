@@ -371,7 +371,7 @@ dbkjs.modules.safetymaps_creator = {
     getClusterLink: function (feature) {
         var me = this;
         var v = {
-            label: feature.attributes.apiObject.formele_naam+" ("+feature.attributes.apiObject.informele_naam+")",
+            label: feature.attributes.apiObject.formele_naam + (feature.attributes.apiObject.informele_naam ? " ("+feature.attributes.apiObject.informele_naam+")" : ""),
             id: feature.attributes.id,
             symbol: feature.attributes.symbol
         };
