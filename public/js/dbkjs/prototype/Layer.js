@@ -92,22 +92,24 @@ dbkjs.Layer = dbkjs.Class({
                         );
 
                 var legends = [];
-                $.each(ly.params.LAYERS.split(","), function(i, layer) {
-                    legends.push(
-                        OpenLayers.Util.urlAppend(
-                            url,
-                            OpenLayers.Util.getParameterString({
-                                "TRANSPARENT": "true",
-                                "SERVICE": "WMS",
-                                "VERSION": "1.1.1",
-                                "REQUEST": "GetLegendGraphic",
-                                "EXCEPTIONS": "application/vnd.ogc.se_xml",
-                                "FORMAT": "image/png",
-                                "LAYER": layer
-                            })
-                        )
-                    );
-                });
+                if(ly.params.LAYERS) {
+                    $.each(ly.params.LAYERS.split(","), function(i, layer) {
+                        legends.push(
+                            OpenLayers.Util.urlAppend(
+                                url,
+                                OpenLayers.Util.getParameterString({
+                                    "TRANSPARENT": "true",
+                                    "SERVICE": "WMS",
+                                    "VERSION": "1.1.1",
+                                    "REQUEST": "GetLegendGraphic",
+                                    "EXCEPTIONS": "application/vnd.ogc.se_xml",
+                                    "FORMAT": "image/png",
+                                    "LAYER": layer
+                                })
+                            )
+                        );
+                    });
+                }
                 ly.events.register("loadstart", ly, function () {
                     dbkjs.util.loadingStart(ly);
                 });
