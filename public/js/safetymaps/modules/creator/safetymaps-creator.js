@@ -193,6 +193,37 @@ dbkjs.modules.safetymaps_creator = {
             }
 
         });
+        
+        //floor button
+        var a = $("<a/>")
+                .attr("id", "floor-a")
+                .attr("title", "Floor button")
+                .addClass("btn btn-default olButton")
+                .on("click", function() {
+                    if(me.floorBox.is(":visible")){
+                        me.floorBox.hide();
+                        me.floorTriangle.hide();
+                    }else {
+                        me.floorBox.show();
+                        me.floorTriangle.show();
+                    }
+                });
+        $("<i/>").addClass("fa fa-building").appendTo(a);
+        a.prependTo("#bottom_left_buttons");
+        
+        // floor window
+        var floorBottom = $(window).height() - $("#floor-a").offset().top - $("#floor-a").outerHeight();
+        me.floorTriangle = $("<div/>")
+                .attr("id", "floor-triangle")
+                .css("bottom", floorBottom + 4)
+                .addClass("triangle-left")
+                .appendTo("#map");
+        me.floorBox = $("<div/>")
+                .attr("id", "floor-box")
+                .css("bottom", floorBottom - 32)
+                .addClass("floor-box")
+                .appendTo("#map");
+        $("#floor-a").hide();
     },
 
     infoWindowTabsResize: function() {
@@ -497,6 +528,15 @@ dbkjs.modules.safetymaps_creator = {
             if(v.id !== object.id) {
                 me.selectObjectById(v.id);
             }
+        });
+        
+        $("#floor-box tr").click(function(e) {
+            me.floorVisible = me.infoWindow.visible;
+            var v = object.verdiepingen[$(e.currentTarget).index()-1];
+            console.log("Click floor index " + $(e.currentTarget).index(), v);
+            if(v.id !== object.id) {
+                me.selectObjectById(v.id,null,!me.floorVisible);
+            }           
         });
 
         if(!isIncident) {
