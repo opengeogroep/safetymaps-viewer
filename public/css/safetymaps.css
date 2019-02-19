@@ -573,3 +573,19 @@ a.btn.on:after {
     top: 0;
     text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white;
 }
+
+.floor-box {
+    position: absolute;
+    opacity: 1.0;
+    left: 80px;
+    bottom: 120px;
+    width: 250px;
+    z-index: 2998;
+    border-color: #000000;
+    padding: 10px 5px;
+    display: none;  
+    margin-bottom: 20px;
+    background-color: #fff;
+    border: 1px solid;
+    border-radius: 4px;
+}
