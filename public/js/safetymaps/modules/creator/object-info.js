@@ -64,6 +64,8 @@ safetymaps.creator.renderInfoTabs = function(object, windowId) {
     safetymaps.infoWindow.addTab(windowId, "danger_symbols", i18n.t("creator.danger_symbols"), "info", safetymaps.creator.createInfoTabDiv(rows));
 
     rows = safetymaps.creator.renderFloors(object);
+    $("#floor-box").empty();
+    $("#floor-box").append(safetymaps.creator.createInfoTabDiv(rows));
     safetymaps.infoWindow.addTab(windowId, "floors", i18n.t("creator.floors"), "info", safetymaps.creator.createInfoTabDiv(rows));
     
     if(!dbkjs.modules.safetymaps_creator.options.hideBrandweervoorziening){
@@ -321,6 +323,7 @@ safetymaps.creator.renderFloors = function(object) {
 
     var rows = [];
     if(object.verdiepingen) {
+        $("#floor-a").show();
         rows.push([
             "<b>" + i18n.t("creator.floor").charAt(0).toUpperCase() + i18n.t("creator.floor").slice(1) + "</b>",
             "<b>" + i18n.t("name") + "</b>"
@@ -339,7 +342,9 @@ safetymaps.creator.renderFloors = function(object) {
                 b + name + b2
             ]);
         });
-
+        
+    }else{
+        $("#floor-a").hide();
     }
 
     return rows;
