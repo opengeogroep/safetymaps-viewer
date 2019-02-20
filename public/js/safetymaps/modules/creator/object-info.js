@@ -320,6 +320,7 @@ safetymaps.creator.embedPDFs = function(element) {
 safetymaps.creator.renderFloors = function(object) {
 
     var rows = [];
+    var currentFloor;
     if(object.verdiepingen) {
         rows.push([
             "<b>" + i18n.t("creator.floor").charAt(0).toUpperCase() + i18n.t("creator.floor").slice(1) + "</b>",
@@ -328,6 +329,7 @@ safetymaps.creator.renderFloors = function(object) {
 
         $.each(object.verdiepingen, function(i, v) {
             var current = v.id === object.id;
+            if (current) currentFloor = v.bouwlaag;
             var b = (current ? "<b>" : "");
             var b2 = (current ? "</b>" : "");
             var name = v.formele_naam;
@@ -339,7 +341,7 @@ safetymaps.creator.renderFloors = function(object) {
                 b + name + b2
             ]);
         });
-        $(dbkjs).trigger('foundFloors',[rows]);
+        $(dbkjs).trigger('foundFloors',{rows:rows,floor:currentFloor});
     }else{
         $(dbkjs).trigger('foundNoFloors');
     }
