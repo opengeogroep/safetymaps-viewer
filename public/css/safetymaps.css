@@ -579,7 +579,7 @@ a.btn.on:after {
     opacity: 1.0;
     left: 80px;
     bottom: 120px;
-    width: 250px;
+    width: 50px;
     z-index: 2998;
     border-color: #000000;
     padding: 10px 5px;
