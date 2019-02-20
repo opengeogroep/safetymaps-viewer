@@ -509,7 +509,6 @@ dbkjs.modules.safetymaps_creator = {
             console.log("Click floor index " + $(e.currentTarget).index(), v);
             if(v.id !== object.id) {
                 me.selectObjectById(v.id,null,!me.floorVisible);
-                $("#floor-span").text(v.bouwlaag);
             }           
         });
 
@@ -726,12 +725,8 @@ dbkjs.modules.safetymaps_creator = {
                         me.floorTriangle.show();
                     }
                 });
-        var i = $("<i/>").addClass("fa fa-building");
-        var span = $("<span>")
-                .attr("id","floor-span")
-                .css("display","block");
-        span.appendTo(i);
-        i.appendTo(a);
+        $("<i/>").addClass("fa fa-building").appendTo(a);
+
         a.prependTo("#bottom_left_buttons");
 
         // floor window
@@ -764,7 +759,6 @@ dbkjs.modules.safetymaps_creator = {
                 }
             });
             $("#floor-box").append(safetymaps.creator.createInfoTabDiv(rows));
-            $("#floor-span").text(currentFloor);
         });
 
         $(dbkjs).on("foundNoFloors", function () {
