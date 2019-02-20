@@ -749,7 +749,9 @@ dbkjs.modules.safetymaps_creator = {
         $("#floor-a").hide();
 
 
-        $(dbkjs).on("foundFloors", function (evt, obj) {
+        $(dbkjs).on("foundFloors", function (evt, evtObj) {
+            var obj = evtObj.rows;
+            var currentFloor = evtObj.floor;
             $("#floor-a").show();
             $("#floor-triangle").show();
             $("#floor-box").show();
@@ -762,10 +764,16 @@ dbkjs.modules.safetymaps_creator = {
                 }
             });
             $("#floor-box").append(safetymaps.creator.createInfoTabDiv(rows));
+            $("#floor-span").text(currentFloor);
         });
 
         $(dbkjs).on("foundNoFloors", function () {
             $("#floor-a").hide();
+            $("#floor-triangle").hide();
+            $("#floor-box").hide();
+        });
+        
+        $(dbkjs).on("mapClicked", function () {
             $("#floor-triangle").hide();
             $("#floor-box").hide();
         });
