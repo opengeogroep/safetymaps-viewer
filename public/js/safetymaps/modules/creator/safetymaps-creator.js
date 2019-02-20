@@ -725,7 +725,9 @@ dbkjs.modules.safetymaps_creator = {
                         me.floorTriangle.show();
                     }
                 });
-        $("<i/>").addClass("fa fa-building").appendTo(a);
+        $("<img/>")
+                .attr("src","images/warehouse.svg")
+                .attr("style","style='position: relative; top: -3px'").appendTo(a);
 
         a.prependTo("#bottom_left_buttons");
 
