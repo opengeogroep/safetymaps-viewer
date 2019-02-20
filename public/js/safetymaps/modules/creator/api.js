@@ -140,6 +140,45 @@ safetymaps.creator.api = {
 
     },
 
+    verdiepingenSort: function(lhs, rhs) {
+        lhs = lhs.bouwlaag;
+        rhs = rhs.bouwlaag;
+        // First +3, +2, +1
+        // Then "BG"
+        // Then -1, -2, -3
+
+        if(lhs.charAt(0) === "+") {
+            // When lhs starts with + and rhs not, lhs always sorted higher
+            if(rhs.charAt(0) !== "+") {
+                return -1;
+            } else {
+                // Sort in descending order
+                return Number(rhs) - Number(lhs);
+            }
+        }
+
+        if(lhs.charAt(0) === "-") {
+            // When lhs starts with - and rhs not, lhs always sorted lower
+            if(rhs.charAt(0) !== "-") {
+                return 1;
+            } else {
+                // Sort negative numbers in descending order
+                return Number(rhs) - Number(lhs);
+            }
+        }
+
+        if(lhs === "BG") {
+            if(rhs.charAt(0) === "+") {
+                return 1;
+            } else if(rhs.charAt(0) === "-") {
+                return -1;
+            }
+        }
+
+        // Fall back to normal sorting
+        return lhs.localeCompare(rhs);
+    },
+
     getObjectDetails: function(id) {
         var me = this;
 
@@ -158,6 +197,11 @@ safetymaps.creator.api = {
             d.reject(msg + safetymaps.utils.getAjaxError(jqXHR, textStatus, errorThrown));
         })
         .done(function(data, textStatus, jqXHR) {
+
+            if(data.verdiepingen) {
+                data.verdiepingen.sort(me.verdiepingenSort);
+            }
+
             d.resolve(data);
         });
         return d.promise();
