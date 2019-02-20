@@ -433,6 +433,7 @@ dbkjs.util = {
                 lay.dbkjsParent.getfeatureinfo(e);
             }
         });
+        $(dbkjs).trigger("mapClicked");
     },
     isJsonNull: function (val) {
         if (val === "null" || val === null || val === "" || typeof (val) === "undefined" || val === "undefined") {
