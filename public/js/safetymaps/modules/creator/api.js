@@ -146,7 +146,16 @@ safetymaps.creator.api = {
         // First +3, +2, +1
         // Then "BG"
         // Then -1, -2, -3
-
+        
+        //bouwlaag can contain '/' example: +2/+11
+        //sort on lhs of the '/'
+        if(lhs.indexOf('/')!== -1){
+            lhs = lhs.slice(0,lhs.indexOf('/'));
+        }
+        if(rhs.indexOf('/')!== -1){
+            rhs = rhs.slice(0,rhs.indexOf('/'));
+        }
+        
         if(lhs.charAt(0) === "+") {
             // When lhs starts with + and rhs not, lhs always sorted higher
             if(rhs.charAt(0) !== "+") {
