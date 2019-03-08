@@ -330,7 +330,8 @@ dbkjs.modules.geolocate = {
 
         if(_obj.options.provider === "geolocate") {
             _obj.control = new OpenLayers.Control.Geolocate({
-                bind: true,
+                bind: false,
+                watch: true,
                 geolocationOptions: {
                     enableHighAccuracy: true,
                     maximumAge: 0,
