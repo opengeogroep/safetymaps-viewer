@@ -133,7 +133,8 @@ function getNonInterfaceObscuredBounds(layer) {
     //console.log("Screen bounds are: " + screenBoundsWkt + ", non interface obscured bounds: " + new jsts.io.WKTWriter().write(newBoundsGeom));
     return {
         bounds: newScreenBounds,
-        jtsGeometry: newBoundsGeom
+        jtsGeometry: newBoundsGeom,
+        jtsCenter: new jsts.geom.Coordinate((newScreenBounds.left + newScreenBounds.right)/2, (newScreenBounds.top + newScreenBounds.bottom)/2)
     };
 };
 
@@ -166,7 +167,8 @@ OpenLayers.Strategy.Cluster.prototype.cluster = function (event) {
                         if (screenBounds.intersectsBounds(theGeom.getBounds())) {
                             //console.log("feature point outside screen but selectiekader inside", feature);
                             var line = gf.createLineString([
-                                new jsts.geom.Coordinate(this.layer.map.getCenter().lon, this.layer.map.getCenter().lat),
+                                //new jsts.geom.Coordinate(this.layer.map.getCenter().lon, this.layer.map.getCenter().lat),
+                                nonInterfaceObscuredBounds.jtsCenter,
                                 new jsts.geom.Coordinate(feature.geometry.x, feature.geometry.y)
                             ]);
                             var newLocation = line.intersection(nonInterfaceObscuredBounds.jtsGeometry);
