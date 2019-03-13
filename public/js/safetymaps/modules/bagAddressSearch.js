@@ -54,8 +54,13 @@
                 }
             },
             resultSelected: function(result) {
-                console.log("bag adddress search result selected " + result.lon + ", " + result.lat, result);
-                dbkjs.map.setCenter([result.lon,result.lat], dbkjs.options.zoom);
+                var p = new OpenLayers.Geometry.Point(result.lon, result.lat);
+                var reproject = result.lon <= 360 && result.lat <= 360;
+                if(reproject) {
+                    p = p.transform(new OpenLayers.Projection("EPSG:4326"), dbkjs.map.getProjectionObject());
+                }
+                console.log("bag adddress search result selected " + result.lon + ", " + result.lat + (reproject ? " (reprojected to " + p.x + ", " + p.y : ""));
+                dbkjs.map.setCenter([p.x, p.y], dbkjs.options.zoom);
             }
         },false);
     }
