@@ -291,7 +291,7 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
     html += '<tr><td class="leftlabel">Start incident: </td><td>' + incident.start.format("dddd, D-M-YYYY HH:mm:ss") + '</td></tr>';
     html += '<tr><td class="leftlabel">Adres:</td><td>' + incident.locatie + '</td></tr>';
     html += '<tr><td class="leftlabel">Postcode &amp; Woonplaats:</td><td>' + (incident.POSTCODE ? incident.POSTCODE + ', ' : "") + (incident.PLAATS_NAAM ? incident.PLAATS_NAAM : incident.PLAATS_NAAM_NEN) + '</td></tr>';
-    html += '<tr><td class="leftlabel">Melding classificatie:</td><td>' + dbkjs.util.htmlEncode(incident.classificatie) + '</td></tr>';
+    html += '<tr><td class="leftlabel">Melding classificatie:</td><td>' + dbkjs.util.htmlEncode(incident.classificaties) + '</td></tr>';
 
     if(!incident.karakteristiek || incident.karakteristiek.length === 0) {
         html += '<tr class="detailed"><td>Karakteristieken:</td><td>';

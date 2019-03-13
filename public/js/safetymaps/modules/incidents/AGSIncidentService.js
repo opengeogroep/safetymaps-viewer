@@ -522,7 +522,7 @@ AGSIncidentService.prototype.getAllIncidentInfo = function(incidentId, archief, 
                 .done(function(classificatie, karakteristiek, kladblok, inzetEenheden) {
 
                     // Set additional properties in incident
-                    incident.classificatie = classificatie;
+                    incident.classificaties = classificatie;
                     incident.karakteristiek = karakteristiek;
                     incident.kladblok = kladblok;
                     incident.inzetEenheden = inzetEenheden;
