@@ -24,7 +24,7 @@ function AlertableButton(id, title, icon) {
     me.id = id;
     me.icon = icon;
 
-    me.i = $('<i class="fa fa-' + icon + '" style="width: 27.5px"></i>');
+    me.i = $('<i class="fa fa-' + icon + '"></i>');
     me.a = $('<a></a>')
     .attr({
         'id': id,

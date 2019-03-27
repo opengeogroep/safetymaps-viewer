@@ -77,7 +77,7 @@ safetymaps.layerWindow = {
             '</div>');
 
 
-        $('#btngrp_3').append('<a id="btn_layers" data-sid="3" class="btn btn-default navbar-btn" href="#" title="' + i18n.t('layer.layers') + '"><img style="position: relative; top: -3px" src="images/layer-group-solid.svg"></a>');
+        $('#btngrp_3').append('<a id="btn_layers" data-sid="3" class="btn btn-default navbar-btn" href="#" title="' + i18n.t('layer.layers') + '"><img style="position: relative; width: 32px; top: -3px" src="images/layer-group-solid.svg"></a>');
 
         $("#btn_layers").on("click", function() {
             me.window.toggle();

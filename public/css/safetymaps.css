@@ -63,18 +63,17 @@ html, body {
     z-index: 1;
 }
 .main-button-group .btn {
-    width: 54px;
     height: 64px;
+    min-width: 50px;
     margin-left: -6px;
     font-size: 35px;
 }
 .btn-group {
     z-index: 1001;
 }
-
 .main-button-group.medium .btn {
-    width: 46px;
     height: 46px;
+    min-width: 46px;
     font-size: 28px;
     margin-top: 4px;
     margin-bottom: 0px;
@@ -82,11 +81,16 @@ html, body {
 }
 .main-button-group.medium .btn img {
     max-height: 44px;
+    min-width: 30px;
+}
+
+.main-button-group.medium #btn_layers img {
+    width: 30px !important;
 }
 
 .main-button-group.small .btn {
-    width: 40px;
     height: 40px;
+    min-width: 35px;
     font-size: 24px;
     margin-top: 2px;
     margin-bottom: 0px;
@@ -95,6 +99,11 @@ html, body {
 .main-button-group.small .btn img {
     max-height: 38px;
 }
+
+.main-button-group.small #btn_layers img {
+    width: 20px !important;
+}
+
 
 /* OpenLayers */
 

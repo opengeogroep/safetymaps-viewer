@@ -76,7 +76,7 @@ function IncidentMonitorController(incidents) {
             'href': '#',
             'title': 'Reset'
         })
-        .append('<i class="fa fa-repeat" style="width: 27.5px"></i>')
+        .append('<i class="fa fa-repeat"></i>')
         .click(function(e) {
             me.getIncidentList();
             me.incidentDetailsWindow.hide();
