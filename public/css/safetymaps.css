@@ -72,7 +72,7 @@ html, body {
     z-index: 1001;
 }
 .main-button-group .btn.biggerminwidth {
-    min-width: 61px;
+    min-width: 64px;
 }
 
 .main-button-group.medium .btn {
