@@ -28,7 +28,7 @@ function AlertableButton(id, title, icon) {
     me.a = $('<a></a>')
     .attr({
         'id': id,
-        'class': 'btn btn-default navbar-btn',
+        'class': 'btn btn-default navbar-btn biggerminwidth',
         'href': '#',
         'title': title
     })

@@ -71,6 +71,10 @@ html, body {
 .btn-group {
     z-index: 1001;
 }
+.main-button-group .btn.biggerminwidth {
+    min-width: 61px;
+}
+
 .main-button-group.medium .btn {
     height: 46px;
     min-width: 46px;
