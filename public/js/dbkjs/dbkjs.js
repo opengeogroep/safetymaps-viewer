@@ -93,18 +93,83 @@ dbkjs.getOrganisation = function() {
         data: params,
         cache: false
     })
+    .fail(function(jqXHR, textStatus, errorThrown) {
+
+        if(jqXHR.status === 200 && jqXHR.responseText.indexOf('<form method="post" action="j_security_check">')) {
+            console.log("Login required, showing login popup...");
+
+            $("#loginsubmit").on("click", function() {
+                var username = $("#j_username").val();
+                var password = $("#j_password").val();
+                console.log("Logging in with " + username + ":" + password);
+
+                $("#loginsubmit").attr("disabled", "disabled");
+                $("#loginsubmit").text("Bezig met inloggen...");
+
+                $.ajax("../j_security_check", {
+                    method: "POST",
+                    data: {
+                        j_username: username,
+                        j_password: password
+                    },
+                    dataType: "html"
+                })
+                .always(function() {
+                    $("#loginsubmit").removeAttr("disabled");
+                    $("#loginsubmit").text("Inloggen");
+                })
+                .fail(function(jqXHR) {
+                    $("#loginmesg").text("Unknown login error (HTTP " + jqXHR.status + ") - check console");
+                    console.log("Login Ajax failure", arguments);
+                    if(jqXHR.status === 400) {
+                        $("#loginmesg").text("");
+                        console.log("Bad request 400, trying again...");
+                        // TODO: get organisation and immediately try POST login again on .fail()?
+                        dbkjs.getOrganisation();
+                    }
+                })
+                .done(function(data) {
+                    try {
+                        var data = JSON.parse(data);
+                        if(data.organisation) {
+                            console.log("Successful login, organisation", data.organisation);
+                            $("#loginpanel").modal("hide");
+                            dbkjs.options.organisation = data.organisation;
+                            dbkjs.gotOrganisation();
+                            return;
+                        }
+                    } catch(err) {
+                        var i = data.indexOf("Fout");
+                        if(i !== -1) {
+                            var msg = data.substring(i);
+                            i = msg.indexOf("</p>");
+                            msg = msg.substring(0,i);
+                            console.log("Got login error message: " + msg);
+                            $("#loginmesg").text(msg);
+                            return;
+                        }
+                    }
+                    $("#loginmesg").text("Unknown login error - check console");
+                    console.log("Login error", arguments);
+                });
+            });
+
+            $("#loginpanel").modal({backdrop:'static',keyboard:false, show:true});
+        }
+    })
     .done(function (data) {
         if (data.organisation) {
             dbkjs.options.organisation = data.organisation;
-            if (dbkjs.options.organisation.title) {
-                document.title = dbkjs.options.organisation.title;
-            }
+
             dbkjs.gotOrganisation();
         }
     });
 };
 
 dbkjs.gotOrganisation = function () {
+    if (dbkjs.options.organisation.title) {
+        document.title = dbkjs.options.organisation.title;
+    }
     dbkjs.hoverControl = new OpenLayers.Control.SelectFeature(
             [],
             {
@@ -153,11 +218,16 @@ dbkjs.gotOrganisation = function () {
             }
         }
     });
-    
+
     dbkjs.sortModuleButtons();
     dbkjs.layers.loadFromWMSGetCapabilities();
     dbkjs.finishMap();
     dbkjs.initialized = true;
+
+    if(OpenLayers.Util.getParameters().integrated === "true") {
+        $("#settingspanel_b").append('<button class="btn btn-default btn-success btn-block" onclick="window.location.href=\'../logout.jsp\'"><span class="glyphicon glyphicon-log-out"></span> Uitloggen</button>');
+    }
+
     $(dbkjs).trigger('dbkjs_init_complete');
 };
 
