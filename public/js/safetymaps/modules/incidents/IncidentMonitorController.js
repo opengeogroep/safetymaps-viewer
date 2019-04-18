@@ -966,7 +966,7 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
     // Remove fixed height used for keeping previous scrollTop
     $("#tab_twitter").css("height", "");
 
-    $.ajax((dbkjs.options.incidents.twitterUrlPrefix ? dbkjs.options.incidents.twitterUrlPrefix : "") + "action/twitter", {
+    $.ajax((dbkjs.options.incidents.twitterUrlPrefix ? dbkjs.options.incidents.twitterUrlPrefix : "") + "api/twitter", {
         dataType: "json",
         data: params
     }).fail(function(jqXHR, textStatus, errorThrown) {
