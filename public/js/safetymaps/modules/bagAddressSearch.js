@@ -27,7 +27,9 @@
         
         this.options = $.extend({
             // default options here
-            maxSearchResults: 30
+            maxSearchResults: 30,
+            showPoint:false,
+            secondsToDisplay:7000
         }, this.options);
         
         if(!dbkjs.modules.search) {
@@ -61,6 +63,9 @@
                 }
                 console.log("bag adddress search result selected " + result.lon + ", " + result.lat + (reproject ? " (reprojected to " + p.x + ", " + p.y : ""));
                 dbkjs.map.setCenter([p.x, p.y], dbkjs.options.zoom);
+                if(me.options.showPoint){
+                    dbkjs.modules.search.zoomAndPulse(result,me.options.secondsToDisplay);
+                }
             }
         },false);
     }

@@ -39,7 +39,9 @@ dbkjs.modules.search_dawa = {
             "stednavneParams": {
                 "fuzzy": "true",
                 "per_side": 40
-            }
+            },
+            showPoint:false,
+            secondsToDisplay:7000
         }, this.options);
 
         if(!dbkjs.modules.search) {
@@ -81,7 +83,11 @@ dbkjs.modules.search_dawa = {
             },
             resultSelected: function(result) {
                 console.log("DAWA search result selected " + result.x + ", " + result.y, result);
-                dbkjs.map.setCenter(new OpenLayers.LonLat(result.x, result.y), dbkjs.options.zoom);
+                var lonlat = new OpenLayers.LonLat(result.x, result.y);
+                dbkjs.map.setCenter(lonlat, dbkjs.options.zoom);
+                if(me.options.showPoint){
+                    dbkjs.modules.search.zoomAndPulse(lonlat,me.options.secondsToDisplay);
+                }
             }
         });
 
@@ -112,7 +118,11 @@ dbkjs.modules.search_dawa = {
             },
             resultSelected: function(result) {
                 console.log("DAWA search result selected", result);
-                dbkjs.map.setCenter(new OpenLayers.LonLat(result.visueltcenter[0], result.visueltcenter[1]), dbkjs.options.zoom);
+                var lonlat = new OpenLayers.LonLat(result.visueltcenter[0], result.visueltcenter[1]);
+                dbkjs.map.setCenter(lonlat, dbkjs.options.zoom);
+                if(me.options.showPoint){
+                    dbkjs.modules.search.zoomAndPulse(lonlat,me.options.secondsToDisplay);
+                }
             }
         });
     }
