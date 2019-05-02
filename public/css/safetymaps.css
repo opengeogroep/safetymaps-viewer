@@ -399,6 +399,7 @@ table td.leftlabel {
     border-radius: 4px;
     font-size: 18px !important;
     font-weight: bold !important;
+    z-index: 10;
 }
 
 /* Module: support */
