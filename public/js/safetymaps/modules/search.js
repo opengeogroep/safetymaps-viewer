@@ -30,6 +30,7 @@ dbkjs.modules.search = {
     activeConfig: null,
     keyupTimeout: null,
     results: null,
+    layer: null,
 
     register: function() {
         var me = this;
@@ -46,6 +47,8 @@ dbkjs.modules.search = {
 
         me.createButton();
         me.createPopup();
+        this.layer = new OpenLayers.Layer.Vector('_search');
+        dbkjs.map.addLayer(this.layer);
     },
 
     createButton: function() {
@@ -199,7 +202,29 @@ dbkjs.modules.search = {
             me.activeConfig.resultSelected(me.results[resultIndex]);
         });
         $("#search_results").append(ul);
+    },
+    
+    zoomAndPulse: function(lonlat,secondsToDisplay){
+        var me = this;
+        me.layer.removeAllFeatures();
+        var point = new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat);
+        me.layer.addFeatures([
+            new OpenLayers.Feature.Vector(
+                point,
+                {},
+                {
+                    graphicName: 'circle',
+                    fillColor: '#BE81F7',
+                    strokeColor: '#BE81F7',
+                    strokeWidth: 3,
+                    fillOpacity: 0.9,
+                    pointRadius: 10
+                }
+            )
+        ]);
+        setTimeout(function(){
+            me.layer.removeAllFeatures();
+        }, secondsToDisplay);
     }
-
     // TODO add show error
  };
