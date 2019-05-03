@@ -101,7 +101,7 @@ dbkjs.getOrganisation = function() {
             $("#loginsubmit").on("click", function() {
                 var username = $("#j_username").val();
                 var password = $("#j_password").val();
-                console.log("Logging in with " + username + ":" + password);
+                console.log("Logging in with username " + username);
 
                 $("#loginsubmit").attr("disabled", "disabled");
                 $("#loginsubmit").text("Bezig met inloggen...");
@@ -119,11 +119,18 @@ dbkjs.getOrganisation = function() {
                     $("#loginsubmit").text("Inloggen");
                 })
                 .fail(function(jqXHR) {
+                    if(jqXHR.status === 403) {
+                        $("#loginmesg").text("Uw account heeft geen rechten op de viewer. U bent uitgelogd.");
+                        $.ajax("../logout.jsp");
+                        // XXX retry button maken voor window.reload()
+                        dbkjs.getOrganisation();
+                    }
+
                     $("#loginmesg").text("Unknown login error (HTTP " + jqXHR.status + ") - check console");
                     console.log("Login Ajax failure", arguments);
-                    if(jqXHR.status === 400) {
+                    if(jqXHR.status === 400 || jqXHR.status === 408) {
                         $("#loginmesg").text("");
-                        console.log("Bad request 400, trying again...");
+                        console.log("Bad request 400 or timeout 408, trying again...");
                         // TODO: get organisation and immediately try POST login again on .fail()?
                         dbkjs.getOrganisation();
                     }
@@ -155,6 +162,10 @@ dbkjs.getOrganisation = function() {
             });
 
             $("#loginpanel").modal({backdrop:'static',keyboard:false, show:true});
+        } else if(jqXHR.status === 403) {
+            $("#loginmesg").text("Uw account heeft geen rechten op de viewer. U bent uitgelogd.");
+            $.ajax("../logout.jsp");
+            dbkjs.getOrganisation();
         }
     })
     .done(function (data) {
