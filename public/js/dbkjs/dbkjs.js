@@ -268,6 +268,19 @@ dbkjs.resizeButtonGroup = function(e) {
         el.removeClass("small");
         el.addClass(clazz);
     }
+
+    var totalButtonGroupWidth = 0;
+    var buttonGroups = el.find(".btn-group");
+    buttonGroups.each(function() {
+        totalButtonGroupWidth += $(this).outerWidth(true);
+    });
+    if (el[0].style.paddingLeft) totalButtonGroupWidth += +(el[0].style.paddingLeft.replace("px", ""));
+    if (el[0].style.paddingRight) totalButtonGroupWidth += +(el[0].style.paddingRight.replace("px", ""));
+    if (totalButtonGroupWidth > width) {
+        el.find("#btngrp_object").css("clear", "right");
+    } else {
+        el.find("#btngrp_object").css("clear", "none");
+    }
 };
 
 dbkjs.sortModuleButtons = function(){
