@@ -62,16 +62,20 @@
             <h4 class="modal-title" id="settings_title"><span class="glyphicon glyphicon-lock"></span> Inloggen</h4>
           </div>
             <div id="loginpanel_b" class="modal-body">
-                <div id="loginmesg"></div>
-                 <div class="form-group">
-                   <label for="j_username"><span class="glyphicon glyphicon-user"></span> Gebruikersnaam:</label>
-                   <input type="text" class="form-control" id="j_username" autocapitalize="none">
-                </div>
-                <div class="form-group">
-                  <label for="j_password"><span class="glyphicon glyphicon-eye-open"></span> Wachtwoord:</label>
-                  <input type="password" class="form-control" id="j_password">
-                </div>
-                <button id="loginsubmit" class="btn btn-default btn-success btn-block"><span class="glyphicon glyphicon-log-in"></span> Inloggen</button>
+                <form id="loginform">
+                    <div id="loginmesg"></div>
+                    <div class="form-group">
+                        <label for="j_username"><span class="glyphicon glyphicon-user"></span> Gebruikersnaam:</label>
+                        <input type="text" class="form-control" id="j_username" autocapitalize="none" autofocus="autofocus">
+                    </div>
+                    <div class="form-group">
+                        <label for="j_password"><span class="glyphicon glyphicon-eye-open"></span> Wachtwoord:</label>
+                        <input type="password" class="form-control" id="j_password">
+                    </div>
+                    <input type="submit" id="loginsubmit2" style="display: none" onclick="$('#loginsubmit').click(); return false;"></input>
+                    <button id="loginsubmit" class="btn btn-default btn-success btn-block"><span class="glyphicon glyphicon-log-in"></span> Inloggen</button>
+                    <button id="loginrefresh" class="btn btn-default btn-default btn-block" style="display: none" onclick="window.location.reload()"><span class="glyphicon glyphicon-retweet"></span> Opnieuw proberen</button>
+                </form>
             </div>
         </div>
       </div>

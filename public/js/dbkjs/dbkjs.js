@@ -122,8 +122,11 @@ dbkjs.getOrganisation = function() {
                     if(jqXHR.status === 403) {
                         $("#loginmesg").text("Uw account heeft geen rechten op de viewer. U bent uitgelogd.");
                         $.ajax("../logout.jsp");
-                        // XXX retry button maken voor window.reload()
+                        $(".form-group").hide();
+                        $("#loginsubmit").hide();
+                        $("#loginrefresh").show();
                         dbkjs.getOrganisation();
+                        return;
                     }
 
                     $("#loginmesg").text("Unknown login error (HTTP " + jqXHR.status + ") - check console");
@@ -235,9 +238,10 @@ dbkjs.gotOrganisation = function () {
     dbkjs.finishMap();
     dbkjs.initialized = true;
 
-    if(OpenLayers.Util.getParameters().integrated === "true") {
+    if(dbkjs.options.organisation.integrated) {
         $("#settingspanel_b").append('<button class="btn btn-default btn-success btn-block" onclick="window.location.href=\'../logout.jsp\'"><span class="glyphicon glyphicon-log-out"></span> Uitloggen</button>');
     }
+
 
     $(dbkjs).trigger('dbkjs_init_complete');
 };
