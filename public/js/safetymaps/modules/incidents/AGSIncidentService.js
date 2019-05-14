@@ -55,7 +55,7 @@ AGSIncidentService.prototype.initialize = function(tokenUrl, user, pass) {
     var dInitialize = $.Deferred();
 
     var dToken;
-    if(tokenUrl && user && pass) {
+    if(tokenUrl) {
         me.getTokenWithParams = function() {
             return me.getToken(tokenUrl, user, pass);
         };

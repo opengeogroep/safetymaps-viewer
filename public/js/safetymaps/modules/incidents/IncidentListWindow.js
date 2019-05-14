@@ -81,7 +81,14 @@ IncidentListWindow.prototype.data = function(activeIncidents, inactiveIncidents,
     d.appendTo(v);
 
     if(dbkjs.modules.incidents.options.incidentListFooterFunction) {
-        dbkjs.modules.incidents.options.incidentListFooterFunction(v, activeIncidents, inactiveIncidents);
+        var f = dbkjs.modules.incidents.options.incidentListFooterFunction;
+        if(typeof f === "string" && typeof(window[f]) === "function") {
+            f = window[f];
+        }
+
+        if(typeof f === "function") {
+            f(v, activeIncidents, inactiveIncidents);
+        }
     }
 
     if(restoreScrollTop) {
@@ -121,8 +128,15 @@ IncidentListWindow.prototype.listIncidents = function(el, incidents, showInzetIn
                 .attr("title", incident.locatie + (showInzetInTitle && actueleInzet.length > 0 ? ", " + actueleInzet.join(", ") : ""));
         odd = !odd;
 
-        if(dbkjs.options.incidents.incidentListFunction) {
-            dbkjs.options.incidents.incidentListFunction(r, incident);
+        if(dbkjs.modules.incidents.options.incidentListFunction) {
+            var f = dbkjs.modules.incidents.options.incidentListFunction;
+            if(typeof f === "string" && typeof(window[f]) === "function") {
+                f = window[f];
+            }
+
+            if(typeof f === "function") {
+                f(r, incident);
+            }
         }
 
         $("<span class='time'/>").text(incident.start.format("D-M-YYYY HH:mm")).appendTo(r);
