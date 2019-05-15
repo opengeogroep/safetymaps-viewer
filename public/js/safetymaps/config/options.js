@@ -30,7 +30,7 @@ dbkjs.options = {
     // Interface
     showZoomButtons: true,
     enableSplitScreen: true,
-    minSplitScreenWidth: 1000,
+    minSplitScreenWidth: 950,
     splitScreenChecked: true,
     splitScreenSwitch: true,
     maxMapWidthMediumButtons: 800,
