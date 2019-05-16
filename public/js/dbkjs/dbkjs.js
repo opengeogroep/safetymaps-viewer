@@ -144,6 +144,7 @@ dbkjs.getOrganisation = function() {
                         if(data.organisation) {
                             console.log("Successful login, organisation", data.organisation);
                             $("#loginpanel").modal("hide");
+                            $(".btn-group .btn").first().focus();
                             dbkjs.options.organisation = data.organisation;
                             dbkjs.gotOrganisation();
                             return;
