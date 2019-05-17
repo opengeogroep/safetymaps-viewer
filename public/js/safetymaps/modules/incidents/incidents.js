@@ -59,6 +59,9 @@ dbkjs.modules.incidents = {
         if(params.webservice === "true") {
             this.options.controller = "FalckIncidentsController";
         }
+
+        // XXX test with old code running on same incidents module settings
+        this.options.controller = "VehicleIncidentsController";
         
         // XXX unused, remove
         if(params.toonZonderEenheden === "true") {
@@ -66,7 +69,7 @@ dbkjs.modules.incidents = {
         }
         
         // Initialize AGS service if needed
-        if(this.options.controller === "AGSIncidentsController" || this.options.incidentMonitor) {
+        if(this.options.controller === "AGSIncidentsController" || this.options.incidentMonitor || this.options.controller === "VehicleIncidentsController") {
             if(this.options.ags) {
                 this.service = new AGSIncidentService(this.options.ags.incidentsUrl, this.options.ags.vehiclePosUrl);
 
@@ -90,6 +93,8 @@ dbkjs.modules.incidents = {
         
         if(this.options.incidentMonitor) {
             this.controller = new IncidentMonitorController(this);
+        } else if(this.options.controller === "VehicleIncidentsController") {
+            this.controller = new VehicleIncidentsController(this);
         } else if(this.options.controller === "PharosIncidentsController") {
             this.controller = new PharosIncidentsController(this);
         } else if(this.options.controller === "AGSIncidentsController") {
