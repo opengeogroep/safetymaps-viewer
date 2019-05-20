@@ -410,7 +410,15 @@ VehicleIncidentsController.prototype.getVoertuigIncidenten = function(nummer) {
     } else {
         primary = me.getVoertuigIncidentSMCT(nummer);
         if(me.options.incidentSourceFallback === "VrhAGS") {
-            fallback = me.getVoertuigIncidentVrhAGS(nummer);
+            if(!me.service.initialized) {
+                console.log("Fallback VrhAGS not initialized, not querying");
+
+                // Optie: na tijd wachten opnieuw proberen te initialiseren...
+
+                fallback = $.Deferred().reject("Fallback niet geinitialiseerd").promise();
+            } else {
+                fallback = me.getVoertuigIncidentVrhAGS(nummer);
+            }
         } else {
             me.options.incidentSourceFallback = null;
         }
