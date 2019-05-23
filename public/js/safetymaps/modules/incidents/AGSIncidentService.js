@@ -1062,7 +1062,7 @@ AGSIncidentService.prototype.getVehiclePositions = function(incidentIds) {
 
     var me = this;
 
-    if(me.vehiclePosLayerUrls === null) {
+    if(!me.vehiclePosLayerUrls) {
         return $.Deferred().resolveWith([]);
     }
 

@@ -40,7 +40,8 @@ function VehicleIncidentsController(incidents) {
         incidentSourceFallback: "VrhAGS",
         incidentSourceSwitchoverTimeout: 10000,
         incidentMonitorCode: null,
-        voertuigIM: true
+        voertuigIM: true,
+        eenheden: true
     }, me.options);
     me.primaryFailing = false;
 
@@ -94,6 +95,16 @@ function VehicleIncidentsController(incidents) {
     window.setTimeout(function() {
         me.addConfigControls();
     }, 2000);
+
+    if(me.options.eenheden) {
+        me.vehiclePositionLayer = new VehiclePositionLayer();
+        me.vehiclePositionLayer.setShowMoving(false);
+
+        if(me.options.incidentSource === "VrhAGS") {
+            // XXX
+            // selectLayers.push(me.vehiclePositionLayer.layer);
+        }
+    }
 
     if(me.options.incidentSource === "falckService" || me.options.incidentSourceFallback === "falckService") {
         $(dbkjs).one("dbkjs_init_complete", function() {
@@ -563,6 +574,14 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
     // XXX update als incidentInfo.incident.nummer !== me.incidentNummer, is met timeout 30s...
 
     var oldIncident = me.incident;
+
+    if(me.options.incidentSource === "VrhAGS" && me.options.eenheden) {
+        me.service.getVehiclePositions([incidentInfo.incident.INCIDENT_ID])
+        .done(function(features) {
+            console.log("Vehicle positions for incident", features);
+            me.vehiclePositionLayer.features(features);
+        });
+    }
 
     if(incidentInfo.incident.nummer !== me.incidentNummer) {
         me.geenInzet(false);
