@@ -602,3 +602,20 @@ a.btn.on:after {
     border: 1px solid;
     border-radius: 4px;
 }
+
+#status {
+    color: #333;
+    background-color: #fff;
+    border-color: #ccc;
+    position: absolute;
+    z-index: 999999;
+    padding: 6px 12px;
+    font-size: 18px;
+    font-weight: bold;
+    line-height: 1.42857;
+    user-select: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    left: 15px;
+    top: 23px;
+}

@@ -99,6 +99,7 @@ function VehicleIncidentsController(incidents) {
     if(me.options.eenheden) {
         me.vehiclePositionLayer = new VehiclePositionLayer();
         me.vehiclePositionLayer.setShowMoving(false);
+        dbkjs.selectControl.layers.push(me.vehiclePositionLayer.layer);
 
         if(me.options.incidentSource === "VrhAGS") {
             // XXX
@@ -112,9 +113,6 @@ function VehicleIncidentsController(incidents) {
                 me.getFalckServiceVoertuignummers();
                 me.setVoertuignummer(me.voertuignummer, true);
             }, 2000);
-            if(me.options.enableVehicleControl){
-                me.vehiclePositionLayer = dbkjs.modules.incidents.vehicleController.vehiclePositionLayer;
-            }
         });
     }
 
@@ -397,6 +395,10 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
         if(me.incidentNummer && !me.incidentFromIncidentList) {
             me.inzetBeeindigd('Inzet beeindigd');
         }
+
+        if(me.options.showInactiveStatus) {
+            me.showInactiveStatus();
+        }
     } else {
         if(me.incidentMonitorController) {
             me.incidentMonitorController.markerLayer.layer.setVisibility(false);
@@ -404,6 +406,70 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
 
         me.inzetIncident(inzetInfo, false);
     }
+};
+
+VehicleIncidentsController.prototype.showInactiveStatus = function() {
+    var me = this;
+/*
+    if(me.options.incidentSource === "VrhAGS") {
+        me.service.getVehicle(me.voertuignummer)
+        .done(function(features) {
+            if(features.length === 1) {
+                console.log("Vehicle status", features[1].attributes);
+
+            }
+        });
+    }
+*/
+
+    var descByCode = {
+        0: "Noodsignaal",
+        1: "Eigen initiatief",
+        2: "Aanvraag spraakcontact",
+        3: "Informatievraag",
+        4: "Aanvang rit / uitruk / aanrijdend",
+        5: "Ter plaatse",
+        6: "Aanrijdend naar bestemming",
+        7: "Binnenkort beschikbaar",
+        8: "Vrij. aanrijdend naar post / standplaats / kazerne",
+        9: "Op post",
+        10: "Vertraagd inzetbaar",
+        11: "Buiten dienst",
+        12: "Binnenkort in dienst",
+        13: "Aanvraag privegesprek",
+        14: "Urgente aanvraag spraakcontact",
+        15: "Opdracht verstrekt"
+    };
+
+    $.ajax(me.options.incidentsUrl + "/eenheidstatus/" + me.voertuignummer, {
+        dataType: "json"
+    })
+    .always(function() {
+        $("#status").remove();
+    })
+    .fail(function(jqXHR, textStatus, errorThrown) {
+        console.log("Fout bij ophalen eenheidstatus", arguments);
+    })
+    .done(function(data) {
+        var status = null;
+        $.each(data, function(i, d) {
+            //if(d.StatusCode && d.StatusCode !== 9) {
+            //    console.log("Andere status voor roepnaam " + d.Roepnaam + ": " + d.StatusCode + " " + descByCode[d.StatusCode]);
+            //}
+            if(d.Roepnaam === me.voertuignummer) {
+                status = d;
+                return false;
+            }
+        });
+        if(status) {
+            var status = status.StatusCode;
+            var desc = descByCode[status];
+            if(status) {
+                console.log("Voertuigstatus: " + status + ": "+ desc);
+                $("<div id='status'>" + status + ": " + desc + "</div>").prependTo("body");
+            }
+        }
+    });
 };
 
 VehicleIncidentsController.prototype.getVoertuigIncidenten = function(nummer) {
@@ -555,6 +621,7 @@ VehicleIncidentsController.prototype.geenInzet = function(triggerEvent) {
     this.incident = null;
     this.incidentDetailsWindow.hide();
     this.markerLayer.clear();
+    this.vehiclePositionLayer.features([]);
     if(this.featureSelector) {
         this.featureSelector.hideBalkRechtsonder();
     }
@@ -585,6 +652,12 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
         });
     }
 
+    if(!me.incidentFromIncidentList) {
+        me.button.setIcon("bell");
+    }
+
+    $("#status").remove();
+
     if(incidentInfo.incident.nummer !== me.incidentNummer) {
         me.geenInzet(false);
 
@@ -614,10 +687,6 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
         me.featureSelector.updateBalkRechtsonder(me.getBalkrechtsonderTitle());
 
         me.incidentDetailsWindow.show();
-
-        if(!me.incidentFromIncidentList) {
-            me.button.setIcon("bell");
-        }
 
         $(me).triggerHandler("new_incident", [incident, incidentInfo]);
     } else { // update
@@ -690,6 +759,20 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
             me.featureSelector.findAndSelectMatches(incident, me.incidentDetailsWindow);
         }
     }
+};
+
+VehicleIncidentsController.prototype.inzetBeeindigd = function(melding) {
+    var me = this;
+    $("#zoom_extent").click();
+
+    // Wait for layer loading messages to clear...
+    window.setTimeout(function() {
+        dbkjs.util.alert('Melding', melding);
+        window.setTimeout(function() {
+            $('#systeem_meldingen').hide();
+        }, 10000);
+    }, 3000);
+    me.geenInzet(true);
 };
 
 VehicleIncidentsController.prototype.zoomToIncident = function() {

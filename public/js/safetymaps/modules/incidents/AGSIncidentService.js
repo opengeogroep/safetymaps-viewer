@@ -431,10 +431,13 @@ AGSIncidentService.prototype.getVoertuigInzet = function(voertuignummer) {
     var me = this;
     var d = $.Deferred();
 
+    var table = "V_B_ACT_INZET_EENHEID";
+
     if(!voertuignummer) {
         d.reject("Null voertuignummer");
+    } else if(!me.tableUrls || !me.tableUrls[table]) {
+        d.reject("Nog niet geinitialiseerd");
     } else {
-        var table = "V_B_ACT_INZET_EENHEID";
         me.doAGSAjax({
             url: me.tableUrls[table] + "/query",
             dataType: "json",
@@ -1056,6 +1059,40 @@ AGSIncidentService.prototype.getArchiefIncidentClassificaties = function(inciden
         classificaties.push(incident.BRW_MELDING_CL2);
     }
     return classificaties.length === 0 ? "" : classificaties.join(", ");
+};
+
+AGSIncidentService.prototype.getVehicle = function(roepnummer) {
+    var me = this;
+
+    if(!me.vehiclePosLayerUrls) {
+        return $.Deferred().reject();
+    }
+
+    var d = $.Deferred();
+
+    me.doAGSAjax({
+        url: me.vehiclePosLayerUrls["Brandweer_Eenheden"] + "/query",
+        dataType: "json",
+        data: {
+            f: "json",
+            token: me.token,
+            where: "Discipline='B' and Roepnummer='" + roepnummer + "'",
+            outFields: "*"
+        },
+        cache: false
+    })
+    .fail(function(e) {
+        d.reject("Fout ophalen voertuig: " + e);
+    })
+    .done(function(data, textStatus, jqXHR) {
+        if(!data.features) {
+            d.reject("Geen features in voertuig query response");
+        } else {
+            d.resolve(data.features);
+        }
+    });
+    return d.promise();
+
 };
 
 AGSIncidentService.prototype.getVehiclePositions = function(incidentIds) {
