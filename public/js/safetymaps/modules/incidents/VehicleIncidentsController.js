@@ -381,6 +381,9 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
         me.incidentMonitorController.markerLayer.layer.setVisibility(true);
     }
 
+    $('#systeem_meldingen').hide();
+    me.button.setIcon("bell-o");
+
     if(typeof inzetInfo === "string") {
         var msg = "Kan meldkamerinfo niet ophalen: " + inzetInfo;
         dbkjs.util.showError(msg);
@@ -399,7 +402,6 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
             me.incidentMonitorController.markerLayer.layer.setVisibility(false);
         }
 
-        $('#systeem_meldingen').hide();
         me.inzetIncident(inzetInfo, false);
     }
 };
