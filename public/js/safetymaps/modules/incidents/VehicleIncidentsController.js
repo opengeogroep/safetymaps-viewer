@@ -41,7 +41,9 @@ function VehicleIncidentsController(incidents) {
         incidentSourceSwitchoverTimeout: 10000,
         incidentMonitorCode: null,
         voertuigIM: true,
-        eenheden: true
+        eenheden: true,
+        showStatus: false,
+        statusUpdateInterval: 15000
     }, me.options);
     me.primaryFailing = false;
 
@@ -123,6 +125,12 @@ function VehicleIncidentsController(incidents) {
             }
             me.setVoertuignummer(me.voertuignummer, true);
         });
+    }
+
+    if(me.options.showStatus) {
+        window.setTimeout(function() {
+            me.updateStatus();
+        }, 2000);
     }
 }
 
@@ -395,10 +403,6 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
         if(me.incidentNummer && !me.incidentFromIncidentList) {
             me.inzetBeeindigd('Inzet beeindigd');
         }
-
-        if(me.options.showInactiveStatus) {
-            me.showInactiveStatus();
-        }
     } else {
         if(me.incidentMonitorController) {
             me.incidentMonitorController.markerLayer.layer.setVisibility(false);
@@ -408,37 +412,43 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
     }
 };
 
-VehicleIncidentsController.prototype.showInactiveStatus = function() {
+VehicleIncidentsController.prototype.updateStatus = function() {
     var me = this;
-/*
-    if(me.options.incidentSource === "VrhAGS") {
-        me.service.getVehicle(me.voertuignummer)
+
+   /* if(me.options.incidentSource === "VrhAGS") {
+        me.service.getVehicleStatus(me.voertuignummer)
         .done(function(features) {
             if(features.length === 1) {
                 console.log("Vehicle status", features[1].attributes);
-
             }
         });
-    }
-*/
+    } else if(me.options.incidentSource === "falckService") {*/
+        me.showStatusSafetymapsService();
+    //}
 
-    var descByCode = {
-        0: "Noodsignaal",
-        1: "Eigen initiatief",
-        2: "Aanvraag spraakcontact",
-        3: "Informatievraag",
-        4: "Aanvang rit / uitruk / aanrijdend",
-        5: "Ter plaatse",
-        6: "Aanrijdend naar bestemming",
-        7: "Binnenkort beschikbaar",
-        8: "Vrij. aanrijdend naar post / standplaats / kazerne",
-        9: "Op post",
-        10: "Vertraagd inzetbaar",
-        11: "Buiten dienst",
-        12: "Binnenkort in dienst",
-        13: "Aanvraag privegesprek",
-        14: "Urgente aanvraag spraakcontact",
-        15: "Opdracht verstrekt"
+};
+
+VehicleIncidentsController.prototype.showStatusSafetymapsService = function() {
+    var me = this;
+
+    var statusById = {
+        0: { desc: "Noodsignaal" },
+        1: { code: "EI", desc: "Eigen initiatief" },
+        2: { code: "AS", desc: "Aanvraag spraakcontact" },
+        3: { code: "I",  desc: "Informatievraag" },
+        4: { code: "UT", desc: "Aanvang rit / uitruk / aanrijdend" },
+        5: { code: "TP", desc: "Ter plaatse" },
+        6: { code: "NV", desc: "Aanrijdend naar bestemming" },
+        7: { code: "IR", desc: "Binnenkort beschikbaar" },
+        8: { code: "BS", desc: "Vrij. aanrijdend naar post / standplaats / kazerne" },
+        9: { code: "KZ", desc: "Op post" },
+        10: { code: "VI", desc: "Vertraagd inzetbaar" },
+        11: { code: "BD", desc: "Buiten dienst" },
+        12: { code: "BI", desc: "Binnenkort in dienst" },
+        13: { code: "A0", desc: "Aanvraag privegesprek" },
+        14: { code: "U",  desc: "Urgente aanvraag spraakcontact" },
+        15: { code: "OV", desc: "Opdracht verstrekt" },
+        16: { code: "OG", desc: "Alarmering ontvangen" }
     };
 
     $.ajax(me.options.incidentsUrl + "/eenheidstatus/" + me.voertuignummer, {
@@ -446,6 +456,10 @@ VehicleIncidentsController.prototype.showInactiveStatus = function() {
     })
     .always(function() {
         $("#status").remove();
+
+        window.setTimeout(function() {
+            me.updateStatus();
+        }, me.options.statusUpdateInterval);
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         console.log("Fout bij ophalen eenheidstatus", arguments);
@@ -462,11 +476,10 @@ VehicleIncidentsController.prototype.showInactiveStatus = function() {
             }
         });
         if(status) {
-            var status = status.StatusCode;
-            var desc = descByCode[status];
-            if(status) {
-                console.log("Voertuigstatus: " + status + ": "+ desc);
-                $("<div id='status'>" + status + ": " + desc + "</div>").prependTo("body");
+            var statusInfo = statusById[status.StatusCode];
+            if(statusInfo) {
+                console.log("Voertuigstatus: " + status.StatusCode + ": " + statusInfo.code + ", " + statusInfo.desc);
+                $("<div id='status'>" + status.StatusCode + ": " + statusInfo.code + "</div>").prependTo("body");
             }
         }
     });
@@ -655,8 +668,6 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
     if(!me.incidentFromIncidentList) {
         me.button.setIcon("bell");
     }
-
-    $("#status").remove();
 
     if(incidentInfo.incident.nummer !== me.incidentNummer) {
         me.geenInzet(false);
