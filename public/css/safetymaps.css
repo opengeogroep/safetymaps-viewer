@@ -608,7 +608,7 @@ a.btn.on:after {
     background-color: #fff;
     border-color: #ccc;
     position: absolute;
-    z-index: 999999;
+    z-index: 1;
     padding: 6px 12px;
     font-size: 18px;
     font-weight: bold;
