@@ -344,6 +344,7 @@ VehicleIncidentsController.prototype.setVoertuignummer = function(voertuignummer
     $(me).triggerHandler("voertuigNummerUpdated", [true]);
     me.cancelGetInzetInfo();
     me.getInzetInfo();
+    me.updateStatus();
 };
 
 VehicleIncidentsController.prototype.cancelGetInzetInfo = function() {
@@ -415,17 +416,38 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
 VehicleIncidentsController.prototype.updateStatus = function() {
     var me = this;
 
-   /* if(me.options.incidentSource === "VrhAGS") {
-        me.service.getVehicleStatus(me.voertuignummer)
-        .done(function(features) {
-            if(features.length === 1) {
-                console.log("Vehicle status", features[1].attributes);
-            }
-        });
-    } else if(me.options.incidentSource === "falckService") {*/
+    if(me.options.incidentSource === "VrhAGS") {
+        me.showStatusVrhAGS();
+    } else if(me.options.incidentSource === "falckService") {
         me.showStatusSafetymapsService();
-    //}
+    }
+};
 
+VehicleIncidentsController.prototype.showStatusVrhAGS = function() {
+    var me = this;
+    window.clearTimeout(me.updateStatusTimer);
+
+    me.service.getVoertuigStatus(me.voertuignummer)
+    .always(function() {
+        $("#status").remove();
+
+        me.updateStatusTimer = window.setTimeout(function() {
+            me.updateStatus();
+        }, me.options.statusUpdateInterval);
+    })
+    .fail(function(jqXHR, textStatus, errorThrown) {
+        console.log("Fout bij ophalen eenheidstatus", arguments);
+    })
+    .done(function(status) {
+        console.log("VrhAGS voertuigstatus", status);
+
+        if(status) {
+            var id = status.T_ACT_STATUS_CODE_EXT_BRW;
+            var code = status.T_SYS_STATUS_AFK_BRW;
+
+            $("<div id='status'>" + id + ": " + code + "</div>").prependTo("body");
+        }
+    });
 };
 
 VehicleIncidentsController.prototype.showStatusSafetymapsService = function() {
@@ -451,13 +473,15 @@ VehicleIncidentsController.prototype.showStatusSafetymapsService = function() {
         16: { code: "OG", desc: "Alarmering ontvangen" }
     };
 
+    window.clearTimeout(me.updateStatusTimer);
+
     $.ajax(me.options.incidentsUrl + "/eenheidstatus/" + me.voertuignummer, {
         dataType: "json"
     })
     .always(function() {
         $("#status").remove();
 
-        window.setTimeout(function() {
+        me.updateStatusTimer = window.setTimeout(function() {
             me.updateStatus();
         }, me.options.statusUpdateInterval);
     })
@@ -467,9 +491,6 @@ VehicleIncidentsController.prototype.showStatusSafetymapsService = function() {
     .done(function(data) {
         var status = null;
         $.each(data, function(i, d) {
-            //if(d.StatusCode && d.StatusCode !== 9) {
-            //    console.log("Andere status voor roepnaam " + d.Roepnaam + ": " + d.StatusCode + " " + descByCode[d.StatusCode]);
-            //}
             if(d.Roepnaam === me.voertuignummer) {
                 status = d;
                 return false;

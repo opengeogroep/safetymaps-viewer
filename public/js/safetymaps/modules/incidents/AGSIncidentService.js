@@ -187,16 +187,21 @@ AGSIncidentService.prototype.resolveAGSFeatures = function(d, data, jqXHR, proce
     } else if(!data.features) {
         d.reject('No features in response "' + jqXHR.responseText + '"');
     } else {
-        var result = noResultFunction ? noResultFunction() : [];
-        $.each(data.features, function(i, feature) {
-            if(processFunction) {
-                result = processFunction(feature.attributes);
-            } else {
-                result.push(feature.attributes);
-            }
-        });
+        var result;
+        if(!data.features || data.features.length === 0) {
+            result = noResultFunction ? noResultFunction() : [];
+        } else {
+            result = [];
+            $.each(data.features, function(i, feature) {
+                if(processFunction) {
+                    result = processFunction(feature.attributes);
+                } else {
+                    result.push(feature.attributes);
+                }
+            });
+        }
         if(postProcessFunction) {
-            d.resolve(postProcessFunction());
+            d.resolve(postProcessFunction(result));
         } else {
             d.resolve(result);
         }
@@ -457,6 +462,50 @@ AGSIncidentService.prototype.getVoertuigInzet = function(voertuignummer) {
             },
             function() {
                 return null;
+            });
+        });
+    }
+    return d.promise();
+};
+
+/**
+ * Get unit status.
+ * @param {string} voertuignummer for unit
+ * @returns {Promise} A promise which will resolve with null when the voertuig
+ *   status is unknown or the unit status details. The promise
+ *   will be rejected on error.
+ */
+AGSIncidentService.prototype.getVoertuigStatus = function(voertuignummer) {
+    var me = this;
+    var d = $.Deferred();
+
+    var table = "V_B_ACT_EENH_STATUS";
+
+    if(!voertuignummer) {
+        d.reject("Null voertuignummer");
+    } else if(!me.tableUrls || !me.tableUrls[table]) {
+        d.reject("Nog niet geinitialiseerd");
+    } else {
+        me.doAGSAjax({
+            url: me.tableUrls[table] + "/query",
+            dataType: "json",
+            data: {
+                f: "json",
+                token: me.token,
+                where: "T_IND_DISC_EENHEID = 'B' AND ROEPNAAM_EENHEID = '" + voertuignummer + "'",
+                outFields: "*"
+            }
+        })
+        .fail(function(e) {
+            d.reject(table + ": " + e);
+        })
+        .done(function(data, textStatus, jqXHR) {
+            me.resolveAGSFeatures(d, data, jqXHR, null,
+            function() {
+                return null;
+            },
+            function(r) {
+                return r[0];
             });
         });
     }
