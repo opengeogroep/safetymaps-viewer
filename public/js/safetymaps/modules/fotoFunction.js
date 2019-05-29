@@ -37,8 +37,6 @@ dbkjs.modules.fotoFunction = {
 
         this.options = $.extend({
             showGallery: false,
-            keyupTimeout: 100,
-            minSearchLength: 3,
             path: "foto/"
         }, this.options);
 
