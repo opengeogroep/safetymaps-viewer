@@ -240,7 +240,7 @@ dbkjs.gotOrganisation = function () {
     dbkjs.initialized = true;
 
     if(dbkjs.options.organisation.integrated) {
-        $("#settingspanel_b").append('<button class="btn btn-default btn-success btn-block" onclick="window.location.href=\'../logout.jsp\'"><span class="glyphicon glyphicon-log-out"></span> Uitloggen</button>');
+        $("#settingspanel_b").append('<button class="btn btn-default btn-success" onclick="window.location.href=\'../logout.jsp\'"><span class="glyphicon glyphicon-log-out"></span> Uitloggen</button>');
     }
 
 
