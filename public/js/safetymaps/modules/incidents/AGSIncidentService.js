@@ -1179,7 +1179,7 @@ AGSIncidentService.prototype.getVehiclePositions = function(incidentIds) {
             f: "json",
             token: me.token,
             where: "Discipline='B' and " + where,
-            outFields: "*"
+            outFields: "PosDate,PosTime,MobileID,Status,Voertuigsoort,Speed,Direction,Roepnummer"
         },
         cache: false
     })
