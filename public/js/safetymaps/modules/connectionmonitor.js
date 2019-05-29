@@ -105,6 +105,8 @@ dbkjs.modules.connectionmonitor = {
             complete: function(jqXHR, textStatus) {
                 if(textStatus === "success" || textStatus === "notmodified") {
                     me.onConnectionOK();
+                } else if(textStatus === "parsererror" && jqXHR.responseText.indexOf("j_security_check") !== -1) {
+                    window.location.reload();
                 } else {
                     me.onConnectionError();
                 }
