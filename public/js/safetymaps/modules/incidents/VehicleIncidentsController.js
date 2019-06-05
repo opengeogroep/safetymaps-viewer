@@ -446,6 +446,10 @@ VehicleIncidentsController.prototype.showStatusVrhAGS = function() {
             var id = status.T_ACT_STATUS_CODE_EXT_BRW;
             var code = status.T_SYS_STATUS_AFK_BRW;
 
+            if(code === "KZ") {
+                code = "OK";
+            }
+
             $("<div id='status'>" + id + ": " + code + "</div>").prependTo("body");
         }
     });
