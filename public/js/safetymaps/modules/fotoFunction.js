@@ -47,6 +47,7 @@ dbkjs.modules.fotoFunction = {
             me.initCarousel();
             if (dbkjs.modules.incidents && dbkjs.modules.incidents.controller) {
                 $(dbkjs.modules.incidents.controller).on("new_incident", function (event, commonIncident, incident) {
+                    me.incidentNr = commonIncident.nummer;
                     me.resetCarousel();
                     me.getFotoForIncident(incident, true);
                 });
@@ -58,6 +59,7 @@ dbkjs.modules.fotoFunction = {
                     dbkjs.modules.incidents.controller.button.setFotoAlert(false);
                 });
                 $(dbkjs.modules.incidents.controller).on("end_incident", function () {
+                    me.incidentNr = null;
                     me.resetCarousel();
                     dbkjs.modules.incidents.controller.button.setFotoAlert(false);
                 });
@@ -134,15 +136,10 @@ dbkjs.modules.fotoFunction = {
     showPicture: function (event) {
         var me = this;
         var fileInput = event.target.files;
-        if (dbkjs.modules.incidents.controller.incidentId) {
-            me.incidentNr = dbkjs.modules.incidents.controller.incidentId;
-        } else {
-            me.incidentNr = "";
-        }
 
         me.extensie = fileInput[0].name.split('.').pop();
-        var prefix = me.incidentNr !== "" ? "_" : "";
-        me.fileName = me.incidentNr + prefix + (new Date).getTime().toString() + "_foto." + me.extensie;
+        var prefix = me.incidentNr ? "_" : "";
+        me.fileName = (me.incidentNr || '') + prefix + (new Date).getTime().toString() + "_foto." + me.extensie;
         $("#input_filename").val(me.fileName);
         if (fileInput.length > 0) {
             var windowURL = window.URL || window.webkitURL;
@@ -192,9 +189,9 @@ dbkjs.modules.fotoFunction = {
         xhr.send(formData);
     },
 
-    getFotoForIncident: function (incident, isNew) {
+    getFotoForIncident: function (incidentInfo, isNew) {
         var me = this;
-        $.ajax("api/foto?fotoForIncident", {data: {incidentNummer: incident.IncidentNummer}})
+        $.ajax("api/foto?fotoForIncident", {data: {incidentNummer: incidentInfo.incident.nummer}})
                 .done(function (result) {
                     me.buildFotoWindow(result, isNew);
                 });
