@@ -46,7 +46,8 @@ function VehicleIncidentsController(incidents) {
         eenhedenSource: "VrhAGS",
         eenhedenUpdateInterval: 10000,
         showStatus: false,
-        statusUpdateInterval: 15000
+        statusUpdateInterval: 15000,
+        silentError: false
     }, me.options);
     me.primaryFailing = false;
 
@@ -394,8 +395,10 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
 
     if(typeof inzetInfo === "string") {
         var msg = "Kan meldkamerinfo niet ophalen: " + inzetInfo;
-        //dbkjs.util.showError(msg);
-        //me.button.setIcon("bell-slash");
+        if(!me.options.silentError) {
+            dbkjs.util.showError(msg);
+            me.button.setIcon("bell-slash");
+        }
         me.incidentDetailsWindow.showError(msg);
     } else if(inzetInfo.incidenten === null || inzetInfo.incidenten === 0) {
         if(!me.incidentFromIncidentList) {
