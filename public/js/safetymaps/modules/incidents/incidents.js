@@ -78,8 +78,8 @@ dbkjs.modules.incidents = {
                 this.service.initialize(this.options.ags.tokenUrl, this.options.ags.user, this.options.ags.password)
                 .fail(function(e) {
 
-                    if(me.options.controller === "VehicleIncidentsController" && me.options.incidentSource !== "VrhAGS") {
-                        console.log("Non-primary VrhAGS service failed to initialize", arguments);
+                    if(me.options.controller === "VehicleIncidentsController") {
+                        console.log("VrhAGS service failed to initialize", arguments);
                         return;
                     }
 
