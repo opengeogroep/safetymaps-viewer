@@ -394,8 +394,8 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
 
     if(typeof inzetInfo === "string") {
         var msg = "Kan meldkamerinfo niet ophalen: " + inzetInfo;
-        dbkjs.util.showError(msg);
-        me.button.setIcon("bell-slash");
+        //dbkjs.util.showError(msg);
+        //me.button.setIcon("bell-slash");
         me.incidentDetailsWindow.showError(msg);
     } else if(inzetInfo.incidenten === null || inzetInfo.incidenten === 0) {
         if(!me.incidentFromIncidentList) {
