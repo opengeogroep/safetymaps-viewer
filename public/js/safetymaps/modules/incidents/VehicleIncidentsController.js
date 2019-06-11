@@ -672,6 +672,9 @@ VehicleIncidentsController.prototype.updateVehiclePositions = function() {
             })
             .done(function(features) {
                 console.log("Vehicle positions for incident", features);
+                if(!features) {
+                    features = [];
+                }
                 me.vehiclePositionLayer.features(features);
             });
         } else {
