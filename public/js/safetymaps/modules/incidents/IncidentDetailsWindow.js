@@ -68,7 +68,7 @@ IncidentDetailsWindow.prototype.renderDetailsScreen = function() {
 
     var renderKladblok = !dbkjs.modules.incidents.options.hideKladblok;
     var renderTwitter = !!dbkjs.modules.incidents.options.showTwitter;
-    var showFoto = dbkjs.modules.incidents.options.showFoto;
+    var showFoto = dbkjs.modules.incidents.options.showFoto && !!dbkjs.modules.fotoFunction.options;
     var html = '<div style="width: 100%" class="table-responsive incidentDetails"></div>';
     html += this.renderKladblokTwitter(renderKladblok, renderTwitter, showFoto);
     this.div.html(html);
