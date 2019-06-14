@@ -508,7 +508,7 @@ IncidentMonitorController.prototype.getIncidentListAGS = function() {
 IncidentMonitorController.prototype.getIncidentListFalck = function() {
     var me = this;
 
-    $.ajax(me.options.incidentsUrl + '/incident', {
+    $.ajax("api/falckService/incident", {
         dataType: "json",
         data: {
             extended: true
@@ -719,7 +719,7 @@ IncidentMonitorController.prototype.updateIncident = function(incidentId, archie
 IncidentMonitorController.prototype.updateIncidentFalck = function(incidentId, archief, isUpdate) {
     var me = this;
 
-    $.ajax(me.options.incidentsUrl + '/incident/' + incidentId, {
+    $.ajax("api/falckService/incident/" + incidentId, {
         dataType: "json",
         data: {
             extended: true
