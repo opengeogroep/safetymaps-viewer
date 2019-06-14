@@ -31,12 +31,6 @@ dbkjs.modules.incidents = {
     register: function() {
         var me = this;
 
-        // useJsOptions is for using options defined in js object dbkjs.options.incidents instead of db
-        // module options, for simultaneous use with older version...
-        if(!this.options || this.options.useJsOptions) {
-            this.options = dbkjs.options.incidents;
-        }
-
         this.options = $.extend({
             controller: "MDTIncidentsController",
             featureExactMatchHuisletter: true,
@@ -72,23 +66,21 @@ dbkjs.modules.incidents = {
         
         // Initialize AGS service if needed
         if(this.options.controller === "AGSIncidentsController" || this.options.incidentMonitor || this.options.incidentSource === "VrhAGS" || this.options.incidentSourceFallback === "VrhAGS") {
-            if(this.options.ags) {
-                this.service = new AGSIncidentService("api/vrhAGS", "api/vrhAGSEenheden");
+            this.service = new AGSIncidentService("api/vrhAGS", "api/vrhAGSEenheden");
 
-                this.service.initialize("api/vrhAGSToken", null, null)
-                .fail(function(e) {
+            this.service.initialize("api/vrhAGSToken", null, null)
+            .fail(function(e) {
 
-                    if(me.options.controller === "VehicleIncidentsController") {
-                        console.log("VrhAGS service failed to initialize", arguments);
-                        return;
-                    }
+                if(me.options.controller === "VehicleIncidentsController") {
+                    console.log("VrhAGS service failed to initialize", arguments);
+                    return;
+                }
 
-                    // Avoid map loading messages hiding our error message
-                    window.setTimeout(function() {
-                        dbkjs.util.alert("Fout bij initialiseren meldingenservice", e, "alert-danger");
-                    }, 3000);
-                });
-            }
+                // Avoid map loading messages hiding our error message
+                window.setTimeout(function() {
+                    dbkjs.util.alert("Fout bij initialiseren meldingenservice", e, "alert-danger");
+                }, 3000);
+            });
         }
         
         //if localstorage is not holding the voertuignummer try to get the voertuignummer from the url
