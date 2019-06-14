@@ -73,9 +73,9 @@ dbkjs.modules.incidents = {
         // Initialize AGS service if needed
         if(this.options.controller === "AGSIncidentsController" || this.options.incidentMonitor || this.options.incidentSource === "VrhAGS" || this.options.incidentSourceFallback === "VrhAGS") {
             if(this.options.ags) {
-                this.service = new AGSIncidentService(this.options.ags.incidentsUrl, this.options.ags.vehiclePosUrl);
+                this.service = new AGSIncidentService("api/vrhAGS", "api/vrhAGSEenheden");
 
-                this.service.initialize(this.options.ags.tokenUrl, this.options.ags.user, this.options.ags.password)
+                this.service.initialize("api/vrhAGSToken", null, null)
                 .fail(function(e) {
 
                     if(me.options.controller === "VehicleIncidentsController") {

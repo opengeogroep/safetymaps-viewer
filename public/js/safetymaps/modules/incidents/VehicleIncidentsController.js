@@ -37,21 +37,27 @@ function VehicleIncidentsController(incidents) {
 
     me.options = $.extend({
         incidentSource: "falckService",
-        incidentSourceFallback: "VrhAGS",
+        incidentSourceFallback: null,
         incidentUpdateInterval: 30000,
         activeIncidentUpdateInterval: 15000,
         incidentMonitorCode: null,
+        voertuignummerCode: null,
         voertuigIM: true,
-        eenheden: true,
-        eenhedenSource: "VrhAGS",
-        eenhedenUpdateInterval: 10000,
-        showStatus: false,
+        eenheden: false,
+        eenhedenSource: "VrhAGS", // falckService eenheden not supported yet
+        eenhedenUpdateInterval: 30000,
+        showStatus: true,
         statusUpdateInterval: 15000,
-        silentError: false
+        showFoto: true,
+        silentError: false,
+        incidentListFooterFunction: null,
+        incidentListFunction: null
     }, me.options);
     me.primaryFailing = false;
 
-    me.options.voertuigIM = false; // XXX werkt nog niet met duokoppeling
+    if(me.options.incidentSourceFallback !== null) {
+        me.options.voertuigIM = false; // XXX werkt nog niet met duokoppeling
+    }
 
     me.featureSelector = incidents.featureSelector;
 
@@ -290,7 +296,7 @@ VehicleIncidentsController.prototype.addConfigControls = function() {
 
 VehicleIncidentsController.prototype.getFalckServiceVoertuignummers = function() {
     var me = this;
-    $.ajax(me.options.incidentsUrl + "/eenheid", {
+    $.ajax("api/falckService/eenheid", {
         dataType: "json"
     })
     .done(function(data, textStatus, jqXHR) {
@@ -483,7 +489,7 @@ VehicleIncidentsController.prototype.showStatusSafetymapsService = function() {
 
     window.clearTimeout(me.updateStatusTimer);
 
-    $.ajax(me.options.incidentsUrl + "/eenheidstatus/" + me.voertuignummer, {
+    $.ajax("api/falckService/eenheidstatus/" + me.voertuignummer, {
         dataType: "json"
     })
     .always(function() {
@@ -585,7 +591,7 @@ VehicleIncidentsController.prototype.getVoertuigIncidentSMCT = function(nummer) 
     var me = this;
 
     var p = $.Deferred();
-    $.ajax(me.options.incidentsUrl + "/eenheid/" + nummer, {
+    $.ajax("api/falckService/eenheid/" + nummer, {
         dataType: "json"
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
@@ -598,7 +604,7 @@ VehicleIncidentsController.prototype.getVoertuigIncidentSMCT = function(nummer) 
         if(incidenten && incidenten.length > 0) {
             console.log("SMCT: Got incidents for voertuig " + nummer + ": " + incidenten);
 
-            $.ajax(me.options.incidentsUrl + "/incident/" + incidenten[incidenten.length-1], {
+            $.ajax("api/falckService/incident/" + incidenten[incidenten.length-1], {
                 dataType: "json",
                 data: {
                     extended: false
