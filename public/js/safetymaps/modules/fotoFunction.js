@@ -47,7 +47,7 @@ dbkjs.modules.fotoFunction = {
             me.initCarousel();
             if (dbkjs.modules.incidents && dbkjs.modules.incidents.controller) {
                 $(dbkjs.modules.incidents.controller).on("new_incident", function (event, commonIncident, incident) {
-                    me.incidentNr = commonIncident.nummer;
+                    me.incidentNr = commonIncident.nummer || incident.IncidentNummer;
                     me.resetCarousel();
                     me.getFotoForIncident(incident, true);
                 });
