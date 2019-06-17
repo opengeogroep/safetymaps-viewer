@@ -191,7 +191,7 @@ dbkjs.modules.fotoFunction = {
 
     getFotoForIncident: function (incidentInfo, isNew) {
         var me = this;
-        $.ajax("api/foto?fotoForIncident", {data: {incidentNummer: incidentInfo.incident.nummer}})
+        $.ajax("api/foto?fotoForIncident", {data: {incidentNummer: incidentInfo.IncidentNummer ? incidentInfo.IncidentNummer : incidentInfo.incident.nummer}})
                 .done(function (result) {
                     me.buildFotoWindow(result, isNew);
                 });
