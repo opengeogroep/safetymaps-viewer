@@ -57,7 +57,7 @@ dbkjs.modules.incidents = {
         }
 
         // XXX test with old code running on same incidents module settings
-        this.options.controller = "VehicleIncidentsController";
+        //this.options.controller = "VehicleIncidentsController";
         
         // XXX unused, remove
         if(params.toonZonderEenheden === "true") {
