@@ -59,22 +59,22 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h4 class="modal-title" id="settings_title"><span class="glyphicon glyphicon-lock"></span> Inloggen</h4>
+            <h4 class="modal-title" id="login_title"><span class="glyphicon glyphicon-lock"></span> Inloggen</h4>
           </div>
             <div id="loginpanel_b" class="modal-body">
                 <form id="loginform">
-                    <div id="loginmesg"></div>
+                    <div id="login_msg"></div>
                     <div class="form-group">
-                        <label for="j_username"><span class="glyphicon glyphicon-user"></span> Gebruikersnaam:</label>
+                        <label for="j_username"><span class="glyphicon glyphicon-user"></span> <span id="login_username">Gebruikersnaam1</span>:</label>
                         <input type="text" class="form-control" id="j_username" autocapitalize="none" autofocus="autofocus">
                     </div>
                     <div class="form-group">
-                        <label for="j_password"><span class="glyphicon glyphicon-eye-open"></span> Wachtwoord:</label>
+                        <label for="j_password"><span class="glyphicon glyphicon-eye-open"></span> <span id="login_password">Wachtwoord1</span>:</label>
                         <input type="password" class="form-control" id="j_password">
                     </div>
-                    <input type="submit" id="loginsubmit2" style="display: none" onclick="$('#loginsubmit').click(); return false;"></input>
-                    <button id="loginsubmit" class="btn btn-default btn-success btn-block"><span class="glyphicon glyphicon-log-in"></span> Inloggen</button>
-                    <button id="loginrefresh" class="btn btn-default btn-default btn-block" style="display: none" onclick="window.location.reload()"><span class="glyphicon glyphicon-retweet"></span> Opnieuw proberen</button>
+                    <input type="submit" id="loginsubmit2" style="display: none" onclick="$('#btn_login_submit').click(); return false;"></input>
+                    <button id="btn_login_submit" class="btn btn-default btn-success btn-block"><span class="glyphicon glyphicon-log-in"></span> <span id="login_submit">Inloggen1</span></button>
+                    <button id="btn_login_refresh" class="btn btn-default btn-default btn-block" style="display: none" onclick="window.location.reload()"><span class="glyphicon glyphicon-retweet"></span> <span id="login_retry">Opnieuw proberen1</span></button>
                 </form>
             </div>
         </div>

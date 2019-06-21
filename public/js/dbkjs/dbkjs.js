@@ -98,13 +98,19 @@ dbkjs.getOrganisation = function() {
         if(jqXHR.status === 200 && jqXHR.responseText.indexOf('<form method="post" action="j_security_check">')) {
             console.log("Login required, showing login popup...");
 
-            $("#loginsubmit").on("click", function() {
+            $("#login_title").text(i18n.t("login.title"));
+            $("#login_username").text(i18n.t("login.username"));
+            $("#login_password").text(i18n.t("login.password"));
+            $("#login_submit").text(i18n.t("login.submit"));
+            $("#login_retry").text(i18n.t("login.retry"));
+
+            $("#btn_login_submit").on("click", function() {
                 var username = $("#j_username").val();
                 var password = $("#j_password").val();
                 console.log("Logging in with username " + username);
 
-                $("#loginsubmit").attr("disabled", "disabled");
-                $("#loginsubmit").text("Bezig met inloggen...");
+                $("#btn_login_submit").attr("disabled", "disabled");
+                $("#login_submit").text(i18n.t("login.processing"));
 
                 $.ajax("../j_security_check", {
                     method: "POST",
@@ -115,24 +121,24 @@ dbkjs.getOrganisation = function() {
                     dataType: "html"
                 })
                 .always(function() {
-                    $("#loginsubmit").removeAttr("disabled");
-                    $("#loginsubmit").text("Inloggen");
+                    $("#btn_login_submit").removeAttr("disabled");
+                    $("#login_submit").text(i18n.t("login.submit"));
                 })
                 .fail(function(jqXHR) {
                     if(jqXHR.status === 403) {
-                        $("#loginmesg").text("Uw account heeft geen rechten op de viewer. U bent uitgelogd.");
+                        $("#login_msg").text(i18n.t("login.norights"));
                         $.ajax("../logout.jsp");
                         $(".form-group").hide();
-                        $("#loginsubmit").hide();
-                        $("#loginrefresh").show();
+                        $("#btn_login_submit").hide();
+                        $("#btn_login_refresh").show();
                         dbkjs.getOrganisation();
                         return;
                     }
 
-                    $("#loginmesg").text("Unknown login error (HTTP " + jqXHR.status + ") - check console");
+                    $("#login_msg").text("Unknown login error (HTTP " + jqXHR.status + ") - check console");
                     console.log("Login Ajax failure", arguments);
                     if(jqXHR.status === 400 || jqXHR.status === 408) {
-                        $("#loginmesg").text("");
+                        $("#login_msg").text("");
                         console.log("Bad request 400 or timeout 408, trying again...");
                         // TODO: get organisation and immediately try POST login again on .fail()?
                         dbkjs.getOrganisation();
@@ -156,18 +162,18 @@ dbkjs.getOrganisation = function() {
                             i = msg.indexOf("</p>");
                             msg = msg.substring(0,i);
                             console.log("Got login error message: " + msg);
-                            $("#loginmesg").text(msg);
+                            $("#login_msg").text(msg);
                             return;
                         }
                     }
-                    $("#loginmesg").text("Unknown login error - check console");
+                    $("#login_msg").text("Unknown login error - check console");
                     console.log("Login error", arguments);
                 });
             });
 
             $("#loginpanel").modal({backdrop:'static',keyboard:false, show:true});
         } else if(jqXHR.status === 403) {
-            $("#loginmesg").text("Uw account heeft geen rechten op de viewer. U bent uitgelogd.");
+            $("#login_msg").text(i18n.t("login.norights"));
             $.ajax("../logout.jsp");
             dbkjs.getOrganisation();
         }

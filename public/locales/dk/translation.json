@@ -38,6 +38,15 @@
         "splitscreen": "Delt skærm",
         "information": "Information"
     },
+    "login": {
+        "title": "Log på",
+        "username": "Brugernavn",
+        "password": "Adgangskode",
+        "submit": "Log på",
+        "processing": "Logger ind...",
+        "retry": "Prøve igen",
+        "norights": "Dine konti har ingen rettigheder til seeren. Du er blevet logget ud."
+    },
     "search": {
         "button": "Søg",
         "title": "Søg",
