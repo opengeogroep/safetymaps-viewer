@@ -399,6 +399,15 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
     $('#systeem_meldingen').hide();
     me.button.setIcon("bell-o");
 
+    $("#inzetSource").remove();
+    var inzetSourceMsg;
+    if(typeof inzetInfo === "string") {
+        inzetSourceMsg = "Bron incidentgegevens: geen bronnen bereikbaar, verbindingsprobleem?";
+    } else {
+        inzetSourceMsg = "Bron incidentgegevens: " + (inzetInfo.source === "VrhAGS" ? "ArcGIS GMS replica VRH" : "Safety C&T webservice");
+    }
+    $("<div id='inzetSource'>" + inzetSourceMsg + "</div>").appendTo("#settingspanel_b");
+
     if(typeof inzetInfo === "string") {
         var msg = "Kan meldkamerinfo niet ophalen: " + inzetInfo;
         if(!me.options.silentError) {
@@ -555,11 +564,12 @@ VehicleIncidentsController.prototype.getVoertuigIncidenten = function(nummer) {
     .then(function(primaryInfo, fallbackInfo) {
         console.log("All services success, primary: " + primaryInfo.source + ":" + JSON.stringify(primaryInfo.incidenten) + ", fallback: " + fallbackInfo.source + ":" + JSON.stringify(fallbackInfo.incidenten));
 
-        // XXX als incident mist bij primary maar wel bij fallback
-        // TODO
-
-
-        p.resolve(primaryInfo);
+        if((!primaryInfo.incidenten || primaryInfo.incidenten.length === 0) && (fallbackInfo.incidenten && fallbackInfo.incidenten.length > 0)) {
+            console.log("Fallback source has incident missing at primary source, using fallback source");
+            p.resolve(fallbackInfo);
+        } else {
+            p.resolve(primaryInfo);
+        }
     }, function(primaryInfo, fallbackInfo) {
         if(me.options.incidentSourceFallback === null && primary.state() === "resolved") {
             console.log("Primary service success, no fallback configured: " + primaryInfo.source + ":" + JSON.stringify(primaryInfo.incidenten));
