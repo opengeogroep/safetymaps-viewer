@@ -517,11 +517,8 @@ VehicleIncidentsController.prototype.showStatusSafetymapsService = function() {
             }
         });
         if(status) {
-            var statusInfo = statusById[status.StatusCode];
-            if(statusInfo) {
-                console.log("Voertuigstatus: " + status.StatusCode + ": " + statusInfo.code + ", " + statusInfo.desc);
-                $("<div id='status'>" + status.StatusCode + ": " + statusInfo.code + "</div>").prependTo("body");
-            }
+            console.log("SCT Voertuigstatus", status);
+            $("<div id='status'>" + status.StatusAfkorting + "</div>").prependTo("body");
         }
     });
 };
