@@ -388,6 +388,8 @@ VehicleIncidentsController.prototype.getInzetInfo = function() {
 VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
     var me = this;
 
+    me.inzetInfo = inzetInfo;
+
     me.getInzetTimeout = window.setTimeout(function() {
         me.getInzetInfo();
     }, inzetInfo.incident ? me.options.activeIncidentUpdateInterval : me.options.incidentUpdateInterval);
@@ -435,10 +437,23 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
 VehicleIncidentsController.prototype.updateStatus = function() {
     var me = this;
 
-    if(me.options.incidentSource === "VrhAGS") {
-        me.showStatusVrhAGS();
-    } else if(me.options.incidentSource === "falckService") {
-        me.showStatusSafetymapsService();
+    // When switched to fallback source, also get status from fallback source
+    // by using the same source for status as was used for inzet info
+
+    if(me.inzetInfo && me.inzetInfo.source) {
+        if(me.inzetInfo.source === "VrhAGS") {
+            me.showStatusVrhAGS();
+        } else {
+            me.showStatusSafetymapsService();
+        }
+    } else {
+        // When no inzetInfo known yet use the primary source for status
+
+        if(me.options.incidentSource === "VrhAGS") {
+            me.showStatusVrhAGS();
+        } else if(me.options.incidentSource === "falckService") {
+            me.showStatusSafetymapsService();
+        }
     }
 };
 
@@ -461,11 +476,13 @@ VehicleIncidentsController.prototype.showStatusVrhAGS = function() {
         console.log("VrhAGS voertuigstatus", status);
 
         if(status) {
-            var id = status.T_ACT_STATUS_CODE_EXT_BRW;
+            var id = status.T_SYS_STATUS_CODE_EXT_BRW;
             var code = status.T_SYS_STATUS_AFK_BRW;
 
-            if(code === "KZ") {
-                code = "OK";
+            switch(code) {
+                case "UT": code = "UG"; break;
+                case "KZ": code = "OK"; break;
+                case "IR": code = "NI"; break;
             }
 
             $("<div id='status'>" + id + ": " + code + "</div>").prependTo("body");
@@ -475,26 +492,6 @@ VehicleIncidentsController.prototype.showStatusVrhAGS = function() {
 
 VehicleIncidentsController.prototype.showStatusSafetymapsService = function() {
     var me = this;
-
-    var statusById = {
-        0: { desc: "Noodsignaal" },
-        1: { code: "EI", desc: "Eigen initiatief" },
-        2: { code: "AS", desc: "Aanvraag spraakcontact" },
-        3: { code: "I",  desc: "Informatievraag" },
-        4: { code: "UT", desc: "Aanvang rit / uitruk / aanrijdend" },
-        5: { code: "TP", desc: "Ter plaatse" },
-        6: { code: "NV", desc: "Aanrijdend naar bestemming" },
-        7: { code: "IR", desc: "Binnenkort beschikbaar" },
-        8: { code: "BS", desc: "Vrij. aanrijdend naar post / standplaats / kazerne" },
-        9: { code: "KZ", desc: "Op post" },
-        10: { code: "VI", desc: "Vertraagd inzetbaar" },
-        11: { code: "BD", desc: "Buiten dienst" },
-        12: { code: "BI", desc: "Binnenkort in dienst" },
-        13: { code: "A0", desc: "Aanvraag privegesprek" },
-        14: { code: "U",  desc: "Urgente aanvraag spraakcontact" },
-        15: { code: "OV", desc: "Opdracht verstrekt" },
-        16: { code: "OG", desc: "Alarmering ontvangen" }
-    };
 
     window.clearTimeout(me.updateStatusTimer);
 
@@ -735,7 +732,6 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
     if(incidentInfo.incident.nummer !== me.incidentNummer) {
         me.geenInzet(false);
 
-        me.incidentInfo = incidentInfo;
         me.incident = incidentInfo.incident;
         var incident = me.incident;
         me.incidentNummer = incident.nummer;
@@ -785,7 +781,6 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
             }
         }
 */
-        me.incidentInfo = incidentInfo;
         me.incident = incidentInfo.incident;
         var incident = me.incident;
 
