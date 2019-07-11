@@ -476,8 +476,8 @@ VehicleIncidentsController.prototype.showStatusVrhAGS = function() {
         console.log("VrhAGS voertuigstatus", status);
 
         if(status) {
-            var id = status.T_SYS_STATUS_CODE_EXT_BRW;
-            var code = status.T_SYS_STATUS_AFK_BRW;
+            var id = status.T_ACT_STATUS_CODE_EXT_BRW;
+            var code = status.T_ACT_STATUS_AFK_BRW;
 
             switch(code) {
                 case "UT": code = "UG"; break;
