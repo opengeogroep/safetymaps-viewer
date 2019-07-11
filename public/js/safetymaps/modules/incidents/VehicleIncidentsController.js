@@ -115,6 +115,10 @@ function VehicleIncidentsController(incidents) {
         if(me.options.incidentSource === "VrhAGS") {
             dbkjs.selectControl.layers.push(me.vehiclePositionLayer.layer);
         }
+
+        $(dbkjs).one("dbkjs_init_complete", function() {
+            me.vehiclePositionLayer.raiseLayers();
+        });
     }
 
     if(me.options.incidentSource === "falckService" || me.options.incidentSourceFallback === "falckService") {

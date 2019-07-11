@@ -125,6 +125,11 @@ function VehiclePositionLayer() {
     });
 };
 
+VehiclePositionLayer.prototype.raiseLayers = function() {
+    dbkjs.map.setLayerIndex(this.layer, 99);
+    dbkjs.map.setLayerIndex(this.layer2, 99);
+};
+
 VehiclePositionLayer.prototype.setShowMoving = function(showMoving) {
     this.showMoving = showMoving;
     this.layer.redraw();
