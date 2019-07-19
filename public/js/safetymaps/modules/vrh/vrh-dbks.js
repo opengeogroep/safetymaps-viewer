@@ -860,6 +860,10 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object) {
 
     var adres = (p.adres || "") + (p.plaats ? "<br>" + p.plaats : "");
 
+    if(!adres && o.straatnaam) {
+        adres = Mustache.render("{{straatnaam}} {{huisnummer}} {{huisletter}} {{toevoeging}}{{#plaats}}<br>{{plaats}}{{/plaats}}", o);
+    }
+
     rows.push({l: "OMS nummer",                     t: p.oms_nummer});
     rows.push({l: "Naam",                           t: o.naam});
     rows.push({l: "Adres",                          html: adres});

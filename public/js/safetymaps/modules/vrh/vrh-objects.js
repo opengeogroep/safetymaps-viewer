@@ -92,7 +92,10 @@ dbkjs.modules.vrh_objects = {
 
         // XXX move to safetymaps.vrh.Dbks.init()
         if(me.options.dbks) {
-            safetymaps.vrh.api.getDbks()
+
+            var newDbSchema = OpenLayers.Util.getParameters()["newDbSchema"] === "true";
+
+            safetymaps.vrh.api.getDbks(newDbSchema)
             .fail(function(msg) {
                 dbkjs.util.alert("Fout", msg, "alert-danger");
                 me.dbks.loading = false;
@@ -525,7 +528,8 @@ dbkjs.modules.vrh_objects = {
 
         // Get object details
         //$("#creator_object_info").text(i18n.t("dialogs.busyloading") + "...");
-        safetymaps.vrh.api.getObjectDetails(type, id)
+        var newDbSchema = OpenLayers.Util.getParameters()["newDbSchema"] === "true";
+        safetymaps.vrh.api.getObjectDetails(type, id, newDbSchema)
         .fail(function(msg) {
             //$("#creator_object_info").text("Error: " + msg);
         })
