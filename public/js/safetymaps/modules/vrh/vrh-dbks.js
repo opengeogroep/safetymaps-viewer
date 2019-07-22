@@ -189,6 +189,21 @@ safetymaps.vrh.Dbks = function(options) {
         },
         "Vluchtroute": {
             color1: "#000"
+        },
+        "Slagboom": {
+            type_viewer: "tube",
+            color1: "#f00",
+            color2: "#fff",
+            thickness: 2
+        },
+        "Aanpijling": {
+            type_viewer: "line",
+            color1: "#000",
+            thickness: 2
+        },
+        "Aanrijroute": {
+            color1: "#000",
+            type_viewer: "arrow"
         }
     };
     me.lineButtons = {
@@ -686,26 +701,18 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
     var lineFeatures3 = [];
     var lineFeatures1 = (object.aanpijling || []).map(wktReader).map(function(f) {
         f.attributes.button = "basis";
-        f.attributes.style = {
-            type_viewer: "line",
-            color1: "#000",
-            thickness: 2
-        };
+        f.attributes.style = me.vrhLineStyles["Aanpijling"];
         return f;
     });
     lineFeatures1 = lineFeatures1.concat((object.slagboom || []).map(wktReader).map(function(f) {
         f.attributes.button = "basis";
         f.attributes.description = "";
-        f.attributes.style = {
-            type_viewer: "tube",
-            color1: "#f00",
-            color2: "#fff",
-            thickness: 2
-        };
+        f.attributes.style = me.vrhLineStyles["Slagboom"];
         lineFeatures2.push(f.clone());
         return f;
     }));
     lineFeatures1 = lineFeatures1.concat((object.overige_lijnen || []).map(wktReader).map(function(f) {
+        f.attributes.button = "basis";
         f.attributes.style = me.vrhLineStyles[f.attributes.type] || me.vrhLineStyles["Default"];
         if(f.attributes.style) {
             if(["doubletrack", "tube"].indexOf(f.attributes.style.type_viewer) !== -1) {
@@ -719,21 +726,23 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
     }));
     lineFeatures1 = lineFeatures1.concat((object.aanrijroute || []).map(wktReader).map(function(f) {
         f.attributes.button = "basis";
-        f.attributes.style = {
-            color1: "#000",
-            type_viewer: "arrow"
-        };
-        // Create two geometries: one line and a point at the end of the
-        // line to display the arrow
-        var vertices = f.geometry.getVertices();
-        var end = vertices[vertices.length - 1];
-
-        // Rotation for triangle graphic rendered at end of line
-        f.attributes.rotation = 90 - safetymaps.utils.geometry.getLastLineSegmentAngle(f.geometry);
-
-        f.geometry = new OpenLayers.Geometry.Collection([f.geometry, end]);
+        f.attributes.style = me.vrhLineStyles["Aanrijroute"];
         return f;
     }));
+
+    // For lines with arrows, add a point feature at the end of the line to
+    // display the arrow
+    $.each(lineFeatures1, function(i, f) {
+        if(f.attributes.style.type_viewer === "arrow") {
+            var vertices = f.geometry.getVertices();
+            var end = vertices[vertices.length - 1];
+
+            // Rotation for triangle graphic rendered at end of line
+            f.attributes.rotation = 90 - safetymaps.utils.geometry.getLastLineSegmentAngle(f.geometry);
+
+            f.geometry = new OpenLayers.Geometry.Collection([f.geometry, end]);
+        }
+    });
 
     this.layerLines1.addFeatures(lineFeatures1);
     this.layerLines2.addFeatures(lineFeatures2);
