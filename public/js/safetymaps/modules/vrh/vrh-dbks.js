@@ -35,10 +35,16 @@ safetymaps.vrh.Dbks = function(options) {
         graphicSize: 15,
         graphicSizeHover: 26,
         graphicSizeSelect: 20,
+        wideLineForSelectionExtraWidth: 6,
+        wideLineForSelectionOpacity: 0,
         options: {
             styleSizeAdjust: 0 // For safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue()
         }
     }, options);
+
+    var params = new OpenLayers.Util.getParameters();
+    me.options.wideLineForSelectionOpacity = Number(params.selectionLineOpacity) || me.options.wideLineForSelectionOpacity;
+    me.options.wideLineForSelectionExtraWidth = Number(params.selectionLineExtraWidth) || me.options.wideLineForSelectionExtraWidth;
 
     me.loading = true;
 
@@ -274,7 +280,8 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
                 strokeColor: "${color}",
                 strokeWidth: "${width}",
                 strokeLinecap: "butt",
-                strokeDashstyle: "${dashstyle}"
+                strokeDashstyle: "${dashstyle}",
+                strokeOpacity: "${opacity}"
             }, {
                 context: {
                     color: function(feature) {
@@ -283,12 +290,26 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
                     },
                     width: function(feature) {
                         // TODO: scaling
-                        if(feature.attributes.style && feature.attributes.style.thickness)return feature.attributes.style.thickness;
-                        else return 2;
+                        var width = feature.attributes.style && feature.attributes.style.thickness ? feature.attributes.style.thickness : 2;
+                        if(feature.attributes.wideLineForSelectionTolerance) {
+                            width += me.options.wideLineForSelectionExtraWidth;
+                        }
+                        return width;
                     },
                     dashstyle: function(feature) {
+                        if(feature.attributes.wideLineForSelectionTolerance) {
+                            return "";
+                        }
+
                         if(feature.attributes.style && feature.attributes.style.pattern)return safetymaps.creator.CreatorObjectLayers.prototype.scalePattern(feature.attributes.style.pattern, 3);
                         else return safetymaps.creator.CreatorObjectLayers.prototype.scalePattern("", 3);
+                    },
+                    opacity: function(feature) {
+                        if(feature.attributes.wideLineForSelectionTolerance) {
+                            return me.options.wideLineForSelectionOpacity;
+                        } else {
+                            return 1;
+                        }
                     }
                 }
             }),
@@ -640,6 +661,21 @@ safetymaps.vrh.Dbks.prototype.layerFeatureSelected = function(e) {
     var me = this;
     var layer = e.feature.layer;
     var f = e.feature.attributes;
+    // For wide selection lines, propagate selection/unselection if already selected
+    if(f.featureToSelect) {
+        if(me.wideFeatureSelected === f.featureToSelect) {
+            dbkjs.selectControl.unselectAll();
+            me.wideFeatureSelected = null;
+            dbkjs.selectControl.unselect(e.feature);
+        } else {
+            dbkjs.selectControl.select(f.featureToSelect);
+            me.wideFeatureSelected = f.featureToSelect;
+            dbkjs.selectControl.unselect(e.feature);
+            $("#vectorclickpanel").show();
+        }
+        return;
+    }
+    me.wideFeatureSelected = null;
     console.log(layer.name + " feature selected", e);
     if(layer === me.layerSymbols) {
         me.showFeatureInfo("Brandweervoorziening", f.symboolcod, f.symbol_noi, me.vrhSymbols[f.code] || i18n.t("symbol." + f.code) || "", f.description);
@@ -679,7 +715,15 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
     this.layerPand.addFeatures([wktReader(object.hoofdpand)]);
     this.layerPand.addFeatures((object.subpanden || []).map(wktReader));
 
-    this.layerFireCompartmentation.addFeatures((object.compartimentering || []).map(wktReader).map(function(f) {
+    var compartimenteringFeatures = (object.compartimentering || []).map(wktReader);
+    this.layerFireCompartmentation.addFeatures(compartimenteringFeatures.map(function(f) {
+        var f2 = f.clone();
+        f2.attributes.style = me.vrhCompartimenteringStyles[f.attributes.symboolcod];
+        f2.attributes.wideLineForSelectionTolerance = true;
+        f2.attributes.featureToSelect = f;
+        return f2;
+    }));
+    this.layerFireCompartmentation.addFeatures(compartimenteringFeatures.map(function(f) {
         f.attributes.style = me.vrhCompartimenteringStyles[f.attributes.symboolcod];
         if(!f.attributes.style) {
             console.log("Ongeldige symboolcode voor brandcompartiment: " + f.attributes.symboolcod);
