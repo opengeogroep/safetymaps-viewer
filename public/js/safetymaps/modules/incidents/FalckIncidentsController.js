@@ -55,6 +55,21 @@ function FalckIncidentsController(incidents) {
         me.button.setAlerted(false);
         me.button.setFotoAlert(false);
     });
+    if(me.options.linkifyWords) {
+        me.incidentDetailsWindow.setLinkifyWords(me.options.linkifyWords);
+        me.externalIFrameWindow = safetymaps.infoWindow.addWindow("external", "Inzetbank", false);//new SplitScreenWindow("externalIFrame");// new ModalWindow("externalIFrame");
+        var div = $("<div style='width: 100%; height: 100%'>Klik op een woord bij een incident om meer informatie op te vragen...</div>");
+        safetymaps.infoWindow.addTab("incident", "external", "Inzetbank", "external", div, null);
+        //me.externalIFrameWindow.createElements("Informatie");
+
+        $(me.incidentDetailsWindow).on("linkifyWordClicked", function(e, word) {
+            console.log("word clicked: " + word);
+            $(div).html("<iframe src='" + me.options.linkifyIFrame.replace("[word]", word) + "' style='width: 100%; height: 100%'></iframe>");
+            $("#tab_external").css("height", "95%");
+            safetymaps.infoWindow.showTab("incident", "external", true);
+            //me.externalIFrameWindow.show();
+        });
+    }
 
     me.markerLayer = new IncidentMarkerLayer();
     $(me.markerLayer).on('click', function(incident) {
