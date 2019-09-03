@@ -174,8 +174,8 @@ safetymaps.infoWindow = {
         if(window) {
             //console.log("infoWindow: remove tab " + tabId);
 
-            window.tabContent.find(".tab-pane #tab_" + tabId).remove();
-            window.tabs.find("li. #tab_li_" + tabId).remove();
+            window.tabContent.find("#tab_" + tabId).remove();
+            window.tabs.find("#tab_li_" + tabId).remove();
         } else {
             console.log("infoWindow: ERROR: cannot remove tab '" + tabId + "' tab from unknown window " + windowId);
         }
