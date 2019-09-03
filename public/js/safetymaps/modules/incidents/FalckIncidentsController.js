@@ -65,7 +65,11 @@ function FalckIncidentsController(incidents) {
 
         $(me.incidentDetailsWindow).on("linkifyWordClicked", function(e, word) {
             console.log("word clicked: " + word);
-            $(div).html("<iframe src='" + me.options.linkifyIFrame.replace("[word]", word) + "' style='width: 100%; height: 100%'></iframe>");
+            var term = me.options.linkifyWords[word.toLowerCase()];
+            if(typeof term === "String") {
+                term = word;
+            }
+            $(div).html("<iframe src='" + me.options.linkifyIFrame.replace("[term]", term) + "' style='width: 100%; height: 100%'></iframe>");
             $("#tab_external").css("height", "95%");
             safetymaps.infoWindow.showTab("incident", "external", true);
             //me.externalIFrameWindow.show();
