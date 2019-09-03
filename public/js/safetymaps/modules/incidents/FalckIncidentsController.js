@@ -68,7 +68,7 @@ function FalckIncidentsController(incidents) {
         $(me.incidentDetailsWindow).on("linkifyWordClicked", function(e, word) {
             console.log("word clicked: " + word);
             var term = me.options.linkifyWords[word.toLowerCase()];
-            if(typeof term !== "String") {
+            if(typeof term !== "string") {
                 term = word;
             }
             $(div).html("<iframe src='" + me.options.linkifyIFrame.replace("[term]", term) + "' style='width: 100%; height: 100%'></iframe>");
