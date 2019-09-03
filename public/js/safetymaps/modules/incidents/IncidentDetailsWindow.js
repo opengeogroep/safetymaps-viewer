@@ -72,8 +72,8 @@ IncidentDetailsWindow.prototype.linkify = function(text) {
 
         t = t.map(function(token) {
             var searchToken = token.trim().toLowerCase();
-            if(searchToken.length > 0 && me.linkifyWords.indexOf(searchToken) !== -1) {
-                return "<a class='linkify'>[word]</a>".replace(/\[word\]/g, token);
+            if(searchToken.length > 0 && me.linkifyWords[searchToken]) {
+                return "<a class='linkify'>" + token + "</a>";
             }
             return token;
         });
