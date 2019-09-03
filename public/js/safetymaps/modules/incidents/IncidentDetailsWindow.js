@@ -352,7 +352,7 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
             return l.naam.localeCompare(r.naam);
         });
         $.each(karakteristieken, function(i, k) {
-            html += "<tr><td>" + dbkjs.util.htmlEncode(k.naam) + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.waardes.sort().join(", "))) + "</td></tr>";
+            html += "<tr><td>" + me.linkify(dbkjs.util.htmlEncode(k.naam)) + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.waardes.sort().join(", "))) + "</td></tr>";
         });
         html += '</table><div/>';
     }
@@ -525,7 +525,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
             return l.Naam.localeCompare(r.Naam);
         });
         $.each(incident.Karakteristieken, function(i, k) {
-            html += "<tr><td>" + dbkjs.util.htmlEncode(k.Naam) + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Waarden.sort().join(", "))) + "</td></tr>";
+            html += "<tr><td>" + me.linkify(dbkjs.util.htmlEncode(k.Naam)) + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Waarden.sort().join(", "))) + "</td></tr>";
         });
         html += '</table><div/>';
     }
@@ -619,7 +619,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlPharos = function(incident, showI
             return l.naam.localeCompare(r.naam);
         });
         $.each(incident.karakteristieken, function(i, k) {
-            html += "<tr><td>" + dbkjs.util.htmlEncode(k.naam) + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.waarde)) + "</td></tr>";
+            html += "<tr><td>" + me.linkify(dbkjs.util.htmlEncode(k.naam)) + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.waarde)) + "</td></tr>";
         });
         html += '</table><div/>';
     }
