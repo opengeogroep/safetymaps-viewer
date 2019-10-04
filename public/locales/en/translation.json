@@ -38,6 +38,15 @@
         "splitscreen": "Splitscreen",
         "information": "Information"
     },
+    "login": {
+        "title": "Login",
+        "username": "Username",
+        "password": "Password",
+        "submit": "Login",
+        "processing": "Logging in...",
+        "retry": "Retry",
+        "norights": "Your accounts has no rights to the viewer. You have been logged out."
+    },
     "search": {
         "button": "Search",
         "title": "Search",

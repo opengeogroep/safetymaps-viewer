@@ -93,18 +93,104 @@ dbkjs.getOrganisation = function() {
         data: params,
         cache: false
     })
+    .fail(function(jqXHR, textStatus, errorThrown) {
+
+        if(jqXHR.status === 200 && jqXHR.responseText.indexOf('<form method="post" action="j_security_check">')) {
+            console.log("Login required, showing login popup...");
+
+            $("#login_title").text(i18n.t("login.title"));
+            $("#login_username").text(i18n.t("login.username"));
+            $("#login_password").text(i18n.t("login.password"));
+            $("#login_submit").text(i18n.t("login.submit"));
+            $("#login_retry").text(i18n.t("login.retry"));
+
+            $("#btn_login_submit").on("click", function() {
+                var username = $("#j_username").val();
+                var password = $("#j_password").val();
+                console.log("Logging in with username " + username);
+
+                $("#btn_login_submit").attr("disabled", "disabled");
+                $("#login_submit").text(i18n.t("login.processing"));
+
+                $.ajax("../j_security_check", {
+                    method: "POST",
+                    data: {
+                        j_username: username,
+                        j_password: password
+                    },
+                    dataType: "html"
+                })
+                .always(function() {
+                    $("#btn_login_submit").removeAttr("disabled");
+                    $("#login_submit").text(i18n.t("login.submit"));
+                })
+                .fail(function(jqXHR) {
+                    if(jqXHR.status === 403) {
+                        $("#login_msg").text(i18n.t("login.norights"));
+                        $.ajax("../logout.jsp");
+                        $(".form-group").hide();
+                        $("#btn_login_submit").hide();
+                        $("#btn_login_refresh").show();
+                        dbkjs.getOrganisation();
+                        return;
+                    }
+
+                    $("#login_msg").text("Unknown login error (HTTP " + jqXHR.status + ") - check console");
+                    console.log("Login Ajax failure", arguments);
+                    if(jqXHR.status === 400 || jqXHR.status === 408) {
+                        $("#login_msg").text("");
+                        console.log("Bad request 400 or timeout 408, trying again...");
+                        // TODO: get organisation and immediately try POST login again on .fail()?
+                        dbkjs.getOrganisation();
+                    }
+                })
+                .done(function(data) {
+                    try {
+                        var data = JSON.parse(data);
+                        if(data.organisation) {
+                            console.log("Successful login, organisation", data.organisation);
+                            $("#loginpanel").modal("hide");
+                            $(".btn-group .btn").first().focus();
+                            dbkjs.options.organisation = data.organisation;
+                            dbkjs.gotOrganisation();
+                            return;
+                        }
+                    } catch(err) {
+                        var i = data.indexOf("Fout");
+                        if(i !== -1) {
+                            var msg = data.substring(i);
+                            i = msg.indexOf("</p>");
+                            msg = msg.substring(0,i);
+                            console.log("Got login error message: " + msg);
+                            $("#login_msg").text(msg);
+                            return;
+                        }
+                    }
+                    $("#login_msg").text("Unknown login error - check console");
+                    console.log("Login error", arguments);
+                });
+            });
+
+            $("#loginpanel").modal({backdrop:'static',keyboard:false, show:true});
+        } else if(jqXHR.status === 403) {
+            $("#login_msg").text(i18n.t("login.norights"));
+            $.ajax("../logout.jsp");
+            dbkjs.getOrganisation();
+        }
+    })
     .done(function (data) {
         if (data.organisation) {
             dbkjs.options.organisation = data.organisation;
-            if (dbkjs.options.organisation.title) {
-                document.title = dbkjs.options.organisation.title;
-            }
+
             dbkjs.gotOrganisation();
         }
     });
 };
 
 dbkjs.gotOrganisation = function () {
+    if (dbkjs.options.organisation.title) {
+        document.title = dbkjs.options.organisation.title;
+    }
     dbkjs.hoverControl = new OpenLayers.Control.SelectFeature(
             [],
             {
@@ -153,11 +239,17 @@ dbkjs.gotOrganisation = function () {
             }
         }
     });
-    
+
     dbkjs.sortModuleButtons();
     dbkjs.layers.loadFromWMSGetCapabilities();
     dbkjs.finishMap();
     dbkjs.initialized = true;
+
+    if(dbkjs.options.organisation.integrated) {
+        $("#settingspanel_b").append('<button id="logoutbtn" class="btn btn-default btn-success" onclick="window.location.href=\'../logout.jsp\'"><span class="glyphicon glyphicon-log-out"></span> Uitloggen</button>');
+    }
+
+
     $(dbkjs).trigger('dbkjs_init_complete');
 };
 

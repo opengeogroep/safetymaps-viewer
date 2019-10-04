@@ -508,7 +508,7 @@ IncidentMonitorController.prototype.getIncidentListAGS = function() {
 IncidentMonitorController.prototype.getIncidentListFalck = function() {
     var me = this;
 
-    $.ajax('gms/incident', {
+    $.ajax("api/falckService/incident", {
         dataType: "json",
         data: {
             extended: true
@@ -719,7 +719,7 @@ IncidentMonitorController.prototype.updateIncident = function(incidentId, archie
 IncidentMonitorController.prototype.updateIncidentFalck = function(incidentId, archief, isUpdate) {
     var me = this;
 
-    $.ajax('gms/incident/' + incidentId, {
+    $.ajax("api/falckService/incident/" + incidentId, {
         dataType: "json",
         data: {
             extended: true
@@ -966,7 +966,7 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
     // Remove fixed height used for keeping previous scrollTop
     $("#tab_twitter").css("height", "");
 
-    $.ajax((dbkjs.options.incidents.twitterUrlPrefix ? dbkjs.options.incidents.twitterUrlPrefix : "") + "action/twitter", {
+    $.ajax((dbkjs.options.incidents.twitterUrlPrefix ? dbkjs.options.incidents.twitterUrlPrefix : "") + "api/twitter", {
         dataType: "json",
         data: params
     }).fail(function(jqXHR, textStatus, errorThrown) {

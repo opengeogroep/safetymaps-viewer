@@ -39,6 +39,15 @@
         "splitscreen": "Half scherm",
         "information": "Informatie"
     },
+    "login": {
+        "title": "Inloggen",
+        "username": "Gebruikersnaam",
+        "password": "Wachtwoord",
+        "submit": "Inloggen",
+        "processing": "Bezig met inloggen...",
+        "retry": "Opnieuw proberen",
+        "norights": "Uw account heeft geen rechten op de viewer. U bent uitgelogd."
+    },
     "search": {
         "button": "Zoeken",
         "title": "Zoeken",

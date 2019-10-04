@@ -130,6 +130,16 @@ dbkjs.modules.search = {
         this.popup.getView().append(div);
 
         this.popup.getView().append($("<div class='row'><div class='col-lg-12' id='search_results'></div></div>"));
+
+        $("#search_results").on("click", "[x-index]", function(e) {
+            var resultIndex = Number($(e.target).attr("x-index"));
+            me.popup.hide();
+            me.activeConfig.resultSelected(me.results[resultIndex]);
+        });
+
+        this.popup.getView().scroll(function(e) {
+            $("#search_input").blur();
+        });
     },
 
     createTabs: function() {
@@ -195,11 +205,6 @@ dbkjs.modules.search = {
                 t = Mustache.escape(t);
             }
             ul.append($("<li><a href='#' x-index='" + i + "'>" + t + "</a></li>"));
-        });
-        ul.click(function(e) {
-            var resultIndex = Number($(e.target).attr("x-index"));
-            me.popup.hide();
-            me.activeConfig.resultSelected(me.results[resultIndex]);
         });
         $("#search_results").append(ul);
     },

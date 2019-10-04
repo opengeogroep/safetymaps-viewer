@@ -35,10 +35,16 @@ safetymaps.vrh.Dbks = function(options) {
         graphicSize: 15,
         graphicSizeHover: 26,
         graphicSizeSelect: 20,
+        wideLineForSelectionExtraWidth: 6,
+        wideLineForSelectionOpacity: 0,
         options: {
             styleSizeAdjust: 0 // For safetymaps.creator.CreatorObjectLayers.prototype.scaleStyleValue()
         }
     }, options);
+
+    var params = new OpenLayers.Util.getParameters();
+    me.options.wideLineForSelectionOpacity = Number(params.selectionLineOpacity) || me.options.wideLineForSelectionOpacity;
+    me.options.wideLineForSelectionExtraWidth = Number(params.selectionLineExtraWidth) || me.options.wideLineForSelectionExtraWidth;
 
     me.loading = true;
 
@@ -189,6 +195,21 @@ safetymaps.vrh.Dbks = function(options) {
         },
         "Vluchtroute": {
             color1: "#000"
+        },
+        "Slagboom": {
+            type_viewer: "tube",
+            color1: "#f00",
+            color2: "#fff",
+            thickness: 2
+        },
+        "Aanpijling": {
+            type_viewer: "line",
+            color1: "#000",
+            thickness: 2
+        },
+        "Aanrijroute": {
+            color1: "#000",
+            type_viewer: "arrow"
         }
     };
     me.lineButtons = {
@@ -259,7 +280,8 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
                 strokeColor: "${color}",
                 strokeWidth: "${width}",
                 strokeLinecap: "butt",
-                strokeDashstyle: "${dashstyle}"
+                strokeDashstyle: "${dashstyle}",
+                strokeOpacity: "${opacity}"
             }, {
                 context: {
                     color: function(feature) {
@@ -268,12 +290,26 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
                     },
                     width: function(feature) {
                         // TODO: scaling
-                        if(feature.attributes.style && feature.attributes.style.thickness)return feature.attributes.style.thickness;
-                        else return 2;
+                        var width = feature.attributes.style && feature.attributes.style.thickness ? feature.attributes.style.thickness : 2;
+                        if(feature.attributes.wideLineForSelectionTolerance) {
+                            width += me.options.wideLineForSelectionExtraWidth;
+                        }
+                        return width;
                     },
                     dashstyle: function(feature) {
+                        if(feature.attributes.wideLineForSelectionTolerance) {
+                            return "";
+                        }
+
                         if(feature.attributes.style && feature.attributes.style.pattern)return safetymaps.creator.CreatorObjectLayers.prototype.scalePattern(feature.attributes.style.pattern, 3);
                         else return safetymaps.creator.CreatorObjectLayers.prototype.scalePattern("", 3);
+                    },
+                    opacity: function(feature) {
+                        if(feature.attributes.wideLineForSelectionTolerance) {
+                            return me.options.wideLineForSelectionOpacity;
+                        } else {
+                            return 1;
+                        }
                     }
                 }
             }),
@@ -625,6 +661,21 @@ safetymaps.vrh.Dbks.prototype.layerFeatureSelected = function(e) {
     var me = this;
     var layer = e.feature.layer;
     var f = e.feature.attributes;
+    // For wide selection lines, propagate selection/unselection if already selected
+    if(f.featureToSelect) {
+        if(me.wideFeatureSelected === f.featureToSelect) {
+            dbkjs.selectControl.unselectAll();
+            me.wideFeatureSelected = null;
+            dbkjs.selectControl.unselect(e.feature);
+        } else {
+            dbkjs.selectControl.select(f.featureToSelect);
+            me.wideFeatureSelected = f.featureToSelect;
+            dbkjs.selectControl.unselect(e.feature);
+            $("#vectorclickpanel").show();
+        }
+        return;
+    }
+    me.wideFeatureSelected = null;
     console.log(layer.name + " feature selected", e);
     if(layer === me.layerSymbols) {
         me.showFeatureInfo("Brandweervoorziening", f.symboolcod, f.symbol_noi, me.vrhSymbols[f.code] || i18n.t("symbol." + f.code) || "", f.description);
@@ -664,7 +715,15 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
     this.layerPand.addFeatures([wktReader(object.hoofdpand)]);
     this.layerPand.addFeatures((object.subpanden || []).map(wktReader));
 
-    this.layerFireCompartmentation.addFeatures((object.compartimentering || []).map(wktReader).map(function(f) {
+    var compartimenteringFeatures = (object.compartimentering || []).map(wktReader);
+    this.layerFireCompartmentation.addFeatures(compartimenteringFeatures.map(function(f) {
+        var f2 = f.clone();
+        f2.attributes.style = me.vrhCompartimenteringStyles[f.attributes.symboolcod];
+        f2.attributes.wideLineForSelectionTolerance = true;
+        f2.attributes.featureToSelect = f;
+        return f2;
+    }));
+    this.layerFireCompartmentation.addFeatures(compartimenteringFeatures.map(function(f) {
         f.attributes.style = me.vrhCompartimenteringStyles[f.attributes.symboolcod];
         if(!f.attributes.style) {
             console.log("Ongeldige symboolcode voor brandcompartiment: " + f.attributes.symboolcod);
@@ -686,26 +745,18 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
     var lineFeatures3 = [];
     var lineFeatures1 = (object.aanpijling || []).map(wktReader).map(function(f) {
         f.attributes.button = "basis";
-        f.attributes.style = {
-            type_viewer: "line",
-            color1: "#000",
-            thickness: 2
-        };
+        f.attributes.style = me.vrhLineStyles["Aanpijling"];
         return f;
     });
     lineFeatures1 = lineFeatures1.concat((object.slagboom || []).map(wktReader).map(function(f) {
         f.attributes.button = "basis";
         f.attributes.description = "";
-        f.attributes.style = {
-            type_viewer: "tube",
-            color1: "#f00",
-            color2: "#fff",
-            thickness: 2
-        };
+        f.attributes.style = me.vrhLineStyles["Slagboom"];
         lineFeatures2.push(f.clone());
         return f;
     }));
     lineFeatures1 = lineFeatures1.concat((object.overige_lijnen || []).map(wktReader).map(function(f) {
+        f.attributes.button = "basis";
         f.attributes.style = me.vrhLineStyles[f.attributes.type] || me.vrhLineStyles["Default"];
         if(f.attributes.style) {
             if(["doubletrack", "tube"].indexOf(f.attributes.style.type_viewer) !== -1) {
@@ -719,21 +770,23 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
     }));
     lineFeatures1 = lineFeatures1.concat((object.aanrijroute || []).map(wktReader).map(function(f) {
         f.attributes.button = "basis";
-        f.attributes.style = {
-            color1: "#000",
-            type_viewer: "arrow"
-        };
-        // Create two geometries: one line and a point at the end of the
-        // line to display the arrow
-        var vertices = f.geometry.getVertices();
-        var end = vertices[vertices.length - 1];
-
-        // Rotation for triangle graphic rendered at end of line
-        f.attributes.rotation = 90 - safetymaps.utils.geometry.getLastLineSegmentAngle(f.geometry);
-
-        f.geometry = new OpenLayers.Geometry.Collection([f.geometry, end]);
+        f.attributes.style = me.vrhLineStyles["Aanrijroute"];
         return f;
     }));
+
+    // For lines with arrows, add a point feature at the end of the line to
+    // display the arrow
+    $.each(lineFeatures1, function(i, f) {
+        if(f.attributes.style.type_viewer === "arrow") {
+            var vertices = f.geometry.getVertices();
+            var end = vertices[vertices.length - 1];
+
+            // Rotation for triangle graphic rendered at end of line
+            f.attributes.rotation = 90 - safetymaps.utils.geometry.getLastLineSegmentAngle(f.geometry);
+
+            f.geometry = new OpenLayers.Geometry.Collection([f.geometry, end]);
+        }
+    });
 
     this.layerLines1.addFeatures(lineFeatures1);
     this.layerLines2.addFeatures(lineFeatures2);
@@ -859,6 +912,10 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object) {
     var p = o.hoofdpand;
 
     var adres = (p.adres || "") + (p.plaats ? "<br>" + p.plaats : "");
+
+    if(!adres && o.straatnaam) {
+        adres = Mustache.render("{{straatnaam}} {{huisnummer}} {{huisletter}} {{toevoeging}}{{#plaats}}<br>{{plaats}}{{/plaats}}", o);
+    }
 
     rows.push({l: "OMS nummer",                     t: p.oms_nummer});
     rows.push({l: "Naam",                           t: o.naam});

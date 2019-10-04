@@ -30,15 +30,18 @@ dbkjs.modules.connectionmonitor = {
     register: function() {
 
         this.options = $.extend({
-            interval: 5
+            interval: 5,
+            hideButton: false
         }, this.options);
         this.options.interval = this.options.interval * 1000;
 
         this.connected = true;
 
-        $(".main-button-group").append($("<div class=\"btn-group pull-left connection-btn-group\">" +
-            "<a id=\"connection\" href=\"#\" title=\"" + i18n.t("connectionmonitor.button") + "\" class=\"btn navbar-btn btn-default\">" +
-            "<i id=\"connectionicon\" class=\"fa fa-signal\" style=\"color: green\"></i></a>"));
+        if(!this.options.hideButton) {
+            $(".main-button-group").append($("<div class=\"btn-group pull-left connection-btn-group\">" +
+                "<a id=\"connection\" href=\"#\" title=\"" + i18n.t("connectionmonitor.button") + "\" class=\"btn navbar-btn btn-default\">" +
+                "<i id=\"connectionicon\" class=\"fa fa-signal\" style=\"color: green\"></i></a>"));
+        }
 
         var me = this;
         $("#connection").click(function() {
@@ -102,6 +105,8 @@ dbkjs.modules.connectionmonitor = {
             complete: function(jqXHR, textStatus) {
                 if(textStatus === "success" || textStatus === "notmodified") {
                     me.onConnectionOK();
+                } else if(textStatus === "parsererror" && jqXHR.responseText.indexOf("j_security_check") !== -1) {
+                    window.location.reload();
                 } else {
                     me.onConnectionError();
                 }

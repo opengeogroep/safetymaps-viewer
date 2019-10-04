@@ -29,11 +29,7 @@ dbkjs.modules.incidents = {
     featureSelector: null,
     options: null,
     register: function() {
-        // useJsOptions is for using options defined in js object dbkjs.options.incidents instead of db
-        // module options, for simultaneous use with older version...
-        if(!this.options || this.options.useJsOptions) {
-            this.options = dbkjs.options.incidents;
-        }
+        var me = this;
 
         this.options = $.extend({
             controller: "MDTIncidentsController",
@@ -59,6 +55,9 @@ dbkjs.modules.incidents = {
         if(params.webservice === "true") {
             this.options.controller = "FalckIncidentsController";
         }
+
+        // XXX test with old code running on same incidents module settings
+        //this.options.controller = "VehicleIncidentsController";
         
         // XXX unused, remove
         if(params.toonZonderEenheden === "true") {
@@ -66,18 +65,22 @@ dbkjs.modules.incidents = {
         }
         
         // Initialize AGS service if needed
-        if(this.options.controller === "AGSIncidentsController" || this.options.incidentMonitor) {
-            if(this.options.ags) {
-                this.service = new AGSIncidentService(this.options.ags.incidentsUrl, this.options.ags.vehiclePosUrl);
+        if(this.options.controller === "AGSIncidentsController" || this.options.incidentMonitor || this.options.incidentSource === "VrhAGS" || this.options.incidentSourceFallback === "VrhAGS") {
+            this.service = new AGSIncidentService("api/vrhAGS", "api/vrhAGSEenheden");
 
-                this.service.initialize(this.options.ags.tokenUrl, this.options.ags.user, this.options.ags.password)
-                .fail(function(e) {
-                    // Avoid map loading messages hiding our error message
-                    window.setTimeout(function() {
-                        dbkjs.util.alert("Fout bij initialiseren meldingenservice", e, "alert-danger");
-                    }, 3000);
-                });
-            }
+            this.service.initialize("api/vrhAGSToken", null, null)
+            .fail(function(e) {
+
+                if(me.options.controller === "VehicleIncidentsController") {
+                    console.log("VrhAGS service failed to initialize", arguments);
+                    return;
+                }
+
+                // Avoid map loading messages hiding our error message
+                window.setTimeout(function() {
+                    dbkjs.util.alert("Fout bij initialiseren meldingenservice", e, "alert-danger");
+                }, 3000);
+            });
         }
         
         //if localstorage is not holding the voertuignummer try to get the voertuignummer from the url
@@ -90,6 +93,8 @@ dbkjs.modules.incidents = {
         
         if(this.options.incidentMonitor) {
             this.controller = new IncidentMonitorController(this);
+        } else if(this.options.controller === "VehicleIncidentsController") {
+            this.controller = new VehicleIncidentsController(this);
         } else if(this.options.controller === "PharosIncidentsController") {
             this.controller = new PharosIncidentsController(this);
         } else if(this.options.controller === "AGSIncidentsController") {

@@ -55,7 +55,7 @@ AGSIncidentService.prototype.initialize = function(tokenUrl, user, pass) {
     var dInitialize = $.Deferred();
 
     var dToken;
-    if(tokenUrl && user && pass) {
+    if(tokenUrl) {
         me.getTokenWithParams = function() {
             return me.getToken(tokenUrl, user, pass);
         };
@@ -187,16 +187,21 @@ AGSIncidentService.prototype.resolveAGSFeatures = function(d, data, jqXHR, proce
     } else if(!data.features) {
         d.reject('No features in response "' + jqXHR.responseText + '"');
     } else {
-        var result = noResultFunction ? noResultFunction() : [];
-        $.each(data.features, function(i, feature) {
-            if(processFunction) {
-                result = processFunction(feature.attributes);
-            } else {
-                result.push(feature.attributes);
-            }
-        });
+        var result;
+        if(!data.features || data.features.length === 0) {
+            result = noResultFunction ? noResultFunction() : [];
+        } else {
+            result = [];
+            $.each(data.features, function(i, feature) {
+                if(processFunction) {
+                    result = processFunction(feature.attributes);
+                } else {
+                    result.push(feature.attributes);
+                }
+            });
+        }
         if(postProcessFunction) {
-            d.resolve(postProcessFunction());
+            d.resolve(postProcessFunction(result));
         } else {
             d.resolve(result);
         }
@@ -431,10 +436,13 @@ AGSIncidentService.prototype.getVoertuigInzet = function(voertuignummer) {
     var me = this;
     var d = $.Deferred();
 
+    var table = "V_B_ACT_INZET_EENHEID";
+
     if(!voertuignummer) {
         d.reject("Null voertuignummer");
+    } else if(!me.tableUrls || !me.tableUrls[table]) {
+        d.reject("Nog niet geinitialiseerd");
     } else {
-        var table = "V_B_ACT_INZET_EENHEID";
         me.doAGSAjax({
             url: me.tableUrls[table] + "/query",
             dataType: "json",
@@ -454,6 +462,50 @@ AGSIncidentService.prototype.getVoertuigInzet = function(voertuignummer) {
             },
             function() {
                 return null;
+            });
+        });
+    }
+    return d.promise();
+};
+
+/**
+ * Get unit status.
+ * @param {string} voertuignummer for unit
+ * @returns {Promise} A promise which will resolve with null when the voertuig
+ *   status is unknown or the unit status details. The promise
+ *   will be rejected on error.
+ */
+AGSIncidentService.prototype.getVoertuigStatus = function(voertuignummer) {
+    var me = this;
+    var d = $.Deferred();
+
+    var table = "V_B_ACT_EENH_STATUS";
+
+    if(!voertuignummer) {
+        d.reject("Null voertuignummer");
+    } else if(!me.tableUrls || !me.tableUrls[table]) {
+        d.reject("Nog niet geinitialiseerd");
+    } else {
+        me.doAGSAjax({
+            url: me.tableUrls[table] + "/query",
+            dataType: "json",
+            data: {
+                f: "json",
+                token: me.token,
+                where: "T_IND_DISC_EENHEID = 'B' AND ROEPNAAM_EENHEID = '" + voertuignummer + "'",
+                outFields: "*"
+            }
+        })
+        .fail(function(e) {
+            d.reject(table + ": " + e);
+        })
+        .done(function(data, textStatus, jqXHR) {
+            me.resolveAGSFeatures(d, data, jqXHR, null,
+            function() {
+                return null;
+            },
+            function(r) {
+                return r[0];
             });
         });
     }
@@ -1058,11 +1110,45 @@ AGSIncidentService.prototype.getArchiefIncidentClassificaties = function(inciden
     return classificaties.length === 0 ? "" : classificaties.join(", ");
 };
 
+AGSIncidentService.prototype.getVehicle = function(roepnummer) {
+    var me = this;
+
+    if(!me.vehiclePosLayerUrls) {
+        return $.Deferred().reject();
+    }
+
+    var d = $.Deferred();
+
+    me.doAGSAjax({
+        url: me.vehiclePosLayerUrls["Brandweer_Eenheden"] + "/query",
+        dataType: "json",
+        data: {
+            f: "json",
+            token: me.token,
+            where: "Discipline='B' and Roepnummer='" + roepnummer + "'",
+            outFields: "*"
+        },
+        cache: false
+    })
+    .fail(function(e) {
+        d.reject("Fout ophalen voertuig: " + e);
+    })
+    .done(function(data, textStatus, jqXHR) {
+        if(!data.features) {
+            d.reject("Geen features in voertuig query response");
+        } else {
+            d.resolve(data.features);
+        }
+    });
+    return d.promise();
+
+};
+
 AGSIncidentService.prototype.getVehiclePositions = function(incidentIds) {
 
     var me = this;
 
-    if(me.vehiclePosLayerUrls === null) {
+    if(!me.vehiclePosLayerUrls) {
         return $.Deferred().resolveWith([]);
     }
 
@@ -1093,7 +1179,7 @@ AGSIncidentService.prototype.getVehiclePositions = function(incidentIds) {
             f: "json",
             token: me.token,
             where: "Discipline='B' and " + where,
-            outFields: "*"
+            outFields: "PosDate,PosTime,MobileID,Status,Voertuigsoort,Speed,Direction,Roepnummer,IncidentID"
         },
         cache: false
     })

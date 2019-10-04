@@ -55,6 +55,32 @@
       </div>
     </div>
 
+    <div id="loginpanel" class="modal fade">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="login_title"><span class="glyphicon glyphicon-lock"></span> Inloggen</h4>
+          </div>
+            <div id="loginpanel_b" class="modal-body">
+                <form id="loginform">
+                    <div id="login_msg"></div>
+                    <div class="form-group">
+                        <label for="j_username"><span class="glyphicon glyphicon-user"></span> <span id="login_username">Gebruikersnaam1</span>:</label>
+                        <input type="text" class="form-control" id="j_username" autocapitalize="none" autofocus="autofocus">
+                    </div>
+                    <div class="form-group">
+                        <label for="j_password"><span class="glyphicon glyphicon-eye-open"></span> <span id="login_password">Wachtwoord1</span>:</label>
+                        <input type="password" class="form-control" id="j_password">
+                    </div>
+                    <input type="submit" id="loginsubmit2" style="display: none" onclick="$('#btn_login_submit').click(); return false;"></input>
+                    <button id="btn_login_submit" class="btn btn-default btn-success btn-block"><span class="glyphicon glyphicon-log-in"></span> <span id="login_submit">Inloggen1</span></button>
+                    <button id="btn_login_refresh" class="btn btn-default btn-default btn-block" style="display: none" onclick="window.location.reload()"><span class="glyphicon glyphicon-retweet"></span> <span id="login_retry">Opnieuw proberen1</span></button>
+                </form>
+            </div>
+        </div>
+      </div>
+    </div>
+
     <script src="js/libs/libs.min.js" type="text/javascript"></script>
     <!-- previous script is the following combined:
     <script src="js/libs/jquery-1.11.0/jquery-1.11.0.min.js" type="text/javascript"></script>
@@ -118,6 +144,7 @@
     <script src="js/safetymaps/modules/incidents/FalckIncidentsController.js?"></script>
     <script src="js/safetymaps/modules/incidents/PharosIncidentsController.js?"></script>
     <script src="js/safetymaps/modules/incidents/FalckIncidentVehicleController.js?"></script>
+    <script src="js/safetymaps/modules/incidents/VehicleIncidentsController.js?"></script>
     <script src="js/safetymaps/modules/incidents/incidents.js?"></script>
 
     <script src="js/safetymaps/modules/edit/edit.js?"></script>

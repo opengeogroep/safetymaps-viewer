@@ -37,7 +37,8 @@ function FalckIncidentsController(incidents) {
         incidentsUrl: "gms",
         incidentMonitorCode: null,
         falckService: true,
-        voertuigIM: true
+        voertuigIM: true,
+        statusUpdateInterval: 15000
     }, me.options);
 
     me.featureSelector = incidents.featureSelector;
@@ -300,6 +301,9 @@ FalckIncidentsController.prototype.getInzetInfo = function() {
     }
 
     var nummers = me.voertuignummer.split(/[,\s]+/);
+
+    me.getStatus(nummers[0]);
+
     var i = 0;
     function check() {
         if(i < nummers.length) {
@@ -322,6 +326,39 @@ FalckIncidentsController.prototype.getInzetInfo = function() {
         }
     }
     check();
+};
+
+FalckIncidentsController.prototype.getStatus = function(voertuignummer) {
+    var me = this;
+
+    window.clearTimeout(me.updateStatusTimer);
+
+    $.ajax("api/falckService/eenheidstatus/" + me.voertuignummer, {
+        dataType: "json"
+    })
+    .always(function() {
+        $("#status").remove();
+
+        me.updateStatusTimer = window.setTimeout(function() {
+            me.getStatus(voertuignummer);
+        }, me.options.statusUpdateInterval);
+    })
+    .fail(function(jqXHR, textStatus, errorThrown) {
+        console.log("Fout bij ophalen eenheidstatus", arguments);
+    })
+    .done(function(data) {
+        var status = null;
+        $.each(data, function(i, d) {
+            if(d.Roepnaam === me.voertuignummer) {
+                status = d;
+                return false;
+            }
+        });
+        if(status) {
+            console.log("Voertuigstatus: " + status.StatusCode + ": " + status.StatusAfkorting);
+            $("<div id='status'>" + status.StatusCode + ": " + status.StatusAfkorting + "</div>").prependTo("body");
+        }
+    });
 };
 
 FalckIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
