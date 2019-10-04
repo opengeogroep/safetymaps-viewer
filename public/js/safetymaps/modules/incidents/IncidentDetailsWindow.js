@@ -28,6 +28,7 @@
 function IncidentDetailsWindow() {
     this.window = safetymaps.infoWindow.addWindow("incident", "Incident", false);
     this.div = $("<div></div>");
+    this.linkifyWords = null;
     safetymaps.infoWindow.addTab("incident", "incident", "Incident", "incident", this.div, "first");
 };
 
@@ -60,7 +61,29 @@ IncidentDetailsWindow.prototype.showError = function(e) {
     this.data(e);
 };
 
+IncidentDetailsWindow.prototype.setLinkifyWords = function(words) {
+    this.linkifyWords = words;
+};
+
+IncidentDetailsWindow.prototype.linkify = function(text) {
+    var me = this;
+    if(this.linkifyWords !== null) {
+        var t = text.split(/([^a-z]+)/i);
+
+        t = t.map(function(token) {
+            var searchToken = token.trim().toLowerCase();
+            if(searchToken.length > 0 && me.linkifyWords[searchToken]) {
+                return "<a class='linkify'>" + token + "</a>";
+            }
+            return token;
+        });
+        return t.join("");
+    }
+    return text;
+};
+
 IncidentDetailsWindow.prototype.renderDetailsScreen = function() {
+    var me = this;
     if(this.rendered) {
         return;
     }
@@ -119,6 +142,7 @@ IncidentDetailsWindow.prototype.addTabClickListener = function() {
  * @returns {undefined}
  */
 IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScrollTop, isXmlOrFormatName) {
+    var me = this;
     this.renderDetailsScreen();
 
     var scrollTop = this.div.scrollTop();
@@ -166,6 +190,11 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
 
     this.div.find(".incidentDetails").html(table);
     this.div.find("#tab_kladblok").html(kladblok);
+    if(this.linkifyWords) {
+        $("a.linkify").on("click", function(e) {
+            $(me).triggerHandler("linkifyWordClicked", [$(e.target).text(), e]);
+        });
+    }
     if(this.showFeatureMatches) {
         this.showMultipleFeatureMatches();
     }
@@ -291,7 +320,7 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
     html += '<tr><td class="leftlabel">Start incident: </td><td>' + incident.start.format("dddd, D-M-YYYY HH:mm:ss") + '</td></tr>';
     html += '<tr><td class="leftlabel">Adres:</td><td>' + incident.locatie + '</td></tr>';
     html += '<tr><td class="leftlabel">Postcode &amp; Woonplaats:</td><td>' + (incident.POSTCODE ? incident.POSTCODE + ', ' : "") + (incident.PLAATS_NAAM ? incident.PLAATS_NAAM : incident.PLAATS_NAAM_NEN) + '</td></tr>';
-    html += '<tr><td class="leftlabel">Melding classificatie:</td><td>' + dbkjs.util.htmlEncode(incident.classificaties) + '</td></tr>';
+    html += '<tr><td class="leftlabel">Melding classificatie:</td><td>' + me.linkify(dbkjs.util.htmlEncode(incident.classificaties)) + '</td></tr>';
 
     if(!incident.karakteristiek || incident.karakteristiek.length === 0) {
         html += '<tr class="detailed"><td>Karakteristieken:</td><td>';
@@ -323,7 +352,7 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
             return l.naam.localeCompare(r.naam);
         });
         $.each(karakteristieken, function(i, k) {
-            html += "<tr><td>" + dbkjs.util.htmlEncode(k.naam) + "</td><td>" + dbkjs.util.htmlEncode(k.waardes.sort().join(", ")) + "</td></tr>";
+            html += "<tr><td>" + me.linkify(dbkjs.util.htmlEncode(k.naam)) + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.waardes.sort().join(", "))) + "</td></tr>";
         });
         html += '</table><div/>';
     }
@@ -395,21 +424,22 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
 };
 
 IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incident) {
+    var me = this;
     var kladblokHTML = "<table>";
     switch(format) {
         case "xml":
             $.each($(incident).find("Kladblok"), function(i, k) {
-                kladblokHTML += "<tr><td>" + dbkjs.util.htmlEncode($(k).text()) + "</td></tr>";
+                kladblokHTML += "<tr><td>" + me.linkify(dbkjs.util.htmlEncode($(k).text())) + "</td></tr>";
             });
             break;
         case "falck":
             $.each(incident.Kladblokregels, function(i, k) {
-                kladblokHTML += "<tr><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + dbkjs.util.htmlEncode(k.Inhoud) + "</td></tr>";
+                kladblokHTML += "<tr><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Inhoud)) + "</td></tr>";
             });
             break;
         case "pharos":
             $.each(incident.kladblokregels, function(i, k) {
-                kladblokHTML += "<tr><td>" + k.tijd.format("HH:mm") + "</td><td>" + dbkjs.util.htmlEncode(k.tekst) + "</td></tr>";
+                kladblokHTML += "<tr><td>" + k.tijd.format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.tekst)) + "</td></tr>";
             });
             break;
         default:
@@ -419,6 +449,7 @@ IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incid
 };
 
 IncidentDetailsWindow.prototype.getIncidentKladblokDefaultHtml = function(kladblok) {
+    var me = this;
     if(!kladblok) {
         return "";
     }
@@ -435,7 +466,7 @@ IncidentDetailsWindow.prototype.getIncidentKladblokDefaultHtml = function(kladbl
             //console.log("Kladblok andere discipline: " + k.T_IND_DISC_KLADBLOK_REGEL +": " + k.INHOUD_KLADBLOK_REGEL);
         }
         kladblokHTML += "<tr class='" + disclass + "'><td>" + AGSIncidentService.prototype.getAGSMoment(k.DTG_KLADBLOK_REGEL).format("HH:mm") + "</td><td>" +
-            dbkjs.util.htmlEncode(k.INHOUD_KLADBLOK_REGEL) + "</td></tr>";
+            me.linkify(dbkjs.util.htmlEncode(k.INHOUD_KLADBLOK_REGEL)) + "</td></tr>";
     });
     return kladblokHTML + "</table>";
 };
@@ -481,7 +512,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
     //html += '<tr><td>Woonplaats: </td><td>' + (a.Plaatsnaam ? a.Plaatsnaam : "-") + '</td></tr>';
 
     //html += '<tr><td>&nbsp;</td><td></td></tr>';
-    html += '<tr><td class="leftlabel">Melding classificatie:</td><td>' + me.getIncidentClassificatiesFalck(incident) + '</td></tr>';
+    html += '<tr><td class="leftlabel">Melding classificatie:</td><td>' + me.linkify(me.getIncidentClassificatiesFalck(incident)) + '</td></tr>';
 
     if(!incident.Karakteristieken || incident.Karakteristieken.length === 0) {
         html += '<tr class="detailed"><td>Karakteristieken:</td><td>';
@@ -494,7 +525,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
             return l.Naam.localeCompare(r.Naam);
         });
         $.each(incident.Karakteristieken, function(i, k) {
-            html += "<tr><td>" + dbkjs.util.htmlEncode(k.Naam) + "</td><td>" + dbkjs.util.htmlEncode(k.Waarden.sort().join(", ")) + "</td></tr>";
+            html += "<tr><td>" + me.linkify(dbkjs.util.htmlEncode(k.Naam)) + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Waarden.sort().join(", "))) + "</td></tr>";
         });
         html += '</table><div/>';
     }
@@ -575,7 +606,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlPharos = function(incident, showI
     html += '<tr><td class="leftlabel">Start incident: </td><td>' + incident.startTijd.format("dddd, D-M-YYYY HH:mm:ss")+'</td></tr>';
     html += '<tr><td class="leftlabel">Adres: </td><td>' + me.getIncidentAdres(incident, false) + '</td></tr>';
     html += '<tr><td class="leftlabel">Woonplaats: </td><td>' + (incident.woonplaats || "-") + '</td></tr>';
-    html += '<tr><td class="leftlabel">Melding classificatie:</td><td>' + incident.classificaties.join(", ") + '</td></tr>';
+    html += '<tr><td class="leftlabel">Melding classificatie:</td><td>' + me.linkify(incident.classificaties.join(", ")) + '</td></tr>';
 
     if(incident.karakteristieken.length === 0) {
         html += '<tr class="detailed"><td>Karakteristieken:</td><td>';
@@ -588,7 +619,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlPharos = function(incident, showI
             return l.naam.localeCompare(r.naam);
         });
         $.each(incident.karakteristieken, function(i, k) {
-            html += "<tr><td>" + dbkjs.util.htmlEncode(k.naam) + "</td><td>" + dbkjs.util.htmlEncode(k.waarde) + "</td></tr>";
+            html += "<tr><td>" + me.linkify(dbkjs.util.htmlEncode(k.naam)) + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.waarde)) + "</td></tr>";
         });
         html += '</table><div/>';
     }
@@ -633,7 +664,7 @@ IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInze
     var prio = $(incident).find("Prioriteit").text();
     html += '<tr><td colspan="2" style="font-weight: bold; text-align: center; color: ' + me.getPrioriteitColor(prio) + '">PRIO ' + prio + '</td></tr>';
 
-    var template = "{{#separator}}<tr><td>&nbsp;</td><td></td></tr>{{/separator}}<tr><td class='leftlabel'><span>{{label}}</span>: </td><td>{{value}}</td></tr>";
+    var template = "{{#separator}}<tr><td>&nbsp;</td><td></td></tr>{{/separator}}<tr><td class='leftlabel'><span>{{label}}</span>: </td><td>{{value}}{{{valueHTML}}}</td></tr>";
 
     //html += Mustache.render(template, { label: "Nummer", value: $(incident).find("IncidentNr").text()});
 
@@ -665,7 +696,7 @@ IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInze
     html += Mustache.render(template, { label: "Woonplaats", value: $(adres).find("Woonplaats").text() });
 
     html += '<tr><td>&nbsp;</td><td></td></tr>';
-    html += Mustache.render(template, { label: "Melding classificatie", value: $(incident).find("Classificatie").text() });
+    html += Mustache.render(template, { label: "Melding classificatie", valueHTML: me.linkify(dbkjs.util.htmlEncode($(incident).find("Classificatie").text())) });
 
     var karakteristiek = $(incident).find("Karakteristiek");
 
@@ -679,9 +710,9 @@ IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInze
         $.each(karakteristiek, function(i, k) {
             v = {};
             v.naam = $(k).find("KarakteristiekNaam").text();
-            v.waarde = $(k).find("KarakteristiekWaarde").text();
+            v.waarde = me.linkify(dbkjs.util.htmlEncode($(k).find("KarakteristiekWaarde").text()));
 
-            html += Mustache.render("<tr><td>{{naam}}</td><td>{{waarde}}</td></tr>", v);
+            html += Mustache.render("<tr><td>{{naam}}</td><td>{{{waarde}}}</td></tr>", v);
         });
         html += '</table><div/>';
     }
