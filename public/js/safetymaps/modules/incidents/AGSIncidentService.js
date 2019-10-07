@@ -564,20 +564,22 @@ AGSIncidentService.prototype.getAllIncidentInfo = function(incidentId, archief, 
                 var dKarakteristiek = me.getKarakteristiek(incidentId, archief);
                 var dKladblok = noKladblok ? null : me.getKladblok(incidentId, archief);
                 var dInzetEenheden = noInzetEenheden ? null : me.getInzetEenheden(incidentId, archief, false);
+                var dGespreksgroep = me.getGespreksgroep(incidentId, archief);
 
-                $.when(dClassificatie, dKarakteristiek, dKladblok, dInzetEenheden)
-                .fail(function(classificatie, karakteristiek, kladblok, inzetEenheden) {
+                $.when(dClassificatie, dKarakteristiek, dKladblok, dInzetEenheden, dGespreksgroep)
+                .fail(function(classificatie, karakteristiek, kladblok, inzetEenheden, gespreksgroep) {
                     d.reject("Kan geen extra incident info ophalen, classificaties: " +
                         classificatie + ", karakteristiek: " + karakteristiek +
-                        ", kladblok: " + kladblok + ", inzet eenheden: " + inzetEenheden);
+                        ", kladblok: " + kladblok + ", inzet eenheden: " + inzetEenheden + ", gespreksgroep: " + gespreksgroep);
                 })
-                .done(function(classificatie, karakteristiek, kladblok, inzetEenheden) {
+                .done(function(classificatie, karakteristiek, kladblok, inzetEenheden, gespreksgroep) {
 
                     // Set additional properties in incident
                     incident.classificaties = classificatie;
                     incident.karakteristiek = karakteristiek;
                     incident.kladblok = kladblok;
                     incident.inzetEenheden = inzetEenheden;
+                    incident.gespreksgroep = gespreksgroep;
 
                     me.normalizeIncidentFields(incident);
 
@@ -752,6 +754,36 @@ AGSIncidentService.prototype.getKarakteristiek = function(incidentId, archief) {
     })
     .done(function(data, textStatus, jqXHR) {
         me.resolveAGSFeatures(d, data, jqXHR);
+    });
+    return d.promise();
+};
+
+AGSIncidentService.prototype.getGespreksgroep = function(incidentId, archief) {
+    var me = this;
+    var d = $.Deferred();
+
+    if(!incidentId) {
+        return d.resolve([]);
+    }
+
+    var table = archief ? "V_B_ARC_INZET_GSGROEP" : "V_B_ACT_INZET_GSGROEP";
+    me.doAGSAjax({
+        url: me.tableUrls[table] + "/query",
+        dataType: "json",
+        data: {
+            f: "json",
+            token: me.token,
+            where: "INCIDENT_ID = " + incidentId,
+            outFields: "GESPREKSGROEP_NAAM"
+        }
+    })
+    .fail(function(e) {
+        d.reject(table + ": " + e);
+    })
+    .done(function(data, textStatus, jqXHR) {
+        me.resolveAGSFeatures(d, data, jqXHR, null, null, function(results) {
+            return results.length > 0 ? results[0].GESPREKSGROEP_NAAM : null;
+        });
     });
     return d.promise();
 };

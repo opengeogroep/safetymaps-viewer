@@ -322,6 +322,10 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
     html += '<tr><td class="leftlabel">Postcode &amp; Woonplaats:</td><td>' + (incident.POSTCODE ? incident.POSTCODE + ', ' : "") + (incident.PLAATS_NAAM ? incident.PLAATS_NAAM : incident.PLAATS_NAAM_NEN) + '</td></tr>';
     html += '<tr><td class="leftlabel">Melding classificatie:</td><td>' + me.linkify(dbkjs.util.htmlEncode(incident.classificaties)) + '</td></tr>';
 
+    if(incident.gespreksgroep) {
+        html += '<tr><td class="leftlabel">INCI-NET:</td><td>' + incident.gespreksgroep + '</td></tr>';
+    }
+
     if(!incident.karakteristiek || incident.karakteristiek.length === 0) {
         html += '<tr class="detailed"><td>Karakteristieken:</td><td>';
         html += "<h4>-</h4>";
