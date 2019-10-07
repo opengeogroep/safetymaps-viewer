@@ -1227,7 +1227,8 @@ AGSIncidentService.prototype.getVehiclePositions = function(incidentIds) {
             var cutoff = new moment().subtract(2, 'hours');
             $.each(data.features, function(i, f) {
                 var dateTime = moment(f.attributes.PosDate + " " + f.attributes.PosTime, "DD-MM-YYYY HH:mm:ss");
-                if(dateTime.isAfter(cutoff)) {
+                // Altijd voertuig ingezet op incident tonen
+                if(dateTime.isAfter(cutoff) || f.attributes.IncidentID !== "") {
                     var p = new Proj4js.Point(f.geometry.x, f.geometry. y);
                     var t = Proj4js.transform(new Proj4js.Proj("EPSG:4326"), new Proj4js.Proj(dbkjs.options.projection.code), p);
                     var p = new OpenLayers.Geometry.Point(t.x, t.y);
