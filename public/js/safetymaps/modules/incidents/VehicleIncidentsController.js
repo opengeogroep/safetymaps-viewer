@@ -650,9 +650,19 @@ VehicleIncidentsController.prototype.getVoertuigIncidentSMCT = function(nummer) 
                 p.reject();
             })
             .done(function(data) {
-                var incidentInfo = { source: "SMCT", incidenten: incidenten, incident: data[0]};
-                me.normalizeIncidentFields(incidentInfo);
-                p.resolve(incidentInfo);
+                if(!data[0].IncidentId) {
+                    console.log("SMCT: Error getting incident data (empty result)", arguments);
+                    p.reject();
+                    return;
+                }
+                try {
+                    var incidentInfo = { source: "SMCT", incidenten: incidenten, incident: data[0]};
+                    me.normalizeIncidentFields(incidentInfo);
+                    p.resolve(incidentInfo);
+                } catch(e) {
+                    console.log("SMCT: Error processing incident", e, data);
+                    p.reject();
+                }
             });
 
         } else {
