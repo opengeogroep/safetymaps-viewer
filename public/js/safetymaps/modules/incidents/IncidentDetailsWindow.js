@@ -518,6 +518,10 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
     //html += '<tr><td>&nbsp;</td><td></td></tr>';
     html += '<tr><td class="leftlabel">Melding classificatie:</td><td>' + me.linkify(me.getIncidentClassificatiesFalck(incident)) + '</td></tr>';
 
+    if(incident.Gespreksgroep) {
+        html += '<tr><td class="leftlabel">INCI-NET:</td><td>' + incident.Gespreksgroep + '</td></tr>';
+    }
+
     if(!incident.Karakteristieken || incident.Karakteristieken.length === 0) {
         html += '<tr class="detailed"><td>Karakteristieken:</td><td>';
         html += "<h4>-</h4>";
