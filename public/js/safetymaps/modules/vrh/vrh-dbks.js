@@ -900,7 +900,7 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
     console.log("Added DBK layer features", this.layers);
 };
 
-safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object) {
+safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, newDbSchema) {
     var me = this;
 
     safetymaps.infoWindow.removeTabs(windowId, "info");
@@ -925,12 +925,20 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object) {
     }
     rows.push({l: "Bouwjaar",                       t: p.bouwjaar});
     rows.push({l: "Gebruik",                        t: p.gebruiksdo});
-    rows.push({l: "Laagste bouwlaag",               t: p.bouwlageno});
-    rows.push({l: "Hoogste bouwlaag",               t: p.bouwlagenb});
+    if(newDbSchema) {
+        rows.push({l: "Gebruiksdoel BAG",           t: p.gebruiks_1});
+        rows.push({l: "Bouwlagen ondergronds",      t: p.bouwlageno});
+        rows.push({l: "Bouwlagen bovengronds",      t: p.bouwlagenb});
+    } else {
+        rows.push({l: "Laagste bouwlaag",           t: p.bouwlageno});
+        rows.push({l: "Hoogste bouwlaag",           t: p.bouwlagenb});
+    }
     rows.push({l: "Afwijkende binnendekking",       t: p.afwijkende});
     rows.push({l: "Aanvullende info binnendekking", t: p.binnendekk});
-    rows.push({l: "Risicoklasse",                   t: p.risicoklas});
-    rows.push({l: "Inzetprocedure",                 t: p.inzetproce});
+    if(!newDbSchema) {
+        rows.push({l: "Risicoklasse",                   t: p.risicoklas});
+    }
+    rows.push({l: newDbSchema ? "Operationele instructies" : "Inzetprocedure", t: p.inzetproce});
     rows.push({l: "Aanvalsplan",                    t: p.aanvalspla});
 
 
@@ -941,42 +949,52 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object) {
         rows.push({l: "Extra info 2 " + (p.bron_ei_2 ? "(Bron: " + p.bron_ei_2 + ")" : ""), t: p.extra_in_1});
     }
 
+    if(newDbSchema) {
+        rows.push({l: "Personeel", t: p.personee_2});
+        rows.push({l: "Bezoekers", t: p.bezoeker_2});
+        rows.push({l: "Slaapplaatsen", t: p.slaappla_3});
+        rows.push({l: "BHV", t: p.bhv_omsch});
+        rows.push({l: "Bijzonderheden aanwezigheid", t: p.bijzonde_1});
+    }
+
     safetymaps.infoWindow.addTab(windowId, "algemeen", "Algemeen", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
 
-    rows = [];
+    if(!newDbSchema) {
+        rows = [];
 
-    var v;
-    v = p.personeel_; if(v) rows.push(["Dag", v, "Personeel"]);
-    v = p.bezoekers_; if(v) rows.push(["Dag", v, "Bezoekers"]);
-    v = p.slaapplaat; if(v) rows.push(["Dag", v, "Slaapplaatsen"]);
-    v = p.bhv_dag;    if(v) rows.push(["Dag", v, "BHV"]);
-    v = p.personeel1; if(v) rows.push(["Nacht", v, "Personeel"]);
-    v = p.bezoekers1; if(v) rows.push(["Nacht", v, "Bezoekers"]);
-    v = p.slaappla_1; if(v) rows.push(["Nacht", v, "Slaapplaatsen"]);
-    v = p.bhv_nacht;  if(v) rows.push(["Nacht", v, "BHV"]);
-    v = p.personee_1; if(v) rows.push(["Weekend", v, "Personeel"]);
-    v = p.bezoeker_1; if(v) rows.push(["Weekend", v, "Bezoekers"]);
-    v = p.slaappla_2; if(v) rows.push(["Weekend", v, "Slaapplaatsen"]);
-    v = p.bhv_weeken; if(v) rows.push(["Weekend", v, "BHV"]);
-    if(rows.length > 1) {
-        rows.unshift(["<b>Moment</b>", "<b>Aantal</b>", "<b>Groep</b>"]);
-    }
-    var div = safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel", "leftlabel"]);
-    rows = [];
-    rows.push({l: "Personeel", t: p.personee_2});
-    rows.push({l: "Bezoekers", t: p.bezoeker_2});
-    rows.push({l: "Slaapplaatsen", t: p.slaappla_3});
-    rows.push({l: "BHV", t: p.bhv_omsch});
-    rows.push({l: "Bijzonderheid aanwezigheid", t: p.bijzonde_1});
-    rows.push({l: "Verzamelplaats", t: p.verzamelpl});
-    var div2 = safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]);
-    if(div) {
-        div.append(div2);
-    } else {
-        div = div2;
-    }
-    if(rows.length !== 1) {
-        safetymaps.infoWindow.addTab(windowId, "verblijf", "Verblijf", "info", div);
+        var v;
+        v = p.personeel_; if(v) rows.push(["Dag", v, "Personeel"]);
+        v = p.bezoekers_; if(v) rows.push(["Dag", v, "Bezoekers"]);
+        v = p.slaapplaat; if(v) rows.push(["Dag", v, "Slaapplaatsen"]);
+        v = p.bhv_dag;    if(v) rows.push(["Dag", v, "BHV"]);
+        v = p.personeel1; if(v) rows.push(["Nacht", v, "Personeel"]);
+        v = p.bezoekers1; if(v) rows.push(["Nacht", v, "Bezoekers"]);
+        v = p.slaappla_1; if(v) rows.push(["Nacht", v, "Slaapplaatsen"]);
+        v = p.bhv_nacht;  if(v) rows.push(["Nacht", v, "BHV"]);
+        v = p.personee_1; if(v) rows.push(["Weekend", v, "Personeel"]);
+        v = p.bezoeker_1; if(v) rows.push(["Weekend", v, "Bezoekers"]);
+        v = p.slaappla_2; if(v) rows.push(["Weekend", v, "Slaapplaatsen"]);
+        v = p.bhv_weeken; if(v) rows.push(["Weekend", v, "BHV"]);
+        if(rows.length > 1) {
+            rows.unshift(["<b>Moment</b>", "<b>Aantal</b>", "<b>Groep</b>"]);
+        }
+        var div = safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel", "leftlabel"]);
+        rows = [];
+        rows.push({l: "Personeel", t: p.personee_2});
+        rows.push({l: "Bezoekers", t: p.bezoeker_2});
+        rows.push({l: "Slaapplaatsen", t: p.slaappla_3});
+        rows.push({l: "BHV", t: p.bhv_omsch});
+        rows.push({l: "Bijzonderheid aanwezigheid", t: p.bijzonde_1});
+        rows.push({l: "Verzamelplaats", t: p.verzamelpl});
+        var div2 = safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]);
+        if(div) {
+            div.append(div2);
+        } else {
+            div = div2;
+        }
+        if(rows.length !== 1) {
+            safetymaps.infoWindow.addTab(windowId, "verblijf", "Verblijf", "info", div);
+        }
     }
 
     rows = [];

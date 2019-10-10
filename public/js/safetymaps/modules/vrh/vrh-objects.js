@@ -27,11 +27,14 @@ dbkjs.modules.vrh_objects = {
     infoWindow: null,
     overviewObjects: null,
     features:[],
+    newDbSchema: false,
 
     register: function() {
         var me = this;
 
         this.overviewObjects = [];
+
+        this.newDbSchema = OpenLayers.Util.getParameters()["newDbSchema"] === "true";
 
         // XXX
         safetymaps.creator.api.imagePath = "js/safetymaps/modules/creator/assets/";        
@@ -92,10 +95,7 @@ dbkjs.modules.vrh_objects = {
 
         // XXX move to safetymaps.vrh.Dbks.init()
         if(me.options.dbks) {
-
-            var newDbSchema = OpenLayers.Util.getParameters()["newDbSchema"] === "true";
-
-            safetymaps.vrh.api.getDbks(newDbSchema)
+            safetymaps.vrh.api.getDbks(me.newDbSchema)
             .fail(function(msg) {
                 dbkjs.util.alert("Fout", msg, "alert-danger");
                 me.dbks.loading = false;
@@ -528,8 +528,7 @@ dbkjs.modules.vrh_objects = {
 
         // Get object details
         //$("#creator_object_info").text(i18n.t("dialogs.busyloading") + "...");
-        var newDbSchema = OpenLayers.Util.getParameters()["newDbSchema"] === "true";
-        safetymaps.vrh.api.getObjectDetails(type, id, newDbSchema)
+        safetymaps.vrh.api.getObjectDetails(type, id, this.newDbSchema)
         .fail(function(msg) {
             //$("#creator_object_info").text("Error: " + msg);
         })
@@ -561,7 +560,7 @@ dbkjs.modules.vrh_objects = {
                 this.events.updateInfoWindow(this.infoWindow.getName(), object);
             } else if(type === "dbk") {
                 this.dbks.addFeaturesForObject(object);
-                this.dbks.updateInfoWindow(this.infoWindow.getName(), object);
+                this.dbks.updateInfoWindow(this.infoWindow.getName(), object, this.newDbSchema);
             } else if(type === "waterongevallenkaart") {
                 this.waterongevallen.addFeaturesForObject(object);
                 this.waterongevallen.updateInfoWindow(this.infoWindow.getName(), object);
