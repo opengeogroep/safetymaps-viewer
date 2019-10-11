@@ -79,7 +79,13 @@ safetymaps.vrh.Dbks = function(options) {
         "To04": "Brandweerinfokast",
         "To1001": "Trap",
         "To1002": "Trap rond",
-        "To1003": "Trappenhuis"
+        "To1003": "Trappenhuis",
+        "Commandokamer": "Commandokamer",
+        "Schuimblus": "Schuimblusinstallatie",
+        "Maatregelen_C2000": "Maatregelen C2000",
+        "NBLA": "Natte blusleiding",
+        "HydrofoorBRW": "Hydrofoor brandweer",
+        "HydrofoorEIGEN": "Eigen hydrofoor"
     };
     me.buttonSymbols = {};
     me.buttonSymbols.basis = [
@@ -132,7 +138,10 @@ safetymaps.vrh.Dbks = function(options) {
         "Tw21": "Niet blussen met water",
         "Tw22": "Markering lab laag risico",
         "Tw23": "Markering lab middel risico",
-        "Tw24": "Markering lab hoog risico"
+        "Tw24": "Markering lab hoog risico",
+        "Geen_C2000_dekking": "Geen C2000 dekking",
+        "Niet_toegankelijk": "Niet toegankelijk",
+        "Wapens_aanwezig": "Wapens aanwezig"
     };
 
     me.vrhCompartimenteringStyles = {
@@ -837,7 +846,7 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
     }).map(vrhSymbol));
 
     this.layerDangerSymbols.addFeatures((object.gevaren || []).map(wktReader).map(function(f) {
-        f.attributes.code = f.attributes.symboolcod;
+        f.attributes.code = f.attributes.symboolcod.replace(/ /g, "_");
 
         if(f.attributes.code === "Tw03") {
             f.attributes.code = "TwTemp";
