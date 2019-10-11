@@ -650,7 +650,7 @@ VehicleIncidentsController.prototype.getVoertuigIncidentSMCT = function(nummer) 
                 p.reject();
             })
             .done(function(data) {
-                if(!data[0].IncidentId) {
+                if(data.length === 0 || !data[0].IncidentId) {
                     console.log("SMCT: Error getting incident data (empty result)", arguments);
                     p.reject();
                     return;
