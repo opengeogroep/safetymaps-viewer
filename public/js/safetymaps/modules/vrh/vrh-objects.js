@@ -115,7 +115,7 @@ dbkjs.modules.vrh_objects = {
 
         // XXX move to safetymaps.vrh.Waterongevallen.init()
         if(me.options.waterongevallen) {
-            safetymaps.vrh.api.getWaterongevallen()
+            safetymaps.vrh.api.getWaterongevallen(me.newDbSchema)
             .fail(function(msg) {
                 dbkjs.util.alert("Fout", msg, "alert-danger");
                 me.waterongevallen.loading = false;
