@@ -36,7 +36,8 @@ dbkjs.modules.safetymaps_creator = {
             // default options here
             autoUpdateInterval: 5*1000*60,// every 5 min
             maxSearchResults: 30,
-            mediaPath: "media/"
+            mediaPath: "media/",
+            showDbkToggleButton : false
         }, this.options);
 
         // Setup API
@@ -196,6 +197,10 @@ dbkjs.modules.safetymaps_creator = {
         
         if(me.options.extendedFloorButton){
             me.createExtendedFloorButton();
+        }
+        
+        if(me.options.showDbkToggleButton){
+            me.createDbkToggleButton();
         }
     },
 
@@ -774,6 +779,22 @@ dbkjs.modules.safetymaps_creator = {
             $("#floor-box").hide();
         });
         
+    },
+    
+    createDbkToggleButton: function () {
+        var me = this;
+        var a = $("<a/>")
+                .attr("id", "toggleDbk")
+                .attr("title", "DBK button")
+                .addClass("btn btn-default navbar-btn")
+                .on("click", function () {
+                    me.clusteringLayer.setVisibility(!me.clusteringLayer.getVisibility());
+                });
+        $("<img/>")
+                .attr("src","images/building.svg")
+                .attr("style","style='position: relative; width: 32px; top: -3px'").appendTo(a);
+        
+        a.prependTo("#btngrp_3");
     }
 
 };
