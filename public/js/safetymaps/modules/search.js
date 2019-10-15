@@ -39,7 +39,8 @@ dbkjs.modules.search = {
             keyupTimeout: 100,
             minSearchLength: 3,
             defaultTab: null,
-            focusOnShow: false // Whether to focus on input field on popup show, may scroll input field out of view on iOS
+            focusOnShow: false, // Whether to focus on input field on popup show, may scroll input field out of view on iOS
+            icon: "<i class='fa fa-search'></i>"
         }, this.options);
 
         me.searchConfigs = [];
@@ -61,7 +62,7 @@ dbkjs.modules.search = {
             title: i18n.t("search.button"),
             "data-sid":me.options.index
         })
-        .append("<i class='fa fa-search'></i>")
+        .append(me.options.icon)
         .click(function(e) {
             e.preventDefault();
             me.showPopup();
