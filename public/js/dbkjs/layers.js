@@ -305,6 +305,9 @@ dbkjs.layers = {
           }
           wms_v.uniqueid = myLayer.layer.id;
           wms_v.div = myLayer.div;
+          if(options.wfsSearch){
+              me.makeSearchConfig(wms_v,options);
+          }
         });
     },
     
@@ -324,5 +327,54 @@ dbkjs.layers = {
         });
     },
     
+    makeSearchConfig: function(layer,options){
+        if(!dbkjs.modules.search) {
+            console.log("WFS-search requires search module, disabled");
+            return;
+        }
 
+        dbkjs.modules.search.addSearchConfig({
+            name: "WFS",
+            tabContents: "<i class='fa fa-home'></i> " + options.wfsSearch.name,
+            placeholder: i18n.t("creator.search_placeholder"),
+            options:{layer:layer,options:options},
+            search: function(value) {
+                var request = OpenLayers.Request.GET({
+                    url: this.options.layer.url,
+                    params: {
+                        REQUEST: "GetFeature",
+                        SERVICE: "WFS",
+                        VERSION: "1.0.0",
+                        TYPENAME: this.options.options.wfsSearch.typeName,
+                        MAXFEATURES:50,
+                        FILTER: "<Filter><PropertyIsLike matchCase='false' wildCard='*' singleChar='.' escapeChar='!'><PropertyName>" + this.options.options.wfsSearch.kolom + "</PropertyName><Literal>*"+value+"*</Literal></PropertyIsLike></Filter>"
+
+                    },
+                    scope:options,
+                    callback: function(data){
+                        var parser = new OpenLayers.Format.GML();
+                        var result = parser.read(data.responseText);
+                        var displayNames = this.wfsSearch.displayName.split(",");
+                        var mustacheString = "";
+                        if(displayNames.length === 0){
+                            console.log("Configureer displayName");
+                            return;
+                        }
+                        for(var i = 0; i < displayNames.length; i++){
+                            mustacheString +="{{"+displayNames[i]+"}} ";
+                        }
+                        dbkjs.modules.search.showResults(result, function(a) {
+                            return Mustache.render(mustacheString, a.data);
+                        }, true);
+                    }
+                }); 
+            },
+            resultSelected: function(result) {
+                console.log(result);
+                if(result.geometry){
+                    dbkjs.map.setCenter([result.geometry.x,result.geometry.y],dbkjs.options.zoom);
+                }
+            }
+        },false);
+    }
 };
