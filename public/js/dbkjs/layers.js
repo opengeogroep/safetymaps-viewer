@@ -219,6 +219,7 @@ dbkjs.layers = {
     },
 
     loadFromWMSGetCapabilities: function () {
+        var me = this;
         if(!dbkjs.options.organisation.wms) {
             return;
         }
@@ -302,6 +303,26 @@ dbkjs.layers = {
                   layertype
               );
           }
+          wms_v.uniqueid = myLayer.layer.id;
+          wms_v.div = myLayer.div;
         });
-    }
+    },
+    
+    listenToIncidents: function () {
+        var me = this;
+        $(dbkjs.modules.incidents.controller).on("new_incident", function () {
+            me.toggleBaseLayer(0);
+            $.each(dbkjs.options.organisation.wms, function (wms_k, wms_v) {
+                var layer  = dbkjs.map.getLayer(wms_v.uniqueid);
+                layer.setVisibility(wms_v.options.visibility);
+                if(wms_v.options.visibility){
+                    $($(wms_v.div).children()[0]).addClass('active');
+                } else {
+                    $($(wms_v.div).children()[0]).removeClass('active');
+                }
+            });
+        });
+    },
+    
+
 };
