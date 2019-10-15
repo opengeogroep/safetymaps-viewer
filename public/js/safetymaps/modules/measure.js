@@ -98,7 +98,12 @@ dbkjs.modules.measure = {
             "measurepartial": _obj.handleMeasurements
         });
         dbkjs.map.addControl(_obj.area_control);
-         
+        
+        $(dbkjs).one("dbkjs_init_complete", function () {
+            _obj.listenToIncidents();
+        });
+        
+        
     },
 
     createButtons: function() {
@@ -183,5 +188,15 @@ dbkjs.modules.measure = {
         }
         $('#measure').show();
         $('#measure').html(out);
+    },
+    listenToIncidents: function () {
+        var me = this;
+        if (dbkjs.options.resetToDefaultOnIncident) {
+            $(dbkjs.modules.incidents.controller).on("new_incident", function () {
+                me.distance_control.deactivate();
+                me.area_control.deactivate();
+                me.clearMeasure();
+            });
+        }
     }
 };
