@@ -44,10 +44,10 @@ dbkjs.modules.geolocate = {
     pulsate: function(feature) {
         var _obj = dbkjs.modules.geolocate;
         var point = feature.geometry.getCentroid(),
-            bounds = feature.geometry.getBounds(),
+                bounds = feature.geometry.getBounds(),
             radius = Math.abs((bounds.right - bounds.left)/2),
-            count = 0,
-            grow = 'up';
+                count = 0,
+                grow = 'up';
 
         var resize = function(){
             if (count>16) {
@@ -81,32 +81,50 @@ dbkjs.modules.geolocate = {
         if(_obj.options.showAccuracyCircle) {
             _obj.layer.removeAllFeatures();
             circle = new OpenLayers.Feature.Vector(
-                OpenLayers.Geometry.Polygon.createRegularPolygon(
-                    new OpenLayers.Geometry.Point(e.point.x, e.point.y),
+                    OpenLayers.Geometry.Polygon.createRegularPolygon(
+                            new OpenLayers.Geometry.Point(e.point.x, e.point.y),
                     e.position.coords.accuracy/2,
-                    40,
-                    0
-                ),
-                {},
-                _obj.style
-            );
+                            40,
+                            0
+                            ),
+                    {},
+                    _obj.style
+                    );
             _obj.layer.addFeatures([
                 new OpenLayers.Feature.Vector(
-                    e.point,
-                    {},
-                    {
-                        graphicName: 'circle',
-                        fillColor: '#CCCC00',
-                        strokeColor: '#CCCC00',
-                        strokeWidth: 1,
-                        fillOpacity: 0.3,
-                        pointRadius: 10
-                    }
+                        e.point,
+                        {},
+                        {
+                            graphicName: 'circle',
+                            fillColor: '#CCCC00',
+                            strokeColor: '#CCCC00',
+                            strokeWidth: 1,
+                            fillOpacity: 0.3,
+                            pointRadius: 10
+                        }
                 ),
                 circle
             ]);
+                        }
+        
+        if(_obj.options.showPoint && !_obj.options.showAccuracyCircle){
+            _obj.layer.removeAllFeatures();
+            _obj.layer.addFeatures([
+                new OpenLayers.Feature.Vector(
+                        e.point,
+                        {},
+                        {
+                            graphicName: 'circle',
+                            fillColor: '#CCCC00',
+                            strokeColor: '#CCCC00',
+                            strokeWidth: 1,
+                            fillOpacity: 0.3,
+                            pointRadius: 10
+                        }
+                )
+            ]);
         }
-
+        
         if(_obj.options.showMarker) {
             _obj.markers.clearMarkers();
             var size = new OpenLayers.Size(36,36);
@@ -206,37 +224,37 @@ dbkjs.modules.geolocate = {
         })
         .always(function() {
             window.setTimeout(function() {
-                _obj.getNmea();
-            }, _obj.options.updateInterval);
-        })
+                        _obj.getNmea();
+                    }, _obj.options.updateInterval);
+                })
         .done(function(nmea) {
             if(!_obj.activated) {
-                return;
-            }
+                        return;
+                    }
 
-            var gga = nmea.$GPGGA.sentence.split(",");
+                    var gga = nmea.$GPGGA.sentence.split(",");
 
             if(gga[6] !== "0") {
-                var lat = _obj.parseLatitude(gga[2], gga[3]);
-                var lon = _obj.parseLongitude(gga[4], gga[5]);
+                        var lat = _obj.parseLatitude(gga[2], gga[3]);
+                        var lon = _obj.parseLongitude(gga[4], gga[5]);
 
-                var pos = new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), dbkjs.map.getProjectionObject());
+                        var pos = new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), dbkjs.map.getProjectionObject());
 
                 if(_obj.position === null || _obj.position.lon !== pos.lon || _obj.position.lat !== pos.lat) {
-                    _obj.position = pos;
-                    _obj.locationupdated({
-                        position: {
-                            coords: {
-                                accuracy: 50
-                            }
-                        },
-                        point: new OpenLayers.Geometry.Point(pos.lon, pos.lat)
-                    });
-                }
-            } else {
-                _obj.locationlost();
-            }
-        });
+                            _obj.position = pos;
+                            _obj.locationupdated({
+                                position: {
+                                    coords: {
+                                        accuracy: 50
+                                    }
+                                },
+                                point: new OpenLayers.Geometry.Point(pos.lon, pos.lat)
+                            });
+                        }
+                    } else {
+                        _obj.locationlost();
+                    }
+                });
     },
     pharosToLonLat: function(gps) {
         var lon = gps.Longitude, lat = gps.Latitude;
@@ -259,56 +277,56 @@ dbkjs.modules.geolocate = {
         })
         .always(function() {
             window.setTimeout(function() {
-                _obj.getPharosPosition();
-            }, _obj.options.updateInterval);
-        })
+                        _obj.getPharosPosition();
+                    }, _obj.options.updateInterval);
+                })
         .done(function(data, textStatus) {
-            var monitor = dbkjs.modules.connectionmonitor;
+                    var monitor = dbkjs.modules.connectionmonitor;
             if(monitor) {
-                monitor.cancelConnectivityCheck();
-                monitor.onConnectionOK();
-            }
+                        monitor.cancelConnectivityCheck();
+                        monitor.onConnectionOK();
+                    }
             if(textStatus === "notmodified") {
-                return;
-            }
+                        return;
+                    }
 
-            var oldSequence = _obj.ealGps ? _obj.ealGps.Sequence : null;
-            var oldLatLon = _obj.ealGps && _obj.ealGps.Gps ? _obj.ealGps.Gps.Latitude + "," + _obj.ealGps.Gps.Longitude : null;
-            _obj.ealGps = data.EAL2OGG;
-            var gps = _obj.ealGps.Gps;
+                    var oldSequence = _obj.ealGps ? _obj.ealGps.Sequence : null;
+                    var oldLatLon = _obj.ealGps && _obj.ealGps.Gps ? _obj.ealGps.Gps.Latitude + "," + _obj.ealGps.Gps.Longitude : null;
+                    _obj.ealGps = data.EAL2OGG;
+                    var gps = _obj.ealGps.Gps;
             if(_obj.ealGps.Sequence !== oldSequence) {
                 if(_obj.options.debug) console.log("geolocate pharos: new GPS data sequence = " + _obj.ealGps.Sequence, gps);
                 if(gps.Validity !== "0") {
                     if(_obj.options.debug) console.log("geolocate pharos: no valid GPS fix");
-                    _obj.locationlost();
-                } else {
+                            _obj.locationlost();
+                        } else {
                     if(oldLatLon === null || gps.Latitude + "," + gps.Longitude !== oldLatLon) {
 
-                        var pos = _obj.pharosToLonLat(gps);
+                                var pos = _obj.pharosToLonLat(gps);
                         if(_obj.options.debug) console.log("geolocate pharos: new or updated position at map position " + pos.lon + ", " + pos.lat);
 
-                        _obj.position = pos;
-                        _obj.locationupdated({
-                            position: {
-                                coords: {
-                                    accuracy: 50
-                                }
-                            },
-                            point: new OpenLayers.Geometry.Point(pos.lon, pos.lat)
-                        });
+                                _obj.position = pos;
+                                _obj.locationupdated({
+                                    position: {
+                                        coords: {
+                                            accuracy: 50
+                                        }
+                                    },
+                                    point: new OpenLayers.Geometry.Point(pos.lon, pos.lat)
+                                });
+                            }
+                        }
                     }
-                }
-            }
-        })
+                })
         .fail(function(jqXHR, textStatus, errorThrown) {
-            console.log("geolocate pharos: ajax failure: " + jqXHR.status + " " + textStatus);
-            var monitor = dbkjs.modules.connectionmonitor;
+                    console.log("geolocate pharos: ajax failure: " + jqXHR.status + " " + textStatus);
+                    var monitor = dbkjs.modules.connectionmonitor;
 
             if(monitor) {
-                monitor.cancelConnectivityCheck();
-                monitor.onConnectionError();
-            }
-        });
+                        monitor.cancelConnectivityCheck();
+                        monitor.onConnectionError();
+                    }
+                });
     },
     register: function(){
         var _obj = dbkjs.modules.geolocate;
@@ -317,6 +335,7 @@ dbkjs.modules.geolocate = {
             provider: "geolocate",
             showAccuracyCircle: true,
             showMarker: false,
+            showPoint: false,
             button: "activate",
             activateOnStart: false,
             updateInterval: 5000,
@@ -390,7 +409,7 @@ dbkjs.modules.geolocate = {
         }
 
         $('#btngrp_3').append('<a id="btn_geolocate" data-sid="'+_obj.options.index+'" class="btn btn-default navbar-btn" href="#" title="' + i18n.t('geolocate.button') + '"><i class="fa fa-crosshairs"></i></a>');
-
+        
         if(_obj.options.activateOnStart) {
             $("#btn_geolocate").css("color", "gray");
 
@@ -399,7 +418,7 @@ dbkjs.modules.geolocate = {
             // When activated on start the button mode is center on position,
             // not 'activate' / 'deactivate'
 
-            _obj.options.button = "center";
+                _obj.options.button = "center";
             // Do not zoom to position, only on click
             _obj.firstGeolocation = false;
         }
@@ -426,7 +445,7 @@ dbkjs.modules.geolocate = {
                 // and set firstGeolocation to true so will center on position
                 // when position received
                 _obj.center();
-            }
+                } 
         });
         dbkjs.map.addLayers([_obj.layer, _obj.markers]);
     }
