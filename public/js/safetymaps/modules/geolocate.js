@@ -413,6 +413,15 @@ dbkjs.modules.geolocate = {
 
         $(_obj.options.location).prepend('<a id="btn_geolocate" data-sid="' + _obj.options.index + '" class="btn btn-default navbar-btn" href="#" title="' + i18n.t('geolocate.button') + '">' + _obj.options.icon + '</a>');
         
+        if (_obj.options.button === "follow") {
+            dbkjs.map.events.register('touchmove', _obj, function (e) {
+                if (_obj.control.bind) {
+                    $("#btn_geolocate").removeClass('active');
+                    _obj.control.bind = !_obj.control.bind;
+                }
+            });
+        }
+        
         if(_obj.options.activateOnStart) {
             $("#btn_geolocate").css("color", "gray");
 
@@ -420,8 +429,9 @@ dbkjs.modules.geolocate = {
 
             // When activated on start the button mode is center on position,
             // not 'activate' / 'deactivate'
-
+            if (_obj.options.button !== "follow"){
                 _obj.options.button = "center";
+            }
             // Do not zoom to position, only on click
             _obj.firstGeolocation = false;
         }
@@ -448,7 +458,16 @@ dbkjs.modules.geolocate = {
                 // and set firstGeolocation to true so will center on position
                 // when position received
                 _obj.center();
+            } else if (_obj.options.button === "follow") {
+                if(_obj.control.bind){
+                    $(this).removeClass('active');
+                    _obj.control.bind = !_obj.control.bind;
+                } else {
+                    $(this).addClass('active');
+                    _obj.control.bind = !_obj.control.bind;
+                    _obj.center();
                 } 
+            }
         });
         dbkjs.map.addLayers([_obj.layer, _obj.markers]);
     }
