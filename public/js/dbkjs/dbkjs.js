@@ -283,7 +283,10 @@ dbkjs.resizeButtonGroup = function(e) {
     var totalButtonGroupWidth = 0;
     var buttonGroups = el.find(".btn-group");
     buttonGroups.each(function() {
+        //btn group 4 is dropdown.
+        if($(this).attr('id') !== "btngrp_4"){
             totalButtonGroupWidth += $(this).outerWidth(true);
+        }
     });
     if (el[0].style.paddingLeft) totalButtonGroupWidth += +(el[0].style.paddingLeft.replace("px", ""));
     if (el[0].style.paddingRight) totalButtonGroupWidth += +(el[0].style.paddingRight.replace("px", ""));
