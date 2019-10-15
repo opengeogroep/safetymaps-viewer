@@ -98,15 +98,22 @@ dbkjs.modules.measure = {
             "measurepartial": _obj.handleMeasurements
         });
         dbkjs.map.addControl(_obj.area_control);
-
+         
     },
 
     createButtons: function() {
         var _obj = this;
+        var buttonParent;
+        if(dbkjs.options.extraButtonGroupDropdown){
+            buttonParent = '#btngrp_4';
+        } else {
+            buttonParent = '#btngrp_3';
+        }
+        
         if($("#btn_measure_distance").length === 0) {
-            $('#btngrp_3').append('<a id="btn_measure_distance" data-sid="'+_obj.options.indexD+'" class="btn btn-default navbar-btn" href="#" title="' +
+            $(buttonParent).append('<a id="btn_measure_distance" data-sid="'+_obj.options.indexD+'" class="btn btn-default navbar-btn" href="#" title="' +
                     i18n.t('map.measureDistance') + '"><i class="fa fa-arrows-v fa-rotate-45"></i></a>');
-            $('#btngrp_3').append('<a id="btn_measure_area" data-sid="'+_obj.options.indexA+'" class="btn btn-default navbar-btn" href="#" title="' +
+            $(buttonParent).append('<a id="btn_measure_area" data-sid="'+_obj.options.indexA+'" class="btn btn-default navbar-btn" href="#" title="' +
                     i18n.t('map.measureArea') + '"><i class="fa fa-bookmark-o fa-rotate-45"></i></a>');
             $('#btn_measure_distance').click(function() {
                 _obj.toggleMeasureDistance();
