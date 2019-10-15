@@ -245,6 +245,10 @@ dbkjs.gotOrganisation = function () {
     dbkjs.finishMap();
     dbkjs.initialized = true;
     
+    if(dbkjs.options.resetToDefaultOnIncident){
+        dbkjs.layers.listenToIncidents();
+    }
+    
     if(dbkjs.options.organisation.integrated) {
         $("#settingspanel_b").append('<button id="logoutbtn" class="btn btn-default btn-success" onclick="window.location.href=\'../logout.jsp\'"><span class="glyphicon glyphicon-log-out"></span> Uitloggen</button>');
     }
