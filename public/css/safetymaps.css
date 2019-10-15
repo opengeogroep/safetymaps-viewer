@@ -621,3 +621,11 @@ a.btn.on:after {
     left: 75px;
     bottom: 20px;
 }
+
+#btngrp_4 {
+    position: absolute;
+    top: 70px;
+    right: 10px;
+    z-index: 3000;
+    display: none;
+}
