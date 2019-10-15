@@ -244,7 +244,7 @@ dbkjs.gotOrganisation = function () {
     dbkjs.layers.loadFromWMSGetCapabilities();
     dbkjs.finishMap();
     dbkjs.initialized = true;
-
+    
     if(dbkjs.options.organisation.integrated) {
         $("#settingspanel_b").append('<button id="logoutbtn" class="btn btn-default btn-success" onclick="window.location.href=\'../logout.jsp\'"><span class="glyphicon glyphicon-log-out"></span> Uitloggen</button>');
     }
@@ -283,7 +283,7 @@ dbkjs.resizeButtonGroup = function(e) {
     var totalButtonGroupWidth = 0;
     var buttonGroups = el.find(".btn-group");
     buttonGroups.each(function() {
-        totalButtonGroupWidth += $(this).outerWidth(true);
+            totalButtonGroupWidth += $(this).outerWidth(true);
     });
     if (el[0].style.paddingLeft) totalButtonGroupWidth += +(el[0].style.paddingLeft.replace("px", ""));
     if (el[0].style.paddingRight) totalButtonGroupWidth += +(el[0].style.paddingRight.replace("px", ""));
@@ -450,6 +450,29 @@ $(document).ready(function () {
                 }
             }
         });
+        
+        //Make toggle button for baselayers; Option can be set in customize.js
+        if(dbkjs.options.separateBaseLayerSwitcher){
+            dbkjs.options.baselayerActive = 0;
+            $("#baselayerpanel_b").hide();
+            var a = $("<a/>")
+                .attr("id", "toggleBaselayers")
+                .attr("title", "Baselayer toggle")
+                .addClass("btn btn-default navbar-btn")
+                .on("click", function () {
+                    dbkjs.options.baselayerActive += 1;
+                    if(dbkjs.options.baselayerActive > dbkjs.options.baselayers.length - 1){
+                        dbkjs.options.baselayerActive = 0;
+                    }
+                    dbkjs.layers.toggleBaseLayer(dbkjs.options.baselayerActive);
+                });
+        $("<img/>")
+                .attr("src","images/baselayer-toggle.svg")
+                .attr("style","style='position: relative; width: 32px; top: -3px'").appendTo(a);
+        
+        a.prependTo("#btngrp_3");
+        }
+        
         FastClick.attach(document.body);
     });
 });
