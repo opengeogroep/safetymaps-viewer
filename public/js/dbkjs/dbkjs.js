@@ -473,6 +473,16 @@ $(document).ready(function () {
         a.prependTo("#btngrp_3");
         }
         
+        if(dbkjs.options.extraButtonGroupDropdown){
+            $("#c_settings").hide();
+            $("#extra_dropDown").on('click',function(){
+                $("#btngrp_4").toggle();
+            });
+        } else {
+            $("#btngrp_4").hide();
+            $("#extra_dropDown").hide();
+        }
+        
         FastClick.attach(document.body);
     });
 });
