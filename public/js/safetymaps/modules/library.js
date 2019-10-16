@@ -98,15 +98,12 @@ dbkjs.modules.library = {
         var me = this;
         me.initLibraryPopup();
         
-        var realpath = me.options.path + item.Documentnaam;
-        var url = safetymaps.utils.getAbsoluteUrl(realpath);
+        var url = safetymaps.utils.getAbsoluteUrl(me.options.path+encodeURIComponent(item.Documentnaam));
         me.libraryPopup.getView().html("");
-        me.libraryPopup.getView().append('<h3 class="pdf-heading" style="margin: 0; text-align: center; height: 28px"><a href="' + realpath + '" target="_blank">' + item.Omschrijving + ' (' + item.Documentnaam + ')</a></h3>' +
+        me.libraryPopup.getView().append('<h3 class="pdf-heading" style="margin: 0; text-align: center; height: 28px"><a href="' + url + '" target="_blank">' + item.Omschrijving + ' (' + item.Documentnaam + ')</a></h3>' +
                 '<div class="pdf-embed" id="pdf_embed_library"/>');
         me.libraryPopup.show();
         
-        //encode ampersand
-        url = encodeURIComponent(url);
         //check if path is set for backend use
         if(me.options.path.includes("?")){
             url += "&t=" + new Date().getTime();
