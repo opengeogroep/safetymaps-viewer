@@ -231,8 +231,9 @@ dbkjs.layers = {
           var layertype;
           var metadata;
           var myLayer;
+          var onlySearch = wms_v.options && wms_v.options.wfsSearch && wms_v.options.wfsSearch.onlySearch;
           var index = wms_v.index || 0;
-          if (wms_v.getcapabilities === true) {
+          if (wms_v.getcapabilities === true && !onlySearch) {
               options = {
                   url: wms_v.url,
                   title: wms_v.name,
@@ -250,7 +251,7 @@ dbkjs.layers = {
                   options.pl = wms_v.pl;
               }
               var myCapabilities = new dbkjs.Capabilities(options);
-          } else if (!wms_v.baselayer) {
+          } else if (!wms_v.baselayer && !onlySearch) {
               params = wms_v.params || {};
               options = wms_v.options || {};
               parent = wms_v.parent || null;
@@ -276,7 +277,7 @@ dbkjs.layers = {
                   layertype,
                   wms_v.gid
               );
-          } else {
+          } else if(!onlySearch) {
               params = wms_v.params || {};
               options = wms_v.options || {};
               options = OpenLayers.Util.extend({isBaseLayer: true}, options);
@@ -303,11 +304,14 @@ dbkjs.layers = {
                   layertype
               );
           }
-          wms_v.uniqueid = myLayer.layer.id;
-          wms_v.div = myLayer.div;
-          if(options.wfsSearch){
-              me.makeSearchConfig(wms_v,options);
-          }
+          
+            if (!onlySearch) {
+                wms_v.uniqueid = myLayer.layer.id;
+                wms_v.div = myLayer.div;
+            }
+            if (wms_v.options && wms_v.options.wfsSearch) {
+                me.makeSearchConfig(wms_v, wms_v.options);
+            }
         });
     },
     
@@ -316,12 +320,14 @@ dbkjs.layers = {
         $(dbkjs.modules.incidents.controller).on("new_incident", function () {
             me.toggleBaseLayer(0);
             $.each(dbkjs.options.organisation.wms, function (wms_k, wms_v) {
-                var layer  = dbkjs.map.getLayer(wms_v.uniqueid);
-                layer.setVisibility(wms_v.options.visibility);
-                if(wms_v.options.visibility){
-                    $($(wms_v.div).children()[0]).addClass('active');
-                } else {
-                    $($(wms_v.div).children()[0]).removeClass('active');
+                if(!(wms_v.options && wms_v.options.wfsSearch && wms_v.options.wfsSearch.onlySearch)){
+                    var layer  = dbkjs.map.getLayer(wms_v.uniqueid);
+                    layer.setVisibility(wms_v.options.visibility);
+                    if(wms_v.options.visibility){
+                        $($(wms_v.div).children()[0]).addClass('active');
+                    } else {
+                        $($(wms_v.div).children()[0]).removeClass('active');
+                    }
                 }
             });
         });
