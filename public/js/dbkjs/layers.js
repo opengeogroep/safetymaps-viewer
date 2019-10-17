@@ -345,7 +345,40 @@ dbkjs.layers = {
             placeholder: i18n.t("creator.search_placeholder"),
             options:{layer:layer,options:options},
             search: function(value) {
-                var request = OpenLayers.Request.GET({
+                
+                var columns  = this.options.options.wfsSearch.kolom.split(',');
+                var values = value.split(' ').filter(function(el){
+                    if(el.length === 0){
+                        return[""];
+                    }
+                    return el.length !== 0;
+                });
+                var filter = "";
+                var operator = "OR";
+                if (columns.length > 1) {
+                    if (values.length === 1) {
+                        var filter = "<Filter><" + operator + ">";
+                        for (var i = 0; i < columns.length; i++) {
+                            var column = columns[i];
+                            var searchValue = values[0];
+                            filter += "<PropertyIsLike matchCase='false' wildCard='*' singleChar='.' escapeChar='!'><PropertyName>" + column + "</PropertyName><Literal>*" + searchValue + "*</Literal></PropertyIsLike>";
+                        }
+                        filter += "</" + operator + "></Filter>"; 
+                    } else {
+                        operator = "AND";
+                        var filter = "<Filter><" + operator + ">";
+                        for(var i = 0; i < values.length; i++ ){
+                            var column = columns[i];
+                            var searchValue = values[i];
+                            filter += "<PropertyIsLike matchCase='false' wildCard='*' singleChar='.' escapeChar='!'><PropertyName>" + column + "</PropertyName><Literal>*" + searchValue + "*</Literal></PropertyIsLike>";
+                        }
+                        filter += "</" + operator + "></Filter>";
+                    }
+                } else {
+                    filter = "<Filter><PropertyIsLike matchCase='false' wildCard='*' singleChar='.' escapeChar='!'><PropertyName>" + this.options.options.wfsSearch.kolom + "</PropertyName><Literal>*"+value+"*</Literal></PropertyIsLike></Filter>";
+                }
+                
+                OpenLayers.Request.GET({
                     url: this.options.layer.url,
                     params: {
                         REQUEST: "GetFeature",
@@ -353,7 +386,7 @@ dbkjs.layers = {
                         VERSION: "1.0.0",
                         TYPENAME: this.options.options.wfsSearch.typeName,
                         MAXFEATURES:50,
-                        FILTER: "<Filter><PropertyIsLike matchCase='false' wildCard='*' singleChar='.' escapeChar='!'><PropertyName>" + this.options.options.wfsSearch.kolom + "</PropertyName><Literal>*"+value+"*</Literal></PropertyIsLike></Filter>"
+                        FILTER: filter
 
                     },
                     scope:options,
