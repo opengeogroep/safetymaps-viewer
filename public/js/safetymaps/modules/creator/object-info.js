@@ -281,7 +281,7 @@ safetymaps.creator.embedPDFs = function(element) {
             var url = safetymaps.utils.getAbsoluteUrl($(pdf).attr("data-url"));
             console.log("embedding PDF " + url);
             // Add cache buster to avoid unexpected server response (206) on iOS 10 safari webapp
-            PDFObject.embed(url + "?t=" + new Date().getTime(), pdf, {
+            PDFObject.embed(url + "&t=" + new Date().getTime(), pdf, {
                 // Use custom built pdf.js with src/core/network.js function
                 // PDFNetworkStreamFullRequestReader_validateRangeRequestCapabilities
                 // always returning false to also avoid 206 error
