@@ -28,6 +28,7 @@ dbkjs.modules.fotoFunction = {
     fileName: null,
     extensie: null,
     useWindowsCamera: false,
+    windowsCameras: {devices:[],index:0},
     carouselId: "foto_carousel",
     image_carousel: $('<div id="foto_carousel" class="carousel slide" data-interval="false"></div>'),
     image_carousel_inner: $('<div class="carousel-inner"></div>'),
@@ -328,11 +329,12 @@ dbkjs.modules.fotoFunction = {
             navigator.mediaDevices.enumerateDevices()
                     .then(function (devices) {
                         devices.forEach(function (device) {
-                            if (device.kind === "videoinput" && !me.useWindowsCamera) {
+                            if (device.kind === "videoinput") {
                                 console.log("windows camera found");
+                                me.windowsCameras.devices.push(device.deviceId);
                                 me.useWindowsCamera = true;
                                 me.contsraint = {video: {
-                                        deviceId: device.deviceId
+                                        deviceId: me.windowsCameras.devices[me.windowsCameras.index]
                                     }
                                 };
                             }
@@ -400,7 +402,13 @@ dbkjs.modules.fotoFunction = {
                     id: "cancelPhoto",
                     class: "btn btn-primary"
                 });
-                
+        
+        me.changeCameraButton = $("<button>Verander camera</button>")
+                .attr({
+                    id: "changeCamera",
+                    class: "btn btn-primary"
+                });
+        
         me.usePhotoButton = $("<button>Gebruik</button>")
                 .attr({
                     id: "usePhoto",
@@ -418,12 +426,14 @@ dbkjs.modules.fotoFunction = {
         this.windowsPopup.getView().append(me.preview);
         this.windowsPopup.getView().append(me.takePhotoButton);
         this.windowsPopup.getView().append(me.cancelPhotoButton);
+        this.windowsPopup.getView().append(me.changeCameraButton);
         this.windowsPopup.getView().append(me.usePhotoButton);
         this.windowsPopup.getView().append(me.remakePhotoButton);
 
         me.takePhotoButton.click(function () {
             $("#takePhoto").hide();
             $("#cancelPhoto").hide();
+            $("#changeCamera").hide();
             $("#cameraCanvas")[0].getContext("2d").drawImage($("#cameraView")[0], 0, 0);
             $("#cameraCanvas")[0].toBlob(function (file) {
                 me.file = file;
@@ -453,6 +463,10 @@ dbkjs.modules.fotoFunction = {
         me.remakePhotoButton.click(function(){
             me.takePicture();
         });
+        
+        me.changeCameraButton.click(function(){
+            me.changeCamera();
+        });
     },
 
     startCamera: function () {
@@ -474,10 +488,25 @@ dbkjs.modules.fotoFunction = {
                     console.error("Oops. Something is broken.", error);
                 });
     },
-
+    
+    changeCamera: function() {
+        var me = this;
+        me.windowsCameras.index++;
+        if(me.windowsCameras.index > me.windowsCameras.devices.length - 1 ){
+            me.windowsCameras.index = 0;
+        }
+        me.contsraint = {video: {
+                deviceId: me.windowsCameras.devices[me.windowsCameras.index]
+            }
+        };
+        me.takePicture();
+        
+    },
+    
     resetWindowsPopup: function () {
         $("#takePhoto").show();
         $("#cancelPhoto").show();
+        $("#changeCamera").show();
         $("#cameraView").show();
         $("#preview").hide();
         $("#usePhoto").hide();
