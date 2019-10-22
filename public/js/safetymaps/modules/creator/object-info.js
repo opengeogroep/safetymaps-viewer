@@ -40,9 +40,12 @@ safetymaps.creator.renderInfoTabs = function(object, windowId) {
     $.each(detailTabs, function(i, detailTab) {
         safetymaps.infoWindow.addTab(windowId, "details_" + i, detailTab.name, "info", safetymaps.creator.createInfoTabDiv(detailTab.rows));
     });
-
-    rows = safetymaps.creator.renderContacts(object);
-    safetymaps.infoWindow.addTab(windowId, "contacts", i18n.t("creator.contacts"), "info", safetymaps.creator.createInfoTabDiv(rows));
+    
+    //TODO dit verplaatsen naar de backend. In de backend kijken of deze gegevens opgehaald moeten worden. Objec = null maakt geen tab aan
+    if(!(dbkjs.modules.safetymaps_creator.options.hideTabs && dbkjs.modules.safetymaps_creator.options.hideTabs.includes("contacts"))){
+        rows = safetymaps.creator.renderContacts(object);
+        safetymaps.infoWindow.addTab(windowId, "contacts", i18n.t("creator.contacts"), "info", safetymaps.creator.createInfoTabDiv(rows));
+    }
 
     rows = safetymaps.creator.renderOccupancy(object);
     safetymaps.infoWindow.addTab(windowId, "occupancy", i18n.t("creator.occupancy"), "info", safetymaps.creator.createInfoTabDiv(rows));
@@ -66,7 +69,8 @@ safetymaps.creator.renderInfoTabs = function(object, windowId) {
     rows = safetymaps.creator.renderFloors(object);
     safetymaps.infoWindow.addTab(windowId, "floors", i18n.t("creator.floors"), "info", safetymaps.creator.createInfoTabDiv(rows));
     
-    if(!dbkjs.modules.safetymaps_creator.options.hideBrandweervoorziening){
+    //TODO dit verplaatsen naar de backend. In de backend kijken of deze gegevens opgehaald moeten worden. Objec = null maakt geen tab aan
+    if(!(dbkjs.modules.safetymaps_creator.options.hideTabs && dbkjs.modules.safetymaps_creator.options.hideTabs.includes("symbols"))){
         rows = safetymaps.creator.renderSymbols(object);
         safetymaps.infoWindow.addTab(windowId, "symbols", i18n.t("creator.symbols"), "info", safetymaps.creator.createInfoTabDiv(rows));
     }
@@ -166,9 +170,12 @@ safetymaps.creator.renderDetails = function(object) {
               rows: rows
         });
     }
-
+    
     if(object.bijzonderhedenlijst) {
         $.each(object.bijzonderhedenlijst, function(i, b) {
+            if(dbkjs.modules.safetymaps_creator.options.hideTabs && dbkjs.modules.safetymaps_creator.options.hideTabs.includes(b.soort)){
+                return;
+            }
             var tab = null;
             $.each(tabs, function(j, t) {
                 if(t.name === b.tabblad) {
@@ -281,7 +288,7 @@ safetymaps.creator.embedPDFs = function(element) {
             var url = safetymaps.utils.getAbsoluteUrl($(pdf).attr("data-url"));
             console.log("embedding PDF " + url);
             // Add cache buster to avoid unexpected server response (206) on iOS 10 safari webapp
-            PDFObject.embed(url + "&t=" + new Date().getTime(), pdf, {
+            PDFObject.embed(url + "?t=" + new Date().getTime(), pdf, {
                 // Use custom built pdf.js with src/core/network.js function
                 // PDFNetworkStreamFullRequestReader_validateRangeRequestCapabilities
                 // always returning false to also avoid 206 error
