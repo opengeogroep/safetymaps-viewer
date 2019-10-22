@@ -338,10 +338,13 @@ dbkjs.layers = {
             console.log("WFS-search requires search module, disabled");
             return;
         }
-
+        var icon = "<i class='fa fa-home'></i> ";
+        if(options.wfsSearch.icon){
+            icon = options.wfsSearch.icon;
+        }
         dbkjs.modules.search.addSearchConfig({
             name: "WFS",
-            tabContents: "<i class='fa fa-home'></i> " + options.wfsSearch.name,
+            tabContents: icon + options.wfsSearch.name,
             placeholder: i18n.t("creator.search_placeholder"),
             options:{layer:layer,options:options},
             search: function(value) {
