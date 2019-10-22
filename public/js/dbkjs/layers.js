@@ -412,8 +412,10 @@ dbkjs.layers = {
                 }); 
             },
             resultSelected: function(result) {
-                console.log(result);
                 if(result.geometry){
+                    if(this.options.options.wfsSearch.showPointInSeconds){
+                        dbkjs.modules.search.zoomAndPulse({lon:result.geometry.x,lat:result.geometry.y},this.options.options.wfsSearch.showPointInSeconds);
+                    }
                     dbkjs.map.setCenter([result.geometry.x,result.geometry.y],dbkjs.options.zoom);
                 }
             }
