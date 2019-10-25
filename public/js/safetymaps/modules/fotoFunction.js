@@ -40,7 +40,8 @@ dbkjs.modules.fotoFunction = {
 
         this.options = $.extend({
             showGallery: false,
-            path: "foto/"
+            path: "foto/",
+            url: "api/foto"
         }, this.options);
 
         me.checkForWindowsCamera();
@@ -197,7 +198,8 @@ dbkjs.modules.fotoFunction = {
         formData.append('type', me.extensie);
 
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', 'api/foto', true);
+        xhr.open('POST', me.options.url, true);
+        xhr.withCredentials = true;
         xhr.onload = function () {
             if (xhr.status === 200) {
                 // File(s) uploaded.
@@ -219,7 +221,11 @@ dbkjs.modules.fotoFunction = {
 
     getFotoForIncident: function (incidentInfo, isNew) {
         var me = this;
-        $.ajax("api/foto?fotoForIncident", {data: {incidentNummer: incidentInfo.IncidentNummer ? incidentInfo.IncidentNummer : incidentInfo.incident.nummer}})
+        $.ajax(me.options.url+"?fotoForIncident", {data: {incidentNummer: incidentInfo.IncidentNummer ? incidentInfo.IncidentNummer : incidentInfo.incident.nummer},
+            xhrFields: {
+                withCredentials: true
+            },
+            crossDomain: true})
                 .done(function (result) {
                     me.buildFotoWindow(result, isNew);
                 });
