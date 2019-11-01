@@ -261,7 +261,7 @@ VehicleIncidentsController.prototype.addConfigControls = function() {
                     "<div class='row'>" +
                         "<div class='col-xs-4'>Voertuignummer:</div>" +
                         "<div class='col-xs-6'><input type='text' disabled id='input_voertuignummer'></div>" +
-                        "<div class='col-xs-2'><button class='btn btn-primary' id='btn_enable_voertuignummer'>Wijzigen</button></div>" +
+                        "<div class='col-xs-2' style='height: 34px'><button class='btn btn-primary' id='btn_enable_voertuignummer'>Wijzigen</button></div>" +
                     "</div>" +
                     "<div class='row ' id='cfg_voertuignummercode' style='visibility: hidden; margin-top: 10px'>" +
                         "<div class='col-xs-4'>Beveiligingscode:</div>" +
@@ -275,6 +275,9 @@ VehicleIncidentsController.prototype.addConfigControls = function() {
     incidentSettings.insertAfter($("#settingspanel_b hr:last"));
 
     $("#btn_enable_voertuignummer").toggle(me.options.eigenVoertuignummerAuthorized);
+    if(!me.options.eigenVoertuignummerAuthorized || !me.options.voertuignummerCode) {
+        $("#cfg_voertuignummercode").hide();
+    }
 
     if(me.options.incidentMonitorAuthorized && me.options.incidentMonitorCode) {
         $("#input_incidentmonitorcode").addClass(me.incidentMonitor ? "check" : "cross");
@@ -300,6 +303,7 @@ VehicleIncidentsController.prototype.addConfigControls = function() {
     function enableVoertuignummerInput() {
         var input = $("#input_voertuignummer");
         input.removeAttr("disabled");
+        input.css("background-color", "");
         input.focus();
     }
 
