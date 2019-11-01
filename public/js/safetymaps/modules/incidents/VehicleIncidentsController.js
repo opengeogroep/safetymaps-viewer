@@ -40,9 +40,20 @@ function VehicleIncidentsController(incidents) {
         incidentSourceFallback: null,
         incidentUpdateInterval: 30000,
         activeIncidentUpdateInterval: 15000,
+
+        // ViewerApiActionBean sets this to true for users with incidentmonitor role
+        incidentMonitorAuthorized: false,
+        // User can only enable IM entering this code, if set
         incidentMonitorCode: null,
+
+        // ViewerApiActionBean sets this to value set by admin for user
+        userVoertuignummer: null,
+        // ViewerApiActionBean sets this to true for users with eigen_voertuignummer role
+        eigenVoertuignummerAuthorized: false,
+        // User can only change voertuignummer if eigenVoertuignummerAuthorized is true
+        // and entering this code, if set
         voertuignummerCode: null,
-        voertuigIM: true,
+
         eenheden: false,
         eenhedenSource: "VrhAGS", // falckService eenheden not supported yet
         eenhedenUpdateInterval: 30000,
@@ -53,11 +64,8 @@ function VehicleIncidentsController(incidents) {
         incidentListFooterFunction: null,
         incidentListFunction: null
     }, me.options);
-    me.primaryFailing = false;
 
-    if(me.options.incidentSourceFallback !== null) {
-        me.options.voertuigIM = false; // XXX werkt nog niet met duokoppeling
-    }
+    me.primaryFailing = false;
 
     me.featureSelector = incidents.featureSelector;
 
@@ -108,15 +116,19 @@ function VehicleIncidentsController(incidents) {
     });
     me.marker = null;
 
-    me.voertuignummer = window.localStorage.getItem("voertuignummer");
-    if(me.voertuignummer === "undefined") {
-        me.voertuignummer = null;
+    if(!me.options.eigenVoertuignummerAuthorized) {
+        me.voertuignummer = me.options.userVoertuignummer;
+    } else {
+        me.voertuignummer = window.localStorage.getItem("voertuignummer");
+        // Empty string not set to default - means disable!
+        if(me.voertuignummer === "undefined" || me.voertuignummer === null) {
+            me.voertuignummer = me.options.voertuignummer;
+            window.localStorage.setItem("voertuignummer", me.voertuignummer);
+        }
     }
 
-    if(me.options.incidentSource === "falckService") {
-        me.incidentMonitorCode = window.localStorage.getItem("imcode");
-        me.checkIncidentMonitor();
-    }
+    me.incidentMonitorCode = window.localStorage.getItem("imcode");
+    me.checkIncidentMonitor();
 
     // XXX to common object (IncidentFeatureSelector?)
     $('#incident_bottom_right').on('click', function() {
@@ -135,8 +147,8 @@ function VehicleIncidentsController(incidents) {
         me.addConfigControls();
     }, 2000);
 
+    me.vehiclePositionLayer = new VehiclePositionLayer();
     if(me.options.eenheden) {
-        me.vehiclePositionLayer = new VehiclePositionLayer();
         me.vehiclePositionLayer.setShowMoving(false);
 
         if(me.options.incidentSource === "VrhAGS") {
@@ -176,7 +188,16 @@ function VehicleIncidentsController(incidents) {
 VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
     var me = this;
 
-    me.incidentMonitor = me.options.voertuigIM && me.options.incidentMonitorCode && me.options.incidentMonitorCode === me.incidentMonitorCode;
+    me.incidentMonitor = false;
+    if(me.options.incidentMonitorAuthorized) {
+        if(!me.options.incidentMonitorCode) {
+            me.incidentMonitor = true;
+        } else {
+            me.incidentMonitor = me.options.incidentMonitorCode === me.incidentMonitorCode;
+        }
+    }
+    // XXX not implemented yet
+    me.incidentMonitor = false;
 
     if(me.incidentMonitor) {
         if(me.incidentMonitorController) {
@@ -221,8 +242,7 @@ VehicleIncidentsController.prototype.addConfigControls = function() {
 
     var incidentCodeHtml = "";
 
-    if(me.options.voertuigIM) {
-
+    if(me.options.incidentMonitorAuthorized && me.options.incidentMonitorCode) {
         incidentCodeHtml =
                 "<div><h4>Incidentmonitor</h4><p/>" +
                     "<div class='container' style='width: 400px; margin-left: 0px'>" +
@@ -254,7 +274,9 @@ VehicleIncidentsController.prototype.addConfigControls = function() {
             "<hr>");
     incidentSettings.insertAfter($("#settingspanel_b hr:last"));
 
-    if(me.options.voertuigIM) {
+    $("#btn_enable_voertuignummer").toggle(me.options.eigenVoertuignummerAuthorized);
+
+    if(me.options.incidentMonitorAuthorized && me.options.incidentMonitorCode) {
         $("#input_incidentmonitorcode").addClass(me.incidentMonitor ? "check" : "cross");
 
         $("#btn_incidentmonitorcode").click(function() {
@@ -278,7 +300,6 @@ VehicleIncidentsController.prototype.addConfigControls = function() {
     function enableVoertuignummerInput() {
         var input = $("#input_voertuignummer");
         input.removeAttr("disabled");
-        input.css("background-color", "");
         input.focus();
     }
 
@@ -287,6 +308,7 @@ VehicleIncidentsController.prototype.addConfigControls = function() {
         if(input.prop("disabled")) {
             if(!me.options.voertuignummerCode) {
                 enableVoertuignummerInput();
+                $("#btn_enable_voertuignummer").hide();
             } else {
                 $("#cfg_voertuignummercode").css("visibility", "visible");
                 $("#cfg_input_code").focus();
@@ -309,9 +331,11 @@ VehicleIncidentsController.prototype.addConfigControls = function() {
 
     $("#settingspanel").on('hidden.bs.modal', function() {
         me.setVoertuignummer($("#input_voertuignummer").val());
-        $("#input_voertuignummer").attr("disabled", "disabled");
-        $("#input_voertuignummer").css("background-color", "transparent");
-        $("#btn_enable_voertuignummer").show();
+
+        if(me.options.eigenVoertuignummerAuthorized) {
+            $("#input_voertuignummer").attr("disabled", "disabled");
+            $("#btn_enable_voertuignummer").show();
+        }
     });
 
     $("#input_voertuignummer").val(me.voertuignummer);
