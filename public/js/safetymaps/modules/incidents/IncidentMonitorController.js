@@ -35,7 +35,9 @@ function IncidentMonitorController(incidents) {
 
     var params = OpenLayers.Util.getParameters();
     me.falck = me.options.falckService || params.webservice === "true" || window.location.pathname === "/opl/";
-    me.toonZonderEenheden = me.options.toonZonderEenheden;
+
+    // Debug option to show incidents without units attached
+    me.toonZonderEenheden = params.toonZonderEenheden === "true";
 
     if(!me.options.checkKbAccessByAuthz) {
         me.kb = true;

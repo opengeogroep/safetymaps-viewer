@@ -59,11 +59,6 @@ dbkjs.modules.incidents = {
         // XXX test with old code running on same incidents module settings
         //this.options.controller = "VehicleIncidentsController";
         
-        // XXX unused, remove
-        if(params.toonZonderEenheden === "true") {
-            this.options.toonZonderEenheden = true;
-        }
-        
         // Initialize AGS service if needed
         if(this.options.controller === "AGSIncidentsController" || this.options.incidentMonitor || this.options.incidentSource === "VrhAGS" || this.options.incidentSourceFallback === "VrhAGS") {
             this.service = new AGSIncidentService("api/vrhAGS", "api/vrhAGSEenheden");
