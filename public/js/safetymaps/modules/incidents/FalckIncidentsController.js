@@ -275,7 +275,11 @@ FalckIncidentsController.prototype.addConfigControls = function() {
 FalckIncidentsController.prototype.getVoertuignummers = function() {
     var me = this;
     $.ajax(me.options.incidentsUrl + "/eenheid", {
-        dataType: "json"
+        dataType: "json",
+        xhrFields: {
+            withCredentials: true
+        },
+        crossDomain: true
     })
     .done(function(data, textStatus, jqXHR) {
         console.log("Voertuignummers", data);
@@ -360,7 +364,11 @@ FalckIncidentsController.prototype.getStatus = function(voertuignummer) {
     window.clearTimeout(me.updateStatusTimer);
 
     $.ajax("api/falckService/eenheidstatus/" + me.voertuignummer, {
-        dataType: "json"
+        dataType: "json",
+        xhrFields: {
+            withCredentials: true
+        },
+        crossDomain: true
     })
     .always(function() {
         $("#status").remove();
@@ -433,7 +441,11 @@ FalckIncidentsController.prototype.getVoertuigIncidenten = function(nummer) {
 
     var p = $.Deferred();
     $.ajax(me.options.incidentsUrl + "/eenheid/" + nummer, {
-        dataType: "json"
+        dataType: "json",
+        xhrFields: {
+            withCredentials: true
+        },
+        crossDomain: true
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         p.reject(safetymaps.utils.getAjaxError(jqXHR, textStatus, errorThrown));
@@ -501,7 +513,11 @@ FalckIncidentsController.prototype.inzetIncident = function(incidentId, fromInci
             dataType: "json",
             data: {
                 extended: fromIncidentList
-            }
+            },
+            xhrFields: {
+                withCredentials: true
+            },
+            crossDomain: true
         })
         .fail(function(e) {
             var msg = "Kan incidentinfo niet ophalen: " + e;
@@ -648,7 +664,11 @@ FalckIncidentsController.prototype.updateIncident = function(incidentId) {
         dataType: "json",
         data: {
             extended: me.incidentFromIncidentList
-        }
+        },
+        xhrFields: {
+            withCredentials: true
+        },
+        crossDomain: true
     })
     .fail(function(e) {
         var msg = "Kan incidentinfo niet updaten: " + e;

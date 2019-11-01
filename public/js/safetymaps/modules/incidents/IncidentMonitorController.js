@@ -508,12 +508,16 @@ IncidentMonitorController.prototype.getIncidentListAGS = function() {
 IncidentMonitorController.prototype.getIncidentListFalck = function() {
     var me = this;
 
-    $.ajax("api/falckService/incident", {
+    $.ajax(me.options.incidentsUrl + "/incident", {
         dataType: "json",
         data: {
             extended: true
         },
-        cache: false
+        cache: false,
+        xhrFields: {
+            withCredentials: true
+        },
+        crossDomain: true
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         window.clearTimeout(me.getIncidentListTimeout);
@@ -719,12 +723,16 @@ IncidentMonitorController.prototype.updateIncident = function(incidentId, archie
 IncidentMonitorController.prototype.updateIncidentFalck = function(incidentId, archief, isUpdate) {
     var me = this;
 
-    $.ajax("api/falckService/incident/" + incidentId, {
+    $.ajax(me.options.incidentsUrl + "/incident/" + incidentId, {
         dataType: "json",
         data: {
             extended: true
         },
-        cache: false
+        cache: false,
+        xhrFields: {
+            withCredentials: true
+        },
+        crossDomain: true
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         var msg = "Kan incidentinfo niet updaten: " + AGSIncidentService.prototype.getAjaxError(jqXHR, textStatus, errorThrown);
