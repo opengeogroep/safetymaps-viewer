@@ -363,7 +363,7 @@ FalckIncidentsController.prototype.getStatus = function(voertuignummer) {
 
     window.clearTimeout(me.updateStatusTimer);
 
-    $.ajax("api/falckService/eenheidstatus/" + me.voertuignummer, {
+    $.ajax(me.options.incidentsUrl + "/eenheidstatus/" + me.voertuignummer, {
         dataType: "json",
         xhrFields: {
             withCredentials: true
