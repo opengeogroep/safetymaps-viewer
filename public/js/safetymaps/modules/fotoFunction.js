@@ -62,10 +62,6 @@ dbkjs.modules.fotoFunction = {
                 $(dbkjs.modules.incidents.controller).on("incidents.vehicle.update", function (event, incident) {
                     me.getFotoForIncident(incident, false);
                 });
-                $(dbkjs.modules.incidents.controller).on("voertuigNummerUpdated", function (bool) {
-                    me.resetCarousel();
-                    dbkjs.modules.incidents.controller.button.setFotoAlert(false);
-                });
                 $(dbkjs.modules.incidents.controller).on("end_incident", function () {
                     me.incidentNr = null;
                     me.resetCarousel();
