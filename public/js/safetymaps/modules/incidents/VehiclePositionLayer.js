@@ -27,6 +27,8 @@ function VehiclePositionLayer() {
     this.showMoving = window.localStorage.getItem("VehiclePositionLayer.showMoving") === "true";
     this.visibility = !(window.localStorage.getItem("VehiclePositionLayer.hidden") === "true");
 
+    this.showInzetRol = true;
+
     function displayFunction(feature) {
         if(!me.showMoving) {
             return feature.attributes.IncidentID === "" ? "none": "visible";
@@ -41,7 +43,7 @@ function VehiclePositionLayer() {
                 externalGraphic: "${graphic}",
                 graphicWidth: 16,
                 graphicHeight: 16,
-                label: "${Voertuigsoort} ${Roepnummer} ${speed}",
+                label: "${label}",
                 fontColor: "black",
                 fontSize: "12px",
                 fontWeight: "bold",
@@ -51,6 +53,11 @@ function VehiclePositionLayer() {
                 display: "${display}"
             }, {
                 context: {
+                    label: function(feature) {
+                        var speed = feature.attributes.Speed === 0 ? "" : feature.attributes.Speed + "km/h";
+                        var inzetRol = me.showInzetRol ? feature.attributes.Voertuigsoort || "" : "";
+                        return inzetRol + " " + feature.attributes.Roepnummer + " " + speed;
+                    },
                     speed: function(feature) {
                         if(feature.attributes.Speed === 0) {
                             return "";
@@ -134,7 +141,15 @@ VehiclePositionLayer.prototype.setShowMoving = function(showMoving) {
     this.showMoving = showMoving;
     this.layer.redraw();
     this.layer2.redraw();
+    // XXX VehicleIncidentsController sets this to false, would override IM
+    // setting if integrated - dont update localStorage then
     window.localStorage.setItem("VehiclePositionLayer.showMoving", showMoving);
+};
+
+VehiclePositionLayer.prototype.setShowInzetRol = function(showInzetRol) {
+    this.showInzetRol = showInzetRol;
+    this.layer.redraw();
+    this.layer2.redraw();
 };
 
 VehiclePositionLayer.prototype.selectFeature = function(e) {

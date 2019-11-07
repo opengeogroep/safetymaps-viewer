@@ -24,8 +24,8 @@
  * voertuig when it is ingezet.
  *
  * Events:
- * new_incident: when new incident is received
- * end_incident: inzet for incident was ended (may not trigger for some koppelingen)
+ * new_incident: when new incident is received, also fired when clicking lower right bar
+ * end_incident: inzet for incident was ended, or voertuignummer was changed
  *
  * @param {Object} incidents dbk module
  * @returns {AGSIncidentsController}
@@ -36,13 +36,19 @@ function VehicleIncidentsController(incidents) {
     me.options = incidents.options;
 
     me.options = $.extend({
-        incidentSource: "falckService",
+        // Supported: 'SafetyConnect', 'VrhAGS'
+        incidentSource: 'SafetyConnect',
         incidentSourceFallback: null,
         incidentUpdateInterval: 30000,
         activeIncidentUpdateInterval: 15000,
 
+        // Set to crossdomain URL for onboard in customize.js
+        safetyConnectUrl: dbkjs.options.urls && dbkjs.options.urls.safetyConnectUrl ? dbkjs.options.urls.safetyConnectUrl : "api/safetyconnect/",
+
         // ViewerApiActionBean sets this to true for users with incidentmonitor role
         incidentMonitorAuthorized: false,
+        // ViewerApiActionBean sets this to true for users with incidentmonitor_kladblok role
+        incidentMonitorKladblokAuthorized: false,
         // User can only enable IM entering this code, if set
         incidentMonitorCode: null,
 
@@ -54,13 +60,21 @@ function VehicleIncidentsController(incidents) {
         // and entering this code, if set
         voertuignummerCode: null,
 
-        eenheden: false,
-        eenhedenSource: "VrhAGS", // falckService eenheden not supported yet
-        eenhedenUpdateInterval: 30000,
+        showVehicles: true,
+        vehiclesUpdateInterval: 30000,
+        vehiclesShowInzetRol: true,
+        vehiclesShowSpeed: true,
+
         showStatus: true,
         statusUpdateInterval: 15000,
         showFoto: true,
+
+        // Change icon to bell with cross and show error message or just show
+        // error message in details window
         silentError: false,
+
+        // Customize incident monitor incident list: specify functions or names
+        // of functions
         incidentListFooterFunction: null,
         incidentListFunction: null
     }, me.options);
@@ -148,22 +162,20 @@ function VehicleIncidentsController(incidents) {
     }, 2000);
 
     me.vehiclePositionLayer = new VehiclePositionLayer();
-    if(me.options.eenheden) {
+    if(me.options.showVehciles) {
         me.vehiclePositionLayer.setShowMoving(false);
 
-        if(me.options.incidentSource === "VrhAGS") {
-            dbkjs.selectControl.layers.push(me.vehiclePositionLayer.layer);
-        }
+        dbkjs.selectControl.layers.push(me.vehiclePositionLayer.layer);
 
         $(dbkjs).one("dbkjs_init_complete", function() {
             me.vehiclePositionLayer.raiseLayers();
         });
     }
 
-    if(me.options.incidentSource === "falckService" || me.options.incidentSourceFallback === "falckService") {
+    if(me.options.incidentSource === "SafetyConnect" || me.options.incidentSourceFallback === "SafetyConnect") {
         $(dbkjs).one("dbkjs_init_complete", function() {
             window.setTimeout(function() {
-                me.getFalckServiceVoertuignummers();
+                me.enableVoertuignummerTypeaheadSC();
                 me.setVoertuignummer(me.voertuignummer, true);
             }, 2000);
         });
@@ -171,9 +183,7 @@ function VehicleIncidentsController(incidents) {
 
     if(me.options.incidentSource === "vrhAGS" || me.options.incidentSourceFallback === "vrhAGS") {
         $(this.service).on('initialized', function() {
-            if(incidents.options.voertuignummerTypeahead) {
-                me.enableVrhAGSVoertuignummerTypeahead();
-            }
+            me.enableVrhAGSVoertuignummerTypeahead();
             me.setVoertuignummer(me.voertuignummer, true);
         });
     }
@@ -353,13 +363,14 @@ VehicleIncidentsController.prototype.addConfigControls = function() {
     }
 };
 
-VehicleIncidentsController.prototype.getFalckServiceVoertuignummers = function() {
+VehicleIncidentsController.prototype.enableVoertuignummerTypeaheadSC = function() {
     var me = this;
-    $.ajax("api/falckService/eenheid", {
+    $.ajax(me.options.safetyConnectUrl + "eenheid", {
         dataType: "json"
     })
     .done(function(data, textStatus, jqXHR) {
-        console.log("Voertuignummers", data);
+        console.log("SC: Voertuignummers", data);
+        // XXX maybe already done when fallback enabled
         $("#input_voertuignummer")
         .typeahead({
             name: 'voertuignummers',
@@ -373,10 +384,12 @@ VehicleIncidentsController.prototype.getFalckServiceVoertuignummers = function()
  * Get and enable typeahead data for voertuignummer config control. Service
  * must be initialized.
  */
-VehicleIncidentsController.prototype.enableVrhAGSVoertuignummerTypeahead = function() {
+VehicleIncidentsController.prototype.enableVoertuignummerTypeaheadVrhAGS = function() {
     var me = this;
     me.service.getVoertuignummerTypeahead()
     .done(function(datums) {
+        console.log("VrhAGS: Voertuignummers", data);
+        // XXX maybe already done when fallback enabled
         $("#input_voertuignummer")
         .typeahead({
             name: 'voertuignummers',
@@ -408,8 +421,11 @@ VehicleIncidentsController.prototype.setVoertuignummer = function(voertuignummer
     }
     me.voertuignummer = voertuignummer;
     window.localStorage.setItem("voertuignummer", voertuignummer);
-    $(me).triggerHandler("voertuigNummerUpdated", [true]);
+
     me.cancelGetInzetInfo();
+    if(me.incidentNummer) {
+        me.geenInzet(true);
+    }
     me.getInzetInfo();
     me.updateStatus();
 };
@@ -503,15 +519,15 @@ VehicleIncidentsController.prototype.updateStatus = function() {
         if(me.inzetInfo.source === "VrhAGS") {
             me.showStatusVrhAGS();
         } else {
-            me.showStatusSafetymapsService();
+            me.showStatusSC();
         }
     } else {
         // When no inzetInfo known yet use the primary source for status
 
         if(me.options.incidentSource === "VrhAGS") {
             me.showStatusVrhAGS();
-        } else if(me.options.incidentSource === "falckService") {
-            me.showStatusSafetymapsService();
+        } else if(me.options.incidentSource === "SafetyConnect") {
+            me.showStatusSC();
         }
     }
 };
@@ -529,10 +545,10 @@ VehicleIncidentsController.prototype.showStatusVrhAGS = function() {
         }, me.options.statusUpdateInterval);
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
-        console.log("Fout bij ophalen eenheidstatus", arguments);
+        console.log("VrhAGS: Fout bij ophalen eenheidstatus", arguments);
     })
     .done(function(status) {
-        console.log("VrhAGS voertuigstatus", status);
+        console.log("VrhAGS: Voertuigstatus", status);
 
         if(status) {
             var id = status.T_ACT_STATUS_CODE_EXT_BRW;
@@ -544,17 +560,17 @@ VehicleIncidentsController.prototype.showStatusVrhAGS = function() {
                 case "IR": code = "NI"; break;
             }
 
-            $("<div id='status'>" + id + ": " + code + "</div>").prependTo("body");
+            $("<div id='status'>" /*+ id + ": "*/ + code + "</div>").prependTo("body");
         }
     });
 };
 
-VehicleIncidentsController.prototype.showStatusSafetymapsService = function() {
+VehicleIncidentsController.prototype.showStatusSC = function() {
     var me = this;
 
     window.clearTimeout(me.updateStatusTimer);
 
-    $.ajax("api/falckService/eenheidstatus/" + me.voertuignummer, {
+    $.ajax(me.options.safetyConnectUrl + "eenheidstatus/" + me.voertuignummer, {
         dataType: "json"
     })
     .always(function() {
@@ -565,7 +581,7 @@ VehicleIncidentsController.prototype.showStatusSafetymapsService = function() {
         }, me.options.statusUpdateInterval);
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
-        console.log("Fout bij ophalen eenheidstatus", arguments);
+        console.log("SC: Fout bij ophalen eenheidstatus", arguments);
     })
     .done(function(data) {
         var status = null;
@@ -576,7 +592,7 @@ VehicleIncidentsController.prototype.showStatusSafetymapsService = function() {
             }
         });
         if(status) {
-            console.log("SCT Voertuigstatus", status);
+            console.log("SC: Voertuigstatus", status);
             $("<div id='status'>" + status.StatusAfkorting + "</div>").prependTo("body");
         }
     });
@@ -591,13 +607,13 @@ VehicleIncidentsController.prototype.getVoertuigIncidenten = function(nummer) {
     var fallback = $.Deferred().reject("geen fallback geconfigureerd").promise();
     if(me.options.incidentSource === "VrhAGS") {
         primary = me.getVoertuigIncidentVrhAGS(nummer);
-        if(me.options.incidentSourceFallback === "falckService") {
-            fallback = me.getVoertuigIncidentSMCT(nummer);
+        if(me.options.incidentSourceFallback === "SafetyConnect") {
+            fallback = me.getVoertuigIncidentSC(nummer);
         } else {
             me.options.incidentSourceFallback = null;
         }
     } else {
-        primary = me.getVoertuigIncidentSMCT(nummer);
+        primary = me.getVoertuigIncidentSC(nummer);
         if(me.options.incidentSourceFallback === "VrhAGS") {
             if(!me.service.initialized) {
                 console.log("Fallback VrhAGS not initialized, not querying");
@@ -650,12 +666,13 @@ VehicleIncidentsController.prototype.getVoertuigIncidenten = function(nummer) {
  * @param {type} nummer voertuignummer
  * @returns null if no incidents from service, string if Ajax error, or array of incidents for eenheid
  */
-VehicleIncidentsController.prototype.getVoertuigIncidentSMCT = function(nummer) {
+VehicleIncidentsController.prototype.getVoertuigIncidentSC = function(nummer) {
     var me = this;
 
     var p = $.Deferred();
-    $.ajax("api/falckService/eenheid/" + nummer, {
-        dataType: "json"
+    $.ajax(me.options.safetyConnectUrl + "eenheid/" + nummer, {
+        dataType: "json",
+        xhrFields: { withCredentials: true }, crossDomain: true
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         p.reject(safetymaps.utils.getAjaxError(jqXHR, textStatus, errorThrown));
@@ -665,37 +682,38 @@ VehicleIncidentsController.prototype.getVoertuigIncidentSMCT = function(nummer) 
         var incidenten = data && data.Incidenten && data.Incidenten.length > 0 ? data.Incidenten : null;
 
         if(incidenten && incidenten.length > 0) {
-            console.log("SMCT: Got incidents for voertuig " + nummer + ": " + incidenten);
+            console.log("SC: Got incidents for voertuig " + nummer + ": " + incidenten);
 
-            $.ajax("api/falckService/incident/" + incidenten[incidenten.length-1], {
+            $.ajax(me.options.safetyConnectUrl + "incident/" + incidenten[incidenten.length-1], {
                 dataType: "json",
                 data: {
                     extended: false
-                }
+                },
+                xhrFields: { withCredentials: true }, crossDomain: true
             })
             .fail(function(e) {
-                console.log("SMCT: Error getting incident data", arguments);
+                console.log("SC: Error getting incident data", arguments);
                 p.reject();
             })
             .done(function(data) {
                 if(!data[0].IncidentId) {
-                    console.log("SMCT: Error getting incident data (empty result)", arguments);
+                    console.log("SC: Error getting incident data (empty result)", arguments);
                     p.reject();
                     return;
                 }
                 try {
-                    var incidentInfo = { source: "SMCT", incidenten: incidenten, incident: data[0]};
+                    var incidentInfo = { source: "SafetyConnect", incidenten: incidenten, incident: data[0]};
                     me.normalizeIncidentFields(incidentInfo);
                     p.resolve(incidentInfo);
                 } catch(e) {
-                    console.log("SMCT: Error processing incident", e, data);
+                    console.log("SC: Error processing incident", e, data);
                     p.reject();
                 }
             });
 
         } else {
-            console.log("SMCT: No incidents for voertuig " + nummer);
-            p.resolve({ source: "SMCT", incidenten: incidenten});
+            console.log("SC: No incidents for voertuig " + nummer);
+            p.resolve({ source: "SafetyConnect", incidenten: incidenten});
         }
     });
     return p;
@@ -742,24 +760,78 @@ VehicleIncidentsController.prototype.updateVehiclePositions = function() {
     window.clearTimeout(me.updateVehicleTimeout);
 
     if(me.incidentNummer) {
-        if(me.options.eenhedenSource === "VrhAGS") {
-            me.service.getVehiclePositions([me.incident.INCIDENT_ID])
-            .always(function() {
-                me.updateVehicleTimeout = window.setTimeout(function() {
-                    me.updateVehiclePositions();
-                }, me.options.eenhedenUpdateInterval);
-            })
-            .done(function(features) {
-                console.log("Vehicle positions for incident", features);
-                if(!features) {
-                    features = [];
-                }
-                me.vehiclePositionLayer.features(features);
-            });
+        // When switched to fallback source, also get vehicle positions from fallback source
+        // by using the same source for vehicles as was used for inzet info
+
+        if(me.inzetInfo && me.inzetInfo.source) {
+            if(me.inzetInfo.source === "VrhAGS") {
+                me.updateVehiclePositionsVrhAGS();
+            } else {
+                me.updateVehiclePositionsSC();
+            }
         } else {
-            console.log("eenhedenSource not supported: " + me.options.eenhedenSource);
+            // noInzetInfo/incidentNummer then no vehicle positions
         }
     }
+};
+
+VehicleIncidentsController.prototype.updateVehiclePositionsVrhAGS = function() {
+    var me = this;
+    me.service.getVehiclePositions([me.incident.INCIDENT_ID])
+    .always(function() {
+        me.updateVehicleTimeout = window.setTimeout(function() {
+            me.updateVehiclePositions();
+        }, me.options.vehiclesUpdateInterval);
+    })
+    .fail(function (jqXHR, textStatus, errorThrown) {
+        console.log(jqXHR, textStatus, errorThrown);
+    })
+    .done(function(features) {
+        console.log("VrhAGS: Vehicle positions for incident", features);
+        if(!features) {
+            features = [];
+        }
+        me.vehiclePositionLayer.features(features);
+    });
+};
+
+VehicleIncidentsController.prototype.updateVehiclePositionsSC = function() {
+    var me = this;
+    $.ajax(me.options.safetyConnectUrl + "eenheidlocatie?extended=false", {
+        dataType: "json"
+    })
+    .always(function() {
+        me.updateVehicleTimeout = window.setTimeout(function() {
+            me.updateVehiclePositions();
+        }, me.options.vehiclesUpdateInterval);
+    })
+    .fail(function (jqXHR, textStatus, errorThrown) {
+        console.log(jqXHR, textStatus, errorThrown);
+    })
+    .done(function (data, textStatus, jqXHR) {
+        console.log("SC: Vehicle positions for incident", data);
+        var transformedVehicles = data.features
+            .filter(function(f) {
+                // Filter only vehicles for incident inzet
+                return f.properties.incidentNummer === me.incident.IncidentNummer;
+            })
+            .map(function(f) {
+                // Map SC vehicles schema to schema expected by VehiclePositionLayer
+                // (based on VrhAGS)
+                var props = f.properties;
+                var attributes = {
+                    IncidentID: props.incidentNummer || "",
+                    Voertuigsoort: props.inzetRol || "",
+                    Roepnummer: props.id,
+                    Speed: props.speed || 0,
+                    Direction: props.heading
+                };
+                var geometry = new OpenLayers.Geometry.Point(f.geometry.coordinates[0], f.geometry.coordinates[1]);
+                return new OpenLayers.Feature.Vector(geometry, attributes);
+            });
+        console.log("SC: Transformed vehicle positions for layer", transformedVehicles);
+        me.vehiclePositionLayer.features(transformedVehicles);
+    });
 };
 
 VehicleIncidentsController.prototype.geenInzet = function(triggerEvent) {
@@ -824,7 +896,7 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
 
         me.incidentDetailsWindow.show();
 
-        if(me.options.eenheden) {
+        if(me.options.showVehicles) {
             me.updateVehiclePositions();
         }
 
@@ -857,7 +929,7 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
 
         // XXX
         var oldIncidentHtml, newIncidentHtml;
-        if(incidentInfo.source === "SMCT") {
+        if(incidentInfo.source === "SafetyConnect") {
             oldIncidentHtml = me.incidentDetailsWindow.getIncidentHtmlFalck(oldIncident, true, true);
             newIncidentHtml = me.incidentDetailsWindow.getIncidentHtmlFalck(incident, true, true);
         } else {
@@ -902,7 +974,7 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
 
 VehicleIncidentsController.prototype.inzetBeeindigd = function(melding) {
     var me = this;
-    $("#zoom_extent").click();
+    dbkjs.zoomToInitialExtent();
 
     // Wait for layer loading messages to clear...
     window.setTimeout(function() {
@@ -944,29 +1016,6 @@ VehicleIncidentsController.prototype.getBalkrechtsonderTitle = function() {
             dbkjs.util.htmlEncode(me.incidentDetailsWindow.getIncidentAdres(me.incident, false)) +
             " " + dbkjs.util.htmlEncode(me.incident.IncidentLocatie.Plaatsnaam);
 
-    /*
-     * Requested by Dennis: dont show units in the rightbottom bar.
-     *
-    var displayEenheden = [];
-    var extraCount = 0;
-    $.each(me.incident.BetrokkenEenheden, function(i, e) {
-        if(e.Discipline !== "B" || me.voertuignummer === e.Roepnaam) {
-            return;
-        }
-        if(displayEenheden.length === 4) {
-            extraCount++;
-        } else {
-            displayEenheden.push(e.Roepnaam);
-        }
-    });
-    if(displayEenheden.length > 0) {
-        title += ", " + displayEenheden.join(" ");
-        if(extraCount > 0) {
-            title += " <b>+" + extraCount + "</b>";
-        }
-    }
-    */
-
     return title;
 };
 
@@ -977,7 +1026,7 @@ VehicleIncidentsController.prototype.markerClick = function() {
 
 VehicleIncidentsController.prototype.normalizeIncidentFields = function(incidentInfo) {
     var incident = incidentInfo.incident;
-    if(incidentInfo.source === "SMCT") {
+    if(incidentInfo.source === "SafetyConnect") {
 
         incident.id = incident.IncidentId; // Used for IncidentMonitorController.updateVehiclePositionLayer()
         incident.nummer = incident.IncidentNummer;
