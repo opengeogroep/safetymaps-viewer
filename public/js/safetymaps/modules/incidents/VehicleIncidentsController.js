@@ -32,7 +32,6 @@
  */
 function VehicleIncidentsController(incidents) {
     var me = this;
-    me.service = incidents.service;
     me.options = me.defaultOptions(incidents.options);
 
     me.checkAuthorizations();
@@ -140,6 +139,15 @@ function VehicleIncidentsController(incidents) {
     }
 
     if(me.options.incidentSource === "vrhAGS" || me.options.incidentSourceFallback === "vrhAGS") {
+        // Initialize AGS service
+        this.service = new AGSIncidentService(me.options.apiPath + "vrhAGS", me.options.apiPath + "vrhAGSEenheden");
+
+        this.service.initialize(me.options.apiPath + "vrhAGSToken", null, null)
+        .fail(function(e) {
+            console.log("VrhAGS service failed to initialize", arguments);
+            return;
+        });
+
         $(this.service).on('initialized', function() {
             me.enableVrhAGSVoertuignummerTypeahead();
             me.setVoertuignummer(me.voertuignummer, true);
@@ -155,14 +163,14 @@ function VehicleIncidentsController(incidents) {
 
 VehicleIncidentsController.prototype.defaultOptions = function(options) {
     return $.extend({
+        // Set to crossdomain URL for onboard in customize.js
+        apiPath: dbkjs.options.urls && dbkjs.options.urls.apiPath ? dbkjs.options.urls.apiPath : "api/",
+
         // Supported: 'SafetyConnect', 'VrhAGS'
         incidentSource: 'SafetyConnect',
         incidentSourceFallback: null,
         incidentUpdateInterval: 30000,
         activeIncidentUpdateInterval: 15000,
-
-        // Set to crossdomain URL for onboard in customize.js
-        safetyConnectUrl: dbkjs.options.urls && dbkjs.options.urls.safetyConnectUrl ? dbkjs.options.urls.safetyConnectUrl : "api/safetyconnect/",
 
         // ViewerApiActionBean sets this to true for users with incidentmonitor role
         incidentMonitorAuthorized: false,
@@ -395,7 +403,7 @@ VehicleIncidentsController.prototype.addConfigControls = function() {
 
 VehicleIncidentsController.prototype.enableVoertuignummerTypeaheadSC = function() {
     var me = this;
-    $.ajax(me.options.safetyConnectUrl + "eenheid", {
+    $.ajax(me.options.apiPath + "eenheid", {
         dataType: "json"
     })
     .done(function(data, textStatus, jqXHR) {
@@ -604,7 +612,7 @@ VehicleIncidentsController.prototype.showStatusSC = function() {
 
     window.clearTimeout(me.updateStatusTimer);
 
-    $.ajax(me.options.safetyConnectUrl + "eenheidstatus/" + me.voertuignummer, {
+    $.ajax(me.options.apiPath + "safetyconnect/eenheidstatus/" + me.voertuignummer, {
         dataType: "json"
     })
     .always(function() {
@@ -704,7 +712,7 @@ VehicleIncidentsController.prototype.getVoertuigIncidentSC = function(nummer) {
     var me = this;
 
     var p = $.Deferred();
-    $.ajax(me.options.safetyConnectUrl + "eenheid/" + nummer, {
+    $.ajax(me.options.apiPath + "safetyconnect/eenheid/" + nummer, {
         dataType: "json",
         xhrFields: { withCredentials: true }, crossDomain: true
     })
@@ -718,7 +726,7 @@ VehicleIncidentsController.prototype.getVoertuigIncidentSC = function(nummer) {
         if(incidenten && incidenten.length > 0) {
             console.log("SC: Got incidents for voertuig " + nummer + ": " + incidenten);
 
-            $.ajax(me.options.safetyConnectUrl + "incident/" + incidenten[incidenten.length-1], {
+            $.ajax(me.options.apiPath + "safetyconnect/incident/" + incidenten[incidenten.length-1], {
                 dataType: "json",
                 data: {
                     extended: false
@@ -831,7 +839,7 @@ VehicleIncidentsController.prototype.updateVehiclePositionsVrhAGS = function() {
 
 VehicleIncidentsController.prototype.updateVehiclePositionsSC = function() {
     var me = this;
-    $.ajax(me.options.safetyConnectUrl + "eenheidlocatie?extended=false", {
+    $.ajax(me.options.apiPath + "safetyconnect/eenheidlocatie?extended=false", {
         dataType: "json"
     })
     .always(function() {

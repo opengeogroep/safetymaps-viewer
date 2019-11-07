@@ -46,17 +46,6 @@ dbkjs.modules.incidents = {
             $('#incident_bottom_right').css("max-width", maxWidth + "px");
         });
 
-        // Initialize AGS service if needed
-        if(this.options.incidentSource === "VrhAGS" || this.options.incidentSourceFallback === "VrhAGS") {
-            this.service = new AGSIncidentService("api/vrhAGS", "api/vrhAGSEenheden");
-
-            this.service.initialize("api/vrhAGSToken", null, null)
-            .fail(function(e) {
-                console.log("VrhAGS service failed to initialize", arguments);
-                return;
-            });
-        }
-        
         // If localstorage is not holding the voertuignummer try to get the voertuignummer from the url
         var vrtg = window.localStorage.getItem("voertuignummer");
         if (!vrtg) {
