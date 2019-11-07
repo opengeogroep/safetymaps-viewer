@@ -33,51 +33,9 @@
 function VehicleIncidentsController(incidents) {
     var me = this;
     me.service = incidents.service;
-    me.options = incidents.options;
+    me.options = me.defaultOptions(incidents.options);
 
-    me.options = $.extend({
-        // Supported: 'SafetyConnect', 'VrhAGS'
-        incidentSource: 'SafetyConnect',
-        incidentSourceFallback: null,
-        incidentUpdateInterval: 30000,
-        activeIncidentUpdateInterval: 15000,
-
-        // Set to crossdomain URL for onboard in customize.js
-        safetyConnectUrl: dbkjs.options.urls && dbkjs.options.urls.safetyConnectUrl ? dbkjs.options.urls.safetyConnectUrl : "api/safetyconnect/",
-
-        // ViewerApiActionBean sets this to true for users with incidentmonitor role
-        incidentMonitorAuthorized: false,
-        // ViewerApiActionBean sets this to true for users with incidentmonitor_kladblok role
-        incidentMonitorKladblokAuthorized: false,
-        // User can only enable IM entering this code, if set
-        incidentMonitorCode: null,
-
-        // ViewerApiActionBean sets this to value set by admin for user
-        userVoertuignummer: null,
-        // ViewerApiActionBean sets this to true for users with eigen_voertuignummer role
-        eigenVoertuignummerAuthorized: false,
-        // User can only change voertuignummer if eigenVoertuignummerAuthorized is true
-        // and entering this code, if set
-        voertuignummerCode: null,
-
-        showVehicles: true,
-        vehiclesUpdateInterval: 30000,
-        vehiclesShowInzetRol: true,
-        vehiclesShowSpeed: true,
-
-        showStatus: true,
-        statusUpdateInterval: 15000,
-        showFoto: true,
-
-        // Change icon to bell with cross and show error message or just show
-        // error message in details window
-        silentError: false,
-
-        // Customize incident monitor incident list: specify functions or names
-        // of functions
-        incidentListFooterFunction: null,
-        incidentListFunction: null
-    }, me.options);
+    me.checkAuthorizations();
 
     me.primaryFailing = false;
 
@@ -192,6 +150,78 @@ function VehicleIncidentsController(incidents) {
         window.setTimeout(function() {
             me.updateStatus();
         }, 2000);
+    }
+}
+
+VehicleIncidentsController.prototype.defaultOptions = function(options) {
+    return $.extend({
+        // Supported: 'SafetyConnect', 'VrhAGS'
+        incidentSource: 'SafetyConnect',
+        incidentSourceFallback: null,
+        incidentUpdateInterval: 30000,
+        activeIncidentUpdateInterval: 15000,
+
+        // Set to crossdomain URL for onboard in customize.js
+        safetyConnectUrl: dbkjs.options.urls && dbkjs.options.urls.safetyConnectUrl ? dbkjs.options.urls.safetyConnectUrl : "api/safetyconnect/",
+
+        // ViewerApiActionBean sets this to true for users with incidentmonitor role
+        incidentMonitorAuthorized: false,
+        // ViewerApiActionBean sets this to true for users with incidentmonitor_kladblok role
+        incidentMonitorKladblokAuthorized: false,
+        // User can only enable IM entering this code, if set
+        incidentMonitorCode: null,
+
+        // ViewerApiActionBean sets this to value set by admin for user
+        userVoertuignummer: null,
+        // ViewerApiActionBean sets this to true for users with eigen_voertuignummer role
+        eigenVoertuignummerAuthorized: false,
+        // User can only change voertuignummer if eigenVoertuignummerAuthorized is true
+        // and entering this code, if set
+        voertuignummerCode: null,
+
+        showVehicles: true,
+        vehiclesUpdateInterval: 30000,
+        vehiclesShowInzetRol: true,
+        vehiclesShowSpeed: true,
+
+        showStatus: true,
+        statusUpdateInterval: 15000,
+        showFoto: true,
+
+        // Change icon to bell with cross and show error message or just show
+        // error message in details window
+        silentError: false,
+
+        // Customize incident monitor incident list: specify functions or names
+        // of functions
+        incidentListFooterFunction: null,
+        incidentListFunction: null
+    }, options);
+};
+
+VehicleIncidentsController.prototype.checkAuthorizations = function() {
+    var authorized = false;
+    if(this.options.incidentSource === "VrhAGS") {
+        authorized = this.options.sourceVrhAGSAuthorized;
+    } else if(this.options.incidentSource === "SafetyConnect") {
+        authorized = this.options.sourceSafetyConnectAuthorized;
+    }
+    if(!authorized && this.options.incidentSourceFallback) {
+        if(this.options.incidentSourceFallback === "VrhAGS" && this.options.sourceVrhAGSAuthorized) {
+            authorized = true;
+            console.log("Primary incident source SC not authorized, using fallback source VrhAGS");
+            this.options.incidentSource = "VrhAGS";
+            this.options.incidentSourceFallback = null;
+        }
+        if(this.options.incidentSourceFallback === "SafetyConnect" && this.options.sourceSafetyConnectAuthorized) {
+            authorized = true;
+            console.log("Primary incident source VrhAGS not authorized, using fallback source SC");
+            this.options.incidentSource = "SafetyConnect";
+            this.options.incidentSourceFallback = null;
+        }
+    }
+    if(!authorized) {
+        throw new Error("Not authorized for incident source " + this.options.incidentSource);
     }
 }
 
@@ -511,6 +541,10 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
 
 VehicleIncidentsController.prototype.updateStatus = function() {
     var me = this;
+
+    if(!me.voertuignummer) {
+        return;
+    }
 
     // When switched to fallback source, also get status from fallback source
     // by using the same source for status as was used for inzet info
