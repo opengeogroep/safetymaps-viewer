@@ -249,6 +249,17 @@ h4 {
     right: 0px;
 }
 
+.modal-popup-view-sticky {
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-popup-row-sticky {
+    flex: 1;
+    overflow: auto;
+}
+
+
 /* Mobile: bigger fonts everywhere */
 
 .modal-popup .btn {
