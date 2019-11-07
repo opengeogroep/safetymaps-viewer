@@ -308,6 +308,7 @@ safetymaps.creator.embedPDFs = function(element) {
                     iframe.find("#secondaryDownload").remove();
                     iframe.find("#secondaryOpenFile").remove();
                     iframe.find("#secondaryPrint").remove();
+                    iframe.find("#presentationMode").remove();
                 } else {
                     if(++removeTries >= 10) {
                         console.log("PDFJS toolbar not found after " + removeTries + " tries (loading failed?), cannot remove for URL " + url);

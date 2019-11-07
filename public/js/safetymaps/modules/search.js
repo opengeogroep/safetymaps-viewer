@@ -105,8 +105,9 @@ dbkjs.modules.search = {
         this.popup = dbkjs.util.createModalPopup({
             title: i18n.t("search.title")
         });
+        this.popup.getView().addClass("modal-popup-view-sticky");
 
-        var div = $("<div></div>").addClass("input-group input-group-lg").css("width", "100%");
+        var div = $("<div></div>").addClass("input-group input-group-lg").css({"width":"100%","flex-shrink":"0"});
 
         this.searchTabs = $("<ul id='search_tabs' class='nav nav-pills' style='margin-bottom: 10px'></ul>");
         this.searchInput = $("<input id='search_input' autocomplete='off' class='form-control' placeholder=''>");
@@ -130,7 +131,7 @@ dbkjs.modules.search = {
 
         this.popup.getView().append(div);
 
-        this.popup.getView().append($("<div class='row'><div class='col-lg-12' id='search_results'></div></div>"));
+        this.popup.getView().append($("<div class='row modal-popup-row-sticky'><div class='col-lg-12' id='search_results'></div></div>"));
 
         $("#search_results").on("click", "[x-index]", function(e) {
             var resultIndex = Number($(e.target).attr("x-index"));
