@@ -44,6 +44,8 @@ dbkjs.modules.fotoFunction = {
             url: "api/foto"
         }, this.options);
 
+        $('<input type="file" id="fotoConnector" accept="image/*" capture="camera" style="display: none;">').appendTo("body");
+
         me.checkForWindowsCamera();
         if (me.useWindowsCamera) {
             me.createWindowsPopup();
