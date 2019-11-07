@@ -129,16 +129,7 @@ function VehicleIncidentsController(incidents) {
         });
     }
 
-    if(me.options.incidentSource === "SafetyConnect" || me.options.incidentSourceFallback === "SafetyConnect") {
-        $(dbkjs).one("dbkjs_init_complete", function() {
-            window.setTimeout(function() {
-                me.enableVoertuignummerTypeaheadSC();
-                me.setVoertuignummer(me.voertuignummer, true);
-            }, 2000);
-        });
-    }
-
-    if(me.options.incidentSource === "vrhAGS" || me.options.incidentSourceFallback === "vrhAGS") {
+    if(me.options.incidentSource === "VrhAGS" || me.options.incidentSourceFallback === "VrhAGS") {
         // Initialize AGS service
         this.service = new AGSIncidentService(me.options.apiPath + "vrhAGS", me.options.apiPath + "vrhAGSEenheden");
 
@@ -147,12 +138,13 @@ function VehicleIncidentsController(incidents) {
             console.log("VrhAGS service failed to initialize", arguments);
             return;
         });
-
-        $(this.service).on('initialized', function() {
-            me.enableVrhAGSVoertuignummerTypeahead();
-            me.setVoertuignummer(me.voertuignummer, true);
-        });
     }
+
+    $(dbkjs).one("dbkjs_init_complete", function() {
+        window.setTimeout(function() {
+            me.setVoertuignummer(me.voertuignummer, true);
+        }, 2000);
+    });
 
     if(me.options.showStatus) {
         window.setTimeout(function() {
@@ -392,6 +384,8 @@ VehicleIncidentsController.prototype.addConfigControls = function() {
 
     $("#input_voertuignummer").val(me.voertuignummer);
 
+    me.enableVoertuignummerTypeahead();
+
     if(!me.voertuignummer) {
         // Open config window when voertuignummer not configured
         $("#c_settings").click();
@@ -401,47 +395,45 @@ VehicleIncidentsController.prototype.addConfigControls = function() {
     }
 };
 
-VehicleIncidentsController.prototype.enableVoertuignummerTypeaheadSC = function() {
+VehicleIncidentsController.prototype.enableVoertuignummerTypeahead = function() {
     var me = this;
-    $.ajax(me.options.apiPath + "eenheid", {
-        dataType: "json"
-    })
-    .done(function(data, textStatus, jqXHR) {
-        console.log("SC: Voertuignummers", data);
-        // XXX maybe already done when fallback enabled
-        $("#input_voertuignummer")
-        .typeahead({
-            name: 'voertuignummers',
-            local: data,
-            limit: 10
+    if(me.options.incidentSource === "SafetyConnect") {
+        $.ajax(me.options.apiPath + "eenheid", {
+            dataType: "json"
+        })
+        .done(function(data, textStatus, jqXHR) {
+            console.log("SC: Voertuignummers", data);
+            // XXX maybe already done when fallback enabled
+            $("#input_voertuignummer")
+            .typeahead({
+                name: 'voertuignummers',
+                local: data,
+                limit: 10
+            });
         });
-    });
-};
-
-/**
- * Get and enable typeahead data for voertuignummer config control. Service
- * must be initialized.
- */
-VehicleIncidentsController.prototype.enableVoertuignummerTypeaheadVrhAGS = function() {
-    var me = this;
-    me.service.getVoertuignummerTypeahead()
-    .done(function(datums) {
-        console.log("VrhAGS: Voertuignummers", data);
-        // XXX maybe already done when fallback enabled
-        $("#input_voertuignummer")
-        .typeahead({
-            name: 'voertuignummers',
-            local: datums,
-            limit: 10,
-            template: function(d) {
-                var s = d.tokens[0] + " " + d.value;
-                if(d.tokens[2]) {
-                    s += " (" + d.tokens[2] + ")";
-                }
-                return s;
-            }
+    } else if(me.options.incidentSource === "VrhAGS") {
+        me.service.whenInitialized()
+        .done(function() {
+            me.service.getVoertuignummerTypeahead()
+            .done(function(datums) {
+                console.log("VrhAGS: Voertuignummers", datums);
+                // XXX maybe already done when fallback enabled
+                $("#input_voertuignummer")
+                .typeahead({
+                    name: 'voertuignummers',
+                    local: datums,
+                    limit: 10,
+                    template: function(d) {
+                        var s = d.tokens[0] + " " + d.value;
+                        if(d.tokens[2]) {
+                            s += " (" + d.tokens[2] + ")";
+                        }
+                        return s;
+                    }
+                });
+            });
         });
-    });
+    }
 };
 
 /**
@@ -550,7 +542,8 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
 VehicleIncidentsController.prototype.updateStatus = function() {
     var me = this;
 
-    if(!me.voertuignummer) {
+    if(!me.service || !me.voertuignummer) {
+        $("#status").remove();
         return;
     }
 
@@ -590,9 +583,8 @@ VehicleIncidentsController.prototype.showStatusVrhAGS = function() {
         console.log("VrhAGS: Fout bij ophalen eenheidstatus", arguments);
     })
     .done(function(status) {
-        console.log("VrhAGS: Voertuigstatus", status);
-
         if(status) {
+            console.log("VrhAGS: Voertuigstatus", status);
             var id = status.T_ACT_STATUS_CODE_EXT_BRW;
             var code = status.T_ACT_STATUS_AFK_BRW;
 
@@ -772,28 +764,31 @@ VehicleIncidentsController.prototype.getVoertuigIncidentVrhAGS = function(nummer
 
     var p = $.Deferred();
 
-    me.service.getVoertuigInzet(nummer)
-    .fail(function(jqXHR, textStatus, errorThrown) {
-        p.reject(safetymaps.utils.getAjaxError(jqXHR, textStatus, errorThrown));
-    })
-    .done(function(incidentId) {
-        if(incidentId ) {
-            console.log("VrhAGS: Got incident for voertuig " + nummer + ": " + incidentId);
+    me.service.whenInitialized()
+    .done(function() {
+        me.service.getVoertuigInzet(nummer)
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            p.reject(safetymaps.utils.getAjaxError(jqXHR, textStatus, errorThrown));
+        })
+        .done(function(incidentId) {
+            if(incidentId ) {
+                console.log("VrhAGS: Got incident for voertuig " + nummer + ": " + incidentId);
 
-            me.service.getAllIncidentInfo(incidentId, false, false)
-            .fail(function(e) {
-                console.log("VrhAGS: Error getting incident data", arguments);
-                p.reject();
-            })
-            .done(function(incident) {
-                var incidentInfo = { source: "VrhAGS", incidenten: [incident.NR_INCIDENT], incident: incident};
-                me.normalizeIncidentFields(incidentInfo);
-                p.resolve(incidentInfo);
-            });
-        } else {
-            console.log("VrhAGS: No incidents for voertuig " + nummer);
-            p.resolve({ source: "VrhAGS", incidenten: null});
-        }
+                me.service.getAllIncidentInfo(incidentId, false, false)
+                .fail(function(e) {
+                    console.log("VrhAGS: Error getting incident data", arguments);
+                    p.reject();
+                })
+                .done(function(incident) {
+                    var incidentInfo = { source: "VrhAGS", incidenten: [incident.NR_INCIDENT], incident: incident};
+                    me.normalizeIncidentFields(incidentInfo);
+                    p.resolve(incidentInfo);
+                });
+            } else {
+                console.log("VrhAGS: No incidents for voertuig " + nummer);
+                p.resolve({ source: "VrhAGS", incidenten: null});
+            }
+        });
     });
     return p;
 };
