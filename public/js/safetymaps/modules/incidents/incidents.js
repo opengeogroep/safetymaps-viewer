@@ -32,7 +32,7 @@ dbkjs.modules.incidents = {
         var me = this;
 
         this.options = $.extend({
-            controller: "MDTIncidentsController",
+            controller: "VehicleIncidentsController",
             featureExactMatchHuisletter: true,
             featureExactMatchToevoeging: false
         }, this.options);
@@ -46,63 +46,32 @@ dbkjs.modules.incidents = {
             $('#incident_bottom_right').css("max-width", maxWidth + "px");
         });
 
-        // Controller can be changed using URL parameter
-
-        var params = OpenLayers.Util.getParameters();
-        if(params.mdt && "true" !== params.mdt) {
-            this.options.controller = "AGSIncidentsController";
-        }
-        if(params.webservice === "true") {
-            this.options.controller = "FalckIncidentsController";
-        }
-
-        // XXX test with old code running on same incidents module settings
-        //this.options.controller = "VehicleIncidentsController";
-        
         // Initialize AGS service if needed
-        if(this.options.controller === "AGSIncidentsController" || this.options.incidentMonitor || this.options.incidentSource === "VrhAGS" || this.options.incidentSourceFallback === "VrhAGS") {
+        if(this.options.incidentSource === "VrhAGS" || this.options.incidentSourceFallback === "VrhAGS") {
             this.service = new AGSIncidentService("api/vrhAGS", "api/vrhAGSEenheden");
 
             this.service.initialize("api/vrhAGSToken", null, null)
             .fail(function(e) {
-
-                if(me.options.controller === "VehicleIncidentsController") {
-                    console.log("VrhAGS service failed to initialize", arguments);
-                    return;
-                }
-
-                // Avoid map loading messages hiding our error message
-                window.setTimeout(function() {
-                    dbkjs.util.alert("Fout bij initialiseren meldingenservice", e, "alert-danger");
-                }, 3000);
+                console.log("VrhAGS service failed to initialize", arguments);
+                return;
             });
         }
         
-        //if localstorage is not holding the voertuignummer try to get the voertuignummer from the url
+        // If localstorage is not holding the voertuignummer try to get the voertuignummer from the url
         var vrtg = window.localStorage.getItem("voertuignummer");
         if (!vrtg) {
+            var params = OpenLayers.Util.getParameters();
             if (params.vtg) {
                 window.localStorage.setItem("voertuignummer", params.vtg);
             }
         }
         
-        if(this.options.incidentMonitor) {
-            this.controller = new IncidentMonitorController(this);
-        } else if(this.options.controller === "VehicleIncidentsController") {
-            this.controller = new VehicleIncidentsController(this);
-        } else if(this.options.controller === "PharosIncidentsController") {
+        if(this.options.controller === "PharosIncidentsController") {
             this.controller = new PharosIncidentsController(this);
-        } else if(this.options.controller === "AGSIncidentsController") {
-            this.controller = new AGSIncidentsController(this);
         } else if(this.options.controller === "MDTIncidentsController") {
             this.controller = new MDTIncidentsController(this);
-        } else if(this.options.controller === "FalckIncidentsController") {
-            this.controller = new FalckIncidentsController(this);
-            if(this.options.enableVehicleControl){
-                this.vehicleController = new FalckIncidentVehicleController(this.controller);
-            }
         } else {
-            console.log("No incidents controller configured");
+            this.controller = new VehicleIncidentsController(this);
         }
     }
 };
