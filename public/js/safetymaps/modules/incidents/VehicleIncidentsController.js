@@ -602,7 +602,7 @@ VehicleIncidentsController.prototype.showStatusVrhAGS = function() {
                 case "IR": code = "NI"; break;
             }
 
-            $("<div id='status'>" /*+ id + ": "*/ + code + "</div>").prependTo("body");
+            $("<div id='status'>" + id + ": " + code + "</div>").prependTo("body");
         }
     });
 };
@@ -635,6 +635,7 @@ VehicleIncidentsController.prototype.showStatusSC = function() {
         });
         if(status) {
             console.log("SC: Voertuigstatus", status);
+            // Do not show code, SafetyConnect webservice puts it in StatusAfkorting and maps different codes
             $("<div id='status'>" + status.StatusAfkorting + "</div>").prependTo("body");
         }
     });
