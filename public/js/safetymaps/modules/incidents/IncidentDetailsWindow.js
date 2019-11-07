@@ -251,7 +251,7 @@ IncidentDetailsWindow.prototype.showMultipleFeatureMatches = function() {
             "iconHeight" : m.attributes.height
         };
         me.multipleItemUl.append(
-                $('<li class="object"><a href="#"><img src="' + info.icon + '">' + (m.attributes.label || m.attributes.apiObject.locatie || m.attributes.apiObject.formele_naam) + (m.attributes.apiObject.informele_naam ? ' (' + m.attributes.apiObject.informele_naam + ')' : '') + '</a></li>')
+                $('<li><a href="#"><img src="' + info.icon + '">' + (m.attributes.label || m.attributes.apiObject.locatie || m.attributes.apiObject.formele_naam) + (m.attributes.apiObject.informele_naam ? ' (' + m.attributes.apiObject.informele_naam + ')' : '') + '</a></li>')
                 .on('click', function(e) {
                     e.preventDefault();
                     me.hideMultipleFeatureMatches();
