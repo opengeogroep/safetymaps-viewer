@@ -92,12 +92,12 @@ function VehicleIncidentsController(incidents) {
     } else {
         me.voertuignummer = window.localStorage.getItem("voertuignummer");
         // Empty string not set to default - means disable!
-        if(me.voertuignummer === "undefined" || me.voertuignummer === null) {
-            me.voertuignummer = me.options.voertuignummer;
-            window.localStorage.setItem("voertuignummer", me.voertuignummer);
+        if(me.voertuignummer === "undefined" || me.voertuignummer === null || me.voertuignummer === "") {
+            me.voertuignummer = me.options.userVoertuignummer;
         }
     }
-
+    window.localStorage.setItem("voertuignummer", me.voertuignummer);
+    
     me.incidentMonitorCode = window.localStorage.getItem("imcode");
     me.checkIncidentMonitor();
 
@@ -119,7 +119,7 @@ function VehicleIncidentsController(incidents) {
     }, 2000);
 
     me.vehiclePositionLayer = new VehiclePositionLayer();
-    if(me.options.showVehciles) {
+    if(me.options.showVehicles) {
         me.vehiclePositionLayer.setShowMoving(false);
 
         dbkjs.selectControl.layers.push(me.vehiclePositionLayer.layer);
@@ -403,7 +403,6 @@ VehicleIncidentsController.prototype.enableVoertuignummerTypeahead = function() 
         })
         .done(function(data, textStatus, jqXHR) {
             console.log("SC: Voertuignummers", data);
-            // XXX maybe already done when fallback enabled
             $("#input_voertuignummer")
             .typeahead({
                 name: 'voertuignummers',
@@ -417,7 +416,6 @@ VehicleIncidentsController.prototype.enableVoertuignummerTypeahead = function() 
             me.service.getVoertuignummerTypeahead()
             .done(function(datums) {
                 console.log("VrhAGS: Voertuignummers", datums);
-                // XXX maybe already done when fallback enabled
                 $("#input_voertuignummer")
                 .typeahead({
                     name: 'voertuignummers',
@@ -472,7 +470,6 @@ VehicleIncidentsController.prototype.getInzetInfo = function() {
     var me = this;
 
     if(!me.voertuignummer) {
-        me.button.setIcon("bell-o");
         me.geenInzet(false);
         return;
     }
@@ -495,9 +492,13 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
 
     me.inzetInfo = inzetInfo;
 
+    var interval = me.options.incidentUpdateInterval;
+    if(typeof inzetInfo === "object" && inzetInfo.incident) {
+        interval = me.options.activeIncidentUpdateInterval;
+    }
     me.getInzetTimeout = window.setTimeout(function() {
         me.getInzetInfo();
-    }, inzetInfo.incident ? me.options.activeIncidentUpdateInterval : me.options.incidentUpdateInterval);
+    }, interval);
 
     if(me.incidentMonitorController) {
         me.incidentMonitorController.markerLayer.layer.setVisibility(true);
@@ -925,7 +926,8 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
             // XXX AGS IM
             me.incidentFromIncidentListWasActive = incident.Actueel && !incident.beeindigdeInzet;
         }
-
+        
+        //XXX Luister naar incident
         dbkjs.modules.safetymaps_creator.unselectObject();
         me.zoomToIncident();
 
@@ -978,12 +980,6 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
             $(dbkjs).trigger("incidents.updated");
             if(!me.incidentDetailsWindow.isVisible()) {
                 me.button.setAlerted(true);
-            }
-
-            if(!me.incidentFromIncidentList) {
-                // Possibly update marker position
-                me.markerLayer.addIncident(incident, false, true);
-                me.markerLayer.setZIndexFix();
             }
 
             me.featureSelector.updateBalkRechtsonder(me.getBalkrechtsonderTitle());
