@@ -27,6 +27,7 @@ dbkjs.modules.fotoFunction = {
     incidentNr: null,
     fileName: null,
     extensie: null,
+    updateFotoTimeout: null,
     useWindowsCamera: false,
     windowsCameras: {devices:[],index:0},
     carouselId: "foto_carousel",
@@ -41,7 +42,8 @@ dbkjs.modules.fotoFunction = {
         this.options = $.extend({
             showGallery: false,
             path: "foto/",
-            url: "api/foto"
+            url: "api/foto",
+            interval: 10000
         }, this.options);
 
         $('<input type="file" id="fotoConnector" accept="image/*" capture="camera" style="display: none;">').appendTo("body");
@@ -60,14 +62,18 @@ dbkjs.modules.fotoFunction = {
                     me.incidentNr = commonIncident.nummer || incident.IncidentNummer;
                     me.resetCarousel();
                     me.getFotoForIncident(incident, true);
-                });
-                $(dbkjs.modules.incidents.controller).on("incidents.vehicle.update", function (event, incident) {
-                    me.getFotoForIncident(incident, false);
+                    me.updateFotoTimeout = window.setInterval(function() {
+                        me.getFotoForIncident(incident, false);
+                    }, me.options.interval);
                 });
                 $(dbkjs.modules.incidents.controller).on("end_incident", function () {
                     me.incidentNr = null;
                     me.resetCarousel();
                     dbkjs.modules.incidents.controller.button.setFotoAlert(false);
+                    if(me.updateFotoTimeout) {
+                        window.clearInterval(me.updateFotoTimeout);
+                        me.updateFotoTimeout = null;
+                    }
                 });
             }
         });
