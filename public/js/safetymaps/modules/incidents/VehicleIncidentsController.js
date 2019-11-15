@@ -26,19 +26,15 @@
  * Events:
  * new_incident: when new incident is received, also fired when clicking lower right bar
  * end_incident: inzet for incident was ended, or voertuignummer was changed
- *
- * @param {Object} incidents dbk module
- * @returns {AGSIncidentsController}
  */
-function VehicleIncidentsController(incidents) {
+function VehicleIncidentsController(options, featureSelector) {
     var me = this;
-    me.options = me.defaultOptions(incidents.options);
+    me.featureSelector = featureSelector;
+    me.options = me.defaultOptions(options);
 
     me.checkAuthorizations();
 
     me.primaryFailing = false;
-
-    me.featureSelector = incidents.featureSelector;
 
     me.button = new AlertableButton("btn_incident", "Incident", "bell-o");
     me.button.getElement().prependTo('#btngrp_object');
@@ -54,32 +50,7 @@ function VehicleIncidentsController(incidents) {
         me.button.setFotoAlert(false);
     });
 
-    if(me.options.linkifyWords) {
-        me.incidentDetailsWindow.setLinkifyWords(me.options.linkifyWords);
-        me.externalIFrameWindow = safetymaps.infoWindow.addWindow("external", "Inzetbank", false);//new SplitScreenWindow("externalIFrame");// new ModalWindow("externalIFrame");
-        var div = $("<div style='width: 100%; height: 100%'>Klik op een woord bij een incident om meer informatie op te vragen...</div>");
-        //me.externalIFrameWindow.createElements("Informatie");
-
-        $(me).on("new_incident", function() {
-            safetymaps.infoWindow.removeTab("incident", "external");
-        });
-
-        $(me.incidentDetailsWindow).on("linkifyWordClicked", function(e, word) {
-            console.log("word clicked: " + word);
-            var term = me.options.linkifyWords[word.toLowerCase()];
-            if(typeof term !== "string") {
-                term = word;
-            }
-            $(div).html("<iframe src='" + me.options.linkifyIFrame.replace("[term]", term) + "' style='width: 100%; height: 100%'></iframe>");
-            if($("#tab_external").length === 0) {
-                safetymaps.infoWindow.addTab("incident", "external", "Inzetbank", "external", div, null);
-            }
-            $("#tab_external").css("height", "95%");
-            safetymaps.infoWindow.showTab("incident", "external", true);
-
-            //me.externalIFrameWindow.show();
-        });
-    }
+    me.checkLinkifyWords();
 
     me.markerLayer = new IncidentMarkerLayer();
     $(me.markerLayer).on('click', function(incident, marker) {
@@ -224,6 +195,36 @@ VehicleIncidentsController.prototype.checkAuthorizations = function() {
         throw new Error("Not authorized for incident source " + this.options.incidentSource);
     }
 }
+
+VehicleIncidentsController.prototype.checkLinkifyWords = function() {
+    var me = this;
+    if(me.options.linkifyWords && me.options.linkifyIFrame) {
+        me.incidentDetailsWindow.setLinkifyWords(me.options.linkifyWords);
+        me.externalIFrameWindow = safetymaps.infoWindow.addWindow("external", "Inzetbank", false);//new SplitScreenWindow("externalIFrame");// new ModalWindow("externalIFrame");
+        var div = $("<div style='width: 100%; height: 100%'>Klik op een woord bij een incident om meer informatie op te vragen...</div>");
+        //me.externalIFrameWindow.createElements("Informatie");
+
+        $(me).on("new_incident", function() {
+            safetymaps.infoWindow.removeTab("incident", "external");
+        });
+
+        $(me.incidentDetailsWindow).on("linkifyWordClicked", function(e, word) {
+            console.log("word clicked: " + word);
+            var term = me.options.linkifyWords[word.toLowerCase()];
+            if(typeof term !== "string") {
+                term = word;
+            }
+            $(div).html("<iframe src='" + me.options.linkifyIFrame.replace("[term]", term) + "' style='width: 100%; height: 100%'></iframe>");
+            if($("#tab_external").length === 0) {
+                safetymaps.infoWindow.addTab("incident", "external", "Inzetbank", "external", div, null);
+            }
+            $("#tab_external").css("height", "95%");
+            safetymaps.infoWindow.showTab("incident", "external", true);
+
+            //me.externalIFrameWindow.show();
+        });
+    }
+};
 
 VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
     var me = this;
