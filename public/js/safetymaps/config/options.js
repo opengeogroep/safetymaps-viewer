@@ -58,5 +58,7 @@ dbkjs.options = {
     
     extraButtonGroupDropdown: false,
     
-    resetToDefaultOnIncident: false
+    resetToDefaultOnIncident: false,
+    
+    showLayerLoadingPanel: true
 };
