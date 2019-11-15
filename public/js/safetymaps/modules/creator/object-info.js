@@ -302,13 +302,7 @@ safetymaps.creator.embedPDFs = function(element) {
                 var iframe = $("iframe").contents();
                 if(iframe.find("#download")[0] || iframe.find("#secondaryDownload")[0] ) {
                     console.log("Found PDFJS toolbar buttons, removing for URL " + url);
-                    iframe.find("#download").remove();
-                    iframe.find("#openFile").remove();
-                    iframe.find("#print").remove();
-                    iframe.find("#secondaryDownload").remove();
-                    iframe.find("#secondaryOpenFile").remove();
-                    iframe.find("#secondaryPrint").remove();
-                    iframe.find("#presentationMode").remove();
+                    iframe.find("#toolbarContainer").remove();
                 } else {
                     if(++removeTries >= 10) {
                         console.log("PDFJS toolbar not found after " + removeTries + " tries (loading failed?), cannot remove for URL " + url);
