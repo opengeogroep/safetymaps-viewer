@@ -24,7 +24,6 @@ window.dbkjs = dbkjs;
 dbkjs.modules = dbkjs.modules || {};
 dbkjs.modules.incidents = {
     id: "dbk.module.incidents",
-    service: null,
     controller: null,
     featureSelector: null,
     options: null,
@@ -39,12 +38,7 @@ dbkjs.modules.incidents = {
 
         this.featureSelector = new IncidentFeatureSelector(this.options.featureExactMatchHuisletter, this.options.featureExactMatchToevoeging);
 
-        $("body").append("<a id='incident_bottom_right' class='btn btn-default'></a>");
-        $(window).on("resize orientationchange", function() {
-            // Calculate the max width so bottom left buttons not overlapped
-            var maxWidth = $("body").outerWidth() - $("#bottom_left_buttons").offset().left - $("#bottom_left_buttons").outerWidth() - 20;
-            $('#incident_bottom_right').css("max-width", maxWidth + "px");
-        });
+        me.createControls();
 
         // If localstorage is not holding the voertuignummer try to get the voertuignummer from the url
         var vrtg = window.localStorage.getItem("voertuignummer");
@@ -62,6 +56,15 @@ dbkjs.modules.incidents = {
         } else {
             this.controller = new VehicleIncidentsController(this, this.featureSelector);
         }
+    },
+
+    createControls: function() {
+        $("body").append("<a id='incident_bottom_right' class='btn btn-default'></a>");
+        $(window).on("resize orientationchange", function() {
+            // Calculate the max width so bottom left buttons not overlapped
+            var maxWidth = $("body").outerWidth() - $("#bottom_left_buttons").offset().left - $("#bottom_left_buttons").outerWidth() - 20;
+            $('#incident_bottom_right').css("max-width", maxWidth + "px");
+        });
     }
 };
 
