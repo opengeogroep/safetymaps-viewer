@@ -41,8 +41,7 @@ dbkjs.modules.fotoFunction = {
 
         this.options = $.extend({
             showGallery: false,
-            path: "foto/",
-            url: "api/foto",
+            apiPath: dbkjs.options.urls && dbkjs.options.urls.apiPath ? dbkjs.options.urls.apiPath + "foto" : "api/foto",
             interval: 10000
         }, this.options);
 
@@ -202,7 +201,7 @@ dbkjs.modules.fotoFunction = {
         formData.append('type', me.extensie);
 
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', me.options.url, true);
+        xhr.open('POST', me.options.apiPath, true);
         xhr.withCredentials = true;
         xhr.onload = function () {
             if (xhr.status === 200) {
@@ -225,7 +224,11 @@ dbkjs.modules.fotoFunction = {
 
     getFotoForIncident: function (incidentInfo, isNew) {
         var me = this;
-        $.ajax(me.options.url+"?fotoForIncident", {data: {incidentNummer: incidentInfo.IncidentNummer ? incidentInfo.IncidentNummer : incidentInfo.incident.nummer},
+        $.ajax(me.options.apiPath, {
+            data: {
+                fotoForIncident: true,
+                incidentNummer: incidentInfo.IncidentNummer ? incidentInfo.IncidentNummer : incidentInfo.incident.nummer
+            },
             xhrFields: {
                 withCredentials: true
             },
@@ -259,7 +262,7 @@ dbkjs.modules.fotoFunction = {
         $.each(data, function (i, object) {
             if (!me.objectIsinList(me.carouselItems, object.filename)) {
                 me.carouselItems.push(object.filename);
-                var path = safetymaps.utils.getAbsoluteUrl(me.options.path + object.filename);
+                var path = safetymaps.utils.getAbsoluteUrl(me.options.apiPath + "?download=t&fileName=" + object.filename);
                 var info = (object.omschrijving === "" ? "" : object.omschrijving);
                 me.image_carousel_inner.append('<div class="item"><img class="img-full" style="width: 100%" src="' + path +
                         '"><div class="carousel-caption"><h3>' + info + '</h3></div></div>');
@@ -271,7 +274,7 @@ dbkjs.modules.fotoFunction = {
     addSinglePictureToCarousel: function () {
         var me = this;
         var i;
-        var path = safetymaps.utils.getAbsoluteUrl(me.options.path + me.fileName);
+        var path = safetymaps.utils.getAbsoluteUrl(me.options.apiPath + "?download=t&fileName=" + me.fileName);
         var info = $("#input_textfield").val();
         if(me.carouselItems.length === 0){
             i = 0;
