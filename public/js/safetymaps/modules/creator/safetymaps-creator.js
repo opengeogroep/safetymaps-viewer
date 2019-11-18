@@ -455,6 +455,7 @@ dbkjs.modules.safetymaps_creator = {
             this.clusteringLayer.setSelectedIds([]);
         }
         $("#vectorclickpanel").hide();
+        safetymaps.infoWindow.removeTabs(this.infoWindow.getName(), "info");
     },
 
     selectedObjectDetailsReceived: function(object,isIncident /*ES2015 = false*/) {

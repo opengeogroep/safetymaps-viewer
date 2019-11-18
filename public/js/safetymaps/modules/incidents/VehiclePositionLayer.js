@@ -19,18 +19,17 @@
 
 /* global dbkjs, safetymaps, OpenLayers, Proj4js, jsts, moment, i18n, Mustache, PDFObject */
 
-function VehiclePositionLayer() {
-    OpenLayers.Renderer.symbol.pointer = [1, -7, 0, -9, -1, -7, 1, -7];
-
+function VehiclePositionLayer(options) {
     var me = this;
 
-    this.showMoving = window.localStorage.getItem("VehiclePositionLayer.showMoving") === "true";
-    this.visibility = !(window.localStorage.getItem("VehiclePositionLayer.hidden") === "true");
-
-    this.showInzetRol = true;
+    me.options = $.extend({
+        showUnassignedButMoving: false,
+        showInzetRol: true,
+        vehiclePopupTemplate: null
+    }, options);
 
     function displayFunction(feature) {
-        if(!me.showMoving) {
+        if(!me.options.showUnassignedButMoving) {
             return feature.attributes.IncidentID === "" ? "none": "visible";
         }
         return feature.attributes.IncidentID === "" && feature.attributes.Speed <= 5 ? "none" : "visible";
@@ -55,7 +54,7 @@ function VehiclePositionLayer() {
                 context: {
                     label: function(feature) {
                         var speed = feature.attributes.Speed === 0 ? "" : feature.attributes.Speed + "km/h";
-                        var inzetRol = me.showInzetRol ? feature.attributes.Voertuigsoort || "" : "";
+                        var inzetRol = me.options.showInzetRol ? feature.attributes.Voertuigsoort || "" : "";
                         return inzetRol + " " + feature.attributes.Roepnummer + " " + speed;
                     },
                     speed: function(feature) {
@@ -76,6 +75,7 @@ function VehiclePositionLayer() {
             })
         })
     });
+    OpenLayers.Renderer.symbol.pointer = [1, -7, 0, -9, -1, -7, 1, -7];
     this.layer2 = new OpenLayers.Layer.Vector("_Vehicle positions 2", {
         styleMap: new OpenLayers.StyleMap({
             "default": new OpenLayers.Style({
@@ -109,27 +109,6 @@ function VehiclePositionLayer() {
 
     this.layer.events.register("featureselected", me, me.selectFeature);
     this.layer.events.register("featureunselected", me, me.unselectFeature);
-//    dbkjs.selectControl.layers.push(this.layer);
-/*
-    this.selectControl = new OpenLayers.Control.SelectFeature(this.layer, {
-            onSelect: function(f) {
-                me.selectFeature(f);
-            },
-            onUnselect: function(f) {
-                me.unselectFeature(f);
-            }
-    });
-    dbkjs.map.addControl(this.selectControl);
-    this.selectControl.activate();
-*/
-
-    // Add config option
-    $(dbkjs).one("dbkjs_init_complete", function() {
-        $("#row_layout_settings").append('<div class="col-xs-12"><label><input type="checkbox" id="checkbox_showvehicles" ' + (me.visibility ? 'checked' : '') + '>Toon voertuigposities</label></div>');
-        $("#checkbox_showvehicles").on('change', function (e) {
-            me.setVisibility(e.target.checked);
-        });
-    });
 };
 
 VehiclePositionLayer.prototype.raiseLayers = function() {
@@ -137,45 +116,40 @@ VehiclePositionLayer.prototype.raiseLayers = function() {
     dbkjs.map.setLayerIndex(this.layer2, 99);
 };
 
-VehiclePositionLayer.prototype.setShowMoving = function(showMoving) {
-    this.showMoving = showMoving;
+VehiclePositionLayer.prototype.setShowUnassignedButMoving = function(showUnassignedButMoving) {
+    this.options.showUnassignedButMoving = showUnassignedButMoving;
     this.layer.redraw();
     this.layer2.redraw();
-    // XXX VehicleIncidentsController sets this to false, would override IM
-    // setting if integrated - dont update localStorage then
-    window.localStorage.setItem("VehiclePositionLayer.showMoving", showMoving);
 };
 
 VehiclePositionLayer.prototype.setShowInzetRol = function(showInzetRol) {
-    this.showInzetRol = showInzetRol;
+    this.options.showInzetRol = showInzetRol;
     this.layer.redraw();
     this.layer2.redraw();
 };
 
 VehiclePositionLayer.prototype.selectFeature = function(e) {
-    console.log("vehicle select", arguments);
     var me = this;
-    var f = e.feature;
-    me.selectedFeature = f;
     me.removePopup();
 
-    function onPopupClose(evt) {
-        me.unselectFeature(me.selectedFeature);
-    };
+    if(me.options.vehiclePopupTemplate) {
+        var f = e.feature;
+        me.selectedFeature = f;
+        function onPopupClose(evt) {
+            me.unselectFeature(me.selectedFeature);
+        };
 
-    var dateTime = moment(f.attributes.PosDate + " " + f.attributes.PosTime, "DD-MM-YYYY HH:mm:ss");
-    me.popup = new OpenLayers.Popup.FramedCloud(null,
-                             f.geometry.getBounds().getCenterLonLat(),
-                             null,
-                             "<div style='font-size: 12px; overflow: hidden'>Pos. van " + dateTime.fromNow() + "<br>Status: " + f.attributes.Status + "<br>Mobile ID: " + f.attributes.MobileID +" </div>",
-                             null, true, onPopupClose);
-    f.popup = me.popup;
-    dbkjs.map.addPopup(me.popup);
+        me.popup = new OpenLayers.Popup.FramedCloud(null,
+                                 f.geometry.getBounds().getCenterLonLat(),
+                                 null,
+                                 Mustache.render(me.options.popupTemplate, f.attributes),
+                                 null, true, onPopupClose);
+        f.popup = me.popup;
+        dbkjs.map.addPopup(me.popup);
+    }
 };
 
 VehiclePositionLayer.prototype.unselectFeature = function(e) {
-    console.log("vehicle unselect", arguments);
-
     var me = this;
     me.selectedFeature = null;
     me.removePopup();
@@ -191,6 +165,19 @@ VehiclePositionLayer.prototype.removePopup = function() {
     }
 };
 
+/**
+ * Call with array of point features with the following attributes:
+ * Speed: null or km/h value, shown after label when showSpeed option is true
+ * Roepnummer: label
+ * Voertuigsoort: when showInzetRol option is true shown in label before Roepnummer
+ * Direction: heading in degrees
+ * IncidentID: set to non-empty value when vehicle is assigned
+ *
+ * And any additional attributes to display in popup using vehiclePopupTemplate.
+ *
+ * @param {type} features
+ * @returns {undefined}
+ */
 VehiclePositionLayer.prototype.features = function(features) {
     var me = this;
     if(me.selectedFeature) {
@@ -207,8 +194,6 @@ VehiclePositionLayer.prototype.features = function(features) {
 };
 
 VehiclePositionLayer.prototype.setVisibility = function(visible) {
-    this.visibility = visible;
     this.layer.setVisibility(visible);
     this.layer2.setVisibility(visible);
-    window.localStorage.setItem("VehiclePositionLayer.hidden", !visible);
 };

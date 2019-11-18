@@ -54,7 +54,7 @@ dbkjs.modules.incidents = {
         } else if(this.options.controller === "MDTIncidentsController") {
             this.controller = new MDTIncidentsController(this);
         } else {
-            this.controller = new VehicleIncidentsController(this, this.featureSelector);
+            this.controller = new VehicleIncidentsController(this.options, this.featureSelector);
         }
     },
 

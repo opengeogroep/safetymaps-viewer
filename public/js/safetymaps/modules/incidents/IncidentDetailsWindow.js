@@ -89,6 +89,7 @@ IncidentDetailsWindow.prototype.renderDetailsScreen = function() {
     }
     this.rendered = true;
 
+    // XXX
     var renderKladblok = !dbkjs.modules.incidents.options.hideKladblok;
     var renderTwitter = !!dbkjs.modules.incidents.options.showTwitter;
     var showFoto = dbkjs.modules.incidents.controller.options.showFoto && !!dbkjs.modules.fotoFunction.options;

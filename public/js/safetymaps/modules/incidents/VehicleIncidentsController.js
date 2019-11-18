@@ -89,10 +89,10 @@ function VehicleIncidentsController(options, featureSelector) {
         me.addConfigControls();
     }, 2000);
 
-    me.vehiclePositionLayer = new VehiclePositionLayer();
+    me.vehiclePositionLayer = new VehiclePositionLayer({
+        showInzetRol: me.options.vehiclesShowInzetRol
+    });
     if(me.options.showVehicles) {
-        me.vehiclePositionLayer.setShowMoving(false);
-
         dbkjs.selectControl.layers.push(me.vehiclePositionLayer.layer);
 
         $(dbkjs).one("dbkjs_init_complete", function() {
@@ -135,12 +135,24 @@ VehicleIncidentsController.prototype.defaultOptions = function(options) {
         incidentUpdateInterval: 30000,
         activeIncidentUpdateInterval: 15000,
 
+        // Show eenheden for ingezet incident?
+        showVehicles: true,
+        vehiclesUpdateInterval: 30000,
+        vehiclesShowInzetRol: true,
+        vehiclesShowSpeed: true,
+        vehiclesShowVehiclePopup: false,
+        vehiclePopupTemplate: "<div style='font-size: 12px; overflow: hidden'>Pos. van {{PositionTimeFromNow}}<br>Status: {{Status}}<br>Mobile ID: {{MobileID}}</div>",
+
         // ViewerApiActionBean sets this to true for users with incidentmonitor role
         incidentMonitorAuthorized: false,
         // ViewerApiActionBean sets this to true for users with incidentmonitor_kladblok role
         incidentMonitorKladblokAuthorized: false,
         // User can only enable IM entering this code, if set
         incidentMonitorCode: null,
+        // Show eenheden for active incidents? Defaults to showVehicles option
+        incidentMonitorShowVehicles: null,
+        // Show option for showing unassigned but moving vehicles (gray icon) in settings page?
+        incidentMonitorEnableUnassignedVehicles: false,
 
         // ViewerApiActionBean sets this to value set by admin for user
         userVoertuignummer: null,
@@ -149,11 +161,6 @@ VehicleIncidentsController.prototype.defaultOptions = function(options) {
         // User can only change voertuignummer if eigenVoertuignummerAuthorized is true
         // and entering this code, if set
         voertuignummerCode: null,
-
-        showVehicles: true,
-        vehiclesUpdateInterval: 30000,
-        vehiclesShowInzetRol: true,
-        vehiclesShowSpeed: true,
 
         showStatus: true,
         statusUpdateInterval: 15000,
@@ -237,19 +244,23 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
             me.incidentMonitor = me.options.incidentMonitorCode === me.incidentMonitorCode;
         }
     }
-    // XXX not implemented yet
-    me.incidentMonitor = false;
 
     if(me.incidentMonitor) {
         if(me.incidentMonitorController) {
             me.incidentMonitorController.enable();
         } else {
-            dbkjs.options.incidents = {
-                /* XXX */
-                incidentListFunction: me.options.incidentListFunction
+
+            var incidentMonitorOptions = {
+                showVehicles: me.options.incidentMonitorShowVehicles ? me.options.incidentMonitorShowVehicles : me.options.showVehicles,
+                showInzetRol: me.options.vehiclesShowInzetRol,
+                enableUnassignedVehicles: me.options.incidentMonitorEnableUnassignedVehicles,
+                incidentListFunction: me.options.incidentListFunction,
+                incidentListFooterFunction: me.options.incidentListFooterFunction,
+                agsService: me.service,
+                source: me.options.incidentSource
             };
 
-            me.incidentMonitorController = new IncidentMonitorController(me);
+            me.incidentMonitorController = new IncidentMonitorController(incidentMonitorOptions);
             me.incidentMonitorController.incidentListWindow.setSplitScreen(false);
 
             $(dbkjs).on("setting_changed_splitscreen", function() {
@@ -266,12 +277,13 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
     }
 };
 
-VehicleIncidentsController.prototype.incidentMonitorIncidentSelected = function(event, click) {
+VehicleIncidentsController.prototype.incidentMonitorIncidentSelected = function(event, inzetInfo) {
     var me = this;
 
+    // XXX
     safetymaps.deselectObject();
     console.log("IM incident selected", arguments);
-    me.inzetIncident(click.incident.IncidentNummer, true);
+    me.inzetIncident(inzetInfo, true);
 
 };
 
@@ -399,7 +411,7 @@ VehicleIncidentsController.prototype.addConfigControls = function() {
 VehicleIncidentsController.prototype.enableVoertuignummerTypeahead = function() {
     var me = this;
     if(me.options.incidentSource === "SafetyConnect") {
-        $.ajax(me.options.apiPath + "eenheid", {
+        $.ajax(me.options.apiPath + "safetyconnect/eenheid", {
             dataType: "json"
         })
         .done(function(data, textStatus, jqXHR) {
@@ -453,7 +465,7 @@ VehicleIncidentsController.prototype.setVoertuignummer = function(voertuignummer
 
     me.cancelGetInzetInfo();
     if(me.incidentNummer) {
-        me.geenInzet(true);
+        me.geenInzet();
     }
     me.getInzetInfo();
     me.updateStatus();
@@ -471,7 +483,7 @@ VehicleIncidentsController.prototype.getInzetInfo = function() {
     var me = this;
 
     if(!me.voertuignummer) {
-        me.geenInzet(false);
+        me.geenInzet();
         return;
     }
 
@@ -513,7 +525,7 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
     if(typeof inzetInfo === "string") {
         inzetSourceMsg = "Bron incidentgegevens: geen bronnen bereikbaar, verbindingsprobleem?";
     } else {
-        inzetSourceMsg = "Bron incidentgegevens: " + (inzetInfo.source === "VrhAGS" ? "ArcGIS GMS replica VRH" : "Safety C&T webservice");
+        inzetSourceMsg = "Bron incidentgegevens: " + (inzetInfo.source === "VrhAGS" ? "ArcGIS GMS replica VRH" : "SC&T SafetyConnect webservice");
     }
     $("<div id='inzetSource'>" + inzetSourceMsg + "</div>").appendTo("#settingspanel_b");
 
@@ -831,6 +843,10 @@ VehicleIncidentsController.prototype.updateVehiclePositionsVrhAGS = function() {
         if(!features) {
             features = [];
         }
+        $.each(features, function(f) {
+             var dateTime = moment(f.attributes.PosDate + " " + f.attributes.PosTime, "DD-MM-YYYY HH:mm:ss");
+             f.attributes.PositionTimeFromNow = dateTime.fromNow();
+        });
         me.vehiclePositionLayer.features(features);
     });
 };
@@ -865,6 +881,7 @@ VehicleIncidentsController.prototype.updateVehiclePositionsSC = function() {
                     Roepnummer: props.id,
                     Speed: props.speed || 0,
                     Direction: props.heading
+                    //PositionTimeFromNow: not available
                 };
                 var geometry = new OpenLayers.Geometry.Point(f.geometry.coordinates[0], f.geometry.coordinates[1]);
                 return new OpenLayers.Feature.Vector(geometry, attributes);
@@ -874,7 +891,7 @@ VehicleIncidentsController.prototype.updateVehiclePositionsSC = function() {
     });
 };
 
-VehicleIncidentsController.prototype.geenInzet = function(triggerEvent) {
+VehicleIncidentsController.prototype.geenInzet = function() {
     this.incidentNummer = null;
     this.incident = null;
     this.incidentDetailsWindow.hide();
@@ -887,11 +904,10 @@ VehicleIncidentsController.prototype.geenInzet = function(triggerEvent) {
     this.button.setAlerted(false);
     this.button.setIcon("bell-o");
 
-    if(triggerEvent) {
-        $(this).triggerHandler("end_incident");
-        safetymaps.deselectObject();
-        this.incidentDetailsWindow.hideMultipleFeatureMatches();
-    }
+    $(this).triggerHandler("end_incident");
+    // XXX should listen to event
+    safetymaps.deselectObject();
+    this.incidentDetailsWindow.hideMultipleFeatureMatches();
 };
 
 VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, fromIncidentList) {
@@ -903,12 +919,12 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
 
     var oldIncident = me.incident;
 
-    if(!me.incidentFromIncidentList) {
+    if(!fromIncidentList) {
         me.button.setIcon("bell");
     }
 
     if(incidentInfo.incident.nummer !== me.incidentNummer) {
-        me.geenInzet(false);
+        me.geenInzet();
 
         me.incident = incidentInfo.incident;
         var incident = me.incident;
@@ -943,13 +959,10 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
 
         $(me).triggerHandler("new_incident", [incident, incidentInfo]);
     } else { // update
-        
-        // XXX IM?
-/*
-        if(me.incidentFromIncidentList) {
+
+        if(fromIncidentList) {
             me.incidentDetailsWindow.show();
         }
-*/
 
         // XXX IM
 /*
@@ -1018,7 +1031,7 @@ VehicleIncidentsController.prototype.inzetBeeindigd = function(melding) {
             $('#systeem_meldingen').hide();
         }, 10000);
     }, 3000);
-    me.geenInzet(true);
+    me.geenInzet();
 };
 
 VehicleIncidentsController.prototype.zoomToIncident = function() {
