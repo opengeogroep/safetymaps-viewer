@@ -118,6 +118,26 @@ dbkjs.modules.library = {
             PDFJS_URL: "js/libs/pdfjs-1.6.210-disablerange-minified/web/viewer.html",
             forcePDFJS: !!dbkjs.options.forcePDFJS
         });
+        var removeTries = 0;
+        // Remove buttons from PDFJS toolbar
+        // XXX hack, use PDFJS documentloaded event?
+        function removeToolbar() {
+            var iframe = $("iframe").contents();
+            if (iframe.find("#toolbarViewer")[0]) {
+                console.log("Found PDFJS toolbar buttons, removing for URL " + url);
+                iframe.find("#toolbarViewer").remove();
+            } else {
+                if (++removeTries >= 10) {
+                    console.log("PDFJS toolbar not found after " + removeTries + " tries (loading failed?), cannot remove for URL " + url);
+                } else {
+                    window.setTimeout(removeToolbar, 1000);
+                }
+            }
+        }
+        //this check is needed. If the program is not using PDFJS then we can't remove buttons.
+        if (PDFObject.supportsPDFs || !!dbkjs.options.forcePDFJS) {
+            removeToolbar();
+        }
     },
 
     initData: function () {
