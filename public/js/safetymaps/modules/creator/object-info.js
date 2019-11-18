@@ -300,14 +300,14 @@ safetymaps.creator.embedPDFs = function(element) {
             // XXX hack, use PDFJS documentloaded event?
             function removeToolbar() {
                 var iframe = $("iframe").contents();
-                if(iframe.find("#download")[0] || iframe.find("#secondaryDownload")[0] ) {
-                    console.log("Found PDFJS toolbar buttons, removing for URL " + url);
-                    iframe.find("#toolbarContainer").remove();
+                if(iframe.find("#toolbarViewer")[0] ) {
+                    console.log("Found PDFJS toolbar buttons, removing for URL " + url);                    	
+                    iframe.find("#toolbarViewer").remove();	
                 } else {
                     if(++removeTries >= 10) {
                         console.log("PDFJS toolbar not found after " + removeTries + " tries (loading failed?), cannot remove for URL " + url);
                     } else {
-                        window.setTimeout(removeToolbar, 500);
+                        window.setTimeout(removeToolbar, 1000);
                     }
                 }
             }
