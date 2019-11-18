@@ -745,7 +745,7 @@ VehicleIncidentsController.prototype.getVoertuigIncidentSC = function(nummer) {
                 p.reject();
             })
             .done(function(data) {
-                if(!data[0].IncidentId) {
+                if(data.length === 0 || !data[0].IncidentId) {
                     console.log("SC: Error getting incident data (empty result)", arguments);
                     p.reject();
                     return;
