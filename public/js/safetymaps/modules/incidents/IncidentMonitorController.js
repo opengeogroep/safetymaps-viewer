@@ -505,8 +505,12 @@ IncidentMonitorController.prototype.updateVehiclePositionLayer = function(incide
             me.vehiclePositionLayer.features(features);
         });
     } else if(me.options.incidentSource === "SafetyConnect") {
-        $.ajax(me.options.apiPath + "safetyconnect/eenheidlocatie?extended=false", {
-            dataType: "json"
+        $.ajax(me.options.apiPath + "safetyconnect/eenheidlocatie", {
+            dataType: "json",
+            data: {
+                extended: false
+            },
+            xhrFields: { withCredentials: true }, crossDomain: true
         })
         .done(function (data, textStatus, jqXHR) {
             console.log("IM SC: Vehicle positions", data);

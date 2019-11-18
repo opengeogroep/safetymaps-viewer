@@ -412,7 +412,8 @@ VehicleIncidentsController.prototype.enableVoertuignummerTypeahead = function() 
     var me = this;
     if(me.options.incidentSource === "SafetyConnect") {
         $.ajax(me.options.apiPath + "safetyconnect/eenheid", {
-            dataType: "json"
+            dataType: "json",
+            xhrFields: { withCredentials: true }, crossDomain: true
         })
         .done(function(data, textStatus, jqXHR) {
             console.log("SC: Voertuignummers", data);
@@ -623,7 +624,8 @@ VehicleIncidentsController.prototype.showStatusSC = function() {
     window.clearTimeout(me.updateStatusTimer);
 
     $.ajax(me.options.apiPath + "safetyconnect/eenheidstatus/" + me.voertuignummer, {
-        dataType: "json"
+        dataType: "json",
+        xhrFields: { withCredentials: true }, crossDomain: true
     })
     .always(function() {
         $("#status").remove();
@@ -857,8 +859,12 @@ VehicleIncidentsController.prototype.updateVehiclePositionsVrhAGS = function() {
 
 VehicleIncidentsController.prototype.updateVehiclePositionsSC = function() {
     var me = this;
-    $.ajax(me.options.apiPath + "safetyconnect/eenheidlocatie?extended=false", {
-        dataType: "json"
+    $.ajax(me.options.apiPath + "safetyconnect/eenheidlocatie", {
+        dataType: "json",
+        data: {
+            extended: false
+        },
+        xhrFields: { withCredentials: true }, crossDomain: true
     })
     .always(function() {
         me.updateVehicleTimeout = window.setTimeout(function() {
