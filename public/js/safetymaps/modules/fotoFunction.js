@@ -172,7 +172,7 @@ dbkjs.modules.fotoFunction = {
         var me = this;
 
         var prefix = me.incidentNr ? "_" : "";
-        me.fileName = (me.incidentNr || '') + prefix + (new Date).getTime().toString() + "_foto" + ".png";
+        me.fileName = (me.incidentNr || '') + prefix + (new Date).getTime().toString() + "_foto.png";
         $("#input_filename").val(me.fileName);
 
         var windowURL = window.URL || window.webkitURL;
