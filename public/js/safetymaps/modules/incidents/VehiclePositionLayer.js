@@ -99,8 +99,6 @@ function VehiclePositionLayer(options) {
             })
         })
     });
-    this.layer.setVisibility(this.visibility);
-    this.layer2.setVisibility(this.visibility);
 
     dbkjs.map.addLayer(this.layer);
     dbkjs.map.addLayer(this.layer2);
