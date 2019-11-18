@@ -22,10 +22,14 @@
 dbkjs.modules.fotoFunction = {
     id: "dbk.module.fotoFunction",
     popup: null,
+    windowsPopup: null,
     picture: null,
     incidentNr: null,
     fileName: null,
     extensie: null,
+    updateFotoTimeout: null,
+    useWindowsCamera: false,
+    windowsCameras: {devices:[],index:0},
     carouselId: "foto_carousel",
     image_carousel: $('<div id="foto_carousel" class="carousel slide" data-interval="false"></div>'),
     image_carousel_inner: $('<div class="carousel-inner"></div>'),
@@ -37,9 +41,17 @@ dbkjs.modules.fotoFunction = {
 
         this.options = $.extend({
             showGallery: false,
-            path: "foto/"
+            path: "foto/",
+            url: "api/foto",
+            interval: 10000
         }, this.options);
 
+        $('<input type="file" id="fotoConnector" accept="image/*" capture="camera" style="display: none;">').appendTo("body");
+
+        me.checkForWindowsCamera();
+        if (me.useWindowsCamera) {
+            me.createWindowsPopup();
+        }
         me.createButton();
         me.createPopup();
 
@@ -50,18 +62,18 @@ dbkjs.modules.fotoFunction = {
                     me.incidentNr = commonIncident.nummer || incident.IncidentNummer;
                     me.resetCarousel();
                     me.getFotoForIncident(incident, true);
-                });
-                $(dbkjs.modules.incidents.controller).on("incidents.vehicle.update", function (event, incident) {
-                    me.getFotoForIncident(incident, false);
-                });
-                $(dbkjs.modules.incidents.controller).on("voertuigNummerUpdated", function (bool) {
-                    me.resetCarousel();
-                    dbkjs.modules.incidents.controller.button.setFotoAlert(false);
+                    me.updateFotoTimeout = window.setInterval(function() {
+                        me.getFotoForIncident(incident, false);
+                    }, me.options.interval);
                 });
                 $(dbkjs.modules.incidents.controller).on("end_incident", function () {
                     me.incidentNr = null;
                     me.resetCarousel();
                     dbkjs.modules.incidents.controller.button.setFotoAlert(false);
+                    if(me.updateFotoTimeout) {
+                        window.clearInterval(me.updateFotoTimeout);
+                        me.updateFotoTimeout = null;
+                    }
                 });
             }
         });
@@ -71,10 +83,10 @@ dbkjs.modules.fotoFunction = {
     },
 
     createButton: function () {
-        var me = this;        
+        var me = this;
         $(".main-button-group").append($("<div class=\"btn-group pull-left\">" +
-            "<a id=\"btn_fotoFunc\" title=\"" + i18n.t("photo.photoButton") + "\" class=\"btn navbar-btn btn-default\">" +
-            "<i id=\"btn_fotoFuncIcon\" class=\"fa fa-camera\"></i></a>"));
+                "<a id=\"btn_fotoFunc\" title=\"" + i18n.t("photo.photoButton") + "\" class=\"btn navbar-btn btn-default\">" +
+                "<i id=\"btn_fotoFuncIcon\" class=\"fa fa-camera\"></i></a>"));
         $("#btn_fotoFunc").click(function(e){
             e.preventDefault();
             me.takePicture();
@@ -99,9 +111,9 @@ dbkjs.modules.fotoFunction = {
                     height: 500
                 })
                 .css('border', "solid 8px black"
-                    
-               );
-                
+
+                        );
+
         me.button = $("<a></a>")
                 .attr({
                     id: "btn_fotoSave",
@@ -126,11 +138,16 @@ dbkjs.modules.fotoFunction = {
     takePicture: function () {
         console.log("foto aan het maken..");
         var me = this;
-        $("#btn_fotoSave").removeAttr("disabled");
-        $("#fotoConnector").click();
-        $('#fotoConnector').change(function (event) {
-            me.showPicture(event);
-        });
+        if (me.useWindowsCamera) {
+            me.startCamera();
+            me.showWindowsPopup();
+        } else {
+            $("#btn_fotoSave").removeAttr("disabled");
+            $("#fotoConnector").click();
+            $('#fotoConnector').change(function (event) {
+                me.showPicture(event);
+            });
+        }
     },
 
     showPicture: function (event) {
@@ -151,6 +168,22 @@ dbkjs.modules.fotoFunction = {
         }
     },
 
+    showPictureForWindows: function () {
+        var me = this;
+
+        var prefix = me.incidentNr ? "_" : "";
+        me.fileName = (me.incidentNr || '') + prefix + (new Date).getTime().toString() + "_foto.png";
+        $("#input_filename").val(me.fileName);
+
+        var windowURL = window.URL || window.webkitURL;
+        var picURL = windowURL.createObjectURL(me.file);
+        me.picture = me.file;
+        $("#pictured").attr({"src": picURL});
+        $("#input_textfield").val("");
+        me.showPopup();
+
+    },
+
     showPopup: function () {
         if (this.popup === null) {
             this.createPopup();
@@ -169,7 +202,8 @@ dbkjs.modules.fotoFunction = {
         formData.append('type', me.extensie);
 
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', 'api/foto', true);
+        xhr.open('POST', me.options.url, true);
+        xhr.withCredentials = true;
         xhr.onload = function () {
             if (xhr.status === 200) {
                 // File(s) uploaded.
@@ -191,7 +225,11 @@ dbkjs.modules.fotoFunction = {
 
     getFotoForIncident: function (incidentInfo, isNew) {
         var me = this;
-        $.ajax("api/foto?fotoForIncident", {data: {incidentNummer: incidentInfo.IncidentNummer ? incidentInfo.IncidentNummer : incidentInfo.incident.nummer}})
+        $.ajax(me.options.url+"?fotoForIncident", {data: {incidentNummer: incidentInfo.IncidentNummer ? incidentInfo.IncidentNummer : incidentInfo.incident.nummer},
+            xhrFields: {
+                withCredentials: true
+            },
+            crossDomain: true})
                 .done(function (result) {
                     me.buildFotoWindow(result, isNew);
                 });
@@ -207,15 +245,15 @@ dbkjs.modules.fotoFunction = {
         if (data.length > 0 && data.length > me.carouselItems.length) { // photo added
             me.addMultiplePicturesToCarousel(data);
         } else if(data.length >= 0 && data.length < me.carouselItems.length){ // photo deleted
-           me.resetCarousel();
-           me.addMultiplePicturesToCarousel(data);
-           $('.item').first().addClass('active');
-        } 
+            me.resetCarousel();
+            me.addMultiplePicturesToCarousel(data);
+            $('.item').first().addClass('active');
+        }
         if (isFirst && data.length > 0) {
             $('.item').first().addClass('active');
         }
     },
-    
+
     addMultiplePicturesToCarousel: function (data) {
         var me = this;
         $.each(data, function (i, object) {
@@ -229,7 +267,7 @@ dbkjs.modules.fotoFunction = {
             }
         });
     },
-    
+
     addSinglePictureToCarousel: function () {
         var me = this;
         var i;
@@ -249,7 +287,7 @@ dbkjs.modules.fotoFunction = {
         me.carouselItems.push(me.fileName);
         $("#t_foto_title").text("Foto (" +me.carouselItems.length+")");
     },
-    
+
     initCarousel: function () {
         var me = this;
         me.image_carousel.append(me.image_carousel_nav);
@@ -289,8 +327,207 @@ dbkjs.modules.fotoFunction = {
         me.image_carousel_nav = $('<ol class="carousel-indicators"></ol>');
         me.initCarousel();
     },
-    
+
     alertFoto: function (alertFoto) {
         dbkjs.modules.incidents.controller.button.setFotoAlert(alertFoto);
+    },
+
+    //TODO gebruiker de keuze geven welke camera gebruikt moet worden -> opslaan in local storage
+    checkForWindowsCamera: function () {
+        var me = this;
+        if (navigator.userAgent.match(/Win64/i) || navigator.userAgent.match(/Win32/i) || navigator.userAgent.match(/Windows/i)) {
+            navigator.mediaDevices.enumerateDevices()
+                    .then(function (devices) {
+                        devices.forEach(function (device) {
+                            if (device.kind === "videoinput") {
+                                console.log("windows camera found");
+                                me.windowsCameras.devices.push(device.deviceId);
+                                me.useWindowsCamera = true;
+                                me.contsraint = {video: {
+                                        deviceId: me.windowsCameras.devices[me.windowsCameras.index]
+                                    }
+                                };
+                            }
+                        });
+                    });
+        }
+    },
+
+    createWindowsPopup: function () {
+        var me = this;
+
+        this.windowsPopup = dbkjs.util.createModalPopup({
+            title: "Foto maken",
+            hideCallback: function () {
+                if (me.stream && me.stream.active) {
+                    me.stream.getVideoTracks()[0].stop();
+                }
+            }
+        });
+        
+        this.windowsPopup.getView()[0].style = "background-color : black";
+        
+        me.video = $("<video></video>")
+                .attr({
+                    id: "cameraView",
+                    src: "",
+                    alt: "windows",
+                    width: 800,
+                    height: 600,
+                    autoplay: true
+                })
+                .css({
+                    border: "solid 8px black",
+                    "margin-left": "25%"
+                });
+
+        me.canvas = $("<canvas></canvas>")
+                .attr({
+                    id: "cameraCanvas",
+                    src: "",
+                    alt: "windows",
+                    width: 1920,
+                    height: 1440
+                })
+                .css({border: "solid 8px black", display: "none"});
+
+        me.preview = $("<img></img>")
+                .attr({
+                    id: "preview",
+                    src: "",
+                    alt: "fotoConnector",
+                    width: 800,
+                    height: 600
+                })
+                .css({border: "solid 8px black", display: "none"});
+
+        me.takePhotoButton = $("<button>Maak foto</button>")
+                .attr({
+                    id: "takePhoto",
+                    class: "btn btn-primary"
+                });
+
+        me.cancelPhotoButton = $("<button>Annuleer</button>")
+                .attr({
+                    id: "cancelPhoto",
+                    class: "btn btn-primary"
+                });
+        
+        me.changeCameraButton = $("<button>Verander camera</button>")
+                .attr({
+                    id: "changeCamera",
+                    class: "btn btn-primary"
+                });
+        
+        me.usePhotoButton = $("<button>Gebruik</button>")
+                .attr({
+                    id: "usePhoto",
+                    class: "btn btn-primary"
+                })
+                .css({display: "none"});
+        me.remakePhotoButton = $("<button>opnieuw</button>")
+                .attr({
+                    id: "remakePhoto",
+                    class: "btn btn-primary"
+                })
+                .css({display: "none"});
+        this.windowsPopup.getView().append(me.video);
+        this.windowsPopup.getView().append(me.canvas);
+        this.windowsPopup.getView().append(me.preview);
+        this.windowsPopup.getView().append(me.takePhotoButton);
+        this.windowsPopup.getView().append(me.cancelPhotoButton);
+        this.windowsPopup.getView().append(me.changeCameraButton);
+        this.windowsPopup.getView().append(me.usePhotoButton);
+        this.windowsPopup.getView().append(me.remakePhotoButton);
+
+        me.takePhotoButton.click(function () {
+            $("#takePhoto").hide();
+            $("#cancelPhoto").hide();
+            $("#changeCamera").hide();
+            $("#cameraCanvas")[0].getContext("2d").drawImage($("#cameraView")[0], 0, 0);
+            $("#cameraCanvas")[0].toBlob(function (file) {
+                me.file = file;
+                var windowURL = window.URL || window.webkitURL;
+                var picURL = windowURL.createObjectURL(file);
+                $("#preview").attr({"src": picURL});
+            });
+            $("#cameraView").hide();
+            $("#cameraView")[0].srcObject = null;
+            $("#preview").show();
+            $("#usePhoto").show();
+            $("#remakePhoto").show();
+        });
+
+        me.cancelPhotoButton.click(function () {
+            me.stream.getVideoTracks()[0].stop();
+            me.windowsPopup.hide();
+        });
+
+
+        me.usePhotoButton.click(function () {
+            me.stream.getVideoTracks()[0].stop();
+            me.windowsPopup.hide();
+            me.showPictureForWindows();
+        });
+        
+        me.remakePhotoButton.click(function(){
+            me.takePicture();
+        });
+        
+        me.changeCameraButton.click(function(){
+            me.changeCamera();
+        });
+    },
+
+    startCamera: function () {
+        var me = this;
+        navigator.mediaDevices.getUserMedia(me.contsraint)
+                .then(function (stream) {
+                    if(me.stream && me.stream.active){
+                        me.stream.getVideoTracks()[0].stop();
+                    }
+                    me.stream = stream;
+                    var track = stream.getVideoTracks()[0];
+                    var cap = track.getCapabilities();
+                    $("#cameraView")[0].srcObject = stream;
+                    track.applyConstraints({
+                        width: {min: 640, ideal: cap.width.max},
+                        height: {min: 480, ideal: cap.height.max}});
+                    })
+                .catch(function (error) {
+                    console.error("Oops. Something is broken.", error);
+                });
+    },
+    
+    changeCamera: function() {
+        var me = this;
+        me.windowsCameras.index++;
+        if(me.windowsCameras.index > me.windowsCameras.devices.length - 1 ){
+            me.windowsCameras.index = 0;
+        }
+        me.contsraint = {video: {
+                deviceId: me.windowsCameras.devices[me.windowsCameras.index]
+            }
+        };
+        me.takePicture();
+        
+    },
+    
+    resetWindowsPopup: function () {
+        $("#takePhoto").show();
+        $("#cancelPhoto").show();
+        $("#changeCamera").show();
+        $("#cameraView").show();
+        $("#preview").hide();
+        $("#usePhoto").hide();
+        $("#remakePhoto").hide();
+    },
+
+    showWindowsPopup: function () {
+        if (this.windowsPopup === null) {
+            this.createWindowsPopup();
+        }
+        this.resetWindowsPopup();
+        this.windowsPopup.show();
     }
 };

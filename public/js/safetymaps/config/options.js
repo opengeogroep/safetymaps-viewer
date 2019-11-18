@@ -7,7 +7,7 @@ OpenLayers.IMAGE_RELOAD_ATTEMPTS = 3;
 dbkjs.options = {
     VERSION: "_VERSION_",
     CONFIG: "_CONFIG_",
-    APPLICATION: "SafetyMaps Viewer 5.2.2-SNAPSHOT (release S2 2019)",
+    APPLICATION: "SafetyMaps Viewer 5.3.0-SNAPSHOT (release S2 2019)",
 
     zoom: 13,
 
@@ -54,5 +54,11 @@ dbkjs.options = {
     // per layer.options to enable. You may need to set MAXSIZE for MapServer or increase
     // GeoServer image buffer size. Only enabled when URL contains "geoserver" or "mapserv",
     // as we know the GetMap parameter for scaled rendering
-    defaultOverlayHiDPI: true
+    defaultOverlayHiDPI: true,
+    
+    extraButtonGroupDropdown: false,
+    
+    resetToDefaultOnIncident: false,
+    
+    showLayerLoadingPanel: true
 };

@@ -40,6 +40,13 @@ dbkjs.mapcontrols = {
             });
         }
 
+        // XXX button removed
+        // Added touchstart event to trigger click on. There was some weird behaviour combined with FastClick,
+        // this seems to fix the issue
+        $('#zoom_extent').on('click touchstart', function () {
+            dbkjs.zoomToExtent();
+        });
+
         if(window.location.search.indexOf("res=true") !== -1) {
             $("<span id='res' style='position: absolute; left: 0; top:0; font-size: 14pt'></span>").appendTo(document.body);
             dbkjs.map.events.register("zoomend", undefined, function(e) {

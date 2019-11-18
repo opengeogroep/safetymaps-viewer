@@ -106,7 +106,25 @@ dbkjs.modules.geolocate = {
                 circle
             ]);
         }
-
+        
+        if(_obj.options.showPoint && !_obj.options.showAccuracyCircle){
+            _obj.layer.removeAllFeatures();
+            _obj.layer.addFeatures([
+                new OpenLayers.Feature.Vector(
+                    e.point,
+                    {},
+                    {
+                        graphicName: 'circle',
+                        fillColor: '#CCCC00',
+                        strokeColor: '#CCCC00',
+                        strokeWidth: 1,
+                        fillOpacity: 0.3,
+                        pointRadius: 10
+                    }
+                )
+            ]);
+        }
+        
         if(_obj.options.showMarker) {
             _obj.markers.clearMarkers();
             var size = new OpenLayers.Size(36,36);
@@ -283,7 +301,6 @@ dbkjs.modules.geolocate = {
                     _obj.locationlost();
                 } else {
                     if(oldLatLon === null || gps.Latitude + "," + gps.Longitude !== oldLatLon) {
-
                         var pos = _obj.pharosToLonLat(gps);
                         if(_obj.options.debug) console.log("geolocate pharos: new or updated position at map position " + pos.lon + ", " + pos.lat);
 
@@ -317,12 +334,16 @@ dbkjs.modules.geolocate = {
             provider: "geolocate",
             showAccuracyCircle: true,
             showMarker: false,
+            showPoint: false,
             button: "activate",
             activateOnStart: false,
             updateInterval: 5000,
-            debug: true
+            debug: true,
+            icon: '<i class="fa fa-crosshairs"></i>',
+            location: "#btngrp_3"
         }, _obj.options);
-
+        //<img style="position: relative; width: 32px; top: -3px" src="images/location-arrow.svg"></a>
+        //'<i class="fa fa-crosshairs"></i>'
         var params = OpenLayers.Util.getParameters();
         if(params.geoprovider && ["geolocate", "nmea"].indexOf(params.geoprovider) !== -1) {
             _obj.options.provider = params.geoprovider;
@@ -389,8 +410,17 @@ dbkjs.modules.geolocate = {
             throw "geolocate: unknown provider: " + _obj.options.provider;
         }
 
-        $('#btngrp_3').append('<a id="btn_geolocate" data-sid="'+_obj.options.index+'" class="btn btn-default navbar-btn" href="#" title="' + i18n.t('geolocate.button') + '"><i class="fa fa-crosshairs"></i></a>');
-
+        $(_obj.options.location).prepend('<a id="btn_geolocate" data-sid="' + _obj.options.index + '" class="btn btn-default navbar-btn" href="#" title="' + i18n.t('geolocate.button') + '">' + _obj.options.icon + '</a>');
+        
+        if (_obj.options.button === "follow") {
+            dbkjs.map.events.register('touchmove', _obj, function (e) {
+                if (_obj.control.bind) {
+                    $("#btn_geolocate").removeClass('active');
+                    _obj.control.bind = !_obj.control.bind;
+                }
+            });
+        }
+        
         if(_obj.options.activateOnStart) {
             $("#btn_geolocate").css("color", "gray");
 
@@ -398,8 +428,9 @@ dbkjs.modules.geolocate = {
 
             // When activated on start the button mode is center on position,
             // not 'activate' / 'deactivate'
-
-            _obj.options.button = "center";
+            if (_obj.options.button !== "follow"){
+                _obj.options.button = "center";
+            }
             // Do not zoom to position, only on click
             _obj.firstGeolocation = false;
         }
@@ -426,6 +457,15 @@ dbkjs.modules.geolocate = {
                 // and set firstGeolocation to true so will center on position
                 // when position received
                 _obj.center();
+            } else if (_obj.options.button === "follow") {
+                if(_obj.control.bind){
+                    $(this).removeClass('active');
+                    _obj.control.bind = !_obj.control.bind;
+                } else {
+                    $(this).addClass('active');
+                    _obj.control.bind = !_obj.control.bind;
+                    _obj.center();
+                } 
             }
         });
         dbkjs.map.addLayers([_obj.layer, _obj.markers]);

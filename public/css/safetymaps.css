@@ -249,6 +249,17 @@ h4 {
     right: 0px;
 }
 
+.modal-popup-view-sticky {
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-popup-row-sticky {
+    flex: 1;
+    overflow: auto;
+}
+
+
 /* Mobile: bigger fonts everywhere */
 
 .modal-popup .btn {
@@ -620,4 +631,12 @@ a.btn.on:after {
     border-radius: 4px;
     left: 75px;
     bottom: 20px;
+}
+
+#btngrp_4 {
+    position: absolute;
+    top: 70px;
+    right: 10px;
+    z-index: 3000;
+    display: none;
 }

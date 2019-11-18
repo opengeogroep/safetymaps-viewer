@@ -36,7 +36,8 @@ dbkjs.modules.safetymaps_creator = {
             // default options here
             autoUpdateInterval: 5*1000*60,// every 5 min
             maxSearchResults: 30,
-            mediaPath: "media/"
+            mediaPath: "media/",
+            showDbkToggleButton : false
         }, this.options);
 
         // Setup API
@@ -197,6 +198,10 @@ dbkjs.modules.safetymaps_creator = {
         if(me.options.extendedFloorButton){
             me.createExtendedFloorButton();
         }
+        
+        if(me.options.showDbkToggleButton){
+            me.createDbkToggleButton();
+        }
     },
 
     infoWindowTabsResize: function() {
@@ -226,7 +231,7 @@ dbkjs.modules.safetymaps_creator = {
                     var searchResults = [];
                     $.each(me.viewerApiObjects, function(i, o) {
                         value = value.toLowerCase();
-                        if(value === "" || o.formele_naam.toLowerCase().indexOf(value) !== -1 || (o.informele_naam && o.informele_naam.toLowerCase().indexOf(value) !== -1)) {
+                        if(value === "" || (o.formele_naam && o.formele_naam.toLowerCase().indexOf(value) !== -1) || (o.informele_naam && o.informele_naam.toLowerCase().indexOf(value) !== -1)) {
                             searchResults.push(o);
                             if(searchResults.length === me.options.maxSearchResults) {
                                 return false;
@@ -450,6 +455,7 @@ dbkjs.modules.safetymaps_creator = {
             this.clusteringLayer.setSelectedIds([]);
         }
         $("#vectorclickpanel").hide();
+        safetymaps.infoWindow.removeTabs(this.infoWindow.getName(), "info");
     },
 
     selectedObjectDetailsReceived: function(object,isIncident /*ES2015 = false*/) {
@@ -774,6 +780,22 @@ dbkjs.modules.safetymaps_creator = {
             $("#floor-box").hide();
         });
         
+    },
+    
+    createDbkToggleButton: function () {
+        var me = this;
+        var a = $("<a/>")
+                .attr("id", "toggleDbk")
+                .attr("title", "DBK button")
+                .addClass("btn btn-default navbar-btn")
+                .on("click", function () {
+                    me.clusteringLayer.setVisibility(!me.clusteringLayer.getVisibility());
+                });
+        $("<img/>")
+                .attr("src","images/building.svg")
+                .attr("style","style='position: relative; width: 32px; top: -3px'").appendTo(a);
+        
+        a.prependTo("#btngrp_3");
     }
 
 };

@@ -18,76 +18,40 @@
  */
 
 /* global dbkjs, safetymaps, OpenLayers, Proj4js, jsts, moment, i18n, Mustache, PDFObject */
-/* global AGSIncidentService, FalckIncidentsController */
+/* global AGSIncidentService */
+
 
 /**
- * Controller for displaying all current incidents.
- *
- * end_incident: inzet for incident was ended (may not trigger for some koppelingen)
- *
- * @param {Object} incidents dbk module
- * @returns {IncidentMonitorController}
+ * Controller for displaying recent incidents, active and archived.
  */
-function IncidentMonitorController(incidents) {
+function IncidentMonitorController(options) {
     var me = this;
-    me.service = incidents.service;
-    me.options = incidents.options;
+    me.options = $.extend({
+        apiPath: dbkjs.options.urls && dbkjs.options.urls.apiPath ? dbkjs.options.urls.apiPath : "api/",
 
-    var params = OpenLayers.Util.getParameters();
-    me.falck = me.options.falckService || params.webservice === "true" || window.location.pathname === "/opl/";
-    me.toonZonderEenheden = me.options.toonZonderEenheden;
+        showVehicles: true,
+        // Can be set to "citygis_wfs"
+        vehicleSource: "incidentService",
+        vehicleSourceURL: null,
+        showInzetRol: true,
+        enableUnassignedVehicles: true,
+        incidentListFunction: null,
+        incidentListFooterFunction: null,
+        updateInterval: 30000,
+        updateIntervalError: 5000,
+        updateTries: 3,
+        incidentSource: "SafetyConnect",
+        agsService: null,
+    }, options);
 
-    if(!me.options.checkKbAccessByAuthz) {
-        me.kb = true;
-        me.options.hideKladblok = false;
-    } else {
-        me.kb = false;
-        me.options.hideKladblok = true;
-        $.ajax("kb", { cache: false } )
-        .always(function(jqXHR) {
-            if(jqXHR.status === 404) {
-                console.log("KB access!");
-                me.kb = true;
-                me.options.hideKladblok = false;
-                me.incidentDetailsWindow.renderDetailsScreen();
-            } else if(jqXHR.status !== 403) {
-                console.log("Unexpected status: " + jqXHR + " " + jqXHR.statusText, jqXHR.responseText);
-            } else {
-                console.log("No KB access!");
-            }
-        });
-    }
+    // Debug option to show incidents without units attached
+    me.options.toonZonderEenheden = OpenLayers.Util.getParameters().toonZonderEenheden === "true";
 
-    me.button = new AlertableButton("btn_incidentlist", "Incidentenlijst", me.options.voertuigIM ? "list" : "bell-o");
-    if(me.options.voertuigIM) {
-        me.button.getElement().insertAfter('#btn_incident');
-    } else {
-        me.button.getElement().attr("data-sid", 0).prependTo('#btngrp_3');
-    }
+    me.button = new AlertableButton("btn_incidentlist", "Incidentenlijst", "list");
+    me.button.getElement().insertAfter('#btn_incident');
     $(me.button).on('click', function() {
         me.incidentListWindow.show();
     });
-
-    if(!me.options.voertuigIM) {
-        $('<a></a>')
-        .attr({
-            'id': 'btn_openreset',
-            'class': 'btn btn-default navbar-btn',
-            'href': '#',
-            'title': 'Reset'
-        })
-        .append('<i class="fa fa-repeat"></i>')
-        .click(function(e) {
-            me.getIncidentList();
-            me.incidentDetailsWindow.hide();
-            if(me.selectedIncidentMarker) {
-                me.markerLayer.removeMarker(me.selectedIncidentMarker);
-                me.selectedIncidentMarker = null;
-            }
-            $("#zoom_extent").click();
-        })
-        .appendTo('#btngrp_3');
-    }
 
     me.incidentListWindow = new IncidentListWindow();
     me.incidentListWindow.createElements("Incidenten");
@@ -98,31 +62,24 @@ function IncidentMonitorController(incidents) {
         me.selectIncident(obj);
     });
 
-    if(!me.options.voertuigIM) {
-        me.incidentDetailsWindow = new IncidentDetailsWindow();
-        me.incidentDetailsWindow.setSplitScreen($(window).width() > 700);
-        $(window).on('resize', function() {
-            me.incidentDetailsWindow.setSplitScreen($(window).width() > 700);
-        });
-        $(me.incidentDetailsWindow).on('hide', function() {
-            me.disableIncidentUpdates();
-        });
-    }
-
     var selectLayers = [];
 
-    if(me.options.eenheden) {
-        me.vehiclePositionLayer = new VehiclePositionLayer();
-
-        if(me.options.eenheden.enableOngekoppeldeEenheden) {
-            $("#settingspanel_b").append('<hr/><label><input type="checkbox" ' + (me.vehiclePositionLayer.showMoving ? 'checked' : '') + ' onclick="dbkjs.modules.incidents.controller.vehiclePositionLayer.setShowMoving(event.target.checked)">Toon bewegende voertuigen niet gekoppeld aan incident (grijs)</label>');
-        } else {
-            me.vehiclePositionLayer.setShowMoving(false);
+    if(me.options.showVehicles) {
+        var showUnassignedButMoving = !!window.localStorage.getItem("showUnassignedButMoving");
+        me.vehiclePositionLayer = new VehiclePositionLayer({
+            showUnassignedButMoving: showUnassignedButMoving,
+            showInzetRol: me.options.showInzetRol,
+            vehiclePopupTemplate: null
+        });
+        if(me.options.enableUnassignedVehicles) {
+            $("#settingspanel_b").append('<hr/><label><input id="im_showunassignedbutmoving" type="checkbox" ' + (showUnassignedButMoving ? 'checked' : '') + '>Toon bewegende voertuigen niet gekoppeld aan incident (grijs)</label>');
+            $("#im_showunassignedbutmoving").on("click", function(event) {
+                showUnassignedButMoving = event.target.checked;
+                window.localStorage.setItem("showUnassignedButMoving", showUnassignedButMoving);
+                me.vehiclePositionLayer.setShowUnassignedButMoving(showUnassignedButMoving);
+            });
         }
-
-        if(me.options.eenheden.type === "ags") {
-            selectLayers.push(me.vehiclePositionLayer.layer);
-        }
+        selectLayers.push(me.vehiclePositionLayer.layer);
     }
 
     me.markerLayer = new IncidentVectorLayer(true);
@@ -130,47 +87,18 @@ function IncidentMonitorController(incidents) {
     $(me.markerLayer).on('click', function(e, obj) {
         me.selectIncident(obj);
     });
-    me.marker = null;
 
     me.addSelectLayers(selectLayers);
 
     me.failedUpdateTries = 0;
-
     me.archivedIncidents = [];
-
-    if(me.options.ags && me.options.ags.agsLayers && me.options.ags.agsLayers.length > 0) {
-        me.service.whenInitialized().done(function() {
-            me.addAGSLayers();
-        });
-    }
-
-    if(me.falck) {
-        me.initIncidents();
-    } else {
-        if(me.options.checkFalckServiceEnabledByAuthz) {
-            me.checkFalckEnabledByAuthz()
-            .always(function() {
-                if(me.falck) {
-                    console.log("Falck service enabled by authz!");
-                    me.initIncidents();
-                } else {
-                    console.log("Falck not enabled by authz");
-                    me.service.whenInitialized().done(function() {
-                        me.initIncidents();
-                    });
-                }
-            });
-        } else {
-            me.service.whenInitialized().done(function() {
-                me.initIncidents();
-            });
-        }
-    }
+    me.initIncidents();
 };
 
 IncidentMonitorController.prototype.initIncidents = function() {
     var me = this;
     me.getIncidentList();
+    // Check if data outdated when returning from suspended execution
     me.updateInterval = window.setInterval(function() {
         me.checkIncidentListOutdated();
     }, 500);
@@ -183,43 +111,11 @@ IncidentMonitorController.prototype.enable = function() {
 };
 
 IncidentMonitorController.prototype.disable = function() {
-    this.disableIncidentUpdates();
     window.clearInterval(this.updateInterval);
     window.clearTimeout(this.getIncidentListTimeout);
     $("#btn_incidentlist").hide();
     this.markerLayer.layer.setVisibility(false);
 };
-
-IncidentMonitorController.prototype.checkFalckEnabledByAuthz = function() {
-    var me = this;
-    var d = $.Deferred();
-
-    var params = OpenLayers.Util.getParameters();
-    if(params.webservice === "false") {
-        me.falck = false;
-        d.resolve();
-    } else {
-        $.ajax("webservice_enabled", { cache: false } )
-        .always(function(jqXHR) {
-            if(jqXHR.status === 404) {
-                console.log("Webservice enabled by authz!");
-                me.falck = true;
-                d.resolve();
-            } else if(jqXHR.status !== 403) {
-                console.log("Unexpected status: " + jqXHR + " " + jqXHR.statusText, jqXHR.responseText);
-                d.resolve();
-            } else {
-                console.log("Webservice not enabled by authz, webservice enabled by param: " + me.falck);
-                d.resolve();
-            }
-        });
-    }
-    return d.promise();
-};
-
-IncidentMonitorController.prototype.UPDATE_INTERVAL_MS = 30000;
-IncidentMonitorController.prototype.UPDATE_INTERVAL_ERROR_MS = 5000;
-IncidentMonitorController.prototype.UPDATE_TRIES = 3;
 
 IncidentMonitorController.prototype.addSelectLayers = function(layers) {
     dbkjs.selectControl.deactivate();
@@ -243,12 +139,12 @@ IncidentMonitorController.prototype.checkUnreadIncidents = function(newCurrentIn
         if(me.currentIncidentIds.length > 0) {
             me.button.setAlerted(true);
         }
-        console.log("First incident list, ids: " + me.currentIncidentIds);
+        console.log("IM: First incident list, ids: " + me.currentIncidentIds);
     } else {
         $.each(newCurrentIncidentIds, function(i, incidentId) {
             if(me.currentIncidentIds.indexOf(incidentId) === -1) {
                 // New incident
-                console.log("New incident ", incidentId);
+                console.log("IM: New incident ", incidentId);
                 me.button.setAlerted(true);
                 return false;
             }
@@ -261,7 +157,7 @@ IncidentMonitorController.prototype.incidentRead = function(incidentId) {
     var me = this;
     if(!me.readCurrentIncidentIds || me.readCurrentIncidentIds.indexOf(incidentId) === -1) {
         // Incident was not read before
-        console.log("Incident shown which was not shown before: " + incidentId);
+        console.log("IM: Incident shown which was not shown before: " + incidentId);
         if(!me.readCurrentIncidentIds) {
             me.readCurrentIncidentIds = [incidentId];
         } else {
@@ -277,106 +173,209 @@ IncidentMonitorController.prototype.incidentRead = function(incidentId) {
             }
         });
         if(allRead) {
-            console.log("All incident ids read");
+            console.log("IM: All incident ids read");
             me.button.setAlerted(false);
         }
     }
 };
 
-/**
- * Add additional AGS layers from config.
- */
-IncidentMonitorController.prototype.addAGSLayers = function() {
+IncidentMonitorController.prototype.selectIncident = function(obj) {
     var me = this;
 
-    $("#settingspanel_b").prepend('<label><input type="checkbox" checked onclick="dbkjs.modules.incidents.controller.setAGSLayersVisibility(event.target.checked)">Toon DBK\'s</label>');
+    if(me.incidentId === (obj.incident.INCIDENT_ID || obj.incident.IncidentNummer)) {
+        // Clicked on already selected incident
 
-    me.additionalLayers = [];
-    if(me.options.ags.agsLayers) {
-        $.each(me.options.ags.agsLayers, function(i, l) {
-            var layer = new OpenLayers.Layer.ArcGIS93Rest("DBK"+i, l.url, $.extend(l.params || {}, { transparent: "true", token: me.service.token }), { maxResolution: 0.42, visibility: true });
-            dbkjs.map.addLayer(layer);
-            me.additionalLayers.push(layer);
-        });
-    }
-
-    $(me.service).on('token', function(e, token) {
-        $.each(me.additionalLayers, function(i, l) {
-            l.params.TOKEN = token;
-        });
-    });
-};
-
-IncidentMonitorController.prototype.setAGSLayersVisibility = function(visible) {
-    $.each(this.additionalLayers, function(i, l) {
-        l.setVisibility(visible);
-    });
-};
-
-IncidentMonitorController.prototype.zoomToIncident = function() {
-    var x, y;
-
-    if(!this.incident) {
+        // XXX
+        dbkjs.modules.incidents.controller.zoomToIncident();
         return;
     }
 
-    if(this.falck) {
-        x = this.incident.IncidentLocatie.XCoordinaat;
-        y = this.incident.IncidentLocatie.YCoordinaat;
-    } else {
-        var xy = AGSIncidentService.prototype.getIncidentXY(this.incident);
-        x = xy.x, y = xy.y;
-    }
-
-    if(x && y) {
-        dbkjs.map.setCenter(new OpenLayers.LonLat(x, y), dbkjs.options.zoom);
-    }
-};
-
-IncidentMonitorController.prototype.selectIncident = function(obj) {
-    var me = this;
     if(me.selectedIncidentMarker) {
         me.markerLayer.removeMarker(me.selectedIncidentMarker);
     }
 
     me.incident = obj.incident;
     me.incidentId = me.incident.INCIDENT_ID || me.incident.IncidentNummer;
-    console.log("Select incident " + me.incidentId + ", addMarker=" + obj.addMarker);
+    console.log("IM: Select incident " + me.incidentId + ", addMarker=" + obj.addMarker);
     if(obj.addMarker && me.markerLayer) {
         me.selectedIncidentMarker = me.markerLayer.addIncident(me.incident, true);
     }
     me.incidentRead(me.incidentId);
 
-    if(me.options.voertuigIM) {
-        $(me).triggerHandler("incident_selected", [obj]);
-        return;
-    }
-
-    me.incidentDetailsWindow.data("Ophalen incidentgegevens...");
-    me.updateIncident(me.incidentId, me.incident.archief, false);
-    $("#t_twitter_title").text("Twitter");
-    $("#tab_twitter").html("");
-    me.incidentDetailsWindow.show();
-    me.zoomToIncident();
-    if(!obj.addMarker) {
-        me.enableIncidentUpdates();
+    if(me.options.incidentSource === "SafetyConnect") {
+        $.ajax(me.options.apiPath + "safetyconnect/incident/" + me.incident.IncidentNummer, {
+            dataType: "json",
+            data: {
+                extended: true
+            },
+            xhrFields: { withCredentials: true }, crossDomain: true
+        })
+        .fail(function(e) {
+            console.log("IM SC: Error getting incident data", arguments);
+        })
+        .done(function(data) {
+            if(data.length === 0 || !data[0].IncidentId) {
+                console.log("IM SC: Error getting incident data (empty result)", arguments);
+                return;
+            }
+            try {
+                var incidentInfo = { source: "SafetyConnect", incident: data[0]};
+                VehicleIncidentsController.prototype.normalizeIncidentFields(incidentInfo);
+                $(me).triggerHandler("incident_selected", [incidentInfo]);
+            } catch(e) {
+                console.log("IM SC: Error processing incident", e, data);
+            }
+        });
+    } else if(me.options.incidentSource === "VrhAGS") {
+        console.log("IM TODO: get AGS full incident details");
+        $(me).triggerHandler("incident_selected", [{
+                source: me.options.incidentSource,
+                incident: obj.incident
+        }]);
     } else {
-        me.disableIncidentUpdates();
+        throw new Error("Invalid incident source");
     }
 };
 
 IncidentMonitorController.prototype.checkIncidentListOutdated = function() {
     var me = this;
     var lastUpdate = new Date().getTime() - me.lastGetIncidentList;
-    if(lastUpdate > me.UPDATE_INTERVAL_MS + 5000) {
-        console.log("incident list outdated, last updated " + (lastUpdate/1000.0) + "s ago, updating now");
+    if(lastUpdate > me.options.updateInterval + 5000) {
+        console.log("IM: incident list outdated, last updated " + (lastUpdate/1000.0) + "s ago, updating now");
         me.getIncidentList();
     }
 };
 
-IncidentMonitorController.prototype.incidentFilter = function(incident) {
-    var me = dbkjs.modules.incidents.controller;
-    return me.toonZonderEenheden || (incident.actueleInzet || incident.beeindigdeInzet || incident.inzetEenhedenStats.B.total !== 0);
+IncidentMonitorController.prototype.getIncidentList = function() {
+    var me = this;
+
+    window.clearTimeout(me.getIncidentListTimeout);
+    me.lastGetIncidentList = new Date().getTime();
+
+    if(me.options.incidentSource === "SafetyConnect") {
+        me.getIncidentListSC();
+    } else if(me.options.incidentSource === "VrhAGS") {
+        me.getIncidentListVrhAGS();
+    }
+};
+
+IncidentMonitorController.prototype.getIncidentListVrhAGS = function() {
+    var me = this;
+
+    var dCurrent = me.service.getCurrentIncidents();
+    var dArchived = me.service.getArchivedIncidents(me.options.cacheArchivedIncidents ? me.archivedIncidents : null);
+
+    $.when(dCurrent, dArchived)
+    .fail(function(e) {
+        me.failedUpdateTries = me.failedUpdateTries + 1;
+        var triesExceeded = me.failedUpdateTries > me.options.updateTries;
+
+        // Stop hammering service that is failing after tries exceeding, retry
+        // after normal update time
+
+        window.clearTimeout(me.getIncidentListTimeout);
+        me.getIncidentListTimeout = window.setTimeout(function() {
+            me.getIncidentList();
+        }, triesExceeded ? me.options.updateInterval : me.options.updateIntervalError);
+
+        console.log("IM VrhAGS: Error getting incident list, try: " + me.failedUpdateTries + ", error: " + e);
+
+        // Only show error after number of failed tries
+        if(triesExceeded) {
+            var msg = "Kan incidentenlijst niet ophalen na " + me.failedUpdateTries + " pogingen: " + e;
+            dbkjs.util.showError(msg);
+            me.incidentListWindow.showError(msg);
+        }
+    })
+    .done(function(currentIncidents, archivedIncidents) {
+        window.clearTimeout(me.getIncidentListTimeout);
+        me.getIncidentListTimeout = window.setTimeout(function() {
+            me.getIncidentList();
+        }, me.options.updateInterval);
+
+        me.failedUpdateTries = 0;
+        $('#systeem_meldingen').hide(); // XXX
+        $.each(currentIncidents.concat(archivedIncidents), function(i, incident) {
+            VehicleIncidentsController.prototype.normalizeIncidentFields({
+                source: "VrhAGS",
+                incident: incident
+            });
+        });
+        //me.processNewArchivedIncidents(archivedIncidents);
+        me.currentIncidents = currentIncidents;
+        me.updateInterface();
+        me.checkUnreadIncidents(me.actueleIncidentIds);
+    });
+};
+
+IncidentMonitorController.prototype.getIncidentListSC = function() {
+    var me = this;
+
+    $.ajax(me.options.apiPath + "safetyconnect/incident", {
+        dataType: "json",
+        data: {
+            extended: true
+        },
+        cache: false,
+        xhrFields: { withCredentials: true }, crossDomain: true
+    })
+    .fail(function(jqXHR, textStatus, errorThrown) {
+        me.failedUpdateTries = me.failedUpdateTries + 1;
+        var triesExceeded = me.failedUpdateTries > me.options.updateTries;
+
+        // Stop hammering service that is failing after tries exceeding, retry
+        // after normal update time
+        window.clearTimeout(me.getIncidentListTimeout);
+        me.getIncidentListTimeout = window.setTimeout(function() {
+            me.getIncidentList();
+        }, triesExceeded ? me.options.updateInterval : me.options.updateIntervalError);
+
+        var e = AGSIncidentService.prototype.getAjaxError(jqXHR, textStatus, errorThrown);
+        console.log("IM SC: Error getting incident list, try: " + me.failedUpdateTries + ", error: " + e);
+
+        // Only show error after number of failed tries
+        if(triesExceeded) {
+            var msg = "Kan incidentenlijst niet ophalen na " + me.failedUpdateTries + " pogingen: " + e;
+            dbkjs.util.showError(msg);
+            me.incidentListWindow.showError(msg);
+        }
+    })
+    .done(function(data) {
+        window.clearTimeout(me.getIncidentListTimeout);
+        me.getIncidentListTimeout = window.setTimeout(function() {
+            me.getIncidentList();
+        }, me.options.updateInterval);
+
+        me.failedUpdateTries = 0;
+        $('#systeem_meldingen').hide(); // XXX
+
+        me.incidents = data;
+        me.processSCIncidents();
+        me.updateInterface();
+        me.checkUnreadIncidents(me.actueleIncidentIds);
+    });
+};
+
+IncidentMonitorController.prototype.processSCIncidents = function() {
+    var me = this;
+
+    me.currentIncidents = [];
+    me.archivedIncidents = [];
+
+    $.each(me.incidents, function(i, incident) {
+        VehicleIncidentsController.prototype.normalizeIncidentFields({
+            source: "SafetyConnect",
+            incident: incident
+        });
+
+        if(incident.Actueel) {
+            me.currentIncidents.push(incident);
+        } else {
+            // Zorg dat niet direct 'endIncident' wordt afgevuurd bij bekijken niet-actueel incident
+            incident.archief = true;
+            me.archivedIncidents.push(incident);
+        }
+    });
 };
 
 IncidentMonitorController.prototype.updateInterface = function() {
@@ -385,10 +384,14 @@ IncidentMonitorController.prototype.updateInterface = function() {
         return;
     }
 
-    // Filter current and archived with criteria for both
-    var archivedFiltered = $.grep(me.archivedIncidents, me.incidentFilter);
+    function incidentFilter(incident) {
+        return me.options.toonZonderEenheden || (incident.actueleInzet || incident.beeindigdeInzet || incident.inzetEenhedenStats.B.total !== 0);
+    }
 
-    var currentFiltered = $.grep(me.currentIncidents, me.incidentFilter);
+    // Filter current and archived with criteria for both
+    var archivedFiltered = $.grep(me.archivedIncidents, incidentFilter);
+
+    var currentFiltered = $.grep(me.currentIncidents, incidentFilter);
 
     // Active incident: current and actueleInzet
     // Inactive incident: (current and !actueleInzet) or archived
@@ -398,13 +401,12 @@ IncidentMonitorController.prototype.updateInterface = function() {
         if(incident.actueleInzet) {
             active.push(incident);
         } else if(incident.beeindigdeInzet || me.toonZonderEenheden) {
-            if(!me.falck) {
-                incident.inzetEenhedenStats = me.service.getInzetEenhedenStats(incident, true);
-            }
             inactive.push(incident);
         }
     });
-    if(!me.falck) {
+
+    // XXX
+    if(me.options.incidentSource === "VrhAGS") {
         // Voeg gearchiveerde incidenten toe aan inactive indien niet al vanuit
         // current incidents met beeindigde inzet
         $.each(archivedFiltered, function(i, incident) {
@@ -419,16 +421,19 @@ IncidentMonitorController.prototype.updateInterface = function() {
                 inactive.push(incident);
             }
         });
-    } else {
+    } else if(me.options.incidentSource === "SafetyConnect") {
         inactive = inactive.concat(archivedFiltered);
         inactive.sort(function(lhs, rhs) {
             return rhs.start.valueOf() - lhs.start.valueOf();
         });
+    } else {
+        throw new Error("Invalid incident source");
     }
 
     me.actueleIncidentIds = $.map(active, function(incident) { return incident.INCIDENT_ID || incident.IncidentNummer; });
 
-    if(!me.falck) {
+    // XXX
+    if(me.options.incidentSource === "VrhAGS") {
         // Remove duplicate incidents
         inactive = $.grep(inactive, function(incident) {
             return me.actueleIncidentIds.indexOf(incident.INCIDENT_ID) === -1;
@@ -444,144 +449,6 @@ IncidentMonitorController.prototype.updateInterface = function() {
     me.updateVehiclePositionLayer(active);
 };
 
-IncidentMonitorController.prototype.getIncidentList = function() {
-    var me = this;
-
-    window.clearTimeout(me.getIncidentListTimeout);
-    me.lastGetIncidentList = new Date().getTime();
-
-    if(me.falck) {
-        me.getIncidentListFalck();
-    } else {
-        me.getIncidentListAGS();
-    }
-};
-
-IncidentMonitorController.prototype.getIncidentListAGS = function() {
-    var me = this;
-
-    var dCurrent = me.service.getCurrentIncidents();
-    var dArchived = me.service.getArchivedIncidents(me.options.cacheArchivedIncidents ? me.archivedIncidents : null);
-
-    $.when(dCurrent, dArchived)
-    .fail(function(e) {
-        window.clearTimeout(me.getIncidentListTimeout);
-        me.getIncidentListTimeout = window.setTimeout(function() {
-            me.getIncidentList();
-        }, me.UPDATE_INTERVAL_ERROR_MS);
-
-        me.failedUpdateTries = me.failedUpdateTries + 1;
-
-        console.log("Error getting incident list, try: " + me.failedUpdateTries + ", error: " + e);
-
-        // Only show error after number of failed tries
-        if(me.failedUpdateTries > me.UPDATE_TRIES) {
-            var msg = "Kan incidentenlijst niet ophalen na " + me.failedUpdateTries + " pogingen: " + e;
-            dbkjs.util.showError(msg);
-            if(!me.options.voertuigIM) {
-                me.button.setIcon("bell-slash");
-            }
-            me.incidentListWindow.showError(msg);
-        }
-    })
-    .done(function(currentIncidents, archivedIncidents) {
-        window.clearTimeout(me.getIncidentListTimeout);
-        me.getIncidentListTimeout = window.setTimeout(function() {
-            me.getIncidentList();
-        }, me.UPDATE_INTERVAL_MS);
-
-        me.failedUpdateTries = 0;
-        if(!me.options.voertuigIM) {
-            me.button.setIcon("bell-o");
-        }
-        $('#systeem_meldingen').hide(); // XXX
-        $.each(currentIncidents.concat(archivedIncidents), function(i, incident) {
-            me.normalizeIncidentFields(incident);
-        });
-        me.processNewArchivedIncidents(archivedIncidents);
-        me.currentIncidents = currentIncidents;
-        me.updateInterface();
-        me.checkUnreadIncidents(me.actueleIncidentIds);
-    });
-};
-
-IncidentMonitorController.prototype.getIncidentListFalck = function() {
-    var me = this;
-
-    $.ajax("api/falckService/incident", {
-        dataType: "json",
-        data: {
-            extended: true
-        },
-        cache: false
-    })
-    .fail(function(jqXHR, textStatus, errorThrown) {
-        window.clearTimeout(me.getIncidentListTimeout);
-        me.getIncidentListTimeout = window.setTimeout(function() {
-            me.getIncidentList();
-        }, me.UPDATE_INTERVAL_ERROR_MS);
-
-        me.failedUpdateTries = me.failedUpdateTries + 1;
-
-        var e = AGSIncidentService.prototype.getAjaxError(jqXHR, textStatus, errorThrown);
-        console.log("Error getting incident list, try: " + me.failedUpdateTries + ", error: " + e);
-
-        // Only show error after number of failed tries
-        if(me.failedUpdateTries > me.UPDATE_TRIES) {
-            var msg = "Kan incidentenlijst niet ophalen na " + me.failedUpdateTries + " pogingen: " + e;
-            dbkjs.util.showError(msg);
-            if(!me.options.voertuigIM) {
-                me.button.setIcon("bell-slash");
-            }
-            me.incidentListWindow.showError(msg);
-        }
-    })
-    .done(function(data) {
-        window.clearTimeout(me.getIncidentListTimeout);
-        me.getIncidentListTimeout = window.setTimeout(function() {
-            me.getIncidentList();
-        }, me.UPDATE_INTERVAL_MS);
-
-        me.failedUpdateTries = 0;
-        if(!me.options.voertuigIM) {
-            me.button.setIcon("bell-o");
-        }
-        $('#systeem_meldingen').hide(); // XXX
-
-        me.incidents = data;
-        me.processFalckIncidents();
-        me.updateInterface();
-        me.checkUnreadIncidents(me.actueleIncidentIds);
-    });
-};
-
-IncidentMonitorController.prototype.processFalckIncidents = function() {
-    var me = this;
-
-    me.currentIncidents = [];
-    me.archivedIncidents = [];
-
-    $.each(me.incidents, function(i, incident) {
-        me.normalizeIncidentFields(incident);
-
-        if(incident.Actueel) {
-            me.currentIncidents.push(incident);
-        } else {
-            // Zorg dat niet direct 'endIncident' wordt afgevuurd bij bekijken niet-actueel incident
-            incident.archief = true;
-            me.archivedIncidents.push(incident);
-        }
-    });
-};
-
-IncidentMonitorController.prototype.normalizeIncidentFields = function(incident) {
-    if(this.falck) {
-        FalckIncidentsController.prototype.normalizeIncidentFields(incident);
-    } else {
-        AGSIncidentService.prototype.normalizeIncidentFields(incident);
-    }
-};
-
 IncidentMonitorController.prototype.processNewArchivedIncidents = function(archivedIncidents) {
     var me = this;
 
@@ -590,7 +457,7 @@ IncidentMonitorController.prototype.processNewArchivedIncidents = function(archi
         return;
     }
 
-    console.log("Huidig aantal gearchiveerde incidenten: " + me.archivedIncidents.length + ", nieuw ontvangen: " + archivedIncidents.length);
+    console.log("IM: Huidig aantal gearchiveerde incidenten: " + me.archivedIncidents.length + ", nieuw ontvangen: " + archivedIncidents.length);
     me.archivedIncidents = archivedIncidents.concat(me.archivedIncidents);
 
     // Remove old archived incidents (start incident more than 24 hours ago)
@@ -598,7 +465,7 @@ IncidentMonitorController.prototype.processNewArchivedIncidents = function(archi
     me.archivedIncidents = $.grep(me.archivedIncidents, function(incident) {
         var incidentStart = me.service.getAGSMoment(incident.DTG_START_INCIDENT);
         if(incidentStart.isBefore(cutoff)) {
-            console.log("Verwijder oud incident begonnen op " + incidentStart.format("D-M-YYYY HH:mm") + " voor 24u cutoff van " + cutoff.format("D-M-YYYY HH:mm"));
+            console.log("IM: Verwijder oud incident begonnen op " + incidentStart.format("D-M-YYYY HH:mm") + " voor 24u cutoff van " + cutoff.format("D-M-YYYY HH:mm"));
         }
         return !incidentStart.isBefore(cutoff);
     });
@@ -624,178 +491,95 @@ IncidentMonitorController.prototype.updateMarkerLayer = function(incidents) {
 IncidentMonitorController.prototype.updateVehiclePositionLayer = function(incidents) {
     var me = this;
 
-    if(!me.options.eenheden) {
+    if(!me.options.showVehicles) {
         return;
     }
 
-    if(me.options.eenheden.type === "ags") {
+    if(me.options.vehicleSource === "citygis_wfs") {
+        me.updateVehiclePositionLayerCityGISWFS(incidents);
+    } else if(me.options.incidentSource === "VrhAGS") {
         var incidentIds = $.map(incidents, function(i) { return i.id; });
 
         me.service.getVehiclePositions(incidentIds)
         .done(function(features) {
             me.vehiclePositionLayer.features(features);
         });
-    } else if(me.options.eenheden.type === "citygis_wfs") {
-
-        var roepnamen = [];
-        $.each(incidents, function(i, incident) {
-            $.each(incident.BetrokkenEenheden || [], function(j, eenheid) {
-                if(eenheid.IsActief && eenheid.Discipline === "B") {
-                    roepnamen.push(eenheid.Roepnaam);
-                }
-            });
-        });
-        console.log("actieve eenheden ", roepnamen);
-
-        $.ajax(me.options.eenheden.url)
-        .done(function(data) {
-            var features = new OpenLayers.Format.GeoJSON().read(data);
-
-            // Geometry useless, latitude and longitude switched
-            var vehicleFeatures = [];
-            var cutoff = new moment().subtract("2", "hours");
-            $.each(features, function(i, f) {
-                var p = new Proj4js.Point(f.attributes.longitude, f.attributes.latitude);
-                var t = Proj4js.transform(new Proj4js.Proj("EPSG:4326"), new Proj4js.Proj(dbkjs.options.projection.code), p);
-                var p = new OpenLayers.Geometry.Point(t.x, t.y);
-                // Speed and direction from service not reliable
-                var feature = new OpenLayers.Feature.Vector(p, {
-                    "Roepnummer": f.attributes.id,
-                    "Speed": 0, // f.attributes.speed,
-                    "time": new moment(f.attributes.time),
-                    "IncidentID": roepnamen.indexOf(f.attributes.id + "") !== -1 ? "1" : "",
-                    "Direction": null, //f.attributes.headingDegrees,
-                    "Voertuigsoort": ""
+    } else if(me.options.incidentSource === "SafetyConnect") {
+        $.ajax(me.options.apiPath + "safetyconnect/eenheidlocatie?extended=false", {
+            dataType: "json"
+        })
+        .done(function (data, textStatus, jqXHR) {
+            console.log("IM SC: Vehicle positions", data);
+            var transformedVehicles = data.features
+                .filter(function(f) {
+                    // XXX is filter for incidentNummer in incidents array (or speed > 5)
+                    // needed?
+                    return true;
+                })
+                .map(function(f) {
+                    // Map SC vehicles schema to schema expected by VehiclePositionLayer
+                    // (based on VrhAGS)
+                    var props = f.properties;
+                    var attributes = {
+                        IncidentID: props.incidentNummer || "",
+                        Voertuigsoort: props.inzetRol || "",
+                        Roepnummer: props.id,
+                        Speed: props.speed || 0,
+                        Direction: props.heading
+                        //PositionTimeFromNow: not available
+                    };
+                    var geometry = new OpenLayers.Geometry.Point(f.geometry.coordinates[0], f.geometry.coordinates[1]);
+                    return new OpenLayers.Feature.Vector(geometry, attributes);
                 });
-                if(feature.attributes.IncidentID !== "") {
-                    console.log("actieve eenheid, time " + feature.attributes.time.fromNow(), feature);
-                }
-                if(feature.attributes.time.isAfter(cutoff)) {
-                    vehicleFeatures.push(feature);
-                }
-            });
-            me.vehiclePositionLayer.features(vehicleFeatures);
+            console.log("IM SC: Transformed vehicle positions for layer", transformedVehicles);
+            me.vehiclePositionLayer.features(transformedVehicles);
         });
     }
 };
 
-IncidentMonitorController.prototype.enableIncidentUpdates = function() {
+IncidentMonitorController.prototype.updateVehiclePositionLayerCityGISWFS = function(incidents) {
     var me = this;
 
-    this.disableIncidentUpdates();
+    var roepnamen = [];
+    $.each(incidents, function(i, incident) {
+        $.each(incident.BetrokkenEenheden || [], function(j, eenheid) {
+            if(eenheid.IsActief && eenheid.Discipline === "B") {
+                roepnamen.push(eenheid.Roepnaam);
+            }
+        });
+    });
+    console.log("IM: actieve eenheden ", roepnamen);
 
-    if(!this.incident) {
-        return;
-    }
-
-    this.updateIncidentInterval = window.setInterval(function() {
-        me.updateIncident(me.incidentId, me.incident.archief, true);
-    }, 15000);
-};
-
-IncidentMonitorController.prototype.disableIncidentUpdates = function() {
-    if(this.updateIncidentInterval) {
-        window.clearInterval(this.updateIncidentInterval);
-        this.updateIncidentInterval = null;
-    }
-};
-
-IncidentMonitorController.prototype.updateIncident = function(incidentId, archief, isUpdate) {
-    var me = this;
-    if(this.incidentId !== incidentId) {
-        // Incident cancelled or changed since timeout was set, ignore
-        return;
-    }
-
-    console.log("Get incident info for " + incidentId + ", archief=" + archief);
-
-    if(me.falck) {
-        me.updateIncidentFalck(incidentId, archief, isUpdate);
-    } else {
-        me.updateIncidentAGS(incidentId, archief, isUpdate);
-    }
-};
-
-IncidentMonitorController.prototype.updateIncidentFalck = function(incidentId, archief, isUpdate) {
-    var me = this;
-
-    $.ajax("api/falckService/incident/" + incidentId, {
-        dataType: "json",
-        data: {
-            extended: true
-        },
-        cache: false
-    })
-    .fail(function(jqXHR, textStatus, errorThrown) {
-        var msg = "Kan incidentinfo niet updaten: " + AGSIncidentService.prototype.getAjaxError(jqXHR, textStatus, errorThrown);
-        dbkjs.util.showError(msg);
-        // Leave incidentDetailsWindow contents with old info
-
-    })
+    $.ajax(me.options.vehicleSourceURL)
     .done(function(data) {
+        var features = new OpenLayers.Format.GeoJSON().read(data);
 
-        if(me.incidentId !== data[0].IncidentNummer) {
-            return;
-        }
-
-        me.incident = data[0];
-        me.normalizeIncidentFields(me.incident);
-
-        if(!archief && !me.incident.Actueel) {
-            me.endIncident();
-            return;
-        }
-
-        me.incidentDetailsWindow.data(me.incident, true, true);
-
-        // Do not update tweets every time incident data updated, reduce number
-        // of API calls to avoid API limits
-        if(!isUpdate && !!dbkjs.modules.incidents.options.showTwitter) {
-            me.loadTweets(incidentId, me.incident);
-        }
+        // Geometry useless, latitude and longitude switched
+        var vehicleFeatures = [];
+        var cutoff = new moment().subtract("2", "hours");
+        $.each(features, function(i, f) {
+            var p = new Proj4js.Point(f.attributes.longitude, f.attributes.latitude);
+            var t = Proj4js.transform(new Proj4js.Proj("EPSG:4326"), new Proj4js.Proj(dbkjs.options.projection.code), p);
+            var p = new OpenLayers.Geometry.Point(t.x, t.y);
+            // Speed and direction from service not reliable
+            var feature = new OpenLayers.Feature.Vector(p, {
+                "Roepnummer": f.attributes.id,
+                "Speed": 0, // f.attributes.speed,
+                "time": new moment(f.attributes.time),
+                "IncidentID": roepnamen.indexOf(f.attributes.id + "") !== -1 ? "1" : "",
+                "Direction": null, //f.attributes.headingDegrees,
+                "Voertuigsoort": "",
+                "PositiontimeFromNow": new moment(f.attributes.time).fromNow()
+            });
+            if(feature.attributes.IncidentID !== "") {
+                console.log("IM: actieve eenheid, time " + feature.attributes.time.fromNow(), feature);
+            }
+            if(feature.attributes.time.isAfter(cutoff)) {
+                vehicleFeatures.push(feature);
+            }
+        });
+        me.vehiclePositionLayer.features(vehicleFeatures);
     });
-};
-
-IncidentMonitorController.prototype.updateIncidentAGS = function(incidentId, archief, isUpdate) {
-    var me = this;
-
-    me.service.getAllIncidentInfo(incidentId, archief, false, !me.kb)
-    .fail(function(e) {
-        var msg = "Kan incidentinfo niet updaten: " + e;
-        dbkjs.util.showError(msg);
-        // Leave incidentDetailsWindow contents with old info
-    })
-    .done(function(incident) {
-        if(incident === null) {
-            me.endIncident();
-            return;
-        }
-        if(me.incidentId !== incidentId) {
-            // Incident cancelled or changed since request was fired off, ignore
-            return;
-        }
-
-        me.incident = incident;
-        me.normalizeIncidentFields(me.incident);
-
-        // Always update window, updates moment.fromNow() times
-        me.incidentDetailsWindow.data(incident, true, true);
-
-        // Do not update tweets every time incident data updated, reduce number
-        // of API calls to avoid API limits
-        if(!isUpdate && !!dbkjs.modules.incidents.options.showTwitter) {
-            me.loadTweets(incidentId, incident);
-        }
-    });
-};
-
-IncidentMonitorController.prototype.endIncident = function() {
-    var me = this;
-    me.disableIncidentUpdates();
-    me.incidentId = null;
-    me.incident = null;
-    me.incidentDetailsWindow.hide();
-    $("#zoom_extent").click();
 };
 
 IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) {
