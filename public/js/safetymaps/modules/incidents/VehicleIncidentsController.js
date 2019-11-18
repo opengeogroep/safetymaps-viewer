@@ -556,7 +556,7 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
 VehicleIncidentsController.prototype.updateStatus = function() {
     var me = this;
 
-    if(!me.service || !me.voertuignummer) {
+    if(!me.voertuignummer) {
         $("#status").remove();
         return;
     }
@@ -584,6 +584,10 @@ VehicleIncidentsController.prototype.updateStatus = function() {
 VehicleIncidentsController.prototype.showStatusVrhAGS = function() {
     var me = this;
     window.clearTimeout(me.updateStatusTimer);
+
+    if(!me.service) {
+        return;
+    }
 
     me.service.getVoertuigStatus(me.voertuignummer)
     .always(function() {
