@@ -81,27 +81,27 @@ dbkjs.modules.geolocate = {
         if(_obj.options.showAccuracyCircle) {
             _obj.layer.removeAllFeatures();
             circle = new OpenLayers.Feature.Vector(
-                    OpenLayers.Geometry.Polygon.createRegularPolygon(
-                            new OpenLayers.Geometry.Point(e.point.x, e.point.y),
-                            e.position.coords.accuracy/2,
-                            40,
-                            0
-                    ),
-                    {},
-                    _obj.style
-                    );
+                OpenLayers.Geometry.Polygon.createRegularPolygon(
+                    new OpenLayers.Geometry.Point(e.point.x, e.point.y),
+                    e.position.coords.accuracy/2,
+                    40,
+                    0
+                ),
+                {},
+                _obj.style
+            );
             _obj.layer.addFeatures([
                 new OpenLayers.Feature.Vector(
-                        e.point,
-                        {},
-                        {
-                            graphicName: 'circle',
-                            fillColor: '#CCCC00',
-                            strokeColor: '#CCCC00',
-                            strokeWidth: 1,
-                            fillOpacity: 0.3,
-                            pointRadius: 10
-                        }
+                    e.point,
+                    {},
+                    {
+                        graphicName: 'circle',
+                        fillColor: '#CCCC00',
+                        strokeColor: '#CCCC00',
+                        strokeWidth: 1,
+                        fillOpacity: 0.3,
+                        pointRadius: 10
+                    }
                 ),
                 circle
             ]);
@@ -111,16 +111,16 @@ dbkjs.modules.geolocate = {
             _obj.layer.removeAllFeatures();
             _obj.layer.addFeatures([
                 new OpenLayers.Feature.Vector(
-                        e.point,
-                        {},
-                        {
-                            graphicName: 'circle',
-                            fillColor: '#CCCC00',
-                            strokeColor: '#CCCC00',
-                            strokeWidth: 1,
-                            fillOpacity: 0.3,
-                            pointRadius: 10
-                        }
+                    e.point,
+                    {},
+                    {
+                        graphicName: 'circle',
+                        fillColor: '#CCCC00',
+                        strokeColor: '#CCCC00',
+                        strokeWidth: 1,
+                        fillOpacity: 0.3,
+                        pointRadius: 10
+                    }
                 )
             ]);
         }
