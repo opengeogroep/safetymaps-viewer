@@ -265,6 +265,45 @@ dbkjs.modules.geolocate = {
 
         return new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), dbkjs.map.getProjectionObject());
     },
+    getGPSGatePosition: function() {
+        var _obj = dbkjs.modules.geolocate;
+        if(!_obj.activated) {
+            return;
+        }
+        $.getScript(dbkjs.options.gpsGateURL, function()
+        {
+            GpsGate.Client.getGpsInfo(function(gps){
+                if(gps.status.permitted == false) {
+                    console.log('geolocate gpsgate: request not permitted by user');
+                } else {
+                    var pos = new OpenLayers.LonLat(gps.trackPoint.position.longitude, gps.trackPoint.position.latitude).transform(new OpenLayers.Projection("EPSG:4326"), dbkjs.map.getProjectionObject());
+                    if(_obj.position === null || _obj.position.lon !== pos.lon || _obj.position.lat !== pos.lat) {
+                        _obj.position = pos;
+                        _obj.locationupdated({
+                            position: {
+                                coords: {
+                                    accuracy: 50
+                                }
+                            },
+                            point: new OpenLayers.Geometry.Point(pos.lon, pos.lat)
+                        });
+                        if (_obj.options.button === "follow" && $('#btn_geolocate').hasClass('active'))
+                            _obj.center();
+                    }                    
+                    if(_obj.options.debug)
+                        console.log('geolocate gpsgate: longitude:' + gps.trackPoint.position.longitude + ' latitude:' + gps.trackPoint.position.latitude);
+                }
+            });
+        })
+        .always(function(){
+            window.setTimeout(function() {
+                _obj.getGPSGatePosition();
+            }, _obj.options.updateInterval);
+        })
+        .fail(function(){
+            console.log("geolocate gpsgate: getScript failure");
+        });
+    },
     getPharosPosition: function() {
         var _obj = dbkjs.modules.geolocate;
         if(!_obj.activated) {
@@ -345,8 +384,12 @@ dbkjs.modules.geolocate = {
         //<img style="position: relative; width: 32px; top: -3px" src="images/location-arrow.svg"></a>
         //'<i class="fa fa-crosshairs"></i>'
         var params = OpenLayers.Util.getParameters();
-        if(params.geoprovider && ["geolocate", "nmea"].indexOf(params.geoprovider) !== -1) {
-            _obj.options.provider = params.geoprovider;
+        if(params.geoprovider && ["geolocate", "nmea"].indexOf(params.geoprovider) !== -1) {        
+            _obj.options.provider = params.geoprovider;        
+        }
+
+        if(dbkjs.options.useGPSGateAsFallbackOnVoertuig){
+            _obj.options.provider = 'gpsgate';
         }
 
         if(_obj.options.provider === "geolocate") {
@@ -406,18 +449,40 @@ dbkjs.modules.geolocate = {
                     _obj.firstGeolocation = true;
                 }
             };
+        } else if(_obj.options.provider.trim() === "gpsgate") {
+            _obj.activated = false;
+
+            _obj.provider = {
+                activate: function() {
+                    if(!_obj.activated) {
+                        _obj.activated = true;
+                        _obj.getGPSGatePosition();
+                    }
+                },
+                deactivate: function() {
+                    _obj.activated = false;
+                    _obj.position = null;
+                    _obj.firstGeolocation = true;
+                }
+            };
         } else {
             throw "geolocate: unknown provider: " + _obj.options.provider;
         }
 
+        console.log(_obj.options.provider);
+
         $(_obj.options.location).prepend('<a id="btn_geolocate" data-sid="' + _obj.options.index + '" class="btn btn-default navbar-btn" href="#" title="' + i18n.t('geolocate.button') + '">' + _obj.options.icon + '</a>');
         
-        if (_obj.options.button === "follow") {
+        if (_obj.options.button === "follow" && _obj.options.provider !== 'gpsgate') {
             dbkjs.map.events.register('touchmove', _obj, function (e) {
                 if (_obj.control.bind) {
                     $("#btn_geolocate").removeClass('active');
                     _obj.control.bind = !_obj.control.bind;
                 }
+            });
+        } else if(_obj.options.button === "follow" && _obj.options.provider === 'gpsgate') {
+            dbkjs.map.events.register('touchmove', _obj, function (e) {
+                $("#btn_geolocate").removeClass('active');
             });
         }
         
@@ -457,7 +522,7 @@ dbkjs.modules.geolocate = {
                 // and set firstGeolocation to true so will center on position
                 // when position received
                 _obj.center();
-            } else if (_obj.options.button === "follow") {
+            } else if (_obj.options.button === "follow" && _obj.options.provider !== 'gpsgate') {
                 if(_obj.control.bind){
                     $(this).removeClass('active');
                     _obj.control.bind = !_obj.control.bind;
@@ -466,6 +531,13 @@ dbkjs.modules.geolocate = {
                     _obj.control.bind = !_obj.control.bind;
                     _obj.center();
                 } 
+            } else if (_obj.options.button === "follow" && _obj.options.provider === 'gpsgate') {
+                if($(this).hasClass('active')) {
+                    $(this).removeClass('active');
+                } else {
+                    $(this).addClass('active');
+                    _obj.center();
+                }
             }
         });
         dbkjs.map.addLayers([_obj.layer, _obj.markers]);
