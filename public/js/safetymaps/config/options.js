@@ -1,11 +1,3 @@
-/*
-    * CHANGELOG
-    *
-    * 20191120 BV
-    * For some reason geolocate from OpenLayers does not always work on all devices
-    * Therefore an extra option is added to the module config 'provider:gpsgate'
-    * This option connects to an local javascript file from FransonGPSgate and gets the Windows Location LonLat
-*/
 
 var dbkjs = dbkjs || {};
 window.dbkjs = dbkjs;
@@ -68,8 +60,5 @@ dbkjs.options = {
     
     resetToDefaultOnIncident: false,
     
-    showLayerLoadingPanel: true,
-
-    useGPSGateAsFallbackOnVoertuig: false,
-    gpsGateURL: 'http://localhost:12175/javascript/GpsGate.js'
+    showLayerLoadingPanel: true
 };
