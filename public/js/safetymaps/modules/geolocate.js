@@ -17,7 +17,8 @@
  *  along with safetymaps-viewer. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* global dbkjs, safetymaps, OpenLayers, Proj4js, jsts, moment, i18n, Mustache, PDFObject */
+/* global dbkjs, safetymaps, OpenLayers, Proj4js, jsts, moment, i18n, Mustache,
+ * PDFObject, GpsGate */
 
 var dbkjs = dbkjs || {};
 window.dbkjs = dbkjs;
@@ -26,6 +27,8 @@ dbkjs.modules = dbkjs.modules || {};
 dbkjs.modules.geolocate = {
     id: 'dbk.modules.geolocate',
     options: null,
+    providerOverride: null,
+    gpsGateUrl: 'http://localhost:12175/javascript/GpsGate.js',
     style: {
         strokeColor: '#CCCC00',
         fillColor: '#CCCC00',
@@ -138,7 +141,8 @@ dbkjs.modules.geolocate = {
                 _obj.pulsate(circle);
             }
             _obj.firstGeolocation = false;
-            _obj.bind = true;
+        } else if(_obj.button === "follow" && $('#btn_geolocate').hasClass('active')) {
+            dbkjs.map.setCenter(_obj.position, dbkjs.options.zoom);
         }
     },
     locationlost: function(e) {
@@ -265,6 +269,61 @@ dbkjs.modules.geolocate = {
 
         return new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), dbkjs.map.getProjectionObject());
     },
+    activateGpsGatePosition: function() {
+        var _obj = dbkjs.modules.geolocate;
+
+        window.clearTimeout(_obj.gpsGateTimeout);
+
+        if(window.GpsGate) {
+            console.log("geolocate gpsgate: already loaded script");
+            _obj.getGpsGateInfo();
+        } else {
+            $.getScript(_obj.gpsGateUrl, function() {
+                console.log("geolocate gpsgate: loaded script");
+                _obj.getGpsGateInfo();
+            })
+            .fail(function(){
+                console.log("geolocate gpsgate: getScript failure");
+            });
+        }
+    },
+    getGpsGateInfo: function() {
+        var _obj = this;
+
+        if(!_obj.activated) {
+            return;
+        }
+
+        GpsGate.Client.getGpsInfo(function(gps) {
+            if(!gps.status.permitted) {
+                console.log('geolocate gpsgate: request not permitted by user');
+            } else {
+                _obj.gpsGateTimeout = window.setTimeout(function() {
+                    _obj.getGpsGateInfo();
+                }, _obj.options.updateInterval);
+
+                var changedPosition = !_obj.gpsGatePosition || _obj.gpsGatePosition.longitude !== gps.trackPoint.position.longitude || _obj.gpsGatePosition.latitude !== gps.trackPoint.position.latitude;
+                if(changedPosition) {
+                    _obj.gpsGatePosition = gps.trackPoint.position;
+
+                    var pos = new OpenLayers.LonLat(gps.trackPoint.position.longitude, gps.trackPoint.position.latitude);
+                    pos = pos.transform(new OpenLayers.Projection("EPSG:4326"), dbkjs.map.getProjectionObject());
+
+                    _obj.locationupdated({
+                        position: {
+                            coords: {
+                                accuracy: 50
+                            }
+                        },
+                        point: new OpenLayers.Geometry.Point(pos.lon, pos.lat)
+                    });
+                }
+                if(_obj.options.debug) {
+                    console.log('geolocate gpsgate: ' + (changedPosition ? 'changed to' : 'same') + ' longitude:' + gps.trackPoint.position.longitude + ' latitude:' + gps.trackPoint.position.latitude);
+                }
+            }
+        });
+    },
     getPharosPosition: function() {
         var _obj = dbkjs.modules.geolocate;
         if(!_obj.activated) {
@@ -344,8 +403,17 @@ dbkjs.modules.geolocate = {
         }, _obj.options);
         //<img style="position: relative; width: 32px; top: -3px" src="images/location-arrow.svg"></a>
         //'<i class="fa fa-crosshairs"></i>'
+
+        // Can set dbkjs.modules.geolocate.providerOverride in customize.js
+        // when onboard
+        if(_obj.providerOverride) {
+            _obj.options.provider = _obj.providerOverride;
+        }
+
+        // URL parameter always takes precedence over organisation.modules and
+        // dkbjs.modules.geolocate.providerOverride
         var params = OpenLayers.Util.getParameters();
-        if(params.geoprovider && ["geolocate", "nmea"].indexOf(params.geoprovider) !== -1) {
+        if(params.geoprovider && ["geolocate", "nmea", "gpsgate"].indexOf(params.geoprovider) !== -1) {
             _obj.options.provider = params.geoprovider;
         }
 
@@ -406,18 +474,39 @@ dbkjs.modules.geolocate = {
                     _obj.firstGeolocation = true;
                 }
             };
+        } else if(_obj.options.provider.trim() === "gpsgate") {
+            _obj.activated = false;
+
+            _obj.provider = {
+                activate: function() {
+                    if(!_obj.activated) {
+                        _obj.activated = true;
+                        _obj.activateGpsGatePosition();
+                    }
+                },
+                deactivate: function() {
+                    _obj.activated = false;
+                    window.clearTimeout(_obj.gpsGateTimeout);
+                    _obj.gpsGatePosition = null;
+                    _obj.position = null;
+                    _obj.firstGeolocation = true;
+                }
+            };
         } else {
             throw "geolocate: unknown provider: " + _obj.options.provider;
         }
 
+        console.log("geolocate: using provider " + _obj.options.provider);
+
         $(_obj.options.location).prepend('<a id="btn_geolocate" data-sid="' + _obj.options.index + '" class="btn btn-default navbar-btn" href="#" title="' + i18n.t('geolocate.button') + '">' + _obj.options.icon + '</a>');
-        
+
+        // Follow is disabled when moving the map with touch, not with mouse!
+        // Catching a specific mouse drag event is possible but more complicated
         if (_obj.options.button === "follow") {
-            dbkjs.map.events.register('touchmove', _obj, function (e) {
-                if (_obj.control.bind) {
-                    $("#btn_geolocate").removeClass('active');
-                    _obj.control.bind = !_obj.control.bind;
-                }
+            dbkjs.map.events.register('touchmove', _obj, function() {
+                $("#btn_geolocate").removeClass('active');
+                // Override grey focus style color
+                $("#btn_geolocate").css("background-color","white");
             });
         }
         
@@ -446,9 +535,10 @@ dbkjs.modules.geolocate = {
                     _obj.markers.clearMarkers();
                     _obj.provider.deactivate();
                     $(this).removeClass('active');
-                    $("#btn_geolocate").blur();
+                    // Override grey focus style color
+                    $(this).css("background-color","white");
                 } else {
-                    $("#btn_geolocate").css("color", "gray");
+                    $("#btn_geolocate").css("color", "#e6e6e6");
                     $(this).addClass('active');
                     _obj.provider.activate();
                 }
@@ -458,14 +548,15 @@ dbkjs.modules.geolocate = {
                 // when position received
                 _obj.center();
             } else if (_obj.options.button === "follow") {
-                if(_obj.control.bind){
+                if($(this).hasClass('active')) {
                     $(this).removeClass('active');
-                    _obj.control.bind = !_obj.control.bind;
+                    // Override grey focus style color
+                    $(this).css("background-color","white");
                 } else {
                     $(this).addClass('active');
-                    _obj.control.bind = !_obj.control.bind;
+		    $(this).css("background-color","#e6e6e6");
                     _obj.center();
-                } 
+                }
             }
         });
         dbkjs.map.addLayers([_obj.layer, _obj.markers]);
