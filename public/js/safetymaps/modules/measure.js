@@ -102,8 +102,15 @@ dbkjs.modules.measure = {
         $(dbkjs).one("dbkjs_init_complete", function () {
             _obj.listenToIncidents();
         });
-        
-        
+
+        $(dbkjs).on("modal_popup_shown", function(event, params) {
+            // Move footer with distance measurement
+            $("#measure").css({right: params.width});
+        });
+        $(dbkjs).on("modal_popup_hide", function(event, params) {
+            // Move footer with distance measurement back
+            $("#measure").css({right: "default"});
+        });
     },
 
     createButtons: function() {

@@ -140,6 +140,8 @@ function SplitScreenWindow(name) {
     ModalWindow.call(this, name);
     this.splitScreen = dbkjs.options.splitScreenChecked;
 
+    this.widthPercent = 45;
+
     // XXX always, also fixes cannot click map next to buttons
     $(".main-button-group").css({paddingRight: "10px", width: "auto", float: "right", right: "0%"});
 
@@ -214,7 +216,6 @@ SplitScreenWindow.prototype.hide = function(noMapAdjust) {
             $("#vectorclickpanel").css({"width": "100%"});
 
             $("#map").css({width: "100%"});
-            $("#measure").css({right: "default"}); // Move footer with distance measurement back
 
             // Needs OpenLayers 2.13.1 patch:
             // https://github.com/openlayers/openlayers/pull/1304
@@ -234,23 +235,28 @@ SplitScreenWindow.prototype.show = function() {
     if(!this.splitScreen) {
         ModalWindow.prototype.show.call(this);
     } else {
+        var windowWidth = this.widthPercent + "%";
+        var remainderWidth = (100 - this.widthPercent) + "%";
+
         // Event should cause other modal popups to hide
         // isSplitScreen means split screen dialog is shown, if other split
         // screen window is open do not adjust map width
         $(dbkjs).trigger('modal_popup_show', { popupName: this.name, isSplitScreen:  true, window: this});
 
         // XXX move to dbkjs event 'split_screen_show';
-        $(".main-button-group").css({right: "45%"});
-        $("#vectorclickpanel").css({"width": "55%"});
 
-        $("#map").css({width: "55%"});
-        $("#measure").css({right: "45%"}); // Move footer with distance measurement
-        this.popup.css({width: "45%"});
+        $(".main-button-group").css({right: windowWidth});
+        $("#vectorclickpanel").css({width: remainderWidth});
+
+        $("#map").css({width: remainderWidth});
+
+        this.popup.css({width: windowWidth});
         // Needs OpenLayers 2.13.1 patch:
         // https://github.com/openlayers/openlayers/issues/669
         dbkjs.map.updateSize();
 
         this.visible = true;
         $(this).triggerHandler('show');
+        $(dbkjs).trigger('modal_popup_shown', { popupName: this.name, isSplitScreen:  true, width: windowWidth, remainderWidth: remainderWidth, window: this});
     }
 };
