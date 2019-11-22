@@ -1104,7 +1104,7 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, newD
     v = p.bijz_hed_1; if(v) rows.push("<tr><td colspan='2'>" + Mustache.escape(v) + "</td></tr>");
     v = p.bijz_hed_2; if(v) rows.push("<tr><td colspan='2'>" + Mustache.escape(v) + "</td></tr>");
     rows.push({l: "Bijzonderheden afsluiters", t: o.bijzonde_1});
-    rows.push({l: "Brandinstallaties", t: o.brandinstallaties ? o.brandinstallaties.join("<br>") : null});
+    rows.push({l: "Brandinstallaties", html: o.brandinstallaties ? o.brandinstallaties.map(Mustache.escape).join(", ") : null});
 
     safetymaps.infoWindow.addTab(windowId, "gebouw", "Gebouw", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
 };
