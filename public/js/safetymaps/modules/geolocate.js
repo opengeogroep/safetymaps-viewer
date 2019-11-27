@@ -501,12 +501,6 @@ dbkjs.modules.geolocate = {
         console.log("geolocate: using provider " + _obj.options.provider);
 
         $(_obj.options.location).prepend('<a id="btn_geolocate" data-sid="' + _obj.options.index + '" class="btn btn-default navbar-btn" href="#" title="' + i18n.t('geolocate.button') + '">' + _obj.options.icon + '</a>');
-
-        // Follow is disabled when moving the map with touch, not with mouse!
-        // Catching a specific mouse drag event is possible but more complicated
-
-        // Moved following code to specific functions on _obj.
-        // Events are now registered for the time they are needed.
         
         if(_obj.options.activateOnStart) {
             $("#btn_geolocate").css("color", "gray");
@@ -546,12 +540,12 @@ dbkjs.modules.geolocate = {
                 // when position received
                 _obj.center();
             } else if (_obj.options.button === "follow") {
-                _obj.initFollowing();
+                _obj.toggleFollowing();
             }
         });
         dbkjs.map.addLayers([_obj.layer, _obj.markers]);
     },   
-    initFollowing: function () {
+    toggleFollowing: function () {
         var _obj = dbkjs.modules.geolocate;
         
         if(_obj.followingIsActive())
@@ -570,10 +564,9 @@ dbkjs.modules.geolocate = {
         dbkjs.map.events.register('touchmove', _obj, _obj.deactivateFollowing);
         dbkjs.map.events.register('mouseup', _obj, _obj.deactivateFollowing);
 
-        var elms = document.getElementsByTagName('a');
-        for(var i = 0; i < elms.length; i++){
-            elms[i].addEventListener('click', _obj.deactivateFollowing);
-        }          
+        $("a").on("click.unfollow", function() {
+            _obj.deactivateFollowing();
+        });
     }, 
     deactivateFollowing: function () {
         var _obj = dbkjs.modules.geolocate;
@@ -585,10 +578,7 @@ dbkjs.modules.geolocate = {
             dbkjs.map.events.unregister('touchmove', _obj, _obj.deactivateFollowing);
             dbkjs.map.events.unregister('mouseup', _obj, _obj.deactivateFollowing);
 
-            var elms = document.getElementsByTagName('a');
-            for(var i = 0; i < elms.length; i++){
-                elms[i].removeEventListener('click', _obj.deactivateFollowing);
-            } 
+            $("a").off("click.unfollow");
         }
     },
     followingIsActive: function () {
