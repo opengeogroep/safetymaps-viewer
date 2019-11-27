@@ -141,8 +141,10 @@ dbkjs.modules.geolocate = {
                 _obj.pulsate(circle);
             }
             _obj.firstGeolocation = false;
-        } else if(_obj.button === "follow" && $('#btn_geolocate').hasClass('active')) {
-            dbkjs.map.setCenter(_obj.position, dbkjs.options.zoom);
+        } else if(_obj.followingIsActive()) {
+            //dbkjs.map.setCenter(_obj.position, dbkjs.options.zoom); 
+            // Above code does not work on the tab, therefore added call to the center() function.
+            _obj.center();
         }
     },
     locationlost: function(e) {
@@ -502,13 +504,9 @@ dbkjs.modules.geolocate = {
 
         // Follow is disabled when moving the map with touch, not with mouse!
         // Catching a specific mouse drag event is possible but more complicated
-        if (_obj.options.button === "follow") {
-            dbkjs.map.events.register('touchmove', _obj, function() {
-                $("#btn_geolocate").removeClass('active');
-                // Override grey focus style color
-                $("#btn_geolocate").css("background-color","white");
-            });
-        }
+
+        // Moved following code to specific functions on _obj.
+        // Events are now registered for the time they are needed.
         
         if(_obj.options.activateOnStart) {
             $("#btn_geolocate").css("color", "gray");
@@ -548,17 +546,54 @@ dbkjs.modules.geolocate = {
                 // when position received
                 _obj.center();
             } else if (_obj.options.button === "follow") {
-                if($(this).hasClass('active')) {
-                    $(this).removeClass('active');
-                    // Override grey focus style color
-                    $(this).css("background-color","white");
-                } else {
-                    $(this).addClass('active');
-		    $(this).css("background-color","#e6e6e6");
-                    _obj.center();
-                }
+                _obj.initFollowing();
             }
         });
         dbkjs.map.addLayers([_obj.layer, _obj.markers]);
+    },   
+    initFollowing: function () {
+        var _obj = dbkjs.modules.geolocate;
+        
+        if(_obj.followingIsActive())
+            _obj.deactivateFollowing();
+        else
+            _obj.activateFollowing();
+    },
+    activateFollowing: function () {
+        var _obj = dbkjs.modules.geolocate;
+
+        _obj.center(); 
+
+        $('#btn_geolocate').addClass('active');
+        $('#btn_geolocate').css("background-color","#e6e6e6");        
+
+        dbkjs.map.events.register('touchmove', _obj, _obj.deactivateFollowing);
+        dbkjs.map.events.register('mouseup', _obj, _obj.deactivateFollowing);
+
+        var elms = document.getElementsByTagName('a');
+        for(var i = 0; i < elms.length; i++){
+            elms[i].addEventListener('click', _obj.deactivateFollowing);
+        }          
+    }, 
+    deactivateFollowing: function () {
+        var _obj = dbkjs.modules.geolocate;
+
+        if(_obj.followingIsActive()){
+            $("#btn_geolocate").removeClass('active');
+            $("#btn_geolocate").css("background-color","white"); 
+            
+            dbkjs.map.events.unregister('touchmove', _obj, _obj.deactivateFollowing);
+            dbkjs.map.events.unregister('mouseup', _obj, _obj.deactivateFollowing);
+
+            var elms = document.getElementsByTagName('a');
+            for(var i = 0; i < elms.length; i++){
+                elms[i].removeEventListener('click', _obj.deactivateFollowing);
+            } 
+        }
+    },
+    followingIsActive: function () {
+        var _obj = dbkjs.modules.geolocate;
+
+        return _obj.options.button === "follow" && $('#btn_geolocate').hasClass('active');
     }
 };
