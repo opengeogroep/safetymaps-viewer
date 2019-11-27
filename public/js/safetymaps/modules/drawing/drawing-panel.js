@@ -17,16 +17,36 @@
  *  along with safetymaps-viewer. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* global SplitScreenWindow */
+/* global dbkjs, i18n, SplitScreenWindow */
 
-function DrawingPanelWindow() {
+function DrawingPanelWindow(options) {
     SplitScreenWindow.call(this, "drawingPanel");
     var me = this;
 
     this.widthPercent = 20;
 
     $(this).on('elements_created', function() {
-        me.getView().html("Tekenen maar");
+        var view = me.getView();
+
+        var buttons = $("<div id='drawing_buttons'>");
+        buttons.appendTo(view);
+
+        if(options.showMeasureButtons) {
+            $(dbkjs).one("dbkjs_init_complete", function() {
+                $("#btn_measure_area").prependTo(buttons);
+                $("#btn_measure_distance").prependTo(buttons);
+            });
+
+            $(this).on("hide", function() {
+                dbkjs.modules.measure.toggleMeasureArea(false);
+                dbkjs.modules.measure.toggleMeasureDistance(false);
+            });
+        }
+
+        $('<a id="btn_drawing" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.title") + '"><i class="fa fa-hand-pointer-o"></i></a>').appendTo(buttons);
+        $("#btn_drawing").on("click", function() {
+            // ???
+        });
     });
 }
 

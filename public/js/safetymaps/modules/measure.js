@@ -136,6 +136,10 @@ dbkjs.modules.measure = {
         }
     },
 
+    hideButtons: function() {
+        $("#btn_measure_distance, #btn_measure_area").hide();
+    },
+
     setMeasureActive: function(distanceOrArea, toggle, active) {
         var me = this;
         $('#measure').html('');

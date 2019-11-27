@@ -30,7 +30,7 @@ dbkjs.modules.drawing = {
         var me = dbkjs.modules.drawing;
 
         me.options = $.extend({
-
+            showMeasureButtons: false
         }, me.options);
 
         me.createElements();
@@ -47,8 +47,13 @@ dbkjs.modules.drawing = {
         me.button.prependTo($("#bottom_left_buttons"));
         me.button.on("click", me.click.bind(me));
 
-        me.panel = new DrawingPanelWindow();
+        me.panel = new DrawingPanelWindow(me.options);
         me.panel.createElements(i18n.t("drawing.title"));
+
+        $(me.panel).on("hide", function() {
+            me.active = false;
+            me.deactivate();
+        });
     },
 
     click: function() {

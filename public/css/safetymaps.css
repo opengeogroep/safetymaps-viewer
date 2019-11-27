@@ -646,3 +646,10 @@ a.btn.on:after {
     position: relative;
     top: -12px;
 }
+
+.modal-popup #drawing_buttons .btn {
+    height: 64px;
+    min-width: 60px;
+    margin-left: -6px;
+    font-size: 35px !important;
+}

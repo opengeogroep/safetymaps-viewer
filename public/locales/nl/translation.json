@@ -248,5 +248,8 @@
         "select": "Selecteer",
         "drawMode" : "Tekenen",
         "readMode" :"Lezen"
+    },
+    "drawing": {
+        "title": "Tekenen"
     }
 }
