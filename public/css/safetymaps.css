@@ -671,3 +671,18 @@ a.btn.on:after {
 #drawing_colors .drawing_color.active {
     border: 2px solid black;
 }
+
+#drawing_feature_controls {
+    clear: left;
+    margin-left: 5px;
+    margin-top: 20px;
+    padding: 5px;
+    border: 1px solid black;
+}
+
+#drawing_feature_controls .btn {
+    width: 60px;
+    height: 60px;
+    margin: 5px;
+    font-size: 35px !important;
+}

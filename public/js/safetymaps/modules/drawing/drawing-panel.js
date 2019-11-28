@@ -48,8 +48,10 @@ function DrawingPanelWindow(options) {
 
     $('<a id="btn_drawing_select" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.select") + '"><i class="fa fa-hand-pointer-o"></i></a>').appendTo(buttons);
     $("#btn_drawing_select").on("click", function() {
+        me.unselectColor();
         $(me).triggerHandler("select");
     });
+    $('<a id="btn_drawing_eraser" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.eraser") + '"><i class="fa fa-eraser"></i></a>').appendTo(buttons);
 
     var colors = $("<div id='drawing_colors'/>");
 
@@ -66,6 +68,11 @@ function DrawingPanelWindow(options) {
             $(me).triggerHandler("color", [ color ]);
         }
     });
+
+    var featureControls = $("<div id='drawing_feature_controls' style='display: none'>Selectie<br><a id='drawing_feature_delete' class='btn btn-default'><i class='fa fa-trash'/></a></div>");
+
+    featureControls.appendTo(view);
+
 };
 
 DrawingPanelWindow.prototype = Object.create(SplitScreenWindow.prototype);
@@ -73,4 +80,13 @@ DrawingPanelWindow.prototype.constructor = DrawingPanelWindow;
 
 DrawingPanelWindow.prototype.unselectColor = function() {
     $("#drawing_colors .drawing_color").removeClass("active");
+};
+
+DrawingPanelWindow.prototype.featureSelected = function() {
+    $("#drawing_feature_controls").show();
+};
+
+
+DrawingPanelWindow.prototype.featureUnselected = function() {
+    $("#drawing_feature_controls").hide();
 };

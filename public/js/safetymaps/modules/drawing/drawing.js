@@ -100,10 +100,15 @@ dbkjs.modules.drawing = {
         });
         dbkjs.map.addLayer(me.layer);
 
+        me.selectControl = new OpenLayers.Control.SelectFeature([me.layer]);
+        dbkjs.map.addControl(me.selectControl);
+        me.selectControl.deactivate();
+        me.layer.events.register("featureselected", me, me.lineSelected);
+        me.layer.events.register("featureunselected", me, me.lineUnselected);
+
         me.drawLineControl = new OpenLayers.Control.DrawFeature(me.layer, OpenLayers.Handler.Path, {
             eventListeners: {
                 featureadded: function(evt) {
-                    console.log("featureadded", evt);
                     evt.feature.attributes.strokeColor = me.color;
                     me.layer.redraw();
                 }
@@ -132,21 +137,36 @@ dbkjs.modules.drawing = {
         this.panel.show();
         this.panel.unselectColor();
         $(dbkjs).triggerHandler("deactivate_exclusive_map_controls");
+        dbkjs.selectControl.deactivate();
         this.drawLineControl.activate();
     },
 
     deactivate: function() {
         this.panel.hide();
         this.drawLineControl.deactivate();
+        this.selectControl.deactivate();
+        dbkjs.selectControl.activate();
     },
 
     selectMode: function() {
         this.drawLineControl.deactivate();
+        this.selectControl.activate();
     },
 
     drawLine: function(color) {
         this.color = color;
         $(dbkjs).triggerHandler("deactivate_exclusive_map_controls");
+        this.selectControl.deactivate();
         this.drawLineControl.activate();
+    },
+
+    lineSelected: function(e) {
+        console.log("lineSelected", e.feature);
+        this.panel.featureSelected();
+    },
+
+    lineUnselected: function(e) {
+        console.log("lineUnselected", e.feature);
+        this.panel.featureUnselected();
     }
 };
