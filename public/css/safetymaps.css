@@ -661,9 +661,13 @@ a.btn.on:after {
 #drawing_colors {
     margin-top: 20px;
 }
-#drawing_colors div {
+#drawing_colors .drawing_color {
     width: 60px;
     height: 60px;
     float: left;
     margin: 5px;
+}
+
+#drawing_colors .drawing_color.active {
+    border: 2px solid black;
 }

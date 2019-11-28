@@ -61,6 +61,8 @@ function DrawingPanelWindow(options) {
     colors.on("click", function(e) {
         var color = $(e.target).css("background-color");
         if(color !== "") {
+            $("#drawing_colors .drawing_color").removeClass("active");
+            $(e.target).addClass("active");
             $(me).triggerHandler("color", [ color ]);
         }
     });
@@ -68,3 +70,7 @@ function DrawingPanelWindow(options) {
 
 DrawingPanelWindow.prototype = Object.create(SplitScreenWindow.prototype);
 DrawingPanelWindow.prototype.constructor = DrawingPanelWindow;
+
+DrawingPanelWindow.prototype.unselectColor = function() {
+    $("#drawing_colors .drawing_color").removeClass("active");
+};
