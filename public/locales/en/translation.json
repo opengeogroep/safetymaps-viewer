@@ -221,6 +221,7 @@
         "readMode" :"Read"
     },
     "drawing": {
-        "title": "Tekenen"
+        "title": "Tekenen",
+        "select": "Select"
     }
 }

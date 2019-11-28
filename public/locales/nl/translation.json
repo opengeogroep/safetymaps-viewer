@@ -250,6 +250,7 @@
         "readMode" :"Lezen"
     },
     "drawing": {
-        "title": "Tekenen"
+        "title": "Tekenen",
+        "select": "Selecteer"
     }
 }

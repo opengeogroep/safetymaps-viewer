@@ -196,6 +196,10 @@ SplitScreenWindow.prototype.setSplitScreen = function(splitScreen) {
     $(this).triggerHandler('splitScreenChange', splitScreen, this.visible);
 };
 
+SplitScreenWindow.prototype.hideSplitScreenSwitch = function() {
+    this.popup.find(".modal-popup-switch").hide();
+};
+
 SplitScreenWindow.prototype.modalPopupShowEvent = function(event, params) {
     if(params.popupName !== this.popupName) {
         this.hide(params.isSplitScreen);

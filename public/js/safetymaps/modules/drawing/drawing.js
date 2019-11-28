@@ -30,7 +30,8 @@ dbkjs.modules.drawing = {
         var me = dbkjs.modules.drawing;
 
         me.options = $.extend({
-            showMeasureButtons: false
+            showMeasureButtons: false,
+            colors: ["yellow", "green", "red", "rgb(45,45,255)", "black"]
         }, me.options);
 
         me.createElements();
@@ -48,11 +49,16 @@ dbkjs.modules.drawing = {
         me.button.on("click", me.click.bind(me));
 
         me.panel = new DrawingPanelWindow(me.options);
-        me.panel.createElements(i18n.t("drawing.title"));
 
         $(me.panel).on("hide", function() {
             me.active = false;
             me.deactivate();
+        })
+        .on("select", function() {
+            me.selectMode();
+        })
+        .on("color", function(e, color) {
+            me.drawLine(color);
         });
     },
 
@@ -72,5 +78,11 @@ dbkjs.modules.drawing = {
 
     deactivate: function() {
         this.panel.hide();
+    },
+
+    selectMode: function() {
+    },
+
+    drawLine: function(color) {
     }
 };

@@ -647,9 +647,23 @@ a.btn.on:after {
     top: -12px;
 }
 
-.modal-popup #drawing_buttons .btn {
+#drawing_buttons {
+    margin-left: 5px;
+}
+
+#drawing_buttons .btn {
     height: 64px;
     min-width: 60px;
-    margin-left: -6px;
     font-size: 35px !important;
+    margin-right: -1px;
+}
+
+#drawing_colors {
+    margin-top: 20px;
+}
+#drawing_colors div {
+    width: 60px;
+    height: 60px;
+    float: left;
+    margin: 5px;
 }

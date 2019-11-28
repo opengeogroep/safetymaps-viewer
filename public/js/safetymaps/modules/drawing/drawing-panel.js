@@ -23,32 +23,48 @@ function DrawingPanelWindow(options) {
     SplitScreenWindow.call(this, "drawingPanel");
     var me = this;
 
-    this.widthPercent = 20;
+    me.widthPercent = 20;
 
-    $(this).on('elements_created', function() {
-        var view = me.getView();
+    me.createElements(i18n.t("drawing.title"));
 
-        var buttons = $("<div id='drawing_buttons'>");
-        buttons.appendTo(view);
+    var view = me.getView();
 
-        if(options.showMeasureButtons) {
-            $(dbkjs).one("dbkjs_init_complete", function() {
-                $("#btn_measure_area").prependTo(buttons);
-                $("#btn_measure_distance").prependTo(buttons);
-            });
+    me.hideSplitScreenSwitch();
 
-            $(this).on("hide", function() {
-                dbkjs.modules.measure.toggleMeasureArea(false);
-                dbkjs.modules.measure.toggleMeasureDistance(false);
-            });
-        }
+    var buttons = $("<div id='drawing_buttons'/>");
+    buttons.appendTo(view);
 
-        $('<a id="btn_drawing" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.title") + '"><i class="fa fa-hand-pointer-o"></i></a>').appendTo(buttons);
-        $("#btn_drawing").on("click", function() {
-            // ???
+    if(options.showMeasureButtons) {
+        $(dbkjs).one("dbkjs_init_complete", function() {
+            $("#btn_measure_area").prependTo(buttons);
+            $("#btn_measure_distance").prependTo(buttons);
         });
+
+        $(me).on("hide", function() {
+            dbkjs.modules.measure.toggleMeasureArea(false);
+            dbkjs.modules.measure.toggleMeasureDistance(false);
+        });
+    }
+
+    $('<a id="btn_drawing_select" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.select") + '"><i class="fa fa-hand-pointer-o"></i></a>').appendTo(buttons);
+    $("#btn_drawing_select").on("click", function() {
+        $(me).triggerHandler("select");
     });
-}
+
+    var colors = $("<div id='drawing_colors'/>");
+
+    $.each(options.colors, function(i, colorCode) {
+        $("<div class='drawing_color' style='background-color: " + colorCode + "'/>").appendTo(colors);
+    });
+    colors.appendTo(view);
+
+    colors.on("click", function(e) {
+        var color = $(e.target).css("background-color");
+        if(color !== "") {
+            $(me).triggerHandler("color", [ color ]);
+        }
+    });
+};
 
 DrawingPanelWindow.prototype = Object.create(SplitScreenWindow.prototype);
 DrawingPanelWindow.prototype.constructor = DrawingPanelWindow;
