@@ -158,3 +158,11 @@ safetymaps.ClusteringLayer.prototype.selected = function (e) {
         $(this).triggerHandler("object_selected", e.feature);
     }
 };
+
+safetymaps.ClusteringLayer.prototype.setVisibility = function(visible) {
+    this.layer.setVisibility(visible);
+};
+
+safetymaps.ClusteringLayer.prototype.getVisibility = function() {
+    return this.layer.getVisibility();
+};

@@ -201,7 +201,11 @@ dbkjs.modules.support = {
                     type: "POST",
                     url: url,
                     dataType: "json",
-                    data: data
+                    data: data,
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    crossDomain: true
                 }).always(function(data, textStatus, errorThrown) {
                     var message;
                     if(textStatus === "success") {

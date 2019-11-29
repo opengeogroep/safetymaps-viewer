@@ -244,7 +244,11 @@ dbkjs.gotOrganisation = function () {
     dbkjs.layers.loadFromWMSGetCapabilities();
     dbkjs.finishMap();
     dbkjs.initialized = true;
-
+    
+    if(dbkjs.options.resetToDefaultOnIncident){
+        dbkjs.layers.listenToIncidents();
+    }
+    
     if(dbkjs.options.organisation.integrated) {
         $("#settingspanel_b").append('<button id="logoutbtn" class="btn btn-default btn-success" onclick="window.location.href=\'../logout.jsp\'"><span class="glyphicon glyphicon-log-out"></span> Uitloggen</button>');
     }
@@ -283,7 +287,10 @@ dbkjs.resizeButtonGroup = function(e) {
     var totalButtonGroupWidth = 0;
     var buttonGroups = el.find(".btn-group");
     buttonGroups.each(function() {
-        totalButtonGroupWidth += $(this).outerWidth(true);
+        //btn group 4 is dropdown.
+        if($(this).attr('id') !== "btngrp_4"){
+            totalButtonGroupWidth += $(this).outerWidth(true);
+        }
     });
     if (el[0].style.paddingLeft) totalButtonGroupWidth += +(el[0].style.paddingLeft.replace("px", ""));
     if (el[0].style.paddingRight) totalButtonGroupWidth += +(el[0].style.paddingRight.replace("px", ""));
@@ -324,6 +331,32 @@ dbkjs.zoomToFixedMapResolutionForBounds = function(bounds) {
     }
 };
 
+dbkjs.zoomToInitialExtent = function() {
+    if(dbkjs.options.organisation.extent) {
+        var wkt = new OpenLayers.Format.WKT();
+        var extent = wkt.read(dbkjs.options.organisation.extent);
+        dbkjs.zoomToFixedMapResolutionForBounds(extent.geometry.getBounds().scale(1.3));
+    } else if (dbkjs.options.organisation.area) {
+        if (dbkjs.options.organisation.area.geometry.type === "Point") {
+            dbkjs.map.setCenter(
+                    new OpenLayers.LonLat(
+                            dbkjs.options.organisation.area.geometry.coordinates[0],
+                            dbkjs.options.organisation.area.geometry.coordinates[1]
+                            ).transform(
+                    new OpenLayers.Projection(dbkjs.options.projection.code),
+                    dbkjs.map.getProjectionObject()
+                    ),
+                    dbkjs.options.organisation.area.zoom
+                    );
+        } else if (dbkjs.options.organisation.area.geometry.type === "Polygon") {
+            var geom = new OpenLayers.Format.GeoJSON().read(dbkjs.options.organisation.area.geometry, "Geometry");
+            dbkjs.zoomToFixedMapResolutionForBounds(geom.getBounds());
+        }
+    } else {
+        dbkjs.map.zoomToMaxExtent();
+    }
+};
+
 dbkjs.finishMap = function () {
     //find the div that contains the baseLayer.name
     var listItems = $("#baselayerpanel_ul li");
@@ -351,29 +384,7 @@ dbkjs.finishMap = function () {
         }
         dbkjs.options.initialZoomed = true;
 
-        if(dbkjs.options.organisation.extent) {
-            var wkt = new OpenLayers.Format.WKT();
-            var extent = wkt.read(dbkjs.options.organisation.extent);
-            dbkjs.zoomToFixedMapResolutionForBounds(extent.geometry.getBounds().scale(1.3));
-        } else if (dbkjs.options.organisation.area) {
-            if (dbkjs.options.organisation.area.geometry.type === "Point") {
-                dbkjs.map.setCenter(
-                        new OpenLayers.LonLat(
-                                dbkjs.options.organisation.area.geometry.coordinates[0],
-                                dbkjs.options.organisation.area.geometry.coordinates[1]
-                                ).transform(
-                        new OpenLayers.Projection(dbkjs.options.projection.code),
-                        dbkjs.map.getProjectionObject()
-                        ),
-                        dbkjs.options.organisation.area.zoom
-                        );
-            } else if (dbkjs.options.organisation.area.geometry.type === "Polygon") {
-                var geom = new OpenLayers.Format.GeoJSON().read(dbkjs.options.organisation.area.geometry, "Geometry");
-                dbkjs.zoomToFixedMapResolutionForBounds(geom.getBounds());
-            }
-        } else {
-            dbkjs.map.zoomToMaxExtent();
-        }
+        dbkjs.zoomToInitialExtent();
     }
     dbkjs.permalink = new safetymaps.utils.Permalink('permalink');
     dbkjs.map.addControl(dbkjs.permalink);
@@ -426,30 +437,39 @@ $(document).ready(function () {
             });
         }
         safetymaps.infoWindow.initialize(dbkjs.options.separateWindowMode);
-
-        // Added touchstart event to trigger click on. There was some weird behaviour combined with FastClick,
-        // this seems to fix the issue
-        $('#zoom_extent').on('click touchstart', function () {
-          var areaGeometry = new OpenLayers.Format.GeoJSON().read(dbkjs.options.organisation.area.geometry, "Geometry");
-            if (dbkjs.options.organisation.modules.regio) {
-                dbkjs.modules.regio.zoomExtent();
-            } else {
-                if (dbkjs.options.organisation.area.geometry.type === "Point") {
-                    dbkjs.map.setCenter(
-                            new OpenLayers.LonLat(
-                                    dbkjs.options.organisation.area.geometry.coordinates[0],
-                                    dbkjs.options.organisation.area.geometry.coordinates[1]
-                                    ).transform(
-                            new OpenLayers.Projection(dbkjs.options.projection.code),
-                            dbkjs.map.getProjectionObject()
-                            ),
-                            dbkjs.options.organisation.area.zoom
-                            );
-                } else if (dbkjs.options.organisation.area.geometry.type === "Polygon") {
-                    dbkjs.zoomToFixedMapResolutionForBounds(areaGeometry.getBounds());
-                }
-            }
-        });
+        
+        //Make toggle button for baselayers; Option can be set in customize.js
+        if(dbkjs.options.separateBaseLayerSwitcher){
+            dbkjs.options.baselayerActive = 0;
+            $("#baselayerpanel_b").hide();
+            var a = $("<a/>")
+                .attr("id", "toggleBaselayers")
+                .attr("title", "Baselayer toggle")
+                .addClass("btn btn-default navbar-btn")
+                .on("click", function () {
+                    dbkjs.options.baselayerActive += 1;
+                    if(dbkjs.options.baselayerActive > dbkjs.options.baselayers.length - 1){
+                        dbkjs.options.baselayerActive = 0;
+                    }
+                    dbkjs.layers.toggleBaseLayer(dbkjs.options.baselayerActive);
+                });
+        $("<img/>")
+                .attr("src","images/baselayer-toggle.svg")
+                .attr("style","style='position: relative; width: 32px; top: -3px'").appendTo(a);
+        
+        a.prependTo("#btngrp_3");
+        }
+        
+        if(dbkjs.options.extraButtonGroupDropdown){
+            $("#c_settings").hide();
+            $("#extra_dropDown").on('click',function(){
+                $("#btngrp_4").toggle();
+            });
+        } else {
+            $("#btngrp_4").hide();
+            $("#extra_dropDown").hide();
+        }
+        
         FastClick.attach(document.body);
     });
 });

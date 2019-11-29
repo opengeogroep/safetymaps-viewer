@@ -64,7 +64,7 @@
                 console.log("bag adddress search result selected " + result.lon + ", " + result.lat + (reproject ? " (reprojected to " + p.x + ", " + p.y : ""));
                 dbkjs.map.setCenter([p.x, p.y], dbkjs.options.zoom);
                 if(me.options.showPoint){
-                    dbkjs.modules.search.zoomAndPulse(result,me.options.secondsToDisplay);
+                    dbkjs.modules.search.zoomAndPulse({lon: p.x, lat: p.y},me.options.secondsToDisplay);
                 }
             }
         },false);

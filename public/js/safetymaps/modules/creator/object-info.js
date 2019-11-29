@@ -40,9 +40,12 @@ safetymaps.creator.renderInfoTabs = function(object, windowId) {
     $.each(detailTabs, function(i, detailTab) {
         safetymaps.infoWindow.addTab(windowId, "details_" + i, detailTab.name, "info", safetymaps.creator.createInfoTabDiv(detailTab.rows));
     });
-
-    rows = safetymaps.creator.renderContacts(object);
-    safetymaps.infoWindow.addTab(windowId, "contacts", i18n.t("creator.contacts"), "info", safetymaps.creator.createInfoTabDiv(rows));
+    
+    //TODO dit verplaatsen naar de backend. In de backend kijken of deze gegevens opgehaald moeten worden. Objec = null maakt geen tab aan
+    if(!(dbkjs.modules.safetymaps_creator.options.hideTabs && dbkjs.modules.safetymaps_creator.options.hideTabs.includes("contacts"))){
+        rows = safetymaps.creator.renderContacts(object);
+        safetymaps.infoWindow.addTab(windowId, "contacts", i18n.t("creator.contacts"), "info", safetymaps.creator.createInfoTabDiv(rows));
+    }
 
     rows = safetymaps.creator.renderOccupancy(object);
     safetymaps.infoWindow.addTab(windowId, "occupancy", i18n.t("creator.occupancy"), "info", safetymaps.creator.createInfoTabDiv(rows));
@@ -66,7 +69,8 @@ safetymaps.creator.renderInfoTabs = function(object, windowId) {
     rows = safetymaps.creator.renderFloors(object);
     safetymaps.infoWindow.addTab(windowId, "floors", i18n.t("creator.floors"), "info", safetymaps.creator.createInfoTabDiv(rows));
     
-    if(!dbkjs.modules.safetymaps_creator.options.hideBrandweervoorziening){
+    //TODO dit verplaatsen naar de backend. In de backend kijken of deze gegevens opgehaald moeten worden. Objec = null maakt geen tab aan
+    if(!(dbkjs.modules.safetymaps_creator.options.hideTabs && dbkjs.modules.safetymaps_creator.options.hideTabs.includes("symbols"))){
         rows = safetymaps.creator.renderSymbols(object);
         safetymaps.infoWindow.addTab(windowId, "symbols", i18n.t("creator.symbols"), "info", safetymaps.creator.createInfoTabDiv(rows));
     }
@@ -166,9 +170,12 @@ safetymaps.creator.renderDetails = function(object) {
               rows: rows
         });
     }
-
+    
     if(object.bijzonderhedenlijst) {
         $.each(object.bijzonderhedenlijst, function(i, b) {
+            if(dbkjs.modules.safetymaps_creator.options.hideTabs && dbkjs.modules.safetymaps_creator.options.hideTabs.includes(b.soort)){
+                return;
+            }
             var tab = null;
             $.each(tabs, function(j, t) {
                 if(t.name === b.tabblad) {
@@ -293,19 +300,14 @@ safetymaps.creator.embedPDFs = function(element) {
             // XXX hack, use PDFJS documentloaded event?
             function removeToolbar() {
                 var iframe = $("iframe").contents();
-                if(iframe.find("#download")[0] || iframe.find("#secondaryDownload")[0] ) {
-                    console.log("Found PDFJS toolbar buttons, removing for URL " + url);
-                    iframe.find("#download").remove();
-                    iframe.find("#openFile").remove();
-                    iframe.find("#print").remove();
-                    iframe.find("#secondaryDownload").remove();
-                    iframe.find("#secondaryOpenFile").remove();
-                    iframe.find("#secondaryPrint").remove();
+                if(iframe.find("#toolbarViewer")[0] ) {
+                    console.log("Found PDFJS toolbar buttons, removing for URL " + url);                    	
+                    iframe.find("#toolbarViewer").remove();	
                 } else {
                     if(++removeTries >= 10) {
                         console.log("PDFJS toolbar not found after " + removeTries + " tries (loading failed?), cannot remove for URL " + url);
                     } else {
-                        window.setTimeout(removeToolbar, 500);
+                        window.setTimeout(removeToolbar, 1000);
                     }
                 }
             }

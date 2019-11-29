@@ -505,7 +505,7 @@ AGSIncidentService.prototype.getVoertuigStatus = function(voertuignummer) {
                 return null;
             },
             function(r) {
-                return r[0];
+                return r ? r[0] || null : null;
             });
         });
     }

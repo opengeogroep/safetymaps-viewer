@@ -461,6 +461,9 @@ dbkjs.util = {
         return returnval;
     },
     loadingStart: function (layer) {
+        if(!dbkjs.options.showLayerLoadingPanel){
+            return;
+        }
         var arr_index = $.inArray(layer.name, this.layersLoading);
         if (arr_index === -1) {
             this.layersLoading.push(layer.name);
@@ -483,6 +486,9 @@ dbkjs.util = {
 
     },
     loadingEnd: function (layer) {
+        if(!dbkjs.options.showLayerLoadingPanel){
+            return;
+        }
         var alert = $('#systeem_meldingen');
         if (this.layersLoading.length !== 0) {
             var arr_index = $.inArray(layer.name, this.layersLoading);

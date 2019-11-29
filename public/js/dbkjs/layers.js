@@ -219,6 +219,7 @@ dbkjs.layers = {
     },
 
     loadFromWMSGetCapabilities: function () {
+        var me = this;
         if(!dbkjs.options.organisation.wms) {
             return;
         }
@@ -230,8 +231,9 @@ dbkjs.layers = {
           var layertype;
           var metadata;
           var myLayer;
+          var onlySearch = wms_v.options && wms_v.options.wfsSearch && wms_v.options.wfsSearch.onlySearch;
           var index = wms_v.index || 0;
-          if (wms_v.getcapabilities === true) {
+          if (wms_v.getcapabilities === true && !onlySearch) {
               options = {
                   url: wms_v.url,
                   title: wms_v.name,
@@ -249,7 +251,7 @@ dbkjs.layers = {
                   options.pl = wms_v.pl;
               }
               var myCapabilities = new dbkjs.Capabilities(options);
-          } else if (!wms_v.baselayer) {
+          } else if (!wms_v.baselayer && !onlySearch) {
               params = wms_v.params || {};
               options = wms_v.options || {};
               parent = wms_v.parent || null;
@@ -275,7 +277,7 @@ dbkjs.layers = {
                   layertype,
                   wms_v.gid
               );
-          } else {
+          } else if(!onlySearch) {
               params = wms_v.params || {};
               options = wms_v.options || {};
               options = OpenLayers.Util.extend({isBaseLayer: true}, options);
@@ -302,6 +304,121 @@ dbkjs.layers = {
                   layertype
               );
           }
+          
+            if (!onlySearch) {
+                wms_v.uniqueid = myLayer.layer.id;
+                wms_v.div = myLayer.div;
+            }
+            if (wms_v.options && wms_v.options.wfsSearch) {
+                me.makeSearchConfig(wms_v, wms_v.options);
+            }
         });
+    },
+    
+    listenToIncidents: function () {
+        var me = this;
+        $(dbkjs.modules.incidents.controller).on("new_incident", function () {
+            me.toggleBaseLayer(0);
+            $.each(dbkjs.options.organisation.wms, function (wms_k, wms_v) {
+                if(!(wms_v.options && wms_v.options.wfsSearch && wms_v.options.wfsSearch.onlySearch)){
+                    var layer  = dbkjs.map.getLayer(wms_v.uniqueid);
+                    layer.setVisibility(wms_v.options.visibility);
+                    if(wms_v.options.visibility){
+                        $($(wms_v.div).children()[0]).addClass('active');
+                    } else {
+                        $($(wms_v.div).children()[0]).removeClass('active');
+                    }
+                }
+            });
+        });
+    },
+    
+    makeSearchConfig: function(layer,options){
+        if(!dbkjs.modules.search) {
+            console.log("WFS-search requires search module, disabled");
+            return;
+        }
+        var icon = "<i class='fa fa-home'></i> ";
+        if(options.wfsSearch.icon){
+            icon = options.wfsSearch.icon;
+        }
+        dbkjs.modules.search.addSearchConfig({
+            name: "WFS",
+            tabContents: icon + options.wfsSearch.name,
+            placeholder: i18n.t("creator.search_placeholder"),
+            options:{layer:layer,options:options},
+            search: function(value) {
+                
+                var columns  = this.options.options.wfsSearch.kolom.split(',');
+                var values = value.split(' ').filter(function(el){
+                    if(el.length === 0){
+                        return[""];
+                    }
+                    return el.length !== 0;
+                });
+                var filter = "";
+                var operator = "OR";
+                if (columns.length > 1) {
+                    if (values.length === 1) {
+                        var filter = "<Filter><" + operator + ">";
+                        for (var i = 0; i < columns.length; i++) {
+                            var column = columns[i];
+                            var searchValue = values[0];
+                            filter += "<PropertyIsLike matchCase='false' wildCard='*' singleChar='.' escapeChar='!'><PropertyName>" + column + "</PropertyName><Literal>*" + searchValue + "*</Literal></PropertyIsLike>";
+                        }
+                        filter += "</" + operator + "></Filter>"; 
+                    } else {
+                        operator = "AND";
+                        var filter = "<Filter><" + operator + ">";
+                        for(var i = 0; i < values.length; i++ ){
+                            var column = columns[i];
+                            var searchValue = values[i];
+                            filter += "<PropertyIsLike matchCase='false' wildCard='*' singleChar='.' escapeChar='!'><PropertyName>" + column + "</PropertyName><Literal>*" + searchValue + "*</Literal></PropertyIsLike>";
+                        }
+                        filter += "</" + operator + "></Filter>";
+                    }
+                } else {
+                    filter = "<Filter><PropertyIsLike matchCase='false' wildCard='*' singleChar='.' escapeChar='!'><PropertyName>" + this.options.options.wfsSearch.kolom + "</PropertyName><Literal>*"+value+"*</Literal></PropertyIsLike></Filter>";
+                }
+                
+                OpenLayers.Request.GET({
+                    url: this.options.layer.url,
+                    params: {
+                        REQUEST: "GetFeature",
+                        SERVICE: "WFS",
+                        VERSION: "1.0.0",
+                        TYPENAME: this.options.options.wfsSearch.typeName,
+                        MAXFEATURES:50,
+                        FILTER: filter
+
+                    },
+                    scope:options,
+                    callback: function(data){
+                        var parser = new OpenLayers.Format.GML();
+                        var result = parser.read(data.responseText);
+                        var displayNames = this.wfsSearch.displayName.split(",");
+                        var mustacheString = "";
+                        if(displayNames.length === 0){
+                            console.log("Configureer displayName");
+                            return;
+                        }
+                        for(var i = 0; i < displayNames.length; i++){
+                            mustacheString +="{{"+displayNames[i]+"}} ";
+                        }
+                        dbkjs.modules.search.showResults(result, function(a) {
+                            return Mustache.render(mustacheString, a.data);
+                        }, true);
+                    }
+                }); 
+            },
+            resultSelected: function(result) {
+                if(result.geometry){
+                    if(this.options.options.wfsSearch.showPointInSeconds){
+                        dbkjs.modules.search.zoomAndPulse({lon:result.geometry.x,lat:result.geometry.y},this.options.options.wfsSearch.showPointInSeconds);
+                    }
+                    dbkjs.map.setCenter([result.geometry.x,result.geometry.y],dbkjs.options.zoom);
+                }
+            }
+        },false);
     }
 };
