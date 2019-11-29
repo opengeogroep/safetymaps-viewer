@@ -640,3 +640,9 @@ a.btn.on:after {
     z-index: 3000;
     display: none;
 }
+
+#logoutbtn {
+    float: right;
+    position: relative;
+    top: -12px;
+}
