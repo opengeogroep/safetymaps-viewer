@@ -83,18 +83,26 @@ dbkjs.modules.drawing = {
                 "default": new OpenLayers.Style({
                     strokeColor: "${strokeColor}",
                     strokeWidth: "2",
-                }/*, {
-                    context: {
-                        strokeColor: function(feature) {
-                            return feature.attributes.strokeColor;
-                        }
-                    }
-                }*/),
+                }),
                 "select": new OpenLayers.Style({
                     strokeWidth: "4"
                 }),
                 "hover": new OpenLayers.Style({
                     strokeWidth: "3"
+                }),
+                "temporary": new OpenLayers.Style({
+                    strokeColor: "${color}",
+                    fillColor: "${color}",
+                    fillOpacity: 0.2,
+                    strokeWidth: 2,
+                    pointRadius: 6,
+                    pointerEvents: "visiblePainted"
+                }, {
+                    context: {
+                        color: function(feature) {
+                            return me.color;
+                        }
+                    }
                 })
             })
         });
@@ -105,17 +113,25 @@ dbkjs.modules.drawing = {
         me.selectControl.deactivate();
         me.layer.events.register("featureselected", me, me.lineSelected);
         me.layer.events.register("featureunselected", me, me.lineUnselected);
-
+        me.layer.events.register("sketchstarted", me, function(evt) {
+            console.log("sketchstarted", evt);
+        });
         me.drawLineControl = new OpenLayers.Control.DrawFeature(me.layer, OpenLayers.Handler.Path, {
+            callbacks: {
+                point: function(evt) {
+                    //console.log(`point draw at ${evt.x}, ${evt.y}, components: ${evt.parent.components.length}`);
+                }
+            },
             eventListeners: {
                 featureadded: function(evt) {
                     evt.feature.attributes.strokeColor = me.color;
                     me.layer.redraw();
+                    sketching = false;
                 }
             },
             handlerOptions: {
                 freehand: true,
-                freehandToggle: null
+                freehandToggle: "shiftKey"
             }
         });
         dbkjs.map.addControl(me.drawLineControl);
