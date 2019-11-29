@@ -686,3 +686,14 @@ a.btn.on:after {
     margin: 5px;
     font-size: 35px !important;
 }
+
+#drawing_feature_labelbtn {
+    border: 0; opacity: 1
+}
+
+#drawing_feature_label {
+    height: 30px;
+    margin-top: 20px;
+    font-size: 16pt;
+    overflow: hidden;
+}

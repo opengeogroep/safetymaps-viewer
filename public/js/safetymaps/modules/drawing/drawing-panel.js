@@ -68,13 +68,20 @@ function DrawingPanelWindow(options) {
         me.selectColor(color);
     });
 
-    var featureControls = $("<div id='drawing_feature_controls' style='display: none'>Selectie<br><a id='drawing_feature_delete' class='btn btn-default'><i class='fa fa-trash'/></a></div>");
+    var featureControls = $("<div id='drawing_feature_controls' style='display: none'>Selectie<br>" +
+            "<a id='drawing_feature_delete' class='btn btn-default'><i class='fa fa-trash'/></a><br>" +
+            "<div style='display: flex'>" +
+                "<a id='drawing_feature_labelbtn' class='btn btn-default' disabled><i class='fa fa-font'/></a>" +
+                "<input id='drawing_feature_label'></div>" +
+            "</div>");
     featureControls.appendTo(view);
 
     $("#drawing_feature_delete").on("click", function() {
         $(me).triggerHandler("delete");
     });
-
+    $("#drawing_feature_label").on("keyup", function(e) {
+        $(me).triggerHandler("label", $(e.target).val());
+    });
 };
 
 DrawingPanelWindow.prototype = Object.create(SplitScreenWindow.prototype);
@@ -95,8 +102,9 @@ DrawingPanelWindow.prototype.unselectColor = function() {
     $("#drawing_colors .drawing_color").removeClass("active");
 };
 
-DrawingPanelWindow.prototype.featureSelected = function() {
+DrawingPanelWindow.prototype.featureSelected = function(f) {
     $("#drawing_feature_controls").show();
+    $("#drawing_feature_label").val(f.attributes.label);
 };
 
 DrawingPanelWindow.prototype.featureUnselected = function() {

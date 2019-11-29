@@ -71,10 +71,14 @@ dbkjs.modules.drawing = {
             me.selectMode();
         })
         .on("color", function(e, color) {
+            me.selectControl.unselectAll();
             me.drawLine(color);
         })
         .on("delete", function() {
             me.deleteLine();
+        })
+        .on("label", function(event, label) {
+            me.setLabel(label);
         });
     },
 
@@ -85,7 +89,13 @@ dbkjs.modules.drawing = {
             styleMap: new OpenLayers.StyleMap({
                 "default": new OpenLayers.Style({
                     strokeColor: "${strokeColor}",
-                    strokeWidth: "3"
+                    strokeWidth: "3",
+                    fontSize: 16,
+                    label: "${label}",
+                    labelSelect: false,
+                    labelOutlineColor: "#ffffff",
+                    labelOutlineWidth: 2,
+                    labelAlign: "cb"
                 }),
                 "select": new OpenLayers.Style({
                     strokeWidth: "5"
@@ -128,8 +138,10 @@ dbkjs.modules.drawing = {
             eventListeners: {
                 featureadded: function(evt) {
                     evt.feature.attributes.strokeColor = me.color;
+                    evt.feature.attributes.label = "";
+                    me.selectControl.unselectAll();
+                    me.selectControl.select(evt.feature);
                     me.layer.redraw();
-                    sketching = false;
                 }
             },
             handlerOptions: {
@@ -181,7 +193,7 @@ dbkjs.modules.drawing = {
 
     lineSelected: function(e) {
         console.log("lineSelected", e.feature);
-        this.panel.featureSelected();
+        this.panel.featureSelected(e.feature);
     },
 
     lineUnselected: function(e) {
@@ -192,5 +204,13 @@ dbkjs.modules.drawing = {
     deleteLine: function() {
         this.layer.removeFeatures(this.layer.selectedFeatures);
         this.panel.featureUnselected();
+    },
+
+    setLabel: function(label) {
+        var f = this.layer.selectedFeatures[0];
+        if(f) {
+            f.attributes.label = label;
+        }
+        this.layer.redraw();
     }
 };
