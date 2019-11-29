@@ -72,6 +72,9 @@ dbkjs.modules.drawing = {
         })
         .on("color", function(e, color) {
             me.drawLine(color);
+        })
+        .on("delete", function() {
+            me.deleteLine();
         });
     },
 
@@ -82,19 +85,19 @@ dbkjs.modules.drawing = {
             styleMap: new OpenLayers.StyleMap({
                 "default": new OpenLayers.Style({
                     strokeColor: "${strokeColor}",
-                    strokeWidth: "2",
+                    strokeWidth: "3"
                 }),
                 "select": new OpenLayers.Style({
-                    strokeWidth: "4"
+                    strokeWidth: "5"
                 }),
                 "hover": new OpenLayers.Style({
-                    strokeWidth: "3"
+                    strokeWidth: "4"
                 }),
                 "temporary": new OpenLayers.Style({
                     strokeColor: "${color}",
                     fillColor: "${color}",
                     fillOpacity: 0.2,
-                    strokeWidth: 2,
+                    strokeWidth: 3,
                     pointRadius: 6,
                     pointerEvents: "visiblePainted"
                 }, {
@@ -151,7 +154,7 @@ dbkjs.modules.drawing = {
 
     activate: function() {
         this.panel.show();
-        this.panel.unselectColor();
+        this.panel.selectColor(this.options.defaultColor);
         $(dbkjs).triggerHandler("deactivate_exclusive_map_controls");
         dbkjs.selectControl.deactivate();
         this.drawLineControl.activate();
@@ -183,6 +186,11 @@ dbkjs.modules.drawing = {
 
     lineUnselected: function(e) {
         console.log("lineUnselected", e.feature);
+        this.panel.featureUnselected();
+    },
+
+    deleteLine: function() {
+        this.layer.removeFeatures(this.layer.selectedFeatures);
         this.panel.featureUnselected();
     }
 };
