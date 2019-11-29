@@ -53,7 +53,7 @@ function DrawingPanelWindow(options) {
         $("#btn_drawing_select").addClass("active");
         $(me).triggerHandler("select");
     });
-    $('<a id="btn_drawing_eraser" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.eraser") + '"><i class="fa fa-eraser"></i></a>').appendTo(buttons);
+    //$('<a id="btn_drawing_eraser" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.eraser") + '"><i class="fa fa-eraser"></i></a>').appendTo(buttons);
 
     var colors = $("<div id='drawing_colors'/>");
 
