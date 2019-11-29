@@ -219,5 +219,9 @@
         "select": "Select",
         "drawMode" : "Draw",
         "readMode" :"Read"
+    },
+    "drawing": {
+        "title": "Tekenen",
+        "select": "Select"
     }
 }
