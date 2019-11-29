@@ -455,7 +455,11 @@ dbkjs.modules.safetymaps_creator = {
             this.clusteringLayer.setSelectedIds([]);
         }
         $("#vectorclickpanel").hide();
-        safetymaps.infoWindow.removeTabs(this.infoWindow.getName(), "info");
+        if(this.infoWindow) {
+            // XXX called by VehicleIncidentsController even when module not
+            // active. Should change to this module listening to event
+            safetymaps.infoWindow.removeTabs(this.infoWindow.getName(), "info");
+        }
     },
 
     selectedObjectDetailsReceived: function(object,isIncident /*ES2015 = false*/) {
