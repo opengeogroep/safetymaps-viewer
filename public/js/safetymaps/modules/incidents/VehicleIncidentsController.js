@@ -849,7 +849,7 @@ VehicleIncidentsController.prototype.updateVehiclePositionsVrhAGS = function() {
         if(!features) {
             features = [];
         }
-        $.each(features, function(f) {
+        $.each(features, function(i, f) {
              var dateTime = moment(f.attributes.PosDate + " " + f.attributes.PosTime, "DD-MM-YYYY HH:mm:ss");
              f.attributes.PositionTimeFromNow = dateTime.fromNow();
         });
