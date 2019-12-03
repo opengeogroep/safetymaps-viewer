@@ -121,6 +121,10 @@ dbkjs.modules.drawing = {
         });
         dbkjs.map.addLayer(me.layer);
 
+        // Add to dbkjs.selectControl, otherwise layers will be below others
+        // when our selectControl is not active
+        dbkjs.selectControl.layers.push(me.layer);
+
         me.selectControl = new OpenLayers.Control.SelectFeature([me.layer]);
         dbkjs.map.addControl(me.selectControl);
         me.selectControl.deactivate();
@@ -168,6 +172,8 @@ dbkjs.modules.drawing = {
         this.panel.show();
         this.panel.selectColor(this.options.defaultColor);
         $(dbkjs).triggerHandler("deactivate_exclusive_map_controls");
+        // Put our layer on top of other vector layers
+        dbkjs.map.raiseLayer(dbkjs.modules.drawing.layer, dbkjs.map.layers.length);
         dbkjs.selectControl.deactivate();
         this.drawLineControl.activate();
     },
@@ -192,6 +198,10 @@ dbkjs.modules.drawing = {
     },
 
     lineSelected: function(e) {
+        if(!this.active) {
+            dbkjs.selectControl.unselect(e.feature);
+            return;
+        }
         console.log("lineSelected", e.feature);
         this.panel.featureSelected(e.feature);
     },
