@@ -72,12 +72,19 @@ function DrawingPanelWindow(options) {
         me.selectColor(color);
     });
 
-    var featureControls = $("<div id='drawing_feature_controls' style='display: none'>Selectie<br>" +
+    var featureControls = $(
+        "<div id='drawing_feature_controls' style='display: none'>Selectie<br>" +
             "<a id='drawing_feature_delete' class='btn btn-default'><i class='fa fa-trash'/></a><br>" +
             "<div style='display: flex'>" +
                 "<a id='drawing_feature_labelbtn' class='btn btn-default' disabled><i class='fa fa-font'/></a>" +
-                "<input id='drawing_feature_label'></div>" +
-            "</div>");
+                "<input id='drawing_feature_label'>" +
+            "</div>" +
+            "<div style='display: flex'>" +
+                "<a id='drawing_feature_rotatebtn' class='btn btn-default' disabled><i class='fa fa-rotate-left'/></a>" +
+                "<input id='drawing_feature_rotate' type='number' min='0' max='360'></div>" +
+            "</div>" +
+        "</div>"
+    );
     featureControls.appendTo(view);
 
     $("#drawing_feature_delete").on("click", function() {
@@ -85,6 +92,9 @@ function DrawingPanelWindow(options) {
     });
     $("#drawing_feature_label").on("keyup", function(e) {
         $(me).triggerHandler("label", $(e.target).val());
+    });
+    $("#drawing_feature_rotate").on("keyup change", function(e) {
+        $(me).triggerHandler("rotate", $(e.target).val());
     });
 };
 

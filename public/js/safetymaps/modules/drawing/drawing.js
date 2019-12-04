@@ -89,6 +89,9 @@ dbkjs.modules.drawing = {
         })
         .on("label", function(event, label) {
             me.setLabel(label);
+        })
+        .on("rotate", function(event, rotation) {
+            me.setRotation(rotation);
         });
     },
 
@@ -101,6 +104,8 @@ dbkjs.modules.drawing = {
                     strokeColor: "${strokeColor}",
                     strokeWidth: "3",
                     fontSize: 16,
+                    rotationPoint: "${rotationPoint}",
+                    rotation: "${rotation}",
                     label: "${label}",
                     labelSelect: false,
                     labelOutlineColor: "#ffffff",
@@ -354,6 +359,8 @@ dbkjs.modules.drawing = {
         var me = this;
         feature.attributes.strokeColor = me.color;
         feature.attributes.label = "";
+        feature.attributes.rotation = 0;
+        feature.attributes.rotationPoint = feature.geometry.bounds.getCenterLonLat();
         me.selectControl.unselectAll();
         me.selectControl.select(feature);
         me.layer.redraw();
@@ -382,6 +389,14 @@ dbkjs.modules.drawing = {
         var f = this.layer.selectedFeatures[0];
         if(f) {
             f.attributes.label = label;
+        }
+        this.layer.redraw();
+    },
+
+    setRotation: function(rotation) {
+        var f = this.layer.selectedFeatures[0];
+        if(f) {
+            f.attributes.rotation = rotation;
         }
         this.layer.redraw();
     }

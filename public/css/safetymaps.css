@@ -697,3 +697,14 @@ a.btn.on:after {
     font-size: 16pt;
     overflow: hidden;
 }
+
+#drawing_feature_rotatebtn {
+    border: 0; opacity: 1
+}
+
+#drawing_feature_rotate {
+    height: 30px;
+    margin-top: 20px;
+    font-size: 16pt;
+    overflow: hidden;
+}
