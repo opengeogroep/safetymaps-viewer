@@ -52,7 +52,11 @@ function DrawingPanelWindow(options) {
         me.unselectColor();
         $(me).triggerHandler("select");
     });
-    //$('<a id="btn_drawing_eraser" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.eraser") + '"><i class="fa fa-eraser"></i></a>').appendTo(buttons);
+    $('<a id="btn_drawing_eraser" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.eraser") + '"><i class="fa fa-eraser"></i></a>').appendTo(buttons);
+    $("#btn_drawing_eraser").on("click", function() {
+        me.unselectColor();
+        $(me).triggerHandler("eraser");
+    });
 
     var colors = $("<div id='drawing_colors'/>");
 
@@ -94,10 +98,19 @@ DrawingPanelWindow.prototype.selectModeActivated = function(color) {
     $("#btn_drawing_select").addClass("active");
 };
 
+DrawingPanelWindow.prototype.eraserModeDeactivated = function(color) {
+    $("#btn_drawing_eraser").removeClass("active").blur();
+};
+
+DrawingPanelWindow.prototype.eraserModeActivated = function(color) {
+    $("#btn_drawing_eraser").addClass("active");
+};
+
 DrawingPanelWindow.prototype.selectColor = function(color) {
     var me = this;
     if(color !== "") {
         $("#btn_drawing_select").removeClass("active");
+        $("#btn_drawing_eraser").removeClass("active");
         $("#drawing_colors .drawing_color").removeClass("active");
         var idx = me.options.colors.indexOf(color);
         $("#drawing_colors .drawing_color[data-color-idx='" + idx + "']").addClass("active");
