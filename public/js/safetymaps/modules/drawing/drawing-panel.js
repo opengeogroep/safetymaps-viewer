@@ -50,7 +50,6 @@ function DrawingPanelWindow(options) {
     $('<a id="btn_drawing_select" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.select") + '"><i class="fa fa-hand-pointer-o"></i></a>').appendTo(buttons);
     $("#btn_drawing_select").on("click", function() {
         me.unselectColor();
-        $("#btn_drawing_select").addClass("active");
         $(me).triggerHandler("select");
     });
     //$('<a id="btn_drawing_eraser" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.eraser") + '"><i class="fa fa-eraser"></i></a>').appendTo(buttons);
@@ -86,6 +85,14 @@ function DrawingPanelWindow(options) {
 
 DrawingPanelWindow.prototype = Object.create(SplitScreenWindow.prototype);
 DrawingPanelWindow.prototype.constructor = DrawingPanelWindow;
+
+DrawingPanelWindow.prototype.selectModeDeactivated = function(color) {
+    $("#btn_drawing_select").removeClass("active").blur();
+};
+
+DrawingPanelWindow.prototype.selectModeActivated = function(color) {
+    $("#btn_drawing_select").addClass("active");
+};
 
 DrawingPanelWindow.prototype.selectColor = function(color) {
     var me = this;

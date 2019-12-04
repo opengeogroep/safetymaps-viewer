@@ -46,6 +46,8 @@ dbkjs.modules.drawing = {
         me.initOpenLayersControls();
 
         $(dbkjs).on("deactivate_exclusive_map_controls", function() {
+            me.panel.selectModeDeactivated();
+            me.selectControl.activate();
             me.drawLineControl.deactivate();
         });
     },
@@ -186,8 +188,10 @@ dbkjs.modules.drawing = {
     },
 
     selectMode: function() {
+        $(dbkjs).triggerHandler("deactivate_exclusive_map_controls");
         this.drawLineControl.deactivate();
         this.selectControl.activate();
+        this.panel.selectModeActivated();
     },
 
     drawLine: function(color) {
