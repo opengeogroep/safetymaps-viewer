@@ -189,7 +189,6 @@ dbkjs.modules.drawing = {
         // Put our layer on top of other vector layers
         dbkjs.map.raiseLayer(dbkjs.modules.drawing.layer, dbkjs.map.layers.length);
         dbkjs.selectControl.deactivate();
-
         this.drawLine(this.options.defaultColor);
     },
 
@@ -255,11 +254,29 @@ dbkjs.modules.drawing = {
                 var lineToErase = this.gf.createLineString(coords).buffer(this.options.eraserWidth * dbkjs.map.getResolution());
                 //console.log("JSTS line to erase", writer.write(lineToErase));
 
+                var eraseLineBoundsCoords = lineToErase.getEnvelope().getExteriorRing().getCoordinates();
+                var eraseLineBounds = new OpenLayers.Bounds(
+                        eraseLineBoundsCoords[0].x, // left
+                        eraseLineBoundsCoords[0].y, // bottom
+                        eraseLineBoundsCoords[2].x, // right
+                        eraseLineBoundsCoords[2].y  // top
+                );
+
                 var allNewFeatures = [];
                 for(var i = 0; i < this.layer.features.length; i++) {
                     var f = this.layer.features[i];
 
+                    // Skip calculation if entire feature outside eraser line
+                    if(!f.geometry.bounds.intersectsBounds(eraseLineBounds)) {
+                        allNewFeatures.push(f);
+                        continue;
+                    }
+
                     var drawnLineGeometry = this.olLineStringToJSTS(f.geometry);
+                    if(!drawnLineGeometry) {
+                        // Sometimes line with one coordinate remains, skip it
+                        continue;
+                    }
                     var difference = drawnLineGeometry.difference(lineToErase);
 
                     //console.log("Old line", writer.write(drawnLineGeometry), "difference", writer.write(difference));
@@ -302,6 +319,9 @@ dbkjs.modules.drawing = {
     },
 
     olLineStringToJSTS: function(geometry) {
+        if(geometry.components.length < 2) {
+            return null;
+        }
         var coords = [];
         for(var i = 0; i < geometry.components.length; i++) {
             var vertex = geometry.components[i];
@@ -326,6 +346,7 @@ dbkjs.modules.drawing = {
         $(dbkjs).triggerHandler("deactivate_exclusive_map_controls");
         this.selectControl.deactivate();
         this.drawLineControl.activate();
+        this.panel.eraserModeDeactivated();
         this.drawMode = "line";
     },
 

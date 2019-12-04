@@ -50,6 +50,7 @@ function DrawingPanelWindow(options) {
     $('<a id="btn_drawing_select" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.select") + '"><i class="fa fa-hand-pointer-o"></i></a>').appendTo(buttons);
     $("#btn_drawing_select").on("click", function() {
         me.unselectColor();
+        me.eraserModeDeactivated();
         $(me).triggerHandler("select");
     });
     $('<a id="btn_drawing_eraser" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.eraser") + '"><i class="fa fa-eraser"></i></a>').appendTo(buttons);
