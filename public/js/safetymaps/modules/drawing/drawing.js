@@ -270,7 +270,11 @@ dbkjs.modules.drawing = {
                             if(g.getGeometryType() === "LineString") {
                                 var newGeom = this.jstsLineStringToOlGeometry(g);
                                 if(newGeom !== null) {
-                                    var newFeature = new OpenLayers.Feature.Vector(newGeom, f.attributes);
+                                    var newAttributes = $.extend(f.attributes);
+                                    if(j > 0) {
+                                        newAttributes.label = "";
+                                    }
+                                    var newFeature = new OpenLayers.Feature.Vector(newGeom, newAttributes);
                                     allNewFeatures.push(newFeature);
                                 }
                             }
