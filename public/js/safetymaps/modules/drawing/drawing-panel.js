@@ -81,11 +81,21 @@ function DrawingPanelWindow(options) {
             "</div>" +
             "<div style='display: flex'>" +
                 "<a id='drawing_feature_rotatebtn' class='btn btn-default' disabled><i class='fa fa-rotate-left'/></a>" +
-                "<input id='drawing_feature_rotate' type='number' min='0' max='360'></div>" +
+                "<input id='drawing_feature_rotate' type='number' min='-180' max='180' data-slider-id='drawing_feature_rotate_slider' data-slider-min='-180' data-slider-max='180' data-slider-value='0'></div>" +
             "</div>" +
         "</div>"
     );
     featureControls.appendTo(view);
+
+    $("#drawing_feature_rotate").slider({
+        ticks: [-180, -90, 0, 90, 180],
+        ticks_labels: ['-180°', '-90°', '0°', '90°', '180°'],
+        ticks_snap_bounds: 10,
+        tooltip: 'always',
+        formatter: function(value) {
+		return value + '°';
+	}
+    });
 
     $("#drawing_feature_delete").on("click", function() {
         $(me).triggerHandler("delete");
@@ -136,11 +146,14 @@ DrawingPanelWindow.prototype.unselectColor = function() {
 DrawingPanelWindow.prototype.featureSelected = function(f) {
     $("#drawing_feature_controls").show();
     $("#drawing_feature_label").val(f.attributes.label);
-    $("#drawing_feature_rotate").val(f.attributes.rotation);
+    $("#drawing_feature_rotate").val(f.data.geometryRotation);
+    $("#drawing_feature_rotate").slider("setValue", f.data.geometryRotation);
+    $("#drawing_feature_rotate").slider("refresh");
 };
 
 DrawingPanelWindow.prototype.featureUnselected = function() {
     $("#drawing_feature_controls").hide();
     $("#drawing_feature_label").val("");
-    $("#drawing_feature_rotate").val("");
+    $("#drawing_feature_rotate").val("0");
+    $("#drawing_feature_rotate").slider("setValue", 0);
 };
