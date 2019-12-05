@@ -292,9 +292,12 @@ dbkjs.modules.drawing = {
                             if(g.getGeometryType() === "LineString") {
                                 var newGeom = this.jstsLineStringToOlGeometry(g);
                                 if(newGeom !== null) {
-                                    var newAttributes = $.extend(f.attributes);
+                                    var newAttributes = f.attributes;
                                     if(j > 0) {
-                                        newAttributes.label = "";
+                                        newAttributes = {
+                                            strokeColor: f.attributes.strokeColor,
+                                            label: ""
+                                        };
                                     }
                                     var newFeature = new OpenLayers.Feature.Vector(newGeom, newAttributes);
                                     allNewFeatures.push(newFeature);
@@ -359,8 +362,7 @@ dbkjs.modules.drawing = {
         var me = this;
         feature.attributes.strokeColor = me.color;
         feature.attributes.label = "";
-        feature.attributes.rotation = 0;
-        feature.attributes.rotationPoint = feature.geometry.bounds.getCenterLonLat();
+        feature.data.geometryRotation = 0;
         me.selectControl.unselectAll();
         me.selectControl.select(feature);
         me.layer.redraw();
@@ -396,8 +398,23 @@ dbkjs.modules.drawing = {
     setRotation: function(rotation) {
         var f = this.layer.selectedFeatures[0];
         if(f) {
-            f.attributes.rotation = rotation;
+            f.data.geometryRotation = rotation;
+
+            var unrotatedGeometry = f.data.unrotatedGeometry;
+            if(!unrotatedGeometry) {
+                unrotatedGeometry = f.geometry.clone();
+                f.data.unrotatedGeometry = unrotatedGeometry;
+            }
+
+            var jstsLine = this.olLineStringToJSTS(unrotatedGeometry);
+            var rotationPoint = unrotatedGeometry.getBounds().getCenterLonLat();
+            var at = new jsts.geom.util.AffineTransformation().rotate(rotation * (Math.PI/180), rotationPoint.lon, rotationPoint.lat);
+            var rotatedJstsLine = at.transform(jstsLine);
+            var rotatedLine = this.jstsLineStringToOlGeometry(rotatedJstsLine);
+            // Keep geometry ID so SVG element is updated, not a new one added
+            f.geometry.components = rotatedLine.components;
+            f.geometry.bounds = rotatedLine.bounds;
+            this.layer.redraw();
         }
-        this.layer.redraw();
     }
 };
