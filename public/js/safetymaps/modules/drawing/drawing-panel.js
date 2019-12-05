@@ -90,7 +90,7 @@ function DrawingPanelWindow(options) {
     $("#drawing_feature_rotate").slider({
         ticks: [-180, -90, 0, 90, 180],
         ticks_labels: ['-180°', '-90°', '0°', '90°', '180°'],
-        ticks_snap_bounds: 10,
+        ticks_snap_bounds: 5,
         tooltip: 'always',
         formatter: function(value) {
 		return value + '°';
@@ -148,7 +148,7 @@ DrawingPanelWindow.prototype.featureSelected = function(f) {
     $("#drawing_feature_label").val(f.attributes.label);
     $("#drawing_feature_rotate").val(f.data.geometryRotation);
     $("#drawing_feature_rotate").slider("setValue", f.data.geometryRotation);
-    $("#drawing_feature_rotate").slider("refresh");
+    $("#drawing_feature_rotate").slider("refresh", { useCurrentValue: true });
 };
 
 DrawingPanelWindow.prototype.featureUnselected = function() {
