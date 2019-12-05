@@ -136,8 +136,11 @@ DrawingPanelWindow.prototype.unselectColor = function() {
 DrawingPanelWindow.prototype.featureSelected = function(f) {
     $("#drawing_feature_controls").show();
     $("#drawing_feature_label").val(f.attributes.label);
+    $("#drawing_feature_rotate").val(f.attributes.rotation);
 };
 
 DrawingPanelWindow.prototype.featureUnselected = function() {
     $("#drawing_feature_controls").hide();
+    $("#drawing_feature_label").val("");
+    $("#drawing_feature_rotate").val("");
 };
