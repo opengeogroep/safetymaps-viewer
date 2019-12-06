@@ -299,6 +299,7 @@ dbkjs.modules.drawing = {
                                             label: ""
                                         };
                                     }
+                                    newAttributes.rotationPoint = 0;
                                     var newFeature = new OpenLayers.Feature.Vector(newGeom, newAttributes);
                                     allNewFeatures.push(newFeature);
                                 }
@@ -362,7 +363,6 @@ dbkjs.modules.drawing = {
         var me = this;
         feature.attributes.strokeColor = me.color;
         feature.attributes.label = "";
-        feature.data.geometryRotation = 0;
         me.selectControl.unselectAll();
         me.selectControl.select(feature);
         me.layer.redraw();
@@ -398,22 +398,12 @@ dbkjs.modules.drawing = {
     setRotation: function(rotation) {
         var f = this.layer.selectedFeatures[0];
         if(f) {
-            f.data.geometryRotation = rotation;
-
-            var unrotatedGeometry = f.data.unrotatedGeometry;
-            if(!unrotatedGeometry) {
-                unrotatedGeometry = f.geometry.clone();
-                f.data.unrotatedGeometry = unrotatedGeometry;
-            }
-
-            var jstsLine = this.olLineStringToJSTS(unrotatedGeometry);
-            var rotationPoint = unrotatedGeometry.getBounds().getCenterLonLat();
-            var at = new jsts.geom.util.AffineTransformation().rotate(rotation * (Math.PI/180), rotationPoint.lon, rotationPoint.lat);
-            var rotatedJstsLine = at.transform(jstsLine);
-            var rotatedLine = this.jstsLineStringToOlGeometry(rotatedJstsLine);
-            // Keep geometry ID so SVG element is updated, not a new one added
-            f.geometry.components = rotatedLine.components;
-            f.geometry.bounds = rotatedLine.bounds;
+            var currentRotation = f.attributes.geometryRotation || 0;
+            var rotationPoint = f.attributes.rotationPoint || f.geometry.getCentroid(true);
+            f.attributes.rotationPoint = rotationPoint;
+            var delta = rotation - currentRotation;
+            f.geometry.rotate(delta, rotationPoint);
+            f.attributes.geometryRotation = rotation;
             this.layer.redraw();
         }
     }
