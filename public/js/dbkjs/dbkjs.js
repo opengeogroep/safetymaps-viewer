@@ -28,6 +28,13 @@ dbkjs.map = dbkjs.map || null;
 dbkjs.init = function () {
     if (!dbkjs.map) {
         dbkjs.map = new OpenLayers.Map(dbkjs.options.map.options);
+        dbkjs.map.Z_INDEX_BASE ={
+            BaseLayer: 100,
+            Overlay: 3250,
+            Feature: 7250,
+            Popup: 7500,
+            Control: 10000
+        };
     }
 
     dbkjs.getOrganisation();
