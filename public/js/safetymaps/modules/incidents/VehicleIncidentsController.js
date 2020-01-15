@@ -257,7 +257,9 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
                 incidentListFunction: me.options.incidentListFunction,
                 incidentListFooterFunction: me.options.incidentListFooterFunction,
                 agsService: me.service,
-                source: me.options.incidentSource
+                source: me.options.incidentSource,
+				vehicleSource: me.options.vehicleSource,
+				vehicleSourceURL: me.options.vehicleSourceURL
             };
 
             me.incidentMonitorController = new IncidentMonitorController(incidentMonitorOptions);
