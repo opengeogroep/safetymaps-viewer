@@ -157,12 +157,15 @@ safetymaps.vrh.api = {
         return features;
     },
 
-    getWaterongevallen: function() {
+    getWaterongevallen: function(newDbSchema) {
         var d = $.Deferred();
 
         var msg = "Fout bij laden WO gegevens: ";
         $.ajax("api/vrh/waterongevallen.json", {
-            dataType: "json"
+            dataType: "json",
+            data: {
+                newDbSchema: newDbSchema
+            }
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             d.reject(msg + safetymaps.utils.getAjaxError(jqXHR, textStatus, errorThrown));
