@@ -102,8 +102,19 @@ dbkjs.modules.measure = {
         $(dbkjs).one("dbkjs_init_complete", function () {
             _obj.listenToIncidents();
         });
-        
-        
+
+        $(dbkjs).on("deactivate_exclusive_map_controls", function() {
+           _obj.off();
+        });
+
+        $(dbkjs).on("modal_popup_shown", function(event, params) {
+            // Move footer with distance measurement
+            $("#measure").css({right: params.width});
+        });
+        $(dbkjs).on("modal_popup_hide", function(event, params) {
+            // Move footer with distance measurement back
+            $("#measure").css({right: "default"});
+        });
     },
 
     createButtons: function() {
@@ -129,6 +140,10 @@ dbkjs.modules.measure = {
         }
     },
 
+    hideButtons: function() {
+        $("#btn_measure_distance, #btn_measure_area").hide();
+    },
+
     setMeasureActive: function(distanceOrArea, toggle, active) {
         var me = this;
         $('#measure').html('');
@@ -146,34 +161,31 @@ dbkjs.modules.measure = {
     toggleMeasureDistance: function(activate) {
         var me = this;
         var newStateIsActive = typeof activate === "undefined" ? !me.distance_control.active : activate;
-        this.clearMeasure();
+        $(dbkjs).triggerHandler("deactivate_exclusive_map_controls");
         if(newStateIsActive) {
             $('#btn_measure_distance').addClass('active');
-            me.toggleMeasureArea(false);
             me.distance_control.activate();
-        } else {
-            me.area_control.deactivate();
-            me.distance_control.deactivate();
-            $('#btn_measure_distance').removeClass("active");
         }
     },
     toggleMeasureArea: function(activate) {
         var me = this;
         var newStateIsActive = typeof activate === "undefined" ? !me.area_control.active : activate;
-        this.clearMeasure();
+        $(dbkjs).triggerHandler("deactivate_exclusive_map_controls");
         if(newStateIsActive) {
             $('#btn_measure_area').addClass('active');
-            me.toggleMeasureDistance(false);
             me.area_control.activate();
-        } else {
-            me.area_control.deactivate();
-            me.distance_control.deactivate();
-            $('#btn_measure_area').removeClass("active");
         }
     },
     clearMeasure: function() {
         $('#measure').html('');
         $('#measure').hide();
+    },
+    off: function() {
+        $('#btn_measure_distance').removeClass("active").blur();
+        $('#btn_measure_area').removeClass("active").blur();
+        this.distance_control.deactivate();
+        this.area_control.deactivate();
+        this.clearMeasure();
     },
     handleMeasurements: function(event) {
         //var geometry = event.geometry;
@@ -193,9 +205,7 @@ dbkjs.modules.measure = {
         var me = this;
         if (dbkjs.options.resetToDefaultOnIncident) {
             $(dbkjs.modules.incidents.controller).on("new_incident", function () {
-                me.distance_control.deactivate();
-                me.area_control.deactivate();
-                me.clearMeasure();
+                me.off();
             });
         }
     }

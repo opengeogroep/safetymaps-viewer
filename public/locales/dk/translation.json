@@ -243,5 +243,9 @@
         "select": "Vælg",
         "drawMode" : "Tegne",
         "readMode" :"Læse"
+    },
+    "drawing": {
+        "title": "Tegne",
+        "select": "Vælg"
     }
 }
