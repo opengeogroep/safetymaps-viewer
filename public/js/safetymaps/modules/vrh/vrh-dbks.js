@@ -1110,7 +1110,7 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, newD
 
     safetymaps.infoWindow.addTab(windowId, "gebouw", "Gebouw", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
 
-    object.media = object.media.map(function(filename) {
+    object.media = (object.media ? object.media : []).map(function(filename) {
         return { filename: filename };
     });
     var content = safetymaps.creator.renderMedia(object);
