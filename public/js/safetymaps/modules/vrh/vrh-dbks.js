@@ -926,8 +926,12 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, newD
         adres = Mustache.render("{{straatnaam}} {{huisnummer}} {{huisletter}} {{toevoeging}}{{#plaats}}<br>{{plaats}}{{/plaats}}", o);
     }
 
-    rows.push({l: "OMS nummer",                     t: p.oms_nummer});
+    rows.push({l: "OMS nummer",                     t: newDbSchema ? o.oms_nummer : p.oms_nummer});
     rows.push({l: "Naam",                           t: o.naam});
+    if(newDbSchema) {
+        rows.push({l: "Naam pand", t: p.naam_pand});
+        rows.push({l: "Naam bedrijfspand", t: p.bedrijfsna});
+    }
     rows.push({l: "Adres",                          html: adres});
     var oppervlakte = p.bag ? p.bag.oppervlakteverblijfsobject : p.oppervlakt;
     if(oppervlakte) {
@@ -937,8 +941,8 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, newD
     rows.push({l: "Gebruik",                        t: p.gebruiksdo});
     if(newDbSchema) {
         rows.push({l: "Gebruiksdoel BAG",           t: p.bag ? p.bag.verblijfsobjectgebruiksdoel : p.gebruiks_1});
-        rows.push({l: "Bouwlagen ondergronds",      t: p.bouwlageno});
-        rows.push({l: "Bouwlagen bovengronds",      t: p.bouwlagenb});
+        rows.push({l: "Verdiepingen ondergronds",      t: p.bouwlageno});
+        rows.push({l: "Verdiepingen bovengronds",      t: p.bouwlagenb});
     } else {
         rows.push({l: "Laagste bouwlaag",           t: p.bouwlageno});
         rows.push({l: "Hoogste bouwlaag",           t: p.bouwlagenb});
@@ -960,11 +964,14 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, newD
     }
 
     if(newDbSchema) {
-        rows.push({l: "Personeel", t: p.personee_2});
-        rows.push({l: "Bezoekers", t: p.bezoeker_2});
-        rows.push({l: "Slaapplaatsen", t: p.slaappla_3});
-        rows.push({l: "BHV", t: p.bhv_omsch});
-        rows.push({l: "Bijzonderheden aanwezigheid", t: p.bijzonde_1});
+        rows.push({l: "Bijzonderheden gebruik", t: o.bijzonderh});
+        rows.push({l: "Instructie bereikbaarheid", t: o.toegang_te});
+        rows.push({l: "Operationele Instructie", t: o.inzetproce});
+        rows.push({l: "Max. Personeel", t: p.personeel_});
+        rows.push({l: "Max. Bezoekers", t: p.bezoekers_});
+        rows.push({l: "Max. Slaapplaatsen", t: p.slaapplaat});
+        rows.push({l: "BHV aanwezig", t: o.bhv_omsch});
+        rows.push({l: "Bijzonderheden aanwezigheid", t: p.bijzonde_2});
     }
 
     safetymaps.infoWindow.addTab(windowId, "algemeen", "Algemeen", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
@@ -1014,6 +1021,7 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, newD
     rows.push({l: "Automatische blusinstallatie", t: p.automatisc});
     rows.push({l: "Rook- en warmteafvoerinstallatie", t: p.rookwarmte});
     rows.push({l: "Overdruk/stuwdrukinstallatie", t: p.overdrukst});
+    rows.push({l: "Brandinstallaties", html: o.brandinstallaties ? o.brandinstallaties.map(Mustache.escape).join(", ") : null});
     div = safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]);
     rows = [];
     var rowsWithInfo = [];
@@ -1099,13 +1107,17 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, newD
     rows.push({l: "Bijzondere bouwkundige constructie", t: p.bijz_bouwk});
     rows.push({l: "Liften", t: p.liften});
     rows.push("<tr><td colspan='2'>&nbsp;</td></tr>");
-    v = o.bijzonderh; if(v) rows.push("<tr><td colspan='2'>" + Mustache.escape(v) + "</td></tr>");
-    v = p.bijzonderh; if(v) rows.push("<tr><td colspan='2'>" + Mustache.escape(v) + "</td></tr>");
+    if(!newDbSchema) {
+        v = o.bijzonderh; if(v) rows.push("<tr><td colspan='2'>" + Mustache.escape(v) + "</td></tr>");
+        v = p.bijzonderh; if(v) rows.push("<tr><td colspan='2'>" + Mustache.escape(v) + "</td></tr>");
+    } else {
+        rows.push({l: "Bijzonderheden gebouw", t: p.bijzonderh});
+        rows.push({l: "Compartimentering", html: o.compartimentering_beschrijving ? o.compartimentering_beschrijving.map(Mustache.escape).join("<br>") : null});
+    }
     v = p.bijz_heden; if(v) rows.push("<tr><td colspan='2'>" + Mustache.escape(v) + "</td></tr>");
     v = p.bijz_hed_1; if(v) rows.push("<tr><td colspan='2'>" + Mustache.escape(v) + "</td></tr>");
     v = p.bijz_hed_2; if(v) rows.push("<tr><td colspan='2'>" + Mustache.escape(v) + "</td></tr>");
     rows.push({l: "Bijzonderheden afsluiters", t: o.bijzonde_1});
-    rows.push({l: "Brandinstallaties", html: o.brandinstallaties ? o.brandinstallaties.map(Mustache.escape).join(", ") : null});
 
     safetymaps.infoWindow.addTab(windowId, "gebouw", "Gebouw", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
 };
