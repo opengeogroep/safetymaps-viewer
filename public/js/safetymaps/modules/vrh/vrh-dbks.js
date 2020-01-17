@@ -929,13 +929,14 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, newD
     rows.push({l: "OMS nummer",                     t: p.oms_nummer});
     rows.push({l: "Naam",                           t: o.naam});
     rows.push({l: "Adres",                          html: adres});
-    if(p.oppervlakt) {
-        rows.push({l: "Oppervlakte",                html: Number(p.oppervlakt).toFixed(0) + " m&sup2;"});
+    var oppervlakte = p.bag ? p.bag.oppervlakteverblijfsobject : p.oppervlakt;
+    if(oppervlakte) {
+        rows.push({l: "Oppervlakte",                html: Number(oppervlakte).toFixed(0) + " m&sup2;"});
     }
-    rows.push({l: "Bouwjaar",                       t: p.bouwjaar});
+    rows.push({l: "Bouwjaar",                       t: p.bag ? p.bag.pandbouwjaar : p.bouwjaar});
     rows.push({l: "Gebruik",                        t: p.gebruiksdo});
     if(newDbSchema) {
-        rows.push({l: "Gebruiksdoel BAG",           t: p.gebruiks_1});
+        rows.push({l: "Gebruiksdoel BAG",           t: p.bag ? p.bag.verblijfsobjectgebruiksdoel : p.gebruiks_1});
         rows.push({l: "Bouwlagen ondergronds",      t: p.bouwlageno});
         rows.push({l: "Bouwlagen bovengronds",      t: p.bouwlagenb});
     } else {
