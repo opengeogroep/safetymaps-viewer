@@ -260,7 +260,6 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
                 source: me.options.incidentSource,
 				vehicleSource: me.options.vehicleSource,
                 vehicleSourceURL: me.options.vehicleSourceURL,
-                vehicleSourceURLauth: me.options.vehicleSourceURLauth,
                 twitterUrlPrefix: me.options.twitterUrlPrefix
             };
 

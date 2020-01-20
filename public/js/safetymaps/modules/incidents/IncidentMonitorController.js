@@ -555,10 +555,7 @@ IncidentMonitorController.prototype.updateVehiclePositionLayerCityGISWFS = funct
     console.log("IM: actieve eenheden ", roepnamen);
 
 	$.ajax({
-        url: me.options.vehicleSourceURL,
-        beforeSend: function (xhr) {
-            xhr.setRequestHeader ("Authorization", "Basic " + me.options.vehicleSourceURLauth); //btoa("username:password")
-        }
+        url: me.options.vehicleSourceURL
     })
     .done(function(data) {
         var features = new OpenLayers.Format.GeoJSON().read(data);
