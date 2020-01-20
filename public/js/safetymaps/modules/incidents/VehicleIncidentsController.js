@@ -258,8 +258,9 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
                 incidentListFooterFunction: me.options.incidentListFooterFunction,
                 agsService: me.service,
                 source: me.options.incidentSource,
-				vehicleSource: me.options.vehicleSource,
-				vehicleSourceURL: me.options.vehicleSourceURL
+				        vehicleSource: me.options.vehicleSource,
+                vehicleSourceURL: me.options.vehicleSourceURL,
+                twitterUrlPrefix: me.options.twitterUrlPrefix
             };
 
             me.incidentMonitorController = new IncidentMonitorController(incidentMonitorOptions);
@@ -1009,7 +1010,7 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
             }
 
             me.featureSelector.updateBalkRechtsonder(me.getBalkrechtsonderTitle());
-        }
+        }        
 
         // Check if position updated
         var oldX = null, oldY = null;
