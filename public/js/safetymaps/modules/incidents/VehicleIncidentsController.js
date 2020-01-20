@@ -259,7 +259,9 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
                 agsService: me.service,
                 source: me.options.incidentSource,
 				vehicleSource: me.options.vehicleSource,
-				vehicleSourceURL: me.options.vehicleSourceURL
+                vehicleSourceURL: me.options.vehicleSourceURL,
+                vehicleSourceURLauth: me.options.vehicleSourceURLauth,
+                twitterUrlPrefix: me.options.twitterUrlPrefix
             };
 
             me.incidentMonitorController = new IncidentMonitorController(incidentMonitorOptions);
@@ -1009,7 +1011,7 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
             }
 
             me.featureSelector.updateBalkRechtsonder(me.getBalkrechtsonderTitle());
-        }
+        }        
 
         // Check if position updated
         var oldX = null, oldY = null;
@@ -1030,6 +1032,8 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
             me.featureSelector.findAndSelectMatches(incident, me.incidentDetailsWindow);
         }
     }
+
+    me.incidentMonitorController.loadTweets(me.incidentNummer, incident);
 };
 
 VehicleIncidentsController.prototype.inzetBeeindigd = function(melding) {
