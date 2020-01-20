@@ -554,7 +554,9 @@ IncidentMonitorController.prototype.updateVehiclePositionLayerCityGISWFS = funct
     });
     console.log("IM: actieve eenheden ", roepnamen);
 
-    $.ajax(me.options.vehicleSourceURL)
+	$.ajax({
+        url: me.options.vehicleSourceURL
+    })
     .done(function(data) {
         var features = new OpenLayers.Format.GeoJSON().read(data);
 
@@ -754,7 +756,7 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
     // Remove fixed height used for keeping previous scrollTop
     $("#tab_twitter").css("height", "");
 
-    $.ajax((dbkjs.options.incidents.twitterUrlPrefix ? dbkjs.options.incidents.twitterUrlPrefix : "") + "api/twitter", {
+    $.ajax((me.options.twitterUrlPrefix ? me.options.twitterUrlPrefix : "") + "api/twitter", {
         dataType: "json",
         data: params
     }).fail(function(jqXHR, textStatus, errorThrown) {
@@ -785,7 +787,7 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
             }
 
             var displayedTweets = [];
-            var ignoredAccounts = dbkjs.options.incidents.twitterIgnoredAccounts || [];
+            var ignoredAccounts = me.options.twitterIgnoredAccounts || [];
 
             function filterTweet(status) {
                 return ignoredAccounts.indexOf(status.user.screen_name) !== -1 || status.user.screen_name.toLowerCase().indexOf("p2000") !== -1;
