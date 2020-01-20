@@ -471,6 +471,11 @@ $(document).ready(function () {
             $("#c_settings").hide();
             $("#extra_dropDown").on('click',function(){
                 $("#btngrp_4").toggle();
+
+                if(!$("#btngrp_4").is(':visible')) 
+                    $(".main-button-group").attr("style", $(".main-button-group").attr("style").replace("min-height:144px;", ""));
+                else
+                    $(".main-button-group").attr("style", $(".main-button-group").attr("style")+" min-height:144px;");
             });
         } else {
             $("#btngrp_4").hide();
