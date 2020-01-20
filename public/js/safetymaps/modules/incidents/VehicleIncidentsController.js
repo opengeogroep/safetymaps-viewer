@@ -1031,7 +1031,8 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
         }
     }
 
-    me.incidentMonitorController.loadTweets(me.incidentNummer, me.incident);
+    if(me.options.showTwitter) 
+        me.incidentMonitorController.loadTweets(me.incidentNummer, me.incident);
 };
 
 VehicleIncidentsController.prototype.inzetBeeindigd = function(melding) {
