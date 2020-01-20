@@ -1030,6 +1030,8 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
             me.featureSelector.findAndSelectMatches(incident, me.incidentDetailsWindow);
         }
     }
+
+    me.incidentMonitorController.loadTweets(me.incidentNummer, me.incident);
 };
 
 VehicleIncidentsController.prototype.inzetBeeindigd = function(melding) {

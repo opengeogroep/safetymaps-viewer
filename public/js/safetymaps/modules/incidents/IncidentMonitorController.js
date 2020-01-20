@@ -620,8 +620,8 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
 
     var terms = [];
     var address;
-    if(me.falck) {
-        var l = incident.IncidentLocatie;
+    var l = incident.IncidentLocatie
+    if(l) {
         address = '"' + l.NaamLocatie1 + '"';
         if(l.Plaatsnaam) {
             terms.push(l.Plaatsnaam === "'s-Gravenhage" ? "Den Haag" : l.Plaatsnaam);
