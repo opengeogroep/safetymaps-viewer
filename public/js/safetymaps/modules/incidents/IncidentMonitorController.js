@@ -622,14 +622,14 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
 
     var terms = [];
     var address;
-    var l = incident.IncidentLocatie
-    if(l) {
-        address = '"' + l.NaamLocatie1 + '"';
-        if(l.Plaatsnaam) {
-            terms.push(l.Plaatsnaam === "'s-Gravenhage" ? "Den Haag" : l.Plaatsnaam);
+    var safetyconnect = incident.IncidentLocatie
+    if(safetyconnect) {
+        address = '"' + safetyconnect.NaamLocatie1 + '"';
+        if(safetyconnect.Plaatsnaam) {
+            terms.push(safetyconnect.Plaatsnaam === "'s-Gravenhage" ? "Den Haag" : safetyconnect.Plaatsnaam);
         }
-        if(l.NaamLocatie2 && l.NaamLocatie1 !== l.NaamLocatie2) {
-            terms = terms.concat(l.NaamLocatie2.split(" "));
+        if(safetyconnect.NaamLocatie2 && safetyconnect.NaamLocatie1 !== safetyconnect.NaamLocatie2) {
+            terms = terms.concat(safetyconnect.NaamLocatie2.split(" "));
         }
     } else {
         address = '"' + incident.NAAM_LOCATIE1 + '"';
@@ -741,7 +741,7 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
         });
     }
 
-    var start = me.falck ? new moment(incident.BrwDisciplineGegevens.StartDTG) : AGSIncidentService.prototype.getAGSMoment(incident.DTG_START_INCIDENT);
+    var start = safetyconnect ? new moment(incident.BrwDisciplineGegevens.StartDTG) : AGSIncidentService.prototype.getAGSMoment(incident.DTG_START_INCIDENT);
     var params = {
         incidentId: incidentId,
         location: t.y + "," + t.x,
