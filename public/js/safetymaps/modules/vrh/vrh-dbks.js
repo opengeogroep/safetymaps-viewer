@@ -226,7 +226,8 @@ safetymaps.vrh.Dbks = function(options) {
             thickness: 2
         },
         "Aanrijroute": {
-            color1: "#000",
+            color1: "#f00",
+            thickness: 3,
             type_viewer: "arrow"
         }
     };
