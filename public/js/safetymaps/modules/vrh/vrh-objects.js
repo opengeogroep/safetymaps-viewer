@@ -42,6 +42,7 @@ dbkjs.modules.vrh_objects = {
             dbks: true,
             evenementen: true,
             waterongevallen: true,
+            log: false,
             evFilter: "huidig",
             evFilterShowDaysBeforeBegin: 3,
             evFilterShowDaysAfterBegin: 3
@@ -101,7 +102,7 @@ dbkjs.modules.vrh_objects = {
                 me.dbks.loading = false;
             })
             .done(function(dbkObjects) {
-                console.log("Got " + dbkObjects.length + " DBK objects");
+                me.options.log && console.log("Got " + dbkObjects.length + " DBK objects");
                 me.dbks.loading = false;
 
                 me.overviewObjects = me.overviewObjects.concat(dbkObjects);
@@ -121,7 +122,7 @@ dbkjs.modules.vrh_objects = {
                 me.waterongevallen.loading = false;
             })
             .done(function(woObjects) {
-                console.log("Got " + woObjects.length + " waterongevallen objects");
+                me.options.log && console.log("Got " + woObjects.length + " waterongevallen objects");
                 me.waterongevallen.loading = false;
 
                 me.overviewObjects = me.overviewObjects.concat(woObjects);
@@ -141,7 +142,7 @@ dbkjs.modules.vrh_objects = {
                 me.events.loading = false;
             })
             .done(function(evenementenObjects) {
-                console.log("Got " + evenementenObjects.length + " event objects");
+                me.options.log && console.log("Got " + evenementenObjects.length + " event objects");
                 me.events.loading = false;
 
                 if(me.options.evFilter !== "alle") {
@@ -169,7 +170,7 @@ dbkjs.modules.vrh_objects = {
 */
                         return filter;
                     });
-                    console.log(countBefore - evenementenObjects.length + " evenementen gefiltered, aantal zichtbaar: " + evenementenObjects.length);
+                    me.options.log && console.log(countBefore - evenementenObjects.length + " evenementen gefiltered, aantal zichtbaar: " + evenementenObjects.length);
                 }
 
                 me.overviewObjects = me.overviewObjects.concat(evenementenObjects);
@@ -245,7 +246,6 @@ dbkjs.modules.vrh_objects = {
                 placeholder: i18n.t("creator.search_placeholder"),
                 search: function(value) {
                     value = value.toLowerCase();
-                    console.log("search event " + value);
                     var searchResults = [];
                     $.each(me.overviewObjects, function(i, o) {
                         if(o.clusterFeature.attributes.type === "evenement") {
@@ -262,7 +262,6 @@ dbkjs.modules.vrh_objects = {
                     });
                 },
                 resultSelected: function(result) {
-                    console.log("Search result selected", result);
 
                     me.selectObjectById("evenement",result.id, result.extent);
                 }
@@ -276,7 +275,6 @@ dbkjs.modules.vrh_objects = {
                 placeholder: "WO-kaartnaam",
                 search: function(value) {
                     value = value.toLowerCase();
-                    console.log("search wo " + value);
                     var searchResults = [];
                     $.each(me.overviewObjects, function(i, o) {
                         if(o.clusterFeature.attributes.type === "waterongevallenkaart") {
@@ -301,8 +299,6 @@ dbkjs.modules.vrh_objects = {
                     });
                 },
                 resultSelected: function(result) {
-                    console.log("Search result selected", result);
-
                     me.selectObjectById("waterongevallenkaart",result.id, result.extent);
                 }
             }, true);
@@ -315,7 +311,6 @@ dbkjs.modules.vrh_objects = {
                 placeholder: i18n.t("creator.search_placeholder"),
                 search: function(value) {
                     value = value.toLowerCase();
-                    console.log("search dbk " + value);
                     var searchResults = [];
                     $.each(me.overviewObjects, function(i, o) {
                         if(o.clusterFeature.attributes.type === "dbk") {
@@ -340,8 +335,6 @@ dbkjs.modules.vrh_objects = {
                     });
                 },
                 resultSelected: function(result) {
-                    console.log("Search result selected", result);
-
                     me.selectObjectById("dbk", result.id, result.extent);
                 }
             }, true);
@@ -392,7 +385,7 @@ dbkjs.modules.vrh_objects = {
                 var matchStraat = straat && o.straatnaam && straat === o.straatnaam;
 
                 if((matchPostcode || (matchWoonplaats && matchStraat)) && matchHuisnummer && matchHuisletter && matchToevoeging) {
-                    console.log("VRH DBK adres match", o);
+                    me.options.log && console.log("VRH DBK adres match", o);
                     matches.push(o.clusterFeature);
                     return;
                 }
@@ -403,7 +396,7 @@ dbkjs.modules.vrh_objects = {
                     var matchStraat = a.sn && a.sn === straat;
 
                     if(matchPostcode || (matchWoonplaats && matchStraat) && a.nrs) {
-                        console.log("VRH DBK check selectieadres nummers voor DBK " + o.naam + ", " + a.pc + " " + a.pl);
+                        me.options.log && console.log("VRH DBK check selectieadres nummers voor DBK " + o.naam + ", " + a.pc + " " + a.pl);
                         $.each(a.nrs, function(j, n) {
                             var parts = n.split("|");
                             var matchHuisnummer = Number(parts[0]) === huisnummer;
@@ -413,7 +406,7 @@ dbkjs.modules.vrh_objects = {
                             var matchToevoeging = !exactMatchToevoeging || (fToevoeging === toevoeging);
 
                             if(matchHuisnummer && matchHuisletter && matchToevoeging) {
-                                console.log("VRH DBK match selectieadres op nummer " + n, o);
+                                me.options.log && console.log("VRH DBK match selectieadres op nummer " + n, o);
                                 matches.push(o.clusterFeature);
                                 // No need to check additional addresses for this feature
                                 continueAdressenSearch = false;
@@ -435,7 +428,7 @@ dbkjs.modules.vrh_objects = {
 
                 $.each(o.clusterFeature.attributes.selectionPolygon.components, function(j, c) {
                     if(c.containsPoint(point)) {
-                    console.log("VRH " + o.clusterFeature.attributes.type + " " + o.clusterFeature.attributes.label + ": incident inside selectiekader");
+                    me.options.log && console.log("VRH " + o.clusterFeature.attributes.type + " " + o.clusterFeature.attributes.label + ": incident inside selectiekader");
                         matches.push(o.clusterFeature);
                     }
                 });
@@ -458,8 +451,6 @@ dbkjs.modules.vrh_objects = {
     },
 
     clusterObjectClusterSelected: function (feature) {
-        console.log("show selection list", feature);
-
         var me = this;
         me.currentCluster = feature.cluster.slice();
 
@@ -493,8 +484,6 @@ dbkjs.modules.vrh_objects = {
     },
 
     clusterObjectSelected: function(feature) {
-        console.log("Select feature", feature);
-
         this.selectedClusterFeature = feature;
         this.selectObjectById(feature.attributes.type, feature.attributes.id, feature.attributes.apiObject.extent);
     },
@@ -507,7 +496,7 @@ dbkjs.modules.vrh_objects = {
 
         // No extent when different floor is selected, do not zoom
         if(extent) {
-            console.log("zooming to selected " + type + " object at ", extent);
+            me.options.log && console.log("zooming to selected " + type + " object at ", extent);
 
             // Parse "BOX(n n,n n)" to array of left, bottom, top, right
             var bounds = extent.match(/[0-9. ,]+/)[0].split(/[ ,]/);
