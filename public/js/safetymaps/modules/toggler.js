@@ -136,7 +136,6 @@
         $.each(me.options.buttons, function(i, button) {
             var layers = me.findButtonLayers(button);
             $.each(layers.organisation, function(j, l) {
-                //console.log("toggler: hiding legend for " + l.name + " gid " + l.gid);
                 $("div[data-layer-gid=" + l.gid + "]").parent().hide();
             });
         });
@@ -156,7 +155,6 @@
 
     resetToDefault: function() {
         var me = this;
-        console.log("toggler: reset to default");
 
         $.each(this.options.buttons, function(i, button) {
             if(button.active) {
@@ -176,7 +174,6 @@
     },
 
     activateButton: function(button) {
-        console.log("toggler: activate ", button.label);
         button.a.addClass("on");
         this.setButtonWmsVisibility(button);
 
@@ -188,7 +185,6 @@
     },
     
     deactivateButton: function(button) {
-        console.log("toggler: deactivate ", button.label);
         button.a.removeClass("on");
         this.setButtonWmsVisibility(button);
         $(this).triggerHandler("button_change", [button.id, false, button]);
@@ -197,7 +193,6 @@
     setButtonWmsVisibility: function(button) {
         var me = this;
         $.each(me.findButtonLayers(button).ol, function(j, l) {
-            console.log("Set layer visibility", l.name);
             l.setVisibility(me.getButtonState(button.id));
         });
     },
