@@ -86,12 +86,9 @@ AGSIncidentService.prototype.whenInitialized = function() {
     var me = this;
     var d = $.Deferred();
     if(this.initialized) {
-        console.log("AGS service whenInitialized: immediate resolve()");
         d.resolve();
     } else {
-        console.log("AGS service whenInitialized: set event handler");
         $(me).on("initialized", function() {
-            console.log("AGS service whenInitialized: initialized event, resolve()");
             d.resolve();
         });
     }

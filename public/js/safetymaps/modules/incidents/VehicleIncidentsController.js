@@ -68,9 +68,6 @@ function VehicleIncidentsController(options, featureSelector) {
         }
     }
     window.localStorage.setItem("voertuignummer", me.voertuignummer);
-    
-    me.incidentMonitorCode = window.localStorage.getItem("imcode");
-    me.checkIncidentMonitor();
 
     // XXX to common object (IncidentFeatureSelector?)
     $('#incident_bottom_right').on('click', function() {
@@ -110,6 +107,10 @@ function VehicleIncidentsController(options, featureSelector) {
             return;
         });
     }
+
+    me.incidentMonitorCode = window.localStorage.getItem("imcode");
+    // Create incidentmonitor after setting this.service
+    me.checkIncidentMonitor();
 
     $(dbkjs).one("dbkjs_init_complete", function() {
         window.setTimeout(function() {
@@ -257,10 +258,12 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
                 incidentListFunction: me.options.incidentListFunction,
                 incidentListFooterFunction: me.options.incidentListFooterFunction,
                 agsService: me.service,
-                source: me.options.incidentSource,
-				vehicleSource: me.options.vehicleSource,
+                incidentSource: me.options.incidentSource,
+                vehicleSource: me.options.vehicleSource,
                 vehicleSourceURL: me.options.vehicleSourceURL,
-                twitterUrlPrefix: me.options.twitterUrlPrefix
+                twitterUrlPrefix: me.options.twitterUrlPrefix,
+                twitterIgnoredAccounts: me.options.twitterIgnoredAccounts,
+                logTwitter: me.options.logTwitter
             };
 
             me.incidentMonitorController = new IncidentMonitorController(incidentMonitorOptions);
@@ -281,13 +284,7 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
 };
 
 VehicleIncidentsController.prototype.incidentMonitorIncidentSelected = function(event, inzetInfo) {
-    var me = this;
-
-    // XXX
-    safetymaps.deselectObject();
-    console.log("IM incident selected", arguments);
-    me.inzetIncident(inzetInfo, true);
-
+    this.inzetIncident(inzetInfo, true);
 };
 
 /**
@@ -924,7 +921,7 @@ VehicleIncidentsController.prototype.geenInzet = function() {
 };
 
 VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, fromIncidentList) {
-    console.log("inzetIncident", incidentInfo);
+    console.log("inzetIncident (from IM: " + fromIncidentList + ")", incidentInfo);
 
     var me = this;
 
@@ -936,7 +933,7 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
         me.button.setIcon("bell");
     }
 
-    if(incidentInfo.incident.nummer !== me.incidentNummer) {
+    if(incidentInfo.incident.nummer !== me.incidentNummer || fromIncidentList) {
         me.geenInzet();
 
         me.incident = incidentInfo.incident;
@@ -1032,7 +1029,9 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
         }
     }
 
-    me.incidentMonitorController.loadTweets(me.incidentNummer, incident);
+    if(me.options.showTwitter) {
+        me.incidentMonitorController.loadTweets(me.incident);
+    }
 };
 
 VehicleIncidentsController.prototype.inzetBeeindigd = function(melding) {
@@ -1104,6 +1103,7 @@ VehicleIncidentsController.prototype.normalizeIncidentFields = function(incident
         incident.huisletter = l.Letter;
         incident.toevoeging = l.HnToevoeging;
         incident.straat = l.NaamLocatie1;
+        incident.locatie2 = l.NaamLocatie2;
 
         incident.actueleInzet = false;
         incident.inzetEenhedenStats = {
@@ -1168,6 +1168,9 @@ VehicleIncidentsController.prototype.normalizeIncidentFields = function(incident
         incident.huisletter = incident.HUISLETTER;
         incident.toevoeging = incident.HUIS_NR_TOEV;
         incident.straat = incident.NAAM_LOCATIE1;
+        incident.locatie2 =  incident.NAAM_LOCATIE2;
+
+        incident.start = AGSIncidentService.prototype.getAGSMoment(incident.DTG_START_INCIDENT);
     } else {
         throw "Unknown incident source: " + incidentInfo.source;
     }
