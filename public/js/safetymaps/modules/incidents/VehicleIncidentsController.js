@@ -134,6 +134,7 @@ VehicleIncidentsController.prototype.defaultOptions = function(options) {
         incidentSourceFallback: null,
         incidentUpdateInterval: 30000,
         activeIncidentUpdateInterval: 15000,
+        logStatus: false,
 
         // Show eenheden for ingezet incident?
         showVehicles: true,
@@ -608,7 +609,7 @@ VehicleIncidentsController.prototype.showStatusVrhAGS = function() {
     })
     .done(function(status) {
         if(status) {
-            console.log("VrhAGS: Voertuigstatus", status);
+            me.options.logStatus && console.log("VrhAGS: Voertuigstatus", status);
             var id = status.T_ACT_STATUS_CODE_EXT_BRW;
             var code = status.T_ACT_STATUS_AFK_BRW;
 
@@ -651,7 +652,7 @@ VehicleIncidentsController.prototype.showStatusSC = function() {
             }
         });
         if(status) {
-            console.log("SC: Voertuigstatus", status);
+            me.options.logStatus && console.log("SC: Voertuigstatus", status);
             // Do not show code, SafetyConnect webservice puts it in StatusAfkorting and maps different codes
             $("<div id='status'>" + status.StatusAfkorting + "</div>").prependTo("body");
         }
@@ -847,7 +848,7 @@ VehicleIncidentsController.prototype.updateVehiclePositionsVrhAGS = function() {
         }, me.options.vehiclesUpdateInterval);
     })
     .fail(function (jqXHR, textStatus, errorThrown) {
-        console.log(jqXHR, textStatus, errorThrown);
+        console.log("VrhAGS: Error updating vehicle positions", jqXHR, textStatus, errorThrown);
     })
     .done(function(features) {
         me.options.logVehicles && console.log("VrhAGS: Vehicle positions for incident", features);
@@ -877,7 +878,7 @@ VehicleIncidentsController.prototype.updateVehiclePositionsSC = function() {
         }, me.options.vehiclesUpdateInterval);
     })
     .fail(function (jqXHR, textStatus, errorThrown) {
-        console.log(jqXHR, textStatus, errorThrown);
+        console.log("SC: Error updating vehicle positions", jqXHR, textStatus, errorThrown);
     })
     .done(function (data, textStatus, jqXHR) {
         me.options.logVehicles && console.log("SC: Vehicle positions for incident", data);
