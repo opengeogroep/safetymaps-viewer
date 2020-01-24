@@ -218,7 +218,6 @@ VehicleIncidentsController.prototype.checkLinkifyWords = function() {
         });
 
         $(me.incidentDetailsWindow).on("linkifyWordClicked", function(e, word) {
-            console.log("word clicked: " + word);
             var term = me.options.linkifyWords[word.toLowerCase()];
             if(typeof term !== "string") {
                 term = word;
