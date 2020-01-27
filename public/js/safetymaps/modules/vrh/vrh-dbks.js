@@ -377,13 +377,13 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
     this.layers.push(this.layerFireCompartmentationLabels);
 
     lineDisplay = function(feature) {
-        if(feature.attributes.button) {
-            return dbkjs.modules.vrh_objects.buttonStates[feature.attributes.button] ? "visible" : "none";
-        }
         if(feature.attributes.type && me.lineButtons[feature.attributes.type]) {
             var button = me.lineButtons[feature.attributes.type];
             var visible = dbkjs.modules.vrh_objects.buttonStates[button];
             return visible ? "visible" : "none";
+        }
+        if(feature.attributes.button) {
+            return dbkjs.modules.vrh_objects.buttonStates[feature.attributes.button] ? "visible" : "none";
         }
         return "visible";
     };
