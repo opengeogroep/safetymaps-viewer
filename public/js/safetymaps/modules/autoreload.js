@@ -91,7 +91,7 @@ dbkjs.modules.autoreload = {
             var isIdle = idleTime > me.options.refreshPageIdleTime;
             me.options.log && console.log("Check refresh time reached, idle time " + (idleTime/1000).toFixed() + ", idle: " + isIdle);
             if(isIdle && me.lastIncidentUpdate && new Date().getTime() - me.lastIncidentUpdate < 30 * 60 * 1000) {
-                console.log("Idle but last incident update less than 30 minutes ago");
+                me.options.log && console.log("Idle but last incident update less than 30 minutes ago");
                 isIdle = false;
             }
             if(new moment().isAfter(me.refreshPageMoment)) {
