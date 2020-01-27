@@ -386,8 +386,8 @@ dbkjs.modules.vrh_objects = {
 
                 var matchPostcode = o.postcode && o.postcode === postcode;
                 var matchHuisnummer = o.huisnummer && o.huisnummer === huisnummer;
-                var matchHuisletter = !exactMatchHuisletter || (o.huisletter === huisletter);
-                var matchToevoeging = !exactMatchToevoeging || (o.toevoeging === toevoeging);
+                var matchHuisletter = !exactMatchHuisletter || ((o.huisletter || "") === huisletter);
+                var matchToevoeging = !exactMatchToevoeging || ((o.toevoeging || "") === toevoeging);
                 var matchWoonplaats = woonplaats && o.plaats && woonplaats === o.plaats;
                 var matchStraat = straat && o.straatnaam && straat === o.straatnaam;
 
