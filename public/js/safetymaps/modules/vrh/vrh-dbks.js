@@ -229,6 +229,11 @@ safetymaps.vrh.Dbks = function(options) {
             color1: "#f00",
             thickness: 3,
             type_viewer: "arrow"
+        },
+        "Ventilatierichting RWA": {
+            color1: "#000",
+            thickness: 3,
+            type_viewer: "arrow"
         }
     };
     me.lineButtons = {
