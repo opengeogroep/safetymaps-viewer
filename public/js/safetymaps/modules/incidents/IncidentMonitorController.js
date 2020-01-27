@@ -186,14 +186,6 @@ IncidentMonitorController.prototype.incidentRead = function(incidentId) {
 IncidentMonitorController.prototype.selectIncident = function(obj) {
     var me = this;
 
-    if(me.incidentId === (obj.incident.INCIDENT_ID || obj.incident.IncidentNummer)) {
-        // Clicked on already selected incident
-
-        // XXX
-        dbkjs.modules.incidents.controller.zoomToIncident();
-        return;
-    }
-
     if(me.selectedIncidentMarker) {
         me.markerLayer.removeMarker(me.selectedIncidentMarker);
     }
