@@ -26,55 +26,92 @@ dbkjs.modules.route = {
     id: "dbkjs.modules.route",
     options: null,
     reloadTimeOut: null,
-    routeUrlSimacar: "/simacar_export/Route.txt",
-    routeUrlNotResponded: false,  
+    states: {
+        INIT: 0,
+        ACTIVE: 1,
+        INACTIVE: 2
+    },
+    currentState: null,
+    providers: {
+        SIMACAR: "simacar"
+    },
+    routeUrlNotResponding: false,  
     register: function () {
         var me = this;
-        var pointArray;
-        var routeLayer;
 
+        me.currentState = me.states.INIT;
         me.options = $.extend({ 
             provider: "simacar",
             routeColor: "blue",
+            routeUrlSimacar: "/simacar_export/Route.txt",
             reloadInterval: 5000
         }, me.options);
         
         window.clearTimeout(me.reloadTimeOut);   
         
-        me.getRoute();
+        me.getRoute(false);
     },
     getRoute: function(reload) {
         var me = this;
 
-        if (me.options.provider === "simacar")            
-            me.getSimacarRoutesAsPointArray(function (pointArray) {
-                me.addRouteLayerToMap(me.createRouteLayer(pointArray), reload);
-            });
+        if (me.currentState == me.states.INACTIVE && me.routeUrlNotResponding){
+            return;
+        }
 
-        me.reloadTimeOut = window.setTimeout(function () {
-            if ((!reload && !me.routeUrlNotResponded) || reload)
+        $.ajax(me.options.routeUrlSimacar, { 
+            dataType: "text", 
+            cache: false 
+        })
+        .fail(function(xhr, status, error) {
+            if (me.currentState == me.states.INIT ) {
+                me.currentState = me.states.INACTIVE;
+            }
+            me.routeUrlNotResponding = true;
+        })
+        .done(function(data) {
+            me.currentState = me.states.ACTIVE;
+            me.routeUrlNotResponding = false;
+            me.handleRoute(data, reload);
+        })
+        .always(function () {
+            window.setTimeout(function () {
                 me.getRoute(true);
-        }, me.options.reloadInterval);
+            }, me.options.reloadInterval);
+        });
     },
-    removeLayerFromMap: function () {
-        var layersToRemove = dbkjs.map.getLayersByName("route");
+    handleRoute: function(data, reload) {
+        var me = this;
+        var pointArray = [];
 
-        for(var i = 0; i < layersToRemove.length; i++) {
-            dbkjs.map.removeLayer(layersToRemove[i]);
+        switch(me.options.provider){
+            case me.providers.SIMACAR:
+                pointArray = me.transformSimacarRoutesIntoPointArray(data);
+        }
+
+        this.addOrUpdateRouteLayer(pointArray); 
+    },
+    addOrUpdateRouteLayer: function (pointArray) {
+        var me = this;
+        var routeLayers = dbkjs.map.getLayersByName("route");
+        var routeFeatures = me.createRouteFeatures(pointArray);
+
+        if(routeLayers !== null && routeLayers.length > 0) {
+            for(var i = 0; i < routeLayers.length; i++) {
+                routeLayers[i].removeAllFeatures();
+                routeLayers[i].addFeatures(routeFeatures);
+            }
+        }
+        else {
+            me.addRouteLayerToMap(me.createRouteLayer(), routeFeatures);
         }
     },
-    addRouteLayerToMap: function (routeLayer, reload) {
-        var me = this;
+    addRouteLayerToMap: function (routeLayer, routeFeatures) {
+        routeLayer.addFeatures(routeFeatures);
 
-        routeLayer.layer.addFeatures(routeLayer.features);
-
-        if (reload)
-            me.removeLayerFromMap();
-
-        dbkjs.map.addLayer(routeLayer.layer);
-        dbkjs.selectControl.setLayer((dbkjs.selectControl.layers || dbkjs.selectControl.layer).concat([routeLayer.layer]));
+        dbkjs.map.addLayer(routeLayer);
+        dbkjs.selectControl.setLayer((dbkjs.selectControl.layers || dbkjs.selectControl.layer).concat([routeLayer]));
     },
-    createRouteLayer: function (pointArray) {
+    createRouteFeatures: function (pointArray) {
         var me = this;
         var features = [];
         var geom = new OpenLayers.Geometry.LineString(pointArray);
@@ -82,6 +119,9 @@ dbkjs.modules.route = {
         
         features.push(new OpenLayers.Feature.Vector(geom, {}, style));
 
+        return features;
+    },
+    createRouteLayer: function () {
         var layer = new OpenLayers.Layer.Vector("route", {
             rendererOptions: {
                 zIndexing: true
@@ -101,31 +141,26 @@ dbkjs.modules.route = {
             })
         });        
 
-        return { layer: layer, features: features };
+        return layer;
     },
-    getSimacarRoutesAsPointArray: function (onSuccess) {        
+    transformSimacarRoutesIntoPointArray: function (data) {
         var me = this;
         var pointArray = [];
 
         Proj4js.defs["EPSG:32632"] = "+proj=utm +zone=32 +ellps=WGS84 +datum=WGS84 +units=m +no_defs";
 
-        $.ajax(me.routeUrlSimacar, { dataType: "text", cache: false })
-        .success(function (response) {
-            lines = response.split('\n');
-            lines.forEach(function(line, i) {
-                if (line !== '') {
-                    xy = line.split(';');
-                    x = xy[0].trim();
-                    y = xy[1].trim();
-                    point = new  Proj4js.Point(x, y);
-                    trans = Proj4js.transform(new Proj4js.Proj("EPSG:32632"), new Proj4js.Proj(dbkjs.options.projection.code), point);
-                    pointArray.push(new OpenLayers.Geometry.Point(trans.x, trans.y));
-                }
-            });
-            onSuccess(pointArray);
-        })
-        .fail(function () {
-            me.routeUrlNotResponded = true;
+        lines = data.split('\n');
+        lines.forEach(function(line, i) {
+            if (line !== '') {
+                xy = line.split(';');
+                x = xy[0].trim();
+                y = xy[1].trim();
+                point = new  Proj4js.Point(x, y);
+                trans = Proj4js.transform(new Proj4js.Proj("EPSG:32632"), new Proj4js.Proj(dbkjs.options.projection.code), point);
+                pointArray.push(new OpenLayers.Geometry.Point(trans.x, trans.y));
+            }
         });
+
+        return pointArray;
     }
 };
