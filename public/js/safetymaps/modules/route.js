@@ -152,24 +152,24 @@ dbkjs.modules.route = {
             cache: false
         })
         .done(function(data) {
-            var pointArray = [];
-
             var projSource = new Proj4js.Proj("EPSG:32632");
             var projDest = new Proj4js.Proj(dbkjs.options.projection.code);
 
-            var lines = data.split('\n');
-            lines.forEach(function(line, i) {
-                if (line !== '') {
+            var points = data
+                .split('\n')
+                .filter(function(line) {
+                    return line !== '';
+                })
+                .map(function(line) {
                     var xy = line.split(';');
                     var x = xy[0].trim();
                     var y = xy[1].trim();
                     var point = new Proj4js.Point(x, y);
                     var trans = Proj4js.transform(projSource, projDest, point);
-                    pointArray.push(new OpenLayers.Geometry.Point(trans.x, trans.y));
-                }
-            });
+                    return new OpenLayers.Geometry.Point(trans.x, trans.y);
+                });
 
-            var geom = new OpenLayers.Geometry.LineString(pointArray);
+            var geom = new OpenLayers.Geometry.LineString(points);
             var features = [new OpenLayers.Feature.Vector(geom)];
             promise.resolve(features);
         })
