@@ -103,11 +103,15 @@ dbkjs.modules.route = {
         me.getRouteFromProvider()
         .done(function(features) {
             $("#route-a").removeClass("disabled");
-            if(features.length === 0) {
-                $("#route-a").addClass("disabled");
-            }
 
-            me.updateRoute(features);
+            // null means not modified
+            if(features !== null) {
+                if(features.length === 0) {
+                    $("#route-a").addClass("disabled");
+                }
+
+                me.updateRoute(features);
+            }
             me.reloadTimeout = window.setTimeout(function() {
                 me.getRoute();
             }, me.options.reloadInterval);
@@ -149,9 +153,18 @@ dbkjs.modules.route = {
 
         $.ajax(me.options.routeUrlSimacar, {
             dataType: "text",
-            cache: false
+            cache: false,
+            // Might not work on Apache with GZIP enabled: https://stackoverflow.com/a/33673478
+            // Change server config to remove ETag header
+            ifModified: true
         })
-        .done(function(data) {
+        .done(function(data, status, xhr) {
+
+            if(status === "notmodified") {
+                promise.resolve(null);
+                return;
+            }
+
             var projSource = new Proj4js.Proj("EPSG:32632");
             var projDest = new Proj4js.Proj(dbkjs.options.projection.code);
 
