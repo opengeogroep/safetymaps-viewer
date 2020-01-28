@@ -142,14 +142,9 @@ dbkjs.modules.route = {
 
         return p.promise();
     },
-    /**
-     * @param {type} features Empty array for no route, array with LineString features for a valid route or null if route is not changed
-     */
     updateRoute: function (features) {
-        if(features) {
-            this.layer.removeAllFeatures();
-            this.layer.addFeatures(features);
-        }
+        this.layer.removeAllFeatures();
+        this.layer.addFeatures(features);
     },
     getSimacarRouteFeature: function (promise) {
         var me = this;
