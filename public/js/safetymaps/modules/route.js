@@ -41,10 +41,15 @@ dbkjs.modules.route = {
             routeUrlSimacar: "/simacar_export/Route.txt",
             reloadInterval: 5000,
             retryTimeout: 30000,
+            showButton: false,
             log: false
         }, me.options);
 
         me.createLayer();
+
+        if(me.options.showButton) {
+            me.createButton();
+        }
 
         Proj4js.defs["EPSG:32632"] = "+proj=utm +zone=32 +ellps=WGS84 +datum=WGS84 +units=m +no_defs";
 
@@ -69,11 +74,39 @@ dbkjs.modules.route = {
         });
         dbkjs.map.addLayer(this.layer);
     },
+    createButton: function() {
+        var me = this;
+        var a = $("<a/>")
+                .attr("id", "route-a")
+                .attr("title", "Zoom route")
+                .addClass("btn btn-default olButton disabled")
+                .on("click", function() {
+                    me.zoomToRoute();
+                });
+        $("<i/>").addClass("fa fa-map-signs").appendTo(a);
+        a.prependTo("#bottom_left_buttons");
+    },
+    zoomToRoute: function() {
+        dbkjs.map.zoomToExtent(this.layer.getDataExtent());
+
+        // We may have zoomed out of minScale range of our layer so it's not visible
+        if(!this.layer.calculateInRange()) {
+            // Zoom to end point of route
+            var f = this.layer.features[this.layer.features.length-1];
+            var lastPoint = f.geometry.components[f.geometry.components.length-1];
+            dbkjs.map.setCenter(new OpenLayers.LonLat(lastPoint.x, lastPoint.y), dbkjs.options.zoom);
+        }
+    },
     getRoute: function() {
         var me = this;
 
         me.getRouteFromProvider()
         .done(function(features) {
+            $("#route-a").removeClass("disabled");
+            if(features.length === 0) {
+                $("#route-a").addClass("disabled");
+            }
+
             me.updateRoute(features);
             me.reloadTimeout = window.setTimeout(function() {
                 me.getRoute();
@@ -81,7 +114,7 @@ dbkjs.modules.route = {
         })
         .fail(function(error) {
             console.log("route: error retrieving route, retrying in " + me.options.retryTimeout / 1000 + "s...", error);
-
+            $("#route-a").addClass("disabled");
             me.reloadTimeout = window.setTimeout(function() {
                 me.getRoute();
             }, me.options.retryTimeout);
