@@ -1165,7 +1165,7 @@ VehicleIncidentsController.prototype.normalizeIncidentFields = function(incident
         incident.y = incident.T_Y_COORD_LOC;
 
         incident.postcode = incident.POSTCODE;
-        incident.woonplaats = incident.PLAATS_NAAM_NEN;
+        incident.woonplaats = incident.plaats || incident.PLAATS_NAAM_NEN || incident.PLAATS_NAAM;
         incident.huisnummer = Number(incident.HUIS_PAAL_NR);
         incident.huisletter = incident.HUISLETTER;
         incident.toevoeging = incident.HUIS_NR_TOEV;
