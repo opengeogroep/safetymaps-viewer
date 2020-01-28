@@ -135,6 +135,7 @@ VehicleIncidentsController.prototype.defaultOptions = function(options) {
         incidentSourceFallback: null,
         incidentUpdateInterval: 30000,
         activeIncidentUpdateInterval: 15000,
+        logStatus: false,
 
         // Show eenheden for ingezet incident?
         showVehicles: true,
@@ -143,6 +144,7 @@ VehicleIncidentsController.prototype.defaultOptions = function(options) {
         vehiclesShowSpeed: true,
         vehiclesShowVehiclePopup: false,
         vehiclePopupTemplate: "<div style='font-size: 12px; overflow: hidden'>Pos. van {{PositionTimeFromNow}}<br>Status: {{Status}}<br>Mobile ID: {{MobileID}}</div>",
+        logVehicles: false,
 
         // ViewerApiActionBean sets this to true for users with incidentmonitor role
         incidentMonitorAuthorized: false,
@@ -217,7 +219,6 @@ VehicleIncidentsController.prototype.checkLinkifyWords = function() {
         });
 
         $(me.incidentDetailsWindow).on("linkifyWordClicked", function(e, word) {
-            console.log("word clicked: " + word);
             var term = me.options.linkifyWords[word.toLowerCase()];
             if(typeof term !== "string") {
                 term = word;
@@ -261,6 +262,7 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
                 incidentSource: me.options.incidentSource,
                 vehicleSource: me.options.vehicleSource,
                 vehicleSourceURL: me.options.vehicleSourceURL,
+                logVehicles: me.options.logVehicles,
                 twitterUrlPrefix: me.options.twitterUrlPrefix,
                 twitterIgnoredAccounts: me.options.twitterIgnoredAccounts,
                 logTwitter: me.options.logTwitter
@@ -416,7 +418,7 @@ VehicleIncidentsController.prototype.enableVoertuignummerTypeahead = function() 
             xhrFields: { withCredentials: true }, crossDomain: true
         })
         .done(function(data, textStatus, jqXHR) {
-            console.log("SC: Voertuignummers", data);
+            me.options.logVehicles && me.options.logVehicles && console.log("SC: Voertuignummers", data);
             $("#input_voertuignummer")
             .typeahead({
                 name: 'voertuignummers',
@@ -429,7 +431,7 @@ VehicleIncidentsController.prototype.enableVoertuignummerTypeahead = function() 
         .done(function() {
             me.service.getVoertuignummerTypeahead()
             .done(function(datums) {
-                console.log("VrhAGS: Voertuignummers", datums);
+                me.options.logVehicles && console.log("VrhAGS: Voertuignummers", datums);
                 $("#input_voertuignummer")
                 .typeahead({
                     name: 'voertuignummers',
@@ -603,7 +605,7 @@ VehicleIncidentsController.prototype.showStatusVrhAGS = function() {
     })
     .done(function(status) {
         if(status) {
-            console.log("VrhAGS: Voertuigstatus", status);
+            me.options.logStatus && console.log("VrhAGS: Voertuigstatus", status);
             var id = status.T_ACT_STATUS_CODE_EXT_BRW;
             var code = status.T_ACT_STATUS_AFK_BRW;
 
@@ -646,7 +648,7 @@ VehicleIncidentsController.prototype.showStatusSC = function() {
             }
         });
         if(status) {
-            console.log("SC: Voertuigstatus", status);
+            me.options.logStatus && console.log("SC: Voertuigstatus", status);
             // Do not show code, SafetyConnect webservice puts it in StatusAfkorting and maps different codes
             $("<div id='status'>" + status.StatusAfkorting + "</div>").prependTo("body");
         }
@@ -842,10 +844,10 @@ VehicleIncidentsController.prototype.updateVehiclePositionsVrhAGS = function() {
         }, me.options.vehiclesUpdateInterval);
     })
     .fail(function (jqXHR, textStatus, errorThrown) {
-        console.log(jqXHR, textStatus, errorThrown);
+        console.log("VrhAGS: Error updating vehicle positions", jqXHR, textStatus, errorThrown);
     })
     .done(function(features) {
-        console.log("VrhAGS: Vehicle positions for incident", features);
+        me.options.logVehicles && console.log("VrhAGS: Vehicle positions for incident", features);
         if(!features) {
             features = [];
         }
@@ -872,10 +874,10 @@ VehicleIncidentsController.prototype.updateVehiclePositionsSC = function() {
         }, me.options.vehiclesUpdateInterval);
     })
     .fail(function (jqXHR, textStatus, errorThrown) {
-        console.log(jqXHR, textStatus, errorThrown);
+        console.log("SC: Error updating vehicle positions", jqXHR, textStatus, errorThrown);
     })
     .done(function (data, textStatus, jqXHR) {
-        console.log("SC: Vehicle positions for incident", data);
+        me.options.logVehicles && console.log("SC: Vehicle positions for incident", data);
         var transformedVehicles = data.features
             .filter(function(f) {
                 // Filter only vehicles for incident inzet
@@ -896,7 +898,7 @@ VehicleIncidentsController.prototype.updateVehiclePositionsSC = function() {
                 var geometry = new OpenLayers.Geometry.Point(f.geometry.coordinates[0], f.geometry.coordinates[1]);
                 return new OpenLayers.Feature.Vector(geometry, attributes);
             });
-        console.log("SC: Transformed vehicle positions for layer", transformedVehicles);
+        me.options.logVehicles && console.log("SC: Transformed vehicle positions for layer", transformedVehicles);
         me.vehiclePositionLayer.features(transformedVehicles);
     });
 };

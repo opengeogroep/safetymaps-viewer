@@ -34,7 +34,8 @@ dbkjs.modules.autoreload = {
             checkInterval: 300,
             refreshPageAt: false,
             refreshPageIdleTime: 300 * 1000,
-            showIdleDimmer: true
+            showIdleDimmer: true,
+            log: false
         }, this.options);
 
         this.setTimer();
@@ -56,7 +57,7 @@ dbkjs.modules.autoreload = {
         if(new moment().isAfter(me.refreshPageMoment)) {
             me.refreshPageMoment = me.refreshPageMoment.add(1, "day");
         }
-        console.log("Checking refresh page at " + me.refreshPageMoment.format("LLLL") + ", idle time " + me.options.refreshPageIdleTime / 1000 + "s");
+        me.options.log && console.log("Checking refresh page at " + me.refreshPageMoment.format("LLLL") + ", idle time " + me.options.refreshPageIdleTime / 1000 + "s");
 
         var resetIdleTime = function() {
             me.lastEventTime = new Date().getTime();
@@ -75,7 +76,7 @@ dbkjs.modules.autoreload = {
         dbkjs.map.events.register("mousedown", me, resetIdleTime);
 
         $(dbkjs).on("incidents.updated", function() {
-            console.log("Incident updated");
+            me.options.log && console.log("Incident updated");
             me.lastIncidentUpdate = new Date().getTime();
 
             $("#dimmer").toggle(false);
@@ -88,17 +89,17 @@ dbkjs.modules.autoreload = {
         this.refreshPageInterval = window.setInterval(function() {
             var idleTime = new Date().getTime() - me.lastEventTime;
             var isIdle = idleTime > me.options.refreshPageIdleTime;
-            console.log("Check refresh time reached, idle time " + (idleTime/1000).toFixed() + ", idle: " + isIdle);
+            me.options.log && console.log("Check refresh time reached, idle time " + (idleTime/1000).toFixed() + ", idle: " + isIdle);
             if(isIdle && me.lastIncidentUpdate && new Date().getTime() - me.lastIncidentUpdate < 30 * 60 * 1000) {
-                console.log("Idle but last incident update less than 30 minutes ago");
+                me.options.log && console.log("Idle but last incident update less than 30 minutes ago");
                 isIdle = false;
             }
             if(new moment().isAfter(me.refreshPageMoment)) {
-                console.log("Refresh time reached, idle time: " + (idleTime/1000).toFixed());
+                me.options.log && console.log("Refresh time reached, idle time: " + (idleTime/1000).toFixed());
                 if(isIdle) {
                   window.location.reload(true); // forceReload=true
                 } else {
-                    console.log("Idle time to short");
+                    me.options.log && console.log("Idle time to short");
                 }
             }
 
@@ -129,15 +130,15 @@ dbkjs.modules.autoreload = {
                   };
               });
               if(newSequence === null) {
-                  console.log("autoreload: no new sequence in organisation autoreload module options", data);
+                  me.options.log && console.log("autoreload: no new sequence in organisation autoreload module options", data);
               } else if(newSequence !== me.options.sequence) {
-                  console.log("autoreload: new sequence different, reloading!", newSequence);
+                  me.options.log && console.log("autoreload: new sequence different, reloading!", newSequence);
                   window.location.reload(true); // forceReload=true
               } else {
-                  console.log("autoreload: same sequence, no reload");
+                  me.options.log && console.log("autoreload: same sequence, no reload");
               }
             } else {
-                console.log("error getting organisation.json autoreload info: " + textStatus, jqXHR);
+                me.options.log && console.log("error getting organisation.json autoreload info: " + textStatus, jqXHR);
             }
             me.setTimer();
         });

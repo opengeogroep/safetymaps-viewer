@@ -277,11 +277,9 @@ dbkjs.modules.geolocate = {
         window.clearTimeout(_obj.gpsGateTimeout);
 
         if(window.GpsGate) {
-            console.log("geolocate gpsgate: already loaded script");
             _obj.getGpsGateInfo();
         } else {
             $.getScript(_obj.gpsGateUrl, function() {
-                console.log("geolocate gpsgate: loaded script");
                 _obj.getGpsGateInfo();
             })
             .fail(function(){
@@ -399,7 +397,7 @@ dbkjs.modules.geolocate = {
             button: "activate",
             activateOnStart: false,
             updateInterval: 5000,
-            debug: true,
+            debug: false,
             icon: '<i class="fa fa-crosshairs"></i>',
             location: "#btngrp_3"
         }, _obj.options);
@@ -498,7 +496,7 @@ dbkjs.modules.geolocate = {
             throw "geolocate: unknown provider: " + _obj.options.provider;
         }
 
-        console.log("geolocate: using provider " + _obj.options.provider);
+        _obj.options.debug && console.log("geolocate: using provider " + _obj.options.provider);
 
         $(_obj.options.location).prepend('<a id="btn_geolocate" data-sid="' + _obj.options.index + '" class="btn btn-default navbar-btn" href="#" title="' + i18n.t('geolocate.button') + '">' + _obj.options.icon + '</a>');
         

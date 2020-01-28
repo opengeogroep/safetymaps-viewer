@@ -33,6 +33,7 @@ function IncidentMonitorController(options) {
         // Can be set to "citygis_wfs"
         vehicleSource: "incidentService",
         vehicleSourceURL: null,
+        logVehicles: false,
         showInzetRol: true,
         showTwitter: false,
         logTwitter: false,
@@ -523,7 +524,7 @@ IncidentMonitorController.prototype.updateVehiclePositionLayer = function(incide
             xhrFields: { withCredentials: true }, crossDomain: true
         })
         .done(function (data, textStatus, jqXHR) {
-            console.log("IM SC: Vehicle positions", data);
+            me.options.logVehicles && console.log("IM SC: Vehicle positions", data);
             var transformedVehicles = data.features
                 .filter(function(f) {
                     // XXX is filter for incidentNummer in incidents array (or speed > 5)
@@ -545,7 +546,7 @@ IncidentMonitorController.prototype.updateVehiclePositionLayer = function(incide
                     var geometry = new OpenLayers.Geometry.Point(f.geometry.coordinates[0], f.geometry.coordinates[1]);
                     return new OpenLayers.Feature.Vector(geometry, attributes);
                 });
-            console.log("IM SC: Transformed vehicle positions for layer", transformedVehicles);
+            me.options.logVehicles && console.log("IM SC: Transformed vehicle positions for layer", transformedVehicles);
             me.vehiclePositionLayer.features(transformedVehicles);
         });
     }
@@ -562,9 +563,9 @@ IncidentMonitorController.prototype.updateVehiclePositionLayerCityGISWFS = funct
             }
         });
     });
-    console.log("IM: actieve eenheden ", roepnamen);
+    me.options.logVehicles && console.log("IM: actieve eenheden ", roepnamen);
 
-	$.ajax({
+    $.ajax({
         url: me.options.vehicleSourceURL
     })
     .done(function(data) {
@@ -588,7 +589,7 @@ IncidentMonitorController.prototype.updateVehiclePositionLayerCityGISWFS = funct
                 "PositiontimeFromNow": new moment(f.attributes.time).fromNow()
             });
             if(feature.attributes.IncidentID !== "") {
-                console.log("IM: actieve eenheid, time " + feature.attributes.time.fromNow(), feature);
+                me.options.logVehicles && console.log("IM: actieve eenheid, time " + feature.attributes.time.fromNow(), feature);
             }
             if(feature.attributes.time.isAfter(cutoff)) {
                 vehicleFeatures.push(feature);

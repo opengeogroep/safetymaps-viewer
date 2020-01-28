@@ -333,7 +333,7 @@ dbkjs.zoomToFixedMapResolutionForBounds = function(bounds) {
             }
         }
         zoomIndex--;
-        console.log("orig res: " + res + ", higher map resolution at index " + zoomIndex + ", res " + dbkjs.map.options.resolutions[zoomIndex]);
+        //console.log("orig res: " + res + ", higher map resolution at index " + zoomIndex + ", res " + dbkjs.map.options.resolutions[zoomIndex]);
         dbkjs.map.setCenter(dbkjs.map.getCenter(), zoomIndex);
     }
 };
