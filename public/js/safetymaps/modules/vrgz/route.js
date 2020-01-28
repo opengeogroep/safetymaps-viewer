@@ -25,7 +25,9 @@ dbkjs.modules = dbkjs.modules || {};
 dbkjs.modules.route = {
     id: "dbkjs.modules.route",
     options: null,
-    reloadTimeOut: null,    
+    reloadTimeOut: null,
+    routeUrlSimacar: "/simacar_export/Route.txt",
+    routeUrlNotResponded: false,  
     register: function () {
         var me = this;
         var pointArray;
@@ -46,12 +48,12 @@ dbkjs.modules.route = {
 
         if (me.options.provider === "simacar")            
             me.getSimacarRoutesAsPointArray(function (pointArray) {
-                console.log("route: (re)loaded simacar route");
                 me.addRouteLayerToMap(me.createRouteLayer(pointArray), reload);
-        });
+            });
 
         me.reloadTimeOut = window.setTimeout(function () {
-            me.getRoute(true);
+            if ((!reload && !me.routeUrlNotResponded) || reload)
+                me.getRoute(true);
         }, me.options.reloadInterval);
     },
     removeLayerFromMap: function () {
@@ -102,11 +104,12 @@ dbkjs.modules.route = {
         return { layer: layer, features: features };
     },
     getSimacarRoutesAsPointArray: function (onSuccess) {        
+        var me = this;
         var pointArray = [];
 
         Proj4js.defs["EPSG:32632"] = "+proj=utm +zone=32 +ellps=WGS84 +datum=WGS84 +units=m +no_defs";
 
-        $.ajax("/simacar_export/Route.txt", { dataType: "text", cache: false })
+        $.ajax(me.routeUrlSimacar, { dataType: "text", cache: false })
         .success(function (response) {
             lines = response.split('\n');
             lines.forEach(function(line, i) {
@@ -120,6 +123,9 @@ dbkjs.modules.route = {
                 }
             });
             onSuccess(pointArray);
+        })
+        .fail(function () {
+            me.routeUrlNotResponded = true;
         });
     }
 };
