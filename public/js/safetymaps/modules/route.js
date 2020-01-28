@@ -109,8 +109,11 @@ dbkjs.modules.route = {
                 if(features.length === 0) {
                     $("#route-a").addClass("disabled");
                 }
+                me.options.log && console.log("route: updating route layer", features);
 
                 me.updateRoute(features);
+            } else {
+                me.options.log && console.log("route: not modified");
             }
             me.reloadTimeout = window.setTimeout(function() {
                 me.getRoute();
