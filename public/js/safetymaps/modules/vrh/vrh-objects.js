@@ -45,7 +45,12 @@ dbkjs.modules.vrh_objects = {
             log: false,
             evFilter: "huidig",
             evFilterShowDaysBeforeBegin: 3,
-            evFilterShowDaysAfterBegin: 3
+            evFilterShowDaysAfterBegin: 3,
+            maxResolutions: {
+                dbk: 1.69,
+                evenementen: Infinity,
+                waterongevallenkaart: 1.69
+            }
         }, this.options);
         this.options.options = dbkjs.options;
         this.options.map = dbkjs.map;
@@ -66,7 +71,16 @@ dbkjs.modules.vrh_objects = {
 
         // Setup clustering layer
 
-        me.clusteringLayer = new safetymaps.ClusteringLayer();
+        me.clusteringLayer = new safetymaps.ClusteringLayer({
+            filterFunction: function(feature) {
+                if(me.options.maxResolutions) {
+                    const maxResolution = me.options.maxResolutions[feature.attributes.type] || Infinity;
+                    console.log(`feature ${feature.attributes.type} max scale ${maxResolution}, map scale ${dbkjs.map.getResolution()}`);
+                    return dbkjs.map.getResolution() < maxResolution;
+                }
+                return true;
+            }
+        });
         $(me.clusteringLayer).on("object_cluster_selected", function(event, features) {
             me.clusterObjectClusterSelected(features);
         });
