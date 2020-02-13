@@ -33,15 +33,12 @@ safetymaps.vrh.api = {
     /**
      * Get array of objects with overview info of DBK objects
      */
-    getDbks: function(newDbSchema) {
+    getDbks: function() {
         var d = $.Deferred();
 
         var msg = "Fout bij laden DBK gegevens: ";
         $.ajax("api/vrh/dbks.json", {
             dataType: "json",
-            data: {
-                newDbSchema: newDbSchema
-            },
             cache: true,
             ifModified: true
         })
@@ -157,15 +154,12 @@ safetymaps.vrh.api = {
         return features;
     },
 
-    getWaterongevallen: function(newDbSchema) {
+    getWaterongevallen: function() {
         var d = $.Deferred();
 
         var msg = "Fout bij laden WO gegevens: ";
         $.ajax("api/vrh/waterongevallen.json", {
-            dataType: "json",
-            data: {
-                newDbSchema: newDbSchema
-            }
+            dataType: "json"
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             d.reject(msg + safetymaps.utils.getAjaxError(jqXHR, textStatus, errorThrown));
@@ -213,17 +207,14 @@ safetymaps.vrh.api = {
         return features;
     },
 
-    getObjectDetails: function(type, id, newDbSchema) {
+    getObjectDetails: function(type, id) {
         var me = this;
 
         var d = $.Deferred();
 
         var msg = "Fout bij laden " + type + " gegevens: ";
         $.ajax("api/vrh/" + type + "/" + id + ".json", {
-            dataType: "json",
-            data: {
-                newDbSchema: newDbSchema
-            }
+            dataType: "json"
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             d.reject(msg + safetymaps.utils.getAjaxError(jqXHR, textStatus, errorThrown));

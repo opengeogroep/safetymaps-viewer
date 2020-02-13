@@ -924,7 +924,7 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
     console.log("Added DBK layer features", this.layers);
 };
 
-safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, newDbSchema) {
+safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object) {
     var me = this;
 
     safetymaps.infoWindow.removeTabs(windowId, "info");
@@ -941,11 +941,9 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, newD
         adres = Mustache.render("{{straatnaam}} {{huisnummer}} {{huisletter}} {{toevoeging}}{{#plaats}}<br>{{plaats}}{{/plaats}}", o);
     }
 
-    rows.push({l: "OMS nummer",                     t: newDbSchema ? o.oms_nummer : p.oms_nummer});
+    rows.push({l: "OMS nummer",                     t: o.oms_nummer});
     rows.push({l: "Naam",                           t: o.naam});
-    if(newDbSchema) {
-        rows.push({l: "Naam bedrijfspand", t: p.bedrijfsna});
-    }
+    rows.push({l: "Naam bedrijfspand", t: p.bedrijfsna});
     rows.push({l: "Adres",                          html: adres});
     var oppervlakte = p.bag ? p.bag.oppervlakteverblijfsobject : p.oppervlakt;
     if(oppervlakte) {
@@ -953,22 +951,13 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, newD
     }
     rows.push({l: "Bouwjaar",                       t: p.bag ? p.bag.pandbouwjaar : p.bouwjaar});
     rows.push({l: "Gebruik",                        t: p.gebruiksdo});
-    if(newDbSchema) {
-        rows.push({l: "Gebruiksdoel BAG",           t: p.bag ? p.bag.verblijfsobjectgebruiksdoel : p.gebruiks_1});
-        rows.push({l: "Verdiepingen ondergronds",      t: p.bouwlageno});
-        rows.push({l: "Verdiepingen bovengronds",      t: p.bouwlagenb});
-    } else {
-        rows.push({l: "Laagste bouwlaag",           t: p.bouwlageno});
-        rows.push({l: "Hoogste bouwlaag",           t: p.bouwlagenb});
-    }
+    rows.push({l: "Gebruiksdoel BAG",           t: p.bag ? p.bag.verblijfsobjectgebruiksdoel : p.gebruiks_1});
+    rows.push({l: "Verdiepingen ondergronds",      t: p.bouwlageno});
+    rows.push({l: "Verdiepingen bovengronds",      t: p.bouwlagenb});
     rows.push({l: "Afwijkende binnendekking",       t: p.afwijkende});
     rows.push({l: "Aanvullende info binnendekking", t: p.binnendekk});
-    if(!newDbSchema) {
-        rows.push({l: "Risicoklasse",                   t: p.risicoklas});
-    }
-    rows.push({l: newDbSchema ? "Operationele instructies" : "Inzetprocedure", t: p.inzetproce});
+    rows.push({l: "Operationele instructies",       t: p.inzetproce});
     rows.push({l: "Aanvalsplan",                    t: p.aanvalspla});
-
 
     if(p.extra_info && (!p.datum_ei_1 || new moment(p.datum_ei_1).isBefore()) && (!p.eind_datum || new moment(p.eind_datum).isAfter())) {
         rows.push({l: "Extra info 1 " + (p.bron_ei_1 ? "(Bron: " + p.bron_ei_1 + ")" : ""), t: p.extra_info});
@@ -977,69 +966,29 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, newD
         rows.push({l: "Extra info 2 " + (p.bron_ei_2 ? "(Bron: " + p.bron_ei_2 + ")" : ""), t: p.extra_in_1});
     }
 
-    if(newDbSchema) {
-        rows.push({l: "Bijzonderheden gebruik", t: o.bijzonderh});
-        rows.push({l: "Instructie bereikbaarheid", t: o.toegang_te});
-        rows.push({l: "Operationele Instructie", t: o.inzetproce});
-        rows.push({l: "Max. Personeel", t: o.personeel_});
-        rows.push({l: "Max. Bezoekers", t: o.bezoekers_});
-        rows.push({l: "Max. Slaapplaatsen", t: o.slaapplaat});
-        rows.push({l: "BHV aanwezig", t: p.aanwezig_1});
+    rows.push({l: "Bijzonderheden gebruik", t: o.bijzonderh});
+    rows.push({l: "Instructie bereikbaarheid", t: o.toegang_te});
+    rows.push({l: "Operationele Instructie", t: o.inzetproce});
+    rows.push({l: "Max. Personeel", t: o.personeel_});
+    rows.push({l: "Max. Bezoekers", t: o.bezoekers_});
+    rows.push({l: "Max. Slaapplaatsen", t: o.slaapplaat});
+    rows.push({l: "BHV aanwezig", t: p.aanwezig_1});
 
-        var bijzonderhedenAanwezigheid = o.bijzonde_2 ? [o.bijzonde_2] : [];
-        $.each(o.bijzonderheden_aanwezigheid || [], function(i, bzh) {
-            if(bijzonderhedenAanwezigheid.indexOf(bzh) === -1) {
-                bijzonderhedenAanwezigheid.push(bzh);
-            }
-        });
-
-        rows.push({l: "Bijzonderheden aanwezigheid", html: bijzonderhedenAanwezigheid.length > 0 ? bijzonderhedenAanwezigheid.map(Mustache.escape).join("<br>") : null});
-
-        rows.push({l: "Bijzonderheden gebouw", t: p.bijzonderh});
-        rows.push({l: "Compartimentering", html: o.compartimentering_beschrijving ? o.compartimentering_beschrijving.map(Mustache.escape).join("<br>") : null});
-
-        rows.push({l: "Brandinstallaties", html: o.brandinstallaties ? o.brandinstallaties.map(Mustache.escape).join("<br>") : null});
-    }
-
-    safetymaps.infoWindow.addTab(windowId, "algemeen", newDbSchema ? "Object info" : "Algemeen", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
-
-    if(!newDbSchema) {
-        rows = [];
-
-        var v;
-        v = p.personeel_; if(v) rows.push(["Dag", v, "Personeel"]);
-        v = p.bezoekers_; if(v) rows.push(["Dag", v, "Bezoekers"]);
-        v = p.slaapplaat; if(v) rows.push(["Dag", v, "Slaapplaatsen"]);
-        v = p.bhv_dag;    if(v) rows.push(["Dag", v, "BHV"]);
-        v = p.personeel1; if(v) rows.push(["Nacht", v, "Personeel"]);
-        v = p.bezoekers1; if(v) rows.push(["Nacht", v, "Bezoekers"]);
-        v = p.slaappla_1; if(v) rows.push(["Nacht", v, "Slaapplaatsen"]);
-        v = p.bhv_nacht;  if(v) rows.push(["Nacht", v, "BHV"]);
-        v = p.personee_1; if(v) rows.push(["Weekend", v, "Personeel"]);
-        v = p.bezoeker_1; if(v) rows.push(["Weekend", v, "Bezoekers"]);
-        v = p.slaappla_2; if(v) rows.push(["Weekend", v, "Slaapplaatsen"]);
-        v = p.bhv_weeken; if(v) rows.push(["Weekend", v, "BHV"]);
-        if(rows.length > 1) {
-            rows.unshift(["<b>Moment</b>", "<b>Aantal</b>", "<b>Groep</b>"]);
+    var bijzonderhedenAanwezigheid = o.bijzonde_2 ? [o.bijzonde_2] : [];
+    $.each(o.bijzonderheden_aanwezigheid || [], function(i, bzh) {
+        if(bijzonderhedenAanwezigheid.indexOf(bzh) === -1) {
+            bijzonderhedenAanwezigheid.push(bzh);
         }
-        var div = safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel", "leftlabel"]);
-        rows = [];
-        rows.push({l: "Personeel", t: p.personee_2});
-        rows.push({l: "Bezoekers", t: p.bezoeker_2});
-        rows.push({l: "Slaapplaatsen", t: p.slaappla_3});
-        rows.push({l: "BHV", t: p.bhv_omsch});
-        rows.push({l: "Bijzonderheid aanwezigheid", t: p.bijzonde_1});
-        rows.push({l: "Verzamelplaats", t: p.verzamelpl});
-        var div2 = safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]);
-        if(div) {
-            div.append(div2);
-        } else {
-            div = div2;
-        }
-        if(rows.length !== 1) {
-            safetymaps.infoWindow.addTab(windowId, "verblijf", "Verblijf", "info", div);
-        }
-    }
+    });
+
+    rows.push({l: "Bijzonderheden aanwezigheid", html: bijzonderhedenAanwezigheid.length > 0 ? bijzonderhedenAanwezigheid.map(Mustache.escape).join("<br>") : null});
+
+    rows.push({l: "Bijzonderheden gebouw", t: p.bijzonderh});
+    rows.push({l: "Compartimentering", html: o.compartimentering_beschrijving ? o.compartimentering_beschrijving.map(Mustache.escape).join("<br>") : null});
+
+    rows.push({l: "Brandinstallaties", html: o.brandinstallaties ? o.brandinstallaties.map(Mustache.escape).join("<br>") : null});
+
+    safetymaps.infoWindow.addTab(windowId, "algemeen", "Object info" , "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
 
     rows = [];
     rows.push({l: "Sleutelbuisklus", t: p.sleutelbui});
@@ -1103,8 +1052,8 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, newD
     } else {
         div = div2;
     }
-    safetymaps.infoWindow.addTab(windowId, "brandweer", newDbSchema ? "Legenda" : "Brandweer", "info", div);
-    dbkjs.modules.vrh_objects.addLegendTrEventHandler("tab_brandweer", {
+    safetymaps.infoWindow.addTab(windowId, "legenda", "Legenda" , "info", div);
+    dbkjs.modules.vrh_objects.addLegendTrEventHandler("tab_legenda", {
         "symbol": me.layerSymbols,
         "danger_symbol": me.layerDangerSymbols
     }, "code");
@@ -1126,22 +1075,4 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, newD
     }
     safetymaps.infoWindow.addTab(windowId, "gevaarlijke_stoffen", "Gevaarlijke stoffen", "info", safetymaps.creator.createInfoTabDiv(rows));
     dbkjs.modules.vrh_objects.addLegendTrEventHandler("tab_gevaarlijke_stoffen", {"gevaarlijke_stof" : me.layerDangerSymbols});
-
-    if(!newDbSchema) {
-        rows = [];
-        rows.push({l: "Gebouwconstructie", t: p.gebouwcons});
-        rows.push({l: "Dakconstructie", t: p.dakconstru});
-        rows.push({l: "Bijzondere bouwkundige constructie", t: p.bijz_bouwk});
-        rows.push({l: "Liften", t: p.liften});
-        rows.push("<tr><td colspan='2'>&nbsp;</td></tr>");
-
-            v = o.bijzonderh; if(v) rows.push("<tr><td colspan='2'>" + Mustache.escape(v) + "</td></tr>");
-            v = p.bijzonderh; if(v) rows.push("<tr><td colspan='2'>" + Mustache.escape(v) + "</td></tr>");
-        v = p.bijz_heden; if(v) rows.push("<tr><td colspan='2'>" + Mustache.escape(v) + "</td></tr>");
-        v = p.bijz_hed_1; if(v) rows.push("<tr><td colspan='2'>" + Mustache.escape(v) + "</td></tr>");
-        v = p.bijz_hed_2; if(v) rows.push("<tr><td colspan='2'>" + Mustache.escape(v) + "</td></tr>");
-        rows.push({l: "Bijzonderheden afsluiters", t: o.bijzonde_1});
-
-        safetymaps.infoWindow.addTab(windowId, "gebouw", "Gebouw", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
-    }
 };
