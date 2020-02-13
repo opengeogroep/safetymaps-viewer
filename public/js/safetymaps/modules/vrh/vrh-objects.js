@@ -75,7 +75,6 @@ dbkjs.modules.vrh_objects = {
             filterFunction: function(feature) {
                 if(me.options.maxResolutions) {
                     const maxResolution = me.options.maxResolutions[feature.attributes.type] || Infinity;
-                    console.log(`feature ${feature.attributes.type} max scale ${maxResolution}, map scale ${dbkjs.map.getResolution()}`);
                     return dbkjs.map.getResolution() < maxResolution;
                 }
                 return true;
