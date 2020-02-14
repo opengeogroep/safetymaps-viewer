@@ -85,7 +85,8 @@ safetymaps.vrh.Dbks = function(options) {
         "Maatregelen_C2000": "Maatregelen C2000",
         "NBLA": "Natte blusleiding",
         "HydrofoorBRW": "Hydrofoor brandweer",
-        "HydrofoorEIGEN": "Eigen hydrofoor"
+        "HydrofoorEIGEN": "Eigen hydrofoor",
+        "Sleutelbuis": "Sleutelbuis"
     };
     me.buttonSymbols = {};
     me.buttonSymbols.basis = [
