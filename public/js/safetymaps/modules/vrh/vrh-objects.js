@@ -106,10 +106,7 @@ dbkjs.modules.vrh_objects = {
 
         // XXX move to safetymaps.vrh.Dbks.init()
         if(me.options.dbks) {
-
-            var newDbSchema = OpenLayers.Util.getParameters()["newDbSchema"] === "true";
-
-            safetymaps.vrh.api.getDbks(newDbSchema)
+            safetymaps.vrh.api.getDbks()
             .fail(function(msg) {
                 dbkjs.util.alert("Fout", msg, "alert-danger");
                 me.dbks.loading = false;
@@ -392,8 +389,8 @@ dbkjs.modules.vrh_objects = {
 
                 var matchPostcode = o.postcode && o.postcode === postcode;
                 var matchHuisnummer = o.huisnummer && o.huisnummer === huisnummer;
-                var matchHuisletter = !exactMatchHuisletter || (o.huisletter === huisletter);
-                var matchToevoeging = !exactMatchToevoeging || (o.toevoeging === toevoeging);
+                var matchHuisletter = !exactMatchHuisletter || ((o.huisletter || "") === huisletter);
+                var matchToevoeging = !exactMatchToevoeging || ((o.toevoeging || "") === toevoeging);
                 var matchWoonplaats = woonplaats && o.plaats && woonplaats === o.plaats;
                 var matchStraat = straat && o.straatnaam && straat === o.straatnaam;
 
@@ -530,8 +527,7 @@ dbkjs.modules.vrh_objects = {
 
         // Get object details
         //$("#creator_object_info").text(i18n.t("dialogs.busyloading") + "...");
-        var newDbSchema = OpenLayers.Util.getParameters()["newDbSchema"] === "true";
-        safetymaps.vrh.api.getObjectDetails(type, id, newDbSchema)
+        safetymaps.vrh.api.getObjectDetails(type, id)
         .fail(function(msg) {
             //$("#creator_object_info").text("Error: " + msg);
         })
