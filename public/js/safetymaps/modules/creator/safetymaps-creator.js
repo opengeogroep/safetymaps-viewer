@@ -177,7 +177,7 @@ dbkjs.modules.safetymaps_creator = {
             safetymaps.infoWindow.showTab(me.infoWindow.getName(), "general", true);
         });
 
-        me.infoWindow = safetymaps.infoWindow.addWindow("vrh_object_info", "Object informatie");
+        me.infoWindow = safetymaps.infoWindow.addWindow("creator_object_info", "Object informatie");
 
         // Resize PDF embed div after width transition has ended
         var resizeFunction = function() {

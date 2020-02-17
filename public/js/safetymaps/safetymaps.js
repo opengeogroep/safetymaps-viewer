@@ -41,7 +41,7 @@ safetymaps.deselectObject = function() {
 safetymaps.selectObject = function(clusterFeature, zoom) {
     safetymaps.selectedClusterFeature = clusterFeature;
 
-    console.log("Select " + clusterFeature.attributes.type + " object '" + clusterFeature.attributes.label + "'" + (zoom ? "' at " + extentWkt : " - no zoom"));
+    // console.log("Select " + clusterFeature.attributes.type + " object '" + clusterFeature.attributes.label + "'" + (zoom ? "' at " + extentWkt : " - no zoom"));
     var extentWkt = clusterFeature.attributes.apiObject.extent;
     if(zoom && extentWkt) {
 
@@ -110,14 +110,12 @@ safetymaps.infoWindow = {
     addWindow: function(windowId, title, showSingleTab) {
         var window;
         if(this.separateWindowMode) {
-            //console.log("infoWindow: add window " + windowId);
             window = new SplitScreenWindow(windowId);
             window.createElements(title);
             this.createTabElements(window);
             window.showSingleTab = showSingleTab;
             this.windows[windowId] = window;
         } else {
-            console.log("infoWindow: add window " + windowId + " [ignored, integrated window mode]");
             window = this.commonWindow;
         }
         return window;
@@ -206,7 +204,7 @@ safetymaps.infoWindow = {
             }
             tabId = s[1];
             showWindow = !!showWindow;
-            console.log("showTab shorthand windowId=" + windowId + ",tabId=" + tabId + ",showWindow=" + showWindow);
+            //console.log("showTab shorthand windowId=" + windowId + ",tabId=" + tabId + ",showWindow=" + showWindow);
         }
 
         var window = this.separateWindowMode ? this.windows[windowId] : this.commonWindow;

@@ -33,7 +33,10 @@ function IncidentMonitorController(options) {
         // Can be set to "citygis_wfs"
         vehicleSource: "incidentService",
         vehicleSourceURL: null,
+        logVehicles: false,
         showInzetRol: true,
+        showTwitter: false,
+        logTwitter: false,
         enableUnassignedVehicles: true,
         incidentListFunction: null,
         incidentListFooterFunction: null,
@@ -42,7 +45,9 @@ function IncidentMonitorController(options) {
         updateTries: 3,
         incidentSource: "SafetyConnect",
         agsService: null,
+        cacheArchivedIncidents: true
     }, options);
+    me.service = me.options.agsService;
 
     // Debug option to show incidents without units attached
     me.options.toonZonderEenheden = OpenLayers.Util.getParameters().toonZonderEenheden === "true";
@@ -182,14 +187,6 @@ IncidentMonitorController.prototype.incidentRead = function(incidentId) {
 IncidentMonitorController.prototype.selectIncident = function(obj) {
     var me = this;
 
-    if(me.incidentId === (obj.incident.INCIDENT_ID || obj.incident.IncidentNummer)) {
-        // Clicked on already selected incident
-
-        // XXX
-        dbkjs.modules.incidents.controller.zoomToIncident();
-        return;
-    }
-
     if(me.selectedIncidentMarker) {
         me.markerLayer.removeMarker(me.selectedIncidentMarker);
     }
@@ -219,7 +216,7 @@ IncidentMonitorController.prototype.selectIncident = function(obj) {
                 return;
             }
             try {
-                var incidentInfo = { source: "SafetyConnect", incident: data[0]};
+                var incidentInfo = { source: me.options.incidentSource, incident: data[0]};
                 VehicleIncidentsController.prototype.normalizeIncidentFields(incidentInfo);
                 $(me).triggerHandler("incident_selected", [incidentInfo]);
             } catch(e) {
@@ -227,11 +224,16 @@ IncidentMonitorController.prototype.selectIncident = function(obj) {
             }
         });
     } else if(me.options.incidentSource === "VrhAGS") {
-        console.log("IM TODO: get AGS full incident details");
-        $(me).triggerHandler("incident_selected", [{
-                source: me.options.incidentSource,
-                incident: obj.incident
-        }]);
+        me.service.getAllIncidentInfo(me.incidentId, obj.incident.archief, false)
+        .fail(function(e) {
+            console.log("IM VrhAGS: Error getting incident data", arguments);
+            p.reject();
+        })
+        .done(function(incident) {
+            var incidentInfo = { source: me.options.incidentSource, incidenten: [incident.NR_INCIDENT], incident: incident};
+            VehicleIncidentsController.prototype.normalizeIncidentFields(incidentInfo);
+            $(me).triggerHandler("incident_selected", [incidentInfo]);
+        });
     } else {
         throw new Error("Invalid incident source");
     }
@@ -255,7 +257,9 @@ IncidentMonitorController.prototype.getIncidentList = function() {
     if(me.options.incidentSource === "SafetyConnect") {
         me.getIncidentListSC();
     } else if(me.options.incidentSource === "VrhAGS") {
-        me.getIncidentListVrhAGS();
+        me.service.whenInitialized().done(function() {
+            me.getIncidentListVrhAGS();
+        });
     }
 };
 
@@ -301,7 +305,7 @@ IncidentMonitorController.prototype.getIncidentListVrhAGS = function() {
                 incident: incident
             });
         });
-        //me.processNewArchivedIncidents(archivedIncidents);
+        me.processNewArchivedIncidents(archivedIncidents);
         me.currentIncidents = currentIncidents;
         me.updateInterface();
         me.checkUnreadIncidents(me.actueleIncidentIds);
@@ -463,11 +467,10 @@ IncidentMonitorController.prototype.processNewArchivedIncidents = function(archi
     // Remove old archived incidents (start incident more than 24 hours ago)
     var cutoff = new moment().subtract(24, 'hours');
     me.archivedIncidents = $.grep(me.archivedIncidents, function(incident) {
-        var incidentStart = me.service.getAGSMoment(incident.DTG_START_INCIDENT);
-        if(incidentStart.isBefore(cutoff)) {
-            console.log("IM: Verwijder oud incident begonnen op " + incidentStart.format("D-M-YYYY HH:mm") + " voor 24u cutoff van " + cutoff.format("D-M-YYYY HH:mm"));
+        if(incident.start.isBefore(cutoff)) {
+            console.log("IM: Verwijder oud incident begonnen op " + incident.start.format("D-M-YYYY HH:mm") + " voor 24u cutoff van " + cutoff.format("D-M-YYYY HH:mm"));
         }
-        return !incidentStart.isBefore(cutoff);
+        return !incident.start.isBefore(cutoff);
     });
 };
 
@@ -513,7 +516,7 @@ IncidentMonitorController.prototype.updateVehiclePositionLayer = function(incide
             xhrFields: { withCredentials: true }, crossDomain: true
         })
         .done(function (data, textStatus, jqXHR) {
-            console.log("IM SC: Vehicle positions", data);
+            me.options.logVehicles && console.log("IM SC: Vehicle positions", data);
             var transformedVehicles = data.features
                 .filter(function(f) {
                     // XXX is filter for incidentNummer in incidents array (or speed > 5)
@@ -535,7 +538,7 @@ IncidentMonitorController.prototype.updateVehiclePositionLayer = function(incide
                     var geometry = new OpenLayers.Geometry.Point(f.geometry.coordinates[0], f.geometry.coordinates[1]);
                     return new OpenLayers.Feature.Vector(geometry, attributes);
                 });
-            console.log("IM SC: Transformed vehicle positions for layer", transformedVehicles);
+            me.options.logVehicles && console.log("IM SC: Transformed vehicle positions for layer", transformedVehicles);
             me.vehiclePositionLayer.features(transformedVehicles);
         });
     }
@@ -552,9 +555,11 @@ IncidentMonitorController.prototype.updateVehiclePositionLayerCityGISWFS = funct
             }
         });
     });
-    console.log("IM: actieve eenheden ", roepnamen);
+    me.options.logVehicles && console.log("IM: actieve eenheden ", roepnamen);
 
-    $.ajax(me.options.vehicleSourceURL)
+    $.ajax({
+        url: me.options.vehicleSourceURL
+    })
     .done(function(data) {
         var features = new OpenLayers.Format.GeoJSON().read(data);
 
@@ -576,7 +581,7 @@ IncidentMonitorController.prototype.updateVehiclePositionLayerCityGISWFS = funct
                 "PositiontimeFromNow": new moment(f.attributes.time).fromNow()
             });
             if(feature.attributes.IncidentID !== "") {
-                console.log("IM: actieve eenheid, time " + feature.attributes.time.fromNow(), feature);
+                me.options.logVehicles && console.log("IM: actieve eenheid, time " + feature.attributes.time.fromNow(), feature);
             }
             if(feature.attributes.time.isAfter(cutoff)) {
                 vehicleFeatures.push(feature);
@@ -586,7 +591,7 @@ IncidentMonitorController.prototype.updateVehiclePositionLayerCityGISWFS = funct
     });
 };
 
-IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) {
+IncidentMonitorController.prototype.loadTweets = function(incident) {
     var me = this;
 
     if(typeof window.twttr === 'undefined') {
@@ -605,7 +610,7 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
             return t;
         }(document, "script", "twitter-wjs"));
         twttr.ready(function(twttr) {
-            me.loadTweets(incidentId, incident);
+            me.loadTweets(incident);
         });
     }
 
@@ -614,32 +619,17 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
     var p = new Proj4js.Point(pos.x, pos.y);
     var t = Proj4js.transform(new Proj4js.Proj(dbkjs.options.projection.code), new Proj4js.Proj("EPSG:4326"), p);
 
-    console.log("Loading tweets for incident, geo=", t);
+    me.options.logTwitter && console.log("Loading tweets for incident, geo=", t);
 
     $("#t_twitter_title").text("Twitter (...)");
 
     var terms = [];
-    var address;
-    if(me.falck) {
-        var l = incident.IncidentLocatie;
-        address = '"' + l.NaamLocatie1 + '"';
-        if(l.Plaatsnaam) {
-            terms.push(l.Plaatsnaam === "'s-Gravenhage" ? "Den Haag" : l.Plaatsnaam);
-        }
-        if(l.NaamLocatie2 && l.NaamLocatie1 !== l.NaamLocatie2) {
-            terms = terms.concat(l.NaamLocatie2.split(" "));
-        }
-    } else {
-        address = '"' + incident.NAAM_LOCATIE1 + '"';
-        if(incident.PLAATS_NAAM) {
-            terms.push(incident.PLAATS_NAAM === "'s-Gravenhage" ? "Den Haag" : incident.PLAATS_NAAM);
-        }
-        if(incident.PLAATS_NAAM_NEN) {
-            terms.push(incident.PLAATS_NAAM_NEN === "'s-Gravenhage" ? "Den Haag" : incident.PLAATS_NAAM_NEN);
-            }
-        if(incident.NAAM_LOCATIE2 && incident.NAAM_LOCATIE1 !== incident.NAAM_LOCATIE2) {
-            terms = terms.concat(incident.NAAM_LOCATIE2.split(" "));
-        }
+    var address = '"' + incident.straat + '"';
+    if(incident.woonplaats) {
+        terms.push(incident.woonplaats === "'s-Gravenhage" ? "Den Haag" : incident.woonplaats);
+    }
+    if(incident.locatie2 && incident.straat !== incident.locatie2) {
+        terms = terms.concat(incident.locatie2.split(" "));
     }
 
     if(incident.classificaties) {
@@ -687,11 +677,13 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
     }
     var karakteristieken = [];
 
+    // XXX should be normalized field
     if(incident.karakteristiek) {
         $.each(incident.karakteristiek, function(i, k) {
             karakteristieken.push({ naam: k.NAAM_KARAKTERISTIEK, values: k.ACTUELE_KAR_WAARDE.split("/") });
         });
     }
+    // XXX should be normalized field
     if(incident.Karakteristieken) {
         $.each(incident.Karakteristieken, function(i, k) {
             karakteristieken.push({ naam: k.Naam, values: k.Waarden });
@@ -739,14 +731,14 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
         });
     }
 
-    var start = me.falck ? new moment(incident.BrwDisciplineGegevens.StartDTG) : AGSIncidentService.prototype.getAGSMoment(incident.DTG_START_INCIDENT);
     var params = {
-        incidentId: incidentId,
+        incidentId: incident.id,
         location: t.y + "," + t.x,
-        startTime: start.format("X"),
+        startTime: incident.start.format("X"),
         terms: JSON.stringify(terms),
         address: address
     };
+    // XXX should be normalized field
     if(incident.DTG_EINDE_INCIDENT) {
         params.endTime = AGSIncidentService.prototype.getAGSMoment(incident.DTG_EINDE_INCIDENT).format("X");
     }
@@ -754,14 +746,14 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
     // Remove fixed height used for keeping previous scrollTop
     $("#tab_twitter").css("height", "");
 
-    $.ajax((dbkjs.options.incidents.twitterUrlPrefix ? dbkjs.options.incidents.twitterUrlPrefix : "") + "api/twitter", {
+    $.ajax((me.options.twitterUrlPrefix ? me.options.twitterUrlPrefix : "") + "api/twitter", {
         dataType: "json",
         data: params
     }).fail(function(jqXHR, textStatus, errorThrown) {
         $("#t_twitter_title").text("Twitter (!)");
         $("#tab_twitter").text(me.service.getAjaxError(jqXHR, textStatus, errorThrown));
     }).done(function(data) {
-        console.log("Twitter search response", data);
+        me.options.logTwitter && console.log("Twitter search response", data);
 
         // Fix height to scrollTop does not get reset when clearing div
         $("#tab_twitter").css("height", $("#tab_twitter").height());
@@ -785,7 +777,7 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
             }
 
             var displayedTweets = [];
-            var ignoredAccounts = dbkjs.options.incidents.twitterIgnoredAccounts || [];
+            var ignoredAccounts = me.options.twitterIgnoredAccounts || [];
 
             function filterTweet(status) {
                 return ignoredAccounts.indexOf(status.user.screen_name) !== -1 || status.user.screen_name.toLowerCase().indexOf("p2000") !== -1;
@@ -797,20 +789,20 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
 
             $.each(statuses, function(i, status) {
                 var createdAt = twitterMoment(status.created_at);
-                if(createdAt.isAfter(start) && (!endCutoff || createdAt.isBefore(endCutoff))) {
+                if(createdAt.isAfter(incident.start) && (!endCutoff || createdAt.isBefore(endCutoff))) {
                     if(status.geo && displayedTweets.indexOf(status.text) === -1) {
                         if(!filterTweet(status)) {
                             displayedTweets.push(status.text);
                             var p2 = new Proj4js.Point(status.geo.coordinates[1], status.geo.coordinates[0]);
                             var t2 = Proj4js.transform(new Proj4js.Proj("EPSG:4326"), new Proj4js.Proj(dbkjs.options.projection.code), p2);
                             var distance = Math.sqrt(Math.pow(t2.x - pos.x, 2) + Math.pow(t2.y - pos.y, 2));
-                            console.log("Tweet " + status.text + " at " + t2.x + "," + t2.y + ", distance " + distance + "m");
+                            me.options.logTwitter && console.log("Tweet " + status.text + " at " + t2.x + "," + t2.y + ", distance " + distance + "m");
                             var el = $("<div id='tweet_" + status.id + "'>Afstand: " + Math.round(distance) + " meter</div>");
                             el.appendTo("#tab_twitter");
                             twttr.widgets.createTweet(status.id_str, document.getElementById("tweet_" + status.id),  { conversation: "none", width: 530, lang: "nl" } );
                             tweets++;
                         } else {
-                            console.log("Filtering geo tweet user: " + status.user.screen_name, status);
+                            me.options.logTwitter && console.log("Filtering geo tweet user: " + status.user.screen_name, status);
                         }
                     }
                 }
@@ -819,16 +811,16 @@ IncidentMonitorController.prototype.loadTweets = function(incidentId, incident) 
                 $("<div id='tweet_" + status.id + "'>Tweets tijdens incident op basis van zoektermen <i>" + address + ", " + terms.join(", ") + "</i></div>").appendTo("#tab_twitter");
                 $.each(data.responseTerms.statuses, function(i, status) {
                     var createdAt = twitterMoment(status.created_at);
-                    if(createdAt.isAfter(start) /*&& (!endCutoff || createdAt.isBefore(endCutoff))*/) {
+                    if(createdAt.isAfter(incident.start) /*&& (!endCutoff || createdAt.isBefore(endCutoff))*/) {
                         var text = status.retweeted_status ? status.retweeted_status.text : status.text;
                         if(displayedTweets.indexOf(text) === -1) {
                             if(!filterTweet(status) && (!status.retweeted_status || !filterTweet(status.retweeted_status))) {
                                 displayedTweets.push(text);
-                                console.log("Tweet matching terms: " + text, status);
+                                me.options.logTwitter && console.log("Tweet matching terms: " + text, status);
                                 twttr.widgets.createTweet(status.id_str, document.getElementById("tab_twitter"),  { conversation: "none", width: 530, lang: "nl" } );
                                 tweets++;
                             } else {
-                                console.log("Filtering search term tweet user: " + status.user.screen_name, status);
+                                me.options.logTwitter && console.log("Filtering search term tweet user: " + status.user.screen_name, status);
                             }
                         }
                     }

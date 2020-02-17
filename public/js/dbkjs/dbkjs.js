@@ -28,6 +28,13 @@ dbkjs.map = dbkjs.map || null;
 dbkjs.init = function () {
     if (!dbkjs.map) {
         dbkjs.map = new OpenLayers.Map(dbkjs.options.map.options);
+        dbkjs.map.Z_INDEX_BASE ={
+            BaseLayer: 100,
+            Overlay: 3250,
+            Feature: 7250,
+            Popup: 7500,
+            Control: 10000
+        };
     }
 
     dbkjs.getOrganisation();
@@ -326,7 +333,7 @@ dbkjs.zoomToFixedMapResolutionForBounds = function(bounds) {
             }
         }
         zoomIndex--;
-        console.log("orig res: " + res + ", higher map resolution at index " + zoomIndex + ", res " + dbkjs.map.options.resolutions[zoomIndex]);
+        //console.log("orig res: " + res + ", higher map resolution at index " + zoomIndex + ", res " + dbkjs.map.options.resolutions[zoomIndex]);
         dbkjs.map.setCenter(dbkjs.map.getCenter(), zoomIndex);
     }
 };
@@ -464,6 +471,11 @@ $(document).ready(function () {
             $("#c_settings").hide();
             $("#extra_dropDown").on('click',function(){
                 $("#btngrp_4").toggle();
+
+                if(!$("#btngrp_4").is(':visible')) 
+                    $(".main-button-group").attr("style", $(".main-button-group").attr("style").replace("min-height:144px;", ""));
+                else
+                    $(".main-button-group").attr("style", $(".main-button-group").attr("style")+" min-height:144px;");
             });
         } else {
             $("#btngrp_4").hide();
