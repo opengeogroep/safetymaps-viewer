@@ -243,7 +243,30 @@ dbkjs.modules.vrh_objects = {
             safetymaps.infoWindow.showTab(me.infoWindow.getName(), "algemeen", true);
         });
 
-        me.infoWindow = safetymaps.infoWindow.addWindow("creator_object_info", "Object informatie");
+        me.infoWindow = safetymaps.infoWindow.addWindow("vrh_object_info", "Object informatie");
+
+        // Resize PDF embed div after width transition has ended
+        var resizeFunction = function() {
+            me.infoWindowTabsResize();
+        };
+        $(window).resize(resizeFunction);
+
+        $(me.infoWindow).on("show", function() {
+            var event = dbkjs.util.getTransitionEvent();
+            if(event) {
+                me.infoWindow.getView().parent().on(event, resizeFunction);
+            } else {
+                resizeFunction();
+            }
+
+        });
+    },
+
+    infoWindowTabsResize: function() {
+        var view = this.infoWindow.getView();
+        var tabContentHeight = view.find(".tab-content").height();
+
+        view.find(".pdf-embed").css("height", tabContentHeight - 28);
     },
 
     addSearchConfig: function() {
@@ -567,6 +590,8 @@ dbkjs.modules.vrh_objects = {
             if(!isIncident) {
                 safetymaps.infoWindow.showTab(this.infoWindow.getName(), "algemeen", true);
             }
+
+            this.infoWindowTabsResize();
 
             this.selectedObject = object;
             this.clusteringLayer.setSelectedIds([id]);

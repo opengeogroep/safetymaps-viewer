@@ -42,6 +42,8 @@ safetymaps.vrh.Dbks = function(options) {
         }
     }, options);
 
+    safetymaps.creator.api.mediaPath = "api/media/";
+
     var params = new OpenLayers.Util.getParameters();
     me.options.wideLineForSelectionOpacity = Number(params.selectionLineOpacity) || me.options.wideLineForSelectionOpacity;
     me.options.wideLineForSelectionExtraWidth = Number(params.selectionLineExtraWidth) || me.options.wideLineForSelectionExtraWidth;
@@ -1076,4 +1078,22 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object) {
     }
     safetymaps.infoWindow.addTab(windowId, "gevaarlijke_stoffen", "Gevaarlijke stoffen", "info", safetymaps.creator.createInfoTabDiv(rows));
     dbkjs.modules.vrh_objects.addLegendTrEventHandler("tab_gevaarlijke_stoffen", {"gevaarlijke_stof" : me.layerDangerSymbols});
+
+    if(object.media) {
+        object.media = object.media.map(function(filename) {
+            return { filename: filename };
+        });
+    }
+    var content = safetymaps.creator.renderMedia(object);
+    safetymaps.infoWindow.addTab(windowId, "media", i18n.t("creator.media"), "info", content);
+    if (content) {
+        //check if first item in carousel is pdf; Render if true
+        if ($("#media_carousel").find('.active').find('.pdf-embed').length !== 0) {
+            safetymaps.creator.embedPDFs($("#media_carousel").find('.active'));
+        }
+        //embed pdf's only if they are requested
+        $("#media_carousel").bind('slide.bs.carousel', function (e) {
+            safetymaps.creator.embedPDFs(e.relatedTarget);
+        });
+    }
 };
