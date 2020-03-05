@@ -29,6 +29,7 @@ function IncidentDetailsWindow() {
     this.window = safetymaps.infoWindow.addWindow("incident", "Incident", false);
     this.div = $("<div></div>");
     this.linkifyWords = null;
+    this.crsLinkEnabled = false;
     safetymaps.infoWindow.addTab("incident", "incident", "Incident", "incident", this.div, "first");
 };
 
@@ -78,6 +79,23 @@ IncidentDetailsWindow.prototype.linkify = function(text) {
             return token;
         });
         return t.join("");
+    }
+    return text;
+};
+
+IncidentDetailsWindow.prototype.crsLink = function(text) {
+    var me = this;
+    var t = text.split(',');
+
+    if(me.crsLinkEnabled) {
+        t = t.map(function(token) {
+            var searchToken = token.split("-").join("").trim();
+            if(searchToken.length > 0) {
+                return "<a class='crsLink'>" + searchToken.toLowerCase() + "</a>";
+            }
+            return token;
+        });
+        return t.join(" ");
     }
     return text;
 };
@@ -196,6 +214,11 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
             $(me).triggerHandler("linkifyWordClicked", [$(e.target).text(), e]);
         });
     }
+    if(this.crsLinkEnabled) {
+        $("a.crsLink").on("click", function(e) {
+            $(me).triggerHandler("crsLinkClicked", [$(e.target).text(), e]);
+        });
+    }
     if(this.showFeatureMatches) {
         this.showMultipleFeatureMatches();
     }
@@ -299,7 +322,6 @@ IncidentDetailsWindow.prototype.getIncidentAdres = function(incident, isXml) {
     }
 };
 
-
 /**
  * Get HTML to display incident. Boolean specificies whether to leave out time
  * dependent information ('1 minute ago') to compare changes.
@@ -357,9 +379,15 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
             return l.naam.localeCompare(r.naam);
         });
         $.each(karakteristieken, function(i, k) {
-            html += "<tr><td>" + me.linkify(dbkjs.util.htmlEncode(k.naam)) + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.waardes.sort().join(", "))) + "</td></tr>";
+            if(k.naam.toLowerCase() !== "kenteken" || !me.crsLinkEnabled){
+                html += "<tr><td>" + me.linkify(dbkjs.util.htmlEncode(k.naam)) + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.waardes.sort().join(", "))) + "</td></tr>";
+            }
+            else {
+                html += "<tr><td>" + k.naam + "</td><td>" + me.crsLink(dbkjs.util.htmlEncode(k.waardes.sort().join(", "))) + "</td></tr>";
+            }
         });
         html += '</table><div/>';
+        html += me.getIncidentKarakteristiekHtml(incident.karakteristiek, false);
     }
     html += '</td></tr>';
 
@@ -534,7 +562,13 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
             return l.Naam.localeCompare(r.Naam);
         });
         $.each(incident.Karakteristieken, function(i, k) {
-            html += "<tr><td>" + me.linkify(dbkjs.util.htmlEncode(k.Naam)) + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Waarden.sort().join(", "))) + "</td></tr>";
+            //html += "<tr><td>" + me.linkify(dbkjs.util.htmlEncode(k.Naam)) + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Waarden.sort().join(", "))) + "</td></tr>";
+            if(k.Naam.toLowerCase() !== "kenteken" || !me.crsLinkEnabled){
+                html += "<tr><td>" + me.linkify(dbkjs.util.htmlEncode(k.Naam)) + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Waarden.sort().join(", "))) + "</td></tr>";
+            }
+            else {
+                html += "<tr><td>" + k.Naam + "</td><td>" + me.crsLink(dbkjs.util.htmlEncode(k.Waarden.sort().join(", "))) + "</td></tr>";
+            } 
         });
         html += '</table><div/>';
     }
@@ -628,7 +662,13 @@ IncidentDetailsWindow.prototype.getIncidentHtmlPharos = function(incident, showI
             return l.naam.localeCompare(r.naam);
         });
         $.each(incident.karakteristieken, function(i, k) {
-            html += "<tr><td>" + me.linkify(dbkjs.util.htmlEncode(k.naam)) + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.waarde)) + "</td></tr>";
+            //html += "<tr><td>" + me.linkify(dbkjs.util.htmlEncode(k.naam)) + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.waarde)) + "</td></tr>";
+            if(k.naam.toLowerCase() !== "kenteken" || !me.crsLinkEnabled){
+                html += "<tr><td>" + me.linkify(dbkjs.util.htmlEncode(k.naam)) + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.waardes.sort().join(", "))) + "</td></tr>";
+            }
+            else {
+                html += "<tr><td>" + k.naam + "</td><td>" + me.crsLink(dbkjs.util.htmlEncode(k.waardes.sort().join(", "))) + "</td></tr>";
+            } 
         });
         html += '</table><div/>';
     }
@@ -722,6 +762,13 @@ IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInze
             v.waarde = me.linkify(dbkjs.util.htmlEncode($(k).find("KarakteristiekWaarde").text()));
 
             html += Mustache.render("<tr><td>{{naam}}</td><td>{{{waarde}}}</td></tr>", v);
+
+            if(v.naam.toLowerCase() !== "kenteken" || !me.crsLinkEnabled){
+                v.waarde = me.linkify(dbkjs.util.htmlEncode($(k).find("KarakteristiekWaarde").text()));
+            }
+            else {
+                v.waarde = me.crsLink(dbkjs.util.htmlEncode($(k).find("KarakteristiekWaarde").text()));
+            } 
         });
         html += '</table><div/>';
     }
