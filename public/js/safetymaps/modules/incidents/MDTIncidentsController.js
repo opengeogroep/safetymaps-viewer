@@ -32,6 +32,7 @@ function MDTIncidentsController(incidents) {
     var me = this;
 
     me.featureSelector = incidents.featureSelector;
+    me.options = incidents.options;
 
     me.button = new AlertableButton("btn_incident", "Incident", "bell-o");
     me.button.getElement().prependTo('#btngrp_object');
@@ -50,8 +51,10 @@ function MDTIncidentsController(incidents) {
     $(me.markerLayer).on('click', function() {
         me.markerClick();
     });
-    me.marker = null;
 
+    me.marker = null;
+    me.incidentId = null;
+    me.html = null;
     me.xml = null;
 
     // XXX to common object (IncidentFeatureSelector?)
@@ -83,32 +86,41 @@ MDTIncidentsController.prototype.getMDTInfo = function() {
         }, 5000);
     })
     .done(function(xml, textStatus, jqXHR) {
-        var first = me.xml === null;
-        me.xml = xml;
-        me.incidentDetailsWindow.data(xml, true, true, true);
-        var newHtml = me.incidentDetailsWindow.getXmlIncidentHtml(xml, true, true);
-        var newId = $(xml).find("Incident IncidentNr").text();
-        me.markerLayer.addIncident(xml, false, true);
-        me.markerLayer.setZIndexFix();
-        if(first) {
-            me.newIncident();
-            me.button.setAlerted(true);
-        } else {
-            if(me.html !== newHtml) {
-                me.button.setAlerted(true);
-                $(dbkjs).trigger("incidents.updated");
-            }
-            if(me.incidentId !== newId) {
-                me.newIncident();
-            }
-        }
-        me.html = newHtml;
-        me.incidentId = newId;
+        me.handleIncident(xml);
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         me.xml = null;
         me.incidentDetailsWindow.showError("Fout bij ophalen MDT incidentinformatie: " + textStatus);
     });
+};
+
+MDTIncidentsController.prototype.handleIncident = function (xml) {
+    var me = this;
+    var first = me.xml === null;
+    var newHtml = me.incidentDetailsWindow.getXmlIncidentHtml(xml, true, true);
+    var newId = $(xml).find("Incident IncidentNr").text();
+
+    me.xml = xml;
+    me.incidentDetailsWindow.data(xml, true, true, true);    
+    me.markerLayer.addIncident(xml, false, true);
+    me.markerLayer.setZIndexFix();
+    
+    if(first) {
+        me.html = newHtml;
+        me.incidentId = newId;
+        me.button.setAlerted(true);
+        me.newIncident();
+    } else {
+        if(me.html !== newHtml) {
+            me.button.setAlerted(true);
+            $(dbkjs).trigger("incidents.updated");
+        }
+        if(me.incidentId !== newId) {                
+            me.html = newHtml;
+            me.incidentId = newId;
+            me.newIncident();
+        }
+    }
 };
 
 MDTIncidentsController.prototype.zoomToIncident = function() {
@@ -129,6 +141,8 @@ MDTIncidentsController.prototype.newIncident = function() {
     var y = $(this.xml).find("IncidentLocatie XYCoordinaten YCoordinaat").text();
     var adres = $(this.xml).find("IncidentLocatie Adres");
     var commonIncidentObject = {
+        nummer: me.incidentId,
+        IncidentNummer: me.incidentId,
         postcode: $(adres).find("Postcode").text(),
         woonplaats: $(adres).find("Woonplaats").text(),
         huisnummer: Number($(adres).find("Huisnummer").text()),
@@ -141,9 +155,13 @@ MDTIncidentsController.prototype.newIncident = function() {
     me.featureSelector.findAndSelectMatches(commonIncidentObject, me.incidentDetailsWindow);
     me.featureSelector.updateBalkRechtsonder();
 
+    if(me.options.showTwitter) {
+        me.incidentMonitorController.loadTweets(commonIncidentObject);
+    }
+
     me.incidentDetailsWindow.show();
 
-    $(me).triggerHandler("new_incident", [commonIncidentObject]);
+    $(me).triggerHandler("new_incident", [commonIncidentObject, commonIncidentObject]);
 };
 
 MDTIncidentsController.prototype.markerClick = function() {
