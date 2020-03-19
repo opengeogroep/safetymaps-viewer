@@ -91,7 +91,7 @@ IncidentDetailsWindow.prototype.crsLink = function(text) {
         t = t.map(function(token) {
             var searchToken = token.split("-").join("").trim();
             if(searchToken.length > 0) {
-                return "<a class='crsLink'>" + searchToken.toLowerCase() + "</a>";
+                return "<a class='crsLink'>" + searchToken.toUpperCase() + "</a>";
             }
             return token;
         });
