@@ -57,6 +57,14 @@ function MDTIncidentsController(incidents) {
     me.html = null;
     me.xml = null;
 
+    if (me.options.showVehicles) {
+        me.vehiclePositionLayer = new VehiclePositionLayer({
+            showUnassignedButMoving: false,
+            showInzetRol: me.options.showInzetRol,
+            vehiclePopupTemplate: null
+        });
+    }
+
     // XXX to common object (IncidentFeatureSelector?)
     $('#incident_bottom_right').on('click', function() {
         me.zoomToIncident();
@@ -155,8 +163,8 @@ MDTIncidentsController.prototype.newIncident = function() {
     me.featureSelector.findAndSelectMatches(commonIncidentObject, me.incidentDetailsWindow);
     me.featureSelector.updateBalkRechtsonder();
 
-    if(me.options.showTwitter) {
-        me.incidentMonitorController.loadTweets(commonIncidentObject);
+    if (me.options.showVehicles) {
+        me.updateVehiclePositionLayerCityGISWFS(me.xml);
     }
 
     me.incidentDetailsWindow.show();
@@ -167,4 +175,57 @@ MDTIncidentsController.prototype.newIncident = function() {
 MDTIncidentsController.prototype.markerClick = function() {
     this.incidentDetailsWindow.show();
     this.zoomToIncident();
+};
+
+
+/**
+ * Update vehicle position(s) on map
+ * @param {xml} incident
+ */
+MDTIncidentsController.prototype.updateVehiclePositionLayerCityGISWFS = function (incident) {
+    var me = this;
+
+    var roepnamen = [];
+    $.each($(incident).find("GekoppeldeEenheden Eenheid"), function (i, eenheid) {
+        var naam = $(eenheid).find("Roepnaam").text();
+        var disc = $(eenheid).find("Disc").text();
+
+        if (disc === 'B--') {
+            roepnamen.push(naam);
+        }
+    });
+    me.options.logVehicles && console.log("IM: actieve eenheden ", roepnamen);
+
+    $.ajax({
+        url: me.options.vehicleSourceURL
+    })
+    .done(function(data) {
+        var features = new OpenLayers.Format.GeoJSON().read(data);
+
+        // Geometry useless, latitude and longitude switched
+        var vehicleFeatures = [];
+        var cutoff = new moment().subtract("2", "hours");
+        $.each(features, function(i, f) {
+            var p = new Proj4js.Point(f.attributes.longitude, f.attributes.latitude);
+            var t = Proj4js.transform(new Proj4js.Proj("EPSG:4326"), new Proj4js.Proj(dbkjs.options.projection.code), p);
+            var p = new OpenLayers.Geometry.Point(t.x, t.y);
+            // Speed and direction from service not reliable
+            var feature = new OpenLayers.Feature.Vector(p, {
+                "Roepnummer": f.attributes.id,
+                "Speed": 0, // f.attributes.speed,
+                "time": new moment(f.attributes.time),
+                "IncidentID": roepnamen.indexOf(f.attributes.id + "") !== -1 ? "1" : "",
+                "Direction": null, //f.attributes.headingDegrees,
+                "Voertuigsoort": "",
+                "PositiontimeFromNow": new moment(f.attributes.time).fromNow()
+            });
+            if(feature.attributes.IncidentID !== "") {
+                me.options.logVehicles && console.log("IM: actieve eenheid, time " + feature.attributes.time.fromNow(), feature);
+            }
+            if(feature.attributes.time.isAfter(cutoff)) {
+                vehicleFeatures.push(feature);
+            }
+        });
+        me.vehiclePositionLayer.features(vehicleFeatures);
+    });
 };
