@@ -85,13 +85,13 @@ IncidentDetailsWindow.prototype.linkify = function(text) {
 
 IncidentDetailsWindow.prototype.crsLink = function(text) {
     var me = this;
-    var t = text.split(',');
+    var t = text.split(/[ ,]+/);
 
     if(me.crsLinkEnabled) {
         t = t.map(function(token) {
             var searchToken = token.split("-").join("").trim();
             if(searchToken.length > 0) {
-                return "<a class='crsLink'>" + searchToken.toUpperCase() + "</a>";
+                return "<a class='crsLink'>" + searchToken.toUpperCase() + "</a>, ";
             }
             return token;
         });
