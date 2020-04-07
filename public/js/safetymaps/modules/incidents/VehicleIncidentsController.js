@@ -891,7 +891,7 @@ VehicleIncidentsController.prototype.updateVehiclePositionsSC = function() {
                     IncidentID: props.incidentNummer || "",
                     Voertuigsoort: props.inzetRol || "",
                     Roepnummer: props.id,
-                    Speed: props.speed || 0,
+                    Speed: me.options.showSpeed ? props.speed || 0 : 0,
                     Direction: props.heading
                     //PositionTimeFromNow: not available
                 };
