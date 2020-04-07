@@ -265,7 +265,8 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
                 logVehicles: me.options.logVehicles,
                 twitterUrlPrefix: me.options.twitterUrlPrefix,
                 twitterIgnoredAccounts: me.options.twitterIgnoredAccounts,
-                logTwitter: me.options.logTwitter
+                logTwitter: me.options.logTwitter,
+                showSpeed: me.options.showSpeed
             };
 
             me.incidentMonitorController = new IncidentMonitorController(incidentMonitorOptions);
