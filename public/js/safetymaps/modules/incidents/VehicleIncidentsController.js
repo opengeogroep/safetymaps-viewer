@@ -265,7 +265,8 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
                 logVehicles: me.options.logVehicles,
                 twitterUrlPrefix: me.options.twitterUrlPrefix,
                 twitterIgnoredAccounts: me.options.twitterIgnoredAccounts,
-                logTwitter: me.options.logTwitter
+                logTwitter: me.options.logTwitter,
+                showSpeed: me.options.showSpeed
             };
 
             me.incidentMonitorController = new IncidentMonitorController(incidentMonitorOptions);
@@ -891,7 +892,7 @@ VehicleIncidentsController.prototype.updateVehiclePositionsSC = function() {
                     IncidentID: props.incidentNummer || "",
                     Voertuigsoort: props.inzetRol || "",
                     Roepnummer: props.id,
-                    Speed: props.speed || 0,
+                    Speed: me.options.showSpeed ? props.speed || 0 : 0,
                     Direction: props.heading
                     //PositionTimeFromNow: not available
                 };
