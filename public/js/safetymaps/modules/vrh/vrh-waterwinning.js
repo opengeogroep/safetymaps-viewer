@@ -50,12 +50,7 @@ dbkjs.modules.vrh_waterwinning = {
         me.div = $('<i> '+ i18n.t("dialogs.noinfo") + '</i>' );
         safetymaps.infoWindow.addTab("waterwinning", "waterwinning", "Waterwinning", "waterwinning", me.div, "last");
 
-        if(!vrh.isVoertuig) {
-            this.options.url = "api/vrh/waterwinning.json";
-        } else {
-            this.options.alternateUrl = "http://localhost/waterwinning/api/vrh/waterwinning.json";
-            console.log("vrh-waterwinning: using URL " + this.options.url + " and alternate URL " + this.options.alternateUrl);
-        }
+        this.options.url = "api/vrh/waterwinning.json";
 
         me.createLayer();
 
