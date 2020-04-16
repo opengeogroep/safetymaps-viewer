@@ -194,7 +194,7 @@ MDTIncidentsController.prototype.updateVehiclePositionLayerCityGISWFS = function
             roepnamen.push(naam);
         }
     });
-    me.options.logVehicles && console.log("IM: actieve eenheden ", roepnamen);
+    me.options.logVehicles && console.log("MDT incidents: actieve eenheden ", roepnamen);
 
     $.ajax({
         url: me.options.vehicleSourceURL
@@ -220,7 +220,7 @@ MDTIncidentsController.prototype.updateVehiclePositionLayerCityGISWFS = function
                 "PositiontimeFromNow": new moment(f.attributes.time).fromNow()
             });
             if(feature.attributes.IncidentID !== "") {
-                me.options.logVehicles && console.log("IM: actieve eenheid, time " + feature.attributes.time.fromNow(), feature);
+                me.options.logVehicles && console.log("MDT incidents: actieve eenheid, time " + feature.attributes.time.fromNow(), feature);
             }
             if(feature.attributes.time.isAfter(cutoff)) {
                 vehicleFeatures.push(feature);
