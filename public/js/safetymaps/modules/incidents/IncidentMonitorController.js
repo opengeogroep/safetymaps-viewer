@@ -227,7 +227,6 @@ IncidentMonitorController.prototype.selectIncident = function(obj) {
         me.service.getAllIncidentInfo(me.incidentId, obj.incident.archief, false)
         .fail(function(e) {
             console.log("IM VrhAGS: Error getting incident data", arguments);
-            p.reject();
         })
         .done(function(incident) {
             var incidentInfo = { source: me.options.incidentSource, incidenten: [incident.NR_INCIDENT], incident: incident};
