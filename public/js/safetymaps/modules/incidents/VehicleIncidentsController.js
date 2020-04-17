@@ -51,6 +51,7 @@ function VehicleIncidentsController(options, featureSelector) {
     });
 
     me.checkLinkifyWords();
+    me.checkCrsLinks();
 
     me.markerLayer = new IncidentMarkerLayer();
     $(me.markerLayer).on('click', function(incident, marker) {
@@ -235,6 +236,17 @@ VehicleIncidentsController.prototype.checkLinkifyWords = function() {
     }
 };
 
+VehicleIncidentsController.prototype.checkCrsLinks = function() {
+    var me = this;
+    if(me.options.crsLinkEnabled && me.options.crsLinkUrl) {
+        var div = $("<div style='width: 100%; height: 100%'></div>");
+        me.incidentDetailsWindow.crsLinkEnabled = true;
+        $(me.incidentDetailsWindow).on("crsLinkClicked", function(e, link) {
+            window.open(`${ me.options.crsLinkUrl.replace("[kenteken]", link) }`);
+        });
+    }
+}
+
 VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
     var me = this;
 
@@ -265,7 +277,8 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
                 logVehicles: me.options.logVehicles,
                 twitterUrlPrefix: me.options.twitterUrlPrefix,
                 twitterIgnoredAccounts: me.options.twitterIgnoredAccounts,
-                logTwitter: me.options.logTwitter
+                logTwitter: me.options.logTwitter,
+                showSpeed: me.options.showSpeed
             };
 
             me.incidentMonitorController = new IncidentMonitorController(incidentMonitorOptions);
