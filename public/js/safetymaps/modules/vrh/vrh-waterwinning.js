@@ -50,12 +50,7 @@ dbkjs.modules.vrh_waterwinning = {
         me.div = $('<i> '+ i18n.t("dialogs.noinfo") + '</i>' );
         safetymaps.infoWindow.addTab("waterwinning", "waterwinning", "Waterwinning", "waterwinning", me.div, "last");
 
-        if(!vrh.isVoertuig) {
-            this.options.url = "api/vrh/waterwinning.json";
-        } else {
-            this.options.alternateUrl = "http://localhost/waterwinning/api/vrh/waterwinning.json";
-            console.log("vrh-waterwinning: using URL " + this.options.url + " and alternate URL " + this.options.alternateUrl);
-        }
+        this.options.url = "api/vrh/waterwinning.json";
 
         me.createLayer();
 
@@ -128,9 +123,9 @@ dbkjs.modules.vrh_waterwinning = {
 
             if(destination.route) {
                 if(!destination.route.success) {
-                    console.log("vrh-waterwinning: route not available for destination: " + destination.route.error, destination);
+                    me.options.log && console.log("vrh-waterwinning: route not available for destination: " + destination.route.error, destination);
                 } else {
-                    console.log("vrh-waterwinning: using route for destination", destination);
+                    me.options.log && console.log("vrh-waterwinning: using route for destination", destination);
                     if(destination.route.data.features) {
                         geom = new OpenLayers.Format.GeoJSON().read(destination.route.data.features[0].geometry)[0].geometry;
                     } else {
@@ -189,7 +184,8 @@ dbkjs.modules.vrh_waterwinning = {
         });
     },
     renderData: function(data) {
-        console.log("vrh-waterwinning: rendering data", data);
+        var me = this;
+        me.options.log && console.log("vrh-waterwinning: rendering data", data);
 
         var me = this;
         var ww_table_div = $('<div class="table-responsive"></div>');
@@ -320,7 +316,7 @@ dbkjs.modules.vrh_waterwinning = {
                     dbkjs.map.zoomOut();
                 }
             if(i>25){
-                console.log("vrh-waterwinning: points are not found");
+                me.options.log && console.log("vrh-waterwinning: points are not found");
                 pointsInScreen = true;
             }
         }
@@ -330,42 +326,7 @@ dbkjs.modules.vrh_waterwinning = {
     requestData:function(incident){
         var me = this;
         var d = $.Deferred();
-        console.log("vrh-waterwinning: requesting data", incident);
-
-        var startTime = new Date().getTime();
-        var succeeded = false;
-        var pending = 1;
-
-        var failMessage = "";
-
-        function ajaxDone(url, data) {
-            var time = (new Date().getTime() - startTime) / 1000;
-            console.log("vrh-waterwinning: " + (succeeded ? "no longer needed " : "") + "Ajax response in " + time + "s, success: " + data.success + " from URL " + url);
-            if(data.success) {
-                if(!succeeded) {
-                    succeeded = true;
-                    d.resolve(data.value);
-                }
-            } else {
-                failMessage += failMessage.length > 0 ? ", " : "";
-                failMessage += "Foutmelding ontvangen van URL " + url + ": " + data.error;
-                if(pending === 0 && !succeeded) {
-                    console.log("No other requests are pending, failing with message: " + failMessage);
-                    d.reject(failMessage);
-                }
-            }
-        };
-        function ajaxFail(url, jqXHR, textStatus, errorThrown) {
-            var time = (new Date().getTime() - startTime) / 1000;
-            console.log("vrh-waterwinning: " + (succeeded ? "no longer needed " : "") + "Ajax request FAILED in " + time + "s, from URL " + url);
-            failMessage += failMessage.length > 0 ? ", " : "";
-            failMessage += "Ajax request mislukt naar URL " + url + ": HTTP status " + jqXHR.status + " " + jqXHR.statusText + (jqXHR.responseText ? ", " : "") + jqXHR.responseText;
-
-            if(pending === 0 && !succeeded) {
-                console.log("No other requests are pending, failing with message: " + failMessage);
-                d.reject(failMessage);
-            }
-        };
+        me.options.log && console.log("vrh-waterwinning: requesting data", incident);
 
         $.ajax(me.options.url, {
             data: {
@@ -374,36 +335,16 @@ dbkjs.modules.vrh_waterwinning = {
                 noRouteTrim: me.noRouteTrim
             }
         })
-        .always(function() {
-            pending--;
-        })
         .done(function(data) {
-            ajaxDone(me.options.url, data);
+            if(data.success) {
+                d.resolve(data.value);
+            } else {
+                d.reject(data.error);
+            }
         })
-        .fail(function(jqXHR, textStatus, errorThrown) {
-            ajaxFail(me.options.url, jqXHR);
+        .fail(function(jqXHR) {
+            d.reject("Ajax request mislukt naar URL " + me.options.url + ": HTTP status " + jqXHR.status + " " + jqXHR.statusText + (jqXHR.responseText ? ", " : "") + jqXHR.responseText);
         });
-
-        if(me.options.alternateUrl) {
-            pending++;
-
-            $.ajax(me.options.alternateUrl, {
-                data: {
-                    x: Number(incident.x).toFixed(),
-                    y: Number(incident.y).toFixed(),
-                    noRouteTrim: me.noRouteTrim
-                }
-            })
-            .always(function() {
-                pending--;
-            })
-            .done(function(data) {
-                ajaxDone(me.options.alternateUrl, data);
-            })
-            .fail(function(jqXHR, textStatus, errorThrown) {
-                ajaxFail(me.options.alternateUrl, jqXHR, textStatus, errorThrown);
-            });
-        }
 
         return d.promise();
     }
