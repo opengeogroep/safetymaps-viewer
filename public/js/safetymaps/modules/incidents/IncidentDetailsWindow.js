@@ -387,7 +387,6 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
             }
         });
         html += '</table><div/>';
-        html += me.getIncidentKarakteristiekHtml(incident.karakteristiek, false);
     }
     html += '</td></tr>';
 
