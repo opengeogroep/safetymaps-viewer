@@ -37,7 +37,22 @@ dbkjs.init = function () {
         };
     }
 
-    dbkjs.getOrganisation();
+   dbkjs.loginConfig = {};
+   $.ajax({
+        dataType: "json",
+        url: '../api/login-config',
+        cache: false
+    })
+    .always(function(data, responseStatus) {
+        if(responseStatus === "success") {
+            dbkjs.loginConfig = data;
+            console.log('Login config', data);
+        } else {
+            // can be onboard viewer
+            console.log('No login config');
+        }
+        dbkjs.getOrganisation();
+    });
 
     dbkjs.mapcontrols.createMapControls();
 
@@ -101,9 +116,24 @@ dbkjs.getOrganisation = function() {
         cache: false
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
+        
+        // XXX ??????
+        if(jqXHR.status === 500 && jqXHR.responseJSON && jqXHR.responseJSON.organisation) {
+            dbkjs.options.organisation = jqXHR.responseJSON.organisation;
+
+            dbkjs.gotOrganisation();
+        }
 
         if(jqXHR.status === 200 && jqXHR.responseText.indexOf('<form method="post" action="j_security_check">')) {
-            console.log("Login required, showing login popup...");
+
+            console.log("Login required, showing login popup (loginConfig = " + JSON.stringify(dbkjs.loginConfig) + ")...", arguments);
+
+            if(dbkjs.loginConfig.ssoPassiveUrl) {
+                // Check session cookie, only redirect to SSO URL once
+            }
+            if(dbkjs.loginConfig.ssoManualHtml) {
+                $("#login_msg").html(dbkjs.loginConfig.ssoManualHtml + "<p>");
+            }
 
             $("#login_title").text(i18n.t("login.title"));
             $("#login_username").text(i18n.t("login.username"));
