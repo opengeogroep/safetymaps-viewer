@@ -265,8 +265,7 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
                 logVehicles: me.options.logVehicles,
                 twitterUrlPrefix: me.options.twitterUrlPrefix,
                 twitterIgnoredAccounts: me.options.twitterIgnoredAccounts,
-                logTwitter: me.options.logTwitter,
-                incidentUpdateInterval: me.options.incidentUpdateInterval
+                logTwitter: me.options.logTwitter
             };
 
             me.incidentMonitorController = new IncidentMonitorController(incidentMonitorOptions);
@@ -488,6 +487,19 @@ VehicleIncidentsController.prototype.getInzetInfo = function() {
 
     if(!me.voertuignummer) {
         me.geenInzet();
+
+        if(me.incidentMonitorController) {
+            // If IncidentMonitor has open incident update that one
+            me.incidentMonitorController.tryGetIncient();
+            // Reset timeout
+            if (me.getInzetTimeout) {
+                window.clearTimeout(me.getInzetTimeout);
+            }
+            me.getInzetTimeout = window.setTimeout(function() {
+                me.getInzetInfo();
+            }, me.options.incidentUpdateInterval);
+        }
+
         return;
     }
 
@@ -512,6 +524,9 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
     var interval = me.options.incidentUpdateInterval;
     if(typeof inzetInfo === "object" && inzetInfo.incident) {
         interval = me.options.activeIncidentUpdateInterval;
+    }
+    if (me.getInzetTimeout) {
+        window.clearTimeout(me.getInzetTimeout);
     }
     me.getInzetTimeout = window.setTimeout(function() {
         me.getInzetInfo();
@@ -543,6 +558,8 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
     } else if(inzetInfo.incidenten === null || inzetInfo.incidenten === 0) {
         if(!me.incidentFromIncidentList) {
             me.incidentDetailsWindow.showError("Geen actief incident voor voertuig " + me.voertuignummer + ". Laatst informatie opgehaald op " + new moment().format("LLL") + ".");
+            // If IncidentMonitor has open incident update that one
+            me.incidentMonitorController.tryGetIncient();
         }
 
         if(me.incidentNummer && !me.incidentFromIncidentList) {

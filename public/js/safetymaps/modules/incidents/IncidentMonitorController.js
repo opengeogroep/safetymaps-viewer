@@ -98,11 +98,6 @@ function IncidentMonitorController(options) {
     me.failedUpdateTries = 0;
     me.archivedIncidents = [];
 
-    // Incident timer placeholders
-    me.incidentTimer = null;
-    me.incidentTimerFails = 0;
-    me.incidentTimerMaxFails = 10;
-
     me.initIncidents();
 };
 
@@ -116,12 +111,14 @@ IncidentMonitorController.prototype.initIncidents = function() {
 };
 
 IncidentMonitorController.prototype.enable = function() {
+    me.incident = null;
     $("#btn_incidentlist").show();
     this.markerLayer.layer.setVisibility(true);
     this.initIncidents();
 };
 
 IncidentMonitorController.prototype.disable = function() {
+    me.incident = null;
     window.clearInterval(this.updateInterval);
     window.clearTimeout(this.getIncidentListTimeout);
     $("#btn_incidentlist").hide();
@@ -225,12 +222,11 @@ IncidentMonitorController.prototype.getSafetyConnectIncident = function () {
 
 /**
  * Get incident info from VrhAGS service
- * @param {object} obj Object obj from selectIncident()
  */
-IncidentMonitorController.prototype.getVrhAGSIncident = function (obj) {
+IncidentMonitorController.prototype.getVrhAGSIncident = function () {
     var me = this;
     // Get incident
-    me.service.getAllIncidentInfo(me.incidentId, obj.incident.archief, false)
+    me.service.getAllIncidentInfo(me.incidentId, me.incident.archief, false)
     .fail(function(e) {
         console.log("IM VrhAGS: Error getting incident data", arguments);
         me.incidentTimerFails = me.incidentTimerFails + 1;
@@ -246,27 +242,20 @@ IncidentMonitorController.prototype.getVrhAGSIncident = function (obj) {
 
 /**
  * Try get incident from me.options.incidentSource
- * @param {object} obj Object obj from selectIncident()
  */
-IncidentMonitorController.prototype.tryGetIncident = function (obj) {
+IncidentMonitorController.prototype.tryGetIncident = function () {
     var me = this;
+    // Only when there is an open incident
+    if (!me.incident) {
+        return;
+    }
     // Try get
     if(me.options.incidentSource === "SafetyConnect") {
         me.getSafetyConnectIncident();
     } else if(me.options.incidentSource === "VrhAGS") {
-        me.getVrhAGSIncident(obj);
+        me.getVrhAGSIncident();
     } else {
         throw new Error("Invalid incident source");
-    }
-    // Set interval if optioned but stop when the fails meets the max
-    var interval = me.options.incidentUpdateInterval;
-    if (me.incidentTimer){
-        window.clearTimeout(incidentTimer);
-    }
-    if (interval && (me.incidentTimerFails < me.incidentTimerMaxFails)) {
-        me.incidentTimer = window.setTimeout(function () {
-            me.tryGetIncident(obj);
-        }, interval);
     }
 }
 
@@ -284,7 +273,7 @@ IncidentMonitorController.prototype.selectIncident = function(obj) {
     }
 
     me.incidentRead(me.incidentId);
-    me.tryGetIncident(obj);
+    me.tryGetIncident();
 };
 
 IncidentMonitorController.prototype.checkIncidentListOutdated = function() {
