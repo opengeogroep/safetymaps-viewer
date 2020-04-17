@@ -38,7 +38,7 @@ dbkjs.modules.route = {
         me.options = $.extend({
             provider: "simacar",
             routeColor: "blue",
-            routeUrlSimacar: "/simacar_export/Route.txt",
+            routeUrlSimacar: "/simacar_export/RouteExport.txt",
             reloadInterval: 5000,
             retryTimeout: 30000,
             showButton: false,

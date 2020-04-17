@@ -31,7 +31,8 @@ dbkjs.modules.measure = {
         var _obj = dbkjs.modules.measure;
 
         _obj.options = $.extend({
-            showButtons: true
+            showButtons: true,
+            round: 3
         }, _obj.options);
 
         if(_obj.options.showButtons) {
@@ -177,14 +178,15 @@ dbkjs.modules.measure = {
     },
     handleMeasurements: function(event) {
         //var geometry = event.geometry;
+        var me = dbkjs.modules.measure;
         var units = event.units;
         var order = event.order;
         var measure = event.measure;
         var out = "";
         if (order === 1) {
-            out += i18n.t("measure.distance")+": " + measure.toFixed(3) + " " + units;
+            out += i18n.t("measure.distance")+": " + measure.toFixed(me.options.round) + " " + units;
         } else {
-            out += i18n.t("measure.area")+": " + measure.toFixed(3) + " " + units + "<sup>2</" + "sup>";
+            out += i18n.t("measure.area")+": " + measure.toFixed(me.options.round) + " " + units + "<sup>2</" + "sup>";
         }
         $('#measure').show();
         $('#measure').html(out);

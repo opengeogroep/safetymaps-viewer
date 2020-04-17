@@ -301,8 +301,9 @@ safetymaps.creator.embedPDFs = function(element) {
             function removeToolbar() {
                 var iframe = $("iframe").contents();
                 if(iframe.find("#toolbarViewer")[0] ) {
-                    console.log("Found PDFJS toolbar buttons, removing for URL " + url);                    	
-                    iframe.find("#toolbarViewer").remove();	
+                    console.log("Found PDFJS toolbar buttons, removing for URL " + url);    
+                    iframe.find("#toolbarViewerLeft").remove();
+                    iframe.find("#toolbarViewerRight").remove();
                 } else {
                     if(++removeTries >= 10) {
                         console.log("PDFJS toolbar not found after " + removeTries + " tries (loading failed?), cannot remove for URL " + url);
