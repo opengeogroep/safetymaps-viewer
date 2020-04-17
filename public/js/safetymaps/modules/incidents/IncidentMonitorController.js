@@ -97,6 +97,7 @@ function IncidentMonitorController(options) {
 
     me.failedUpdateTries = 0;
     me.archivedIncidents = [];
+
     me.initIncidents();
 };
 
@@ -110,12 +111,14 @@ IncidentMonitorController.prototype.initIncidents = function() {
 };
 
 IncidentMonitorController.prototype.enable = function() {
+    me.incident = null;
     $("#btn_incidentlist").show();
     this.markerLayer.layer.setVisibility(true);
     this.initIncidents();
 };
 
 IncidentMonitorController.prototype.disable = function() {
+    me.incident = null;
     window.clearInterval(this.updateInterval);
     window.clearTimeout(this.getIncidentListTimeout);
     $("#btn_incidentlist").hide();
@@ -184,58 +187,93 @@ IncidentMonitorController.prototype.incidentRead = function(incidentId) {
     }
 };
 
+/**
+ * Get incident info from safetyconnect/incident/[me.incident.IncidentNummer]
+ */
+IncidentMonitorController.prototype.getSafetyConnectIncident = function () {
+    var me = this;
+    // Get incident
+    $.ajax(me.options.apiPath + "safetyconnect/incident/" + me.incident.IncidentNummer, {
+        dataType: "json",
+        data: {
+            extended: true
+        },
+        xhrFields: { withCredentials: true }, crossDomain: true
+    })
+    .fail(function(e) {
+        console.log("IM SC: Error getting incident data", arguments);
+        me.incidentTimerFails = me.incidentTimerFails + 1;
+    })
+    .done(function(data) {
+        me.incidentTimerFails = 0;
+        if(data.length === 0 || !data[0].IncidentId) {
+            console.log("IM SC: Error getting incident data (empty result)", arguments);
+            return;
+        }
+        try {
+            var incidentInfo = { source: me.options.incidentSource, incident: data[0]};
+            VehicleIncidentsController.prototype.normalizeIncidentFields(incidentInfo);
+            $(me).triggerHandler("incident_selected", [incidentInfo]);
+        } catch(e) {
+            console.log("IM SC: Error processing incident", e, data);
+        }
+    });
+}
+
+/**
+ * Get incident info from VrhAGS service
+ */
+IncidentMonitorController.prototype.getVrhAGSIncident = function () {
+    var me = this;
+    // Get incident
+    me.service.getAllIncidentInfo(me.incidentId, me.incident.archief, false)
+    .fail(function(e) {
+        console.log("IM VrhAGS: Error getting incident data", arguments);
+        me.incidentTimerFails = me.incidentTimerFails + 1;
+        p.reject();
+    })
+    .done(function(incident) {
+        me.incidentTimerFails = 0;
+        var incidentInfo = { source: me.options.incidentSource, incidenten: [incident.NR_INCIDENT], incident: incident};
+        VehicleIncidentsController.prototype.normalizeIncidentFields(incidentInfo);
+        $(me).triggerHandler("incident_selected", [incidentInfo]);
+    });
+}
+
+/**
+ * Try get incident from me.options.incidentSource
+ */
+IncidentMonitorController.prototype.tryGetIncident = function () {
+    var me = this;
+    // Only when there is an open incident
+    if (!me.incident) {
+        return;
+    }
+    // Try get
+    if(me.options.incidentSource === "SafetyConnect") {
+        me.getSafetyConnectIncident();
+    } else if(me.options.incidentSource === "VrhAGS") {
+        me.getVrhAGSIncident();
+    } else {
+        throw new Error("Invalid incident source");
+    }
+}
+
 IncidentMonitorController.prototype.selectIncident = function(obj) {
     var me = this;
 
     if(me.selectedIncidentMarker) {
         me.markerLayer.removeMarker(me.selectedIncidentMarker);
     }
-
     me.incident = obj.incident;
     me.incidentId = me.incident.INCIDENT_ID || me.incident.IncidentNummer;
     console.log("IM: Select incident " + me.incidentId + ", addMarker=" + obj.addMarker);
     if(obj.addMarker && me.markerLayer) {
         me.selectedIncidentMarker = me.markerLayer.addIncident(me.incident, true);
     }
-    me.incidentRead(me.incidentId);
 
-    if(me.options.incidentSource === "SafetyConnect") {
-        $.ajax(me.options.apiPath + "safetyconnect/incident/" + me.incident.IncidentNummer, {
-            dataType: "json",
-            data: {
-                extended: true
-            },
-            xhrFields: { withCredentials: true }, crossDomain: true
-        })
-        .fail(function(e) {
-            console.log("IM SC: Error getting incident data", arguments);
-        })
-        .done(function(data) {
-            if(data.length === 0 || !data[0].IncidentId) {
-                console.log("IM SC: Error getting incident data (empty result)", arguments);
-                return;
-            }
-            try {
-                var incidentInfo = { source: me.options.incidentSource, incident: data[0]};
-                VehicleIncidentsController.prototype.normalizeIncidentFields(incidentInfo);
-                $(me).triggerHandler("incident_selected", [incidentInfo]);
-            } catch(e) {
-                console.log("IM SC: Error processing incident", e, data);
-            }
-        });
-    } else if(me.options.incidentSource === "VrhAGS") {
-        me.service.getAllIncidentInfo(me.incidentId, obj.incident.archief, false)
-        .fail(function(e) {
-            console.log("IM VrhAGS: Error getting incident data", arguments);
-        })
-        .done(function(incident) {
-            var incidentInfo = { source: me.options.incidentSource, incidenten: [incident.NR_INCIDENT], incident: incident};
-            VehicleIncidentsController.prototype.normalizeIncidentFields(incidentInfo);
-            $(me).triggerHandler("incident_selected", [incidentInfo]);
-        });
-    } else {
-        throw new Error("Invalid incident source");
-    }
+    me.incidentRead(me.incidentId);
+    me.tryGetIncident();
 };
 
 IncidentMonitorController.prototype.checkIncidentListOutdated = function() {
