@@ -7,7 +7,7 @@ OpenLayers.IMAGE_RELOAD_ATTEMPTS = 3;
 dbkjs.options = {
     VERSION: "_VERSION_",
     CONFIG: "_CONFIG_",
-    APPLICATION: "SafetyMaps Viewer 5.3.2",
+    APPLICATION: "SafetyMaps Viewer 5.3.3",
 
     zoom: 13,
 
