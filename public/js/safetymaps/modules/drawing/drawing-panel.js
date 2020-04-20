@@ -50,10 +50,14 @@ function DrawingPanelWindow(options) {
     $('<a id="btn_drawing_select" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.select") + '"><i class="fa fa-hand-pointer-o"></i></a>').appendTo(buttons);
     $("#btn_drawing_select").on("click", function() {
         me.unselectColor();
-        $("#btn_drawing_select").addClass("active");
+        me.eraserModeDeactivated();
         $(me).triggerHandler("select");
     });
-    //$('<a id="btn_drawing_eraser" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.eraser") + '"><i class="fa fa-eraser"></i></a>').appendTo(buttons);
+    $('<a id="btn_drawing_eraser" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.eraser") + '"><i class="fa fa-eraser"></i></a>').appendTo(buttons);
+    $("#btn_drawing_eraser").on("click", function() {
+        me.unselectColor();
+        $(me).triggerHandler("eraser");
+    });
 
     var colors = $("<div id='drawing_colors'/>");
 
@@ -68,13 +72,30 @@ function DrawingPanelWindow(options) {
         me.selectColor(color);
     });
 
-    var featureControls = $("<div id='drawing_feature_controls' style='display: none'>Selectie<br>" +
+    var featureControls = $(
+        "<div id='drawing_feature_controls' style='display: none'>Selectie<br>" +
             "<a id='drawing_feature_delete' class='btn btn-default'><i class='fa fa-trash'/></a><br>" +
             "<div style='display: flex'>" +
                 "<a id='drawing_feature_labelbtn' class='btn btn-default' disabled><i class='fa fa-font'/></a>" +
-                "<input id='drawing_feature_label'></div>" +
-            "</div>");
+                "<input id='drawing_feature_label'>" +
+            "</div>" +
+            "<div style='display: flex'>" +
+                "<a id='drawing_feature_rotatebtn' class='btn btn-default' disabled><i class='fa fa-rotate-left'/></a>" +
+                "<input id='drawing_feature_rotate' type='number' min='-180' max='180' data-slider-id='drawing_feature_rotate_slider' data-slider-min='-180' data-slider-max='180' data-slider-value='0'></div>" +
+            "</div>" +
+        "</div>"
+    );
     featureControls.appendTo(view);
+
+    $("#drawing_feature_rotate").slider({
+        ticks: [-180, -90, 0, 90, 180],
+        ticks_labels: ['-180°', '-90°', '0°', '90°', '180°'],
+        ticks_snap_bounds: 5,
+        tooltip: 'always',
+        formatter: function(value) {
+		return value + '°';
+	}
+    });
 
     $("#drawing_feature_delete").on("click", function() {
         $(me).triggerHandler("delete");
@@ -82,15 +103,35 @@ function DrawingPanelWindow(options) {
     $("#drawing_feature_label").on("keyup", function(e) {
         $(me).triggerHandler("label", $(e.target).val());
     });
+    $("#drawing_feature_rotate").on("keyup change", function(e) {
+        $(me).triggerHandler("rotate", $(e.target).val());
+    });
 };
 
 DrawingPanelWindow.prototype = Object.create(SplitScreenWindow.prototype);
 DrawingPanelWindow.prototype.constructor = DrawingPanelWindow;
 
+DrawingPanelWindow.prototype.selectModeDeactivated = function(color) {
+    $("#btn_drawing_select").removeClass("active").blur();
+};
+
+DrawingPanelWindow.prototype.selectModeActivated = function(color) {
+    $("#btn_drawing_select").addClass("active");
+};
+
+DrawingPanelWindow.prototype.eraserModeDeactivated = function(color) {
+    $("#btn_drawing_eraser").removeClass("active").blur();
+};
+
+DrawingPanelWindow.prototype.eraserModeActivated = function(color) {
+    $("#btn_drawing_eraser").addClass("active");
+};
+
 DrawingPanelWindow.prototype.selectColor = function(color) {
     var me = this;
     if(color !== "") {
         $("#btn_drawing_select").removeClass("active");
+        $("#btn_drawing_eraser").removeClass("active");
         $("#drawing_colors .drawing_color").removeClass("active");
         var idx = me.options.colors.indexOf(color);
         $("#drawing_colors .drawing_color[data-color-idx='" + idx + "']").addClass("active");
@@ -105,8 +146,14 @@ DrawingPanelWindow.prototype.unselectColor = function() {
 DrawingPanelWindow.prototype.featureSelected = function(f) {
     $("#drawing_feature_controls").show();
     $("#drawing_feature_label").val(f.attributes.label);
+    $("#drawing_feature_rotate").val(f.data.geometryRotation);
+    $("#drawing_feature_rotate").slider("setValue", f.data.geometryRotation);
+    $("#drawing_feature_rotate").slider("refresh", { useCurrentValue: true });
 };
 
 DrawingPanelWindow.prototype.featureUnselected = function() {
     $("#drawing_feature_controls").hide();
+    $("#drawing_feature_label").val("");
+    $("#drawing_feature_rotate").val("0");
+    $("#drawing_feature_rotate").slider("setValue", 0);
 };

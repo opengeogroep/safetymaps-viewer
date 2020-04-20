@@ -26,17 +26,22 @@ dbkjs.modules = dbkjs.modules || {};
 dbkjs.modules.drawing = {
     id: "dbk.modules.drawing",
     active: false,
+    drawMode: null,
     layer: null,
     drawLineControl: null,
     register: function() {
         var me = dbkjs.modules.drawing;
+
+        me.gf = new jsts.geom.GeometryFactory();
 
         me.options = $.extend({
             showMeasureButtons: false,
             // Set by ViewerApiActionBean
             editAuthorized: false,
             colors: ["yellow", "green", "red", "rgb(45,45,255)", "black"],
-            defaultColor: "black"
+            defaultColor: "black",
+            eraserWidth: 10,
+            eraserInterval: 50
         }, me.options);
 
         me.color = me.options.defaultColor;
@@ -46,6 +51,8 @@ dbkjs.modules.drawing = {
         me.initOpenLayersControls();
 
         $(dbkjs).on("deactivate_exclusive_map_controls", function() {
+            me.panel.selectModeDeactivated();
+            me.selectControl.activate();
             me.drawLineControl.deactivate();
         });
     },
@@ -70,6 +77,9 @@ dbkjs.modules.drawing = {
         .on("select", function() {
             me.selectMode();
         })
+        .on("eraser", function() {
+            me.eraserMode();
+        })
         .on("color", function(e, color) {
             me.selectControl.unselectAll();
             me.drawLine(color);
@@ -79,6 +89,9 @@ dbkjs.modules.drawing = {
         })
         .on("label", function(event, label) {
             me.setLabel(label);
+        })
+        .on("rotate", function(event, rotation) {
+            me.setRotation(rotation);
         });
     },
 
@@ -91,6 +104,8 @@ dbkjs.modules.drawing = {
                     strokeColor: "${strokeColor}",
                     strokeWidth: "3",
                     fontSize: 16,
+                    rotationPoint: "${rotationPoint}",
+                    rotation: "${rotation}",
                     label: "${label}",
                     labelSelect: false,
                     labelOutlineColor: "#ffffff",
@@ -107,13 +122,17 @@ dbkjs.modules.drawing = {
                     strokeColor: "${color}",
                     fillColor: "${color}",
                     fillOpacity: 0.2,
+                    strokeOpacity: "${strokeOpacity}",
                     strokeWidth: 3,
                     pointRadius: 6,
                     pointerEvents: "visiblePainted"
                 }, {
                     context: {
                         color: function(feature) {
-                            return me.color;
+                            return me.drawMode === "eraser" ? "black" : me.color;
+                        },
+                        strokeOpacity: function(feature) {
+                            return me.drawMode === "eraser" ? 0 : 1;
                         }
                     }
                 })
@@ -121,27 +140,33 @@ dbkjs.modules.drawing = {
         });
         dbkjs.map.addLayer(me.layer);
 
+        // Add to dbkjs.selectControl, otherwise layers will be below others
+        // when our selectControl is not active
+        dbkjs.selectControl.layers.push(me.layer);
+
         me.selectControl = new OpenLayers.Control.SelectFeature([me.layer]);
         dbkjs.map.addControl(me.selectControl);
         me.selectControl.deactivate();
         me.layer.events.register("featureselected", me, me.lineSelected);
         me.layer.events.register("featureunselected", me, me.lineUnselected);
         me.layer.events.register("sketchstarted", me, function(evt) {
-            console.log("sketchstarted", evt);
+            //console.log("sketchstarted", evt);
         });
         me.drawLineControl = new OpenLayers.Control.DrawFeature(me.layer, OpenLayers.Handler.Path, {
             callbacks: {
                 point: function(evt) {
-                    //console.log(`point draw at ${evt.x}, ${evt.y}, components: ${evt.parent.components.length}`);
+                    if(me.drawMode === "eraser") {
+                        me.erasePoint(evt.x, evt.y, evt.parent);
+                    }
                 }
             },
             eventListeners: {
                 featureadded: function(evt) {
-                    evt.feature.attributes.strokeColor = me.color;
-                    evt.feature.attributes.label = "";
-                    me.selectControl.unselectAll();
-                    me.selectControl.select(evt.feature);
-                    me.layer.redraw();
+                    if(me.drawMode === "line") {
+                        me.lineDrawn(evt.feature);
+                    } else if(me.drawMode === "eraser") {
+                        me.eraserLineFinished(evt.feature);
+                    }
                 }
             },
             handlerOptions: {
@@ -166,10 +191,10 @@ dbkjs.modules.drawing = {
 
     activate: function() {
         this.panel.show();
-        this.panel.selectColor(this.options.defaultColor);
-        $(dbkjs).triggerHandler("deactivate_exclusive_map_controls");
+        // Put our layer on top of other vector layers
+        dbkjs.map.raiseLayer(dbkjs.modules.drawing.layer, dbkjs.map.layers.length);
         dbkjs.selectControl.deactivate();
-        this.drawLineControl.activate();
+        this.drawLine(this.options.defaultColor);
     },
 
     deactivate: function() {
@@ -180,8 +205,149 @@ dbkjs.modules.drawing = {
     },
 
     selectMode: function() {
+        $(dbkjs).triggerHandler("deactivate_exclusive_map_controls");
         this.drawLineControl.deactivate();
         this.selectControl.activate();
+        this.panel.selectModeActivated();
+    },
+
+    eraserMode: function() {
+        $(dbkjs).triggerHandler("deactivate_exclusive_map_controls");
+        this.selectControl.unselectAll();
+        this.selectControl.deactivate();
+        this.drawLineControl.activate();
+        this.drawMode = "eraser";
+        this.panel.eraserModeActivated();
+        this.eraserLineProcessedComponents = 0;
+    },
+
+    erasePoint: function(x, y, erasedLine) {
+        var me = this;
+        this.eraserLine = erasedLine;
+        if(!this.eraserInterval) {
+            this.eraserInterval = setInterval(function() {
+                me.processEraser();
+            }, this.options.eraserInterval);
+        }
+    },
+
+    eraserLineFinished: function(feature) {
+        this.layer.removeFeatures([feature]);
+        this.eraserLine = feature.geometry;
+        clearInterval(this.eraserInterval);
+        this.eraserInterval = null;
+        this.processEraser();
+        this.eraserLine = null;
+        this.eraserLineProcessedComponents = 0;
+    },
+
+    processEraser: function() {
+        var extraComponents = (this.eraserLine.components.length - this.eraserLineProcessedComponents);
+        if(extraComponents > 1) {
+            //console.log("Process " + extraComponents + " eraser line components", this.eraserLine);
+
+            try {
+                //var writer = new jsts.io.WKTWriter();
+
+                // Create JSTS line from OpenLayers.Geometry.LineString components
+                var coords = [];
+                for(var i = this.eraserLineProcessedComponents; i < this.eraserLine.components.length; i++) {
+                    var vertex = this.eraserLine.components[i];
+                    coords.push(new jsts.geom.Coordinate(vertex.x, vertex.y));
+                }
+                // Buffer line to erase with scale dependent width
+                var lineToErase = this.gf.createLineString(coords).buffer(this.options.eraserWidth * dbkjs.map.getResolution());
+                //console.log("JSTS line to erase", writer.write(lineToErase));
+
+                var eraseLineBoundsCoords = lineToErase.getEnvelope().getExteriorRing().getCoordinates();
+                var eraseLineBounds = new OpenLayers.Bounds(
+                        eraseLineBoundsCoords[0].x, // left
+                        eraseLineBoundsCoords[0].y, // bottom
+                        eraseLineBoundsCoords[2].x, // right
+                        eraseLineBoundsCoords[2].y  // top
+                );
+
+                var allNewFeatures = [];
+                for(var i = 0; i < this.layer.features.length; i++) {
+                    var f = this.layer.features[i];
+
+                    // Skip calculation if entire feature outside eraser line
+                    if(!f.geometry.bounds.intersectsBounds(eraseLineBounds)) {
+                        allNewFeatures.push(f);
+                        continue;
+                    }
+
+                    var drawnLineGeometry = this.olLineStringToJSTS(f.geometry);
+                    if(!drawnLineGeometry) {
+                        // Sometimes line with one coordinate remains, skip it
+                        continue;
+                    }
+                    var difference = drawnLineGeometry.difference(lineToErase);
+
+                    //console.log("Old line", writer.write(drawnLineGeometry), "difference", writer.write(difference));
+
+                    if(difference.getGeometryType() === "MultiLineString") {
+                        for(var j = 0; j < difference.getNumGeometries(); j++) {
+                            var g = difference.getGeometryN(j);
+                            if(g.getGeometryType() === "LineString") {
+                                var newGeom = this.jstsLineStringToOlGeometry(g);
+                                if(newGeom !== null) {
+                                    var newAttributes = f.attributes;
+                                    if(j > 0) {
+                                        newAttributes = {
+                                            strokeColor: f.attributes.strokeColor,
+                                            label: ""
+                                        };
+                                    }
+                                    newAttributes.rotationPoint = 0;
+                                    var newFeature = new OpenLayers.Feature.Vector(newGeom, newAttributes);
+                                    allNewFeatures.push(newFeature);
+                                }
+                            }
+                        }
+                    } else if(difference.getGeometryType() === "LineString") {
+                        var newGeom = this.jstsLineStringToOlGeometry(difference);
+                        if(newGeom !== null) {
+                            var newFeature = new OpenLayers.Feature.Vector(newGeom, f.attributes);
+                            allNewFeatures.push(newFeature);
+                        }
+                    } else {
+                        console.log("Unexpects JSTS difference geometry type: " + difference.getGeometryType(), difference);
+                        allNewFeatures.push(f);
+                    }
+                }
+                this.layer.removeAllFeatures();
+                this.layer.addFeatures(allNewFeatures);
+
+                this.eraserLineProcessedComponents = this.eraserLine.components.length;
+            } catch(error) {
+                console.log("Error processing eraser, disabling interval", error);
+                clearInterval(this.eraserInterval);
+            }
+        }
+    },
+
+    olLineStringToJSTS: function(geometry) {
+        if(geometry.components.length < 2) {
+            return null;
+        }
+        var coords = [];
+        for(var i = 0; i < geometry.components.length; i++) {
+            var vertex = geometry.components[i];
+            coords.push(new jsts.geom.Coordinate(vertex.x, vertex.y));
+        }
+        return this.gf.createLineString(coords);
+    },
+
+    jstsLineStringToOlGeometry: function(line) {
+        var coords = line.getCoordinates().splice(0);
+        if(coords.length < 2) {
+            return null;
+        }
+        for(var i = 0; i < coords.length; i++) {
+            coords[i] = new OpenLayers.Geometry.Point(coords[i].x, coords[i].y);
+        }
+        return new OpenLayers.Geometry.LineString(coords);
     },
 
     drawLine: function(color) {
@@ -189,9 +355,24 @@ dbkjs.modules.drawing = {
         $(dbkjs).triggerHandler("deactivate_exclusive_map_controls");
         this.selectControl.deactivate();
         this.drawLineControl.activate();
+        this.panel.eraserModeDeactivated();
+        this.drawMode = "line";
+    },
+
+    lineDrawn: function(feature) {
+        var me = this;
+        feature.attributes.strokeColor = me.color;
+        feature.attributes.label = "";
+        me.selectControl.unselectAll();
+        me.selectControl.select(feature);
+        me.layer.redraw();
     },
 
     lineSelected: function(e) {
+        if(!this.active) {
+            dbkjs.selectControl.unselect(e.feature);
+            return;
+        }
         console.log("lineSelected", e.feature);
         this.panel.featureSelected(e.feature);
     },
@@ -212,5 +393,18 @@ dbkjs.modules.drawing = {
             f.attributes.label = label;
         }
         this.layer.redraw();
+    },
+
+    setRotation: function(rotation) {
+        var f = this.layer.selectedFeatures[0];
+        if(f) {
+            var currentRotation = f.attributes.geometryRotation || 0;
+            var rotationPoint = f.attributes.rotationPoint || f.geometry.getCentroid(true);
+            f.attributes.rotationPoint = rotationPoint;
+            var delta = rotation - currentRotation;
+            f.geometry.rotate(delta, rotationPoint);
+            f.attributes.geometryRotation = rotation;
+            this.layer.redraw();
+        }
     }
 };

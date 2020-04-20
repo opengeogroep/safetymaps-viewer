@@ -310,7 +310,7 @@ OpenLayers.Renderer.SVG.prototype.drawText = function(featureId, style, location
     } else {
         label.setAttributeNS(null, "pointer-events", "none");
     }
-    if (style.rotation) {
+    if (style.rotation && style.rotation !== "undefined") {
         label.setAttributeNS(null, "transform",
             'rotate(' + style.rotation + ',' + x + ',' + -y + ')'
         );

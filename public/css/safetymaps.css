@@ -697,3 +697,26 @@ a.btn.on:after {
     font-size: 16pt;
     overflow: hidden;
 }
+
+#drawing_feature_rotatebtn {
+    border: 0; opacity: 1
+}
+
+#drawing_feature_rotate {
+    height: 30px;
+    margin-top: 20px;
+    font-size: 16pt;
+    overflow: hidden;
+}
+
+#drawing_feature_rotate_slider {
+    margin-top: 24px;
+}
+
+#drawing_feature_rotate_slider .slider-selection {
+    background: transparent;
+}
+
+#drawing_feature_rotate_slider .slider-tick {
+    background: linear-gradient(to bottom,#f5f5f5 0,#f9f9f9 100%);
+}

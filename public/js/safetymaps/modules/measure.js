@@ -160,8 +160,8 @@ dbkjs.modules.measure = {
     },
     toggleMeasureDistance: function(activate) {
         var me = this;
-        $(dbkjs).triggerHandler("deactivate_exclusive_map_controls");
         var newStateIsActive = typeof activate === "undefined" ? !me.distance_control.active : activate;
+        $(dbkjs).triggerHandler("deactivate_exclusive_map_controls");
         if(newStateIsActive) {
             $('#btn_measure_distance').addClass('active');
             me.distance_control.activate();
@@ -169,8 +169,8 @@ dbkjs.modules.measure = {
     },
     toggleMeasureArea: function(activate) {
         var me = this;
-        $(dbkjs).triggerHandler("deactivate_exclusive_map_controls");
         var newStateIsActive = typeof activate === "undefined" ? !me.area_control.active : activate;
+        $(dbkjs).triggerHandler("deactivate_exclusive_map_controls");
         if(newStateIsActive) {
             $('#btn_measure_area').addClass('active');
             me.area_control.activate();
@@ -181,8 +181,8 @@ dbkjs.modules.measure = {
         $('#measure').hide();
     },
     off: function() {
-        $('#btn_measure_distance').removeClass("active");
-        $('#btn_measure_area').removeClass("active");
+        $('#btn_measure_distance').removeClass("active").blur();
+        $('#btn_measure_area').removeClass("active").blur();
         this.distance_control.deactivate();
         this.area_control.deactivate();
         this.clearMeasure();
