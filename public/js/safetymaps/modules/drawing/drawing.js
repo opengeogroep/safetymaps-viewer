@@ -179,10 +179,7 @@ dbkjs.modules.drawing = {
     },
 
     click: function() {
-        if(this.active) {
-            this.active = false;
-            this.deactivate();
-        } else {
+        if(!this.active) {
             this.active = true;
             this.color = this.options.defaultColor;
             this.activate();
