@@ -503,7 +503,7 @@ VehicleIncidentsController.prototype.getInzetInfo = function() {
 
         if(me.incidentMonitorController) {
             // If IncidentMonitor has open incident update that one
-            me.incidentMonitorController.tryGetIncient();
+            me.incidentMonitorController.tryGetIncident();
             // Reset timeout
             if (me.getInzetTimeout) {
                 window.clearTimeout(me.getInzetTimeout);
