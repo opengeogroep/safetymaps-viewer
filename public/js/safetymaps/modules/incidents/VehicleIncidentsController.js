@@ -265,7 +265,7 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
         } else {
 
             var incidentMonitorOptions = {
-                showVehicles: me.options.incidentMonitorShowVehicles ? me.options.incidentMonitorShowVehicles : me.options.showVehicles,
+                showVehicles: me.options.incidentMonitorShowVehicles !== null ? me.options.incidentMonitorShowVehicles : me.options.showVehicles,
                 showInzetRol: me.options.vehiclesShowInzetRol,
                 enableUnassignedVehicles: me.options.incidentMonitorEnableUnassignedVehicles,
                 incidentListFunction: me.options.incidentListFunction,
@@ -299,6 +299,7 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
 };
 
 VehicleIncidentsController.prototype.incidentMonitorIncidentSelected = function(event, inzetInfo) {
+    this.inzetInfo = inzetInfo;
     this.inzetIncident(inzetInfo, true);
 };
 
@@ -497,13 +498,11 @@ VehicleIncidentsController.prototype.cancelGetInzetInfo = function() {
 
 VehicleIncidentsController.prototype.getInzetInfo = function() {
     var me = this;
-
-    if(!me.voertuignummer) {
-        me.geenInzet();
-
+    
+    if(!me.voertuignummer || me.voertuignummer === 'null') {
         if(me.incidentMonitorController) {
             // If IncidentMonitor has open incident update that one
-            me.incidentMonitorController.tryGetIncient();
+            me.incidentMonitorController.tryGetIncident();
             // Reset timeout
             if (me.getInzetTimeout) {
                 window.clearTimeout(me.getInzetTimeout);
@@ -515,6 +514,10 @@ VehicleIncidentsController.prototype.getInzetInfo = function() {
 
         return;
     }
+
+    /*if(!me.voertuignummer || me.voertuignummer === 'null') {
+        me.geenInzet();
+    }*/
 
     // Nu geen meerdere voertuignummers...
 
@@ -571,9 +574,10 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
     } else if(inzetInfo.incidenten === null || inzetInfo.incidenten === 0) {
         if(!me.incidentFromIncidentList) {
             me.incidentDetailsWindow.showError("Geen actief incident voor voertuig " + me.voertuignummer + ". Laatst informatie opgehaald op " + new moment().format("LLL") + ".");
-            // If IncidentMonitor has open incident update that one
-            me.incidentMonitorController.tryGetIncient();
         }
+
+        // If IncidentMonitor has open incident update that one
+        me.incidentMonitorController.tryGetIncident();
 
         if(me.incidentNummer && !me.incidentFromIncidentList) {
             me.inzetBeeindigd('Inzet beeindigd');
@@ -946,7 +950,6 @@ VehicleIncidentsController.prototype.geenInzet = function() {
     }
     this.button.setAlerted(false);
     this.button.setIcon("bell-o");
-
     $(this).triggerHandler("end_incident");
     // XXX should listen to event
     safetymaps.deselectObject();
@@ -966,7 +969,7 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
         me.button.setIcon("bell");
     }
 
-    if(incidentInfo.incident.nummer !== me.incidentNummer || fromIncidentList) {
+    if(incidentInfo.incident.nummer !== me.incidentNummer) {
         me.geenInzet();
 
         me.incident = incidentInfo.incident;
@@ -1003,9 +1006,9 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
         $(me).triggerHandler("new_incident", [incident, incidentInfo]);
     } else { // update
 
-        if(fromIncidentList) {
+        /*if(fromIncidentList) {
             me.incidentDetailsWindow.show();
-        }
+        }*/
 
         // XXX IM
 /*
