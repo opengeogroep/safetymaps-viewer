@@ -105,7 +105,7 @@ dbkjs.getOrganisation = function() {
         
         if(jqXHR.status === 401) {
             console.log("Login required, redirect to login URL", jqXHR);
-            window.location.href = "api/login";
+            window.location.href = "../api/sso";
         } else {
             console.log("Error loading api/organisation.json", jqXHR);
             dbkjs.util.showError("Fout bij opstarten: HTTP status " + jqXHR.status + ", " + jqXHR.responseText.substring(0,1000));
