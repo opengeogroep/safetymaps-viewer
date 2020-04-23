@@ -576,11 +576,11 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
             me.incidentDetailsWindow.showError("Geen actief incident voor voertuig " + me.voertuignummer + ". Laatst informatie opgehaald op " + new moment().format("LLL") + ".");
         }
 
-        // If IncidentMonitor has open incident update that one
-        me.incidentMonitorController.tryGetIncident();
-
         if(me.incidentNummer && !me.incidentFromIncidentList) {
             me.inzetBeeindigd('Inzet beeindigd');
+        } else {
+            // If IncidentMonitor has open incident update that one
+            me.incidentMonitorController.tryGetIncident();
         }
     } else {
         if(me.incidentMonitorController) {
