@@ -1,18 +1,18 @@
-/* 
+/*
  * Copyright (c) 2019 B3Partners (info@b3partners.nl)
- * 
+ *
  * This file is part of safetymaps-viewer.
- * 
+ *
  * safetymaps-viewer is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * safetymaps-viewer is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  *  along with safetymaps-viewer. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -121,7 +121,7 @@ function VehicleIncidentsController(options, featureSelector) {
 
     if(me.options.showStatus) {
         window.setTimeout(function() {
-            me.updateStatus(); 
+            me.updateStatus();
         }, 2000);
     }
 }
@@ -414,12 +414,9 @@ VehicleIncidentsController.prototype.addConfigControls = function() {
 
     me.enableVoertuignummerTypeahead();
 
-    if(!me.voertuignummer) {
+    if(!me.voertuignummer && me.options.eigenVoertuignummerAuthorized) {
         // Open config window when voertuignummer not configured
         $("#c_settings").click();
-
-        // Wait for transition to end to set focus
-        window.setTimeout(function() { $("#input_voertuignummer").focus(); }, 1000);
     }
 };
 
@@ -498,12 +495,10 @@ VehicleIncidentsController.prototype.cancelGetInzetInfo = function() {
 VehicleIncidentsController.prototype.getInzetInfo = function() {
     var me = this;
 
-    if(!me.voertuignummer) {
-        me.geenInzet();
-
+    if(!me.voertuignummer || me.voertuignummer === 'null') {
         if(me.incidentMonitorController) {
             // If IncidentMonitor has open incident update that one
-            me.incidentMonitorController.tryGetIncient();
+            me.incidentMonitorController.tryGetIncident();
             // Reset timeout
             if (me.getInzetTimeout) {
                 window.clearTimeout(me.getInzetTimeout);
@@ -515,6 +510,10 @@ VehicleIncidentsController.prototype.getInzetInfo = function() {
 
         return;
     }
+
+    /*if(!me.voertuignummer || me.voertuignummer === 'null') {
+        me.geenInzet();
+    }*/
 
     // Nu geen meerdere voertuignummers...
 
@@ -571,9 +570,10 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
     } else if(inzetInfo.incidenten === null || inzetInfo.incidenten === 0) {
         if(!me.incidentFromIncidentList) {
             me.incidentDetailsWindow.showError("Geen actief incident voor voertuig " + me.voertuignummer + ". Laatst informatie opgehaald op " + new moment().format("LLL") + ".");
-            // If IncidentMonitor has open incident update that one
-            me.incidentMonitorController.tryGetIncient();
         }
+
+        // If IncidentMonitor has open incident update that one
+        me.incidentMonitorController.tryGetIncident();
 
         if(me.incidentNummer && !me.incidentFromIncidentList) {
             me.inzetBeeindigd('Inzet beeindigd');
@@ -966,7 +966,7 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
         me.button.setIcon("bell");
     }
 
-    if(incidentInfo.incident.nummer !== me.incidentNummer || fromIncidentList) {
+    if(incidentInfo.incident.nummer !== me.incidentNummer) {
         me.geenInzet();
 
         me.incident = incidentInfo.incident;
@@ -986,7 +986,7 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
             // XXX AGS IM
             me.incidentFromIncidentListWasActive = incident.Actueel && !incident.beeindigdeInzet;
         }
-        
+
         //XXX Luister naar incident
         dbkjs.modules.safetymaps_creator.unselectObject();
         me.zoomToIncident();
@@ -1003,9 +1003,9 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
         $(me).triggerHandler("new_incident", [incident, incidentInfo]);
     } else { // update
 
-        if(fromIncidentList) {
+        /*if(fromIncidentList) {
             me.incidentDetailsWindow.show();
-        }
+        }*/
 
         // XXX IM
 /*
@@ -1040,7 +1040,7 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
             }
 
             me.featureSelector.updateBalkRechtsonder(me.getBalkrechtsonderTitle());
-        }        
+        }
 
         // Check if position updated
         var oldX = null, oldY = null;
