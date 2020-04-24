@@ -29,6 +29,7 @@ dbkjs.modules.drawing = {
     drawMode: null,
     layer: null,
     drawLineControl: null,
+    updateInterval: null,
     register: function() {
         var me = dbkjs.modules.drawing;
 
@@ -41,7 +42,10 @@ dbkjs.modules.drawing = {
             colors: ["yellow", "green", "red", "rgb(45,45,255)", "black"],
             defaultColor: "black",
             eraserWidth: 10,
-            eraserInterval: 50
+            eraserInterval: 50,
+            updateInterval: 5000,
+            saveDebounceTime: 1000,
+            log: true
         }, me.options);
 
         me.color = me.options.defaultColor;
@@ -55,6 +59,115 @@ dbkjs.modules.drawing = {
             me.selectControl.activate();
             me.drawLineControl.deactivate();
         });
+
+        $(dbkjs).one("dbkjs_init_complete", function () {
+            if (dbkjs.modules.incidents && dbkjs.modules.incidents.controller) {
+                $(dbkjs.modules.incidents.controller).on("new_incident", function (event, commonIncident, incident) {
+                    me.newIncident(commonIncident.nummer || incident.IncidentNummer);
+                });
+                $(dbkjs.modules.incidents.controller).on("end_incident", function () {
+                    me.endIncident();
+                });
+            }
+        });
+    },
+
+    newIncident: function(incidentNr) {
+        var me = this;
+        me.options.log && console.log("drawing: new incident " + incidentNr);
+        me.incidentNr = incidentNr;
+        me.button.show();
+        if(me.updateJqXHR && me.updateJqXHR.state() === "pending") {
+            console.log("drawing: aborting previous request");
+            me.updateJqXHR.abort();
+        }
+        window.clearInterval(me.updateInterval);
+        me.update();
+        me.updateInterval = window.setInterval(function() {
+            me.update();
+        }, me.options.updateInterval);
+    },
+
+    endIncident: function() {
+        var me = this;
+        me.options.log && console.log("drawing: end incident ");
+        me.incidentNr = null;
+        window.clearInterval(me.updateInterval);
+        me.button.hide();
+    },
+
+    update: function() {
+        var me = this;
+
+        if(me.modifiedDebounceTimeout) {
+            return;
+        }
+
+        if(me.updateJqXHR && me.updateJqXHR.state() === "pending") {
+            me.options.log && console.log("drawing: previous request from " + ((new Date().getTime() - me.lastUpdateStart)/1000).toFixed(1) + "s ago still pending!");
+            return;
+        }
+
+        me.updateJqXHR = $.ajax('api/drawing/' + me.incidentNr + '.json', {
+            dataType: 'json',
+            cache: true,
+            ifModified: true
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            if(jqXHR.status === 404) {
+                return;
+            }
+            console.log("drawing: ajax failure: " + jqXHR.status + " " + textStatus, jqXHR.responseText);
+        })
+        .done(function(drawing, textStatus, jqXHR) {
+            if(textStatus === "notmodified") {
+                return;
+            }
+
+            var lastModified = jqXHR.getResponseHeader("last-modified");
+            console.log("drawing: got drawing, last modified " + lastModified, drawing);
+
+            var geoJsonFormatter = new OpenLayers.Format.GeoJSON();
+            me.selectControl.unselectAll();
+            me.layer.removeAllFeatures();
+            me.layer.addFeatures(geoJsonFormatter.read(drawing));
+            me.layer.redraw();
+
+            // TODO restore selected feature?
+        });
+    },
+
+    modified: function() {
+        var me = this;
+        if(me.modifiedDebounceTimeout) {
+            window.clearTimeout(me.modifiedDebounceTimeout);
+        }
+        me.modifiedDebounceTimeout = window.setTimeout(function() {
+            me.modifiedDebounceTimeout = null;
+            me.save();
+        }, me.options.saveDebounceTime);
+    },
+
+    save: function() {
+        var me = this;
+
+        if(me.saveJqXHR != null && me.saveJqXHR.state() === "pending") {
+            console.log("drawing: modified but previous save still pending!");
+            return;
+        }
+
+        // TODO If-Unmodified-Since
+        me.saveJqXHR = $.ajax('api/drawing/' + me.incidentNr + '.json', {
+            method: 'POST',
+            data: { features: new OpenLayers.Format.GeoJSON().write(me.layer.features) }
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            console.log("drawing: saving ajax failure: " + jqXHR.status + " " + textStatus, jqXHR.responseText);
+        })
+        .done(function(drawing, textStatus, jqXHR) {
+            var lastModified = jqXHR.getResponseHeader("last-modified");
+            console.log("drawing: saved drawing, last modified " + lastModified, drawing);
+        });
     },
 
     createElements: function() {
@@ -63,7 +176,8 @@ dbkjs.modules.drawing = {
         me.button = $("<a>")
             .attr("id", "btn-drawing")
             .attr("title", i18n.t("drawing.title"))
-            .addClass("btn btn-default");
+            .addClass("btn btn-default")
+            .hide();
         $("<i/>").addClass("fa fa-pencil-square-o").appendTo(me.button);
         me.button.prependTo($("#bottom_left_buttons"));
         me.button.on("click", me.click.bind(me));
@@ -236,6 +350,7 @@ dbkjs.modules.drawing = {
         this.processEraser();
         this.eraserLine = null;
         this.eraserLineProcessedComponents = 0;
+        this.modified();
     },
 
     processEraser: function() {
@@ -363,6 +478,7 @@ dbkjs.modules.drawing = {
         me.selectControl.unselectAll();
         me.selectControl.select(feature);
         me.layer.redraw();
+        me.modified();
     },
 
     lineSelected: function(e) {
@@ -382,6 +498,7 @@ dbkjs.modules.drawing = {
     deleteLine: function() {
         this.layer.removeFeatures(this.layer.selectedFeatures);
         this.panel.featureUnselected();
+        this.modified();
     },
 
     setLabel: function(label) {
@@ -390,6 +507,7 @@ dbkjs.modules.drawing = {
             f.attributes.label = label;
         }
         this.layer.redraw();
+        this.modified();
     },
 
     setRotation: function(rotation) {
@@ -402,6 +520,7 @@ dbkjs.modules.drawing = {
             f.geometry.rotate(delta, rotationPoint);
             f.attributes.geometryRotation = rotation;
             this.layer.redraw();
+            this.modified();
         }
     }
 };
