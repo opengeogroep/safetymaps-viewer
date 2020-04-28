@@ -265,7 +265,7 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
         } else {
 
             var incidentMonitorOptions = {
-                showVehicles: me.options.incidentMonitorShowVehicles ? me.options.incidentMonitorShowVehicles : me.options.showVehicles,
+                showVehicles: me.options.incidentMonitorShowVehicles !== null ? me.options.incidentMonitorShowVehicles : me.options.showVehicles,
                 showInzetRol: me.options.vehiclesShowInzetRol,
                 enableUnassignedVehicles: me.options.incidentMonitorEnableUnassignedVehicles,
                 incidentListFunction: me.options.incidentListFunction,
@@ -299,7 +299,13 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
 };
 
 VehicleIncidentsController.prototype.incidentMonitorIncidentSelected = function(event, inzetInfo) {
-    this.inzetIncident(inzetInfo, true);
+    // New info says closed incident while old info says active incident
+    if (inzetInfo.incident.beeindigdeInzet && !this.inzetInfo.incident.beeindigdeInzet) {
+        this.inzetBeeindigd('Incident beeindigd');
+    } else {
+        this.inzetInfo = inzetInfo;
+        this.inzetIncident(inzetInfo, true);
+    }
 };
 
 /**
@@ -572,11 +578,11 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
             me.incidentDetailsWindow.showError("Geen actief incident voor voertuig " + me.voertuignummer + ". Laatst informatie opgehaald op " + new moment().format("LLL") + ".");
         }
 
-        // If IncidentMonitor has open incident update that one
-        me.incidentMonitorController.tryGetIncident();
-
         if(me.incidentNummer && !me.incidentFromIncidentList) {
             me.inzetBeeindigd('Inzet beeindigd');
+        } else {
+            // If IncidentMonitor has open incident update that one
+            me.incidentMonitorController.tryGetIncident();
         }
     } else {
         if(me.incidentMonitorController) {
@@ -946,7 +952,6 @@ VehicleIncidentsController.prototype.geenInzet = function() {
     }
     this.button.setAlerted(false);
     this.button.setIcon("bell-o");
-
     $(this).triggerHandler("end_incident");
     // XXX should listen to event
     safetymaps.deselectObject();
