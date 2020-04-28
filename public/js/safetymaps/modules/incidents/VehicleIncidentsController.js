@@ -1,18 +1,18 @@
-/*
+/* 
  * Copyright (c) 2019 B3Partners (info@b3partners.nl)
- *
+ * 
  * This file is part of safetymaps-viewer.
- *
+ * 
  * safetymaps-viewer is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * safetymaps-viewer is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  *  along with safetymaps-viewer. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -121,7 +121,7 @@ function VehicleIncidentsController(options, featureSelector) {
 
     if(me.options.showStatus) {
         window.setTimeout(function() {
-            me.updateStatus();
+            me.updateStatus(); 
         }, 2000);
     }
 }
@@ -265,7 +265,7 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
         } else {
 
             var incidentMonitorOptions = {
-                showVehicles: me.options.incidentMonitorShowVehicles ? me.options.incidentMonitorShowVehicles : me.options.showVehicles,
+                showVehicles: me.options.incidentMonitorShowVehicles !== null ? me.options.incidentMonitorShowVehicles : me.options.showVehicles,
                 showInzetRol: me.options.vehiclesShowInzetRol,
                 enableUnassignedVehicles: me.options.incidentMonitorEnableUnassignedVehicles,
                 incidentListFunction: me.options.incidentListFunction,
@@ -299,7 +299,13 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
 };
 
 VehicleIncidentsController.prototype.incidentMonitorIncidentSelected = function(event, inzetInfo) {
-    this.inzetIncident(inzetInfo, true);
+    // New info says closed incident while old info says active incident
+    if (inzetInfo.incident.beeindigdeInzet && !this.inzetInfo.incident.beeindigdeInzet) {
+        this.inzetBeeindigd('Incident beeindigd');
+    } else {
+        this.inzetInfo = inzetInfo;
+        this.inzetIncident(inzetInfo, true);
+    }
 };
 
 /**
@@ -414,9 +420,12 @@ VehicleIncidentsController.prototype.addConfigControls = function() {
 
     me.enableVoertuignummerTypeahead();
 
-    if(!me.voertuignummer && me.options.eigenVoertuignummerAuthorized) {
+    if(!me.voertuignummer) {
         // Open config window when voertuignummer not configured
         $("#c_settings").click();
+
+        // Wait for transition to end to set focus
+        window.setTimeout(function() { $("#input_voertuignummer").focus(); }, 1000);
     }
 };
 
@@ -494,7 +503,7 @@ VehicleIncidentsController.prototype.cancelGetInzetInfo = function() {
 
 VehicleIncidentsController.prototype.getInzetInfo = function() {
     var me = this;
-
+    
     if(!me.voertuignummer || me.voertuignummer === 'null') {
         if(me.incidentMonitorController) {
             // If IncidentMonitor has open incident update that one
@@ -572,11 +581,11 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
             me.incidentDetailsWindow.showError("Geen actief incident voor voertuig " + me.voertuignummer + ". Laatst informatie opgehaald op " + new moment().format("LLL") + ".");
         }
 
-        // If IncidentMonitor has open incident update that one
-        me.incidentMonitorController.tryGetIncident();
-
         if(me.incidentNummer && !me.incidentFromIncidentList) {
             me.inzetBeeindigd('Inzet beeindigd');
+        } else {
+            // If IncidentMonitor has open incident update that one
+            me.incidentMonitorController.tryGetIncident();
         }
     } else {
         if(me.incidentMonitorController) {
@@ -946,7 +955,6 @@ VehicleIncidentsController.prototype.geenInzet = function() {
     }
     this.button.setAlerted(false);
     this.button.setIcon("bell-o");
-
     $(this).triggerHandler("end_incident");
     // XXX should listen to event
     safetymaps.deselectObject();
@@ -986,7 +994,7 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
             // XXX AGS IM
             me.incidentFromIncidentListWasActive = incident.Actueel && !incident.beeindigdeInzet;
         }
-
+        
         //XXX Luister naar incident
         dbkjs.modules.safetymaps_creator.unselectObject();
         me.zoomToIncident();
@@ -1040,7 +1048,7 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
             }
 
             me.featureSelector.updateBalkRechtsonder(me.getBalkrechtsonderTitle());
-        }
+        }        
 
         // Check if position updated
         var oldX = null, oldY = null;
