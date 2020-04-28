@@ -252,6 +252,8 @@
     },
     "drawing": {
         "title": "Tekenen",
-        "select": "Selecteer"
+        "select": "Selecteer",
+        "line": "Lijn",
+        "polygon": "Gebied"
     }
 }

@@ -29,6 +29,7 @@ dbkjs.modules.drawing = {
     drawMode: null,
     layer: null,
     drawLineControl: null,
+    drawPolygonControl: null,
     updateInterval: null,
     register: function() {
         var me = dbkjs.modules.drawing;
@@ -189,14 +190,29 @@ dbkjs.modules.drawing = {
             me.deactivate();
         })
         .on("select", function() {
+            me.selectControl.unselectAll();
             me.selectMode();
         })
         .on("eraser", function() {
+            me.selectControl.unselectAll();
             me.eraserMode();
         })
         .on("color", function(e, color) {
             me.selectControl.unselectAll();
-            me.drawLine(color);
+            me.color = color;
+            if (me.drawMode === 'polygon') {
+                me.drawPolygon();
+            } else {
+                me.drawLine();
+            }
+        })
+        .on("line", function(e, color) {
+            me.selectControl.unselectAll();
+            me.drawLine();
+        })
+        .on("polygon", function(e, color) {
+            me.selectControl.unselectAll();
+            me.drawPolygon();
         })
         .on("delete", function() {
             me.deleteLine();
@@ -207,6 +223,7 @@ dbkjs.modules.drawing = {
         .on("rotate", function(event, rotation) {
             me.setRotation(rotation);
         });
+
     },
 
     initOpenLayersControls: function() {
@@ -224,7 +241,9 @@ dbkjs.modules.drawing = {
                     labelSelect: false,
                     labelOutlineColor: "#ffffff",
                     labelOutlineWidth: 2,
-                    labelAlign: "cb"
+                    labelAlign: "cb",
+                    fillColor: "${strokeColor}",
+                    fillOpacity: 0.2
                 }),
                 "select": new OpenLayers.Style({
                     strokeWidth: "5"
@@ -290,6 +309,20 @@ dbkjs.modules.drawing = {
         });
         dbkjs.map.addControl(me.drawLineControl);
         me.drawLineControl.deactivate();
+        // Polygon control
+        me.drawPolygonControl = new OpenLayers.Control.DrawFeature(me.layer, OpenLayers.Handler.Polygon, {
+            eventListeners: {
+                featureadded: function (evt) {
+                    me.polygonDrawn(evt.feature);
+                }
+            },
+            handlerOptions: {
+                freehand: true,
+                freehandToggle: null
+            }
+        });
+        dbkjs.map.addControl(me.drawPolygonControl);
+        me.drawPolygonControl.deactivate();        
     },
 
     click: function() {
@@ -305,7 +338,8 @@ dbkjs.modules.drawing = {
         // Put our layer on top of other vector layers
         dbkjs.map.raiseLayer(dbkjs.modules.drawing.layer, dbkjs.map.layers.length);
         dbkjs.selectControl.deactivate();
-        this.drawLine(this.options.defaultColor);
+        this.color = this.options.defaultColor;
+        this.drawLine();
     },
 
     deactivate: function() {
@@ -318,14 +352,19 @@ dbkjs.modules.drawing = {
     selectMode: function() {
         $(dbkjs).triggerHandler("deactivate_exclusive_map_controls");
         this.drawLineControl.deactivate();
+        this.drawPolygonControl.deactivate();
+        this.panel.lineModeDeactivated();
+        this.panel.polygonModeDeactivated();
         this.selectControl.activate();
         this.panel.selectModeActivated();
     },
 
     eraserMode: function() {
         $(dbkjs).triggerHandler("deactivate_exclusive_map_controls");
-        this.selectControl.unselectAll();
         this.selectControl.deactivate();
+        this.drawPolygonControl.deactivate();
+        this.panel.lineModeDeactivated();
+        this.panel.polygonModeDeactivated();
         this.drawLineControl.activate();
         this.drawMode = "eraser";
         this.panel.eraserModeActivated();
@@ -462,16 +501,39 @@ dbkjs.modules.drawing = {
         return new OpenLayers.Geometry.LineString(coords);
     },
 
-    drawLine: function(color) {
-        this.color = color;
+    drawLine: function() {
         $(dbkjs).triggerHandler("deactivate_exclusive_map_controls");
         this.selectControl.deactivate();
+        this.drawPolygonControl.deactivate();
         this.drawLineControl.activate();
         this.panel.eraserModeDeactivated();
+        this.panel.polygonModeDeactivated();
+        this.panel.lineModeActivated();
         this.drawMode = "line";
     },
 
+    drawPolygon: function () {
+        $(dbkjs).triggerHandler("deactivate_exclusive_map_controls");
+        this.selectControl.deactivate();
+        this.drawLineControl.deactivate();
+        this.drawPolygonControl.activate();
+        this.panel.eraserModeDeactivated();
+        this.panel.polygonModeActivated();
+        this.panel.lineModeDeactivated();
+        this.drawMode = "polygon";
+    },
+
     lineDrawn: function(feature) {
+        var me = this;
+        feature.attributes.strokeColor = me.color;
+        feature.attributes.label = "";
+        me.selectControl.unselectAll();
+        me.selectControl.select(feature);
+        me.layer.redraw();
+        me.modified();
+    },
+
+    polygonDrawn: function (feature) {
         var me = this;
         feature.attributes.strokeColor = me.color;
         feature.attributes.label = "";

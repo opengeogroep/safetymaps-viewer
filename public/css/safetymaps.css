@@ -647,11 +647,13 @@ a.btn.on:after {
     top: -12px;
 }
 
-#drawing_buttons {
+#drawing_buttons,
+#drawing_controls {
     margin-left: 5px;
 }
 
-#drawing_buttons .btn {
+#drawing_buttons .btn,
+#drawing_controls .btn {
     height: 64px;
     min-width: 60px;
     font-size: 35px !important;

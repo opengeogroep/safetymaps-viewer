@@ -246,6 +246,8 @@
     },
     "drawing": {
         "title": "Tegne",
-        "select": "Vælg"
+        "select": "Vælg",
+        "line": "Linje",
+        "polygon": "Areal"
     }
 }

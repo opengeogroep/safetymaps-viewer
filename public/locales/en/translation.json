@@ -222,6 +222,8 @@
     },
     "drawing": {
         "title": "Tekenen",
-        "select": "Select"
+        "select": "Select",
+        "line": "Line",
+        "polygon": "Area"
     }
 }

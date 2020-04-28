@@ -34,6 +34,8 @@ function DrawingPanelWindow(options) {
 
     var buttons = $("<div id='drawing_buttons'/>");
     buttons.appendTo(view);
+    var controls = $("<div id='drawing_controls'/>");
+    controls.appendTo(view);
 
     if(options.showMeasureButtons) {
         $(dbkjs).one("dbkjs_init_complete", function() {
@@ -58,6 +60,19 @@ function DrawingPanelWindow(options) {
         me.unselectColor();
         $(me).triggerHandler("eraser");
     });
+    
+    if(me.options.showAdvancedControls) {
+        $('<a id="btn_drawing_line" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.line") + '"><img style="width:35px; height:35px;" src="images/imoov/s1170---g.png" /></a>').appendTo(controls);
+        $("#btn_drawing_line").on("click", function() {
+            me.eraserModeDeactivated();
+            $(me).triggerHandler("line");
+        });
+        $('<a id="btn_drawing_polygon" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.polygon") + '"><img style="width:35px; height:35px;" src="images/imoov/s1140---g.png" /></a>').appendTo(controls);
+        $("#btn_drawing_polygon").on("click", function() {
+            me.eraserModeDeactivated();
+            $(me).triggerHandler("polygon");
+        });
+    }
 
     var colors = $("<div id='drawing_colors'/>");
 
@@ -117,6 +132,22 @@ DrawingPanelWindow.prototype.selectModeDeactivated = function(color) {
 
 DrawingPanelWindow.prototype.selectModeActivated = function(color) {
     $("#btn_drawing_select").addClass("active");
+};
+
+DrawingPanelWindow.prototype.lineModeDeactivated = function(color) {
+    $("#btn_drawing_line").removeClass("active").blur();
+};
+
+DrawingPanelWindow.prototype.lineModeActivated = function(color) {
+    $("#btn_drawing_line").addClass("active");
+};
+
+DrawingPanelWindow.prototype.polygonModeDeactivated = function(color) {
+    $("#btn_drawing_polygon").removeClass("active").blur();
+};
+
+DrawingPanelWindow.prototype.polygonModeActivated = function(color) {
+    $("#btn_drawing_polygon").addClass("active");
 };
 
 DrawingPanelWindow.prototype.eraserModeDeactivated = function(color) {
