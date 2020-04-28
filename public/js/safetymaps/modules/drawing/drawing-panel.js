@@ -54,43 +54,46 @@ function DrawingPanelWindow(options) {
         $(me).triggerHandler("toggle");
     });
 
-    $('<a id="btn_drawing_select" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.select") + '"><i class="fa fa-hand-pointer-o"></i></a>').appendTo(buttons);
-    $("#btn_drawing_select").on("click", function() {
-        me.unselectColor();
-        me.eraserModeDeactivated();
-        $(me).triggerHandler("select");
-    });
-    $('<a id="btn_drawing_eraser" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.eraser") + '"><i class="fa fa-eraser"></i></a>').appendTo(buttons);
-    $("#btn_drawing_eraser").on("click", function() {
-        me.unselectColor();
-        $(me).triggerHandler("eraser");
-    });
-    
-    if(me.options.showAdvancedControls) {
-        $('<a id="btn_drawing_line" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.line") + '"><img style="width:35px; height:35px;" src="images/imoov/s1170---g.png" /></a>').appendTo(controls);
-        $("#btn_drawing_line").on("click", function() {
+
+    if(options.editAuthorized) {
+        $('<a id="btn_drawing_select" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.select") + '"><i class="fa fa-hand-pointer-o"></i></a>').appendTo(buttons);
+        $("#btn_drawing_select").on("click", function() {
+            me.unselectColor();
             me.eraserModeDeactivated();
-            $(me).triggerHandler("line");
+            $(me).triggerHandler("select");
         });
-        $('<a id="btn_drawing_polygon" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.polygon") + '"><img style="width:35px; height:35px;" src="images/imoov/s1140---g.png" /></a>').appendTo(controls);
-        $("#btn_drawing_polygon").on("click", function() {
-            me.eraserModeDeactivated();
-            $(me).triggerHandler("polygon");
+        $('<a id="btn_drawing_eraser" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.eraser") + '"><i class="fa fa-eraser"></i></a>').appendTo(buttons);
+        $("#btn_drawing_eraser").on("click", function() {
+            me.unselectColor();
+            $(me).triggerHandler("eraser");
+        });
+
+        if(me.options.showAdvancedControls) {
+            $('<a id="btn_drawing_line" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.line") + '"><img style="width:35px; height:35px;" src="images/imoov/s1170---g.png" /></a>').appendTo(controls);
+            $("#btn_drawing_line").on("click", function() {
+                me.eraserModeDeactivated();
+                $(me).triggerHandler("line");
+            });
+            $('<a id="btn_drawing_polygon" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.polygon") + '"><img style="width:35px; height:35px;" src="images/imoov/s1140---g.png" /></a>').appendTo(controls);
+            $("#btn_drawing_polygon").on("click", function() {
+                me.eraserModeDeactivated();
+                $(me).triggerHandler("polygon");
+            });
+        }
+
+        var colors = $("<div id='drawing_colors'/>");
+
+        $.each(options.colors, function(i, colorCode) {
+            $("<div class='drawing_color' data-color-idx='" + i + "' style='background-color: " + colorCode + "'/>").appendTo(colors);
+        });
+        colors.appendTo(view);
+
+        colors.on("click", function(e) {
+            var idx = $(e.target).attr("data-color-idx");
+            var color = me.options.colors[idx];
+            me.selectColor(color);
         });
     }
-
-    var colors = $("<div id='drawing_colors'/>");
-
-    $.each(options.colors, function(i, colorCode) {
-        $("<div class='drawing_color' data-color-idx='" + i + "' style='background-color: " + colorCode + "'/>").appendTo(colors);
-    });
-    colors.appendTo(view);
-
-    colors.on("click", function(e) {
-        var idx = $(e.target).attr("data-color-idx");
-        var color = me.options.colors[idx];
-        me.selectColor(color);
-    });
 
     var featureControls = $(
         "<div id='drawing_feature_controls' style='display: none'>Selectie<br>" +

@@ -347,12 +347,17 @@ dbkjs.modules.drawing = {
         this.layer.setVisibility(true);
         // Put our layer on top of other vector layers
         dbkjs.map.raiseLayer(dbkjs.modules.drawing.layer, dbkjs.map.layers.length);
-        dbkjs.selectControl.deactivate();
+
+        if(this.options.editAuthorized) {
+            dbkjs.selectControl.deactivate();
+        }
 
         if(!setVisibleOnly) {
             this.panel.show();
             this.color = this.options.defaultColor;
-            this.drawLine();
+            if(this.options.editAuthorized) {
+                this.drawLine();
+            }
         }
     },
 
