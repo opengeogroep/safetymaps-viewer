@@ -178,6 +178,9 @@ VehiclePositionLayer.prototype.removePopup = function() {
  */
 VehiclePositionLayer.prototype.features = function(features) {
     var me = this;
+    if(!features) {
+        return;
+    }
     if(me.selectedFeature) {
         me.selectControl.unselectAll();
     }
