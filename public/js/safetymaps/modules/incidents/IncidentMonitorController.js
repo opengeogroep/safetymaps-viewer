@@ -230,7 +230,6 @@ IncidentMonitorController.prototype.getVrhAGSIncident = function () {
     .fail(function(e) {
         console.log("IM VrhAGS: Error getting incident data", arguments);
         me.incidentTimerFails = me.incidentTimerFails + 1;
-        p.reject();
     })
     .done(function(incident) {
         me.incidentTimerFails = 0;
