@@ -49,6 +49,11 @@ function DrawingPanelWindow(options) {
         });
     }
 
+    $('<a id="btn_drawing_toggle" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.toggle") + '"><i class="fa fa-eye-slash"></i></a>').appendTo(buttons);
+    $("#btn_drawing_toggle").on("click", function() {
+        $(me).triggerHandler("toggle");
+    });
+
     $('<a id="btn_drawing_select" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.select") + '"><i class="fa fa-hand-pointer-o"></i></a>').appendTo(buttons);
     $("#btn_drawing_select").on("click", function() {
         me.unselectColor();
@@ -125,6 +130,18 @@ function DrawingPanelWindow(options) {
 
 DrawingPanelWindow.prototype = Object.create(SplitScreenWindow.prototype);
 DrawingPanelWindow.prototype.constructor = DrawingPanelWindow;
+
+DrawingPanelWindow.prototype.setToggleState = function(visible) {
+    var i = $("#btn_drawing_toggle i");
+    i.removeClass("fa-eye-slash");
+    i.removeClass("fa-eye");
+
+    if(visible) {
+        i.addClass("fa-eye-slash");
+    } else {
+        i.addClass("fa-eye");
+    }
+}
 
 DrawingPanelWindow.prototype.selectModeDeactivated = function(color) {
     $("#btn_drawing_select").removeClass("active").blur();

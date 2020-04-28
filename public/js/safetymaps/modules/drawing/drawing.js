@@ -27,6 +27,7 @@ dbkjs.modules.drawing = {
     id: "dbk.modules.drawing",
     active: false,
     drawMode: null,
+    visible: true,
     layer: null,
     drawLineControl: null,
     drawPolygonControl: null,
@@ -78,6 +79,7 @@ dbkjs.modules.drawing = {
         me.options.log && console.log("drawing: new incident " + incidentNr);
         me.incidentNr = incidentNr;
         me.button.show();
+        me.toggleVisibility(true);
         if(me.updateJqXHR && me.updateJqXHR.state() === "pending") {
             console.log("drawing: aborting previous request");
             me.updateJqXHR.abort();
@@ -189,15 +191,21 @@ dbkjs.modules.drawing = {
             me.active = false;
             me.deactivate();
         })
+        .on("toggle", function() {
+            me.toggleVisibility();
+        })
         .on("select", function() {
+            me.toggleVisibility(true);
             me.selectControl.unselectAll();
             me.selectMode();
         })
         .on("eraser", function() {
+            me.toggleVisibility(true);
             me.selectControl.unselectAll();
             me.eraserMode();
         })
         .on("color", function(e, color) {
+            me.toggleVisibility(true);
             me.selectControl.unselectAll();
             me.color = color;
             if (me.drawMode === 'polygon') {
@@ -207,10 +215,12 @@ dbkjs.modules.drawing = {
             }
         })
         .on("line", function(e, color) {
+            me.toggleVisibility(true);
             me.selectControl.unselectAll();
             me.drawLine();
         })
         .on("polygon", function(e, color) {
+            me.toggleVisibility(true);
             me.selectControl.unselectAll();
             me.drawPolygon();
         })
@@ -333,20 +343,42 @@ dbkjs.modules.drawing = {
         }
     },
 
-    activate: function() {
-        this.panel.show();
+    activate: function(setVisibleOnly) {
+        this.layer.setVisibility(true);
         // Put our layer on top of other vector layers
         dbkjs.map.raiseLayer(dbkjs.modules.drawing.layer, dbkjs.map.layers.length);
         dbkjs.selectControl.deactivate();
-        this.color = this.options.defaultColor;
-        this.drawLine();
+
+        if(!setVisibleOnly) {
+            this.panel.show();
+            this.color = this.options.defaultColor;
+            this.drawLine();
+        }
     },
 
-    deactivate: function() {
-        this.panel.hide();
+    deactivate: function(keepPanelOpen) {
+        if(!keepPanelOpen) {
+            this.panel.hide();
+        }
         this.drawLineControl.deactivate();
         this.selectControl.deactivate();
         dbkjs.selectControl.activate();
+    },
+
+    toggleVisibility: function(optionalVisible) {
+        if(typeof optionalVisible !== 'undefined') {
+            this.visible = optionalVisible;
+        } else {
+            this.visible = !this.visible;
+        }
+
+        if(this.visible) {
+            this.activate(true);
+        } else {
+            this.deactivate(true);
+            this.layer.setVisibility(false);
+        }
+        this.panel.setToggleState(this.visible);
     },
 
     selectMode: function() {
