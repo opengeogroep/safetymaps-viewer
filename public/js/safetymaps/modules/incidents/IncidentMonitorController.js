@@ -174,7 +174,7 @@ IncidentMonitorController.prototype.incidentRead = function(incidentId) {
 
         // Check if all incidents are now read
         var allRead = true;
-        $.each(me.currentIncidentIds, function(i, checkIncidentId) {
+        $.each(me.currentIncidentIds || [], function(i, checkIncidentId) {
             if(me.readCurrentIncidentIds.indexOf(checkIncidentId) === -1) {
                 allRead = false;
                 return false;
