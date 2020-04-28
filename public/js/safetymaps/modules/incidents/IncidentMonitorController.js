@@ -233,6 +233,10 @@ IncidentMonitorController.prototype.getVrhAGSIncident = function () {
     })
     .done(function(incident) {
         me.incidentTimerFails = 0;
+        if(!incident || !incident.NR_INCIDENT) {
+            console.log("IM VrhAGS: invalid incident", incident);
+            return;
+        }
         var incidentInfo = { source: me.options.incidentSource, incidenten: [incident.NR_INCIDENT], incident: incident};
         VehicleIncidentsController.prototype.normalizeIncidentFields(incidentInfo);
         $(me).triggerHandler("incident_selected", [incidentInfo]);
