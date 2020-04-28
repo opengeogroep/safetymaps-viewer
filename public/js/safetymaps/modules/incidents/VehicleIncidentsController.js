@@ -299,8 +299,13 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
 };
 
 VehicleIncidentsController.prototype.incidentMonitorIncidentSelected = function(event, inzetInfo) {
-    this.inzetInfo = inzetInfo;
-    this.inzetIncident(inzetInfo, true);
+    // New info says closed incident while old info says active incident
+    if (inzetInfo.incident.beeindigdeInzet && !this.inzetInfo.incident.beeindigdeInzet) {
+        this.inzetBeeindigd('Incident beeindigd');
+    } else {
+        this.inzetInfo = inzetInfo;
+        this.inzetIncident(inzetInfo, true);
+    }
 };
 
 /**
