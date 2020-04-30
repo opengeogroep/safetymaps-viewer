@@ -225,6 +225,7 @@
         "toggle": "Drawing show/hide",
         "select": "Select",
         "line": "Line",
-        "polygon": "Area"
+        "polygon": "Area",
+        "point": "Symbol"
     }
 }

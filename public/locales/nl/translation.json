@@ -255,6 +255,7 @@
         "toggle": "Tekening tonen/verbergen",
         "select": "Selecteer",
         "line": "Lijn",
-        "polygon": "Gebied"
+        "polygon": "Gebied",
+        "point": "Symbool"
     }
 }

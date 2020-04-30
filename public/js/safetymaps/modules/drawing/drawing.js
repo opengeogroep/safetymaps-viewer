@@ -51,6 +51,25 @@ dbkjs.modules.drawing = {
         }, me.options);
 
         me.color = me.options.defaultColor;
+        me.symbol = null;
+
+        onMapClick = dbkjs.util.onClick;
+        dbkjs.util.onClick = function(e) {
+            var xy;
+            if(!e) {
+                return;
+            }
+            if(e.xy) {
+                xy = e.xy;
+            } else if(e.changedTouches && e.changedTouches.length > 0) {
+                xy = {x: e.changedTouches[0].pageX, y: e.changedTouches[0].pageY };
+            }
+            if (me.active) {
+                me.mapClick(dbkjs.map.getLonLatFromPixel(xy));
+            } else {
+                onMapClick(e);
+            }
+        };
 
         me.createElements();
 
@@ -214,15 +233,26 @@ dbkjs.modules.drawing = {
                 me.drawLine();
             }
         })
-        .on("line", function(e, color) {
+        .on("symbol", function (e, symbol) {
+            me.toggleVisibility(true);
+            me.selectControl.unselectAll();
+            me.symbol = symbol;
+            me.drawPoint();
+        })
+        .on("line", function(e) {
             me.toggleVisibility(true);
             me.selectControl.unselectAll();
             me.drawLine();
         })
-        .on("polygon", function(e, color) {
+        .on("polygon", function(e) {
             me.toggleVisibility(true);
             me.selectControl.unselectAll();
             me.drawPolygon();
+        })
+        .on("point", function(e) {
+            me.toggleVisibility(true);
+            me.selectControl.unselectAll();
+            me.drawPoint();
         })
         .on("delete", function() {
             me.deleteLine();
@@ -242,6 +272,11 @@ dbkjs.modules.drawing = {
         me.layer = new OpenLayers.Layer.Vector("_Drawing", {
             styleMap: new OpenLayers.StyleMap({
                 "default": new OpenLayers.Style({
+                    pointRadius: "${radius}",
+                    externalGraphic: "${image}",
+                    labelYOffset: "${labelYOffset}",
+                    labelOutlineWidth: 2,
+                    labelOutlineColor: 'white',
                     strokeColor: "${strokeColor}",
                     strokeWidth: "3",
                     fontSize: 16,
@@ -253,7 +288,7 @@ dbkjs.modules.drawing = {
                     labelOutlineWidth: 2,
                     labelAlign: "cb",
                     fillColor: "${strokeColor}",
-                    fillOpacity: 0.2
+                    fillOpacity: "${fillOpacity}"
                 }),
                 "select": new OpenLayers.Style({
                     strokeWidth: "5"
@@ -332,7 +367,20 @@ dbkjs.modules.drawing = {
             }
         });
         dbkjs.map.addControl(me.drawPolygonControl);
-        me.drawPolygonControl.deactivate();        
+        me.drawPolygonControl.deactivate();
+    },
+
+    mapClick: function (lonLat) {
+        var me = this;
+        if(me.drawMode === "point" && me.symbol) {
+            var attributes = $.extend({}, me.symbol, {
+                label: "",
+            });
+            attributes.radius = 20;
+            var feature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(lonLat.lon, lonLat.lat), attributes);
+            me.layer.addFeatures(feature);
+            me.pointDrawn(feature);
+        }
     },
 
     click: function() {
@@ -344,6 +392,7 @@ dbkjs.modules.drawing = {
     },
 
     activate: function(setVisibleOnly) {
+        var me = this;
         this.layer.setVisibility(true);
         // Put our layer on top of other vector layers
         dbkjs.map.raiseLayer(dbkjs.modules.drawing.layer, dbkjs.map.layers.length);
@@ -365,6 +414,7 @@ dbkjs.modules.drawing = {
         if(!keepPanelOpen) {
             this.panel.hide();
         }
+        this.active = false;
         this.drawLineControl.deactivate();
         this.selectControl.deactivate();
         dbkjs.selectControl.activate();
@@ -392,8 +442,10 @@ dbkjs.modules.drawing = {
         this.drawPolygonControl.deactivate();
         this.panel.lineModeDeactivated();
         this.panel.polygonModeDeactivated();
+        this.panel.pointModeDeactivated();
         this.selectControl.activate();
         this.panel.selectModeActivated();
+        this.symbol = null;
     },
 
     eraserMode: function() {
@@ -405,6 +457,7 @@ dbkjs.modules.drawing = {
         this.drawLineControl.activate();
         this.drawMode = "eraser";
         this.panel.eraserModeActivated();
+        this.panel.pointModeDeactivated();
         this.eraserLineProcessedComponents = 0;
     },
 
@@ -546,6 +599,7 @@ dbkjs.modules.drawing = {
         this.panel.eraserModeDeactivated();
         this.panel.polygonModeDeactivated();
         this.panel.lineModeActivated();
+        this.panel.pointModeDeactivated();
         this.drawMode = "line";
     },
 
@@ -557,7 +611,20 @@ dbkjs.modules.drawing = {
         this.panel.eraserModeDeactivated();
         this.panel.polygonModeActivated();
         this.panel.lineModeDeactivated();
+        this.panel.pointModeDeactivated();
         this.drawMode = "polygon";
+    },
+
+    drawPoint: function () {
+        $(dbkjs).triggerHandler("deactivate_exclusive_map_controls");
+        this.selectControl.deactivate();
+        this.drawLineControl.deactivate();
+        this.drawPolygonControl.deactivate();
+        this.panel.eraserModeDeactivated();
+        this.panel.polygonModeDeactivated();
+        this.panel.lineModeDeactivated();
+        this.panel.pointModeActivated();
+        this.drawMode = "point";
     },
 
     lineDrawn: function(feature) {
@@ -573,7 +640,17 @@ dbkjs.modules.drawing = {
     polygonDrawn: function (feature) {
         var me = this;
         feature.attributes.strokeColor = me.color;
+        feature.attributes.fillOpacity = "0.2";
         feature.attributes.label = "";
+        me.selectControl.unselectAll();
+        me.selectControl.select(feature);
+        me.layer.redraw();
+        me.modified();
+    },
+
+    pointDrawn: function (feature) {
+        var me = this;
+        feature.attributes.fillOpacity = "1";
         me.selectControl.unselectAll();
         me.selectControl.select(feature);
         me.layer.redraw();

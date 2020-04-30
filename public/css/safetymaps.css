@@ -660,17 +660,20 @@ a.btn.on:after {
     margin-right: -1px;
 }
 
-#drawing_colors {
+#drawing_colors,
+#drawing_symbols {
     margin-top: 20px;
 }
-#drawing_colors .drawing_color {
+#drawing_colors .drawing_color,
+#drawing_symbols .drawing_symbol {
     width: 60px;
     height: 60px;
     float: left;
     margin: 5px;
 }
 
-#drawing_colors .drawing_color.active {
+#drawing_colors .drawing_color.active,
+#drawing_symbols .drawing_symbol.active {
     border: 2px solid black;
 }
 

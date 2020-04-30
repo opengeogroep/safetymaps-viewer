@@ -22,7 +22,9 @@
 function DrawingPanelWindow(options) {
     SplitScreenWindow.call(this, "drawingPanel");
     var me = this;
+    
     me.options = options;
+    me.symbolList = me.options.symbols;
 
     me.widthPercent = 20;
 
@@ -54,8 +56,8 @@ function DrawingPanelWindow(options) {
         $(me).triggerHandler("toggle");
     });
 
-
     if(options.editAuthorized) {
+        // Buttons
         $('<a id="btn_drawing_select" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.select") + '"><i class="fa fa-hand-pointer-o"></i></a>').appendTo(buttons);
         $("#btn_drawing_select").on("click", function() {
             me.unselectColor();
@@ -67,31 +69,52 @@ function DrawingPanelWindow(options) {
             me.unselectColor();
             $(me).triggerHandler("eraser");
         });
-
+        // Advanced controls 
         if(me.options.showAdvancedControls) {
             $('<a id="btn_drawing_line" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.line") + '"><img style="width:35px; height:35px;" src="images/imoov/s1170---g.png" /></a>').appendTo(controls);
             $("#btn_drawing_line").on("click", function() {
                 me.eraserModeDeactivated();
                 $(me).triggerHandler("line");
+                $("#drawing_colors").show();
+                $("#drawing_symbols").hide();
             });
             $('<a id="btn_drawing_polygon" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.polygon") + '"><img style="width:35px; height:35px;" src="images/imoov/s1140---g.png" /></a>').appendTo(controls);
             $("#btn_drawing_polygon").on("click", function() {
                 me.eraserModeDeactivated();
                 $(me).triggerHandler("polygon");
+                $("#drawing_colors").show();
+                $("#drawing_symbols").hide();
+            });
+            $('<a id="btn_drawing_point" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.point") + '"><img style="width:35px; height:35px;" src="images/imoov/s1040---g.png" /></a>').appendTo(controls);
+            $("#btn_drawing_point").on("click", function() {
+                me.eraserModeDeactivated();
+                $(me).triggerHandler("point");
+                $("#drawing_colors").hide();
+                $("#drawing_symbols").show();
             });
         }
-
+        // Colors
         var colors = $("<div id='drawing_colors'/>");
-
         $.each(options.colors, function(i, colorCode) {
             $("<div class='drawing_color' data-color-idx='" + i + "' style='background-color: " + colorCode + "'/>").appendTo(colors);
         });
         colors.appendTo(view);
-
         colors.on("click", function(e) {
             var idx = $(e.target).attr("data-color-idx");
             var color = me.options.colors[idx];
             me.selectColor(color);
+        });
+        // Symbols
+        var symbols = $("<div id='drawing_symbols'/>");
+        $.each(me.symbolList, function(i, symbol) {
+            $("<div class='drawing_symbol' data-symbol-idx='" + i + "' style='background-image: url(\"" + symbol.image + "\"); background-position: center; background-repeat: no-repeat; background-size: cover;'/>").appendTo(symbols);
+        });
+        symbols.hide();
+        symbols.appendTo(view);
+        symbols.on("click", function (e) {
+            var idx = $(e.target).attr("data-symbol-idx");
+            var symbol = me.symbolList[idx];
+            me.selectSymbol(symbol);
         });
     }
 
@@ -162,6 +185,14 @@ DrawingPanelWindow.prototype.lineModeActivated = function(color) {
     $("#btn_drawing_line").addClass("active");
 };
 
+DrawingPanelWindow.prototype.pointModeActivated = function(color) {
+    $("#btn_drawing_point").addClass("active");
+};
+
+DrawingPanelWindow.prototype.pointModeDeactivated = function(color) {
+    $("#btn_drawing_point").removeClass("active").blur();
+};
+
 DrawingPanelWindow.prototype.polygonModeDeactivated = function(color) {
     $("#btn_drawing_polygon").removeClass("active").blur();
 };
@@ -193,6 +224,23 @@ DrawingPanelWindow.prototype.selectColor = function(color) {
 DrawingPanelWindow.prototype.unselectColor = function() {
     $("#drawing_colors .drawing_color").removeClass("active");
 };
+
+DrawingPanelWindow.prototype.selectSymbol = function(symbol) {
+    var me = this;
+    if(symbol !== "") {
+        $("#btn_drawing_select").removeClass("active");
+        $("#btn_drawing_eraser").removeClass("active");
+        $("#drawing_symbols .drawing_symbol").removeClass("active");
+        var idx = me.symbolList.indexOf(symbol);
+        $("#drawing_symbols .drawing_symbol[data-symbol-idx='" + idx + "']").addClass("active");
+        $(me).triggerHandler("symbol", [ symbol ]);
+    }
+};
+
+DrawingPanelWindow.prototype.unselectSymbol = function() {
+    $("#drawing_symbols .drawing_symbol").removeClass("active");
+};
+
 
 DrawingPanelWindow.prototype.featureSelected = function(f) {
     $("#drawing_feature_controls").show();
