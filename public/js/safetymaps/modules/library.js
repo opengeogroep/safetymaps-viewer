@@ -36,9 +36,10 @@ dbkjs.modules.library = {
         }
 
         me.initData();
+        var searchTabtext = me.options.searchTabText || i18n.t("search.library");
 
         dbkjs.modules.search.addSearchConfig({
-            tabContents: "<i class='fa fa-file-pdf-o'></i> " + i18n.t("search.library"),
+            tabContents: "<i class='fa fa-file-pdf-o'></i> " + searchTabtext,
             placeholder: i18n.t("creator.search_placeholder"),
             search: function (value) {
                 value = value.toLowerCase();
