@@ -60,5 +60,7 @@ dbkjs.options = {
     
     resetToDefaultOnIncident: false,
     
-    showLayerLoadingPanel: true
+    showLayerLoadingPanel: true,
+
+    useAPIforWMS: true
 };

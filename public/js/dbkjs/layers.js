@@ -224,6 +224,8 @@ dbkjs.layers = {
             return;
         }
 
+        var baseURI = $(location).attr("origin") + $(location).attr("pathname");
+        
         $.each(dbkjs.options.organisation.wms, function (wms_k, wms_v) {
           var options;
           var params;
@@ -233,6 +235,9 @@ dbkjs.layers = {
           var myLayer;
           var onlySearch = wms_v.options && wms_v.options.wfsSearch && wms_v.options.wfsSearch.onlySearch;
           var index = wms_v.index || 0;
+          if (dbkjs.options.useAPIforWMS) {
+            wms_v.url = baseURI + 'api/geoserver/get?url=' + wms_v.url;
+          }
           if (wms_v.getcapabilities === true && !onlySearch) {
               options = {
                   url: wms_v.url,
