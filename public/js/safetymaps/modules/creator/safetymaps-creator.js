@@ -222,9 +222,11 @@ dbkjs.modules.safetymaps_creator = {
     addSearchConfig: function() {
         var me = this;
 
+        var searchTabtext = me.options.searchTabText || i18n.t("creator.search");
+
         if(dbkjs.modules.search) {
             dbkjs.modules.search.addSearchConfig({
-                tabContents: "<i class='fa fa-building'></i> " + i18n.t("creator.search"),
+                tabContents: "<i class='fa fa-building'></i> " + searchTabtext,
                 placeholder: i18n.t("creator.search_placeholder"),
                 search: function(value) {
                     console.log("search object " + value);
