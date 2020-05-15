@@ -212,11 +212,13 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
     if(this.linkifyWords) {
         $("a.linkify").on("click", function(e) {
             $(me).triggerHandler("linkifyWordClicked", [$(e.target).text(), e]);
+            return false;
         });
     }
     if(this.crsLinkEnabled) {
         $("a.crsLink").on("click", function(e) {
             $(me).triggerHandler("crsLinkClicked", [$(e.target).text(), e]);
+            return false;
         });
     }
     if(this.showFeatureMatches) {
