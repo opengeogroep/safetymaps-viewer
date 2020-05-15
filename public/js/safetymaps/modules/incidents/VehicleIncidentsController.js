@@ -290,6 +290,11 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
             });
 
             $(me.incidentMonitorController).on("incident_selected", function() { me.incidentMonitorIncidentSelected.apply(me, arguments); });
+            $(me.incidentMonitorController).on("incident_empty", function () { 
+                if (me.inzetInfo) {
+                    me.inzetBeeindigd('Incident beeindigd'); 
+                }
+            });
         }
     } else {
         if(me.incidentMonitorController) {
