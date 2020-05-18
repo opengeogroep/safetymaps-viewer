@@ -24,7 +24,8 @@ function DrawingPanelWindow(options) {
     var me = this;
     
     me.options = options;
-    me.symbolList = me.options.symbols;
+    me.symbolList = me.options.symbols || [];
+    me.symbolList.push({ "image": "images/imoov/xy.png", "label": "XY" });
 
     me.widthPercent = 20;
 
@@ -34,15 +35,17 @@ function DrawingPanelWindow(options) {
 
     me.hideSplitScreenSwitch();
 
-    var buttons = $("<div id='drawing_buttons'/>");
+    var measure = $("<div id='drawing_measure' />");
+    measure.appendTo(view);
+    var buttons = $("<div id='drawing_buttons' />");
     buttons.appendTo(view);
-    var controls = $("<div id='drawing_controls'/>");
+    var controls = $("<div id='drawing_controls' />");
     controls.appendTo(view);
 
     if(options.showMeasureButtons) {
         $(dbkjs).one("dbkjs_init_complete", function() {
-            $("#btn_measure_area").prependTo(buttons);
-            $("#btn_measure_distance").prependTo(buttons);
+            $("#btn_measure_area").prependTo(measure);
+            $("#btn_measure_distance").prependTo(measure);
         });
 
         $(me).on("hide", function() {
@@ -54,6 +57,8 @@ function DrawingPanelWindow(options) {
     $('<a id="btn_drawing_toggle" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.toggle") + '"><i class="fa fa-eye-slash"></i></a>').appendTo(buttons);
     $("#btn_drawing_toggle").on("click", function() {
         $(me).triggerHandler("toggle");
+        me.unselectColor();
+        me.eraserModeDeactivated();
     });
 
     if(options.editAuthorized) {
@@ -96,7 +101,11 @@ function DrawingPanelWindow(options) {
         // Colors
         var colors = $("<div id='drawing_colors'/>");
         $.each(options.colors, function(i, colorCode) {
-            $("<div class='drawing_color' data-color-idx='" + i + "' style='background-color: " + colorCode + "'/>").appendTo(colors);
+            var css = colorCode === me.options.defaultColor ? 'active' : '';
+            var html = colorCode === me.options.defaultColor 
+                ? "<i class='fa fa-pencil' style='margin:8px; margin-top:5px; font-size:45px; color:rgba(255,255,255,0.8)'></i>"
+                : "";
+            $("<div class='drawing_color " + css + "' data-color-idx='" + i + "' style='background-color: " + colorCode + "'>" + html + "</div>").appendTo(colors);
         });
         colors.appendTo(view);
         colors.on("click", function(e) {
@@ -125,32 +134,19 @@ function DrawingPanelWindow(options) {
                 "<a id='drawing_feature_labelbtn' class='btn btn-default' disabled><i class='fa fa-font'/></a>" +
                 "<input id='drawing_feature_label'>" +
             "</div>" +
-            "<div style='display: flex'>" +
+            "<div id='drawing_feature_rotation' style='display: flex'>" +
                 "<a id='drawing_feature_rotatebtn' class='btn btn-default' disabled><i class='fa fa-rotate-left'/></a>" +
                 "<input id='drawing_feature_rotate' type='number' min='-180' max='180' data-slider-id='drawing_feature_rotate_slider' data-slider-min='-180' data-slider-max='180' data-slider-value='0'></div>" +
             "</div>" +
         "</div>"
     );
-    featureControls.appendTo(view);
-
-    $("#drawing_feature_rotate").slider({
-        ticks: [-180, -90, 0, 90, 180],
-        ticks_labels: ['-180°', '-90°', '0°', '90°', '180°'],
-        ticks_snap_bounds: 5,
-        tooltip: 'always',
-        formatter: function(value) {
-		return value + '°';
-	}
-    });
+    featureControls.appendTo(view);    
 
     $("#drawing_feature_delete").on("click", function() {
         $(me).triggerHandler("delete");
     });
     $("#drawing_feature_label").on("keyup", function(e) {
         $(me).triggerHandler("label", $(e.target).val());
-    });
-    $("#drawing_feature_rotate").on("keyup change", function(e) {
-        $(me).triggerHandler("rotate", $(e.target).val());
     });
 };
 
@@ -215,8 +211,10 @@ DrawingPanelWindow.prototype.selectColor = function(color) {
         $("#btn_drawing_select").removeClass("active");
         $("#btn_drawing_eraser").removeClass("active");
         $("#drawing_colors .drawing_color").removeClass("active");
+        $("#drawing_colors .drawing_color").html("");
         var idx = me.options.colors.indexOf(color);
         $("#drawing_colors .drawing_color[data-color-idx='" + idx + "']").addClass("active");
+        $("#drawing_colors .drawing_color[data-color-idx='" + idx + "']").html("<i class='fa fa-pencil' style='margin:8px; margin-top:5px; font-size:45px; color:rgba(255,255,255,0.8)'></i>");
         $(me).triggerHandler("color", [ color ]);
     }
 };
@@ -242,12 +240,35 @@ DrawingPanelWindow.prototype.unselectSymbol = function() {
 };
 
 
-DrawingPanelWindow.prototype.featureSelected = function(f) {
+DrawingPanelWindow.prototype.featureSelected = function(f) {   
+    var me = this;
+    
     $("#drawing_feature_controls").show();
     $("#drawing_feature_label").val(f.attributes.label);
+
+    $("#drawing_feature_rotate").slider({
+        ticks: [-180, -90, 0, 90, 180],
+        ticks_labels: ['-180°', '-90°', '0°', '90°', '180°'],
+        ticks_snap_bounds: 5,
+        tooltip: 'always',
+        orientation: $("#drawing_feature_controls").width() <= 300 ? 'vertical' : 'horizontal',
+        formatter: function(value) {
+            return value + '°';
+        }
+    });
+
     $("#drawing_feature_rotate").val(f.data.geometryRotation);
     $("#drawing_feature_rotate").slider("setValue", f.data.geometryRotation);
     $("#drawing_feature_rotate").slider("refresh", { useCurrentValue: true });
+    $("#drawing_feature_rotate").on("keyup change", function(e) {
+        $(me).triggerHandler("rotate", $(e.target).val());
+    });
+
+    if (f.attributes.type && f.attributes.type === "symbol") {
+        $("#drawing_feature_rotation").hide();
+    } else {
+        $("#drawing_feature_rotation").show();
+    }
 };
 
 DrawingPanelWindow.prototype.featureUnselected = function() {
@@ -255,4 +276,5 @@ DrawingPanelWindow.prototype.featureUnselected = function() {
     $("#drawing_feature_label").val("");
     $("#drawing_feature_rotate").val("0");
     $("#drawing_feature_rotate").slider("setValue", 0);
+    $("#drawing_feature_rotate").slider( "destroy" );
 };

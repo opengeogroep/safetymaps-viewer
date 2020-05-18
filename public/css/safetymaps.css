@@ -648,12 +648,17 @@ a.btn.on:after {
 }
 
 #drawing_buttons,
-#drawing_controls {
+#drawing_controls,
+#drawing_measure {
     margin-left: 5px;
+    margin-bottom: 10px;
+    border-bottom: 0.5px solid rgba(0,0,0,0.3);
+    padding-bottom: 10px;
 }
 
 #drawing_buttons .btn,
-#drawing_controls .btn {
+#drawing_controls .btn,
+#drawing_measure .btn {
     height: 64px;
     min-width: 60px;
     font-size: 35px !important;
@@ -716,6 +721,10 @@ a.btn.on:after {
 
 #drawing_feature_rotate_slider {
     margin-top: 24px;
+}
+
+.slider-vertical {
+    margin-bottom: 15px;
 }
 
 #drawing_feature_rotate_slider .slider-selection {

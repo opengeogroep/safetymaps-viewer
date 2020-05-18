@@ -52,6 +52,7 @@ dbkjs.modules.drawing = {
 
         me.color = me.options.defaultColor;
         me.symbol = null;
+        me.selectedFeature = null;
 
         onMapClick = dbkjs.util.onClick;
         dbkjs.util.onClick = function(e) {
@@ -150,12 +151,21 @@ dbkjs.modules.drawing = {
             console.log("drawing: got drawing, last modified " + lastModified, drawing);
 
             var geoJsonFormatter = new OpenLayers.Format.GeoJSON();
-            me.selectControl.unselectAll();
+            var features = geoJsonFormatter.read(drawing)
             me.layer.removeAllFeatures();
-            me.layer.addFeatures(geoJsonFormatter.read(drawing));
+            me.layer.addFeatures(features);
             me.layer.redraw();
 
-            // TODO restore selected feature?
+            // Restore selected feature?
+            if (me.selectedFeature) {
+                features.map(function (f) {
+                    if (f.geometry.toString() === me.selectedFeature.geometry.toString()) {
+                        me.selectControl.select(f);
+                    }
+                });
+            } else {
+                me.selectControl.unselectAll();
+            }
         });
     },
 
@@ -212,6 +222,7 @@ dbkjs.modules.drawing = {
         })
         .on("toggle", function() {
             me.toggleVisibility();
+            me.selectControl.unselectAll();
         })
         .on("select", function() {
             me.toggleVisibility(true);
@@ -374,7 +385,8 @@ dbkjs.modules.drawing = {
         var me = this;
         if(me.drawMode === "point" && me.symbol) {
             var attributes = $.extend({}, me.symbol, {
-                label: "",
+                label: me.symbol.label === "XY" ? "" + lonLat.lat + ", " + lonLat.lon : "",
+                type: "symbol"
             });
             attributes.radius = 20;
             var feature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(lonLat.lon, lonLat.lat), attributes);
@@ -629,6 +641,7 @@ dbkjs.modules.drawing = {
 
     lineDrawn: function(feature) {
         var me = this;
+        me.selectedFeature = feature;
         feature.attributes.strokeColor = me.color;
         feature.attributes.label = "";
         me.selectControl.unselectAll();
@@ -639,6 +652,7 @@ dbkjs.modules.drawing = {
 
     polygonDrawn: function (feature) {
         var me = this;
+        me.selectedFeature = feature;
         feature.attributes.strokeColor = me.color;
         feature.attributes.fillOpacity = "0.2";
         feature.attributes.label = "";
@@ -650,6 +664,7 @@ dbkjs.modules.drawing = {
 
     pointDrawn: function (feature) {
         var me = this;
+        me.selectedFeature = feature;
         feature.attributes.fillOpacity = "1";
         me.selectControl.unselectAll();
         me.selectControl.select(feature);
@@ -664,11 +679,13 @@ dbkjs.modules.drawing = {
         }
         console.log("lineSelected", e.feature);
         this.panel.featureSelected(e.feature);
+        this.selectedFeature = e.feature;
     },
 
     lineUnselected: function(e) {
         console.log("lineUnselected", e.feature);
         this.panel.featureUnselected();
+        this.selectedFeature = null;
     },
 
     deleteLine: function() {
@@ -687,6 +704,7 @@ dbkjs.modules.drawing = {
     },
 
     setRotation: function(rotation) {
+        console.log(rotation);
         var f = this.layer.selectedFeatures[0];
         if(f) {
             var currentRotation = f.attributes.geometryRotation || 0;
