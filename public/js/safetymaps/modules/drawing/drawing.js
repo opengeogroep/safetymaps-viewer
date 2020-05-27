@@ -411,6 +411,7 @@ dbkjs.modules.drawing = {
 
         if(this.options.editAuthorized) {
             dbkjs.selectControl.deactivate();
+            dbkjs.selectControl.activate();
         }
 
         if(!setVisibleOnly) {

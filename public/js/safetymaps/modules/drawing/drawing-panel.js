@@ -33,8 +33,6 @@ function DrawingPanelWindow(options) {
 
     var view = me.getView();
 
-    me.hideSplitScreenSwitch();
-
     var measure = $("<div id='drawing_measure' />");
     measure.appendTo(view);
     var buttons = $("<div id='drawing_buttons' />");
