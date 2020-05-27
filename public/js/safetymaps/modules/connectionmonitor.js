@@ -107,6 +107,8 @@ dbkjs.modules.connectionmonitor = {
                     me.onConnectionOK();
                 } else if(textStatus === "parsererror" && jqXHR.responseText.indexOf("j_security_check") !== -1) {
                     window.location.reload();
+                } else if(jqXHR.status === 401) {
+                    window.location.reload();
                 } else {
                     me.onConnectionError();
                 }
