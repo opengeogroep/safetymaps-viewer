@@ -300,7 +300,7 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
 
 VehicleIncidentsController.prototype.incidentMonitorIncidentSelected = function(event, inzetInfo) {
     // New info says closed incident while old info says active incident
-    if (inzetInfo.incident.beeindigdeInzet && (this.inzetInfo && !this.inzetInfo.incident.beeindigdeInzet)) {
+    if (inzetInfo.incident.beeindigdeInzet && (this.inzetInfo && this.inzetInfo.incident && !this.inzetInfo.incident.beeindigdeInzet)) {
         this.inzetBeeindigd('Incident beeindigd');
     } else {
         this.inzetInfo = inzetInfo;
