@@ -249,6 +249,8 @@
         "toggle": "Tegne at vise/skjul",
         "select": "Vælg",
         "line": "Linje",
-        "polygon": "Areal"
+        "polygon": "Areal",
+        "drawing": "Tegne",
+        "measure": "Mål"
     }
 }

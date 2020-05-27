@@ -256,6 +256,8 @@
         "select": "Selecteer",
         "line": "Lijn",
         "polygon": "Gebied",
-        "point": "Symbool"
+        "point": "Symbool",
+        "drawing": "Tekenen",
+        "measure": "Meten"
     }
 }

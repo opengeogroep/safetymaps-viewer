@@ -226,6 +226,8 @@
         "select": "Select",
         "line": "Line",
         "polygon": "Area",
-        "point": "Symbol"
+        "point": "Symbol",
+        "drawing": "Drawing",
+        "measure": "Measure"
     }
 }

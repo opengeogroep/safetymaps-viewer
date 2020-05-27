@@ -29,12 +29,16 @@ function DrawingPanelWindow(options) {
 
     me.widthPercent = 20;
 
-    me.createElements(i18n.t("drawing.title"));
+    me.createElements("");
 
     var view = me.getView();
 
+    var captionMeasure = $("<p class='drawing_caption'>" + i18n.t("drawing.measure") + "</p>");
+    captionMeasure.appendTo(view);
     var measure = $("<div id='drawing_measure' />");
     measure.appendTo(view);
+    var captionDrawing = $("<p class='drawing_caption'>" + i18n.t("drawing.drawing") + "</p>");
+    captionDrawing.appendTo(view);
     var buttons = $("<div id='drawing_buttons' />");
     buttons.appendTo(view);
     var controls = $("<div id='drawing_controls' />");
