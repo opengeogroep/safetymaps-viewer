@@ -64,10 +64,10 @@ dbkjs.layers = {
                 var hiDPI = false;
                 if(dbkjs.layers.hiDPI) {
                     hiDPI = this.options.hiDPI;
-                    if(!hiDPI && dbkjs.options.defaultOverlayHiDPI) {
+                    if(typeof hiDPI === 'undefined' && dbkjs.options.defaultOverlayHiDPI) {
                         // Use HiDPI by default if we can figure out the parameter
                         // to draw scaled up. We know this for GeoServer and MapServer
-                        hiDPI = this.url.indexOf("/geoserver") || this.url.indexOf("/mapserv");
+                        hiDPI = this.url.indexOf("/geoserver") !== -1 || this.url.indexOf("/mapserv") !== -1;
                     }
                 }
                 // Double WIDTH and HEIGHT for high resolution if layer configured it works
