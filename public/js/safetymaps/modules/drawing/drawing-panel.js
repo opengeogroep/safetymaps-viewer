@@ -210,14 +210,16 @@ DrawingPanelWindow.prototype.eraserModeActivated = function(color) {
 DrawingPanelWindow.prototype.selectColor = function(color) {
     var me = this;
     if(color !== "") {
-        $("#btn_drawing_select").removeClass("active");
-        $("#btn_drawing_eraser").removeClass("active");
-        $("#drawing_colors .drawing_color").removeClass("active");
-        $("#drawing_colors .drawing_color").html("");
         var idx = me.options.colors.indexOf(color);
-        $("#drawing_colors .drawing_color[data-color-idx='" + idx + "']").addClass("active");
-        $("#drawing_colors .drawing_color[data-color-idx='" + idx + "']").html("<i class='fa fa-pencil' style='margin:8px; margin-top:5px; font-size:45px; color:rgba(255,255,255,0.8)'></i>");
-        $(me).triggerHandler("color", [ color ]);
+        if(!$("#drawing_colors .drawing_color[data-color-idx='" + idx + "']").hasClass("active")) {
+            $("#btn_drawing_select").removeClass("active");
+            $("#btn_drawing_eraser").removeClass("active");
+            $("#drawing_colors .drawing_color").removeClass("active");
+            $("#drawing_colors .drawing_color").html("");
+            $("#drawing_colors .drawing_color[data-color-idx='" + idx + "']").addClass("active");
+            $("#drawing_colors .drawing_color[data-color-idx='" + idx + "']").html("<i class='fa fa-pencil' style='margin:8px; margin-top:5px; font-size:45px; color:rgba(255,255,255,0.8)'></i>");
+            $(me).triggerHandler("color", [ color ]);
+        }
     }
 };
 
