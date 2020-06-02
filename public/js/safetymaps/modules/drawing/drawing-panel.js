@@ -268,10 +268,10 @@ DrawingPanelWindow.prototype.featureSelected = function(f) {
         $(me).triggerHandler("rotate", $(e.target).val());
     });
 
-    if (f.attributes.type && f.attributes.type === "symbol") {
-        $("#drawing_feature_rotation").hide();
-    } else {
+    if (f.attributes.type && options.rotation.includes(f.attributes.type)) {
         $("#drawing_feature_rotation").show();
+    } else {
+        $("#drawing_feature_rotation").hide();
     }
 };
 

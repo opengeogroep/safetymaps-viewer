@@ -47,7 +47,9 @@ dbkjs.modules.drawing = {
             eraserInterval: 50,
             updateInterval: 5000,
             saveDebounceTime: 1000,
-            log: true
+            log: true,
+            showAdvancedControls: false,
+            rotation: ["polygon"]
         }, me.options);
 
         me.color = me.options.defaultColor;
