@@ -161,9 +161,9 @@ DrawingPanelWindow.prototype.setToggleState = function(visible) {
     i.removeClass("fa-eye");
 
     if(visible) {
-        i.addClass("fa-eye-slash");
-    } else {
         i.addClass("fa-eye");
+    } else {
+        i.addClass("fa-eye-slash");
     }
 }
 
