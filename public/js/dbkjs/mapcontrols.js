@@ -30,6 +30,24 @@ dbkjs.mapcontrols = {
             autoActivate: true
         }));
 
+        // For some unknown reason, some touch tablets cause OpenLayers.Controls.PinchZoom.pinchDone()
+        // to be called twice when ending pinching, with the second time with a
+        // wrong zoom. HACK: Ignore the second call to setCenter() if the last was less
+        // than a second ago.
+
+        var originalSetCenter = dbkjs.map.setCenter;
+        var lastPinchDoneZoom = null;
+        dbkjs.map.setCenter = function(center, zoom) {
+            const caller = arguments.callee.caller.name;
+            if(caller === "pinchDone") {
+                if(lastPinchDoneZoom && new Date().getTime() - lastPinchDoneZoom < 1000) {
+                    return;
+                }
+                lastPinchDoneZoom = new Date().getTime();
+            }
+            originalSetCenter.call(this, center, zoom);
+        };
+
         $("#zoom_buttons").toggle(dbkjs.options.showZoomButtons);
         if (dbkjs.options.showZoomButtons) {
             $("#zoom_in").on("click", function () {

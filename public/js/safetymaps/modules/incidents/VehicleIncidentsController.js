@@ -290,6 +290,11 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
             });
 
             $(me.incidentMonitorController).on("incident_selected", function() { me.incidentMonitorIncidentSelected.apply(me, arguments); });
+            $(me.incidentMonitorController).on("incident_empty", function () { 
+                if (me.inzetInfo) {
+                    me.inzetBeeindigd('Incident beeindigd'); 
+                }
+            });
         }
     } else {
         if(me.incidentMonitorController) {
@@ -300,7 +305,7 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
 
 VehicleIncidentsController.prototype.incidentMonitorIncidentSelected = function(event, inzetInfo) {
     // New info says closed incident while old info says active incident
-    if (inzetInfo.incident.beeindigdeInzet && !this.inzetInfo.incident.beeindigdeInzet) {
+    if (inzetInfo.incident.beeindigdeInzet && (this.inzetInfo && this.inzetInfo.incident && !this.inzetInfo.incident.beeindigdeInzet)) {
         this.inzetBeeindigd('Incident beeindigd');
     } else {
         this.inzetInfo = inzetInfo;

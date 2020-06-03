@@ -31,6 +31,7 @@ safetymaps.creator = safetymaps.creator || {};
 safetymaps.creator.api = {
     basePath: "",
     imagePath: "",
+    apiPath: "api/",
 
     /**
      * Get array of objects with overview info of SafetyMaps Creator objects
@@ -39,8 +40,8 @@ safetymaps.creator.api = {
         var d = $.Deferred();
 
         // TODO i18n
-        var msg = "Error loading Creator objects from " + this.basePath + "api/features.json: ";
-        $.ajax(this.basePath + "api/features.json", {
+        var msg = "Error loading Creator objects from " + this.basePath + this.apiPath + "features.json: ";
+        $.ajax(this.basePath + this.apiPath + "features.json", {
             dataType: "json",
             data: {
                 version: "3"
@@ -194,8 +195,8 @@ safetymaps.creator.api = {
         var d = $.Deferred();
 
         // TODO i18n
-        var msg = "Error loading Creator object details from " + this.basePath + "api/object/" + id + ".json: ";
-        $.ajax(this.basePath + "api/object/" + id + ".json", {
+        var msg = "Error loading Creator object details from " + this.basePath + this.apiPath + "object/" + id + ".json: ";
+        $.ajax(this.basePath + this.apiPath + "object/" + id + ".json", {
             dataType: "json",
             data: {
                 version: "3"

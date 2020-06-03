@@ -208,6 +208,7 @@ IncidentMonitorController.prototype.getSafetyConnectIncident = function () {
         me.incidentTimerFails = 0;
         if(data.length === 0 || !data[0].IncidentId) {
             console.log("IM SC: Error getting incident data (empty result)", arguments);
+            $(me).triggerHandler("incident_empty");
             return;
         }
         try {
