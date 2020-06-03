@@ -37,13 +37,15 @@ dbkjs.modules.safetymaps_creator = {
             autoUpdateInterval: 5*1000*60,// every 5 min
             maxSearchResults: 30,
             mediaPath: "media/",
-            showDbkToggleButton : false
+            showDbkToggleButton: false,
+            apiPath: "api/",
+            imagePath: "assets/"
         }, this.options);
 
         // Setup API
-
+        safetymaps.creator.api.apiPath = this.options.apiPath;
         safetymaps.creator.api.basePath = "";
-        safetymaps.creator.api.imagePath = "js/safetymaps/modules/creator/assets/";
+        safetymaps.creator.api.imagePath = "js/safetymaps/modules/creator/" + this.options.imagePath;
         safetymaps.creator.api.mediaPath = this.options.mediaPath;
         
         //register only if there is a scaleLevel set in the DB
