@@ -49,7 +49,9 @@ dbkjs.modules.drawing = {
             saveDebounceTime: 1000,
             log: true,
             showAdvancedControls: false,
-            rotation: ["polygon"]
+            rotation: ["polygon"],
+            wideLineForSelectionExtraWidth: 6,
+            wideLineForSelectionOpacity: 0
         }, me.options);
 
         me.color = me.options.defaultColor;
@@ -155,10 +157,24 @@ dbkjs.modules.drawing = {
             var geoJsonFormatter = new OpenLayers.Format.GeoJSON();
             var features = geoJsonFormatter.read(drawing)
             me.layer.removeAllFeatures();
+            var features2 = features.map(function (f) {
+                if (f.attributes.type && f.attributes.type === "line") {
+                    var f2 = f.clone();
+                    f2.attributes.wideLineForSelectionTolerance = true;
+                    f2.attributes.featureToSelect = f;
+                    return f2;
+                }
+            })
+            .filter(function (f) { 
+                return f;
+            });
+            if (features2.length > 0) {
+                console.log(features2);
+                me.layer.addFeatures(features2);
+            }
             me.layer.addFeatures(features);
             me.layer.redraw();
 
-            // Restore selected feature?
             if (me.selectedFeature) {
                 features.map(function (f) {
                     if (f.geometry.toString() === me.selectedFeature.geometry.toString()) {
@@ -291,7 +307,8 @@ dbkjs.modules.drawing = {
                     labelOutlineWidth: 2,
                     labelOutlineColor: 'white',
                     strokeColor: "${strokeColor}",
-                    strokeWidth: "3",
+                    strokeWidth: "${width}",
+                    strokeOpacity: "${opacity}",
                     fontSize: 16,
                     rotationPoint: "${rotationPoint}",
                     rotation: "${rotation}",
@@ -302,6 +319,23 @@ dbkjs.modules.drawing = {
                     labelAlign: "cb",
                     fillColor: "${strokeColor}",
                     fillOpacity: "${fillOpacity}"
+                }, {
+                    context: {
+                        width: function(feature) {
+                            var width = feature.attributes.style && feature.attributes.style.thickness ? feature.attributes.style.thickness : 2;
+                            if(feature.attributes.wideLineForSelectionTolerance) {
+                                width += me.options.wideLineForSelectionExtraWidth;
+                            }
+                            return width;
+                        },
+                        opacity: function(feature) {
+                            if(feature.attributes.wideLineForSelectionTolerance) {
+                                return me.options.wideLineForSelectionOpacity;
+                            } else {
+                                return 1;
+                            }
+                        }
+                    }
                 }),
                 "select": new OpenLayers.Style({
                     strokeWidth: "5"
@@ -647,6 +681,7 @@ dbkjs.modules.drawing = {
         me.selectedFeature = feature;
         feature.attributes.strokeColor = me.color;
         feature.attributes.label = "";
+        feature.attributes.type = "line";
         me.selectControl.unselectAll();
         me.selectControl.select(feature);
         me.layer.redraw();
@@ -659,6 +694,7 @@ dbkjs.modules.drawing = {
         feature.attributes.strokeColor = me.color;
         feature.attributes.fillOpacity = "0.2";
         feature.attributes.label = "";
+        feature.attributes.type = "polygon";
         me.selectControl.unselectAll();
         me.selectControl.select(feature);
         me.layer.redraw();
@@ -676,17 +712,24 @@ dbkjs.modules.drawing = {
     },
 
     lineSelected: function(e) {
-        if(!this.active) {
+        var me = this;
+        var f = e.feature.attributes;
+        if(!me.active) {
             dbkjs.selectControl.unselect(e.feature);
             return;
         }
-        console.log("lineSelected", e.feature);
-        this.panel.featureSelected(e.feature);
-        this.selectedFeature = e.feature;
+        if (f.featureToSelect) {
+            dbkjs.selectControl.unselect(e.feature);
+            dbkjs.selectControl.select(f.featureToSelect);
+            me.panel.featureSelected(f.featureToSelect);
+            me.selectedFeature = f.featureToSelect;
+        } else {
+            me.panel.featureSelected(e.feature);
+            me.selectedFeature = e.feature;
+        }
     },
 
     lineUnselected: function(e) {
-        console.log("lineUnselected", e.feature);
         this.panel.featureUnselected();
         this.selectedFeature = null;
     },

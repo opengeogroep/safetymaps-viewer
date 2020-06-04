@@ -26,6 +26,7 @@ function DrawingPanelWindow(options) {
     me.options = options;
     me.symbolList = me.options.symbols || [];
     me.symbolList.push({ "image": "images/imoov/xy.png", "label": "XY" });
+    me.selectedColor = me.options.defaultColor;
 
     me.widthPercent = 20;
 
@@ -211,7 +212,8 @@ DrawingPanelWindow.prototype.selectColor = function(color) {
     var me = this;
     if(color !== "") {
         var idx = me.options.colors.indexOf(color);
-        if(!$("#drawing_colors .drawing_color[data-color-idx='" + idx + "']").hasClass("active")) {
+        if(color && color !== me.selectedColor) {
+            me.selectedColor = color;
             $("#btn_drawing_select").removeClass("active");
             $("#btn_drawing_eraser").removeClass("active");
             $("#drawing_colors .drawing_color").removeClass("active");
@@ -261,15 +263,14 @@ DrawingPanelWindow.prototype.featureSelected = function(f) {
         }
     });
 
-    $("#drawing_feature_rotate").val(f.data.geometryRotation);
-    $("#drawing_feature_rotate").slider("setValue", f.data.geometryRotation);
-    $("#drawing_feature_rotate").slider("refresh", { useCurrentValue: true });
-    $("#drawing_feature_rotate").on("keyup change", function(e) {
-        $(me).triggerHandler("rotate", $(e.target).val());
-    });
-
-    if (f.attributes.type && options.rotation.includes(f.attributes.type)) {
+    if (f.attributes.type && me.options.rotation.includes(f.attributes.type)) {
         $("#drawing_feature_rotation").show();
+        $("#drawing_feature_rotate").val(f.data.geometryRotation);
+        $("#drawing_feature_rotate").slider("setValue", f.data.geometryRotation);
+        $("#drawing_feature_rotate").slider("refresh", { useCurrentValue: true });
+        $("#drawing_feature_rotate").on("keyup change", function(e) {
+            $(me).triggerHandler("rotate", $(e.target).val());
+        });
     } else {
         $("#drawing_feature_rotation").hide();
     }
