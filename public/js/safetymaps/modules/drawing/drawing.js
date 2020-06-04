@@ -157,19 +157,17 @@ dbkjs.modules.drawing = {
             var geoJsonFormatter = new OpenLayers.Format.GeoJSON();
             var features = geoJsonFormatter.read(drawing)
             me.layer.removeAllFeatures();
-            var features2 = features.map(function (f) {
-                if (f.attributes.type && f.attributes.type === "line") {
+            var features2 = features
+                .filter(function (f) {
+                    return f.geometry instanceof OpenLayers.Geometry.LineString;
+                })
+                .map(function (f) {
                     var f2 = f.clone();
                     f2.attributes.wideLineForSelectionTolerance = true;
                     f2.attributes.featureToSelect = f;
                     return f2;
-                }
-            })
-            .filter(function (f) { 
-                return f;
-            });
+                })
             if (features2.length > 0) {
-                console.log(features2);
                 me.layer.addFeatures(features2);
             }
             me.layer.addFeatures(features);
@@ -209,7 +207,9 @@ dbkjs.modules.drawing = {
         // TODO If-Unmodified-Since
         me.saveJqXHR = $.ajax('api/drawing/' + me.incidentNr + '.json', {
             method: 'POST',
-            data: { features: new OpenLayers.Format.GeoJSON().write(me.layer.features) }
+            data: { features: new OpenLayers.Format.GeoJSON().write(me.layer.features.filter(function (f) {
+                return !f.attributes.featureToSelect;
+            })) }
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             console.log("drawing: saving ajax failure: " + jqXHR.status + " " + textStatus, jqXHR.responseText);
@@ -322,7 +322,7 @@ dbkjs.modules.drawing = {
                 }, {
                     context: {
                         width: function(feature) {
-                            var width = feature.attributes.style && feature.attributes.style.thickness ? feature.attributes.style.thickness : 2;
+                            var width = 3;
                             if(feature.attributes.wideLineForSelectionTolerance) {
                                 width += me.options.wideLineForSelectionExtraWidth;
                             }
@@ -750,7 +750,6 @@ dbkjs.modules.drawing = {
     },
 
     setRotation: function(rotation) {
-        console.log(rotation);
         var f = this.layer.selectedFeatures[0];
         if(f) {
             var currentRotation = f.attributes.geometryRotation || 0;
