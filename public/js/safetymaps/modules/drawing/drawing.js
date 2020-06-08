@@ -208,7 +208,7 @@ dbkjs.modules.drawing = {
         me.saveJqXHR = $.ajax('api/drawing/' + me.incidentNr + '.json', {
             method: 'POST',
             data: { features: new OpenLayers.Format.GeoJSON().write(me.layer.features.filter(function (f) {
-                return !f.attributes.featureToSelect;
+                return !f.attributes.wideLineForSelectionTolerance;
             })) }
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
@@ -447,7 +447,7 @@ dbkjs.modules.drawing = {
 
         if(this.options.editAuthorized) {
             dbkjs.selectControl.deactivate();
-            dbkjs.selectControl.activate();
+            this.selectControl.activate();
         }
 
         if(!setVisibleOnly) {
@@ -463,13 +463,15 @@ dbkjs.modules.drawing = {
         if(!keepPanelOpen) {
             this.panel.hide();
         }
-        this.active = false;
+        this.active = keepPanelOpen;
         this.drawLineControl.deactivate();
         this.selectControl.deactivate();
         dbkjs.selectControl.activate();
     },
 
     toggleVisibility: function(optionalVisible) {
+        var me = this;
+
         if(typeof optionalVisible !== 'undefined') {
             this.visible = optionalVisible;
         } else {
@@ -478,6 +480,13 @@ dbkjs.modules.drawing = {
 
         if(this.visible) {
             this.activate(true);
+            if(typeof optionalVisible === "undefined") {
+                if (me.drawMode === 'polygon') {
+                    me.drawPolygon();
+                } else {
+                    me.drawLine();
+                }
+            }
         } else {
             this.deactivate(true);
             this.layer.setVisibility(false);
@@ -718,7 +727,7 @@ dbkjs.modules.drawing = {
             dbkjs.selectControl.unselect(e.feature);
             return;
         }
-        if (f.featureToSelect) {
+        if (f.wideLineForSelectionTolerance && f.featureToSelect !== null) {
             dbkjs.selectControl.unselect(e.feature);
             dbkjs.selectControl.select(f.featureToSelect);
             me.panel.featureSelected(f.featureToSelect);

@@ -60,7 +60,6 @@ function DrawingPanelWindow(options) {
     $('<a id="btn_drawing_toggle" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.toggle") + '"><i class="fa fa-eye-slash"></i></a>').appendTo(buttons);
     $("#btn_drawing_toggle").on("click", function() {
         $(me).triggerHandler("toggle");
-        me.unselectColor();
         me.eraserModeDeactivated();
     });
 
@@ -157,14 +156,18 @@ DrawingPanelWindow.prototype = Object.create(SplitScreenWindow.prototype);
 DrawingPanelWindow.prototype.constructor = DrawingPanelWindow;
 
 DrawingPanelWindow.prototype.setToggleState = function(visible) {
+    var me = this;
     var i = $("#btn_drawing_toggle i");
+
     i.removeClass("fa-eye-slash");
     i.removeClass("fa-eye");
 
     if(visible) {
         i.addClass("fa-eye");
+        me.selectColor(me.selectedColor);
     } else {
         i.addClass("fa-eye-slash");
+        me.unselectColor();
     }
 }
 
@@ -210,23 +213,24 @@ DrawingPanelWindow.prototype.eraserModeActivated = function(color) {
 
 DrawingPanelWindow.prototype.selectColor = function(color) {
     var me = this;
-    if(color !== "") {
+    if(color && color !== "") {
         var idx = me.options.colors.indexOf(color);
-        if(color && color !== me.selectedColor) {
+        if(color !== me.selectedColor) {
             me.selectedColor = color;
             $("#btn_drawing_select").removeClass("active");
             $("#btn_drawing_eraser").removeClass("active");
             $("#drawing_colors .drawing_color").removeClass("active");
             $("#drawing_colors .drawing_color").html("");
-            $("#drawing_colors .drawing_color[data-color-idx='" + idx + "']").addClass("active");
-            $("#drawing_colors .drawing_color[data-color-idx='" + idx + "']").html("<i class='fa fa-pencil' style='margin:8px; margin-top:5px; font-size:45px; color:rgba(255,255,255,0.8)'></i>");
             $(me).triggerHandler("color", [ color ]);
         }
+        $("#drawing_colors .drawing_color[data-color-idx='" + idx + "']").addClass("active");
+        $("#drawing_colors .drawing_color[data-color-idx='" + idx + "']").html("<i class='fa fa-pencil' style='margin:8px; margin-top:5px; font-size:45px; color:rgba(255,255,255,0.8)'></i>");
     }
 };
 
 DrawingPanelWindow.prototype.unselectColor = function() {
     $("#drawing_colors .drawing_color").removeClass("active");
+    $("#drawing_colors .drawing_color").html("");
 };
 
 DrawingPanelWindow.prototype.selectSymbol = function(symbol) {
@@ -280,6 +284,4 @@ DrawingPanelWindow.prototype.featureUnselected = function() {
     $("#drawing_feature_controls").hide();
     $("#drawing_feature_label").val("");
     $("#drawing_feature_rotate").val("0");
-    $("#drawing_feature_rotate").slider("setValue", 0);
-    $("#drawing_feature_rotate").slider( "destroy" );
 };
