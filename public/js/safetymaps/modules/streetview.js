@@ -108,7 +108,7 @@ dbkjs.modules.streetview = {
         return gLonLat;
     },
     openStreetView: function(lonLat) {
-        var url = "https://maps.google.nl/maps?q=[y],[x]&z=16&layer=c&cbll=[y],[x]&cbp=12,0,,0,0";
+        var url = "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=[y],[x]";
         url = url.replace(/\[x\]/g, lonLat.lon);
         url = url.replace(/\[y\]/g, lonLat.lat);
         if(this.options.newWindow) {
