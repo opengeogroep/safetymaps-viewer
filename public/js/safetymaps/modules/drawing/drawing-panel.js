@@ -59,8 +59,9 @@ function DrawingPanelWindow(options) {
 
     $('<a id="btn_drawing_toggle" class="btn btn-default navbar-btn" href="#" title="' + i18n.t("drawing.toggle") + '"><i class="fa fa-eye-slash"></i></a>').appendTo(buttons);
     $("#btn_drawing_toggle").on("click", function() {
-        $(me).triggerHandler("toggle");
+        me.unselectColor();
         me.eraserModeDeactivated();
+        $(me).triggerHandler("toggle");
     });
 
     if(options.editAuthorized) {
@@ -164,10 +165,8 @@ DrawingPanelWindow.prototype.setToggleState = function(visible) {
 
     if(visible) {
         i.addClass("fa-eye");
-        me.selectColor(me.selectedColor);
     } else {
         i.addClass("fa-eye-slash");
-        me.unselectColor();
     }
 }
 
@@ -216,15 +215,15 @@ DrawingPanelWindow.prototype.selectColor = function(color) {
     if(color && color !== "") {
         var idx = me.options.colors.indexOf(color);
         if(color !== me.selectedColor) {
-            me.selectedColor = color;
-            $("#btn_drawing_select").removeClass("active");
-            $("#btn_drawing_eraser").removeClass("active");
+            me.selectedColor = color;            
             $("#drawing_colors .drawing_color").removeClass("active");
             $("#drawing_colors .drawing_color").html("");
-            $(me).triggerHandler("color", [ color ]);
         }
+        $("#btn_drawing_select").removeClass("active");
+        $("#btn_drawing_eraser").removeClass("active");
         $("#drawing_colors .drawing_color[data-color-idx='" + idx + "']").addClass("active");
         $("#drawing_colors .drawing_color[data-color-idx='" + idx + "']").html("<i class='fa fa-pencil' style='margin:8px; margin-top:5px; font-size:45px; color:rgba(255,255,255,0.8)'></i>");
+        $(me).triggerHandler("color", [ color ]);
     }
 };
 

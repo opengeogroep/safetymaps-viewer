@@ -465,6 +465,10 @@ dbkjs.modules.drawing = {
         }
         this.active = keepPanelOpen;
         this.drawLineControl.deactivate();
+        this.drawPolygonControl.deactivate();
+        this.panel.lineModeDeactivated();
+        this.panel.polygonModeDeactivated();
+        this.panel.pointModeDeactivated();
         this.selectControl.deactivate();
         dbkjs.selectControl.activate();
     },
@@ -480,12 +484,8 @@ dbkjs.modules.drawing = {
 
         if(this.visible) {
             this.activate(true);
-            if(typeof optionalVisible === "undefined") {
-                if (me.drawMode === 'polygon') {
-                    me.drawPolygon();
-                } else {
-                    me.drawLine();
-                }
+            if(typeof optionalVisible === 'undefined') {
+                this.panel.selectColor(me.color);
             }
         } else {
             this.deactivate(true);
