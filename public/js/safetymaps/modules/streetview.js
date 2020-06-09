@@ -61,6 +61,10 @@ dbkjs.modules.streetview = {
         me.active = false;
         me.triggering = false;
 
+        this.options = $.extend({
+            newWindow: true,
+        }, this.options);
+
         if(dbkjs.options.streetview && typeof dbkjs.options.streetview.onRegister === "function") {
             dbkjs.options.streetview.onRegister();
         } else {
@@ -104,10 +108,14 @@ dbkjs.modules.streetview = {
         return gLonLat;
     },
     openStreetView: function(lonLat) {
-        var url = "http://maps.google.nl/maps?q=[y],[x]&z=16&layer=c&cbll=[y],[x]&cbp=12,0,,0,0";
+        var url = "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=[y],[x]";
         url = url.replace(/\[x\]/g, lonLat.lon);
         url = url.replace(/\[y\]/g, lonLat.lat);
-        window.open(url);
+        if(this.options.newWindow) {
+            window.open(url);
+        } else {
+            window.location.href = url;
+        }
     },
     createDefaultMobileButton: function() {
         var me = this;
