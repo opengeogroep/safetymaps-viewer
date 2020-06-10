@@ -771,6 +771,9 @@ VehicleIncidentsController.prototype.getVoertuigIncidentSC = function(nummer) {
     var p = $.Deferred();
     $.ajax(me.options.apiPath + "safetyconnect/eenheid/" + nummer, {
         dataType: "json",
+        data: {
+            excludeManuallyCreated: me.options.excludeManuallyCreatedIncidents
+        },
         xhrFields: { withCredentials: true }, crossDomain: true
     })
     .fail(function(jqXHR, textStatus, errorThrown) {

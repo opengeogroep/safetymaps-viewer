@@ -359,7 +359,8 @@ IncidentMonitorController.prototype.getIncidentListSC = function() {
     $.ajax(me.options.apiPath + "safetyconnect/incident", {
         dataType: "json",
         data: {
-            extended: true
+            extended: true,
+            excludeManuallyCreated: me.options.excludeManuallyCreatedIncidents
         },
         cache: false,
         xhrFields: { withCredentials: true }, crossDomain: true
