@@ -33,7 +33,8 @@ dbkjs.modules.incidents = {
         this.options = $.extend({
             controller: "VehicleIncidentsController",
             featureExactMatchHuisletter: true,
-            featureExactMatchToevoeging: false
+            featureExactMatchToevoeging: false,
+            excludeManualCreatedIncidents: false
         }, this.options);
 
         this.featureSelector = new IncidentFeatureSelector(this.options.featureExactMatchHuisletter, this.options.featureExactMatchToevoeging);
