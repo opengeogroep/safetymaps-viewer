@@ -34,7 +34,7 @@ dbkjs.modules.incidents = {
             controller: "VehicleIncidentsController",
             featureExactMatchHuisletter: true,
             featureExactMatchToevoeging: false,
-            excludeManualCreatedIncidents: false
+            excludeManuallyCreatedIncidents: false
         }, this.options);
 
         this.featureSelector = new IncidentFeatureSelector(this.options.featureExactMatchHuisletter, this.options.featureExactMatchToevoeging);
