@@ -249,5 +249,15 @@
         "select": "Selecteer",
         "drawMode" : "Tekenen",
         "readMode" :"Lezen"
+    },
+    "drawing": {
+        "title": "Tekenen",
+        "toggle": "Tekening tonen/verbergen",
+        "select": "Selecteer",
+        "line": "Lijn",
+        "polygon": "Gebied",
+        "point": "Symbool",
+        "drawing": "Tekenen",
+        "measure": "Meten"
     }
 }

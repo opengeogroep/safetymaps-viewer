@@ -646,3 +646,95 @@ a.btn.on:after {
     position: relative;
     top: -12px;
 }
+
+#drawing_buttons,
+#drawing_controls,
+#drawing_measure {
+    margin-left: 5px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+}
+
+.drawing_caption {
+    margin-left: 5px;
+    margin-bottom: 10px;
+}
+
+#drawing_buttons .btn,
+#drawing_controls .btn,
+#drawing_measure .btn {
+    height: 64px;
+    min-width: 60px;
+    font-size: 35px !important;
+    margin-right: -1px;
+}
+
+#drawing_colors,
+#drawing_symbols {
+    margin-top: 20px;
+}
+#drawing_colors .drawing_color,
+#drawing_symbols .drawing_symbol {
+    width: 60px;
+    height: 60px;
+    float: left;
+    margin: 5px;
+}
+
+#drawing_colors .drawing_color.active,
+#drawing_symbols .drawing_symbol.active {
+    border: 2px solid black;
+}
+
+#drawing_feature_controls {
+    clear: left;
+    margin-left: 5px;
+    margin-top: 20px;
+    padding: 5px;
+    border: 1px solid black;
+}
+
+#drawing_feature_controls .btn {
+    width: 60px;
+    height: 60px;
+    margin: 5px;
+    font-size: 35px !important;
+}
+
+#drawing_feature_labelbtn {
+    border: 0; opacity: 1
+}
+
+#drawing_feature_label {
+    height: 30px;
+    margin-top: 20px;
+    font-size: 16pt;
+    overflow: hidden;
+}
+
+#drawing_feature_rotatebtn {
+    border: 0; opacity: 1
+}
+
+#drawing_feature_rotate {
+    height: 30px;
+    margin-top: 20px;
+    font-size: 16pt;
+    overflow: hidden;
+}
+
+#drawing_feature_rotate_slider {
+    margin-top: 24px;
+}
+
+.slider-vertical {
+    margin-bottom: 15px;
+}
+
+#drawing_feature_rotate_slider .slider-selection {
+    background: transparent;
+}
+
+#drawing_feature_rotate_slider .slider-tick {
+    background: linear-gradient(to bottom,#f5f5f5 0,#f9f9f9 100%);
+}

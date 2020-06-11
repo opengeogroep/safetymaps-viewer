@@ -243,5 +243,14 @@
         "select": "Vælg",
         "drawMode" : "Tegne",
         "readMode" :"Læse"
+    },
+    "drawing": {
+        "title": "Tegne",
+        "toggle": "Tegne at vise/skjul",
+        "select": "Vælg",
+        "line": "Linje",
+        "polygon": "Areal",
+        "drawing": "Tegne",
+        "measure": "Mål"
     }
 }
