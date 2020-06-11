@@ -926,7 +926,9 @@ VehicleIncidentsController.prototype.updateVehiclePositionsSC = function() {
         var transformedVehicles = data.features
             .filter(function(f) {
                 // Filter only vehicles for incident inzet
-                return f.properties.incidentNummer === me.incident.IncidentNummer;
+                return me.incident.BetrokkenEenheden.filter(function (be) {
+                    return be.IsActief && be.Roepnaam === f.properties.id;
+                }).length > 0;
             })
             .map(function(f) {
                 // Map SC vehicles schema to schema expected by VehiclePositionLayer
