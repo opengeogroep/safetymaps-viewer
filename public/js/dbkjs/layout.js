@@ -40,7 +40,7 @@ dbkjs.layout = {
         });
         
         $(parent).append("<hr id='h_settings_version'><h4>" + i18n.t("settings.version") + "</h4><br>");
-        $(parent).append('<p><strong>' + dbkjs.options.APPLICATION + '</strong> ' + dbkjs.options.VERSION + '</p>');
+        $(parent).append('<p id="settings_version"><strong>' + dbkjs.options.APPLICATION + '</strong> ' + dbkjs.options.VERSION + '</p>');
         if(dbkjs.options.CONFIG !== "_CONFIG_") {
             $(parent).append('<p>' + i18n.t("settings.version_deploy") + ': ' + dbkjs.options.CONFIG + '</p>');
         }
