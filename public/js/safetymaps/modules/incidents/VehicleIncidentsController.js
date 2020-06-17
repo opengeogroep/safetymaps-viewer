@@ -35,6 +35,7 @@ function VehicleIncidentsController(options, featureSelector) {
     me.checkAuthorizations();
 
     me.primaryFailing = false;
+    me.handlingInzetInfo = false;
 
     me.button = new AlertableButton("btn_incident", "Incident", "bell-o");
     me.button.getElement().prependTo('#btngrp_object');
@@ -116,14 +117,9 @@ function VehicleIncidentsController(options, featureSelector) {
     $(dbkjs).one("dbkjs_init_complete", function() {
         window.setTimeout(function() {
             me.setVoertuignummer(me.voertuignummer, true);
+            me.options.showStatus && me.updateStatus();
         }, 2000);
     });
-
-    if(me.options.showStatus) {
-        window.setTimeout(function() {
-            me.updateStatus();
-        }, 2000);
-    }
 }
 
 VehicleIncidentsController.prototype.defaultOptions = function(options) {
@@ -304,8 +300,13 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
 };
 
 VehicleIncidentsController.prototype.incidentMonitorIncidentSelected = function(event, inzetInfo) {
-    // New info says closed incident while old info says active incident
-    if (inzetInfo.incident.beeindigdeInzet && (this.inzetInfo && this.inzetInfo.incident && !this.inzetInfo.incident.beeindigdeInzet)) {
+    var me = this;
+
+    var openedIncident = (me.incident && me.incident !== null);
+    var openedIncidentIsEnded = (openedIncident && me.incident.beeindigdeInzet);
+    var selectedIncidentIsEnded = inzetInfo.incident.beeindigdeInzet;
+
+    if (openedIncident && !openedIncidentIsEnded && selectedIncidentIsEnded) {
         this.inzetBeeindigd('Incident beeindigd');
     } else {
         this.inzetInfo = inzetInfo;
@@ -481,19 +482,32 @@ VehicleIncidentsController.prototype.enableVoertuignummerTypeahead = function() 
  */
 VehicleIncidentsController.prototype.setVoertuignummer = function(voertuignummer, noDuplicateCheck) {
     var me = this;
+
     if(me.voertuignummer === voertuignummer && !noDuplicateCheck) {
         return;
+    }   
+    
+    var voertuignummers;
+    if (!voertuignummer || voertuignummer === '') {
+        voertuignummers = [""];
+    } else {
+        voertuignummers = voertuignummer.split(";").join(",").split(" ").join(",");
     }
-    me.voertuignummer = voertuignummer;
+    me.voertuignummers = voertuignummers.split(",");
+
+    me.voertuignummer = me.voertuignummers[0];
     window.localStorage.setItem("voertuignummer", voertuignummer);
 
     me.cancelGetInzetInfo();
-    if(me.incidentNummer) {
-        me.geenInzet();
-    }
+    me.incident && me.geenInzet();
+
     me.getInzetInfo();
     me.updateStatus();
 };
+
+VehicleIncidentsController.prototype.resetVoertuignummer = function (voertuignummer) {
+    this.voertuignummer = voertuignummer;
+}
 
 VehicleIncidentsController.prototype.cancelGetInzetInfo = function() {
     var me = this;
@@ -505,30 +519,6 @@ VehicleIncidentsController.prototype.cancelGetInzetInfo = function() {
 
 VehicleIncidentsController.prototype.getInzetInfo = function() {
     var me = this;
-
-    if(!me.voertuignummer || me.voertuignummer === 'null') {
-        if(me.incidentMonitorController) {
-            // If IncidentMonitor has open incident update that one
-            me.incidentMonitorController.tryGetIncident();
-            // Reset timeout
-            if (me.getInzetTimeout) {
-                window.clearTimeout(me.getInzetTimeout);
-            }
-            me.getInzetTimeout = window.setTimeout(function() {
-                me.getInzetInfo();
-            }, me.options.incidentUpdateInterval);
-        }
-
-        return;
-    }
-
-    /*if(!me.voertuignummer || me.voertuignummer === 'null') {
-        me.geenInzet();
-    }*/
-
-    // Nu geen meerdere voertuignummers...
-
-    //var nummers = me.voertuignummer.split(/[,\s]+/);
 
     me.getVoertuigIncidenten(me.voertuignummer)
     .fail(function(msg) {
@@ -542,6 +532,7 @@ VehicleIncidentsController.prototype.getInzetInfo = function() {
 VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
     var me = this;
 
+    me.handlingInzetInfo = true;
     me.inzetInfo = inzetInfo;
 
     var interval = me.options.incidentUpdateInterval;
@@ -578,23 +569,62 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
             me.button.setIcon("bell-slash");
         }
         me.incidentDetailsWindow.showError(msg);
-    } else if(inzetInfo.incidenten === null || inzetInfo.incidenten === 0) {
-        if(!me.incidentFromIncidentList) {
-            me.incidentDetailsWindow.showError("Geen actief incident voor voertuig " + me.voertuignummer + ". Laatst informatie opgehaald op " + new moment().format("LLL") + ".");
-        }
 
-        if(me.incidentNummer && !me.incidentFromIncidentList) {
-            me.inzetBeeindigd('Inzet beeindigd');
-        } else {
-            // If IncidentMonitor has open incident update that one
-            me.incidentMonitorController.tryGetIncident();
-        }
-    } else {
-        if(me.incidentMonitorController) {
-            me.incidentMonitorController.markerLayer.layer.setVisibility(false);
-        }
+        return;
+    }
 
+    var openedIncident = (me.incident && me.incident !== null);
+    var openedIncidentIsEnded = (openedIncident && me.incident.beeindigdeInzet)
+    var openedIncidentIsForVehicle = (openedIncident && (me.incident.BetrokkenEenheden.filter(function (be) {
+            return be.Roepnaam === me.voertuignummer && be.IsActief;
+        }).length > 0));
+    var incidentFoundForVehicle = (inzetInfo.incidenten !== null && inzetInfo.incidenten !== 0);
+    var vehicleCount = me.voertuignummers.length;
+    var currentVehicleIndex = me.voertuignummers.indexOf(me.voertuignummer);
+
+    if (!openedIncident && !incidentFoundForVehicle) {
+        me.incidentDetailsWindow.showError("Geen actief incident voor voertuig " + me.voertuignummer + ". Laatst informatie opgehaald op " + new moment().format("LLL") + ".");
+
+        if (vehicleCount > 1 && currentVehicleIndex < (vehicleCount - 1)) {
+            me.resetVoertuignummer(me.voertuignummers[currentVehicleIndex + 1]);
+            me.getInzetTimeout && window.clearTimeout(me.getInzetTimeout);
+            me.getInzetInfo();
+        } 
+        else if (vehicleCount > 1 && currentVehicleIndex === (vehicleCount - 1)) {
+            me.resetVoertuignummer(me.voertuignummers[0]);
+        }
+    } 
+    else if (!openedIncident && incidentFoundForVehicle) {
+        me.incidentMonitorController && me.incidentMonitorController.markerLayer.layer.setVisibility(false);
         me.inzetIncident(inzetInfo, false);
+        me.handlingInzetInfo = false;
+    } 
+    else if (openedIncident && openedIncidentIsEnded && !incidentFoundForVehicle) {
+        me.incidentMonitorController.tryGetIncident();
+        me.handlingInzetInfo = false;
+    } 
+    else if (openedIncident && openedIncidentIsEnded && incidentFoundForVehicle) { 
+        me.incidentMonitorController && me.incidentMonitorController.markerLayer.layer.setVisibility(false);
+        me.inzetIncident(inzetInfo, false);
+        me.handlingInzetInfo = false;
+    } 
+    else if (openedIncident && !openedIncidentIsEnded && !openedIncidentIsForVehicle && !incidentFoundForVehicle) {
+        me.incidentMonitorController.tryGetIncident();
+        me.handlingInzetInfo = false;
+    } 
+    else if (openedIncident && !openedIncidentIsEnded && !openedIncidentIsForVehicle && incidentFoundForVehicle) {
+        me.incidentMonitorController && me.incidentMonitorController.markerLayer.layer.setVisibility(false);
+        me.inzetIncident(inzetInfo, false);
+        me.handlingInzetInfo = false;
+    } 
+    else if (openedIncident && !openedIncidentIsEnded && openedIncidentIsForVehicle && !incidentFoundForVehicle) {
+        me.inzetBeeindigd('Inzet beeindigd');
+        me.handlingInzetInfo = false;
+    } 
+    else if (openedIncident && !openedIncidentIsEnded && openedIncidentIsForVehicle && incidentFoundForVehicle) {
+        me.incidentMonitorController && me.incidentMonitorController.markerLayer.layer.setVisibility(false);
+        me.inzetIncident(inzetInfo, false);
+        me.handlingInzetInfo = false;
     }
 };
 
@@ -603,6 +633,14 @@ VehicleIncidentsController.prototype.updateStatus = function() {
 
     if(!me.voertuignummer) {
         $("#status").remove();
+        return;
+    }
+
+    // When there is more then 1 voertuignummer configured it's possible that
+    // me.getInzetInfo is still busy and the correct voertuignummer 
+    // is not yet set in me.voertuignummer. 
+
+    if (me.handleInzetInfo === true) {
         return;
     }
 
@@ -1093,6 +1131,7 @@ VehicleIncidentsController.prototype.inzetBeeindigd = function(melding) {
             $('#systeem_meldingen').hide();
         }, 10000);
     }, 3000);
+    me.resetVoertuignummer(me.voertuignummers[0]);
     me.geenInzet();
 };
 
