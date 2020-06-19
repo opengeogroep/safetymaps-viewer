@@ -32,6 +32,7 @@ dbkjs.modules.drawing = {
     drawLineControl: null,
     drawPolygonControl: null,
     updateInterval: null,
+    modifiedSince: null,
     register: function() {
         var me = dbkjs.modules.drawing;
 
@@ -96,6 +97,8 @@ dbkjs.modules.drawing = {
                 });
             }
         });
+
+        me.modifiedSince = {};
     },
 
     newIncident: function(incidentNr) {
@@ -135,10 +138,18 @@ dbkjs.modules.drawing = {
             return;
         }
 
+        var headers = {};
+
+        if(me.modifiedSince[me.incidentNr]) {
+            headers = {
+                'If-Modified-Since': me.modifiedSince[me.incidentNr].toUTCString(),
+            };
+        }
+
         me.updateJqXHR = $.ajax('api/drawing/' + me.incidentNr + '.json', {
             dataType: 'json',
             cache: true,
-            ifModified: true
+            headers: headers,
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             if(jqXHR.status === 404) {
@@ -153,6 +164,9 @@ dbkjs.modules.drawing = {
 
             var lastModified = jqXHR.getResponseHeader("last-modified");
             console.log("drawing: got drawing, last modified " + lastModified, drawing);
+            if(lastModified) {
+                me.modifiedSince[me.incidentNr] = new Date(lastModified);
+            }
 
             var geoJsonFormatter = new OpenLayers.Format.GeoJSON();
             var features = geoJsonFormatter.read(drawing)
@@ -217,6 +231,7 @@ dbkjs.modules.drawing = {
         .done(function(drawing, textStatus, jqXHR) {
             var lastModified = jqXHR.getResponseHeader("last-modified");
             console.log("drawing: saved drawing, last modified " + lastModified, drawing);
+            me.modifiedSince[me.incidentNr] = new Date(lastModified);
         });
     },
 
