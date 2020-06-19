@@ -793,7 +793,7 @@ IncidentMonitorController.prototype.loadTweets = function(incident) {
         data: params
     }).fail(function(jqXHR, textStatus, errorThrown) {
         $("#t_twitter_title").text("Twitter (!)");
-        $("#tab_twitter").text(me.service.getAjaxError(jqXHR, textStatus, errorThrown));
+        $("#tab_twitter").text(AGSIncidentService.prototype.getAjaxError(jqXHR, textStatus, errorThrown));
     }).done(function(data) {
         me.options.logTwitter && console.log("Twitter search response", data);
 
