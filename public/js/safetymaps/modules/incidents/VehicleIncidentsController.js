@@ -491,9 +491,9 @@ VehicleIncidentsController.prototype.setVoertuignummer = function(voertuignummer
     if (!voertuignummer || voertuignummer === '') {
         voertuignummers = [""];
     } else {
-        voertuignummers = voertuignummer.split(";").join(",").split(" ").join(",");
+        voertuignummers = voertuignummer.split(/[,; ]/);
     }
-    me.voertuignummers = voertuignummers.split(",");
+    me.voertuignummers = voertuignummers;
 
     me.voertuignummer = me.voertuignummers[0];
     window.localStorage.setItem("voertuignummer", voertuignummer);
