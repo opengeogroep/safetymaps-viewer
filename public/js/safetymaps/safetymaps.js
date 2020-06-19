@@ -254,7 +254,7 @@ safetymaps.showSmvxLink = function() {
             popupIntervalMinutes = smvx.options.popupIntervalMinutes;
         }
         if(!shown || new Date().getTime() - new Date(+shown).getTime() > popupIntervalMinutes * 60 * 1000) {
-            var div = $("<div id='smvx' class='alert alert-info alert-dismissable' style='position: absolute; width: 450px; margin-left: -225px; top: 48px; left: 50%'><button class='close' data-dismiss='alert'>×</button>Klik <a href='../smvx/app/'>hier</a> om de vernieuwde voertuigviewer te proberen!</div>");
+            var div = $("<div id='smvx' class='alert alert-info alert-dismissable' style='position: absolute; width: 450px; margin-left: -225px; top: 80px; left: 50%'><button class='close' data-dismiss='alert'>×</button>Klik <a href='../smvx/app/'>hier</a> om de vernieuwde voertuigviewer te proberen!</div>");
             div.appendTo('body');
             window.localStorage.setItem('smvx-shown', new Date().getTime());
         }
