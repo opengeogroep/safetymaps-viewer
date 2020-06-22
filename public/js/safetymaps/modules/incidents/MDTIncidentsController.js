@@ -56,6 +56,7 @@ function MDTIncidentsController(incidents) {
     me.incidentId = null;
     me.html = null;
     me.xml = null;
+    me.xmlFormat = {};
 
     if (me.options.showVehicles) {
         me.vehiclePositionLayer = new VehiclePositionLayer({
@@ -104,9 +105,12 @@ MDTIncidentsController.prototype.getMDTInfo = function() {
 
 MDTIncidentsController.prototype.handleIncident = function (xml) {
     var me = this;
+
+    me.xmlFormat = me.getXmlFormat(xml);
+
     var first = me.xml === null;
     var newHtml = me.incidentDetailsWindow.getXmlIncidentHtml(xml, true, true);
-    var newId = $(xml).find("Incident IncidentNr").text();
+    var newId = $(xml).find(me.xmlFormat.incidentNr).text();
 
     me.xml = xml;
     me.incidentDetailsWindow.data(xml, true, true, true);    
@@ -132,9 +136,11 @@ MDTIncidentsController.prototype.handleIncident = function (xml) {
 };
 
 MDTIncidentsController.prototype.zoomToIncident = function() {
+    var me = this;
+
     if(this.xml) {
-        var x = $(this.xml).find("IncidentLocatie XYCoordinaten XCoordinaat").text();
-        var y = $(this.xml).find("IncidentLocatie XYCoordinaten YCoordinaat").text();
+        var x = $(this.xml).find(me.xmlFormat.x).text();
+        var y = $(this.xml).find(me.xmlFormat.y).text();
         dbkjs.map.setCenter(new OpenLayers.LonLat(x, y), dbkjs.options.zoom);
     }
 };
@@ -145,18 +151,17 @@ MDTIncidentsController.prototype.newIncident = function() {
     safetymaps.deselectObject();
     me.zoomToIncident();
 
-    var x = $(this.xml).find("IncidentLocatie XYCoordinaten XCoordinaat").text();
-    var y = $(this.xml).find("IncidentLocatie XYCoordinaten YCoordinaat").text();
-    var adres = $(this.xml).find("IncidentLocatie Adres");
+    var x = $(this.xml).find(me.xmlFormat.x).text();
+    var y = $(this.xml).find(me.xmlFormat.y).text();
     var commonIncidentObject = {
         nummer: me.incidentId,
         IncidentNummer: me.incidentId,
-        postcode: $(adres).find("Postcode").text(),
-        woonplaats: $(adres).find("Woonplaats").text(),
-        huisnummer: Number($(adres).find("Huisnummer").text()),
-        huisletter: $(adres).find("HnAanduiding").text(),
-        toevoeging: $(adres).find("HnToevoeging").text(),
-        straat: $(adres).find("Straat").text(),
+        postcode: $(this.xml).find(me.xmlFormat.postcode).text(),
+        woonplaats: $(this.xml).find(me.xmlFormat.woonplaats).text(),
+        huisnummer: Number($(this.xml).find(me.xmlFormat.huisnummer).text()),
+        huisletter: $(this.xml).find(me.xmlFormat.huisnummeraanduiding).text(),
+        toevoeging: $(this.xml).find(me.xmlFormat.huisnummertoevoeging).text(),
+        straat: $(this.xml).find(me.xmlFormat.straat).text(),
         x: x,
         y: y
     };
@@ -177,6 +182,71 @@ MDTIncidentsController.prototype.markerClick = function() {
     this.zoomToIncident();
 };
 
+MDTIncidentsController.prototype.getXmlFormat = function (xml) {
+    var xmlIsDefault = $(xml).find("Incident IncidentNr").length > 0;
+    var xmlIsSCT = $(xml).find("MdtIncident IncidentNummer").length > 0;
+    
+    var xmlFormat = {};
+
+    if (xmlIsDefault) {
+        xmlFormat.incidentNr = "Incident IncidentNr";
+        xmlFormat.x = "IncidentLocatie XYCoordinaten XCoordinaat";
+        xmlFormat.y = "IncidentLocatie XYCoordinaten YCoordinaat";
+        xmlFormat.postcode = "IncidentLocatie Adres Postcode";
+        xmlFormat.woonplaats =  "IncidentLocatie Adres Woonplaats";
+        xmlFormat.huisnummer = "IncidentLocatie Adres Huisnummer";
+        xmlFormat.huisnummeraanduiding = "IncidentLocatie Adres HnAanduiding";
+        xmlFormat.huisnummertoevoeging = "IncidentLocatie Adres HnToevoeging";
+        xmlFormat.straat = "IncidentLocatie Adres Straat";
+        xmlFormat.eenheid = "GekoppeldeEenheden Eenheid";
+        xmlFormat.roepnaam = "Roepnaam";
+        xmlFormat.disc = "Disc";
+
+        xmlFormat.prio = "Prioriteit";
+        xmlFormat.startdatumtijd = "StartDatumTijd";
+        xmlFormat.msgDate = "XmlMsgKop MsgDate";
+        xmlFormat.msgTime = "XmlMsgKop MsgTime";
+        xmlFormat.incidentLocatie = "IncidentLocatie"
+        xmlFormat.karakteristiek = "Karakteristiek";
+        xmlFormat.karakteristiekNaam = "KarakteristiekNaam";
+        xmlFormat.karakteristiekWaarde = "KarakteristiekWaarde";
+        xmlFormat.afspraakOpLocatie = "AfspraakOpLocatie";
+        xmlFormat.kladblok = "Kladblok";
+
+        xmlFormat.classificatie = $(xml).find("Classificatie").text();
+    }
+    else if (xmlIsSCT) {
+        xmlFormat.incidentNr = "MdtIncident IncidentNummer";
+        xmlFormat.x = "IncidentLocatie XCoordinaat";
+        xmlFormat.y = "IncidentLocatie YCoordinaat";
+        xmlFormat.postcode = "IncidentLocatie NaamLocatie2";
+        xmlFormat.woonplaats =  "IncidentLocatie Plaatsnaam";
+        xmlFormat.huisnummer = "IncidentLocatie Huisnummer";
+        xmlFormat.huisnummeraanduiding = "IncidentLocatie HnAanduiding";
+        xmlFormat.huisnummertoevoeging = "IncidentLocatie HnToevoeging";
+        xmlFormat.straat = "IncidentLocatie NaamLocatie1";
+        xmlFormat.eenheid = "GekoppeldeEenheden Eenheid";
+        xmlFormat.roepnaam = "Roepnaam";
+        xmlFormat.disc = "Disc";
+
+        xmlFormat.prio = "Prioriteit";
+        xmlFormat.startdatumtijd = "StartDTG";
+        xmlFormat.msgDate = "XmlMsgKop MsgDate";
+        xmlFormat.msgTime = "XmlMsgKop MsgTime";
+        xmlFormat.incidentLocatie = "IncidentLocatie"
+        xmlFormat.karakteristiek = "Karakteristiek";
+        xmlFormat.karakteristiekNaam = "KarakteristiekNaam";
+        xmlFormat.karakteristiekWaarde = "KarakteristiekWaarde";
+        xmlFormat.afspraakOpLocatie = "AfspraakOpLocatie";
+        xmlFormat.kladblok = "Kladblokregel Inhoud";
+
+        xmlFormat.classificatie = $(xml).find("Meldingsclassificatie1").text() + ", "
+            + $(xml).find("Meldingsclassificatie2").text() + ", "
+            + $(xml).find("Meldingsclassificatie3").text();
+    }
+
+    return xmlFormat;
+}
 
 /**
  * Update vehicle position(s) on map
@@ -186,9 +256,9 @@ MDTIncidentsController.prototype.updateVehiclePositionLayerCityGISWFS = function
     var me = this;
 
     var roepnamen = [];
-    $.each($(incident).find("GekoppeldeEenheden Eenheid"), function (i, eenheid) {
-        var naam = $(eenheid).find("Roepnaam").text();
-        var disc = $(eenheid).find("Disc").text();
+    $.each($(incident).find(me.xmlFormat.eenheid), function (i, eenheid) {
+        var naam = $(eenheid).find(me.xmlFormat.roepnaam).text();
+        var disc = $(eenheid).find(me.xmlFormat.disc).text();
 
         if (disc === 'B--') {
             roepnamen.push(naam);

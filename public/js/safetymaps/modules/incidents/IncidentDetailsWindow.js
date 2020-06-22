@@ -462,7 +462,8 @@ IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incid
     var kladblokHTML = "<table>";
     switch(format) {
         case "xml":
-            $.each($(incident).find("Kladblok"), function(i, k) {
+            var xmlFormat = MDTIncidentsController.prototype.getXmlFormat(incident);
+            $.each($(incident).find(xmlFormat.kladblok), function(i, k) {
                 kladblokHTML += "<tr><td>" + me.linkify(dbkjs.util.htmlEncode($(k).text())) + "</td></tr>";
             });
             break;
@@ -709,22 +710,24 @@ IncidentDetailsWindow.prototype.getIncidentHtmlPharos = function(incident, showI
  */
 IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInzet, compareMode) {
     var me = this;
-    html = '<table class="table table-hover">';
 
-    var prio = $(incident).find("Prioriteit").text();
+    var xmlFormat = MDTIncidentsController.prototype.getXmlFormat(incident);
+
+    html = '<table class="table table-hover">';
+    var prio = $(incident).find(xmlFormat.prio).text();
     html += '<tr><td colspan="2" style="font-weight: bold; text-align: center; color: ' + me.getPrioriteitColor(prio) + '">PRIO ' + prio + '</td></tr>';
 
     var template = "{{#separator}}<tr><td>&nbsp;</td><td></td></tr>{{/separator}}<tr><td class='leftlabel'><span>{{label}}</span>: </td><td>{{value}}{{{valueHTML}}}</td></tr>";
 
     //html += Mustache.render(template, { label: "Nummer", value: $(incident).find("IncidentNr").text()});
 
-    var startS = $(incident).find("StartDatumTijd").text();
+    var startS = $(incident).find(xmlFormat.startdatumtijd).text();
     var d = null;
     if(startS !== "") {
         d = moment(startS);
     } else {
-        var date = $(incident).find("XmlMsgKop MsgDate").text();
-        var time = $(incident).find("XmlMsgKop MsgTime").text();
+        var date = $(incident).find(xmlFormat.msgDate).text();
+        var time = $(incident).find(xmlFormat.msgTime).text();
         if(date !== "" && time !== "") {
             d = moment(date + " " + time, "DD-MM-YYYY HH:mm:ss");
         }
@@ -732,8 +735,8 @@ IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInze
     var v = d === null ? "" : d.format("dddd, D-M-YYYY HH:mm:ss") + (compareMode ? "" : " (" + d.fromNow() + ")");
     html += Mustache.render(template, { label: "Start incident", value: v});
 
-    var adres = $(incident).find("IncidentLocatie Adres");
-    v = Mustache.render("{{#x}}Straat{{/x}} {{#x}}Huisnummer{{/x}}{{#x}}HnToevoeging{{/x}} {{#x}}HnAanduiding{{/x}}", {
+    var adres = $(incident).find(xmlFormat.incidentLocatie);
+    v = Mustache.render("{{#x}}" + xmlFormat.straat +"{{/x}} {{#x}}"+ xmlFormat.huisnummer +"{{/x}}{{#x}}"+ xmlFormat.huisnummertoevoeging +"{{/x}} {{#x}}"+ xmlFormat.huisnummeraanduiding +"{{/x}}", {
         x: function() {
             return function(text, render) {
                 return render($(adres).find(text).text());
@@ -742,13 +745,13 @@ IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInze
     });
     html += Mustache.render(template, { label: "Adres", value: v });
 
-    html += Mustache.render(template, { label: "Postcode", value: $(adres).find("Postcode").text() });
-    html += Mustache.render(template, { label: "Woonplaats", value: $(adres).find("Woonplaats").text() });
+    html += Mustache.render(template, { label: "Postcode", value: $(adres).find(xmlFormat.postcode).text() });
+    html += Mustache.render(template, { label: "Woonplaats", value: $(adres).find(xmlFormat.woonplaats).text() });
 
     html += '<tr><td>&nbsp;</td><td></td></tr>';
-    html += Mustache.render(template, { label: "Melding classificatie", valueHTML: me.linkify(dbkjs.util.htmlEncode($(incident).find("Classificatie").text())) });
+    html += Mustache.render(template, { label: "Melding classificatie", valueHTML: me.linkify(dbkjs.util.htmlEncode(xmlFormat.classificatie)) });
 
-    var karakteristiek = $(incident).find("Karakteristiek");
+    var karakteristiek = $(incident).find(xmlFormat.karakteristiek);
 
     if(karakteristiek.length === 0) {
         html += '<tr class="detailed"><td>Karakteristieken:</td><td>';
@@ -759,16 +762,16 @@ IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInze
         html += '<table class="table table-hover" style="width: auto">';
         $.each(karakteristiek, function(i, k) {
             v = {};
-            v.naam = $(k).find("KarakteristiekNaam").text();
-            v.waarde = me.linkify(dbkjs.util.htmlEncode($(k).find("KarakteristiekWaarde").text()));
+            v.naam = $(k).find(xmlFormat.karakteristiekNaam).text();
+            v.waarde = me.linkify(dbkjs.util.htmlEncode($(k).find(xmlFormat.karakteristiekWaarde).text()));
 
             html += Mustache.render("<tr><td>{{naam}}</td><td>{{{waarde}}}</td></tr>", v);
 
             if(v.naam.toLowerCase() !== "kenteken" || !me.crsLinkEnabled){
-                v.waarde = me.linkify(dbkjs.util.htmlEncode($(k).find("KarakteristiekWaarde").text()));
+                v.waarde = me.linkify(dbkjs.util.htmlEncode($(k).find(xmlFormat.karakteristiekWaarde).text()));
             }
             else {
-                v.waarde = me.crsLink(dbkjs.util.htmlEncode($(k).find("KarakteristiekWaarde").text()));
+                v.waarde = me.crsLink(dbkjs.util.htmlEncode($(k).find(xmlFormat.karakteristiekWaarde).text()));
             } 
         });
         html += '</table><div/>';
@@ -778,9 +781,9 @@ IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInze
     if(showInzet) {
         html += '<tr class="detailed"><td colspan="2" id="eenheden">';
         var eenhBrw = "", eenhPol = "", eenhAmbu = "";
-        $.each($(incident).find("GekoppeldeEenheden Eenheid"), function(i, eenheid) {
-            var naam = $(eenheid).find("Roepnaam").text();
-            var disc = $(eenheid).find("Disc").text();
+        $.each($(incident).find(xmlFormat.eenheid), function(i, eenheid) {
+            var naam = $(eenheid).find(xmlFormat.roepnaam).text();
+            var disc = $(eenheid).find(xmlFormat.disc).text();
 
             var span = "<span>" + dbkjs.util.htmlEncode(naam) + "</span><br/>";
             if("B--" === disc) {
@@ -797,7 +800,7 @@ IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInze
         html += '</td></tr>';
     }
 
-    var afspraak = $(incident).find("AfspraakOpLocatie").text();
+    var afspraak = $(incident).find(xmlFormat.afspraakOpLocatie).text();
     if(afspraak) {
         html += Mustache.render("<tr><td>Afspraak op locatie:</td><td>{{v}}</td></tr>", {v: afspraak});
     }
