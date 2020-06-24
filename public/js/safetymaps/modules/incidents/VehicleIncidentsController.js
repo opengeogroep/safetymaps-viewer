@@ -338,8 +338,8 @@ VehicleIncidentsController.prototype.addConfigControls = function() {
             "<div><h4>Meldkamerkoppeling</h4><p/>" +
                 "<div class='container' style='width: 400px; margin-left: 0px'>" +
                     "<div class='row'>" +
-                        "<div class='col-xs-4'>Voertuignummer:</div>" +
-                        "<div class='col-xs-6'><input type='text' disabled id='input_voertuignummer'></div>" +
+                        "<div class='col-xs-4'>Voertuignummer(s):</div>" +
+                        "<div class='col-xs-6'><input type='text' disabled id='input_voertuignummer' maxlength='20'></div>" +
                         "<div class='col-xs-2' style='height: 34px'><button class='btn btn-primary' id='btn_enable_voertuignummer'>Wijzigen</button></div>" +
                     "</div>" +
                     "<div class='row ' id='cfg_voertuignummercode' style='visibility: hidden; margin-top: 10px'>" +
