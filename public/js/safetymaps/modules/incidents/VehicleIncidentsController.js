@@ -492,6 +492,9 @@ VehicleIncidentsController.prototype.setVoertuignummer = function(voertuignummer
         voertuignummers = [""];
     } else {
         voertuignummers = voertuignummer.split(/[,; ]/);
+        voertuignummers = voertuignummers.filter(function(f) {
+            return v !== "";
+        })
     }
     me.voertuignummers = voertuignummers;
 
