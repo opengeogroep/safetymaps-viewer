@@ -107,8 +107,7 @@ IncidentDetailsWindow.prototype.renderDetailsScreen = function() {
     }
     this.rendered = true;
 
-    // XXX 
-    var renderKladblok = dbkjs.modules.incidents.options.incidentMonitorKladblokAuthorized && !dbkjs.modules.incidents.options.hideKladblok;
+    var renderKladblok = !dbkjs.modules.incidents.options.hideKladblok;
     var renderTwitter = !!dbkjs.modules.incidents.options.showTwitter;
     var showFoto = dbkjs.modules.incidents.options.showFoto && !!dbkjs.modules.fotoFunction.options;
     var html = '<div style="width: 100%" class="table-responsive incidentDetails"></div>';
@@ -160,7 +159,7 @@ IncidentDetailsWindow.prototype.addTabClickListener = function() {
  * @param {boolean} restoreScrollTop
  * @returns {undefined}
  */
-IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScrollTop, isXmlOrFormatName) {
+IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScrollTop, isXmlOrFormatName, fromIncidentList) {
     var me = this;
     this.renderDetailsScreen();
 
@@ -206,6 +205,10 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
     }
 
     $(".incident_tabs").toggle(format !== "string");
+
+    if(fromIncidentList && !dbkjs.modules.incidents.options.incidentMonitorKladblokAuthorized) {
+        kladblok = "<i>Niet beschikbaar: alleen geautoriseerd voor kladblok van incident waarvoor ingezet</i>";
+    }
 
     this.div.find(".incidentDetails").html(table);
     this.div.find("#tab_kladblok").html(kladblok);
