@@ -460,16 +460,13 @@ dbkjs.modules.drawing = {
         // Put our layer on top of other vector layers
         dbkjs.map.raiseLayer(dbkjs.modules.drawing.layer, dbkjs.map.layers.length);
 
-        if(this.options.editAuthorized) {
-            dbkjs.selectControl.deactivate();
-            this.selectControl.activate();
-        }
-
         if(!setVisibleOnly) {
             this.panel.show();
             this.color = this.options.defaultColor;
             if(this.options.editAuthorized) {
+                dbkjs.selectControl.deactivate();
                 this.drawLine();
+                this.selectControl.activate();
             }
         }
     },
