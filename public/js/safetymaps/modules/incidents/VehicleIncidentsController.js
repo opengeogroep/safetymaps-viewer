@@ -990,7 +990,7 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
 
         me.incidentFromIncidentList = fromIncidentList;
 
-        me.incidentDetailsWindow.data(incident, true);
+        me.incidentDetailsWindow.data(incident, true, false, false, me.incidentFromIncidentList);
 
         if(!me.incidentFromIncidentList) {
             me.markerLayer.addIncident(incident, false, true);
@@ -1035,7 +1035,7 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
         var incident = me.incident;
 
         // Always update window, updates moment.fromNow() times
-        me.incidentDetailsWindow.data(incident, true, /* restoreScrollTop = */ true);
+        me.incidentDetailsWindow.data(incident, true, /* restoreScrollTop = */ true, false, me.incidentFromIncidentList);
 
         // Check if updated, enable alert state if true
 
