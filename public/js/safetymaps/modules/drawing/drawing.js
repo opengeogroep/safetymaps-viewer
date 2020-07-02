@@ -52,7 +52,8 @@ dbkjs.modules.drawing = {
             showAdvancedControls: false,
             rotation: ["polygon"],
             wideLineForSelectionExtraWidth: 6,
-            wideLineForSelectionOpacity: 0
+            wideLineForSelectionOpacity: 0,
+            apiPath: "api/drawing/"
         }, me.options);
 
         me.color = me.options.defaultColor;
@@ -146,7 +147,7 @@ dbkjs.modules.drawing = {
             };
         }
 
-        me.updateJqXHR = $.ajax('api/drawing/' + me.incidentNr + '.json', {
+        me.updateJqXHR = $.ajax(me.options.apiPath + me.incidentNr + '.json', {
             dataType: 'json',
             cache: true,
             headers: headers,
@@ -219,7 +220,7 @@ dbkjs.modules.drawing = {
         }
 
         // TODO If-Unmodified-Since
-        me.saveJqXHR = $.ajax('api/drawing/' + me.incidentNr + '.json', {
+        me.saveJqXHR = $.ajax(me.options.apiPath + me.incidentNr + '.json', {
             method: 'POST',
             data: { features: new OpenLayers.Format.GeoJSON().write(me.layer.features.filter(function (f) {
                 return !f.attributes.wideLineForSelectionTolerance;
