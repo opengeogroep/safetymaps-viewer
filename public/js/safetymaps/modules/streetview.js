@@ -63,6 +63,7 @@ dbkjs.modules.streetview = {
 
         this.options = $.extend({
             newWindow: true,
+            pinToIncidentLocation: false,
         }, this.options);
 
         if(dbkjs.options.streetview && typeof dbkjs.options.streetview.onRegister === "function") {
@@ -90,10 +91,31 @@ dbkjs.modules.streetview = {
                 oldOnClick(e);
             }
         };
+
+        me.incidentLonLat = null;
+        if (me.options.pinToIncidentLocation) {
+            $(dbkjs).one("dbkjs_init_complete", function () {
+                if (dbkjs.modules.incidents && dbkjs.modules.incidents.controller) {
+                    $(dbkjs.modules.incidents.controller).on("new_incident", function (event, commonIncident, incident) {
+                        me.incidentLonLat = me.getLonLatFromIncident(commonIncident);
+                    });
+                    $(dbkjs.modules.incidents.controller).on("end_incident", function () {
+                        me.incidentLonLat = null;
+                    });
+                }
+            });
+        }
     },
     activate: function() {
-        this.active = true;
-        $(this).triggerHandler('activate');
+        var me = this;
+
+        if (me.options.pinToIncidentLocation && me.incidentLonLat !== null) {
+            me.openStreetView(me.incidentLonLat);
+            me.deactivate();
+        } else {
+            this.active = true;
+            $(this).triggerHandler('activate');
+        }
     },
     deactivate: function() {
         this.active = false;
@@ -103,6 +125,14 @@ dbkjs.modules.streetview = {
         var lonLat = dbkjs.map.getLonLatFromPixel(xy);
         Proj4js.defs["EPSG:4236"] = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs ";
         var p = new Proj4js.Point(lonLat.lon, lonLat.lat);
+        var t = Proj4js.transform(new Proj4js.Proj(dbkjs.map.getProjection()), new Proj4js.Proj("EPSG:4236"), p);
+        var gLonLat = new OpenLayers.LonLat(t.x, t.y);
+        return gLonLat;
+    },
+    getLonLatFromIncident: function(incident) {
+        var xy = AGSIncidentService.prototype.getIncidentXY(incident);
+        Proj4js.defs["EPSG:4236"] = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs ";
+        var p = new Proj4js.Point(xy.x, xy.y);
         var t = Proj4js.transform(new Proj4js.Proj(dbkjs.map.getProjection()), new Proj4js.Proj("EPSG:4236"), p);
         var gLonLat = new OpenLayers.LonLat(t.x, t.y);
         return gLonLat;
