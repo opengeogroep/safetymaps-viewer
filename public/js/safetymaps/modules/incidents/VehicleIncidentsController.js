@@ -1088,6 +1088,7 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
         }
         if(oldIncidentHtml !== newIncidentHtml) {
             $(dbkjs).trigger("incidents.updated");
+            $(me).triggerHandler("updated_incident", [incident]);
             if(!me.incidentDetailsWindow.isVisible()) {
                 me.button.setAlerted(true);
             }
