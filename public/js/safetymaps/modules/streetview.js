@@ -99,6 +99,9 @@ dbkjs.modules.streetview = {
                     $(dbkjs.modules.incidents.controller).on("new_incident", function (event, commonIncident, incident) {
                         me.incidentLonLat = me.getLonLatFromIncident(commonIncident);
                     });
+                    $(dbkjs.modules.incidents.controller).on("updated_incident", function (event, commonIncident) {
+                        me.incidentLonLat = me.getLonLatFromIncident(commonIncident);
+                    })
                     $(dbkjs.modules.incidents.controller).on("end_incident", function () {
                         me.incidentLonLat = null;
                     });
