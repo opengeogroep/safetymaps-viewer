@@ -360,7 +360,7 @@ IncidentMonitorController.prototype.getIncidentListSC = function() {
         dataType: "json",
         data: {
             extended: true,
-            excludeManuallyCreated: me.options.excludeManuallyCreatedIncidents
+            excludeTraining: me.options.excludeManuallyCreatedIncidents
         },
         cache: false,
         xhrFields: { withCredentials: true }, crossDomain: true
