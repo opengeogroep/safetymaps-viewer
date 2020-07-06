@@ -575,7 +575,7 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
 
     var openedIncident = (me.incident && me.incident !== null);
     var openedIncidentIsEnded = (openedIncident && me.incident.beeindigdeInzet)
-    var openedIncidentIsForVehicle = (openedIncident && (me.incident.BetrokkenEenheden.filter(function (be) {
+    var openedIncidentIsForVehicle = (openedIncident && (me.incident.BetrokkenEenheden && me.incident.BetrokkenEenheden.filter(function (be) {
             return be.Roepnaam === me.voertuignummer && be.IsActief;
         }).length > 0));
     var incidentFoundForVehicle = (inzetInfo.incidenten !== null && inzetInfo.incidenten !== 0);
