@@ -1258,6 +1258,18 @@ VehicleIncidentsController.prototype.normalizeIncidentFields = function(incident
         incident.locatie2 =  incident.NAAM_LOCATIE2;
 
         incident.start = AGSIncidentService.prototype.getAGSMoment(incident.DTG_START_INCIDENT);
+        incident.beeindigdeInzet = incident.DTG_EINDE_INCIDENT !== null;
+
+        incident.BetrokkenEenheden = [];
+        if (incident.inzetEenheden) {
+            $.each(incident.inzetEenheden, function(j, eenheid) {
+                var be = {
+                    Roepnaam: eenheid.ROEPNAAM_EENHEID,
+                    IsActief: eenheid.DTG_EIND_ACTIE === null
+                }
+                incident.BetrokkenEenheden.push(be);
+            });
+        }
     } else {
         throw "Unknown incident source: " + incidentInfo.source;
     }
