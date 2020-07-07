@@ -26,6 +26,7 @@ function DrawingPanelWindow(options) {
     me.options = options;
     me.symbolList = me.options.symbols || [];
     me.symbolList.push({ "image": "images/imoov/xy.png", "label": "XY" });
+    me.symbolList.push({ "image": "images/imoov/s0590_B03---g-110.png", "label": "110" });
     me.selectedColor = me.options.defaultColor;
 
     me.widthPercent = 20;

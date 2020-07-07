@@ -436,7 +436,11 @@ dbkjs.modules.drawing = {
         var me = this;
         if(me.drawMode === "point" && me.symbol) {
             var attributes = $.extend({}, me.symbol, {
-                label: me.symbol.label === "XY" ? "" + lonLat.lat + ", " + lonLat.lon : "",
+                label: me.symbol.label === "XY" 
+                    ? "" + lonLat.lat + ", " + lonLat.lon 
+                    : me.symbol.label === "110"
+                        ? "110"
+                        : "",
                 type: "symbol"
             });
             attributes.radius = 20;
@@ -726,6 +730,7 @@ dbkjs.modules.drawing = {
         var me = this;
         me.selectedFeature = feature;
         feature.attributes.fillOpacity = "1";
+        feature.attributes.labelYOffset = "20";
         me.selectControl.unselectAll();
         me.selectControl.select(feature);
         me.layer.redraw();
