@@ -30,6 +30,7 @@ function IncidentDetailsWindow() {
     this.div = $("<div></div>");
     this.linkifyWords = null;
     this.crsLinkEnabled = false;
+    this.addGoogleMapsNavigationLink = false;
     safetymaps.infoWindow.addTab("incident", "incident", "Incident", "incident", this.div, "first");
 };
 
@@ -224,6 +225,13 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
             return false;
         });
     }
+
+    if(this.addGoogleMapsNavigationLink) {
+        $("#incidentDetail_nav").on("click", function (e) {
+            me.openGoogleMapsNavigation(incident);
+        })
+    }
+
     if(this.showFeatureMatches) {
         this.showMultipleFeatureMatches();
     }
@@ -327,6 +335,27 @@ IncidentDetailsWindow.prototype.getIncidentAdres = function(incident, isXml) {
     }
 };
 
+IncidentDetailsWindow.prototype.openGoogleMapsNavigation = function (incident) {
+    Proj4js.defs["EPSG:4236"] = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs ";
+    
+    var xy = AGSIncidentService.prototype.getIncidentXY(incident);
+    var p = new Proj4js.Point(xy.x, xy.y);
+    var t = Proj4js.transform(new Proj4js.Proj(dbkjs.map.getProjection()), new Proj4js.Proj("EPSG:4236"), p);
+    var lonLat = new OpenLayers.LonLat(t.x, t.y);
+    var url = "https://www.google.com/maps/dir/?api=1&destination=[y],[x]";
+
+    url = url.replace(/\[x\]/g, lonLat.lon);
+    url = url.replace(/\[y\]/g, lonLat.lat);
+
+    window.open(url);
+};
+
+IncidentDetailsWindow.prototype.displayGoogleMapsNavigationLink = function () {
+    var me = this;
+    var link = me.addGoogleMapsNavigationLink ? '<img id="incidentDetail_nav" style="height:20px; cursor:pointer; position: relative;" src="images/location-arrow.svg" />' : '';
+    return link;
+}
+
 /**
  * Get HTML to display incident. Boolean specificies whether to leave out time
  * dependent information ('1 minute ago') to compare changes.
@@ -346,7 +375,7 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
             + '</td></tr>';
 
     html += '<tr><td class="leftlabel">Start incident: </td><td>' + incident.start.format("dddd, D-M-YYYY HH:mm:ss") + '</td></tr>';
-    html += '<tr><td class="leftlabel">Adres:</td><td>' + incident.locatie + '</td></tr>';
+    html += '<tr><td class="leftlabel">Adres: ' + me.displayGoogleMapsNavigationLink() + '</td><td>' + incident.locatie + '</td></tr>';
     html += '<tr><td class="leftlabel">Postcode &amp; Woonplaats:</td><td>' + (incident.POSTCODE ? incident.POSTCODE + ', ' : "") + (incident.PLAATS_NAAM ? incident.PLAATS_NAAM : incident.PLAATS_NAAM_NEN) + '</td></tr>';
     html += '<tr><td class="leftlabel">Melding classificatie:</td><td>' + me.linkify(dbkjs.util.htmlEncode(incident.classificaties)) + '</td></tr>';
 
@@ -545,7 +574,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
     //html += '<tr><td class="leftlabel">Start incident: </td><td>' + d.format("dddd, D-M-YYYY HH:mm:ss")  + (compareMode ? "" : " (" + d.fromNow() + ")") + '</td></tr>';
     html += '<tr><td class="leftlabel">Start incident: </td><td>' + d.format("dddd, D-M-YYYY HH:mm:ss")+'</td></tr>';
     var a = incident.IncidentLocatie;
-    html += '<tr><td class="leftlabel">Adres: </td><td>' + me.getIncidentAdres(incident, false) + '</td></tr>';
+    html += '<tr><td class="leftlabel">Adres: ' + me.displayGoogleMapsNavigationLink() + '</td><td>' + me.getIncidentAdres(incident, false) + '</td></tr>';
     html += '<tr><td class="leftlabel">Postcode &amp; Woonplaats: </td><td>' + (a.Postcode && a.Postcode.trim().length > 0 ? a.Postcode +  ', ' : "") +(a.Plaatsnaam ? a.Plaatsnaam : "-") + '</td></tr>';
     //html += '<tr><td>Woonplaats: </td><td>' + (a.Plaatsnaam ? a.Plaatsnaam : "-") + '</td></tr>';
 
@@ -652,7 +681,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlPharos = function(incident, showI
 
     html += '<tr><td colspan="2" style="font-weight: bold; text-align: center; color: ' + me.getPrioriteitColor(incident.prioriteit) + '">PRIO ' + incident.prioriteit + '<sub style="font-size:10px; text-align: center; color:black;"> ('+incident.nummer+')</sub></td></tr>';
     html += '<tr><td class="leftlabel">Start incident: </td><td>' + incident.startTijd.format("dddd, D-M-YYYY HH:mm:ss")+'</td></tr>';
-    html += '<tr><td class="leftlabel">Adres: </td><td>' + me.getIncidentAdres(incident, false) + '</td></tr>';
+    html += '<tr><td class="leftlabel">Adres: ' + me.displayGoogleMapsNavigationLink() + '</td><td>' + me.getIncidentAdres(incident, false) + '</td></tr>';
     html += '<tr><td class="leftlabel">Woonplaats: </td><td>' + (incident.woonplaats || "-") + '</td></tr>';
     html += '<tr><td class="leftlabel">Melding classificatie:</td><td>' + me.linkify(incident.classificaties.join(", ")) + '</td></tr>';
 

@@ -46,6 +46,7 @@ function VehicleIncidentsController(options, featureSelector) {
     });
 
     me.incidentDetailsWindow = new IncidentDetailsWindow();
+    me.incidentDetailsWindow.addGoogleMapsNavigationLink = (me.options.addGoogleMapsNavigationLink && me.options.googleMapsNavigationAuthorized);
     $(me.incidentDetailsWindow).on('show', function() {
         me.button.setAlerted(false);
         me.button.setFotoAlert(false);
