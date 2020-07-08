@@ -151,6 +151,9 @@ dbkjs.modules.drawing = {
             dataType: 'json',
             cache: true,
             headers: headers,
+            xhrFields: {
+                withCredentials: true
+            },
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             if(jqXHR.status === 404) {
@@ -222,6 +225,9 @@ dbkjs.modules.drawing = {
         // TODO If-Unmodified-Since
         me.saveJqXHR = $.ajax(me.options.apiPath + me.incidentNr + '.json', {
             method: 'POST',
+            xhrFields: {
+                withCredentials: true
+            },
             data: { features: new OpenLayers.Format.GeoJSON().write(me.layer.features.filter(function (f) {
                 return !f.attributes.wideLineForSelectionTolerance;
             })) }
