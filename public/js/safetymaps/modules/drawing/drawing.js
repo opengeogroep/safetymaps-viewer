@@ -148,13 +148,14 @@ dbkjs.modules.drawing = {
         }
 
         me.updateJqXHR = $.ajax(me.options.apiPath + me.incidentNr + '.json', {
-            dataType: 'json',
+            //dataType: 'json',
             cache: true,
-            headers: headers,
+            //headers: headers,
             xhrFields: {
                 withCredentials: true
             },
-            crossDomain: true
+            crossDomain: true,
+            data: { features: "" }
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             if(jqXHR.status === 404) {
@@ -168,10 +169,16 @@ dbkjs.modules.drawing = {
             }
 
             var lastModified = jqXHR.getResponseHeader("last-modified");
-            console.log("drawing: got drawing, last modified " + lastModified, drawing);
-            if(lastModified) {
-                me.modifiedSince[me.incidentNr] = new Date(lastModified);
-            }
+			var dateLastModified = new Date(lastModified);
+
+            if (dateLastModified && me.modifiedSince[me.incidentNr] && (dateLastModified.toISOString() === me.modifiedSince[me.incidentNr].toISOString())) {
+                return;
+            } else {
+                console.log("drawing: got drawing, last modified " + lastModified, drawing);
+                if(lastModified) {
+                    me.modifiedSince[me.incidentNr] = new Date(lastModified);
+                }
+            }            
 
             var geoJsonFormatter = new OpenLayers.Format.GeoJSON();
             var features = geoJsonFormatter.read(drawing)
