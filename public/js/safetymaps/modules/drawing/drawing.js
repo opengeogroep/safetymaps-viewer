@@ -236,7 +236,7 @@ dbkjs.modules.drawing = {
             xhrFields: {
                 withCredentials: true
             },
-            crossDomain: true
+            crossDomain: true,
             data: { features: new OpenLayers.Format.GeoJSON().write(me.layer.features.filter(function (f) {
                 return !f.attributes.wideLineForSelectionTolerance;
             })) }
