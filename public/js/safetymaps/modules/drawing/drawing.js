@@ -53,7 +53,7 @@ dbkjs.modules.drawing = {
             rotation: ["polygon"],
             wideLineForSelectionExtraWidth: 6,
             wideLineForSelectionOpacity: 0,
-            apiPath: "api/drawing/"
+            apiPath: dbkjs.options.urls && dbkjs.options.urls.apiPath ? dbkjs.options.urls.apiPath + 'drawing/' : 'api/drawing/'
         }, me.options);
 
         me.color = me.options.defaultColor;
@@ -161,7 +161,8 @@ dbkjs.modules.drawing = {
             if(jqXHR.status === 404) {
                 return;
             }
-            console.log("drawing: ajax failure: " + jqXHR.status + " " + textStatus, jqXHR.responseText);
+            // XXX server does not send CORS headers when returning 304
+            //console.log("drawing: ajax failure: " + jqXHR.status + " " + textStatus, jqXHR.responseText);
         })
         .done(function(drawing, textStatus, jqXHR) {
             if(textStatus === "notmodified") {
