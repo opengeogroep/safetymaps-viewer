@@ -150,7 +150,7 @@ dbkjs.modules.drawing = {
         me.updateJqXHR = $.ajax(me.options.apiPath + me.incidentNr + '.json', {
             //dataType: 'json',
             cache: true,
-            //headers: headers,
+            headers: headers,
             xhrFields: {
                 withCredentials: true
             },
@@ -171,14 +171,14 @@ dbkjs.modules.drawing = {
             var lastModified = jqXHR.getResponseHeader("last-modified");
 			var dateLastModified = new Date(lastModified);
 
-            if (dateLastModified && me.modifiedSince[me.incidentNr] && (dateLastModified.toISOString() === me.modifiedSince[me.incidentNr].toISOString())) {
-                return;
-            } else {
+            //if (dateLastModified && me.modifiedSince[me.incidentNr] && (dateLastModified.toISOString() === me.modifiedSince[me.incidentNr].toISOString())) {
+            //    return;
+            //} else {
                 console.log("drawing: got drawing, last modified " + lastModified, drawing);
                 if(lastModified) {
                     me.modifiedSince[me.incidentNr] = new Date(lastModified);
                 }
-            }            
+            //}            
 
             var geoJsonFormatter = new OpenLayers.Format.GeoJSON();
             var features = geoJsonFormatter.read(drawing)
