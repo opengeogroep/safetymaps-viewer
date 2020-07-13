@@ -338,7 +338,7 @@ dbkjs.modules.fotoFunction = {
     //TODO gebruiker de keuze geven welke camera gebruikt moet worden -> opslaan in local storage
     checkForWindowsCamera: function () {
         var me = this;
-        if (navigator.mediaDevices && navigator.userAgent.match(/Win64/i) || navigator.userAgent.match(/Win32/i) || navigator.userAgent.match(/Windows/i)) {
+        if (typeof(navigator.mediaDevices) !== "undefined" && (navigator.userAgent.match(/Win64/i) || navigator.userAgent.match(/Win32/i) || navigator.userAgent.match(/Windows/i))) {
             navigator.mediaDevices.enumerateDevices()
                     .then(function (devices) {
                         devices.forEach(function (device) {
