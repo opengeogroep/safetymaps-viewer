@@ -186,8 +186,7 @@ dbkjs.gotOrganisation = function () {
     }
     
     if(dbkjs.options.organisation.integrated) {
-
-        $("#settingspanel_b").append('Ingelogd als: <b>' + dbkjs.options.organisation.username + '</b><button id="logoutbtn" class="btn btn-default btn-success" onclick="window.location.href=\'../logout.jsp?returnTo=' + encodeURIComponent(window.location.pathname) + '\'"><span class="glyphicon glyphicon-log-out"></span> Uitloggen</button>');
+        $("#settingspanel_b").append(i18n.t('login.whoami') + ': <b>' + dbkjs.options.organisation.username + '</b><button id="logoutbtn" class="btn btn-default btn-success" onclick="window.location.href=\'../logout.jsp?returnTo=' + encodeURIComponent(window.location.pathname) + '\'"><span class="glyphicon glyphicon-log-out"></span> ' + i18n.t('login.logout') + '</button>');
     }
 
 

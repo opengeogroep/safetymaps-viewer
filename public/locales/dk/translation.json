@@ -45,7 +45,9 @@
         "submit": "Log på",
         "processing": "Logger ind...",
         "retry": "Prøve igen",
-        "norights": "Dine konti har ingen rettigheder til seeren. Du er blevet logget ud."
+        "norights": "Dine konti har ingen rettigheder til seeren. Du er blevet logget ud.",
+        "whoami": "Logget ind som",
+        "logout": "Log ud"
     },
     "search": {
         "button": "Søg",
