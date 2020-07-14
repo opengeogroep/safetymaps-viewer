@@ -25,12 +25,14 @@
  * only one instance as it always uses modal popup name "incidentDetails".
  * @returns {IncidentDetailsWindow}
  */
-function IncidentDetailsWindow() {
+function IncidentDetailsWindow(addKladblokChat = true) {
     this.window = safetymaps.infoWindow.addWindow("incident", "Incident", false);
     this.div = $("<div></div>");
+    this.kcDiv = "<div style='display:block; margin-bottom:15px; height:27px; border:1px solid #ff0000; color:#ff0000;'><input id='kladblokChat' style='border: 0; width:calc(100% - 30px); margin-right:15px; color: #ff0000;' /><i class='fa fa-plus' style='cursor:pointer' /></div>";
     this.linkifyWords = null;
     this.crsLinkEnabled = false;
     this.addGoogleMapsNavigationLink = false;
+    this.addKladblokChat = addKladblokChat;
     safetymaps.infoWindow.addTab("incident", "incident", "Incident", "incident", this.div, "first");
 };
 
@@ -518,9 +520,24 @@ IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incid
             }
             break;
         case "falck":
-            $.each(incident.Kladblokregels, function(i, k) {
-                kladblokHTML += "<tr><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Inhoud)) + "</td></tr>";
-            });
+            if (this.addKladblokChat) {
+                kladblokHTML += this.kcDiv;
+                $.each(incident.Kladblokregels.sort(function (a, b) {
+                    if (a.DTG > b.DTG) {
+                        return -1;
+                    }
+                    if (a.DTG < b.DTG) {
+                        return 1;
+                    }
+                    return 0;
+                }), function(i, k) {
+                    kladblokHTML += "<tr><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Inhoud)) + "</td></tr>";
+                });
+            } else {
+                $.each(incident.Kladblokregels, function(i, k) {
+                    kladblokHTML += "<tr><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Inhoud)) + "</td></tr>";
+                });
+            }
             break;
         case "pharos":
             $.each(incident.kladblokregels, function(i, k) {

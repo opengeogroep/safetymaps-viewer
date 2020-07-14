@@ -45,7 +45,7 @@ function VehicleIncidentsController(options, featureSelector) {
         me.zoomToIncident();
     });
 
-    me.incidentDetailsWindow = new IncidentDetailsWindow();
+    me.incidentDetailsWindow = new IncidentDetailsWindow(me.options.kladblokChatAuthorized);
     me.incidentDetailsWindow.addGoogleMapsNavigationLink = (me.options.addGoogleMapsNavigationLink && me.options.googleMapsNavigationAuthorized);
     $(me.incidentDetailsWindow).on('show', function() {
         me.button.setAlerted(false);
@@ -1018,6 +1018,10 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
 
     if(!fromIncidentList) {
         me.button.setIcon("bell");
+    }
+
+    if (me.options.kladblokChatAuthorized) {
+        
     }
 
     if(incidentInfo.incident.nummer !== me.incidentNummer) {
