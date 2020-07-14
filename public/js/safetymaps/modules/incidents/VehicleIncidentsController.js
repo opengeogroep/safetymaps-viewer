@@ -45,7 +45,7 @@ function VehicleIncidentsController(options, featureSelector) {
         me.zoomToIncident();
     });
 
-    me.incidentDetailsWindow = new IncidentDetailsWindow();
+    me.incidentDetailsWindow = new IncidentDetailsWindow(me.options.kladblokChatAuthorized);
     $(me.incidentDetailsWindow).on('show', function() {
         me.button.setAlerted(false);
         me.button.setFotoAlert(false);
@@ -1017,6 +1017,10 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
 
     if(!fromIncidentList) {
         me.button.setIcon("bell");
+    }
+
+    if (me.options.kladblokChatAuthorized) {
+        
     }
 
     if(incidentInfo.incident.nummer !== me.incidentNummer) {
