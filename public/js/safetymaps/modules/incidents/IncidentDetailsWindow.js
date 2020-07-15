@@ -28,7 +28,7 @@
 function IncidentDetailsWindow(editKladblokChat = true, showKladblokChat = true) {
     this.window = safetymaps.infoWindow.addWindow("incident", "Incident", false);
     this.div = $("<div></div>");
-    this.kcDiv = "<div style='display:block; margin-bottom:15px; height:27px; border:1px solid #ff0000; color:#ff0000;'><input id='kladblokChat' style='border: 0; width:calc(100% - 30px); margin-right:15px; color: #ff0000;' /><i class='fa fa-plus' style='cursor:pointer' /></div>";
+    this.kcDiv = "<div style='display:block; margin-bottom:15px; height:27px; border:1px solid #ff0000; color:#ff0000;'><input id='kladblokChat' style='border: 0; width:calc(100% - 30px); margin-right:15px; color: #ff0000;' /><i id='addKladblokChat' class='fa fa-plus' style='cursor:pointer' /></div>";
     this.linkifyWords = null;
     this.crsLinkEnabled = false;
     this.addGoogleMapsNavigationLink = false;
@@ -241,6 +241,21 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
 
     if(restoreScrollTop) {
         this.div.scrollTop(scrollTop);
+    }
+
+    var me = this;
+    if (me.editKladblokChat) {
+        $("#addKladblokChat").on("click", function(e) {
+            $(me).triggerHandler("addKladblokChat", [$("#kladblokChat").val(), incident.IncidentNummer]);
+            $("#kladblokChat").val("");
+        });
+
+        $("#kladblokChat").keyup(function(e) {
+            if(e.keyCode == 13) {
+                $(me).triggerHandler("addKladblokChat", [$("#kladblokChat").val(), incident.IncidentNummer]);
+                $("#kladblokChat").val("");
+            }
+        })
     }
 };
 
@@ -534,7 +549,8 @@ IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incid
                     }
                     return 0;
                 }), function(i, k) {
-                    kladblokHTML += "<tr><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Inhoud)) + "</td></tr>";
+                    var className = k.IsChat ? "font-weight:normal !important; font-style:italic; !important" : "";
+                    kladblokHTML += "<tr style='" + className + "'><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Inhoud)) + "</td></tr>";
                 });
             } else {
                 $.each(incident.Kladblokregels, function(i, k) {
