@@ -1053,7 +1053,7 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
                     IsChat: true
                 }
             })
-            incidentInfo.incident.Kladblokregels = incidentInfo.incident.Kladblokregels.concat(chat);
+            incidentInfo.incident.Kladblokregels = incidentInfo.incident.Kladblokregels.filter(function (f) { return !f.IsChat; }).concat(chat);
             me.onInzetIncident(incidentInfo, fromIncidentList);
         });
     } else {
