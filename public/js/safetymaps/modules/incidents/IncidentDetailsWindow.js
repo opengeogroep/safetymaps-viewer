@@ -240,15 +240,21 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
         $("#addKladblokChat").on("click", function(e) {
             $(me).triggerHandler("addKladblokChat", [$("#kladblokChat").val(), incident.IncidentNummer]);
             $("#kladblokChat").val("");
+            me.kladblokchat = "";
         });
 
         $("#kladblokChat").keyup(function(e) {
             if(e.keyCode == 13) {
                 $(me).triggerHandler("addKladblokChat", [$("#kladblokChat").val(), incident.IncidentNummer]);
                 $("#kladblokChat").val("");
+                me.kladblokchat = "";
             }
+
+            me.kladblokchat = $("#kladblokChat").val();
         })
     }
+
+    $("#kladblokChat").val(me.kladblokchat);
 };
 
 IncidentDetailsWindow.prototype.setMultipleFeatureMatches = function(matches, incidentLonLat) {
@@ -494,11 +500,11 @@ IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incid
             }
             if (this.showKladblokChat) {
                 $.each(incident.Kladblokregels.sort(function (a, b) {
-                    if (a.DTG > b.DTG) {
-                        return -1;
-                    }
-                    if (a.DTG < b.DTG) {
+                    if (new moment(a.DTG).format("HH:mm:ss") > new moment(b.DTG).format("HH:mm:ss")) {
                         return 1;
+                    }
+                    if (new moment(a.DTG).format("HH:mm:ss") < new moment(b.DTG).format("HH:mm:ss")) {
+                        return -1;
                     }
                     return 0;
                 }), function(i, k) {

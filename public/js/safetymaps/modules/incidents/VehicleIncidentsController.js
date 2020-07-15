@@ -1012,11 +1012,11 @@ VehicleIncidentsController.prototype.geenInzet = function() {
 
 VehicleIncidentsController.prototype.saveKladblokChat = function (chat, incidentnr) {
     var me = this;
-    if (me.options.editKladblokChatAuthorized) {
+    if (me.options.editKladblokChatAuthorized && chat.length > 0) {
         $.ajax("api/kladblok/" + incidentnr + ".json", {
             method: 'POST',
             data: {
-                vehicle: me.voertuignummer === "" ? "IM" : me.voertuignummer,
+                vehicle: me.voertuignummer === "" || me.voertuignummer === "null" || me.voertuignummer === null || me.voertuignummer === 0 ? "IM" : me.voertuignummer,
                 rule: chat
             },
             xhrFields: { withCredentials: true }, 
