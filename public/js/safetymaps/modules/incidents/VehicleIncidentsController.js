@@ -45,7 +45,7 @@ function VehicleIncidentsController(options, featureSelector) {
         me.zoomToIncident();
     });
 
-    me.incidentDetailsWindow = new IncidentDetailsWindow(me.options.kladblokChatAuthorized);
+    me.incidentDetailsWindow = new IncidentDetailsWindow(me.options.editKladblokChatAuthorized);
     me.incidentDetailsWindow.addGoogleMapsNavigationLink = (me.options.addGoogleMapsNavigationLink && me.options.googleMapsNavigationAuthorized);
     $(me.incidentDetailsWindow).on('show', function() {
         me.button.setAlerted(false);
@@ -1008,6 +1008,24 @@ VehicleIncidentsController.prototype.geenInzet = function() {
 };
 
 VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, fromIncidentList) {
+    var me = this;
+    if (me.options.showKladblokChatAuthorized) {
+        $.ajax(me.options.apiPath + "kladblok/" + incidentInfo.incident.nummer + ".json", {
+            xhrFields: { withCredentials: true }, crossDomain: true
+        })
+        .fail(function (jqXHR, textStatus, errorThrown) {
+            console.log("Error getting kladblok chat rules.", jqXHR, textStatus, errorThrown);
+            me.onInzetIncident(incidentInfo, fromIncidentList);
+        })
+        .done(function (data) {
+            me.onInzetIncident(incidentInfo, fromIncidentList);
+        });
+    } else {
+        me.onInzetIncident(incidentInfo, fromIncidentList);
+    }
+};
+
+VehicleIncidentsController.prototype.onInzetIncident = function(incidentInfo, fromIncidentList) {
     console.log("inzetIncident (from IM: " + fromIncidentList + ")", incidentInfo);
 
     var me = this;
@@ -1018,10 +1036,6 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
 
     if(!fromIncidentList) {
         me.button.setIcon("bell");
-    }
-
-    if (me.options.kladblokChatAuthorized) {
-        
     }
 
     if(incidentInfo.incident.nummer !== me.incidentNummer) {
