@@ -46,6 +46,7 @@ function VehicleIncidentsController(options, featureSelector) {
     });
 
     me.incidentDetailsWindow = new IncidentDetailsWindow(me.options.editKladblokChatAuthorized, me.options.showKladblokChatAuthorized);
+    me.incidentDetailsWindow.addGoogleMapsNavigationLink = (me.options.addGoogleMapsNavigationLink && me.options.googleMapsNavigationAuthorized);
     $(me.incidentDetailsWindow).on('show', function() {
         me.button.setAlerted(false);
         me.button.setFotoAlert(false);
@@ -814,7 +815,7 @@ VehicleIncidentsController.prototype.getVoertuigIncidentSC = function(nummer) {
     $.ajax(me.options.apiPath + "safetyconnect/eenheid/" + nummer, {
         dataType: "json",
         data: {
-            excludeManuallyCreated: me.options.excludeManuallyCreatedIncidents
+            excludeTraining: me.options.excludeManuallyCreatedIncidents
         },
         xhrFields: { withCredentials: true }, crossDomain: true
     })
@@ -1142,6 +1143,7 @@ VehicleIncidentsController.prototype.onInzetIncident = function(incidentInfo, fr
         }
         if(oldIncidentHtml !== newIncidentHtml) {
             $(dbkjs).trigger("incidents.updated");
+            $(me).triggerHandler("updated_incident", [incident]);
             if(!me.incidentDetailsWindow.isVisible()) {
                 me.button.setAlerted(true);
             }
@@ -1312,6 +1314,18 @@ VehicleIncidentsController.prototype.normalizeIncidentFields = function(incident
         incident.locatie2 =  incident.NAAM_LOCATIE2;
 
         incident.start = AGSIncidentService.prototype.getAGSMoment(incident.DTG_START_INCIDENT);
+        incident.beeindigdeInzet = incident.DTG_EINDE_INCIDENT !== null;
+
+        incident.BetrokkenEenheden = [];
+        if (incident.inzetEenheden) {
+            $.each(incident.inzetEenheden, function(j, eenheid) {
+                var be = {
+                    Roepnaam: eenheid.ROEPNAAM_EENHEID,
+                    IsActief: eenheid.DTG_EIND_ACTIE === null
+                }
+                incident.BetrokkenEenheden.push(be);
+            });
+        }
     } else {
         throw "Unknown incident source: " + incidentInfo.source;
     }

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2015 B3Partners (info@b3partners.nl)
+ *  Copyright (c) 2020 B3Partners (info@b3partners.nl) 
  *
  *  This file is part of safetymapDBK
  *
@@ -20,24 +20,21 @@
 
 /**
  * Module which, after activated, listens to click on map, and opens Google
- * StreetView in a new window, then deactivates.
- *
- * Note: does not work on Google Maps Lite!
- * Note: does not work on iOS (web or app), works on Android
+ * Earth in a new window, then deactivates.
  *
  * The GUI should be created by the configuration. See below for the default:
- * dbkjs.options.streetview.onRegister = function() {
+ * dbkjs.options.earthview.onRegister = function() {
  *   // Create a button at a fixed position above zoom in/out buttons shown when
  *   // dbkjs.options.showZoomButtons is true.
  *   // Perhaps parametrize this function in the future to allow more flexible
  *   // button placement.
- *   dbkjs.modules.streetview.createDefaultMobileButton();
+ *   dbkjs.modules.earthview.createDefaultMobileButton();
  * };
  *
  * API:
  * register(): calls options.onRegister(), which should create GUI
  * activate(): trigger 'activate' event, listens to next onclick on map, open
- *   Google StreetView at click position, call deactivate()
+ *   Google earthview at click position, call deactivate()
  * deactivate(): stop listening to onclick on map, trigger 'deactivate' event.
  *
  * Do not call activate() or deactive() in the event handlers.
@@ -52,8 +49,8 @@
 var dbkjs = dbkjs || {};
 window.dbkjs = dbkjs;
 dbkjs.modules = dbkjs.modules || {};
-dbkjs.modules.streetview = {
-    id: "dbk.module.streetview",
+dbkjs.modules.earthview = {
+    id: "dbk.module.earthview",
     active: null,
     triggering: null,
     register: function() {
@@ -66,8 +63,8 @@ dbkjs.modules.streetview = {
             pinToIncidentLocation: false,
         }, this.options);
 
-        if(dbkjs.options.streetview && typeof dbkjs.options.streetview.onRegister === "function") {
-            dbkjs.options.streetview.onRegister();
+        if(dbkjs.options.earthview && typeof dbkjs.options.earthview.onRegister === "function") {
+            dbkjs.options.earthview.onRegister();
         } else {
             this.createDefaultMobileButton();
         }
@@ -85,7 +82,7 @@ dbkjs.modules.streetview = {
             }
             if(me.active) {
                 var lonLat = me.getLonLatFromClick(xy);
-                me.openStreetView(lonLat);
+                me.openEarthView(lonLat);
                 me.deactivate();
             } else {
                 oldOnClick(e);
@@ -113,7 +110,7 @@ dbkjs.modules.streetview = {
         var me = this;
 
         if (me.options.pinToIncidentLocation && me.incidentLonLat !== null) {
-            me.openStreetView(me.incidentLonLat);
+            me.openEarthView(me.incidentLonLat);
             me.deactivate();
         } else {
             this.active = true;
@@ -140,8 +137,9 @@ dbkjs.modules.streetview = {
         var gLonLat = new OpenLayers.LonLat(t.x, t.y);
         return gLonLat;
     },
-    openStreetView: function(lonLat) {
-        var url = "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=[y],[x]";
+    openEarthView: function(lonLat) {
+        //var url = "https://earth.google.com/web/@[y],[x],4.1972381a,216.26807046d,35y,0h,45t,0r/data=KAI"; // Long adres for auto zoom and helicopterview but without location marker
+        var url = "https://earth.google.com/web/search/[y],[x]"; // Simple adres with animated search and location marker
         url = url.replace(/\[x\]/g, lonLat.lon);
         url = url.replace(/\[y\]/g, lonLat.lat);
         if(this.options.newWindow) {
@@ -153,24 +151,24 @@ dbkjs.modules.streetview = {
     createDefaultMobileButton: function() {
         var me = this;
         var a = $("<a/>")
-                .attr("id", "streetview-a")
-                .attr("title", "Open StreetView")
+                .attr("id", "earthview-a")
+                .attr("title", "Open earthview")
                 .addClass("btn btn-default olButton")
                 .on("click", function() {
                     if(me.active) {
-                        dbkjs.modules.streetview.deactivate();
+                        dbkjs.modules.earthview.deactivate();
                     } else {
                         $("#map").attr("style", "cursor: crosshair");
-                        $("#streetview-a").addClass("btn-primary");
-                        dbkjs.modules.streetview.activate();
+                        $("#earthview-a").addClass("btn-primary");
+                        dbkjs.modules.earthview.activate();
                     }
                 });
-        $("<i/>").addClass("fa fa-street-view").appendTo(a);
+        $("<i/>").addClass("fa fa-globe").appendTo(a);
         a.prependTo("#bottom_left_buttons");
 
-        $(dbkjs.modules.streetview).on('deactivate', function() {
+        $(dbkjs.modules.earthview).on('deactivate', function() {
             $("#map").attr("style", "");
-            $("#streetview-a").removeClass("btn-primary");
+            $("#earthview-a").removeClass("btn-primary");
         });
     }
 };
