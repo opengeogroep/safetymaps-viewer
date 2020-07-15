@@ -45,7 +45,7 @@ function VehicleIncidentsController(options, featureSelector) {
         me.zoomToIncident();
     });
 
-    me.incidentDetailsWindow = new IncidentDetailsWindow(me.options.editKladblokChatAuthorized);
+    me.incidentDetailsWindow = new IncidentDetailsWindow(me.options.editKladblokChatAuthorized, me.options.showKladblokChatAuthorized);
     me.incidentDetailsWindow.addGoogleMapsNavigationLink = (me.options.addGoogleMapsNavigationLink && me.options.googleMapsNavigationAuthorized);
     $(me.incidentDetailsWindow).on('show', function() {
         me.button.setAlerted(false);
