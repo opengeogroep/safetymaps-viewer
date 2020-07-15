@@ -25,14 +25,15 @@
  * only one instance as it always uses modal popup name "incidentDetails".
  * @returns {IncidentDetailsWindow}
  */
-function IncidentDetailsWindow(addKladblokChat = true) {
+function IncidentDetailsWindow(editKladblokChat = true, showKladblokChat = true) {
     this.window = safetymaps.infoWindow.addWindow("incident", "Incident", false);
     this.div = $("<div></div>");
     this.kcDiv = "<div style='display:block; margin-bottom:15px; height:27px; border:1px solid #ff0000; color:#ff0000;'><input id='kladblokChat' style='border: 0; width:calc(100% - 30px); margin-right:15px; color: #ff0000;' /><i class='fa fa-plus' style='cursor:pointer' /></div>";
     this.linkifyWords = null;
     this.crsLinkEnabled = false;
     this.addGoogleMapsNavigationLink = false;
-    this.addKladblokChat = addKladblokChat;
+    this.showKladblokChat = showKladblokChat;
+    this.editKladblokChat = editKladblokChat;
     safetymaps.infoWindow.addTab("incident", "incident", "Incident", "incident", this.div, "first");
 };
 
@@ -520,8 +521,10 @@ IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incid
             }
             break;
         case "falck":
-            if (this.addKladblokChat) {
+            if (this.editKladblokChat) {
                 kladblokHTML += this.kcDiv;
+            }
+            if (this.showKladblokChat) {
                 $.each(incident.Kladblokregels.sort(function (a, b) {
                     if (a.DTG > b.DTG) {
                         return -1;
