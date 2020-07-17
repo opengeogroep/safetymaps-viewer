@@ -257,12 +257,14 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
                 $("#kladblokChat").val("");
                 me.kladblokchat = "";
             }
-
             me.kladblokchat = $("#kladblokChat").val();
         })
-    }
 
-    $("#kladblokChat").val(me.kladblokchat);
+        $("#kladblokChat").val(me.kladblokchat);
+        if (me.kladblokchat && me.kladblokchat !== "" ) {
+            $("#kladblokChat").focus();
+        }
+    }
 };
 
 IncidentDetailsWindow.prototype.setMultipleFeatureMatches = function(matches, incidentLonLat) {
