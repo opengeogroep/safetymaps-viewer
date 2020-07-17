@@ -48,7 +48,8 @@
         "retry": "Opnieuw proberen",
         "norights": "Uw account heeft geen rechten op de viewer. U bent uitgelogd.",
         "whoami": "Ingelogd als",
-        "logout": "Uitloggen"
+        "logout": "Uitloggen",
+        "logoutMessage": "Weet u zeker dat u uit wilt loggen? Alleen een beheerder kan opnieuw inloggen."
     },
     "search": {
         "button": "Zoeken",

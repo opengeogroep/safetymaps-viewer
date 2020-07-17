@@ -47,7 +47,8 @@
         "retry": "Retry",
         "norights": "Your accounts has no rights to the viewer. You have been logged out.",
         "whoami": "Logged in as",
-        "logout": "Logout"
+        "logout": "Logout",
+        "logoutMessage": "Weet u zeker dat u uit wilt loggen? Alleen een beheerder kan opnieuw inloggen."
     },
     "search": {
         "button": "Search",
