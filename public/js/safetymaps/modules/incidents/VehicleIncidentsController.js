@@ -1017,7 +1017,7 @@ VehicleIncidentsController.prototype.saveKladblokChat = function (chat, incident
         $.ajax("api/kladblok/" + incidentnr + ".json", {
             method: 'POST',
             data: {
-                vehicle: me.voertuignummer === "" || me.voertuignummer === "null" || me.voertuignummer === null || me.voertuignummer === 0 ? "IM" : me.voertuignummer,
+                vehicle: dbkjs.options.organisation.username,
                 rule: chat
             },
             xhrFields: { withCredentials: true }, 
