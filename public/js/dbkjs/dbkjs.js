@@ -187,7 +187,7 @@ dbkjs.gotOrganisation = function () {
     
     if (dbkjs.options.organisation.integrated && dbkjs.options.extendedLogout) {
         var logoutUrl = "../logout.jsp?returnTo=" + encodeURIComponent(window.location.pathname);
-        $("#settingspanel_b").append(i18n.t('login.whoami') + ': <b>' + dbkjs.options.organisation.username + '</b><button id="logoutbtn" class="btn btn-default btn-success" onclick="dbkjs.confirmDialog(\'' + i18n.t('login.logoutMessage') + '\');"><span class="glyphicon glyphicon-log-out"></span> ' + i18n.t('login.logout') + '</button>');
+        $("#settingspanel_b").append(i18n.t('login.whoami') + ': <b>' + dbkjs.options.organisation.username + '</b><button id="logoutbtn" class="btn btn-default btn-danger" onclick="dbkjs.confirmDialog(\'' + i18n.t('login.logoutMessage') + '\');"><span class="glyphicon glyphicon-log-out"></span> ' + i18n.t('login.logout') + '</button>');
 
         dbkjs.confirmDialog = function(message) {
             $("#logoutbtn").hide();
