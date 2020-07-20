@@ -114,7 +114,7 @@ MDTIncidentsController.prototype.handleIncident = function (xml) {
 
     me.xml = xml;
     me.incidentDetailsWindow.data(xml, true, true, true);    
-    
+
 	me.markerLayer.clear();
 	me.markerLayer.addIncident(xml, false, true);
 	me.markerLayer.setZIndexFix();
@@ -219,6 +219,8 @@ MDTIncidentsController.prototype.getXmlFormat = function (xml) {
         xmlFormat.kladblok = "Kladblok";
 
         xmlFormat.classificatie = $(xml).find("Classificatie").text();
+
+        xmlFormat.discBrandweer = "B--";
     }
     else if (xmlIsSCT) {
         xmlFormat.incidentNr = "MdtIncident IncidentNummer";
@@ -230,9 +232,9 @@ MDTIncidentsController.prototype.getXmlFormat = function (xml) {
         xmlFormat.huisnummeraanduiding = "IncidentLocatie HnAanduiding";
         xmlFormat.huisnummertoevoeging = "IncidentLocatie HnToevoeging";
         xmlFormat.straat = "IncidentLocatie NaamLocatie1";
-        xmlFormat.eenheid = "GekoppeldeEenheden Eenheid";
+        xmlFormat.eenheid = "Eenheden Eenheid";
         xmlFormat.roepnaam = "Roepnaam";
-        xmlFormat.disc = "Disc";
+        xmlFormat.disc = "Discipline";
 
         xmlFormat.prio = "Prioriteit";
         xmlFormat.startdatumtijd = "StartDTG";
@@ -248,6 +250,8 @@ MDTIncidentsController.prototype.getXmlFormat = function (xml) {
         xmlFormat.classificatie = $(xml).find("Meldingsclassificatie1").text() + ", "
             + $(xml).find("Meldingsclassificatie2").text() + ", "
             + $(xml).find("Meldingsclassificatie3").text();
+
+        xmlFormat.discBrandweer = "B";
     }
 
     return xmlFormat;
@@ -265,7 +269,7 @@ MDTIncidentsController.prototype.updateVehiclePositionLayerCityGISWFS = function
         var naam = $(eenheid).find(me.xmlFormat.roepnaam).text();
         var disc = $(eenheid).find(me.xmlFormat.disc).text();
 
-        if (disc === 'B--') {
+        if (disc === me.xmlFormat.discBrandweer) {
             roepnamen.push(naam);
         }
     });
