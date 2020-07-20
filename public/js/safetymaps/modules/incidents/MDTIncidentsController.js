@@ -114,8 +114,11 @@ MDTIncidentsController.prototype.handleIncident = function (xml) {
 
     me.xml = xml;
     me.incidentDetailsWindow.data(xml, true, true, true);    
-    me.markerLayer.addIncident(xml, false, true);
-    me.markerLayer.setZIndexFix();
+    
+	me.markerLayer.clear();
+	me.markerLayer.addIncident(xml, false, true);
+	me.markerLayer.setZIndexFix();
+	me.markerLayer.layer.setVisibility(true);
     
     if(first) {
         me.html = newHtml;
@@ -124,7 +127,9 @@ MDTIncidentsController.prototype.handleIncident = function (xml) {
         me.newIncident();
     } else {
         if(me.html !== newHtml) {
-            me.button.setAlerted(true);
+            if(!me.incidentDetailsWindow.isVisible()) {
+                me.button.setAlerted(true);
+            }
             $(dbkjs).trigger("incidents.updated");
         }
         if(me.incidentId !== newId) {                
