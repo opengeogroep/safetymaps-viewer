@@ -32,7 +32,11 @@ function MDTIncidentsController(incidents) {
     var me = this;
 
     me.featureSelector = incidents.featureSelector;
-    me.options = incidents.options;
+    me.options = me.options = $.extend({
+        apiPath: dbkjs.options.urls && dbkjs.options.urls.apiPath ? dbkjs.options.urls.apiPath : "api/",
+        vehiclesUpdateInterval: 5000,
+        showVehicles: true,
+    }, incidents.options);
 
     me.button = new AlertableButton("btn_incident", "Incident", "bell-o");
     me.button.getElement().prependTo('#btngrp_object');
@@ -114,29 +118,39 @@ MDTIncidentsController.prototype.handleIncident = function (xml) {
 
     me.xml = xml;
     me.incidentDetailsWindow.data(xml, true, true, true);    
-
-	me.markerLayer.clear();
-	me.markerLayer.addIncident(xml, false, true);
-	me.markerLayer.setZIndexFix();
-	me.markerLayer.layer.setVisibility(true);
     
+    var updateMap = false;
     if(first) {
         me.html = newHtml;
         me.incidentId = newId;
         me.button.setAlerted(true);
         me.newIncident();
+        updateMap = true;
     } else {
         if(me.html !== newHtml) {
+            me.html = newHtml;
             if(!me.incidentDetailsWindow.isVisible()) {
+                updateMap = true;
                 me.button.setAlerted(true);
+                $(dbkjs).trigger("incidents.updated");
             }
-            $(dbkjs).trigger("incidents.updated");
         }
         if(me.incidentId !== newId) {                
             me.html = newHtml;
             me.incidentId = newId;
             me.newIncident();
+            updateMap = true;
         }
+    }
+
+    if (me.options.showVehicles && updateMap) {
+        me.markerLayer.clear();
+        me.markerLayer.addIncident(xml, false, true);
+        me.markerLayer.setZIndexFix();
+        me.markerLayer.layer.setVisibility(true);
+
+        window.clearTimeout(me.updateVehicleTimeout);
+        me.updateVehiclePositionLayerSC(me.xml);
     }
 };
 
@@ -172,10 +186,6 @@ MDTIncidentsController.prototype.newIncident = function() {
     };
     me.featureSelector.findAndSelectMatches(commonIncidentObject, me.incidentDetailsWindow);
     me.featureSelector.updateBalkRechtsonder();
-
-    if (me.options.showVehicles) {
-        me.updateVehiclePositionLayerCityGISWFS(me.xml);
-    }
 
     me.incidentDetailsWindow.show();
 
@@ -255,6 +265,59 @@ MDTIncidentsController.prototype.getXmlFormat = function (xml) {
     }
 
     return xmlFormat;
+}
+
+MDTIncidentsController.prototype.updateVehiclePositionLayerSC = function (incident) {
+    var me = this;
+
+    var roepnamen = [];
+    $.each($(incident).find(me.xmlFormat.eenheid), function (i, eenheid) {
+        var naam = $(eenheid).find(me.xmlFormat.roepnaam).text();
+        var disc = $(eenheid).find(me.xmlFormat.disc).text();
+
+        if (disc === me.xmlFormat.discBrandweer) {
+            roepnamen.push(naam);
+        }
+    });
+
+    $.ajax(me.options.apiPath + "safetyconnect/eenheidlocatie", {
+        dataType: "json",
+        data: {
+            extended: false
+        },
+        xhrFields: { withCredentials: true }, crossDomain: true
+    })
+    .always(function() {
+        me.updateVehicleTimeout = window.setTimeout(function() {
+            me.updateVehiclePositionLayerSC(incident);
+        }, me.options.vehiclesUpdateInterval);
+    })
+    .fail(function (jqXHR, textStatus, errorThrown) {
+        console.log("SC: Error updating vehicle positions", jqXHR, textStatus, errorThrown);
+    })
+    .done(function (data, textStatus, jqXHR) {
+        me.options.logVehicles && console.log("IM SC: Vehicle positions", data);
+        var transformedVehicles = data.features
+            .filter(function(el) {
+                return roepnamen.filter(function (rn) {
+                    return rn === el.properties.id;
+                }).length > 0;
+            })
+            .map(function(f) {
+                var props = f.properties;
+                var attributes = {
+                    IncidentID: props.incidentNummer || "",
+                    Voertuigsoort: props.inzetRol || "",
+                    Roepnummer: props.id,
+                    Speed: me.options.showSpeed ? props.speed || 0 : 0,
+                    Direction: props.heading
+                };
+                var geometry = new OpenLayers.Geometry.Point(f.geometry.coordinates[0], f.geometry.coordinates[1]);
+                return new OpenLayers.Feature.Vector(geometry, attributes);
+            });
+        me.options.logVehicles && console.log("IM SC: Transformed vehicle positions for layer", transformedVehicles);
+        me.vehiclePositionLayer.features(transformedVehicles);
+    });
 }
 
 /**
