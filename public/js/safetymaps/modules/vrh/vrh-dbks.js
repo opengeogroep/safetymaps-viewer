@@ -528,7 +528,7 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
                     },
                     label: function(feature) {
                         if(feature.attributes.code === "TbeHoogte") {
-                            return feature.attributes.bijzonderh;
+                            return feature.attributes.omschrijvi;
                         }
                         return "";
                     },
@@ -823,13 +823,7 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
         if(f.attributes.symboolcod) {
             f.attributes.code = f.attributes.symboolcod.replace(/,/, "");
         }
-        f.attributes.description = f.attributes.omschrijvi || "";
-        if(f.attributes.bijzonderh && f.attributes.bijzonderh.trim() !== "-") {
-            if(f.attributes.description.length > 0) {
-                f.attributes.description += "; ";
-            }
-            f.attributes.description += f.attributes.bijzonderh;
-        }
+        f.attributes.description = f.attributes.bijzonderh || "";
         f.attributes.rotation = -(360-f.attributes.symboolhoe) || 0;
 
         var symbol = f.attributes.code;
@@ -858,8 +852,6 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
     }).map(vrhSymbol));
     this.layerSymbols.addFeatures((object.hellingbaan || []).map(wktReader).map(function(f) {
         f.attributes.symboolcod = "Hellingbaan";
-        f.attributes.omschrijvi = f.attributes.bijzonderh;
-        delete f.attributes.bijzonderh;
         return f;
     }).map(vrhSymbol));
 
