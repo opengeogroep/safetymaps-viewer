@@ -185,7 +185,23 @@ dbkjs.gotOrganisation = function () {
         dbkjs.layers.listenToIncidents();
     }
     
-    if(dbkjs.options.organisation.integrated) {
+    if (dbkjs.options.organisation.integrated && dbkjs.options.extendedLogout) {
+        var logoutUrl = "../logout.jsp?returnTo=" + encodeURIComponent(window.location.pathname);
+        $("#settingspanel_b").append(i18n.t('login.whoami') + ': <b>' + dbkjs.options.organisation.username + '</b><button id="logoutbtn" class="btn btn-default btn-danger" onclick="dbkjs.confirmDialog(\'' + i18n.t('login.logoutMessage') + '\');"><span class="glyphicon glyphicon-log-out"></span> ' + i18n.t('login.logout') + '</button>');
+
+        dbkjs.confirmDialog = function(message) {
+            $("#logoutbtn").hide();
+            $('#settingspanel_b').attr("style", "margin-bottom:60px !important;");
+            $('#settingspanel_b').append("<p id='logoutMessage' style='font-weight:bold; display: block; position: fixed; bottom: 0; margin-top:0;'>" + message + "<br /><a class='btn btn-default btn-primary' href='" + logoutUrl + "'>" + i18n.t('login.logout') + "</a></p>");
+
+            setTimeout(function() {
+                $("#logoutbtn").show();
+                $('#settingspanel_b').attr("style", "margin-bottom:0 !important;");
+                $("#logoutMessage").remove();
+            }, 7000);
+        };
+    }
+    else if(dbkjs.options.organisation.integrated) {
         $("#settingspanel_b").append(i18n.t('login.whoami') + ': <b>' + dbkjs.options.organisation.username + '</b><button id="logoutbtn" class="btn btn-default btn-success" onclick="window.location.href=\'../logout.jsp?returnTo=' + encodeURIComponent(window.location.pathname) + '\'"><span class="glyphicon glyphicon-log-out"></span> ' + i18n.t('login.logout') + '</button>');
     }
 

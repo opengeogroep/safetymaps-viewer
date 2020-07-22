@@ -47,7 +47,8 @@
         "retry": "Prøve igen",
         "norights": "Dine konti har ingen rettigheder til seeren. Du er blevet logget ud.",
         "whoami": "Logget ind som",
-        "logout": "Log ud"
+        "logout": "Log ud",
+        "logoutMessage": "Weet u zeker dat u uit wilt loggen? Alleen een beheerder kan opnieuw inloggen."
     },
     "search": {
         "button": "Søg",
