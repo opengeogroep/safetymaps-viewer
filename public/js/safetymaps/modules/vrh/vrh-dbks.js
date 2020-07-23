@@ -90,6 +90,13 @@ safetymaps.vrh.Dbks = function(options) {
         "HydrofoorEIGEN": "Eigen hydrofoor",
         "Sleutelbuis": "Sleutelbuis"
     };
+    /* These symbols are flipped 180 degrees compared to the Creator symbols */
+    me.vrhSymbolsFlipped = [
+        "Tb1007",
+        "Tb1007a",
+        "Tb4005",
+        "NBLA"
+    ];
     me.buttonSymbols = {};
     me.buttonSymbols.basis = [
         "TbeRIJ", "TbeBus", "TbeHoogte", "Tbe05", "Tbe06", "Tbe02", "Tbe01", "Tn504", "To04", "Tb1010o",
@@ -825,6 +832,10 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
         }
         f.attributes.description = f.attributes.bijzonderh || "";
         f.attributes.rotation = -(360-f.attributes.symboolhoe) || 0;
+
+        if(me.vrhSymbolsFlipped.indexOf(f.attributes.code) !== -1) {
+            f.attributes.rotation += 180;
+        }
 
         var symbol = f.attributes.code;
         var path = safetymaps.creator.api.imagePath + 'symbols/';
