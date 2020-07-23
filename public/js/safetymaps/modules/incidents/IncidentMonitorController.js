@@ -30,7 +30,6 @@ function IncidentMonitorController(options) {
         apiPath: dbkjs.options.urls && dbkjs.options.urls.apiPath ? dbkjs.options.urls.apiPath : "api/",
 
         showVehicles: true,
-        // Can be set to "citygis_wfs"
         vehicleSource: "incidentService",
         vehicleSourceURL: null,
         logVehicles: false,
@@ -540,9 +539,7 @@ IncidentMonitorController.prototype.updateVehiclePositionLayer = function(incide
         return;
     }
 
-    if(me.options.vehicleSource === "citygis_wfs") {
-        me.updateVehiclePositionLayerCityGISWFS(incidents);
-    } else if(me.options.incidentSource === "VrhAGS") {
+    if(me.options.incidentSource === "VrhAGS") {
         var incidentIds = $.map(incidents, function(i) { return i.id; });
 
         me.service.getVehiclePositions(incidentIds)
@@ -584,53 +581,6 @@ IncidentMonitorController.prototype.updateVehiclePositionLayer = function(incide
             me.vehiclePositionLayer.features(transformedVehicles);
         });
     }
-};
-
-IncidentMonitorController.prototype.updateVehiclePositionLayerCityGISWFS = function(incidents) {
-    var me = this;
-
-    var roepnamen = [];
-    $.each(incidents, function(i, incident) {
-        $.each(incident.BetrokkenEenheden || [], function(j, eenheid) {
-            if(eenheid.IsActief && eenheid.Discipline === "B") {
-                roepnamen.push(eenheid.Roepnaam);
-            }
-        });
-    });
-    me.options.logVehicles && console.log("IM: actieve eenheden ", roepnamen);
-
-    $.ajax({
-        url: me.options.vehicleSourceURL
-    })
-    .done(function(data) {
-        var features = new OpenLayers.Format.GeoJSON().read(data);
-
-        // Geometry useless, latitude and longitude switched
-        var vehicleFeatures = [];
-        var cutoff = new moment().subtract("2", "hours");
-        $.each(features, function(i, f) {
-            var p = new Proj4js.Point(f.attributes.longitude, f.attributes.latitude);
-            var t = Proj4js.transform(new Proj4js.Proj("EPSG:4326"), new Proj4js.Proj(dbkjs.options.projection.code), p);
-            var p = new OpenLayers.Geometry.Point(t.x, t.y);
-            // Speed and direction from service not reliable
-            var feature = new OpenLayers.Feature.Vector(p, {
-                "Roepnummer": f.attributes.id,
-                "Speed": 0, // f.attributes.speed,
-                "time": new moment(f.attributes.time),
-                "IncidentID": roepnamen.indexOf(f.attributes.id + "") !== -1 ? "1" : "",
-                "Direction": null, //f.attributes.headingDegrees,
-                "Voertuigsoort": "",
-                "PositiontimeFromNow": new moment(f.attributes.time).fromNow()
-            });
-            if(feature.attributes.IncidentID !== "") {
-                me.options.logVehicles && console.log("IM: actieve eenheid, time " + feature.attributes.time.fromNow(), feature);
-            }
-            if(feature.attributes.time.isAfter(cutoff)) {
-                vehicleFeatures.push(feature);
-            }
-        });
-        me.vehiclePositionLayer.features(vehicleFeatures);
-    });
 };
 
 IncidentMonitorController.prototype.loadTweets = function(incident) {
