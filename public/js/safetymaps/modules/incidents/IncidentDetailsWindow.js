@@ -818,7 +818,7 @@ IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInze
             var disc = $(eenheid).find(xmlFormat.disc).text();
 
             var span = "<span>" + dbkjs.util.htmlEncode(naam) + "</span><br/>";
-            if("B--" === disc) {
+            if(xmlFormat.discBrandweer === disc) {
                 eenhBrw += span;
             } else if("--P" === disc) {
                 eenhPol += span;

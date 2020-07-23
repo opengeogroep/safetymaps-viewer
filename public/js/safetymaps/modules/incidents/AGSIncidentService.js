@@ -369,6 +369,9 @@ AGSIncidentService.prototype.getIncidentXY = function(incident) {
     } else if(incident.IncidentLocatie) {
         x = incident.IncidentLocatie.XCoordinaat;
         y = incident.IncidentLocatie.YCoordinaat;
+    } else if ($(incident).find("MdtIncident IncidentNummer").length > 0) {
+        x = $(incident).find("IncidentLocatie XCoordinaat").text();
+        y = $(incident).find("IncidentLocatie YCoordinaat").text();
     } else {
         x = $(incident).find("IncidentLocatie XYCoordinaten XCoordinaat").text();
         y = $(incident).find("IncidentLocatie XYCoordinaten YCoordinaat").text();
