@@ -1088,8 +1088,8 @@ safetymaps.vrh.Events.prototype.updateInfoWindow = function(windowId, object) {
     rows.push({l: "Centralist telefoon",                    t: t.centrali_1});
     rows.push({l: "PID naam",                               t: t.pid_naam});
     rows.push({l: "PID telefoon",                           t: t.pid_telefo});
-    rows.push({l: "Objectofficier naam",                    t: t.objectoffi });
-    rows.push({l: "Object officier telefoon",               t: t.objectof_1});
+    rows.push({l: "Evenementenofficier brandweer",          t: t.objectoffi });
+    rows.push({l: "Evenementenofficier telefoon",           t: t.objectof_1});
     rows.push({l: "HIN naam",                               t: t.hin_naam});
     rows.push({l: "HIN telefoon",                           t: t.hin_telefo});
     rows.push({l: "Medewerker OV naam",                     t: t.medewerker});
