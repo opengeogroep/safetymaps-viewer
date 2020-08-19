@@ -162,13 +162,31 @@ dbkjs.layers = {
             // TODO ArcGIS93Rest
         });
     },
-
+    currentBl: null,
     createBaseLayers: function() {
         var baselayer_ul = $('<ul id="baselayerpanel_ul" class="nav nav-pills nav-stacked">');
+        
         $.each(dbkjs.options.baselayers, function(bl_index, bl) {
             var _li = $('<li class="bl" id="bl' + bl_index + '"><a href="#">' + bl.name + '</a></li>');
             baselayer_ul.append(_li);
             bl.events.register("loadstart", bl, function() {
+                if (dbkjs.options.organisationExtent && (bl.options.outsideOrganisationExtentSwitchToLayer || dbkjs.layers.currentBl)) {
+                    var extent = new OpenLayers.Format.GeoJSON().read(dbkjs.options.organisationExtent);
+                    var center = dbkjs.map.getCenter();
+                    var point = new OpenLayers.Geometry.Point(center.lon, center.lat);
+                    var meters = point.distanceTo(extent[0].geometry.transform(new OpenLayers.Projection("EPSG:4326"), dbkjs.map.getProjectionObject()), { edge: false }).toFixed(0);
+                    if (meters >= dbkjs.options.organisationExtentBounderyInMeters ?? 0) {
+                        if (bl.options.outsideOrganisationExtentSwitchToLayer) {
+                            dbkjs.map.setBaseLayer(dbkjs.map.getLayersByName(bl.options.outsideOrganisationExtentSwitchToLayer)[0]);
+                            dbkjs.layers.currentBl = bl;
+                        }
+                    } else {
+                        if (!bl.options.outsideOrganisationExtentSwitchToLayer) {
+                            dbkjs.map.setBaseLayer(dbkjs.layers.currentBl);
+                            dbkjs.layers.currentBl = null;
+                        }
+                    }
+                }
                 dbkjs.util.loadingStart(bl);
             });
             bl.events.register("loadend", bl, function() {
