@@ -162,15 +162,40 @@ dbkjs.layers = {
             // TODO ArcGIS93Rest
         });
     },
-    currentBl: null,
+    switchedBaseLayer: null,
+    switchedZoomBaseLayer: null,
+    switchedAtZoomLevel: null,
     createBaseLayers: function() {
         var baselayer_ul = $('<ul id="baselayerpanel_ul" class="nav nav-pills nav-stacked">');
-        
+
+        // Change baselayer to options.afterMaxZoomLevelSwitchToLayer based on options.switchAtZoomLevel
+        dbkjs.map.events.register('zoomend', dbkjs.map, function () {
+            var bl = dbkjs.map.baseLayer;
+            var zl = dbkjs.map.getZoom();
+            if (bl.options.afterMaxZoomLevelSwitchToLayer || dbkjs.layers.switchedZoomBaseLayer) {
+                if (zl === bl.options.switchAtZoomLevel ?? 10) {
+                    if (!dbkjs.layers.switchedZoomBaseLayer) {
+                        dbkjs.map.setBaseLayer(dbkjs.map.getLayersByName(bl.options.afterMaxZoomLevelSwitchToLayer)[0]);
+                        dbkjs.layers.switchedZoomBaseLayer = bl;
+                        dbkjs.layers.switchedAtZoomLevel = bl.options.switchAtZoomLevel ?? 10
+                    }
+                } else {
+                    if (!bl.options.afterMaxZoomLevelSwitchToLayer && zl === dbkjs.layers.switchedAtZoomLevel - 1) {
+                        dbkjs.map.setBaseLayer(dbkjs.layers.switchedZoomBaseLayer);
+                        dbkjs.layers.switchedZoomBaseLayer = null;
+                        dbkjs.layers.switchedAtZoomLevel = null;
+                    }
+                }
+            }
+        });
+
         $.each(dbkjs.options.baselayers, function(bl_index, bl) {
             var _li = $('<li class="bl" id="bl' + bl_index + '"><a href="#">' + bl.name + '</a></li>');
             baselayer_ul.append(_li);
             bl.events.register("loadstart", bl, function() {
-                if (dbkjs.options.organisationExtent && (bl.options.outsideOrganisationExtentSwitchToLayer || dbkjs.layers.currentBl)) {
+                // Change baselayer to options.outsideOrganisationExtentSwitchToLayer based on 
+                // dbkjs.options.organisationExtent + dbkjs.options.organisationExtentBounderyInMeters
+                if (dbkjs.options.organisationExtent && (bl.options.outsideOrganisationExtentSwitchToLayer || dbkjs.layers.switchedBaseLayer)) {
                     var extent = new OpenLayers.Format.GeoJSON().read(dbkjs.options.organisationExtent);
                     var center = dbkjs.map.getCenter();
                     var point = new OpenLayers.Geometry.Point(center.lon, center.lat);
@@ -178,12 +203,12 @@ dbkjs.layers = {
                     if (meters >= dbkjs.options.organisationExtentBounderyInMeters ?? 0) {
                         if (bl.options.outsideOrganisationExtentSwitchToLayer) {
                             dbkjs.map.setBaseLayer(dbkjs.map.getLayersByName(bl.options.outsideOrganisationExtentSwitchToLayer)[0]);
-                            dbkjs.layers.currentBl = bl;
+                            dbkjs.layers.switchedBaseLayer = bl;
                         }
                     } else {
                         if (!bl.options.outsideOrganisationExtentSwitchToLayer) {
-                            dbkjs.map.setBaseLayer(dbkjs.layers.currentBl);
-                            dbkjs.layers.currentBl = null;
+                            dbkjs.map.setBaseLayer(dbkjs.layers.switchedBaseLayer);
+                            dbkjs.layers.switchedBaseLayer = null;
                         }
                     }
                 }

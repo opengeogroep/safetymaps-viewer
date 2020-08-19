@@ -13,7 +13,9 @@ dbkjs.options.baselayers = [
                 zoomOffset: 0,
                 outsideOrganisationExtentSwitchToLayer: null,
                 disableInToggleButton: false,
-                hideInList: false
+                hideInList: false,
+                switchAtZoomLevel: 14,
+                afterMaxZoomLevelSwitchToLayer: null
             }
     ),
     // High resolution layer with the same name will be shown when hiDPI available and enabled
