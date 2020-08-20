@@ -178,12 +178,14 @@ dbkjs.layers = {
                         dbkjs.map.setBaseLayer(dbkjs.map.getLayersByName(bl.options.afterMaxZoomLevelSwitchToLayer)[0]);
                         dbkjs.layers.switchedZoomBaseLayer = bl;
                         dbkjs.layers.switchedAtZoomLevel = bl.options.switchAtZoomLevel ?? 10
+                        return false;
                     }
                 } else {
                     if (!bl.options.afterMaxZoomLevelSwitchToLayer && zl === dbkjs.layers.switchedAtZoomLevel - 1) {
                         dbkjs.map.setBaseLayer(dbkjs.layers.switchedZoomBaseLayer);
                         dbkjs.layers.switchedZoomBaseLayer = null;
                         dbkjs.layers.switchedAtZoomLevel = null;
+                        return false;
                     }
                 }
             }
@@ -204,11 +206,13 @@ dbkjs.layers = {
                         if (bl.options.outsideOrganisationExtentSwitchToLayer) {
                             dbkjs.map.setBaseLayer(dbkjs.map.getLayersByName(bl.options.outsideOrganisationExtentSwitchToLayer)[0]);
                             dbkjs.layers.switchedBaseLayer = bl;
+                            return false;
                         }
                     } else {
                         if (!bl.options.outsideOrganisationExtentSwitchToLayer) {
                             dbkjs.map.setBaseLayer(dbkjs.layers.switchedBaseLayer);
                             dbkjs.layers.switchedBaseLayer = null;
+                            return false;
                         }
                     }
                 }
