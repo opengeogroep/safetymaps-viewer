@@ -437,7 +437,7 @@ dbkjs.modules.drawing = {
         if(me.drawMode === "point" && me.symbol) {
             var attributes = $.extend({}, me.symbol, {
                 label: me.symbol.label === "XY" 
-                    ? "" + lonLat.lat + ", " + lonLat.lon 
+                    ? "" + Math.round(lonLat.lon) + ", " + Math.round(lonLat.lat) 
                     : me.symbol.label === "110"
                         ? "110"
                         : "",
