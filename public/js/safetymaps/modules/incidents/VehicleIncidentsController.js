@@ -37,6 +37,8 @@ function VehicleIncidentsController(options, featureSelector) {
     me.primaryFailing = false;
     me.handlingInzetInfo = false;
 
+    me.twitterTimer = null;
+
     me.button = new AlertableButton("btn_incident", "Incident", "bell-o");
     me.button.getElement().prependTo('#btngrp_object');
 
@@ -1172,7 +1174,11 @@ VehicleIncidentsController.prototype.onInzetIncident = function(incidentInfo, fr
     }
 
     if(me.options.showTwitter) {
-        me.incidentMonitorController.loadTweets(me.incident);
+        var milElapsed = me.twitterTimer ? Date.now() - me.twitterTimer : 30000;
+        if (Math.floor(milElapsed / 1000) >= 30) {
+            me.incidentMonitorController.loadTweets(me.incident);
+            me.twitterTimer = Date.now();
+        }
     }
 };
 
