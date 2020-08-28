@@ -392,6 +392,11 @@ $(document).ready(function () {
         
         //Make toggle button for baselayers; Option can be set in customize.js
         if(dbkjs.options.separateBaseLayerSwitcher){
+            var checkResetBaselayerActive = function () {
+                if (dbkjs.options.baselayerActive > dbkjs.options.baselayers.length - 1){
+                    dbkjs.options.baselayerActive = 0;
+                }
+            };
             dbkjs.options.baselayerActive = 0;
             $("#baselayerpanel_b").hide();
             var a = $("<a/>")
@@ -400,9 +405,11 @@ $(document).ready(function () {
                 .addClass("btn btn-default navbar-btn")
                 .on("click", function () {
                     dbkjs.options.baselayerActive += 1;
-                    if(dbkjs.options.baselayerActive > dbkjs.options.baselayers.length - 1){
-                        dbkjs.options.baselayerActive = 0;
+                    checkResetBaselayerActive();
+                    if (dbkjs.options.baselayers[dbkjs.options.baselayerActive].disableInToggleButton) {
+                        dbkjs.options.baselayerActive += 1;
                     }
+                    checkResetBaselayerActive();
                     dbkjs.layers.toggleBaseLayer(dbkjs.options.baselayerActive);
                 });
         $("<img/>")
