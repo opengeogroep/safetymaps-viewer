@@ -643,7 +643,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
         html += '<tr class="detailed"><td style="display:'+showAllEenheden+';" colspan="2" id="allEenheden">';
         html += 'Eenheden: <span style="color: #A9A9A9">(Klik voor minder info)</span><br/><table>';
         $.each(incident.BetrokkenEenheden, function(i, inzet) {
-            if(inzet.Discipline === "B") {
+            //if(inzet.Discipline === "B") {
                 var tooltip = "";
                 if(inzet.EindeActieDTG) {
                     var einde = new moment(inzet.EindeActieDTG);
@@ -656,7 +656,7 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
                 html += "<td>" + (inzet.BrwKazerne ? inzet.BrwKazerne : "") + "</td>";
                 html += "<td>" + (!compareMode && inzet.ETA && inzet.ETA.length > 0 ? me.calculateETA(inzet.ETA[0], true) : "") + "</td>";
                 html += "</tr>";
-            }
+            //}
         });
         html += '</table></td></tr>';
         $(document).on('click', '#allEenheden', function(){
