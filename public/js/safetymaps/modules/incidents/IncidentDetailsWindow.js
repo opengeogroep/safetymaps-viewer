@@ -438,9 +438,9 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
         html += 'Eenheden: ';
         var s = [];
         $.each(incident.inzetEenheden, function(i, inzet) {
-            if(inzet.T_IND_DISC_EENHEID !== "B") {
+            /*if(inzet.T_IND_DISC_EENHEID !== "B") {
                 return;
-            }
+            }*/
             var tooltip = inzet.KAZ_NAAM ? inzet.KAZ_NAAM : "";
             var span = (inzet.DTG_EIND_ACTIE || incident.archief ? "<span class='beeindigd' " : "<span ") + " title='" + tooltip + "'>" + dbkjs.util.htmlEncode(inzet.ROEPNAAM_EENHEID) + "</span>";
             s.push(span);
@@ -455,7 +455,7 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
         html += "<tr class='detailed'><td colspan='2' id='allEenheden' style='display:" + showAllEenheden + "'>";
         html += "Eenheden: <span class='beeindigd'>(Klik voor minder info)</span><br/><table>";
         $.each(incident.inzetEenheden, function(i, inzet) {
-            if(inzet.T_IND_DISC_EENHEID !== "B" || inzet.ROEPNAAM_EENHEID === null) {
+            if(/*inzet.T_IND_DISC_EENHEID !== "B" || */inzet.ROEPNAAM_EENHEID === null) {
                 return;
             }
             var tooltip;
