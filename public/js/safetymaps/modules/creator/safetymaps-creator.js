@@ -149,20 +149,31 @@ dbkjs.modules.safetymaps_creator = {
     },
 
     togglerButtonChanged: function(button, active, config) {
-        var me = this;
         if(typeof config.creatorType === "undefined") {
             return;
         }
-        var i = me.hiddenTypes.indexOf(config.creatorType);
-        if(active && i !== -1) {
-            me.hiddenTypes.splice(i, 1);
-        } else if(!active && i === -1) {
-            me.hiddenTypes.push(config.creatorType);
+        var me = this;
+        var creatorTypeIsArray = Array.isArray(config.creatorType);
+        if(creatorTypeIsArray) {
+            config.creatorType.map(function(creatorType) {
+                me.toggleHiddenTypes(active, creatorType);
+            });
+        } else {
+            me.toggleHiddenTypes(active, config.creatorType);
         }
         console.log("Hidden object types: " + me.hiddenTypes);
         me.clusteringLayer.redraw();
     },
 
+    toggleHiddenTypes: function(active, type) {
+        var me = this;
+        var i = me.hiddenTypes.indexOf(type);
+        if(active && i !== -1) {
+            me.hiddenTypes.splice(i, 1);
+        } else if(!active && i === -1) {
+            me.hiddenTypes.push(type);
+        }
+    },
 
     setupInterface: function() {
         var me = this;
