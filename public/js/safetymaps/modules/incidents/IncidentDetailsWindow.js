@@ -495,9 +495,27 @@ IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incid
     switch(format) {
         case "xml":
             var xmlFormat = MDTIncidentsController.prototype.getXmlFormat(incident);
+            var notepad = new Array();
             $.each($(incident).find(xmlFormat.kladblok), function(i, k) {
-                kladblokHTML += "<tr><td>" + me.linkify(dbkjs.util.htmlEncode($(k).text())) + "</td></tr>";
+                var text = $(k).find("Inhoud").text() || '';
+                var dtg = $(k).find("DTG").text() || '';
+                if(text !== '' && dtg !== '') {
+                    notepad.push({ dtg: dtg, text: text });
+                } else {
+                    kladblokHTML += "<tr><td>" + me.linkify(dbkjs.util.htmlEncode($(k).text())) + "</td></tr>";
+                }
             });
+            if(notepad.length > 0){
+                notepad
+                    .sort(function(a, b) {
+                        var dateA = new Date(a.dtg);
+                        var dateB = new Date(b.dtg);
+                        return dateA - dateB;
+                    })
+                    .map(function(row) {
+                        kladblokHTML += "<tr><td>" + new moment(row.dtg).format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(row.text)) + "</td></tr>";
+                    });
+            }
             break;
         case "falck":
             $.each(incident.Kladblokregels, function(i, k) {
