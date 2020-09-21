@@ -232,10 +232,16 @@ dbkjs.modules.fotoFunction = {
             xhrFields: {
                 withCredentials: true
             },
-            crossDomain: true})
-                .done(function (result) {
-                    me.buildFotoWindow(result, isNew);
-                });
+            crossDomain: true
+        })
+        .done(function(result, textStatus, xhr) {
+            var currentTitle = $("#t_foto_title").text();
+            if(xhr.status !== 200 && currentTitle.slice(-1) !== '!'){
+                $("#t_foto_title").text($("#t_foto_title").text() + ' !');
+            } else {
+                me.buildFotoWindow(result, isNew);
+            }
+        });
     },
 
     buildFotoWindow: function (data, isNew) {
