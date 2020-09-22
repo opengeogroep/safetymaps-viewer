@@ -255,7 +255,7 @@ MDTIncidentsController.prototype.getXmlFormat = function (xml) {
         xmlFormat.karakteristiekNaam = "KarakteristiekNaam";
         xmlFormat.karakteristiekWaarde = "KarakteristiekWaarde";
         xmlFormat.afspraakOpLocatie = "AfspraakOpLocatie";
-        xmlFormat.kladblok = "Kladblokregel Inhoud";
+        xmlFormat.kladblok = "Kladblokregel";
 
         xmlFormat.classificatie = $(xml).find("Meldingsclassificatie1").text() + ", "
             + $(xml).find("Meldingsclassificatie2").text() + ", "
