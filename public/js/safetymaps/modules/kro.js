@@ -68,10 +68,15 @@ dbkjs.modules.kro = {
 
     shouldShowKroForObject: function(object) {
         var me = dbkjs.modules.kro;
+
+        if (!me.shouldShowKro()) {
+            return false;
+        }
+
         var objectTypeIsEnabled = object.symbool &&
             me.options.enableForObjectTypes.filter(function(type) { return type === object.symbool; }).length > 0;
 
-        return me.shouldShowKro() && objectTypeIsEnabled;
+        return objectTypeIsEnabled;
     },
 
     callApi: function(params) {
@@ -117,6 +122,23 @@ dbkjs.modules.kro = {
 
     getObjectInfoForBAGpandId: function(bagpandid) {
 
+    },
+
+    mergeKroRowsIntoDdbkRows: function(dbkRows) {
+        var me = dbkjs.modules.kro;
+        var kroRows = me.createRows();
+
+        dbkRows.push(kroRows);
+        dbkRows = me.removeDuplicateObjectInfoRows(dbkRows);
+        dbkRows = me.orderObjectInfoRows(dbkRows);
+
+        return dbkRows;
+    },
+
+    createRows: function() {
+        return [
+            { l: "BAG pand id", t: kro[0].bagpandid, source: "kro" },
+        ];
     },
 
     removeDuplicateObjectInfoRows: function(rows) {

@@ -46,9 +46,7 @@ safetymaps.creator.renderInfoTabs = function(object, windowId, isIncident = fals
         })
         .done(function(kro) {
             if(kro.length > 0) {
-                rows.push({ l: "BAG pand id", t: kro[0].bagpandid, source: "kro" });
-                rows = dbkjs.modules.kro.removeDuplicateObjectInfoRows(rows);
-                rows = dbkjs.modules.kro.orderObjectInfoRows(rows);
+                rows = dbkjs.modules.kro.mergeKroRowsIntoDdbkRows(rows);
             }
         })
         .always(function() {
