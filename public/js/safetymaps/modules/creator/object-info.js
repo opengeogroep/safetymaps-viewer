@@ -27,7 +27,7 @@
 var safetymaps = safetymaps || {};
 safetymaps.creator = safetymaps.creator || {};
 
-safetymaps.creator.renderInfoTabs = function(object, windowId) {
+safetymaps.creator.renderInfoTabs = function(object, windowId, isIncident = false) {
 
     safetymaps.infoWindow.removeTabs(windowId, "info");
 
@@ -51,15 +51,15 @@ safetymaps.creator.renderInfoTabs = function(object, windowId) {
             rows = dbkjs.modules.kro.removeDuplicateObjectInfoRows(rows);
             rows = dbkjs.modules.kro.orderObjectInfoRows(rows);
             safetymaps.infoWindow.addTab(windowId, "general", i18n.t("creator.general"), "info", safetymaps.creator.createInfoTabDiv(rows));
-            renderRemainingInfoTabs(object, windowId);
+            safetymaps.creator.renderRemainingInfoTabs(object, windowId, isIncident);
         })
     } else {
         safetymaps.infoWindow.addTab(windowId, "general", i18n.t("creator.general"), "info", safetymaps.creator.createInfoTabDiv(rows));
-        renderRemainingInfoTabs(object, windowId);
+        safetymaps.creator.renderRemainingInfoTabs(object, windowId, isIncident);
     }
 };
 
-safetymaps.creator.renderRemainingInfoTabs = function(object, windowId) {
+safetymaps.creator.renderRemainingInfoTabs = function(object, windowId, isIncident) {
     var rows;
 
     detailTabs = safetymaps.creator.renderDetails(object);
@@ -99,6 +99,10 @@ safetymaps.creator.renderRemainingInfoTabs = function(object, windowId) {
     if(!(dbkjs.modules.safetymaps_creator.options.hideTabs && dbkjs.modules.safetymaps_creator.options.hideTabs.includes("symbols"))){
         rows = safetymaps.creator.renderSymbols(object);
         safetymaps.infoWindow.addTab(windowId, "symbols", i18n.t("creator.symbols"), "info", safetymaps.creator.createInfoTabDiv(rows));
+    }
+
+    if(!isIncident) {
+        safetymaps.infoWindow.showTab(windowId, "general", true);
     }
 }
 

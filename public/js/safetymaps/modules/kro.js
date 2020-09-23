@@ -131,7 +131,7 @@ dbkjs.modules.kro = {
                 }
             })
             .map(function(row) {
-                return { l: row.l, t: row.t, };
+                return { l: row.l, t: row.t, html: row.html, };
             });
     },
 
@@ -145,11 +145,11 @@ dbkjs.modules.kro = {
                 if(configFound.length > 0) {
                     order = configFound[0].order;
                 }
-                return { l: row.l, t: row.t, o: order, }
+                return { l: row.l, t: row.t, html: row.html, o: order, }
             })
             .sort(function(a, b) { return a.o - b.o; })
             .map(function(row) {
-                return { l: row.l, t: row.t, };
+                return { l: row.l, t: row.t, html: row.html, };
             });
     },
 

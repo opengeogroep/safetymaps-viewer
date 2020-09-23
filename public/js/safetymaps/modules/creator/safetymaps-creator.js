@@ -512,7 +512,7 @@ dbkjs.modules.safetymaps_creator = {
         isIncident = (typeof isIncident !== "undefined") ? isIncident : false;
         var me = this;
 
-        safetymaps.creator.renderInfoTabs(object, this.infoWindow.getName());
+        safetymaps.creator.renderInfoTabs(object, this.infoWindow.getName(), isIncident);
         dbkjs.modules.vrh_objects.addLegendTrEventHandler("tab_danger_symbols", {
             "safetymaps_creatorDangerSymbolsId:" : me.objectLayers.layerDangerSymbols
         });
@@ -537,11 +537,7 @@ dbkjs.modules.safetymaps_creator = {
             }           
         });
 
-        if(!isIncident) {
-            safetymaps.infoWindow.showTab(me.infoWindow.getName(), "general", true);
-        }
         this.infoWindowTabsResize();
-
     },
 
     objectLayerFeatureSelected: function(e) {
