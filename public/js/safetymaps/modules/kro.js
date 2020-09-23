@@ -88,7 +88,7 @@ dbkjs.modules.kro = {
             cache: false
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
-            d.reject(msg + safetymaps.utils.getAjaxError(jqXHR, textStatus, errorThrown));
+            d.reject(safetymaps.utils.getAjaxError(jqXHR, textStatus, errorThrown));
         })
         .done(function(data, textStatus, jqXHR) {
             if(data.success) {

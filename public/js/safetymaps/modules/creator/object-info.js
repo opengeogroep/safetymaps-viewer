@@ -33,8 +33,32 @@ safetymaps.creator.renderInfoTabs = function(object, windowId) {
 
     var rows;
 
-    rows = safetymaps.creator.renderGeneral(object);
-    safetymaps.infoWindow.addTab(windowId, "general", i18n.t("creator.general"), "info", safetymaps.creator.createInfoTabDiv(rows));
+    if(dbkjs.modules.kro.shouldShowKroFor(object)) {
+        dbkjs.modules.kro.getObjectInfoForAddress(
+            object.straatnaam,
+            object.huisnummer,
+            object.huisletter || '',
+            object.toevoeging || '',
+            object.plaats
+        )
+        .fail(function(msg) { 
+            console.log("Error fetching KRO data: " + msg);
+        })
+        .done(function(kro) {
+            var result;
+            result = safetymaps.creator.renderGeneral(object);
+            if(kro.length > 0) {
+                result.concat([
+                    { l: "BAG pand id", t: kro[0].bagpandid, source: "kro" },
+                ]);
+            }
+            result = dbkjs.modules.kro.removeDuplicateObjectInfoRows(result);
+            result = dbkjs.modules.kro.orderObjectInfoRows(result);
+        })
+    } else {
+        rows = safetymaps.creator.renderGeneral(object);
+        safetymaps.infoWindow.addTab(windowId, "general", i18n.t("creator.general"), "info", safetymaps.creator.createInfoTabDiv(rows));
+    }
 
     detailTabs = safetymaps.creator.renderDetails(object);
     $.each(detailTabs, function(i, detailTab) {
@@ -110,31 +134,7 @@ safetymaps.creator.renderGeneral = function(object) {
         {l: i18n.t("creator.highestLevel") + " (" + i18n.t("creator.floor") + ")", t: highestFloor}
     ]);
 
-    if(dbkjs.modules.kro.shouldShowKroFor(object)) {
-        var kroData = dbkjs.modules.kro.getObjectInfoForAddress(
-            object.straatnaam,
-            object.huisnummer,
-            object.huisletter || '',
-            object.toevoeging || '',
-            object.plaats
-        );
-        $.when(kroData)
-            .fail(function(msg) { 
-                console.log("Error fetching KRO data: " + msg);
-            })
-            .done(function(kro) {
-                if(kro.length > 0) {
-                    result.concat([
-                        { l: "BAG pand id", t: kro[0].bagpandid, source: "kro" },
-                    ]);
-                }
-                result = dbkjs.modules.kro.removeDuplicateObjectInfoRows(result);
-                result = dbkjs.modules.kro.orderObjectInfoRows(result);
-                return result;
-            })
-    } else {
-        return result;
-    }
+    return result;
 };
 
 safetymaps.creator.renderContacts = function(object) {
