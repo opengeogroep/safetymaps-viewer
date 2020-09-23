@@ -62,10 +62,15 @@ dbkjs.modules.kro = {
 
     shouldShowKroFor: function(object) {
         var me = dbkjs.modules.kro;
+
+        if (!me.activated){
+            return false;
+        }
+
         var objectTypeIsEnabled = object.symbool &&
             me.options.enableForObjectTypes.filter(function(type) { return type === object.symbool; }).length > 0;
 
-        return me.activated && objectTypeIsEnabled;
+        return objectTypeIsEnabled;
     },
 
     callApi: function(params) {
