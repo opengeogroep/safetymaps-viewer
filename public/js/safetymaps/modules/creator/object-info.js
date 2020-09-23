@@ -77,7 +77,6 @@ safetymaps.creator.renderInfoTabs = function(object, windowId) {
 };
 
 safetymaps.creator.renderGeneral = function(object) {
-
     var lowestFloor = null, highestFloor = null;
     if(object.bouwlaag_min && object.bouwlaag_min !== "") {
         var n = Number(object.bouwlaag_min);
@@ -110,7 +109,32 @@ safetymaps.creator.renderGeneral = function(object) {
         {l: i18n.t("creator.lowestLevel") + " (" + i18n.t("creator.floor") + ")", t: lowestFloor},
         {l: i18n.t("creator.highestLevel") + " (" + i18n.t("creator.floor") + ")", t: highestFloor}
     ]);
-    return result;
+
+    if(dbkjs.modules.kro.shouldShowKroFor(object)) {
+        var kroData = dbkjs.modules.kro.getObjectInfoForAddress(
+            object.straatnaam,
+            object.huisnummer,
+            object.huisletter || '',
+            object.toevoeging || '',
+            object.plaats
+        );
+        $.when(kroData)
+            .fail(function(msg) { 
+                console.log("Error fetching KRO data: " + msg);
+            })
+            .done(function(kro) {
+                if(kro.length > 0) {
+                    result.concat([
+                        { l: "BAG pand id", t: kro[0].bagpandid, source: "kro" },
+                    ]);
+                }
+                result = dbkjs.modules.kro.removeDuplicateObjectInfoRows(result);
+                result = dbkjs.modules.kro.orderObjectInfoRows(result);
+                return result;
+            })
+    } else {
+        return result;
+    }
 };
 
 safetymaps.creator.renderContacts = function(object) {
