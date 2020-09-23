@@ -35,7 +35,7 @@ dbkjs.modules.kro = {
 
         me.options = $.extend({
             debug: false,
-            enableForObjectTypes: ["Object", "dbk"]
+            enableForObjectTypes: ["Object"]
         });
 
         me.activated = true;
@@ -44,33 +44,34 @@ dbkjs.modules.kro = {
         // * Api call to get roworder
         // * In api add vrh labels
         me.rowConfig = [
-            { label: i18n.t("creator.formal_name"), order: 0, source: "" },
-            { label: i18n.t("creator.informal_name"), order: 1, source: "" },
-            { label: i18n.t("creator.adress"), order: 2, source: "" },
-            { label: i18n.t("creator.check_date"), order: 3, source: "" },
-            { label: i18n.t("creator.emergencyResponderPresent"), order: 4, source: "" },
-            { label: i18n.t("creator.respondingProcedure"), order: 5, source: "" },
-            { label: i18n.t("creator.buildingConstruction"), order: 6, source: "" },
-            { label: i18n.t("creator.fireAlarmCode"), order: 7, source: "" },
-            { label: i18n.t("creator.usage"), order: 8, source: "" },
-            { label: i18n.t("creator.usage_specific"), order: 9, source: "" },
-            { label: i18n.t("creator.level"), order: 10, source: "" },
-            { label: i18n.t("creator.lowestLevel"), order: 11, source: "" },
-            { label: i18n.t("creator.highestLevel"), order: 12, source: "" },
+            { label: i18n.t("creator.formal_name"), order: 0, source: "dbk" },
+            { label: i18n.t("creator.informal_name"), order: 1, source: "dbk" },
+            { label: i18n.t("creator.adress"), order: 2, source: "dbk" },
+            { label: i18n.t("creator.check_date"), order: 3, source: "dbk" },
+            { label: i18n.t("creator.emergencyResponderPresent"), order: 4, source: "dbk" },
+            { label: i18n.t("creator.respondingProcedure"), order: 5, source: "dbk" },
+            { label: i18n.t("creator.buildingConstruction"), order: 6, source: "dbk" },
+            { label: i18n.t("creator.fireAlarmCode"), order: 7, source: "dbk" },
+            { label: i18n.t("creator.usage"), order: 8, source: "dbk" },
+            { label: i18n.t("creator.usage_specific"), order: 9, source: "dbk" },
+            { label: i18n.t("creator.level"), order: 10, source: "dbk" },
+            { label: i18n.t("creator.lowestLevel"), order: 11, source: "dbk" },
+            { label: i18n.t("creator.highestLevel"), order: 12, source: "dbk" },
         ];
     },
 
-    shouldShowKroFor: function(object) {
+    shouldShowKro: function() {
         var me = dbkjs.modules.kro;
 
-        if (!me.activated){
-            return false;
-        }
+        return me.activated;
+    },
 
+    shouldShowKroForObject: function(object) {
+        var me = dbkjs.modules.kro;
         var objectTypeIsEnabled = object.symbool &&
             me.options.enableForObjectTypes.filter(function(type) { return type === object.symbool; }).length > 0;
 
-        return objectTypeIsEnabled;
+        return me.shouldShowKro() && objectTypeIsEnabled;
     },
 
     callApi: function(params) {
@@ -125,7 +126,7 @@ dbkjs.modules.kro = {
             .filter(function(row) {
                 var configFound = me.rowConfig.filter(function(cr) { return cr.label === row.l; });
                 if(configFound.length > 0) {
-                    return (typeof(row.source) === "undefined" ? "" : row.source) === configFound[0].source;
+                    return (typeof(row.source) === "undefined" ? "dbk" : row.source) === configFound[0].source;
                 } else {
                     return true;
                 }

@@ -33,7 +33,7 @@ safetymaps.creator.renderInfoTabs = function(object, windowId, isIncident = fals
 
     var rows = safetymaps.creator.renderGeneral(object);
 
-    if(dbkjs.modules.kro.shouldShowKroFor(object)) {
+    if(dbkjs.modules.kro.shouldShowKroForObject(object)) {
         dbkjs.modules.kro.getObjectInfoForAddress(
             object.straatnaam,
             object.huisnummer,
@@ -42,17 +42,19 @@ safetymaps.creator.renderInfoTabs = function(object, windowId, isIncident = fals
             object.plaats
         )
         .fail(function(msg) { 
-            console.log("Error fetching KRO data: " + msg);
+            console.log("Error fetching KRO data in Creator Module: " + msg);
         })
         .done(function(kro) {
             if(kro.length > 0) {
                 rows.push({ l: "BAG pand id", t: kro[0].bagpandid, source: "kro" });
+                rows = dbkjs.modules.kro.removeDuplicateObjectInfoRows(rows);
+                rows = dbkjs.modules.kro.orderObjectInfoRows(rows);
             }
-            rows = dbkjs.modules.kro.removeDuplicateObjectInfoRows(rows);
-            rows = dbkjs.modules.kro.orderObjectInfoRows(rows);
+        })
+        .always(function() {
             safetymaps.infoWindow.addTab(windowId, "general", i18n.t("creator.general"), "info", safetymaps.creator.createInfoTabDiv(rows));
             safetymaps.creator.renderRemainingInfoTabs(object, windowId, isIncident);
-        })
+        });
     } else {
         safetymaps.infoWindow.addTab(windowId, "general", i18n.t("creator.general"), "info", safetymaps.creator.createInfoTabDiv(rows));
         safetymaps.creator.renderRemainingInfoTabs(object, windowId, isIncident);
