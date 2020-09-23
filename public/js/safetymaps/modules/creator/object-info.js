@@ -31,7 +31,7 @@ safetymaps.creator.renderInfoTabs = function(object, windowId) {
 
     safetymaps.infoWindow.removeTabs(windowId, "info");
 
-    var rows;
+    var rows = safetymaps.creator.renderGeneral(object);
 
     if(dbkjs.modules.kro.shouldShowKroFor(object)) {
         dbkjs.modules.kro.getObjectInfoForAddress(
@@ -45,20 +45,22 @@ safetymaps.creator.renderInfoTabs = function(object, windowId) {
             console.log("Error fetching KRO data: " + msg);
         })
         .done(function(kro) {
-            var result;
-            result = safetymaps.creator.renderGeneral(object);
             if(kro.length > 0) {
-                result.concat([
-                    { l: "BAG pand id", t: kro[0].bagpandid, source: "kro" },
-                ]);
+                rows.push({ l: "BAG pand id", t: kro[0].bagpandid, source: "kro" });
             }
-            result = dbkjs.modules.kro.removeDuplicateObjectInfoRows(result);
-            result = dbkjs.modules.kro.orderObjectInfoRows(result);
+            rows = dbkjs.modules.kro.removeDuplicateObjectInfoRows(rows);
+            rows = dbkjs.modules.kro.orderObjectInfoRows(rows);
+            safetymaps.infoWindow.addTab(windowId, "general", i18n.t("creator.general"), "info", safetymaps.creator.createInfoTabDiv(rows));
+            renderRemainingInfoTabs(object, windowId);
         })
     } else {
-        rows = safetymaps.creator.renderGeneral(object);
         safetymaps.infoWindow.addTab(windowId, "general", i18n.t("creator.general"), "info", safetymaps.creator.createInfoTabDiv(rows));
+        renderRemainingInfoTabs(object, windowId);
     }
+};
+
+safetymaps.creator.renderRemainingInfoTabs = function(object, windowId) {
+    var rows;
 
     detailTabs = safetymaps.creator.renderDetails(object);
     $.each(detailTabs, function(i, detailTab) {
@@ -98,7 +100,7 @@ safetymaps.creator.renderInfoTabs = function(object, windowId) {
         rows = safetymaps.creator.renderSymbols(object);
         safetymaps.infoWindow.addTab(windowId, "symbols", i18n.t("creator.symbols"), "info", safetymaps.creator.createInfoTabDiv(rows));
     }
-};
+}
 
 safetymaps.creator.renderGeneral = function(object) {
     var lowestFloor = null, highestFloor = null;

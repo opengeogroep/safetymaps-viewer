@@ -91,11 +91,7 @@ dbkjs.modules.kro = {
             d.reject(safetymaps.utils.getAjaxError(jqXHR, textStatus, errorThrown));
         })
         .done(function(data, textStatus, jqXHR) {
-            if(data.success) {
-                d.resolve(data);
-            } else {
-                d.reject(msg + data.error);
-            }
+            d.resolve(data);
         });
         return d.promise();
     },
