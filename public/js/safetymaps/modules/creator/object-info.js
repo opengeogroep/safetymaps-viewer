@@ -225,8 +225,8 @@ safetymaps.creator.renderOccupancy = function(object) {
             rows.push([
                 v.begintijd.substring(0,2) + ':' + v.begintijd.substring(2,4),
                 v.eindtijd.substring(0,2) + ':' + v.eindtijd.substring(2,4),
-                Number(v.aantal) || 0,
-                Number(v.aantal_nzr) || 0,
+                v.aantal,
+                v.aantal_nzr,
                 Mustache.escape(v.groep),
                 days
             ]);
