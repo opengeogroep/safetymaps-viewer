@@ -46,7 +46,7 @@ safetymaps.creator.renderInfoTabs = function(object, windowId, isIncident = fals
         })
         .done(function(kro) {
             if(kro.length > 0) {
-                rows = dbkjs.modules.kro.mergeKroRowsIntoDdbkRows(rows);
+                rows = dbkjs.modules.kro.mergeKroRowsIntoDdbkRows(rows, kro[0]);
             }
         })
         .always(function() {

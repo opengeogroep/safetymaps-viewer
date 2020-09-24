@@ -124,20 +124,20 @@ dbkjs.modules.kro = {
 
     },
 
-    mergeKroRowsIntoDdbkRows: function(dbkRows) {
+    mergeKroRowsIntoDdbkRows: function(dbkRows, kro) {
         var me = dbkjs.modules.kro;
-        var kroRows = me.createRows();
+        var kroRows = me.createRows(kro);
 
-        dbkRows.push(kroRows);
+        dbkRows = dbkRows.concat(kroRows);
         dbkRows = me.removeDuplicateObjectInfoRows(dbkRows);
         dbkRows = me.orderObjectInfoRows(dbkRows);
 
         return dbkRows;
     },
 
-    createRows: function() {
+    createRows: function(kro) {
         return [
-            { l: "BAG pand id", t: kro[0].bagpandid, source: "kro" },
+            { l: "BAG pand id", t: kro.bagpandid, source: "kro" },
         ];
     },
 
