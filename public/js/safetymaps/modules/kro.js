@@ -56,8 +56,8 @@ dbkjs.modules.kro = {
             { label: i18n.t("creator.usage"), order: 8, source: "dbk" },
             { label: i18n.t("creator.usage_specific"), order: 9, source: "dbk" },
             { label: i18n.t("creator.level"), order: 10, source: "dbk" },
-            { label: i18n.t("creator.lowestLevel"), order: 11, source: "dbk" },
-            { label: i18n.t("creator.highestLevel"), order: 12, source: "dbk" },
+            { label: i18n.t("creator.lowestLevel") + " (" + i18n.t("creator.floor") + ")", order: 11, source: "dbk" },
+            { label: i18n.t("creator.highestLevel") + " (" + i18n.t("creator.floor") + ")", order: 12, source: "dbk" },
         ];
     },
 
@@ -143,8 +143,15 @@ dbkjs.modules.kro = {
     },
 
     createGeneralRows: function(kro) {
+        var typeList = "<table>";
+        kro.adres_objecttypering_ordered.map(function(type) {
+            typeList += "<tr><td>" + type + "</td></tr>";
+        });
+        typeList += "</table>";
+
         return [
             { l: "BAG pand id", t: kro.bagpandid, source: "kro" },
+            { l: "Adressen", html: typeList, source: "kro" },
         ];
     },
 
