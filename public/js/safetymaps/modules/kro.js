@@ -36,7 +36,7 @@ dbkjs.modules.kro = {
 
         me.options = $.extend({
             debug: false,
-            enableForObjectTypes: ["Object"]
+            enableForObjectTypes: ["object"]
         });
 
         me.activated = true;
@@ -75,7 +75,7 @@ dbkjs.modules.kro = {
         }
 
         var objectTypeIsEnabled = object.symbool &&
-            me.options.enableForObjectTypes.filter(function(type) { return type === object.symbool; }).length > 0;
+            me.options.enableForObjectTypes.filter(function(type) { return type.toLowerCase() === object.symbool.toLowerCase(); }).length > 0;
 
         return objectTypeIsEnabled;
     },
@@ -127,7 +127,7 @@ dbkjs.modules.kro = {
 
     mergeKroRowsIntoDbkRows: function(dbkRows, kro) {
         var me = dbkjs.modules.kro;
-        var kroRows = me.createRows(kro);
+        var kroRows = me.createGeneralRows(kro);
 
         dbkRows = dbkRows.concat(kroRows);
         dbkRows = me.removeDuplicateObjectInfoRows(dbkRows);
@@ -138,11 +138,11 @@ dbkjs.modules.kro = {
 
     showKroForIncidentWithoutDbk: function(kro) {
         var me = dbkjs.modules.kro;
-        var rows = me.createRows(kro);
+        var rows = me.createGeneralRows(kro);
         safetymaps.infoWindow.addTab('incident', "general", i18n.t("creator.general"), "kro", safetymaps.creator.createInfoTabDiv(rows));
     },
 
-    createRows: function(kro) {
+    createGeneralRows: function(kro) {
         return [
             { l: "BAG pand id", t: kro.bagpandid, source: "kro" },
         ];
