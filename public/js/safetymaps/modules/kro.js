@@ -145,7 +145,7 @@ dbkjs.modules.kro = {
     createGeneralRows: function(kro) {
         var typeList = "<table>";
         kro.adres_objecttypering_ordered.map(function(type) {
-            typeList += "<tr><td>" + type + "</td></tr>";
+            typeList += "<tr style='cursor: pointer;' onClick='dbkjs.modules.kro.clickTypeRow(\"" + type + "\")'><td>" + type + "</td></tr>";
         });
         typeList += "</table>";
 
@@ -153,6 +153,10 @@ dbkjs.modules.kro = {
             { l: "BAG pand id", t: kro.bagpandid, source: "kro" },
             { l: "Adressen", html: typeList, source: "kro" },
         ];
+    },
+
+    clickTypeRow: function(type) {
+        console.log(type);
     },
 
     removeDuplicateObjectInfoRows: function(rows) {
