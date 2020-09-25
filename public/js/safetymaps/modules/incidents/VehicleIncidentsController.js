@@ -55,8 +55,8 @@ function VehicleIncidentsController(options, featureSelector) {
     me.checkLinkifyWords();
     me.checkCrsLinks();
 
-    $(me.incidentDetailsWindow).on("addKladblokChat", function(e, chat, incidentnr) {
-        me.saveKladblokChat(chat, incidentnr);
+    $(me.incidentDetailsWindow).on("saveKladblokChatRow", function(e, row, incidentnr) {
+        me.saveKladblokChatRow(row, incidentnr);
     });
 
     me.markerLayer = new IncidentMarkerLayer();
@@ -1011,23 +1011,23 @@ VehicleIncidentsController.prototype.geenInzet = function() {
     this.incidentDetailsWindow.hideMultipleFeatureMatches();
 };
 
-VehicleIncidentsController.prototype.saveKladblokChat = function (chat, incidentnr) {
+VehicleIncidentsController.prototype.saveKladblokChatRow = function (row, incidentnr) {
     var me = this;
-    if (me.options.editKladblokChatAuthorized && chat.length > 0) {
+    if (me.options.editKladblokChatAuthorized && row.length > 0) {
         $.ajax("api/kladblok/" + incidentnr + ".json", {
             method: 'POST',
             data: {
                 vehicle: dbkjs.options.organisation.username,
-                rule: chat
+                row: row
             },
             xhrFields: { withCredentials: true }, 
             crossDomain: true
         })
         .fail(function (jqXHR, textStatus, errorThrown) {
-            console.log("Error saving kladblok chat rule.", jqXHR, textStatus, errorThrown);
+            console.log("Error saving kladblok chat row.", jqXHR, textStatus, errorThrown);
         })
         .done(function () {
-            console.log("Kladblok chat rule saved.")
+            console.log("Kladblok chat row saved.")
             me.inzetIncident({ incident: me.incident, source: "SafetyConnect" }, me.incidentFromIncidentList);
         })
     }
@@ -1042,18 +1042,18 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
             crossDomain: true
         })
         .fail(function (jqXHR, textStatus, errorThrown) {
-            console.log("Error getting kladblok chat rules.", jqXHR, textStatus, errorThrown);
+            console.log("Error getting kladblok chat rows.", jqXHR, textStatus, errorThrown);
             me.onInzetIncident(incidentInfo, fromIncidentList);
         })
         .done(function (data) {
-            var chat = data.map(function (itm) {
+            var chatRow = data.map(function (itm) {
                 return { 
                     DTG: itm.dtg,
                     Inhoud: itm.inhoud,
                     IsChat: true
                 }
             })
-            incidentInfo.incident.Kladblokregels = incidentInfo.incident.Kladblokregels.filter(function (f) { return !f.IsChat; }).concat(chat);
+            incidentInfo.incident.Kladblokregels = incidentInfo.incident.Kladblokregels.filter(function (f) { return !f.IsChat; }).concat(chatRow);
             me.onInzetIncident(incidentInfo, fromIncidentList);
         });
     } else {

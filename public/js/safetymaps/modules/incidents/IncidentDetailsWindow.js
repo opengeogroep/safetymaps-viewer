@@ -28,7 +28,7 @@
 function IncidentDetailsWindow(editKladblokChat = false, showKladblokChat = false) {
     this.window = safetymaps.infoWindow.addWindow("incident", "Incident", false);
     this.div = $("<div></div>");
-    this.kcDiv = "<div style='display:block; margin-bottom:15px; height:27px; border:1px solid #ff0000; color:#ff0000;'><input id='kladblokChat' style='border: 0; width:calc(100% - 30px); margin-right:15px; color: #ff0000;' /><i id='addKladblokChat' class='fa fa-plus' style='cursor:pointer' /></div>";
+    this.kcDiv = "<div style='display:block; margin-bottom:15px; height:27px; border:1px solid #ff0000; color:#ff0000;'><input id='kladblokChatRow' style='border: 0; width:calc(100% - 30px); margin-right:15px; color: #ff0000;' /><i id='addKladblokChatRow' class='fa fa-plus' style='cursor:pointer' /></div>";
     this.linkifyWords = null;
     this.crsLinkEnabled = false;
     this.addGoogleMapsNavigationLink = false;
@@ -245,24 +245,24 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
 
     var me = this;
     if (me.editKladblokChat) {
-        $("#addKladblokChat").on("click", function(e) {
-            $(me).triggerHandler("addKladblokChat", [$("#kladblokChat").val(), incident.IncidentNummer]);
-            $("#kladblokChat").val("");
-            me.kladblokchat = "";
+        $("#addKladblokChatRow").on("click", function(e) {
+            $(me).triggerHandler("saveKladblokChatRow", [$("#kladblokChatRow").val(), incident.IncidentNummer]);
+            $("#kladblokChatRow").val("");
+            me.kladblokChatRow = "";
         });
 
-        $("#kladblokChat").keyup(function(e) {
+        $("#kladblokChatRow").keyup(function(e) {
             if(e.keyCode == 13) {
-                $(me).triggerHandler("addKladblokChat", [$("#kladblokChat").val(), incident.IncidentNummer]);
-                $("#kladblokChat").val("");
-                me.kladblokchat = "";
+                $(me).triggerHandler("saveKladblokChatRow", [$("#kladblokChatRow").val(), incident.IncidentNummer]);
+                $("#kladblokChatRow").val("");
+                me.kladblokChatRow = "";
             }
-            me.kladblokchat = $("#kladblokChat").val();
+            me.kladblokChatRow = $("#kladblokChatRow").val();
         })
 
-        $("#kladblokChat").val(me.kladblokchat);
-        if (me.kladblokchat && me.kladblokchat !== "" ) {
-            $("#kladblokChat").focus();
+        $("#kladblokChatRow").val(me.kladblokChatRow);
+        if (me.kladblokChatRow && me.kladblokChatRow !== "" ) {
+            $("#kladblokChatRow").focus();
         }
     }
 };
