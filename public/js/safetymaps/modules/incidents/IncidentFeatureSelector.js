@@ -84,7 +84,7 @@ IncidentFeatureSelector.prototype.findAndSelectMatches = function(matchInfo, inc
         .done(function(kro) {
             console.log(kro)
             if(kro.length > 0) {
-                dbkjs.modules.kro.showKroForIncidentWithoutDbk(kro);
+                dbkjs.modules.kro.showKroForIncidentWithoutDbk(kro[0]);
             }
         });
     }
