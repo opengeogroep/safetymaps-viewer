@@ -1046,14 +1046,33 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
             me.onInzetIncident(incidentInfo, fromIncidentList);
         })
         .done(function (data) {
-            var chatRow = data.map(function (itm) {
-                return { 
-                    DTG: itm.dtg,
-                    Inhoud: itm.inhoud,
-                    IsChat: true
-                }
-            })
-            incidentInfo.incident.Kladblokregels = incidentInfo.incident.Kladblokregels.filter(function (f) { return !f.IsChat; }).concat(chatRow);
+            var chatRow;
+            if(incidentInfo.source === "SafetyConnect"){
+                chatRow = data.map(function (itm) {
+                    return { DTG: itm.dtg, Inhoud: itm.inhoud, IsChat: true };
+                });
+                incidentInfo.incident.Kladblokregels = incidentInfo.incident.Kladblokregels.filter(function (f) { return !f.IsChat; }).concat(chatRow);
+            } else {
+                chatRow = data.map(function (itm) {
+                    return { 
+                        INCIDENT_ID: null,
+                        KLADBLOK_REGEL_ID: null,
+                        VOLG_NR_KLADBLOK_REGEL: null,
+                        DTG_KLADBLOK_REGEL: AGSIncidentService.prototype.getAGSEpochFromMoment(itm.dtg, "yyyy-MM-dd HH:mm:ss"),
+                        T_IND_DISC_KLADBLOK_REGEL: "-B-",
+                        TYPE_KLADBLOK_REGEL: null,
+                        CODE_KLADBLOK_REGEL: null,
+                        INHOUD_KLADBLOK_REGEL: itm.inhoud,
+                        LOGIN_NAAM: null,
+                        USER_NAAM: null,
+                        EXTERNE_SYSTEEM_TYPE: null,
+                        EXTERNE_SYSTEEM_CODE: null,
+                        ESRI_OID: null,
+                        MELDING_ID: null,
+                        IsChat: true };
+                });
+                incidentInfo.incident.kladblok = incidentInfo.incident.kladblok.filter(function (f) { return !f.IsChat; }).concat(chatRow);
+            }
             me.onInzetIncident(incidentInfo, fromIncidentList);
         });
     } else {

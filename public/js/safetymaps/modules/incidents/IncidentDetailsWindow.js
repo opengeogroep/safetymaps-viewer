@@ -549,16 +549,10 @@ IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incid
             }
             if (this.showKladblokChat) {
                 $.each(incident.Kladblokregels.sort(function (a, b) {
-                    if (new moment(a.DTG).format("HH:mm:ss") > new moment(b.DTG).format("HH:mm:ss")) {
-                        return 1;
-                    }
-                    if (new moment(a.DTG).format("HH:mm:ss") < new moment(b.DTG).format("HH:mm:ss")) {
-                        return -1;
-                    }
-                    return 0;
+                    return (new moment(a.DTG).format("HH:mm:ss") > new moment(b.DTG).format("HH:mm:ss"));
                 }), function(i, k) {
-                    var className = k.IsChat ? "font-weight:normal !important; font-style:italic; !important" : "";
-                    kladblokHTML += "<tr style='" + className + "'><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Inhoud)) + "</td></tr>";
+                    var style = k.IsChat ? "font-weight:normal !important; font-style:italic; !important" : "";
+                    kladblokHTML += "<tr style='" + style + "'><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Inhoud)) + "</td></tr>";
                 });
             } else {
                 $.each(incident.Kladblokregels, function(i, k) {
@@ -572,7 +566,10 @@ IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incid
             });
             break;
         default:
-            kladblokHTML = this.getIncidentKladblokDefaultHtml(incident.kladblok);
+            if (this.editKladblokChat) {
+                kladblokHTML += this.kcDiv;
+            }
+            kladblokHTML += this.getIncidentKladblokDefaultHtml(incident.kladblok);
     }
     return kladblokHTML;
 };
@@ -583,9 +580,12 @@ IncidentDetailsWindow.prototype.getIncidentKladblokDefaultHtml = function(kladbl
         return "";
     }
     var kladblokHTML = "<table>";
-    $.each(kladblok, function(i, k) {
+    $.each(kladblok.sort(function (a, b) {
+        return a.DTG_KLADBLOK_REGEL > b.DTG_KLADBLOK_REGEL;
+    }), function(i, k) {
         var ind = k.T_IND_DISC_KLADBLOK_REGEL;
         var disclass = "brw";
+        var style = "";
         if(ind.indexOf("B") === -1) {
             if(ind.indexOf("P") !== -1) {
                 disclass = "pol";
@@ -594,7 +594,10 @@ IncidentDetailsWindow.prototype.getIncidentKladblokDefaultHtml = function(kladbl
             }
             //console.log("Kladblok andere discipline: " + k.T_IND_DISC_KLADBLOK_REGEL +": " + k.INHOUD_KLADBLOK_REGEL);
         }
-        kladblokHTML += "<tr class='" + disclass + "'><td>" + AGSIncidentService.prototype.getAGSMoment(k.DTG_KLADBLOK_REGEL).format("HH:mm") + "</td><td>" +
+        if (this.showKladblokChat) {
+            style = k.IsChat ? "font-weight:normal !important; font-style:italic; !important" : "";
+        }
+        kladblokHTML += "<tr class='" + disclass + "' style='" + style + "'><td>" + AGSIncidentService.prototype.getAGSMoment(k.DTG_KLADBLOK_REGEL).format("HH:mm") + "</td><td>" +
             me.linkify(dbkjs.util.htmlEncode(k.INHOUD_KLADBLOK_REGEL)) + "</td></tr>";
     });
     return kladblokHTML + "</table>";

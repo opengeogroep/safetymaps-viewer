@@ -158,6 +158,16 @@ AGSIncidentService.prototype.getAGSMoment = function(epoch) {
 };
 
 /**
+ * Static utility function: return AGS milliseconds since epoch in local time
+ * @param {string} moment 
+ * @param {string} format 
+ * @returns {number} AGS milliseconds since epoch in local time
+ */
+AGSIncidentService.prototype.getAGSEpochFromMoment = function(moment, format) {
+    return moment(moment, format).valueOf();
+}
+
+/**
  * Static utility function: resolve a deffered with the results from a AGS table
  * query returning the feature attributes as objects in an array or reject the
  * deferred on error.
