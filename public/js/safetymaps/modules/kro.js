@@ -37,7 +37,7 @@ dbkjs.modules.kro = {
         me.options = $.extend({
             debug: false,
             enableForObjectTypes: ["object"]
-        });
+        }, me.options);
 
         me.activated = true;
 
