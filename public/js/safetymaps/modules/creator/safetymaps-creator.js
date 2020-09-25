@@ -149,31 +149,20 @@ dbkjs.modules.safetymaps_creator = {
     },
 
     togglerButtonChanged: function(button, active, config) {
+        var me = this;
         if(typeof config.creatorType === "undefined") {
             return;
         }
-        var me = this;
-        var creatorTypeIsArray = Array.isArray(config.creatorType);
-        if(creatorTypeIsArray) {
-            config.creatorType.map(function(creatorType) {
-                me.toggleHiddenTypes(active, creatorType);
-            });
-        } else {
-            me.toggleHiddenTypes(active, config.creatorType);
+        var i = me.hiddenTypes.indexOf(config.creatorType);
+        if(active && i !== -1) {
+            me.hiddenTypes.splice(i, 1);
+        } else if(!active && i === -1) {
+            me.hiddenTypes.push(config.creatorType);
         }
         console.log("Hidden object types: " + me.hiddenTypes);
         me.clusteringLayer.redraw();
     },
 
-    toggleHiddenTypes: function(active, type) {
-        var me = this;
-        var i = me.hiddenTypes.indexOf(type);
-        if(active && i !== -1) {
-            me.hiddenTypes.splice(i, 1);
-        } else if(!active && i === -1) {
-            me.hiddenTypes.push(type);
-        }
-    },
 
     setupInterface: function() {
         var me = this;
@@ -512,7 +501,9 @@ dbkjs.modules.safetymaps_creator = {
         isIncident = (typeof isIncident !== "undefined") ? isIncident : false;
         var me = this;
 
-        safetymaps.creator.renderInfoTabs(object, this.infoWindow.getName(), isIncident);
+        object.type = this.selectedClusterFeature.type;
+
+        safetymaps.creator.renderInfoTabs(object, this.infoWindow.getName());
         dbkjs.modules.vrh_objects.addLegendTrEventHandler("tab_danger_symbols", {
             "safetymaps_creatorDangerSymbolsId:" : me.objectLayers.layerDangerSymbols
         });
@@ -537,7 +528,11 @@ dbkjs.modules.safetymaps_creator = {
             }           
         });
 
+        if(!isIncident) {
+            safetymaps.infoWindow.showTab(me.infoWindow.getName(), "general", true);
+        }
         this.infoWindowTabsResize();
+
     },
 
     objectLayerFeatureSelected: function(e) {

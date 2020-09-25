@@ -74,8 +74,8 @@ dbkjs.modules.kro = {
             return false;
         }
 
-        var objectTypeIsEnabled = object.symbool &&
-            me.options.enableForObjectTypes.filter(function(type) { return type.toLowerCase() === object.symbool.toLowerCase(); }).length > 0;
+        var objectTypeIsEnabled = object.type &&
+            me.options.enableForObjectTypes.filter(function(type) { return type.toLowerCase() === object.type.toLowerCase(); }).length > 0;
 
         return objectTypeIsEnabled;
     },
