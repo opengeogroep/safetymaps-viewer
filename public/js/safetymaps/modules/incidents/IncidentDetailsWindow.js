@@ -549,7 +549,9 @@ IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incid
             }
             if (this.showKladblokChat) {
                 $.each(incident.Kladblokregels.sort(function (a, b) {
-                    return (new moment(a.DTG).format("HH:mm:ss") > new moment(b.DTG).format("HH:mm:ss"));
+                    var dateA = new Date(a.dtg);
+                    var dateB = new Date(b.dtg);
+                    return dateA - dateB;
                 }), function(i, k) {
                     var style = k.IsChat ? "font-weight:normal !important; font-style:italic; !important" : "";
                     kladblokHTML += "<tr style='" + style + "'><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Inhoud)) + "</td></tr>";
@@ -581,7 +583,7 @@ IncidentDetailsWindow.prototype.getIncidentKladblokDefaultHtml = function(kladbl
     }
     var kladblokHTML = "<table>";
     $.each(kladblok.sort(function (a, b) {
-        return a.DTG_KLADBLOK_REGEL > b.DTG_KLADBLOK_REGEL;
+        return a.DTG_KLADBLOK_REGEL - b.DTG_KLADBLOK_REGEL;
     }), function(i, k) {
         var ind = k.T_IND_DISC_KLADBLOK_REGEL;
         var disclass = "brw";
