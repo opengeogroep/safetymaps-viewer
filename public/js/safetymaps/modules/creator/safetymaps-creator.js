@@ -406,7 +406,9 @@ dbkjs.modules.safetymaps_creator = {
 
     selectObjectById: function(id, extent, isIncident /*ES2015 = false */) {
         isIncident = (typeof isIncident !== "undefined") ? isIncident : false;
+        
         var me = this;
+        var type = me.selectedClusterFeature.attributes.type;
 
         // Unselect current, if any
         me.unselectObject();
@@ -439,6 +441,9 @@ dbkjs.modules.safetymaps_creator = {
             $("#creator_object_info").text("Error: " + msg);
         })
         .done(function(object) {
+            object = $.extend({
+                type: type
+            }, object);
             me.selectedObjectDetailsReceived(object, isIncident);
         });
     },
@@ -500,9 +505,7 @@ dbkjs.modules.safetymaps_creator = {
     updateInfoWindow: function(object,isIncident /*ES2015 = false*/) {
         isIncident = (typeof isIncident !== "undefined") ? isIncident : false;
         var me = this;
-
-        object.type = this.selectedClusterFeature.type;
-
+        
         safetymaps.creator.renderInfoTabs(object, this.infoWindow.getName());
         dbkjs.modules.vrh_objects.addLegendTrEventHandler("tab_danger_symbols", {
             "safetymaps_creatorDangerSymbolsId:" : me.objectLayers.layerDangerSymbols
