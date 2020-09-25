@@ -136,9 +136,8 @@ dbkjs.modules.kro = {
         return dbkRows;
     },
 
-    showKroWithoutDbk: function(kro) {
-        me.infoWindow = safetymaps.infoWindow.addWindow("kro", "KRO", false);
-        safetymaps.infoWindow.addTab(me.infoWindow.getName(), "general", i18n.t("creator.general"), "kro", safetymaps.creator.createInfoTabDiv(me.createRows(kro)));
+    showKroForIncidentWithoutDbk: function(kro) {
+        safetymaps.infoWindow.addTab('incident', "general", i18n.t("creator.general"), "kro", safetymaps.creator.createInfoTabDiv(me.createRows(kro)));
         console.log(me.infoWindow);
     },
 
