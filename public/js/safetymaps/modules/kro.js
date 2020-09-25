@@ -29,6 +29,7 @@ dbkjs.modules.kro = {
     options: null,
     activated: false,
     rowConfig: null,
+    infoWindow: null,
     
     register: function() {
         var me = dbkjs.modules.kro;
@@ -124,7 +125,7 @@ dbkjs.modules.kro = {
 
     },
 
-    mergeKroRowsIntoDdbkRows: function(dbkRows, kro) {
+    mergeKroRowsIntoDbkRows: function(dbkRows, kro) {
         var me = dbkjs.modules.kro;
         var kroRows = me.createRows(kro);
 
@@ -133,6 +134,12 @@ dbkjs.modules.kro = {
         dbkRows = me.orderObjectInfoRows(dbkRows);
 
         return dbkRows;
+    },
+
+    showKroWithoutDbk: function(kro) {
+        me.infoWindow = safetymaps.infoWindow.addWindow("kro", "KRO", false);
+        safetymaps.infoWindow.addTab(me.infoWindow.getName(), "general", i18n.t("creator.general"), "kro", safetymaps.creator.createInfoTabDiv(me.createRows(kro)));
+        console.log(me.infoWindow);
     },
 
     createRows: function(kro) {
