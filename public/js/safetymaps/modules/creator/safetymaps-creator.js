@@ -506,36 +506,36 @@ dbkjs.modules.safetymaps_creator = {
         isIncident = (typeof isIncident !== "undefined") ? isIncident : false;
         var me = this;
         
-        safetymaps.creator.renderInfoTabs(object, this.infoWindow.getName());
-        dbkjs.modules.vrh_objects.addLegendTrEventHandler("tab_danger_symbols", {
-            "safetymaps_creatorDangerSymbolsId:" : me.objectLayers.layerDangerSymbols
-        });
-        dbkjs.modules.vrh_objects.addLegendTrEventHandler("tab_symbols", {
-            "symbol" : me.objectLayers.layerSymbols
-        }, "code");
-
-        $("#tab_floors tr").click(function(e) {
-            var v = object.verdiepingen[$(e.currentTarget).index()-1];
-            console.log("Click floor index " + $(e.currentTarget).index(), v);
-            if(v.id !== object.id) {
-                me.selectObjectById(v.id);
+        safetymaps.creator.renderInfoTabs(object, this.infoWindow.getName()).then(function() {
+            dbkjs.modules.vrh_objects.addLegendTrEventHandler("tab_danger_symbols", {
+                "safetymaps_creatorDangerSymbolsId:" : me.objectLayers.layerDangerSymbols
+            });
+            dbkjs.modules.vrh_objects.addLegendTrEventHandler("tab_symbols", {
+                "symbol" : me.objectLayers.layerSymbols
+            }, "code");
+    
+            $("#tab_floors tr").click(function(e) {
+                var v = object.verdiepingen[$(e.currentTarget).index()-1];
+                console.log("Click floor index " + $(e.currentTarget).index(), v);
+                if(v.id !== object.id) {
+                    me.selectObjectById(v.id);
+                }
+            });
+            
+            $("#floor-box tr").click(function(e) {
+                me.floorVisible = me.infoWindow.visible;
+                var v = object.verdiepingen[$(e.currentTarget).index()];
+                console.log("Click floor index " + $(e.currentTarget).index(), v);
+                if(v.id !== object.id) {
+                    me.selectObjectById(v.id,null,!me.floorVisible);
+                }           
+            });
+    
+            if(!isIncident) {
+                safetymaps.infoWindow.showTab(me.infoWindow.getName(), "general", true);
             }
+            this.infoWindowTabsResize();
         });
-        
-        $("#floor-box tr").click(function(e) {
-            me.floorVisible = me.infoWindow.visible;
-            var v = object.verdiepingen[$(e.currentTarget).index()];
-            console.log("Click floor index " + $(e.currentTarget).index(), v);
-            if(v.id !== object.id) {
-                me.selectObjectById(v.id,null,!me.floorVisible);
-            }           
-        });
-
-        if(!isIncident) {
-            safetymaps.infoWindow.showTab(me.infoWindow.getName(), "general", true);
-        }
-        this.infoWindowTabsResize();
-
     },
 
     objectLayerFeatureSelected: function(e) {
