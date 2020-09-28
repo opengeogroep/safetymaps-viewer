@@ -597,7 +597,7 @@ IncidentDetailsWindow.prototype.getIncidentKladblokDefaultHtml = function(kladbl
             }
             //console.log("Kladblok andere discipline: " + k.T_IND_DISC_KLADBLOK_REGEL +": " + k.INHOUD_KLADBLOK_REGEL);
         }
-        if (this.showKladblokChat) {
+        if (me.showKladblokChat) {
             style = k.IsChat ? "font-weight:normal !important; font-style:italic; !important" : "";
         }
         kladblokHTML += "<tr class='" + disclass + "' style='" + style + "'><td>" + AGSIncidentService.prototype.getAGSMoment(k.DTG_KLADBLOK_REGEL).format("HH:mm") + "</td><td>" +
