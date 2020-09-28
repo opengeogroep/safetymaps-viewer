@@ -124,6 +124,7 @@ dbkjs.modules.drawing = {
         me.incidentNr = null;
         window.clearInterval(me.updateInterval);
         me.button.hide();
+        me.layer.removeAllFeatures();
     },
 
     update: function() {
