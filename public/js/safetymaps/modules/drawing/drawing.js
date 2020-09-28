@@ -121,6 +121,7 @@ dbkjs.modules.drawing = {
     endIncident: function() {
         var me = this;
         me.options.log && console.log("drawing: end incident ");
+        me.modifiedSince[me.incidentNr] = null;
         me.incidentNr = null;
         window.clearInterval(me.updateInterval);
         me.button.hide();
@@ -159,7 +160,7 @@ dbkjs.modules.drawing = {
             console.log("drawing: ajax failure: " + jqXHR.status + " " + textStatus, jqXHR.responseText);
         })
         .done(function(drawing, textStatus, jqXHR) {
-            if(textStatus === "notmodified") {
+            if(textStatus === "notmodified" && !firstLoad) {
                 return;
             }
 
