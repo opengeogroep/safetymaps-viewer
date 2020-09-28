@@ -1028,7 +1028,7 @@ VehicleIncidentsController.prototype.saveKladblokChatRow = function (row, incide
         })
         .done(function () {
             console.log("Kladblok chat row saved.")
-            me.inzetIncident({ incident: me.incident, source: "SafetyConnect" }, me.incidentFromIncidentList);
+            me.inzetIncident({ incident: me.incident, source: me.options.incidentSource }, me.incidentFromIncidentList);
         })
     }
 }

@@ -245,15 +245,16 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
 
     var me = this;
     if (me.editKladblokChat) {
+        var incidentNr = (format === "vrh" ? incident.NR_INCIDENT : incident.IncidentNummer)
         $("#addKladblokChatRow").on("click", function(e) {
-            $(me).triggerHandler("saveKladblokChatRow", [$("#kladblokChatRow").val(), incident.IncidentNummer]);
+            $(me).triggerHandler("saveKladblokChatRow", [$("#kladblokChatRow").val(), incidentNr]);
             $("#kladblokChatRow").val("");
             me.kladblokChatRow = "";
         });
 
         $("#kladblokChatRow").keyup(function(e) {
             if(e.keyCode == 13) {
-                $(me).triggerHandler("saveKladblokChatRow", [$("#kladblokChatRow").val(), incident.IncidentNummer]);
+                $(me).triggerHandler("saveKladblokChatRow", [$("#kladblokChatRow").val(), incidentNr]);
                 $("#kladblokChatRow").val("");
                 me.kladblokChatRow = "";
             }
