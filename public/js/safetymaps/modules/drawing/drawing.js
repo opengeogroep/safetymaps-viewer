@@ -496,7 +496,7 @@ dbkjs.modules.drawing = {
 
         if(this.visible) {
             this.activate(true);
-            if(typeof optionalVisible === 'undefined') {
+            if(typeof optionalVisible === 'undefined' && me.options.editAuthorized) {
                 this.panel.selectColor(me.color);
             }
         } else {
