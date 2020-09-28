@@ -1058,7 +1058,7 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
                         INCIDENT_ID: null,
                         KLADBLOK_REGEL_ID: null,
                         VOLG_NR_KLADBLOK_REGEL: null,
-                        DTG_KLADBLOK_REGEL: AGSIncidentService.prototype.getAGSEpochFromMoment(itm.dtg, "yyyy-MM-dd HH:mm:ss"),
+                        DTG_KLADBLOK_REGEL: moment(itm.dtg, "yyyy-MM-dd HH:mm:ss").valueOf(),
                         T_IND_DISC_KLADBLOK_REGEL: "-B-",
                         TYPE_KLADBLOK_REGEL: null,
                         CODE_KLADBLOK_REGEL: null,
