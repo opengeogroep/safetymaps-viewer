@@ -25,6 +25,8 @@ dbkjs.modules.safetymaps_creator = {
     clusteringLayer: null,
     selectedObject: null,
     selectedClusterFeature: null,
+    selectedClusterFeatureType: "",
+    selectedClusterFeatureObjectId: null,
     infoWindow: null,
     features:[],
     loading: null,
@@ -408,7 +410,11 @@ dbkjs.modules.safetymaps_creator = {
         isIncident = (typeof isIncident !== "undefined") ? isIncident : false;
         
         var me = this;
-        var type = me.selectedClusterFeature.attributes.type;
+        
+        if(me.selectedClusterFeature) {
+            me.selectedClusterFeatureType = me.selectedClusterFeature.attributes.type;
+            me.selectedClusterFeatureObjectId = me.selectedClusterFeature.attributes.id;
+        }
 
         // Unselect current, if any
         me.unselectObject();
@@ -442,7 +448,7 @@ dbkjs.modules.safetymaps_creator = {
         })
         .done(function(object) {
             object = $.extend({
-                type: type
+                type: me.selectedClusterFeatureObjectId === id ? me.selectedClusterFeatureType : ""
             }, object);
             me.selectedObjectDetailsReceived(object, isIncident);
         });
@@ -534,7 +540,7 @@ dbkjs.modules.safetymaps_creator = {
             if(!isIncident) {
                 safetymaps.infoWindow.showTab(me.infoWindow.getName(), "general", true);
             }
-            this.infoWindowTabsResize();
+            me.infoWindowTabsResize();
         });
     },
 
