@@ -157,6 +157,10 @@ AGSIncidentService.prototype.getAGSMoment = function(epoch) {
     return new moment(epoch).add(new Date().getTimezoneOffset(), 'minutes');
 };
 
+AGSIncidentService.prototype.createAGSDtgFromMoment = function(moment) {
+    return moment.add(-1 * (new Date().getTimezoneOffset()), 'minutes').valueOf();
+}
+
 /**
  * Static utility function: resolve a deffered with the results from a AGS table
  * query returning the feature attributes as objects in an array or reject the
