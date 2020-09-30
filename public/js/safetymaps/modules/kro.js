@@ -215,13 +215,8 @@ dbkjs.modules.kro = {
                     kroAddressesData
                         .sort(function(a, b) { return b.objecttypering_order - a.objecttypering_order})
                         .map(function(dataRow) {
-                            var address = (dataRow.straatnaam || "") + " " + 
-                                (dataRow.huisnr || "") + 
-                                (dataRow.huisletter || "") + " " + 
-                                (dataRow.huistoevg || "") + " " + 
-                                (dataRow.plaatsnaam || "")
-                            bodyHtml += "<tr><td>" + address + "</td><td>" + (dataRow.omschrijving || "") + 
-                                "</td><td>" + (dataRow.naam || "") + "</td><td>" + (dataRow.contacttel || "") + 
+                            bodyHtml += "<tr><td>" + (dataRow.adres) + "</td><td>" + (dataRow.omschrijving_typering || "") + 
+                                "</td><td>" + (dataRow.naam_vol || "") + "</td><td>" + (dataRow.contact || "") + 
                                 "</td><td>" + (dataRow.personen || "") + "</td></tr>";
                         })
                 }
