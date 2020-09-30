@@ -355,10 +355,11 @@ a.--without-effects:hover {
 
 .table-small-text {
     font-size: 12px;
+    width: 100%;
 }
 
 .table-small-text td {
-    padding: 0 5px 0 0;
+    padding: 0 5px 0 0 !important;
 }
 
 /* Info window table */

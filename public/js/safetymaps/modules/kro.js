@@ -209,7 +209,7 @@ dbkjs.modules.kro = {
             .done(function(kroAddressesData) {
                 var bodyHtml = "<table class='table-small-text'><thead>";
                 bodyHtml += "<tr><th>Adres</th><th>Typering</th><th>Bedrijfsnaam</th><th>Telefoon</th><th>Aantal pers.</th></tr>";
-                bodyHtml += "</thead><tbody style='max-height:400px; overflow:auto'>";
+                bodyHtml += "</thead><tbody>";
 
                 if(kroAddressesData.length > 0) {
                     kroAddressesData
