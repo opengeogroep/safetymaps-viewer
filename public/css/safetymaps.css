@@ -169,17 +169,6 @@ h4 {
 
 /* Modal popups */
 
-.tab-content--scroll-visible-on-ipad::-webkit-scrollbar {
-    -webkit-appearance: none;
-    width: 7px;
-}
-
-.tab-content--scroll-visible-on-ipad::-webkit-scrollbar-thumb {
-    border-radius: 4px;
-    background-color: rgba(0, 0, 0, .5);
-    box-shadow: 0 0 1px rgba(255, 255, 255, .5);
-  }
-
 .close {
     font-size: 2em !important;
 }
@@ -343,6 +332,17 @@ input.cross {
 .tabbable.tabs-bottom .tab-content {
     flex: 1;
     overflow: auto;
+}
+
+.tabbable.tabs-bottom .tab-content--scroll-visible-on-ipad::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 7px;
+}
+
+.tabbable.tabs-bottom .tab-content--scroll-visible-on-ipad::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, .5);
+    box-shadow: 0 0 1px rgba(255, 255, 255, .5);
 }
 
 /* Info window table */

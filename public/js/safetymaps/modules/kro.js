@@ -148,16 +148,21 @@ dbkjs.modules.kro = {
         dbkRows = me.removeDuplicateObjectInfoRows(dbkRows);
         dbkRows = me.orderObjectInfoRows(dbkRows);
 
+        me.setScrollBar();
+
         return dbkRows;
     },
 
     showKroForIncidentWithoutDbk: function(kro) {
         var me = dbkjs.modules.kro;
         var rows = me.createGeneralRows(kro);
+
+        me.setScrollBar();
+
         safetymaps.infoWindow.addTab('incident', "general", i18n.t("creator.general"), "kro", safetymaps.creator.createInfoTabDiv(rows));
     },
 
-    addScrollButtons: function() {
+    setScrollBar: function() {
         var me = this;
 
         setTimeout(function() {
@@ -167,11 +172,11 @@ dbkjs.modules.kro = {
     },
 
     createGeneralRows: function(kro) {
-        var typeList = "<table>";
+        var typeList = "<a href='#custompanel' data-toggle='modal'><table>";
         kro.adres_objecttypering_ordered.map(function(type) {
-            typeList += "<tr style='cursor: pointer;' onClick='dbkjs.modules.kro.clickTypeRow(\"" + type + "\")'><td>" + type + "</td></tr>";
+            typeList += "<tr style='cursor: pointer;' onClick='dbkjs.modules.kro.clickType()'><td>" + type + "</td></tr>";
         });
-        typeList += "</table>";
+        typeList += "</table></a>";
 
         return [
             { l: "Monument", t: kro.monument === "" ? "Nee" : "Ja", source: "kro" },
@@ -184,8 +189,8 @@ dbkjs.modules.kro = {
         ];
     },
 
-    clickTypeRow: function(type) {
-        console.log(type);
+    clickType: function() {
+        console.log("clickType()");
     },
 
     removeDuplicateObjectInfoRows: function(rows) {
