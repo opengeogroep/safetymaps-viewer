@@ -30,8 +30,6 @@ dbkjs.modules.kro = {
     activated: false,
     rowConfig: null,
     infoWindow: null,
-    scrollBottomButton: "",
-    scrollTopButton: "",
     
     register: function() {
         var me = dbkjs.modules.kro;
@@ -164,13 +162,7 @@ dbkjs.modules.kro = {
 
         setTimeout(function() {
             var content = $("#tab_general.active").parent();
-            var bottomPos = content.offset().top + content.outerHeight(true) - 50;
-
-            me.scrollBottomButton = "<button id='gotoBottom' style='display:block; position:absolute; z-index:999; bottom:" + bottomPos + "px; right:15px;'>Meer...</button>";
-            me.scrollTopButton = "<button id='gotoTop' style='display:block; position:absolute; z-index:999; top:15px; right:15px;'>Terug</button>";
-            
-            content.prepend($(me.scrollTopButton));
-            content.append($(me.scrollBotomButton));
+            content.addClass("tab-content--scroll-visible-on-ipad");
         }, 500);
     },
 
