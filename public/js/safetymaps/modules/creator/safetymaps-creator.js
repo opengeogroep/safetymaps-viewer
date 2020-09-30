@@ -269,6 +269,7 @@ dbkjs.modules.safetymaps_creator = {
         });
 
         $(safetymaps).on("object_select", function(event, clusterFeature) {
+            me.selectedClusterFeature = clusterFeature;
             me.selectObjectById(clusterFeature.attributes.id, null, true);
         });
 
