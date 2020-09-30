@@ -346,11 +346,11 @@ input.cross {
 }
 
 a.--without-effects {
-    color: #333;
-    text-decoration: none;
+    color: #333 !important;
+    text-decoration: none !important;
 }
 a.--without-effects:hover {
-    text-decoration: none;
+    text-decoration: none !important;
 }
 
 /* Info window table */
