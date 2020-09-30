@@ -358,12 +358,12 @@ a.--without-effects:hover {
     width: 100%;
 }
 
-.table-small-text td {
-    padding: 0 5px 0 0 !important;
+.table-small-text th {
+    padding: 3px !important;
 }
 
 .table-small-text tr.odd {
-    background-color: #fcfcfc;
+    background-color: #efefef;
 }
 
 /* Info window table */
