@@ -52,8 +52,6 @@ dbkjs.modules.kro = {
                 me.rowConfig = config;
             });
 
-        me.scrollBottomButton = "<button id='gotoBottom' style='display:block; position:absolute; z-index:999; bottom:15px; right:15px;'>Meer...</button>";
-        me.scrollTopButton = "<button id='gotoTop' style='display:block; position:absolute; z-index:999; top:15px; right:15px;'>Terug</button>";
        /* me.rowConfig = [
             { label: i18n.t("creator.formal_name"), order: 0, source: "dbk" },
             { label: i18n.t("creator.informal_name"), order: 1, source: "dbk" },
@@ -166,9 +164,13 @@ dbkjs.modules.kro = {
 
         setTimeout(function() {
             var content = $("#tab_general.active").parent();
+            var bottomPos = content.offset().top + content.outerHeight(true) - 50;
+
+            me.scrollBottomButton = "<button id='gotoBottom' style='display:block; position:absolute; z-index:999; bottom:" + bottomPos + "px; right:15px;'>Meer...</button>";
+            me.scrollTopButton = "<button id='gotoTop' style='display:block; position:absolute; z-index:999; top:15px; right:15px;'>Terug</button>";
             
-            content.append($(me.scrollTopButton));
-            content.append($(me.scrollBottomButton));
+            content.prepend($(me.scrollTopButton));
+            content.append($(me.scrollBotomButton));
         }, 500);
     },
 
