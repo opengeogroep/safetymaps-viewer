@@ -345,6 +345,14 @@ input.cross {
     box-shadow: 0 0 1px rgba(255, 255, 255, .5);
 }
 
+a.--without-effects {
+    color: #333;
+    text-decoration: none;
+}
+a.--without-effects:hover {
+    text-decoration: none;
+}
+
 /* Info window table */
 
 table th {

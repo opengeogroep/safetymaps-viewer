@@ -130,14 +130,20 @@ dbkjs.modules.kro = {
     getObjectInfoForBAGvboId: function(bagvboid) {
         var me = dbkjs.modules.kro;
         var params = {
-            bagId: bagvboid,
+            bagVboId: bagvboid,
         };
         
         return me.callApi(params);
     },
 
     getObjectInfoForBAGpandId: function(bagpandid) {
-
+        var me = dbkjs.modules.kro;
+        var params = {
+            addresses: true,
+            bagPandId: bagpandid,
+        };
+        
+        return me.callApi(params);
     },
 
     mergeKroRowsIntoDbkRows: function(dbkRows, kro) {
@@ -172,9 +178,9 @@ dbkjs.modules.kro = {
     },
 
     createGeneralRows: function(kro) {
-        var typeList = "<a href='#custompanel' data-toggle='modal'><table>";
+        var typeList = "<a class='.--without-effects' href='#custompanel' data-toggle='modal'><table onClick='dbkjs.modules.kro.clickType('" + kro.bagpandid + "')'>";
         kro.adres_objecttypering_ordered.map(function(type) {
-            typeList += "<tr style='cursor: pointer;' onClick='dbkjs.modules.kro.clickType()'><td>" + type + "</td></tr>";
+            typeList += "<tr><td>" + type + "</td></tr>";
         });
         typeList += "</table></a>";
 
@@ -189,8 +195,19 @@ dbkjs.modules.kro = {
         ];
     },
 
-    clickType: function() {
-        console.log("clickType()");
+    clickType: function(bagpandid) {
+        var me = this;
+        var $titleEl = $("#custom_title");
+
+        $titleEl.html("Adres en gebruik informatie");
+
+        me.getObjectInfoForBAGpandId(bagpandid)
+            .fail(function(msg) { 
+                console.log("Error fetching KRO addresses data in KRO Module: " + msg);
+            })
+            .done(function(kroAddresses) {
+                console.log(kroAddresses);
+            })
     },
 
     removeDuplicateObjectInfoRows: function(rows) {
