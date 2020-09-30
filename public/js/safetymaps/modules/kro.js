@@ -30,6 +30,8 @@ dbkjs.modules.kro = {
     activated: false,
     rowConfig: null,
     infoWindow: null,
+    scrollBottomButton: "",
+    scrollTopButton: "",
     
     register: function() {
         var me = dbkjs.modules.kro;
@@ -49,6 +51,9 @@ dbkjs.modules.kro = {
             .done(function(config) {
                 me.rowConfig = config;
             });
+
+        me.scrollBottomButton = "<button id='gotoBottom' style='display:block; position:absolute; z-index:999; bottom:15px; right:15px;'>Meer...</button>";
+        me.scrollTopButton = "<button id='gotoTop' style='display:block; position:absolute; z-index:999; top:15px; right:15px;'>Terug</button>";
        /* me.rowConfig = [
             { label: i18n.t("creator.formal_name"), order: 0, source: "dbk" },
             { label: i18n.t("creator.informal_name"), order: 1, source: "dbk" },
@@ -156,6 +161,17 @@ dbkjs.modules.kro = {
         safetymaps.infoWindow.addTab('incident', "general", i18n.t("creator.general"), "kro", safetymaps.creator.createInfoTabDiv(rows));
     },
 
+    addScrollButtons: function() {
+        var me = this;
+
+        setTimeout(function() {
+            var content = $("#tab_general.active").parent();
+            
+            content.append($(me.scrollTopButton));
+            content.append($(me.scrollBottomButton));
+        }, 500);
+    },
+
     createGeneralRows: function(kro) {
         var typeList = "<table>";
         kro.adres_objecttypering_ordered.map(function(type) {
@@ -168,7 +184,7 @@ dbkjs.modules.kro = {
             { l: "Oppervlakte gebouw", t: kro.adres_oppervlak + "m2", source: "kro" },
             { l: "Status", t: kro.pand_status, source: "kro" },
             { l: "Bouwjaar", t: kro.pand_bouwjaar, source: "kro" },
-            { l: "Maximale hoogte",t: kro.pand_maxhoogte.replace(".", ",") + "m", source: "kro" },
+            { l: "Maximale hoogte",t: ("" + kro.pand_maxhoogte + "").replace(".", ",") + "m", source: "kro" },
             { l: "Geschat aantal bouwlagen bovengronds",t: kro.pand_bouwlagen, source: "kro" },
             { l: "Typering (klik voor meer info)", html: typeList, source: "kro" },
         ];
