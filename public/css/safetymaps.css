@@ -362,6 +362,10 @@ a.--without-effects:hover {
     padding: 0 5px 0 0 !important;
 }
 
+.table-small-text tr.odd {
+    background-color: #fcfcfc;
+}
+
 /* Info window table */
 
 table th {

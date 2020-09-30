@@ -207,6 +207,7 @@ dbkjs.modules.kro = {
                 console.log("Error fetching KRO addresses data in KRO Module: " + msg);
             })
             .done(function(kroAddressesData) {
+                var rowCss = "odd";
                 var bodyHtml = "<table class='table-small-text'><thead>";
                 bodyHtml += "<tr><th>Adres</th><th>Typering</th><th>Bedrijfsnaam</th><th>Telefoon</th><th>Aantal pers.</th></tr>";
                 bodyHtml += "</thead><tbody>";
@@ -214,9 +215,10 @@ dbkjs.modules.kro = {
                 if(kroAddressesData.length > 0) {
                     kroAddressesData
                         .map(function(dataRow) {
-                            bodyHtml += "<tr><td>" + (dataRow.adres) + "</td><td>" + (dataRow.omschrijving_typering || "") + 
+                            bodyHtml += "<tr class='" + rowCss + "'><td>" + (dataRow.adres) + "</td><td>" + (dataRow.omschrijving_typering || "") + 
                                 "</td><td>" + (dataRow.naam_vol || "") + "</td><td>" + (dataRow.contact || "") + 
                                 "</td><td>" + (dataRow.personen || "") + "</td></tr>";
+                            rowCss = rowCss === "odd" ? "" : "odd";
                         })
                 }
 
