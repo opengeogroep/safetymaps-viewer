@@ -198,6 +198,7 @@ dbkjs.modules.kro = {
     clickType: function(bagpandid) {
         var me = this;
         var $titleEl = $("#custom_title");
+        var $bodyEl = $("#custompanel_b");
 
         $titleEl.html("Adres en gebruik informatie");
 
@@ -205,8 +206,29 @@ dbkjs.modules.kro = {
             .fail(function(msg) { 
                 console.log("Error fetching KRO addresses data in KRO Module: " + msg);
             })
-            .done(function(kroAddresses) {
-                console.log(kroAddresses);
+            .done(function(kroAddressesData) {
+                var bodyHtml = "<table><thead>";
+                bodyHtml += "<tr><th>Adres</th><th>Typering</th><th>Bedrijfs-naam</th><th>Telefoon</th><th>Aantal pers.</th></tr>";
+                bodyHtml += "</thead><tbody>";
+
+                if(kroAddressesData.length > 0) {
+                    kroAddressesData
+                        .sort(function(a, b) { return b - a})
+                        .map(function(dataRow) {
+                            var address = dataRow.straatnaam || "" + " " + 
+                                dataRow.huisnr || "" + 
+                                dataRow.huisletter || "" + " " + 
+                                dataRow.huistoevg || "" + " " + 
+                                dataRow.plaatsnaam || ""
+                            bodyHtml += "<tr><td>" + address + "</td><td>" + dataRow.omschrijving + 
+                                "</td><td>" + dataRow.naam + "</td><td>" + dataRow.contacttel + 
+                                "</td><td>" + dataRow.personen + "</td></tr>";
+                        })
+                }
+
+                bodyHtml += "</tbody></table>";
+
+                $bodyEl.html(bodyHtml);
             });
     },
 
