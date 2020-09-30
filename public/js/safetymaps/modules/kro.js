@@ -165,10 +165,10 @@ dbkjs.modules.kro = {
 
         return [
             { l: "Monument", t: kro.monument === "" ? "Nee" : "Ja", source: "kro" },
-            { l: "Oppervlakte gebouw", t: kro.adres_oppervlak, source: "kro" },
+            { l: "Oppervlakte gebouw", t: kro.adres_oppervlak + "m2", source: "kro" },
             { l: "Status", t: kro.pand_status, source: "kro" },
             { l: "Bouwjaar", t: kro.pand_bouwjaar, source: "kro" },
-            { l: "Maximale hoogte",t: kro.pand_maxhoogte, source: "kro" },
+            { l: "Maximale hoogte",t: kro.pand_maxhoogte.replace(".", ",") + "m", source: "kro" },
             { l: "Geschat aantal bouwlagen bovengronds",t: kro.pand_bouwlagen, source: "kro" },
             { l: "Typering (klik voor meer info)", html: typeList, source: "kro" },
         ];
