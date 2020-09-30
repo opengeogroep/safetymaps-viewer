@@ -353,6 +353,14 @@ a.--without-effects:hover {
     text-decoration: none !important;
 }
 
+.table-small-text {
+    font-size: 12px;
+}
+
+.table-small-text td {
+    padding: 0 5px 0 0;
+}
+
 /* Info window table */
 
 table th {

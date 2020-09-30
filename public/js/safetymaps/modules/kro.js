@@ -207,13 +207,12 @@ dbkjs.modules.kro = {
                 console.log("Error fetching KRO addresses data in KRO Module: " + msg);
             })
             .done(function(kroAddressesData) {
-                var bodyHtml = "<table><thead>";
+                var bodyHtml = "<table class='table-small-text'><thead>";
                 bodyHtml += "<tr><th>Adres</th><th>Typering</th><th>Bedrijfsnaam</th><th>Telefoon</th><th>Aantal pers.</th></tr>";
-                bodyHtml += "</thead><tbody>";
+                bodyHtml += "</thead><tbody style='max-height:400px; overflow:auto'>";
 
                 if(kroAddressesData.length > 0) {
                     kroAddressesData
-                        .sort(function(a, b) { return b.objecttypering_order - a.objecttypering_order})
                         .map(function(dataRow) {
                             bodyHtml += "<tr><td>" + (dataRow.adres) + "</td><td>" + (dataRow.omschrijving_typering || "") + 
                                 "</td><td>" + (dataRow.naam_vol || "") + "</td><td>" + (dataRow.contact || "") + 
