@@ -41,10 +41,15 @@ dbkjs.modules.kro = {
 
         me.activated = true;
 
-        // TODO: 
-        // * Api call to get roworder
-        // * In api add vrh labels
-        me.rowConfig = [
+        me.getObjectInfoRowConfig()
+            .fail(function(msg) {
+                console.log("Error fetching KRO row config in KRO module: " + msg);
+                me.rowConfig = [];
+            })
+            .done(function(config) {
+                me.rowConfig = config;
+            });
+       /* me.rowConfig = [
             { label: i18n.t("creator.formal_name"), order: 0, source: "dbk" },
             { label: i18n.t("creator.informal_name"), order: 1, source: "dbk" },
             { label: i18n.t("creator.adress"), order: 2, source: "dbk" },
@@ -58,7 +63,7 @@ dbkjs.modules.kro = {
             { label: i18n.t("creator.level"), order: 10, source: "dbk" },
             { label: i18n.t("creator.lowestLevel") + " (" + i18n.t("creator.floor") + ")", order: 11, source: "dbk" },
             { label: i18n.t("creator.highestLevel") + " (" + i18n.t("creator.floor") + ")", order: 12, source: "dbk" },
-        ];
+        ];*/
     },
 
     shouldShowKro: function() {
@@ -101,6 +106,15 @@ dbkjs.modules.kro = {
             d.resolve(data);
         });
         return d.promise();
+    },
+
+    getObjectInfoRowConfig: function() {
+        var me = dbkjs.modules.kro;
+        var params = {
+            config: true
+        };
+
+        return me.callApi(params);
     },
 
     getObjectInfoForAddress: function(streetname, housnr, housletter, housaddition, city) {
