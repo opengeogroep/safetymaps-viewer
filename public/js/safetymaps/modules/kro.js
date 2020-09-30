@@ -208,21 +208,21 @@ dbkjs.modules.kro = {
             })
             .done(function(kroAddressesData) {
                 var bodyHtml = "<table><thead>";
-                bodyHtml += "<tr><th>Adres</th><th>Typering</th><th>Bedrijfs-naam</th><th>Telefoon</th><th>Aantal pers.</th></tr>";
+                bodyHtml += "<tr><th>Adres</th><th>Typering</th><th>Bedrijfsnaam</th><th>Telefoon</th><th>Aantal pers.</th></tr>";
                 bodyHtml += "</thead><tbody>";
 
                 if(kroAddressesData.length > 0) {
                     kroAddressesData
-                        .sort(function(a, b) { return b - a})
+                        .sort(function(a, b) { return b.objecttypering_order - a.objecttypering_order})
                         .map(function(dataRow) {
-                            var address = dataRow.straatnaam || "" + " " + 
-                                dataRow.huisnr || "" + 
-                                dataRow.huisletter || "" + " " + 
-                                dataRow.huistoevg || "" + " " + 
-                                dataRow.plaatsnaam || ""
-                            bodyHtml += "<tr><td>" + address + "</td><td>" + dataRow.omschrijving + 
-                                "</td><td>" + dataRow.naam + "</td><td>" + dataRow.contacttel + 
-                                "</td><td>" + dataRow.personen + "</td></tr>";
+                            var address = (dataRow.straatnaam || "") + " " + 
+                                (dataRow.huisnr || "") + 
+                                (dataRow.huisletter || "") + " " + 
+                                (dataRow.huistoevg || "") + " " + 
+                                (dataRow.plaatsnaam || "")
+                            bodyHtml += "<tr><td>" + address + "</td><td>" + (dataRow.omschrijving || "") + 
+                                "</td><td>" + (dataRow.naam || "") + "</td><td>" + (dataRow.contacttel || "") + 
+                                "</td><td>" + (dataRow.personen || "") + "</td></tr>";
                         })
                 }
 
