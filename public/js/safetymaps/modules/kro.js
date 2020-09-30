@@ -191,7 +191,7 @@ dbkjs.modules.kro = {
             { l: "Bouwjaar", t: kro.pand_bouwjaar, source: "kro" },
             { l: "Maximale hoogte",t: ("" + kro.pand_maxhoogte + "").replace(".", ",") + "m", source: "kro" },
             { l: "Geschat aantal bouwlagen bovengronds",t: kro.pand_bouwlagen, source: "kro" },
-            { l: "Typering (klik voor meer info)", html: typeList, source: "kro" },
+            { l: "<span onClick='dbkjs.modules.kro.clickType(\"" + kro.bagpandid + "\")'>Typering (klik voor meer info)</span>", html: typeList, source: "kro" },
         ];
     },
 
