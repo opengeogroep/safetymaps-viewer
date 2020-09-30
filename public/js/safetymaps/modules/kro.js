@@ -178,7 +178,7 @@ dbkjs.modules.kro = {
     },
 
     createGeneralRows: function(kro) {
-        var typeList = "<a class='.--without-effects' href='#custompanel' data-toggle='modal'><table onClick='dbkjs.modules.kro.clickType(\"" + kro.bagpandid + "\")'>";
+        var typeList = "<a class='--without-effects' href='#custompanel' data-toggle='modal'><table onClick='dbkjs.modules.kro.clickType(\"" + kro.bagpandid + "\")'>";
         kro.adres_objecttypering_ordered.map(function(type) {
             typeList += "<tr><td>" + type + "</td></tr>";
         });
