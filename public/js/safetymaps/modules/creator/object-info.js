@@ -27,7 +27,10 @@
 var safetymaps = safetymaps || {};
 safetymaps.creator = safetymaps.creator || {};
 
-safetymaps.creator.renderInfoTabs = function(object, windowId, isIncident = false) {
+safetymaps.creator.renderInfoTabs = function(object, windowId, isIncident) {
+    if (typeof(isIncident) === "undefined" || !isIncident) {
+        isIncident = false;
+    }
 
     safetymaps.infoWindow.removeTabs(windowId, "info");
 

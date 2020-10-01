@@ -175,11 +175,13 @@ dbkjs.layers = {
                 // Change baselayer to options.afterMaxZoomLevelSwitchToLayer based on options.switchAtZoomLevel                
                 if (bl.options.afterMaxZoomLevelSwitchToLayer || dbkjs.layers.switchedZoomBaseLayer) {
                     var zl = dbkjs.map.getZoom();
-                    if (zl >= bl.options.switchAtZoomLevel ?? 10) {
+                    var optionsZl = bl.options.switchAtZoomLevel;
+                    optionsZl = typeof(optionsZl) === "undefined" ? 10 : optionsZl;
+                    if (zl >= optionsZl) {
                         if (!dbkjs.layers.switchedZoomBaseLayer) {
                             dbkjs.map.setBaseLayer(dbkjs.map.getLayersByName(bl.options.afterMaxZoomLevelSwitchToLayer)[0]);
                             dbkjs.layers.switchedZoomBaseLayer = bl;
-                            dbkjs.layers.switchedAtZoomLevel = bl.options.switchAtZoomLevel ?? 10
+                            dbkjs.layers.switchedAtZoomLevel = optionsZl;
                         }
                     } else {
                         if (!bl.options.afterMaxZoomLevelSwitchToLayer && zl <= dbkjs.layers.switchedAtZoomLevel - 1) {
