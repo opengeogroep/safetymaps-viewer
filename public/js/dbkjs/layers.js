@@ -175,8 +175,7 @@ dbkjs.layers = {
                 // Change baselayer to options.afterMaxZoomLevelSwitchToLayer based on options.switchAtZoomLevel                
                 if (bl.options.afterMaxZoomLevelSwitchToLayer || dbkjs.layers.switchedZoomBaseLayer) {
                     var zl = dbkjs.map.getZoom();
-                    var optionsZl = bl.options.switchAtZoomLevel;
-                    optionsZl = typeof(optionsZl) === "undefined" ? 10 : optionsZl;
+                    var optionsZl = typeof bl.options.switchAtZoomLevel === "undefined" ? 10 : bl.options.switchAtZoomLevel;
                     if (zl >= optionsZl) {
                         if (!dbkjs.layers.switchedZoomBaseLayer) {
                             dbkjs.map.setBaseLayer(dbkjs.map.getLayersByName(bl.options.afterMaxZoomLevelSwitchToLayer)[0]);
@@ -198,7 +197,8 @@ dbkjs.layers = {
                     var center = dbkjs.map.getCenter();
                     var point = new OpenLayers.Geometry.Point(center.lon, center.lat);
                     var meters = point.distanceTo(extent[0].geometry.transform(new OpenLayers.Projection("EPSG:4326"), dbkjs.map.getProjectionObject()), { edge: false }).toFixed(0);
-                    if (meters >= dbkjs.options.organisationExtentBounderyInMeters ?? 0) {
+                    var oebim = typeof dbkjs.options.organisationExtentBounderyInMeters === "undefined" ? 0 : dbkjs.options.organisationExtentBounderyInMeters;
+                    if (meters >= oebim) {
                         if (bl.options.outsideOrganisationExtentSwitchToLayer) {
                             dbkjs.map.setBaseLayer(dbkjs.map.getLayersByName(bl.options.outsideOrganisationExtentSwitchToLayer)[0]);
                             dbkjs.layers.switchedBaseLayer = bl;

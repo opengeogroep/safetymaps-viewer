@@ -120,6 +120,12 @@ function getNonInterfaceObscuredBounds(layer) {
         leftBuf = (el.position().left + el.outerWidth(true) + 30) * resolution;
     }
     var screenBounds = layer.map.getExtent();
+    // Fix for Safari 12.
+    if (screenBounds.left === null)
+    {
+        screenBounds.left = 0;
+    }
+    // End fix
     var newScreenBounds = new OpenLayers.Bounds([screenBounds.left + leftBuf, screenBounds.bottom + buf, screenBounds.right - buf, screenBounds.top - topBuf]);
 
     var newBoundsGeom = gf.createLinearRing([
