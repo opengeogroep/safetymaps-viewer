@@ -550,9 +550,9 @@ IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incid
             }
             if (this.showKladblokChat) {
                 $.each(incident.Kladblokregels.sort(function (a, b) {
-                    var dateA = new Date(a.dtg);
-                    var dateB = new Date(b.dtg);
-                    return dateA - dateB;
+                    var dateA = new moment(a.DTG);
+                    var dateB = new moment(b.DTG);
+                    return dateA._d - dateB._d;
                 }), function(i, k) {
                     var style = k.IsChat ? "font-weight:normal !important; font-style:italic; !important" : "";
                     kladblokHTML += "<tr style='" + style + "'><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Inhoud)) + "</td></tr>";
