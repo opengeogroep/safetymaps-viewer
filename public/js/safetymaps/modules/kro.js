@@ -180,7 +180,7 @@ dbkjs.modules.kro = {
     createGeneralRows: function(kro) {
         var rows = [];
         var typeList = "<a class='--without-effects' href='#custompanel' data-toggle='modal'><table onClick='dbkjs.modules.kro.clickType(\"" + kro.bagpandid + "\")'>";
-        kro.adres_objecttypering_ordered.map(function(type) {
+        kro.pand_objecttypering_ordered.map(function(type) {
             typeList += "<tr><td>" + type + "</td></tr>";
         });
         typeList += "</table></a>";
