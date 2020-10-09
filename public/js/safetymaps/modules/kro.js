@@ -222,8 +222,8 @@ dbkjs.modules.kro = {
                 if(kroAddressesData.length > 0) {
                     kroAddressesData
                         .sort((a, b) => {
-                            if (a.adres_aantal_personen || "-1" > b.adres_aantal_personen || "-1") { return -1; }
-                            if (a.adres_aantal_personen || "-1" < b.adres_aantal_personen || "-1") { return 1; }
+                            if ((a.adres_aantal_personen || "-1") > (b.adres_aantal_personen || "-1")) { return -1; }
+                            if ((a.adres_aantal_personen || "-1") < (b.adres_aantal_personen || "-1")) { return 1; }
                             return 0;
                         })
                         .map(function(dataRow) {
