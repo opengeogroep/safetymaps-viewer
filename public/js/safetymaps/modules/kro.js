@@ -178,21 +178,28 @@ dbkjs.modules.kro = {
     },
 
     createGeneralRows: function(kro) {
+        var rows = [];
         var typeList = "<a class='--without-effects' href='#custompanel' data-toggle='modal'><table onClick='dbkjs.modules.kro.clickType(\"" + kro.bagpandid + "\")'>";
         kro.adres_objecttypering_ordered.map(function(type) {
             typeList += "<tr><td>" + type + "</td></tr>";
         });
         typeList += "</table></a>";
 
-        return [
-            { l: "Monument", t: kro.monument === "" ? "Nee" : "Ja", source: "kro" },
-            { l: "Oppervlakte gebouw", t: kro.adres_oppervlak + "m2", source: "kro" },
-            { l: "Status", t: kro.pand_status, source: "kro" },
-            { l: "Bouwjaar", t: kro.pand_bouwjaar, source: "kro" },
-            { l: "Maximale hoogte",t: ("" + kro.pand_maxhoogte + "").replace(".", ",") + "m", source: "kro" },
-            { l: "Geschat aantal bouwlagen bovengronds",t: kro.pand_bouwlagen, source: "kro" },
-            { l: "<a class='--without-effects' href='#custompanel' data-toggle='modal'><span onClick='dbkjs.modules.kro.clickType(\"" + kro.bagpandid + "\")'>Typering (klik voor meer info)</span></a>", html: typeList, source: "kro" },
-        ];
+        rows.push({ l: "Oppervlakte gebouw", t: kro.adres_oppervlak + "m2", source: "kro" });
+        rows.push({ l: "Bouwjaar", t: kro.pand_bouwjaar, source: "kro" });
+        rows.push({ l: "Maximale hoogte",t: ("" + kro.pand_maxhoogte + "").replace(".", ",") + "m", source: "kro" });
+        rows.push({ l: "Geschat aantal bouwlagen bovengronds",t: kro.pand_bouwlagen, source: "kro" });
+        rows.push({ l: "<a class='--without-effects' href='#custompanel' data-toggle='modal'><span onClick='dbkjs.modules.kro.clickType(\"" + kro.bagpandid + "\")'>Meer in dit pand (klik voor meer info)</span></a>", html: typeList, source: "kro" },);
+
+        if (kro.pand_status.toLowerCase() !== "pand in gebruik") {
+            rows.push({ l: "Status", t: kro.pand_status, source: "kro" });
+        }
+
+        if (kro.monument !== "") {
+            rows.push({ l: "Monument", t: "Ja", source: "kro" });
+        }
+
+        return rows;
     },
 
     clickType: function(bagpandid) {
