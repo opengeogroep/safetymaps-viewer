@@ -221,12 +221,24 @@ dbkjs.modules.kro = {
 
                 if(kroAddressesData.length > 0) {
                     kroAddressesData
-                        .map(function(dataRow) {
-                            bodyHtml += "<tr class='" + rowCss + "'><td>" + (dataRow.adres) + "</td><td>" + (dataRow.omschrijving_typering || "") + 
-                                "</td><td>" + (dataRow.naam_vol || "") + "</td><td>" + (dataRow.contact || "") + 
-                                "</td><td>" + (dataRow.personen || "") + "</td></tr>";
-                            rowCss = rowCss === "odd" ? "" : "odd";
+                        .sort((a, b) => {
+                            if (a.adres_aantal_personen || "-1" > b.adres_aantal_personen || "-1") { return -1; }
+                            if (a.adres_aantal_personen || "-1" < b.adres_aantal_personen || "-1") { return 1; }
+                            return 0;
                         })
+                        .map(function(dataRow) {
+                            var adres_typering = (dataRow.adres_objecttypering
+                                ? dataRow.adres_objecttypering.split('||')
+                                : ["|"]).map((itm) => { return itm.split('|')[1] }).join(', ');
+                            var aanzien_typering = (dataRow.aanzien_objecttypering
+                                ? dataRow.aanzien_objecttypering.split('||')
+                                : ["|"]).map((itm) => { return itm.split('|')[1] }).join(', ');
+                            var adres = dataRow.straatnaam + (" " + dataRow.huisnr || "") + (" " + dataRow.huisletter || "") + (" " + dataRow.huistoevg || "") + dataRow.plaatsnaam;
+                            bodyHtml += "<tr class='" + rowCss + "'><td>" + (adres) + "</td><td>" + (aanzien_typering) + (adres_typering) +
+                                "</td><td>" + (dataRow.adres_bedrijfsnaam || "") + "</td><td>" + (dataRow.adres_telefoonnummer || "") +
+                                "</td><td>" + (dataRow.adres_aantal_personen || "") + "</td></tr>";
+                            rowCss = rowCss === "odd" ? "" : "odd";
+                        });
                 }
 
                 bodyHtml += "</tbody></table>";
