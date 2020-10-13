@@ -150,7 +150,7 @@ dbkjs.modules.kro = {
         var me = dbkjs.modules.kro;
         var kroRows = me.createGeneralRows(kro);
 
-        dbkRows = dbkRows.concat(kroRows);
+        dbkRows = kroRows.concat(dbkRows);
         dbkRows = me.removeDuplicateObjectInfoRows(dbkRows);
         dbkRows = me.orderObjectInfoRows(dbkRows);
 
@@ -189,7 +189,7 @@ dbkjs.modules.kro = {
         rows.push({ l: "Bouwjaar", t: kro.pand_bouwjaar, source: "kro" });
         rows.push({ l: "Maximale hoogte",t: ("" + kro.pand_maxhoogte + "").replace(".", ",") + "m", source: "kro" });
         rows.push({ l: "Geschat aantal bouwlagen bovengronds",t: kro.pand_bouwlagen, source: "kro" });
-        rows.push({ l: "<a class='--without-effects' href='#custompanel' data-toggle='modal'><span onClick='dbkjs.modules.kro.clickType(\"" + kro.bagpandid + "\")'>Meer in dit pand (klik voor meer info)</span></a>", html: typeList, source: "kro" },);
+        rows.push({ l: "Meer in dit pand <a href='#custompanel' data-toggle='modal'><span onClick='dbkjs.modules.kro.clickType(\"" + kro.bagpandid + "\")'>klik voor meer info</span></a>", html: typeList, source: "kro" },);
 
         if (kro.pand_status.toLowerCase() !== "pand in gebruik") {
             rows.push({ l: "Status", t: kro.pand_status, source: "kro" });
@@ -198,6 +198,8 @@ dbkjs.modules.kro = {
         if (kro.monument !== "") {
             rows.push({ l: "Monument", t: "Ja", source: "kro" });
         }
+
+        rows.push({ l: "", html: "<br /><br/>", source: "kro" });
 
         return rows;
     },
@@ -270,7 +272,7 @@ dbkjs.modules.kro = {
         return rows
             .map(function(row) {
                 var configFound = me.rowConfig.filter(function(cr) { return cr.label === row.l; });
-                var order = 999;
+                var order = row.source === "kro" ? 1 : 999; 
                 if(configFound.length > 0) {
                     order = configFound[0].order;
                 }
