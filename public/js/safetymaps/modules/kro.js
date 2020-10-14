@@ -36,7 +36,9 @@ dbkjs.modules.kro = {
 
         me.options = $.extend({
             debug: false,
-            enableForObjectTypes: ["object"]
+            enableForObjectTypes: ["object"],
+            layerName: "KRO\Pand risico score",
+            bagPandIdFeature: "identificatie",
         }, me.options);
 
         me.activated = true;
@@ -84,6 +86,37 @@ dbkjs.modules.kro = {
             me.options.enableForObjectTypes.filter(function(type) { return type.toLowerCase() === object.type.toLowerCase(); }).length > 0;
 
         return objectTypeIsEnabled;
+    },
+
+    shouldShowKroForMapLayer: function(layerName) {
+        var me = dbkjs.modules.kro;
+
+        if (!me.shouldShowKro()) {
+            return false;
+        }
+
+        return layerName === me.options.layerName;
+    },
+
+    getBagPandIdFromLayerFeatureAndShowPopup: function(getFeaturesResponse) {
+        var me = dbkjs.modules.kro;
+        var bagPandId = null;
+        var gfi = new OpenLayers.Format.WMSGetFeatureInfo();
+
+        features = gfi.read($.parseXML(getFeaturesResponse.responseText));
+        for (var feat in features) {
+            for (var j in features[feat].attributes) {
+                if (typeof (features[feat].attributes[j]) !== "undefined" 
+                    && features[feat].attributes[j] !== ""
+                    && j === me.options.bagPandIdFeature) {
+                        bagPandId = features[feat].attributes[j];
+                    }
+            }
+        }
+
+        if (bagPandId) {
+            me.showPopup(bagPandId);
+        }
     },
 
     callApi: function(params) {
@@ -179,7 +212,7 @@ dbkjs.modules.kro = {
 
     createGeneralRows: function(kro) {
         var rows = [];
-        var typeList = "<a class='--without-effects' href='#custompanel' data-toggle='modal'><table onClick='dbkjs.modules.kro.clickType(\"" + kro.bagpandid + "\")'>";
+        var typeList = "<a class='--without-effects' href='#custompanel' data-toggle='modal'><table onClick='dbkjs.modules.kro.showPopup(\"" + kro.bagpandid + "\")'>";
         kro.pand_objecttypering_ordered.map(function(type) {
             typeList += "<tr><td>" + type + "</td></tr>";
         });
@@ -189,7 +222,7 @@ dbkjs.modules.kro = {
         rows.push({ l: "Bouwjaar", t: kro.pand_bouwjaar, source: "kro" });
         rows.push({ l: "Maximale hoogte",t: ("" + kro.pand_maxhoogte + "").replace(".", ",") + "m", source: "kro" });
         rows.push({ l: "Geschat aantal bouwlagen bovengronds",t: kro.pand_bouwlagen, source: "kro" });
-        rows.push({ l: "Meer in dit pand <a href='#custompanel' data-toggle='modal'><span onClick='dbkjs.modules.kro.clickType(\"" + kro.bagpandid + "\")'>klik voor meer info</span></a>", html: typeList, source: "kro" },);
+        rows.push({ l: "Meer in dit pand <a href='#custompanel' data-toggle='modal'><span onClick='dbkjs.modules.kro.showPopup(\"" + kro.bagpandid + "\")'>klik voor meer info</span></a>", html: typeList, source: "kro" },);
 
         if (kro.pand_status.toLowerCase() !== "pand in gebruik") {
             rows.push({ l: "Status", t: kro.pand_status, source: "kro" });
@@ -204,7 +237,7 @@ dbkjs.modules.kro = {
         return rows;
     },
 
-    clickType: function(bagpandid) {
+    showPopup: function(bagpandid) {
         var me = this;
         var $titleEl = $("#custom_title");
         var $bodyEl = $("#custompanel_b");

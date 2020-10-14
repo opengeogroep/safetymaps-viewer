@@ -279,7 +279,12 @@ dbkjs.Layer = dbkjs.Class({
                     params.x = Math.round(e.xy.x);
                     params.y = Math.round(e.xy.y);
                 }
-                OpenLayers.Request.GET({url: this.layer.url, "params": params, callback: this.panel, scope: _obj});
+
+                if (dbkjs.modules.kro && dbkjs.modules.kro.shouldShowKroForMapLayer(this.layer.name)) {
+                    OpenLayers.Request.GET({url: this.layer.url, "params": params, callback: dbkjs.modules.kro.getBagPandIdFromLayerFeatureAndShowPopup, scope: _obj});
+                } else {
+                    OpenLayers.Request.GET({url: this.layer.url, "params": params, callback: this.panel, scope: _obj});
+                }
                 //OpenLayers.Event.stop(e);
             }
         }
