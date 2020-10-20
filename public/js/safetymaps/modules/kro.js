@@ -37,7 +37,7 @@ dbkjs.modules.kro = {
         me.options = $.extend({
             debug: false,
             enableForObjectTypes: ["object"],
-            layerName: "KRO\Pand risico score",
+            layerName: "KRO\\Pand risico score",
             bagPandIdFeature: "identificatie",
         }, me.options);
 
@@ -115,7 +115,8 @@ dbkjs.modules.kro = {
         }
 
         if (bagPandId) {
-            me.showPopup(bagPandId);
+            me.showPopup(bagPandId, true);
+            $("#custompanel").modal('toggle');
         }
     },
 
@@ -222,7 +223,7 @@ dbkjs.modules.kro = {
         rows.push({ l: "Bouwjaar", t: kro.pand_bouwjaar, source: "kro" });
         rows.push({ l: "Maximale hoogte",t: ("" + kro.pand_maxhoogte + "").replace(".", ",") + "m", source: "kro" });
         rows.push({ l: "Geschat aantal bouwlagen bovengronds",t: kro.pand_bouwlagen, source: "kro" });
-        rows.push({ l: "Meer in dit pand <a href='#custompanel' data-toggle='modal'><span onClick='dbkjs.modules.kro.showPopup(\"" + kro.bagpandid + "\")'>klik voor meer info</span></a>", html: typeList, source: "kro" },);
+        rows.push({ l: "Meer in dit pand <a href='#custompanel' data-toggle='modal'><span onClick='dbkjs.modules.kro.showPopup(\"" + kro.bagpandid + "\")'><br/>klik voor meer info</span></a>", html: typeList, source: "kro" },);
 
         if (kro.pand_status.toLowerCase() !== "pand in gebruik") {
             rows.push({ l: "Status", t: kro.pand_status, source: "kro" });
@@ -232,15 +233,19 @@ dbkjs.modules.kro = {
             rows.push({ l: "Monument", t: "Ja", source: "kro" });
         }
 
-        rows.push({ l: "", html: "<br /><br/>", source: "kro" });
+        rows.push({ l: "", html: "<br/><br/>", source: "kro" });
 
         return rows;
     },
 
-    showPopup: function(bagpandid) {
+    showPopup: function(bagpandid, extended) {
         var me = this;
         var $titleEl = $("#custom_title");
         var $bodyEl = $("#custompanel_b");
+
+        if (typeof extended === "undefined" || extended === null) {
+            extended = false;
+        }
 
         $titleEl.html("Adres en gebruik informatie");
 
@@ -250,7 +255,20 @@ dbkjs.modules.kro = {
             })
             .done(function(kroAddressesData) {
                 var rowCss = "odd";
-                var bodyHtml = "<table class='table-small-text'><thead>";
+                var bodyHtml = "";
+
+                if (extended) {
+                    if(kroAddressesData.length > 0) {
+                        bodyHtml += "<table>";
+                        var kro = me.createGeneralRows(kroAddressesData[0]);
+                        kro.filter(function(kroItm) { return !kroItm.html }).map(function(kroItm) {
+                            bodyHtml += "<tr><td>" + kroItm.l + "</td><td>" + kroItm.t + "</td></tr>";
+                        });
+                        bodyHtml += "</table><br/>";
+                    }
+                }
+
+                bodyHtml += "<table class='table-small-text'><thead>";
                 bodyHtml += "<tr><th>Adres</th><th>Typering</th><th>Bedrijfs-<br/>naam</th><th>Telefoon</th><th>Aantal pers.</th></tr>";
                 bodyHtml += "</thead><tbody>";
 
@@ -264,10 +282,10 @@ dbkjs.modules.kro = {
                         .map(function(dataRow) {
                             var adres_typering = (dataRow.adres_objecttypering
                                 ? dataRow.adres_objecttypering.split('||')
-                                : ["|"]).map((itm) => { return itm.split('|')[1] }).join(', ');
+                                : ["|"]).map(function(itm) { return itm.split('|')[1] }).join(', ');
                             var aanzien_typering = (dataRow.aanzien_objecttypering
                                 ? dataRow.aanzien_objecttypering.split('||')
-                                : ["|"]).map((itm) => { return itm.split('|')[1] }).join(', ');
+                                : ["|"]).map(function(itm) { return itm.split('|')[1] }).join(', ');
                             var adres = dataRow.straatnaam + (" " + dataRow.huisnr || "") + (" " + dataRow.huisletter || "") + (" " + dataRow.huistoevg || "") + dataRow.plaatsnaam;
                             bodyHtml += "<tr class='" + rowCss + "'><td>" + (adres) + "</td><td>" + (aanzien_typering) + (adres_typering) +
                                 "</td><td>" + (dataRow.adres_bedrijfsnaam || "") + "</td><td>" + (dataRow.adres_telefoonnummer || "") +
