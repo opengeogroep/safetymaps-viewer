@@ -382,6 +382,7 @@ dbkjs.modules.vrh_objects = {
         });
 
         $(safetymaps).on("object_select", function(event, clusterFeature) {
+            me.selectedClusterFeature = clusterFeature;
             me.selectObjectById(clusterFeature.attributes.type, clusterFeature.attributes.id, null, true);
         });
 
@@ -555,6 +556,9 @@ dbkjs.modules.vrh_objects = {
             //$("#creator_object_info").text("Error: " + msg);
         })
         .done(function(object) {
+            object = $.extend({
+                type: type
+            }, object);
             me.selectedObjectDetailsReceived(type, id, object, isIncident);
         });
     },

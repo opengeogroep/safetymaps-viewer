@@ -254,7 +254,7 @@ dbkjs.modules.safetymaps_creator = {
                 },
                 resultSelected: function(result) {
                     console.log("Search result selected", result);
-
+                    me.selectedClusterFeature = result.clusterFeature;
                     me.selectObjectById(result.id, result.extent);
                 }
             }, true);

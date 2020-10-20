@@ -213,11 +213,14 @@ dbkjs.modules.kro = {
 
     createGeneralRows: function(kro) {
         var rows = [];
-        var typeList = "<a class='--without-effects' href='#custompanel' data-toggle='modal'><table onClick='dbkjs.modules.kro.showPopup(\"" + kro.bagpandid + "\")'>";
-        kro.pand_objecttypering_ordered.map(function(type) {
-            typeList += "<tr><td>" + type + "</td></tr>";
-        });
-        typeList += "</table></a>";
+        var typeList = "-";
+        if (kro.pand_objecttypering_ordered) {
+            typeList = "<a class='--without-effects' href='#custompanel' data-toggle='modal'><table onClick='dbkjs.modules.kro.showPopup(\"" + kro.bagpandid + "\")'>";
+            kro.pand_objecttypering_ordered.map(function(type) {
+                typeList += "<tr><td>" + type + "</td></tr>";
+            });
+            typeList += "</table></a>";
+        }
 
         rows.push({ l: "Oppervlakte gebouw", t: kro.adres_oppervlak + "m2", source: "kro" });
         rows.push({ l: "Bouwjaar", t: kro.pand_bouwjaar, source: "kro" });
