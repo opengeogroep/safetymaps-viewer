@@ -217,7 +217,6 @@ dbkjs.layoutElements = function() {
 
 dbkjs.resizeElements = function(e) {
     var clazz = "normal";
-
     var width = $("#map").width();
 
     if(width < dbkjs.options.maxMapWidthMediumButtons) {
@@ -269,6 +268,7 @@ dbkjs.resizeElements = function(e) {
             totalButtonGroupWidth += $(this).outerWidth(true);
         }
     });
+    
     if (el[0].style.paddingLeft) totalButtonGroupWidth += +(el[0].style.paddingLeft.replace("px", ""));
     if (el[0].style.paddingRight) totalButtonGroupWidth += +(el[0].style.paddingRight.replace("px", ""));
     if (totalButtonGroupWidth > width) {
