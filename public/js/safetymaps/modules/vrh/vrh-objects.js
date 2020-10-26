@@ -340,7 +340,7 @@ dbkjs.modules.vrh_objects = {
         // XXX move to safetymaps.vrh.Dbks.init()
         if(dbkjs.modules.search && me.options.dbks) {
             dbkjs.modules.search.addSearchConfig({
-                tabContents: "<i class='fa fa-building'></i> DBK's",
+                tabContents: "<i class='fa fa-building'></i> Object info",
                 placeholder: i18n.t("creator.search_placeholder"),
                 search: function(value) {
                     value = value.toLowerCase();
