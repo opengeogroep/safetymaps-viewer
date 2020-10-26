@@ -239,7 +239,7 @@ VehicleIncidentsController.prototype.checkCrsLinks = function() {
         var div = $("<div style='width: 100%; height: 100%'></div>");
         me.incidentDetailsWindow.crsLinkEnabled = true;
         $(me.incidentDetailsWindow).on("crsLinkClicked", function(e, link) {
-            window.open(`${ me.options.crsLinkUrl.replace("[kenteken]", link) }`);
+            window.open(me.options.crsLinkUrl.replace("[kenteken]", link));
         });
     }
 }

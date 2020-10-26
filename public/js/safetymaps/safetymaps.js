@@ -245,9 +245,9 @@ safetymaps.infoWindow = {
 })();
 
 safetymaps.showSmvxLink = function() {
-
-    const smvx = dbkjs.options.organisation.modules.find(function(module) { return module.name === "smvx"; } );
-    if(smvx) {
+    var smvx = dbkjs.options.organisation.modules.filter(function(module) { return module.name === "smvx"; } );
+    if(smvx.length > 0) {
+        smvx = smvx[0];
         var shown = window.localStorage.getItem('smvx-shown');
         var popupIntervalMinutes = 7 * 24 * 60;
         if(smvx.options && smvx.options.popupIntervalMinutes) {
