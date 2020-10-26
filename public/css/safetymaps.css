@@ -483,6 +483,14 @@ li.object img {
     text-overflow: ellipsis;
     overflow: hidden;
 }
+#incident_bottom_right.medium {
+    font-size: 14px !important;
+    line-height: 28px;
+}
+#incident_bottom_right.small {
+    font-size: 12px !important;
+    line-height: 24px;
+}
 
 /* Incident details window */
 

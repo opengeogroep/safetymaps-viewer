@@ -229,6 +229,7 @@ dbkjs.resizeButtonGroup = function(e) {
 
     var el = $(".main-button-group");
     var leftMenu = $("#bottom_left_buttons");
+    var incAdress = $("#incident_bottom_right");
 
     if(!el.hasClass(clazz)) {
         //console.log("map width " + width + ", button group size: " + clazz);
@@ -236,6 +237,14 @@ dbkjs.resizeButtonGroup = function(e) {
         el.removeClass("medium");
         el.removeClass("small");
         el.addClass(clazz);
+    }
+
+    if(!incAdress.hasClass(clazz)) {
+        //console.log("map width " + width + ", button group size: " + clazz);
+        incAdress.removeClass("normal");
+        incAdress.removeClass("medium");
+        incAdress.removeClass("small");
+        incAdress.addClass(clazz);
     }
 
     if(!leftMenu.hasClass(clazz)) {
