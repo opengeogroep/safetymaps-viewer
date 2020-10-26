@@ -228,12 +228,19 @@ dbkjs.resizeButtonGroup = function(e) {
     }
 
     var el = $(".main-button-group");
+    var leftMenu = $("#bottom_left_buttons");
 
     if(!el.hasClass(clazz)) {
         //console.log("map width " + width + ", button group size: " + clazz);
         el.removeClass("medium");
         el.removeClass("small");
         el.addClass(clazz);
+    }
+
+    if(!leftMenu.hasClass(clazz)) {
+        leftMenu.removeClass("medium");
+        leftMenu.removeClass("small");
+        leftMenu.addClass(clazz);
     }
 
     var totalButtonGroupWidth = 0;

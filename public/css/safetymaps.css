@@ -44,11 +44,28 @@ html, body {
     width: 48px;
     z-index: 3000;
 }
-
 #bottom_left_buttons a.btn {
     margin-top: 12px;
     width: 48px;
     font-size: 24px;
+}
+
+#bottom_left_buttons.medium {
+    width: 46px;
+}
+#bottom_left_buttons.medium a.btn {
+    width: 46px;
+    font-size: 22px;
+    margin-top: 11px;
+}
+
+#bottom_left_buttons.small {
+    width: 40px;
+}
+#bottom_left_buttons.small a.btn {
+    width: 40px;
+    font-size: 20px;
+    margin-top: 10px;
 }
 
 .dialog {
