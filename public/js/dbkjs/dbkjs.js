@@ -216,7 +216,7 @@ dbkjs.layoutButtonGroup = function() {
 };
 
 dbkjs.resizeButtonGroup = function(e) {
-    var clazz = "";
+    var clazz = "normal";
 
     var width = $("#map").width();
 
@@ -232,15 +232,23 @@ dbkjs.resizeButtonGroup = function(e) {
 
     if(!el.hasClass(clazz)) {
         //console.log("map width " + width + ", button group size: " + clazz);
+        el.removeClass("normal");
         el.removeClass("medium");
         el.removeClass("small");
         el.addClass(clazz);
     }
 
     if(!leftMenu.hasClass(clazz)) {
+        leftMenu.removeClass("normal");
         leftMenu.removeClass("medium");
         leftMenu.removeClass("small");
         leftMenu.addClass(clazz);
+
+        if (clazz === "small") {
+            $("#zoom_buttons").toggle(false);
+        } else {
+            $("#zoom_buttons").toggle(dbkjs.options.showZoomButtons);
+        }
     }
 
     var totalButtonGroupWidth = 0;
