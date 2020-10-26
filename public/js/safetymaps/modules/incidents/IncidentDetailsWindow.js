@@ -438,9 +438,6 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
         html += 'Eenheden: ';
         var s = [];
         $.each(incident.inzetEenheden, function(i, inzet) {
-            if(inzet.T_IND_DISC_EENHEID !== "B") {
-                return;
-            }
             var tooltip = inzet.KAZ_NAAM ? inzet.KAZ_NAAM : "";
             var span = (inzet.DTG_EIND_ACTIE || incident.archief ? "<span class='beeindigd' " : "<span ") + " title='" + tooltip + "'>" + dbkjs.util.htmlEncode(inzet.ROEPNAAM_EENHEID) + "</span>";
             s.push(span);
@@ -661,20 +658,18 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
         html += '<tr class="detailed"><td style="display:'+showAllEenheden+';" colspan="2" id="allEenheden">';
         html += 'Eenheden: <span style="color: #A9A9A9">(Klik voor minder info)</span><br/><table>';
         $.each(incident.BetrokkenEenheden, function(i, inzet) {
-            if(inzet.Discipline === "B") {
-                var tooltip = "";
-                if(inzet.EindeActieDTG) {
-                    var einde = new moment(inzet.EindeActieDTG);
-                    tooltip = "actie be&euml;indigd om " + einde.format("HH:mm") + ", " + einde.fromNow();
-                }
-                var beeindigd = !inzet.IsActief;
-                html += "<tr title='" + tooltip + "' class='" + (beeindigd ? "beeindigd" : "") + "'>";
-                html += "<td align='right'>" + (inzet.InzetRol ? inzet.InzetRol : "") + "</td>";
-                html += "<td>" + inzet.Roepnaam + "</td>";
-                html += "<td>" + (inzet.BrwKazerne ? inzet.BrwKazerne : "") + "</td>";
-                html += "<td>" + (!compareMode && inzet.ETA && inzet.ETA.length > 0 ? me.calculateETA(inzet.ETA[0], true) : "") + "</td>";
-                html += "</tr>";
+            var tooltip = "";
+            if(inzet.EindeActieDTG) {
+                var einde = new moment(inzet.EindeActieDTG);
+                tooltip = "actie be&euml;indigd om " + einde.format("HH:mm") + ", " + einde.fromNow();
             }
+            var beeindigd = !inzet.IsActief;
+            html += "<tr title='" + tooltip + "' class='" + (beeindigd ? "beeindigd" : "") + "'>";
+            html += "<td align='right'>" + (inzet.InzetRol ? inzet.InzetRol : "") + "</td>";
+            html += "<td>" + inzet.Roepnaam + "</td>";
+            html += "<td>" + (inzet.BrwKazerne ? inzet.BrwKazerne : "") + "</td>";
+            html += "<td>" + (!compareMode && inzet.ETA && inzet.ETA.length > 0 ? me.calculateETA(inzet.ETA[0], true) : "") + "</td>";
+            html += "</tr>";
         });
         html += '</table></td></tr>';
         $(document).on('click', '#allEenheden', function(){
