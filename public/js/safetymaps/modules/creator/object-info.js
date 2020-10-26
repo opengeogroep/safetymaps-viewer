@@ -332,7 +332,7 @@ safetymaps.creator.embedPDFs = function(element) {
             // Remove buttons from PDFJS toolbar
             // XXX hack, use PDFJS documentloaded event?
             function removeToolbar() {
-                var iframe = $("iframe").contents();
+                var iframe = $("iframe").first().contents();
                 if(iframe.find("#toolbarViewer")[0] ) {
                     console.log("Found PDFJS toolbar buttons, removing for URL " + url);    
                     iframe.find("#toolbarViewerLeft").remove();
