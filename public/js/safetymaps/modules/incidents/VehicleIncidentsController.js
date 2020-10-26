@@ -1017,7 +1017,6 @@ VehicleIncidentsController.prototype.saveKladblokChatRow = function (row, incide
         $.ajax("api/kladblok/" + incidentnr + ".json", {
             method: 'POST',
             data: {
-                vehicle: dbkjs.options.organisation.username,
                 row: row
             },
             xhrFields: { withCredentials: true }, 
