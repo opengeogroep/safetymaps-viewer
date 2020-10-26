@@ -209,13 +209,13 @@ dbkjs.gotOrganisation = function () {
     $(dbkjs).trigger('dbkjs_init_complete');
 };
 
-dbkjs.layoutButtonGroup = function() {
-    $(window).on("resize", dbkjs.resizeButtonGroup);
-    window.setInterval(dbkjs.resizeButtonGroup, 300);
-    dbkjs.resizeButtonGroup();
+dbkjs.layoutElements = function() {
+    $(window).on("resize", dbkjs.resizeElements);
+    window.setInterval(dbkjs.resizeElements, 300);
+    dbkjs.resizeElements();
 };
 
-dbkjs.resizeButtonGroup = function(e) {
+dbkjs.resizeElements = function(e) {
     var clazz = "normal";
 
     var width = $("#map").width();
@@ -227,17 +227,7 @@ dbkjs.resizeButtonGroup = function(e) {
         clazz = "small";
     }
 
-    var el = $(".main-button-group");
-    var leftMenu = $("#bottom_left_buttons");
     var incAdress = $("#incident_bottom_right");
-
-    if(!el.hasClass(clazz)) {
-        el.removeClass("normal");
-        el.removeClass("medium");
-        el.removeClass("small");
-        el.addClass(clazz);
-    }
-
     if(!incAdress.hasClass(clazz)) {
         incAdress.removeClass("normal");
         incAdress.removeClass("medium");
@@ -245,6 +235,7 @@ dbkjs.resizeButtonGroup = function(e) {
         incAdress.addClass(clazz);
     }
 
+    var leftMenu = $("#bottom_left_buttons");
     if(!leftMenu.hasClass(clazz)) {
         leftMenu.removeClass("normal");
         leftMenu.removeClass("medium");
@@ -253,9 +244,21 @@ dbkjs.resizeButtonGroup = function(e) {
 
         if (clazz === "small") {
             $("#zoom_buttons").toggle(false);
+            $("#settingspanel_b .dbk-responsive").removeClass("col-xs-4");
+            $("#settingspanel_b .dbk-responsive").addClass("col-xs-12");
         } else {
             $("#zoom_buttons").toggle(dbkjs.options.showZoomButtons);
+            $("#settingspanel_b .dbk-responsive").removeClass("col-xs-12");
+            $("#settingspanel_b .dbk-responsive").addClass("col-xs-4");
         }
+    }
+
+    var el = $(".main-button-group");
+    if(!el.hasClass(clazz)) {
+        el.removeClass("normal");
+        el.removeClass("medium");
+        el.removeClass("small");
+        el.addClass(clazz);
     }
 
     var totalButtonGroupWidth = 0;
@@ -368,7 +371,7 @@ $(document).ready(function () {
     if($(window).width() < dbkjs.options.minSplitScreenWidth) {
         dbkjs.options.splitScreenChecked = false;
     }
-    dbkjs.layoutButtonGroup();
+    dbkjs.layoutElements();
 
     // Make sure i18n is initialized
     i18n.init({
