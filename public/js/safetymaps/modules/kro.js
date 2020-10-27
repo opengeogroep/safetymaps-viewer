@@ -30,6 +30,9 @@ dbkjs.modules.kro = {
     activated: false,
     rowConfig: null,
     infoWindow: null,
+    cache: {
+        incidentAddress: null,
+    },
     
     register: function() {
         var me = dbkjs.modules.kro;
@@ -160,6 +163,8 @@ dbkjs.modules.kro = {
         var params = {
             address: me.createAddressString(streetname, housnr, housletter, housaddition, city),
         };
+
+        me.cache.incidentAddress = me.createIncidentAddressString(streetname, housnr, housletter, housaddition, city);
         
         return me.callApi(params);
     },
@@ -183,9 +188,13 @@ dbkjs.modules.kro = {
         return me.callApi(params);
     },
 
-    mergeKroRowsIntoDbkRows: function(dbkRows, kro) {
+    mergeKroRowsIntoDbkRows: function(dbkRows, kro, isIncident) {
         var me = dbkjs.modules.kro;
         var kroRows = me.createGeneralRows(kro);
+
+        if (isIncident) {
+            kroRows.unshift({ l: "Incident adres", t: me.cache.incidentAddress, source: "kro" });
+        }
 
         dbkRows = kroRows.concat(dbkRows);
         dbkRows = me.removeDuplicateObjectInfoRows(dbkRows);
@@ -199,6 +208,8 @@ dbkjs.modules.kro = {
     showKroForIncidentWithoutDbk: function(kro) {
         var me = dbkjs.modules.kro;
         var rows = me.createGeneralRows(kro);
+
+        rows.unshift({ l: "Incident adres", t: me.cache.incidentAddress, source: "kro" });
 
         me.setScrollBar();
 
@@ -362,5 +373,9 @@ dbkjs.modules.kro = {
     createAddressString: function(streetname, housenr, houseletter, houseaddition, city) {
        //return `${ streetname }|${ (housenr === 0 ? '' : housenr) || '' }|${ houseletter || '' }|${ houseaddition || '' }|${ city }`;
        return streetname + "|" + ((housenr === 0 ? '' : housenr) || '') + "|" + (houseletter || '') + "|" + (houseaddition || '') + "|" + city;
+    },
+
+    createIncidentAddressString: function(streetname, housenr, houseletter, houseaddition, city) {
+        return streetname + " " + ((housenr === 0 ? '' : housenr) || '') + (houseletter + " " || '') + (houseaddition + " " || '') + city;
     },
 }

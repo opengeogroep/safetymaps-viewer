@@ -585,13 +585,13 @@ dbkjs.modules.vrh_objects = {
             var promise;
             if(type === "evenement") {
                 me.events.addFeaturesForObject(object);
-                promise = me.events.updateInfoWindow(me.infoWindow.getName(), object);
+                promise = me.events.updateInfoWindow(me.infoWindow.getName(), object, isIncident);
             } else if(type === "dbk") {
                 me.dbks.addFeaturesForObject(object);
-                promise = me.dbks.updateInfoWindow(me.infoWindow.getName(), object);
+                promise = me.dbks.updateInfoWindow(me.infoWindow.getName(), object, isIncident);
             } else if(type === "waterongevallenkaart") {
                 me.waterongevallen.addFeaturesForObject(object);
-                promise = me.waterongevallen.updateInfoWindow(me.infoWindow.getName(), object);
+                promise = me.waterongevallen.updateInfoWindow(me.infoWindow.getName(), object, isIncident);
             }
 
             promise.then(function() {

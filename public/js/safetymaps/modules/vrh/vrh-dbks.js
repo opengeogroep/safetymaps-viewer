@@ -930,7 +930,7 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
     console.log("Added DBK layer features", this.layers);
 };
 
-safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object) {
+safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, isIncident) {
     var me = this;
 
     safetymaps.infoWindow.removeTabs(windowId, "info");
@@ -1009,7 +1009,7 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object) {
         })
         .done(function(kro) {
             if(kro.length > 0) {
-                rows = dbkjs.modules.kro.mergeKroRowsIntoDbkRows(rows, kro[0]);
+                rows = dbkjs.modules.kro.mergeKroRowsIntoDbkRows(rows, kro[0], isIncident);
             }
         })
         .always(function() {
