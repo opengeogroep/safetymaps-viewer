@@ -513,7 +513,7 @@ dbkjs.modules.safetymaps_creator = {
         isIncident = (typeof isIncident !== "undefined") ? isIncident : false;
         var me = this;
         
-        safetymaps.creator.renderInfoTabs(object, this.infoWindow.getName()).then(function() {
+        safetymaps.creator.renderInfoTabs(object, this.infoWindow.getName(), isIncident).then(function() {
             dbkjs.modules.vrh_objects.addLegendTrEventHandler("tab_danger_symbols", {
                 "safetymaps_creatorDangerSymbolsId:" : me.objectLayers.layerDangerSymbols
             });

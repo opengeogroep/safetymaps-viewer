@@ -28,7 +28,7 @@ var safetymaps = safetymaps || {};
 safetymaps.creator = safetymaps.creator || {};
 
 safetymaps.creator.renderInfoTabs = function(object, windowId, isIncident) {
-    if (typeof(isIncident) === "undefined" || !isIncident) {
+    if (typeof isIncident === "undefined" || !isIncident) {
         isIncident = false;
     }
 
