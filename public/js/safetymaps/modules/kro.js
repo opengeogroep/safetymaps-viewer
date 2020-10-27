@@ -248,6 +248,7 @@ dbkjs.modules.kro = {
         var me = this;
         var $titleEl = $("#custom_title");
         var $bodyEl = $("#custompanel_b");
+        var $bodyTable = $("<table>");
 
         if (typeof extended === "undefined" || extended === null) {
             extended = false;
@@ -274,9 +275,12 @@ dbkjs.modules.kro = {
                     }
                 }
 
-                bodyHtml += "<table class='table-small-text'><thead>";
-                bodyHtml += "<tr><th>Adres</th><th>Typering</th><th>Bedrijfs-<br/>naam</th><th>Telefoon</th><th>Indicatie aantal pers.</th></tr>";
-                bodyHtml += "</thead><tbody>";
+                $bodyEl.html(bodyHtml);
+                $bodyTable.addClass("table-small-text");
+                $bodyTable.append("<thead><tr><th>Adres</th><th>Typering</th><th>Bedrijfs-<br/>naam</th><th>Telefoon</th><th>Indicatie<br/>aantal pers.</th></tr></thead><tbody>");
+                //bodyHtml += "<table class='table-small-text'><thead>";
+                //bodyHtml += "<tr><th>Adres</th><th>Typering</th><th>Bedrijfs-<br/>naam</th><th>Telefoon</th><th>Indicatie<br/>aantal pers.</th></tr>";
+                //bodyHtml += "</thead><tbody>";
 
                 if(kroAddressesData.length > 0) {
                     kroAddressesData
@@ -293,16 +297,20 @@ dbkjs.modules.kro = {
                                 ? dataRow.aanzien_objecttypering.split('||')
                                 : ["|"]).map(function(itm) { return itm.split('|')[1] }).join(', ');
                             var adres = dataRow.straatnaam + (" " + dataRow.huisnr || "") + (" " + dataRow.huisletter || "") + (" " + dataRow.huistoevg || "") + dataRow.plaatsnaam;
-                            bodyHtml += "<tr class='" + rowCss + "'><td>" + (adres) + "</td><td>" + (aanzien_typering) + (adres_typering) +
+                            var rowHtml = "<tr class='" + rowCss + "'><td>" + (adres) + "</td><td>" + (aanzien_typering) + (adres_typering) +
                                 "</td><td>" + (dataRow.adres_bedrijfsnaam || "") + "</td><td>" + (dataRow.adres_telefoonnummer || "") +
                                 "</td><td>" + (dataRow.adres_aantal_personen || "") + "</td></tr>";
+
+                            $bodyTable.append(rowHtml);
+
                             rowCss = rowCss === "odd" ? "" : "odd";
                         });
                 }
 
-                bodyHtml += "</tbody></table>";
-
-                $bodyEl.html(bodyHtml);
+                $bodyTable.append("</tbody></table>");
+                $bodyTable.tablesorter();
+                $bodyEl.append($bodyTable);
+                //bodyHtml += "</tbody></table>";
             });
     },
 
