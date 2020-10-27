@@ -39,7 +39,7 @@ dbkjs.modules.library = {
         var searchTabtext = me.options.searchTabText || i18n.t("search.library");
 
         dbkjs.modules.search.addSearchConfig({
-            tabContents: "<i class='fa fa-file-pdf-o'></i> " + searchTabtext,
+            tabContents: "<span onClick='dbkjs.modules.library.initData()'><i class='fa fa-file-pdf-o'></i> " + searchTabtext + "</span>",
             placeholder: i18n.t("creator.search_placeholder"),
             search: function (value) {
                 value = value.toLowerCase();
@@ -147,7 +147,8 @@ dbkjs.modules.library = {
         me.library = [];
         $.ajax("api/library.json", {
             dataType: "json",
-            ifModified: true
+            ifModified: true,
+            cache: false
         }).done(function (data) {
             me.library = data.items;
             console.log("Got " + me.library.length + " library items");
