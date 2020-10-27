@@ -47,8 +47,8 @@ dbkjs.modules.kro = {
             .fail(function(msg) {
                 console.log("Error fetching KRO row config in KRO module: " + msg);
                 me.rowConfig = [
-                    { label: i18n.t("creator.adress"), order: 2, source: "dbk", enabled: false },
-                    { label: i18n.t("creator.fireAlarmCode"), order: 7, source: "dbk", enabled: false },
+                    { label: i18n.t("creator.adress"), order: 2, source: "dbk", disabled: false },
+                    { label: i18n.t("creator.fireAlarmCode"), order: 7, source: "dbk", disabled: false },
                 ];
             })
             .done(function(config) {
@@ -277,10 +277,7 @@ dbkjs.modules.kro = {
 
                 $bodyEl.html(bodyHtml);
                 $bodyTable.addClass("table-small-text");
-                $bodyTable.append("<thead><tr><th>Adres</th><th>Typering</th><th>Bedrijfs-<br/>naam</th><th>Telefoon</th><th>Indicatie<br/>aantal pers.</th></tr></thead><tbody>");
-                //bodyHtml += "<table class='table-small-text'><thead>";
-                //bodyHtml += "<tr><th>Adres</th><th>Typering</th><th>Bedrijfs-<br/>naam</th><th>Telefoon</th><th>Indicatie<br/>aantal pers.</th></tr>";
-                //bodyHtml += "</thead><tbody>";
+                $bodyTable.append("<thead style='cursor: pointer;'><tr><th>Adres</th><th>Typering</th><th>Bedrijfs-<br/>naam</th><th>Telefoon</th><th>Indicatie<br/>aantal pers.</th></tr></thead><tbody>");
 
                 if(kroAddressesData.length > 0) {
                     kroAddressesData
@@ -310,7 +307,6 @@ dbkjs.modules.kro = {
                 $bodyTable.append("</tbody></table>");
                 $bodyTable.tablesorter();
                 $bodyEl.append($bodyTable);
-                //bodyHtml += "</tbody></table>";
             });
     },
 
@@ -321,7 +317,7 @@ dbkjs.modules.kro = {
             .filter(function(row) {
                 var configFound = me.rowConfig.filter(function(cr) { return cr.label === row.l; });
                 if(configFound.length > 0) {
-                    return (typeof(row.source) === "undefined" ? "dbk" : row.source) === configFound[0].source;
+                    return (typeof row.source === "undefined" ? "dbk" : row.source) === configFound[0].source;
                 } else {
                     return true;
                 }
@@ -341,10 +337,10 @@ dbkjs.modules.kro = {
                 if(configFound.length > 0) {
                     order = configFound[0].order;
                 }
-                return { l: row.l, t: row.t, html: row.html, o: order, enabled: (row.enabled || true) }
+                return { l: row.l, t: row.t, html: row.html, o: order, disabled: row.disabled }
             })
+            .filter(function(row) { return !row.disabled; })
             .sort(function(a, b) { return a.o - b.o; })
-            .filter(function(row) { return row.enabled; })
             .map(function(row) {
                 return { l: row.l, t: row.t, html: row.html, };
             });
