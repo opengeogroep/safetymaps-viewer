@@ -47,8 +47,8 @@ dbkjs.modules.kro = {
             .fail(function(msg) {
                 console.log("Error fetching KRO row config in KRO module: " + msg);
                 me.rowConfig = [
-                    { label: i18n.t("creator.adress"), order: 2, source: "dbk", disabled: false },
-                    { label: i18n.t("creator.fireAlarmCode"), order: 7, source: "dbk", disabled: false },
+                    { label: i18n.t("creator.adress"), order: 2, source: "dbk", disabled: true },
+                    { label: i18n.t("creator.fireAlarmCode"), order: 7, source: "dbk", disabled: true },
                 ];
             })
             .done(function(config) {
@@ -217,6 +217,8 @@ dbkjs.modules.kro = {
     createGeneralRows: function(kro) {
         var rows = [];
         var typeList = "-";
+        var addressTypeList = "-";
+
         if (kro.pand_objecttypering_ordered) {
             typeList = "<a class='--without-effects' href='#custompanel' data-toggle='modal'><table onClick='dbkjs.modules.kro.showPopup(\"" + kro.bagpandid + "\")'>";
             kro.pand_objecttypering_ordered.map(function(type) {
@@ -225,10 +227,19 @@ dbkjs.modules.kro = {
             typeList += "</table></a>";
         }
 
+        if (kro.address_objecttypering_ordered) {
+            addressTypeList = "<table>";
+            kro.address_objecttypering_ordered.map(function(type) {
+                addressTypeList += "<tr><td>" + type + "</td></tr>";
+            });
+            addressTypeList += "</table>";
+        }
+
         rows.push({ l: "Oppervlakte gebouw", t: kro.adres_oppervlak + "m2", source: "kro" });
         rows.push({ l: "Bouwjaar", t: kro.pand_bouwjaar, source: "kro" });
         rows.push({ l: "Maximale hoogte",t: ("" + kro.pand_maxhoogte + "").replace(".", ",") + "m", source: "kro" });
         rows.push({ l: "Geschat aantal bouwlagen bovengronds",t: kro.pand_bouwlagen, source: "kro" });
+        rows.push({ l: "Functies binnen dit adres", html: addressTypeList, source: "kro" });
         rows.push({ l: "Alle functies in dit gebouw <a href='#custompanel' data-toggle='modal'><span onClick='dbkjs.modules.kro.showPopup(\"" + kro.bagpandid + "\")'><br/>klik voor meer info</span></a>", html: typeList, source: "kro" },);
 
         if (kro.pand_status.toLowerCase() !== "pand in gebruik") {
@@ -323,7 +334,7 @@ dbkjs.modules.kro = {
                 }
             })
             .map(function(row) {
-                return { l: row.l, t: row.t, html: row.html, };
+                return row;
             });
     },
 
@@ -334,12 +345,14 @@ dbkjs.modules.kro = {
             .map(function(row) {
                 var configFound = me.rowConfig.filter(function(cr) { return cr.label === row.l; });
                 var order = row.source === "kro" ? 1 : 999; 
+                var disabled = typeof row.disabled === "undefined" ? false : row.disabled;
                 if(configFound.length > 0) {
                     order = configFound[0].order;
+                    disabled = configFound[0].disabled;
                 }
-                return { l: row.l, t: row.t, html: row.html, o: order, disabled: row.disabled }
+                return { l: row.l, t: row.t, html: row.html, o: order, disabled: disabled }
             })
-            .filter(function(row) { return !row.disabled; })
+            .filter(function(row) { return row.disabled === false; })
             .sort(function(a, b) { return a.o - b.o; })
             .map(function(row) {
                 return { l: row.l, t: row.t, html: row.html, };
