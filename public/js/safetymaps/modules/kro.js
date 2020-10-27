@@ -304,8 +304,8 @@ dbkjs.modules.kro = {
                 if(kroAddressesData.length > 0) {
                     kroAddressesData
                         .sort((a, b) => {
-                            if ((a.adres_aantal_personen || "-1") > (b.adres_aantal_personen || "-1")) { return -1; }
-                            if ((a.adres_aantal_personen || "-1") < (b.adres_aantal_personen || "-1")) { return 1; }
+                            if ((a.straatnaam + (" " + a.huisnr || "")) > (b.straatnaam + (" " + b.huisnr || ""))) { return -1; }
+                            if ((a.straatnaam + (" " + a.huisnr || "")) < (b.straatnaam + (" " + b.huisnr || ""))) { return 1; }
                             return 0;
                         })
                         .map(function(dataRow) {
@@ -376,6 +376,6 @@ dbkjs.modules.kro = {
     },
 
     createIncidentAddressString: function(streetname, housenr, houseletter, houseaddition, city) {
-        return streetname + " " + ((housenr === 0 ? '' : housenr) || '') + (houseletter + " " || '') + (houseaddition + " " || '') + city;
+        return streetname + " " + ((housenr === 0 ? '' : housenr) || '') + (houseletter + " " || '') + (houseaddition + " " || '') + ", " + city;
     },
 }
