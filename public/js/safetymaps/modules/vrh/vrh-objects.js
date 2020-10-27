@@ -580,25 +580,30 @@ dbkjs.modules.vrh_objects = {
     },
 
     selectedObjectDetailsReceived: function(type, id, object, isIncident) {
+        var me = this;
         try {
+            var promise;
             if(type === "evenement") {
-                this.events.addFeaturesForObject(object);
-                this.events.updateInfoWindow(this.infoWindow.getName(), object);
+                me.events.addFeaturesForObject(object);
+                promise = me.events.updateInfoWindow(me.infoWindow.getName(), object);
             } else if(type === "dbk") {
-                this.dbks.addFeaturesForObject(object);
-                this.dbks.updateInfoWindow(this.infoWindow.getName(), object);
+                me.dbks.addFeaturesForObject(object);
+                promise = me.dbks.updateInfoWindow(me.infoWindow.getName(), object);
             } else if(type === "waterongevallenkaart") {
-                this.waterongevallen.addFeaturesForObject(object);
-                this.waterongevallen.updateInfoWindow(this.infoWindow.getName(), object);
-            }
-            if(!isIncident) {
-                safetymaps.infoWindow.showTab(this.infoWindow.getName(), "algemeen", true);
+                me.waterongevallen.addFeaturesForObject(object);
+                promise = me.waterongevallen.updateInfoWindow(me.infoWindow.getName(), object);
             }
 
-            this.infoWindowTabsResize();
-
-            this.selectedObject = object;
-            this.clusteringLayer.setSelectedIds([id]);
+            promise.then(function() {
+                if(!isIncident) {
+                    safetymaps.infoWindow.showTab(me.infoWindow.getName(), "algemeen", true);
+                }
+    
+                me.infoWindowTabsResize();
+    
+                me.selectedObject = object;
+                me.clusteringLayer.setSelectedIds([id]);
+            });
         } catch(error) {
             console.log("Error creating layers for object", object);
             if(error.stack) {
