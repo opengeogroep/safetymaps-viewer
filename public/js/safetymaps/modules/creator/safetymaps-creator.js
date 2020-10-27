@@ -309,8 +309,8 @@ dbkjs.modules.safetymaps_creator = {
             var matchHuisnummer = o.huisnummer && o.huisnummer === huisnummer;
             var matchHuisletter = !exactMatchHuisletter || ((o.huisletter  || "") === huisletter);
             var matchToevoeging = !exactMatchToevoeging || ((o.toevoeging || "") === toevoeging);
-            var matchWoonplaats = woonplaats && o.plaats && woonplaats === o.plaats;
-            var matchStraat = straat && o.straatnaam && straat === o.straatnaam;
+            var matchWoonplaats = woonplaats && o.plaats && woonplaats.toLowerCase() === o.plaats.toLowerCase();
+            var matchStraat = straat && o.straatnaam && straat.toLowerCase() === o.straatnaam.toLowerCase();
 
             if((matchPostcode || (matchWoonplaats && matchStraat)) && matchHuisnummer && matchHuisletter && matchToevoeging) {
                 console.log("Creator object adres match", o);
@@ -321,8 +321,8 @@ dbkjs.modules.safetymaps_creator = {
             var continueAdressenSearch = true;
             $.each(o.selectieadressen || [], function(i, a) {
                 var matchPostcode = a.pc && a.pc === postcode;
-                var matchWoonplaats = a.pl && a.pl === woonplaats;
-                var matchStraat = a.sn && a.sn === straat;
+                var matchWoonplaats = a.pl && a.pl.toLowerCase() === woonplaats.toLowerCase();
+                var matchStraat = a.sn && a.sn.toLowerCase() === straat.toLowerCase();
 
 
                 if(matchPostcode || (matchWoonplaats && matchStraat) && a.nrs) {
