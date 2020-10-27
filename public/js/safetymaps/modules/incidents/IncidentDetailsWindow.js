@@ -25,12 +25,15 @@
  * only one instance as it always uses modal popup name "incidentDetails".
  * @returns {IncidentDetailsWindow}
  */
-function IncidentDetailsWindow() {
+function IncidentDetailsWindow(editKladblokChat = false, showKladblokChat = false) {
     this.window = safetymaps.infoWindow.addWindow("incident", "Incident", false);
     this.div = $("<div></div>");
+    this.kcDiv = "<div style='display:block; margin-bottom:15px; height:27px; border:1px solid #ff0000; color:#ff0000;'><input id='kladblokChatRow' style='border: 0; width:calc(100% - 30px); margin-right:15px; color: #ff0000;' /><i id='addKladblokChatRow' class='fa fa-plus' style='cursor:pointer' /></div>";
     this.linkifyWords = null;
     this.crsLinkEnabled = false;
     this.addGoogleMapsNavigationLink = false;
+    this.showKladblokChat = showKladblokChat;
+    this.editKladblokChat = editKladblokChat;
     safetymaps.infoWindow.addTab("incident", "incident", "Incident", "incident", this.div, "first");
 };
 
@@ -238,6 +241,30 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
 
     if(restoreScrollTop) {
         this.div.scrollTop(scrollTop);
+    }
+
+    var me = this;
+    if (me.editKladblokChat) {
+        var incidentNr = (format === "vrh" ? incident.NR_INCIDENT : incident.IncidentNummer)
+        $("#addKladblokChatRow").on("click", function(e) {
+            $(me).triggerHandler("saveKladblokChatRow", [$("#kladblokChatRow").val(), incidentNr]);
+            $("#kladblokChatRow").val("");
+            me.kladblokChatRow = "";
+        });
+
+        $("#kladblokChatRow").keyup(function(e) {
+            if(e.keyCode == 13) {
+                $(me).triggerHandler("saveKladblokChatRow", [$("#kladblokChatRow").val(), incidentNr]);
+                $("#kladblokChatRow").val("");
+                me.kladblokChatRow = "";
+            }
+            me.kladblokChatRow = $("#kladblokChatRow").val();
+        })
+
+        $("#kladblokChatRow").val(me.kladblokChatRow);
+        if (me.kladblokChatRow && me.kladblokChatRow !== "" ) {
+            $("#kladblokChatRow").focus();
+        }
     }
 };
 
@@ -515,9 +542,23 @@ IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incid
             }
             break;
         case "falck":
-            $.each(incident.Kladblokregels, function(i, k) {
-                kladblokHTML += "<tr><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Inhoud)) + "</td></tr>";
-            });
+            if (this.editKladblokChat) {
+                kladblokHTML += this.kcDiv;
+            }
+            if (this.showKladblokChat) {
+                $.each(incident.Kladblokregels.sort(function (a, b) {
+                    var dateA = new moment(a.DTG);
+                    var dateB = new moment(b.DTG);
+                    return dateA._d - dateB._d;
+                }), function(i, k) {
+                    var style = k.IsChat ? "font-weight:normal !important; font-style:italic; !important" : "";
+                    kladblokHTML += "<tr style='" + style + "'><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Inhoud)) + "</td></tr>";
+                });
+            } else {
+                $.each(incident.Kladblokregels, function(i, k) {
+                    kladblokHTML += "<tr><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Inhoud)) + "</td></tr>";
+                });
+            }
             break;
         case "pharos":
             $.each(incident.kladblokregels, function(i, k) {
@@ -525,7 +566,10 @@ IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incid
             });
             break;
         default:
-            kladblokHTML = this.getIncidentKladblokDefaultHtml(incident.kladblok);
+            if (this.editKladblokChat) {
+                kladblokHTML += this.kcDiv;
+            }
+            kladblokHTML += this.getIncidentKladblokDefaultHtml(incident.kladblok);
     }
     return kladblokHTML;
 };
@@ -536,9 +580,12 @@ IncidentDetailsWindow.prototype.getIncidentKladblokDefaultHtml = function(kladbl
         return "";
     }
     var kladblokHTML = "<table>";
-    $.each(kladblok, function(i, k) {
+    $.each(kladblok.sort(function (a, b) {
+        return a.DTG_KLADBLOK_REGEL - b.DTG_KLADBLOK_REGEL;
+    }), function(i, k) {
         var ind = k.T_IND_DISC_KLADBLOK_REGEL;
         var disclass = "brw";
+        var style = "";
         if(ind.indexOf("B") === -1) {
             if(ind.indexOf("P") !== -1) {
                 disclass = "pol";
@@ -547,7 +594,10 @@ IncidentDetailsWindow.prototype.getIncidentKladblokDefaultHtml = function(kladbl
             }
             //console.log("Kladblok andere discipline: " + k.T_IND_DISC_KLADBLOK_REGEL +": " + k.INHOUD_KLADBLOK_REGEL);
         }
-        kladblokHTML += "<tr class='" + disclass + "'><td>" + AGSIncidentService.prototype.getAGSMoment(k.DTG_KLADBLOK_REGEL).format("HH:mm") + "</td><td>" +
+        if (me.showKladblokChat && k.IsChat) {
+            style = "font-weight:normal !important; font-style:italic; !important";
+        }        
+        kladblokHTML += "<tr class='" + disclass + "' style='" + style + "'><td>" + AGSIncidentService.prototype.getAGSMoment(k.DTG_KLADBLOK_REGEL).format("HH:mm") + "</td><td>" +
             me.linkify(dbkjs.util.htmlEncode(k.INHOUD_KLADBLOK_REGEL)) + "</td></tr>";
     });
     return kladblokHTML + "</table>";

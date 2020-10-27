@@ -45,7 +45,7 @@ function VehicleIncidentsController(options, featureSelector) {
         me.zoomToIncident();
     });
 
-    me.incidentDetailsWindow = new IncidentDetailsWindow();
+    me.incidentDetailsWindow = new IncidentDetailsWindow(me.options.editKladblokChatAuthorized, me.options.showKladblokChatAuthorized);
     me.incidentDetailsWindow.addGoogleMapsNavigationLink = (me.options.addGoogleMapsNavigationLink && me.options.googleMapsNavigationAuthorized);
     $(me.incidentDetailsWindow).on('show', function() {
         me.button.setAlerted(false);
@@ -54,6 +54,10 @@ function VehicleIncidentsController(options, featureSelector) {
 
     me.checkLinkifyWords();
     me.checkCrsLinks();
+
+    $(me.incidentDetailsWindow).on("saveKladblokChatRow", function(e, row, incidentnr) {
+        me.saveKladblokChatRow(escape(row), incidentnr);
+    });
 
     me.markerLayer = new IncidentMarkerLayer();
     $(me.markerLayer).on('click', function(incident, marker) {
@@ -1007,7 +1011,75 @@ VehicleIncidentsController.prototype.geenInzet = function() {
     this.incidentDetailsWindow.hideMultipleFeatureMatches();
 };
 
+VehicleIncidentsController.prototype.saveKladblokChatRow = function (row, incidentnr) {
+    var me = this;
+    if (me.options.editKladblokChatAuthorized && row.length > 0) {
+        $.ajax("api/kladblok/" + incidentnr + ".json", {
+            method: 'POST',
+            data: {
+                row: row
+            },
+            xhrFields: { withCredentials: true }, 
+            crossDomain: true
+        })
+        .fail(function (jqXHR, textStatus, errorThrown) {
+            console.log("Error saving kladblok chat row.", jqXHR, textStatus, errorThrown);
+        })
+        .done(function () {
+            console.log("Kladblok chat row saved.")
+            me.inzetIncident({ incident: me.incident, source: me.options.incidentSource }, me.incidentFromIncidentList);
+        })
+    }
+}
+
 VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, fromIncidentList) {
+    var me = this;
+    if (me.options.showKladblokChatAuthorized) {
+        $.ajax("api/kladblok/" + incidentInfo.incident.nummer + ".json", {
+            dataType: 'json',
+            xhrFields: { withCredentials: true }, 
+            crossDomain: true
+        })
+        .fail(function (jqXHR, textStatus, errorThrown) {
+            console.log("Error getting kladblok chat rows.", jqXHR, textStatus, errorThrown);
+            me.onInzetIncident(incidentInfo, fromIncidentList);
+        })
+        .done(function (data) {
+            var chatRow;
+            if(incidentInfo.source === "SafetyConnect"){
+                chatRow = data.map(function (itm) {
+                    return { DTG: itm.dtg, Inhoud: itm.inhoud, IsChat: true };
+                });
+                incidentInfo.incident.Kladblokregels = incidentInfo.incident.Kladblokregels.filter(function (f) { return !f.IsChat; }).concat(chatRow);
+            } else {
+                chatRow = data.map(function (itm) {
+                    return { 
+                        INCIDENT_ID: null,
+                        KLADBLOK_REGEL_ID: null,
+                        VOLG_NR_KLADBLOK_REGEL: null,
+                        DTG_KLADBLOK_REGEL: AGSIncidentService.prototype.createAGSDtgFromMoment(moment(itm.dtg, "yyyy-MM-DD HH:mm:ss")),
+                        T_IND_DISC_KLADBLOK_REGEL: "-B-",
+                        TYPE_KLADBLOK_REGEL: null,
+                        CODE_KLADBLOK_REGEL: null,
+                        INHOUD_KLADBLOK_REGEL: itm.inhoud,
+                        LOGIN_NAAM: null,
+                        USER_NAAM: null,
+                        EXTERNE_SYSTEEM_TYPE: null,
+                        EXTERNE_SYSTEEM_CODE: null,
+                        ESRI_OID: null,
+                        MELDING_ID: null,
+                        IsChat: true };
+                });
+                incidentInfo.incident.kladblok = incidentInfo.incident.kladblok.filter(function (f) { return !f.IsChat; }).concat(chatRow);
+            }
+            me.onInzetIncident(incidentInfo, fromIncidentList);
+        });
+    } else {
+        me.onInzetIncident(incidentInfo, fromIncidentList);
+    }
+};
+
+VehicleIncidentsController.prototype.onInzetIncident = function(incidentInfo, fromIncidentList) {
     console.log("inzetIncident (from IM: " + fromIncidentList + ")", incidentInfo);
 
     var me = this;
