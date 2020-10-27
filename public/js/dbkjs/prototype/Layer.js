@@ -281,6 +281,7 @@ dbkjs.Layer = dbkjs.Class({
                 }
 
                 if (dbkjs.modules.kro && dbkjs.modules.kro.shouldShowKroForMapLayer(this.layer.name)) {
+                    $('#vectorclickpanel').hide();
                     OpenLayers.Request.GET({url: this.layer.url, "params": params, callback: dbkjs.modules.kro.getBagPandIdFromLayerFeatureAndShowPopup, scope: _obj});
                 } else {
                     OpenLayers.Request.GET({url: this.layer.url, "params": params, callback: this.panel, scope: _obj});

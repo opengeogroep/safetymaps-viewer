@@ -46,7 +46,10 @@ dbkjs.modules.kro = {
         me.getObjectInfoRowConfig()
             .fail(function(msg) {
                 console.log("Error fetching KRO row config in KRO module: " + msg);
-                me.rowConfig = [];
+                me.rowConfig = [
+                    { label: i18n.t("creator.adress"), order: 2, source: "dbk", enabled: false },
+                    { label: i18n.t("creator.fireAlarmCode"), order: 7, source: "dbk", enabled: false },
+                ];
             })
             .done(function(config) {
                 me.rowConfig = config;
@@ -186,7 +189,7 @@ dbkjs.modules.kro = {
 
         dbkRows = kroRows.concat(dbkRows);
         dbkRows = me.removeDuplicateObjectInfoRows(dbkRows);
-        dbkRows = me.orderObjectInfoRows(dbkRows);
+        dbkRows = me.orderAndFilterObjectInfoRows(dbkRows);
 
         me.setScrollBar();
 
@@ -226,7 +229,7 @@ dbkjs.modules.kro = {
         rows.push({ l: "Bouwjaar", t: kro.pand_bouwjaar, source: "kro" });
         rows.push({ l: "Maximale hoogte",t: ("" + kro.pand_maxhoogte + "").replace(".", ",") + "m", source: "kro" });
         rows.push({ l: "Geschat aantal bouwlagen bovengronds",t: kro.pand_bouwlagen, source: "kro" });
-        rows.push({ l: "Meer in dit pand <a href='#custompanel' data-toggle='modal'><span onClick='dbkjs.modules.kro.showPopup(\"" + kro.bagpandid + "\")'><br/>klik voor meer info</span></a>", html: typeList, source: "kro" },);
+        rows.push({ l: "Alle functies in dit gebouw <a href='#custompanel' data-toggle='modal'><span onClick='dbkjs.modules.kro.showPopup(\"" + kro.bagpandid + "\")'><br/>klik voor meer info</span></a>", html: typeList, source: "kro" },);
 
         if (kro.pand_status.toLowerCase() !== "pand in gebruik") {
             rows.push({ l: "Status", t: kro.pand_status, source: "kro" });
@@ -272,7 +275,7 @@ dbkjs.modules.kro = {
                 }
 
                 bodyHtml += "<table class='table-small-text'><thead>";
-                bodyHtml += "<tr><th>Adres</th><th>Typering</th><th>Bedrijfs-<br/>naam</th><th>Telefoon</th><th>Aantal pers.</th></tr>";
+                bodyHtml += "<tr><th>Adres</th><th>Typering</th><th>Bedrijfs-<br/>naam</th><th>Telefoon</th><th>Indicatie aantal pers.</th></tr>";
                 bodyHtml += "</thead><tbody>";
 
                 if(kroAddressesData.length > 0) {
@@ -320,7 +323,7 @@ dbkjs.modules.kro = {
             });
     },
 
-    orderObjectInfoRows: function(rows) {
+    orderAndFilterObjectInfoRows: function(rows) {
         var me = dbkjs.modules.kro;
 
         return rows
@@ -330,9 +333,10 @@ dbkjs.modules.kro = {
                 if(configFound.length > 0) {
                     order = configFound[0].order;
                 }
-                return { l: row.l, t: row.t, html: row.html, o: order, }
+                return { l: row.l, t: row.t, html: row.html, o: order, enabled: (row.enabled || true) }
             })
             .sort(function(a, b) { return a.o - b.o; })
+            .filter(function(row) { return row.enabled; })
             .map(function(row) {
                 return { l: row.l, t: row.t, html: row.html, };
             });
