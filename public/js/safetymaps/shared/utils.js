@@ -120,6 +120,7 @@ function getNonInterfaceObscuredBounds(layer) {
         leftBuf = (el.position().left + el.outerWidth(true) + 30) * resolution;
     }
     var screenBounds = layer.map.getExtent();
+    var left = screenBounds.left ? screenBounds.left : 0;
     var newScreenBounds = new OpenLayers.Bounds([screenBounds.left + leftBuf, screenBounds.bottom + buf, screenBounds.right - buf, screenBounds.top - topBuf]);
 
     var newBoundsGeom = gf.createLinearRing([
