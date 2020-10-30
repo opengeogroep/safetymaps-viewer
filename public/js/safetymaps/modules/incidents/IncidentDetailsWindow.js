@@ -25,7 +25,14 @@
  * only one instance as it always uses modal popup name "incidentDetails".
  * @returns {IncidentDetailsWindow}
  */
-function IncidentDetailsWindow(editKladblokChat = false, showKladblokChat = false) {
+function IncidentDetailsWindow(editKladblokChat, showKladblokChat) {
+    if (typeof editKladblokChat === "undefined") {
+        editKladblokChat = false;
+    }
+    if (typeof showKladblokChat === "undefined") {
+        showKladblokChat = false;
+    }
+
     this.window = safetymaps.infoWindow.addWindow("incident", "Incident", false);
     this.div = $("<div></div>");
     this.kcDiv = "<div style='display:block; margin-bottom:15px; height:27px; border:1px solid #ff0000; color:#ff0000;'><input id='kladblokChatRow' style='border: 0; width:calc(100% - 30px); margin-right:15px; color: #ff0000;' /><i id='addKladblokChatRow' class='fa fa-plus' style='cursor:pointer' /></div>";
