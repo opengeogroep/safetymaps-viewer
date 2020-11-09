@@ -30,6 +30,7 @@ dbkjs.modules.kro = {
     activated: false,
     rowConfig: null,
     infoWindow: null,
+    pandLayer: null,
     cache: {
         incidentAddress: null,
     },
@@ -201,6 +202,7 @@ dbkjs.modules.kro = {
         dbkRows = me.orderAndFilterObjectInfoRows(dbkRows);
 
         me.setScrollBar();
+        me.createAndAddPandLayer(kro.bagpandid);
 
         return dbkRows;
     },
@@ -212,6 +214,7 @@ dbkjs.modules.kro = {
         rows.unshift({ l: "Incident adres", t: me.cache.incidentAddress, source: "kro" });
 
         me.setScrollBar();
+        me.createAndAddPandLayer(kro.bagpandid);
 
         safetymaps.infoWindow.addTab('incident', "general", i18n.t("creator.general"), "kro", safetymaps.creator.createInfoTabDiv(rows));
     },
@@ -370,8 +373,61 @@ dbkjs.modules.kro = {
             });
     },
 
+    createPandLayer: function() {
+        var me = this;
+
+        me.pandLayer = new OpenLayers.Layer.Vector("KRO pand layer", {
+            hover: false,
+            rendererOptions: {
+                zIndexing: true
+            },
+            styleMap: new OpenLayers.StyleMap({
+                default: new OpenLayers.Style({
+                    fillColor: "ff0000",
+                    fillOpacity: 0.2,
+                    strokeColor: "ff0000",
+                    strokeWidth: 1,
+                }),
+                temporary: new OpenLayers.Style({}),
+                select: new OpenLayers.Style({}),
+            }),
+        });
+    },
+
+    addPandFeatures: function(bagPandId) {
+        var me = this;
+        var params = {
+            pand: true,
+            bagPandId: bagPandId,
+        };
+        
+        me.callApi(params)
+            .then(function(result) {
+                var wktParser = new OpenLayers.Format.WKT();
+                var features = [];
+
+                $.each(result || [], function(i, pand) {
+                    var feature = wktParser.read(pand.pandgeo);
+                    feature.attributes.index = i;
+                    features.push(feature);
+                });
+
+                me.pandLayer.push(features);
+            })
+            .catch(function(error) {
+                console.log(error);
+            });
+    },
+
+    createAndAddPandLayer: function(bagPandId) {
+        var me = this;
+        
+        me.createPandLayer();
+        me.addPandFeatures(bagpandid);
+        dbkjs.map.addLayer(me.pandLayer);
+    },
+
     createAddressString: function(streetname, housenr, houseletter, houseaddition, city) {
-       //return `${ streetname }|${ (housenr === 0 ? '' : housenr) || '' }|${ houseletter || '' }|${ houseaddition || '' }|${ city }`;
        return streetname + "|" + ((housenr === 0 ? '' : housenr) || '') + "|" + (houseletter || '') + "|" + (houseaddition || '') + "|" + city;
     },
 
