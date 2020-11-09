@@ -383,9 +383,9 @@ dbkjs.modules.kro = {
             },
             styleMap: new OpenLayers.StyleMap({
                 default: new OpenLayers.Style({
-                    fillColor: "ff0000",
+                    fillColor: "#ff0000",
                     fillOpacity: 0.2,
-                    strokeColor: "ff0000",
+                    strokeColor: "#ff0000",
                     strokeWidth: 1,
                 }),
                 temporary: new OpenLayers.Style({}),
@@ -402,7 +402,10 @@ dbkjs.modules.kro = {
         };
         
         me.callApi(params)
-            .then(function(result) {
+            .fail(function(error) {
+                console.log(error);
+            })
+            .done(function(result) {
                 var wktParser = new OpenLayers.Format.WKT();
                 var features = [];
 
@@ -412,10 +415,7 @@ dbkjs.modules.kro = {
                     features.push(feature);
                 });
 
-                me.pandLayer.push(features);
-            })
-            .catch(function(error) {
-                console.log(error);
+                me.pandLayer.addFeatures(features);
             });
     },
 
@@ -423,7 +423,7 @@ dbkjs.modules.kro = {
         var me = this;
         
         me.createPandLayer();
-        me.addPandFeatures(bagpandid);
+        me.addPandFeatures(bagPandId);
         dbkjs.map.addLayer(me.pandLayer);
     },
 
