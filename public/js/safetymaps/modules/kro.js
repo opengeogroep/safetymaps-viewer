@@ -315,6 +315,9 @@ dbkjs.modules.kro = {
                             return 0;
                         })
                         .map(function(dataRow) {
+                            var containsWoTypering = (dataRow.adres_objecttypering
+                                ? dataRow.adres_objecttypering.split('||')
+                                : ["|"]).map(function(itm) { return itm.split('|')[0].includes("Wo") }).filter(function(itm) { return itm }).length > 0;
                             var adres_typering = (dataRow.adres_objecttypering
                                 ? dataRow.adres_objecttypering.split('||')
                                 : ["|"]).map(function(itm) { return itm.split('|')[1] }).join(', ');
@@ -323,8 +326,8 @@ dbkjs.modules.kro = {
                                 : ["|"]).map(function(itm) { return itm.split('|')[1] }).join(', ');
                             var adres = dataRow.straatnaam + (" " + dataRow.huisnr || "") + (" " + dataRow.huisletter || "") + (" " + dataRow.huistoevg || "") + dataRow.plaatsnaam;
                             var rowHtml = "<tr class='" + rowCss + "'><td>" + (adres) + "</td><td>" + (aanzien_typering) + (adres_typering) +
-                                "</td><td>" + (dataRow.adres_bedrijfsnaam || "") + "</td><td>" + (dataRow.adres_telefoonnummer || "") +
-                                "</td><td>" + (dataRow.adres_aantal_personen || "") + "</td></tr>";
+                                "</td><td>" + (containsWoTypering ? '' : dataRow.adres_bedrijfsnaam || "") + "</td><td>" + (containsWoTypering ? '' : dataRow.adres_telefoonnummer || "") +
+                                "</td><td>" + (containsWoTypering ? '' : dataRow.adres_aantal_personen || "") + "</td></tr>";
 
                             $bodyTable.append(rowHtml);
 
