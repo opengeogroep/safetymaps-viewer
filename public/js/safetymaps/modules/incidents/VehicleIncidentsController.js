@@ -336,16 +336,17 @@ VehicleIncidentsController.prototype.addConfigControls = function() {
                 "</div>";
     }
 
+    var dbkResponsive =  $("#bottom_left_buttons").hasClass("normal") ? "col-xs-4" : "col-xs-12";
     var incidentSettings = $(
             "<div><h4>Meldkamerkoppeling</h4><p/>" +
                 "<div class='container' style='width: 400px; margin-left: 0px'>" +
                     "<div class='row'>" +
-                        "<div class='dbk-responsive col-xs-4'>Voertuignummer(s):</div>" +
+                        "<div class='dbk-responsive " + dbkResponsive + "'>Voertuignummer(s):</div>" +
                         "<div class='col-xs-6'><input type='text' disabled id='input_voertuignummer' maxlength='20'></div>" +
                         "<div class='col-xs-2' style='height: 34px'><button class='btn btn-primary' id='btn_enable_voertuignummer'>Wijzigen</button></div>" +
                     "</div>" +
                     "<div class='row ' id='cfg_voertuignummercode' style='visibility: hidden; margin-top: 10px'>" +
-                        "<div class='dbk-responsive col-xs-4'>Beveiligingscode:</div>" +
+                        "<div class='dbk-responsive " + dbkResponsive + "'>Beveiligingscode:</div>" +
                         "<div class='col-xs-6'><input id='cfg_input_code' type='password' autocapitalize='none'></div>" +
                         "<div class='col-xs-2'><button class='btn btn-primary' id='cfg_btn_codeok'>OK</button></div>" +
                     "</div>" +

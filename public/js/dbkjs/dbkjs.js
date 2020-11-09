@@ -211,7 +211,7 @@ dbkjs.gotOrganisation = function () {
 
 dbkjs.layoutElements = function() {
     $(window).on("resize", dbkjs.resizeElements);
-    window.setInterval(dbkjs.resizeElements, 300);
+    //window.setInterval(dbkjs.resizeElements, 300);
     dbkjs.resizeElements();
 };
 
@@ -241,10 +241,12 @@ dbkjs.resizeElements = function(e) {
         leftMenu.removeClass("small");
         leftMenu.addClass(clazz);
 
-        if (clazz === "medium") {
-            $("#zoom_buttons").toggle(false);
-            $("#settingspanel_b .dbk-responsive").removeClass("col-xs-4");
-            $("#settingspanel_b .dbk-responsive").addClass("col-xs-12");
+        if (clazz !== "normal") {
+            window.setTimeout(function() {
+                $("#zoom_buttons").toggle(false);
+                $("#settingspanel_b .dbk-responsive").removeClass("col-xs-4");
+                $("#settingspanel_b .dbk-responsive").addClass("col-xs-12");
+            }, 500);
         } else {
             $("#zoom_buttons").toggle(dbkjs.options.showZoomButtons);
             $("#settingspanel_b .dbk-responsive").removeClass("col-xs-12");
