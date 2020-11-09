@@ -47,6 +47,7 @@ dbkjs.modules.kro = {
 
         me.activated = true;
 
+        me.createPandLayer();
         me.getObjectInfoRowConfig()
             .fail(function(msg) {
                 console.log("Error fetching KRO row config in KRO module: " + msg);
@@ -58,6 +59,8 @@ dbkjs.modules.kro = {
             .done(function(config) {
                 me.rowConfig = config;
             });
+        
+        dbkjs.map.addLayer(me.pandLayer);
 
        /* me.rowConfig = [
             { label: i18n.t("creator.formal_name"), order: 0, source: "dbk" },
@@ -202,7 +205,7 @@ dbkjs.modules.kro = {
         dbkRows = me.orderAndFilterObjectInfoRows(dbkRows);
 
         me.setScrollBar();
-        me.createAndAddPandLayer(kro.bagpandid);
+        me.addPandFeatures(kro.bagpandid);
 
         return dbkRows;
     },
@@ -214,7 +217,7 @@ dbkjs.modules.kro = {
         rows.unshift({ l: "Incident adres", t: me.cache.incidentAddress, source: "kro" });
 
         me.setScrollBar();
-        me.createAndAddPandLayer(kro.bagpandid);
+        me.addPandFeatures(kro.bagpandid);
 
         safetymaps.infoWindow.addTab('incident', "general", i18n.t("creator.general"), "kro", safetymaps.creator.createInfoTabDiv(rows));
     },
@@ -383,9 +386,9 @@ dbkjs.modules.kro = {
             },
             styleMap: new OpenLayers.StyleMap({
                 default: new OpenLayers.Style({
-                    fillColor: "#ff0000",
+                    fillColor: "#66ff66",
                     fillOpacity: 0.2,
-                    strokeColor: "#ff0000",
+                    strokeColor: "#66ff66",
                     strokeWidth: 1,
                 }),
                 temporary: new OpenLayers.Style({}),
@@ -401,6 +404,7 @@ dbkjs.modules.kro = {
             bagPandId: bagPandId,
         };
         
+        me.pandLayer.clearFeatures();
         me.callApi(params)
             .fail(function(error) {
                 console.log(error);
@@ -417,14 +421,6 @@ dbkjs.modules.kro = {
 
                 me.pandLayer.addFeatures(features);
             });
-    },
-
-    createAndAddPandLayer: function(bagPandId) {
-        var me = this;
-        
-        me.createPandLayer();
-        me.addPandFeatures(bagPandId);
-        dbkjs.map.addLayer(me.pandLayer);
     },
 
     createAddressString: function(streetname, housenr, houseletter, houseaddition, city) {
