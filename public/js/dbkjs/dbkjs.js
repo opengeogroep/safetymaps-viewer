@@ -241,7 +241,7 @@ dbkjs.resizeElements = function(e) {
         leftMenu.removeClass("small");
         leftMenu.addClass(clazz);
 
-        if (clazz === "small") {
+        if (clazz === "medium") {
             $("#zoom_buttons").toggle(false);
             $("#settingspanel_b .dbk-responsive").removeClass("col-xs-4");
             $("#settingspanel_b .dbk-responsive").addClass("col-xs-12");
