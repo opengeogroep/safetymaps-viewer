@@ -404,7 +404,7 @@ dbkjs.modules.kro = {
             bagPandId: bagPandId,
         };
         
-        me.pandLayer.clearFeatures();
+        me.pandLayer.removeAllFeatures();
         me.callApi(params)
             .fail(function(error) {
                 console.log(error);
