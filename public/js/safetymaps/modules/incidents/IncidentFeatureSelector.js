@@ -82,9 +82,7 @@ IncidentFeatureSelector.prototype.findAndSelectMatches = function(matchInfo, inc
             console.log("Error fetching KRO data in Incident Feature Selector: " + msg);
         })
         .done(function(kro) {
-            if(kro.length > 0) {
-                dbkjs.modules.kro.showKroForIncidentWithoutDbk(kro[0]);
-            }
+            dbkjs.modules.kro.showKroForIncidentWithoutDbk(kro);
         });
     }
 };

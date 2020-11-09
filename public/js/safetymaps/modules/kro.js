@@ -212,12 +212,18 @@ dbkjs.modules.kro = {
 
     showKroForIncidentWithoutDbk: function(kro) {
         var me = dbkjs.modules.kro;
-        var rows = me.createGeneralRows(kro);
+        var rows = [];
+
+        if (kro.length > 0) {
+            kro = kro[0];
+
+            rows = me.createGeneralRows(kro);
+
+            me.setScrollBar();
+            me.addPandFeatures(kro.bagpandid);
+        }
 
         rows.unshift({ l: "Incident adres", t: me.cache.incidentAddress, source: "kro" });
-
-        me.setScrollBar();
-        me.addPandFeatures(kro.bagpandid);
 
         safetymaps.infoWindow.addTab('incident', "general", i18n.t("creator.general"), "kro", safetymaps.creator.createInfoTabDiv(rows));
     },
@@ -300,6 +306,8 @@ dbkjs.modules.kro = {
                             bodyHtml += "<tr><td>" + kroItm.l + "</td><td>" + kroItm.t + "</td></tr>";
                         });
                         bodyHtml += "</table><br/>";
+
+                        me.addPandFeatures(kroAddressesData[0].bagpandid);
                     }
                 }
 
@@ -427,7 +435,11 @@ dbkjs.modules.kro = {
     },
 
     createAddressString: function(streetname, housenr, houseletter, houseaddition, city) {
-       return streetname + "|" + ((housenr === 0 ? '' : housenr) || '') + "|" + (houseletter || '') + "|" + (houseaddition || '') + "|" + city;
+        if ((houseletter === null || houseletter === '') && (houseaddition !== null && houseaddition !== '')) {
+            houseletter = houseaddition;
+            houseaddition = '';
+        }
+        return streetname + "|" + ((housenr === 0 ? '' : housenr) || '') + "|" + (houseletter || '') + "|" + (houseaddition || '') + "|" + city;
     },
 
     createIncidentAddressString: function(streetname, housenr, houseletter, houseaddition, city) {
