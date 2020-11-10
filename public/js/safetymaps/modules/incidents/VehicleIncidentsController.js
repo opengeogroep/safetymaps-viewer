@@ -322,13 +322,14 @@ VehicleIncidentsController.prototype.addConfigControls = function() {
     var me = this;
 
     var incidentCodeHtml = "";
+    var dbkResponsive =  $("#bottom_left_buttons").hasClass("normal") ? "col-xs-4" : "col-xs-12";
 
     if(me.options.incidentMonitorAuthorized && me.options.incidentMonitorCode) {
         incidentCodeHtml =
                 "<div><h4>Incidentmonitor</h4><p/>" +
                     "<div class='container' style='width: 400px; margin-left: 0px'>" +
                         "<div class='row'>" +
-                            "<div class='col-xs-4'>Activatiecode:</div>" +
+                            "<div class='dbk-responsive " + dbkResponsive + "'>Activatiecode:</div>" +
                             "<div class='col-xs-6'><input id='input_incidentmonitorcode' type='password' disabled autocapitalize='none'></div>" +
                             "<div class='col-xs-2'><input type='button' class='btn btn-primary' id='btn_incidentmonitorcode' value='Wijzigen'></div>" +
                         "</div>" +
@@ -336,7 +337,6 @@ VehicleIncidentsController.prototype.addConfigControls = function() {
                 "</div>";
     }
 
-    var dbkResponsive =  $("#bottom_left_buttons").hasClass("normal") ? "col-xs-4" : "col-xs-12";
     var incidentSettings = $(
             "<div><h4>Meldkamerkoppeling</h4><p/>" +
                 "<div class='container' style='width: 400px; margin-left: 0px'>" +
