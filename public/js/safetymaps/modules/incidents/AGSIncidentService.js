@@ -88,7 +88,12 @@ AGSIncidentService.prototype.whenInitialized = function() {
     if(this.initialized) {
         d.resolve();
     } else {
+        var timeout = window.setTimeout(function() {
+            d.reject();
+        }, 5000);
+
         $(me).on("initialized", function() {
+            window.clearTimeout(timeout);
             d.resolve();
         });
     }
