@@ -17,7 +17,7 @@
  *  along with safetymaps-viewer. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* global dbkjs, safetymaps, OpenLayers, Proj4js, jsts, moment, i18n, Mustache, PDFObject, IncidentDetailsWindow */
+/* global dbkjs, safetymaps, OpenLayers, Proj4js, jsts, moment, i18n, Mustache, PDFObject, IncidentDetailsWindow, AGSIncidentService */
 
 /**
  * Controller for displaying incident info from multiple sources for a specific
@@ -106,13 +106,8 @@ function VehicleIncidentsController(options, featureSelector) {
 
     if(me.options.incidentSource === "VrhAGS" || me.options.incidentSourceFallback === "VrhAGS") {
         // Initialize AGS service
-        this.service = new AGSIncidentService(me.options.apiPath + "vrhAGS", me.options.apiPath + "vrhAGSEenheden");
-
-        this.service.initialize(me.options.apiPath + "vrhAGSToken", null, null)
-        .fail(function(e) {
-            console.log("VrhAGS service failed to initialize", arguments);
-            return;
-        });
+        me.service = new AGSIncidentService(me.options.apiPath + "vrhAGS", me.options.apiPath + "vrhAGSEenheden");
+        me.initializeService();
     }
 
     me.incidentMonitorCode = window.localStorage.getItem("imcode");
@@ -125,7 +120,19 @@ function VehicleIncidentsController(options, featureSelector) {
             me.options.showStatus && me.updateStatus();
         }, 2000);
     });
-}
+};
+
+VehicleIncidentsController.prototype.initializeService = function() {
+    var me = this;
+    me.service.initialize(me.options.apiPath + "vrhAGSToken", null, null)
+    .fail(function(e) {
+        console.log("VrhAGS service failed to initialize", arguments);
+        window.setTimeout(function() {
+            console.log('Retrying VrhAGS service initialization');
+            me.initializeService();
+        }, 10000);
+    });
+};
 
 VehicleIncidentsController.prototype.defaultOptions = function(options) {
     return $.extend({
