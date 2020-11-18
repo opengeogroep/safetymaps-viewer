@@ -1014,19 +1014,18 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, isIn
         })
         .always(function() {
             safetymaps.infoWindow.addTab(windowId, "algemeen", "Object info" , "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
-            safetymaps.vrh.Dbks.prototype.updateRemainingInfoWindow(windowId, object);
+            safetymaps.vrh.Dbks.prototype.updateRemainingInfoWindow(windowId, object, me);
             d.resolve();
         });
     } else {
         safetymaps.infoWindow.addTab(windowId, "algemeen", "Object info" , "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
-        safetymaps.vrh.Dbks.prototype.updateRemainingInfoWindow(windowId, object);
+        safetymaps.vrh.Dbks.prototype.updateRemainingInfoWindow(windowId, object, me);
         d.resolve();
     }
     return d.promise();
 };
 
-safetymaps.vrh.Dbks.prototype.updateRemainingInfoWindow = function(windowId, object) {
-    var me = this;
+safetymaps.vrh.Dbks.prototype.updateRemainingInfoWindow = function(windowId, object, me) {
     var rows = [];
     var o = object;
     var p = o.hoofdpand;
