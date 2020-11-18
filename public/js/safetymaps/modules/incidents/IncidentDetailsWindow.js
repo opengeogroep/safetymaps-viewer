@@ -840,7 +840,7 @@ IncidentDetailsWindow.prototype.getXmlIncidentHtml = function(incident, showInze
     });
     html += Mustache.render(template, { label: "Adres", value: v });
 
-    html += Mustache.render(template, { label: "Postcode", value: $(adres).find(xmlFormat.postcode).text() });
+    html += Mustache.render(template, { label: "Object", value: $(adres).find(xmlFormat.postcode).text() });
     html += Mustache.render(template, { label: "Woonplaats", value: $(adres).find(xmlFormat.woonplaats).text() });
 
     html += '<tr><td>&nbsp;</td><td></td></tr>';
