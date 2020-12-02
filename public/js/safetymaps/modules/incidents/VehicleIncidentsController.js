@@ -1055,7 +1055,7 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
             var chatRow;
             if(incidentInfo.source === "SafetyConnect"){
                 chatRow = data.map(function (itm) {
-                    return { DTG: itm.dtg, Inhoud: itm.inhoud, IsChat: true };
+                    return { DTG: itm.dtg, Inhoud: decodeURIComponent(itm.inhoud), IsChat: true };
                 });
                 incidentInfo.incident.Kladblokregels = incidentInfo.incident.Kladblokregels.filter(function (f) { return !f.IsChat; }).concat(chatRow);
             } else {
@@ -1068,7 +1068,7 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
                         T_IND_DISC_KLADBLOK_REGEL: "-B-",
                         TYPE_KLADBLOK_REGEL: null,
                         CODE_KLADBLOK_REGEL: null,
-                        INHOUD_KLADBLOK_REGEL: itm.inhoud,
+                        INHOUD_KLADBLOK_REGEL: decodeURIComponent(itm.inhoud),
                         LOGIN_NAAM: null,
                         USER_NAAM: null,
                         EXTERNE_SYSTEEM_TYPE: null,

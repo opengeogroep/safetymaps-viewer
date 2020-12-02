@@ -252,7 +252,10 @@ DrawingPanelWindow.prototype.unselectSymbol = function() {
 DrawingPanelWindow.prototype.featureSelected = function(f) {   
     var me = this;
     
-    $("#drawing_feature_controls").show();
+    if (me.options.editAuthorized) {
+        $("#drawing_feature_controls").show();
+    }
+
     $("#drawing_feature_label").val(f.attributes.label);
 
     $("#drawing_feature_rotate").slider({
