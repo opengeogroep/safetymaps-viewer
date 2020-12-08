@@ -556,8 +556,8 @@ IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incid
                     kladblokHTML += "<tr class='" + styleClass + "' style='" + style + "'><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Inhoud)) + "</td></tr>";
                 });
             } else {
-                var styleClass = this.getKladblokRegelColor(k.Discipline);
                 $.each(incident.Kladblokregels, function(i, k) {
+                    var styleClass = this.getKladblokRegelColor(k.Discipline);
                     kladblokHTML += "<tr class='" + styleClass + "'><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Inhoud)) + "</td></tr>";
                 });
             }
