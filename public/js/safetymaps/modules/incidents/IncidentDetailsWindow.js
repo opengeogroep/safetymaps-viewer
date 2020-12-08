@@ -580,7 +580,7 @@ IncidentDetailsWindow.prototype.getKladblokRegelColor = function(kladblokregelDi
     if (kladblokregelDiscipline.indexOf("B") === -1) {
         if (kladblokregelDiscipline.indexOf("P") !== -1) {
             return "pol";
-        } else if (kladblokregelDiscipline.indexOf("B") !== -1) {
+        } else if (kladblokregelDiscipline.indexOf("A") !== -1) {
             return "ambu";
         }
     }
