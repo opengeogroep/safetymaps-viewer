@@ -551,12 +551,14 @@ IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incid
                     var dateB = new moment(b.DTG);
                     return dateA._d - dateB._d;
                 }), function(i, k) {
+                    var styleClass = this.getKladblokRegelColor(k.Discipline);
                     var style = k.IsChat ? "font-weight:normal !important; font-style:italic; !important" : "";
-                    kladblokHTML += "<tr style='" + style + "'><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Inhoud)) + "</td></tr>";
+                    kladblokHTML += "<tr class='" + styleClass + "' style='" + style + "'><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Inhoud)) + "</td></tr>";
                 });
             } else {
+                var styleClass = this.getKladblokRegelColor(k.Discipline);
                 $.each(incident.Kladblokregels, function(i, k) {
-                    kladblokHTML += "<tr><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Inhoud)) + "</td></tr>";
+                    kladblokHTML += "<tr class='" + styleClass + "'><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Inhoud)) + "</td></tr>";
                 });
             }
             break;
@@ -573,6 +575,17 @@ IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incid
     }
     return kladblokHTML;
 };
+
+IncidentDetailsWindow.prototype.getKladblokRegelColor = function(kladblokregelDiscipline) {
+    if (kladblokregelDiscipline.indexOf("B") === -1) {
+        if (kladblokregelDiscipline.indexOf("P") !== -1) {
+            return "pol";
+        } else if (kladblokregelDiscipline.indexOf("B") !== -1) {
+            return "ambu";
+        }
+    }
+    return "brw";
+}
 
 IncidentDetailsWindow.prototype.getIncidentKladblokDefaultHtml = function(kladblok) {
     var me = this;
