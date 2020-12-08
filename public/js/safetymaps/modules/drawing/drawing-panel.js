@@ -47,7 +47,7 @@ function DrawingPanelWindow(options) {
 
     if(options.showMeasureButtons) {
         $(dbkjs).one("dbkjs_init_complete", function() {
-            if (options.cloneMeasureButtons) {
+            if (options.keepExistingMeasureButtons) {
                 $("#btn_measure_area").clone(true).prependTo(measure);
                 $("#btn_measure_distance").clone(true).prependTo(measure);
             } else {
