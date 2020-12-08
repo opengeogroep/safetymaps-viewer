@@ -551,13 +551,13 @@ IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incid
                     var dateB = new moment(b.DTG);
                     return dateA._d - dateB._d;
                 }), function(i, k) {
-                    var styleClass = this.getKladblokRegelColor(k.Discipline);
+                    var styleClass = me.getKladblokRegelColor(k.Discipline);
                     var style = k.IsChat ? "font-weight:normal !important; font-style:italic; !important" : "";
                     kladblokHTML += "<tr class='" + styleClass + "' style='" + style + "'><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Inhoud)) + "</td></tr>";
                 });
             } else {
                 $.each(incident.Kladblokregels, function(i, k) {
-                    var styleClass = this.getKladblokRegelColor(k.Discipline);
+                    var styleClass = me.getKladblokRegelColor(k.Discipline);
                     kladblokHTML += "<tr class='" + styleClass + "'><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Inhoud)) + "</td></tr>";
                 });
             }
