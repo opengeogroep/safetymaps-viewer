@@ -31,6 +31,7 @@ dbkjs.modules.connectionmonitor = {
 
         this.options = $.extend({
             interval: 5,
+            timeout: 5000,
             hideButton: false
         }, this.options);
         this.options.interval = this.options.interval * 1000;
@@ -101,7 +102,7 @@ dbkjs.modules.connectionmonitor = {
             dataType: "json",
             cache: false,
             ifModified: true,
-            timeout: 5000,
+            timeout: me.options.timeout,
             complete: function(jqXHR, textStatus) {
                 if(textStatus === "success" || textStatus === "notmodified") {
                     me.onConnectionOK();
