@@ -279,7 +279,16 @@ dbkjs.Layer = dbkjs.Class({
                     params.x = Math.round(e.xy.x);
                     params.y = Math.round(e.xy.y);
                 }
-                OpenLayers.Request.GET({url: this.layer.url, "params": params, callback: this.panel, scope: _obj});
+                $.ajax(this.layer.url, {
+                    data: params,
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    crossDomain: true
+                }).done(function(result) {
+                    _obj.panel(result);
+                });
+                //OpenLayers.Request.GET({url: this.layer.url, "params": params, callback: this.panel, scope: _obj});
                 //OpenLayers.Event.stop(e);
             }
         }
@@ -294,7 +303,7 @@ dbkjs.Layer = dbkjs.Class({
         //verwerk de featureinformatie
         g = new OpenLayers.Format.WMSGetFeatureInfo();
 
-        features = g.read($.parseXML(response.responseText));
+        features = g.read($.parseXML(response));
         console.log("Feature info for layer "+ _obj.layer.name + ": "+ features.length + " features returned");//, response.responseText);
         if (features.length > 0) {
             var title = _obj.layer.name.split("\\");
