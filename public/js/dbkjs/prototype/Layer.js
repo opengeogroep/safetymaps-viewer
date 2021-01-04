@@ -279,6 +279,8 @@ dbkjs.Layer = dbkjs.Class({
                     params.x = Math.round(e.xy.x);
                     params.y = Math.round(e.xy.y);
                 }
+
+                var layerName = this.layer.name;
                 $.ajax(this.layer.url, {
                     data: params,
                     xhrFields: {
@@ -286,14 +288,14 @@ dbkjs.Layer = dbkjs.Class({
                     },
                     crossDomain: true
                 }).done(function(result) {
-                    _obj.panel(result);
+                    _obj.panel(result, layerName);
                 });
                 //OpenLayers.Request.GET({url: this.layer.url, "params": params, callback: this.panel, scope: _obj});
                 //OpenLayers.Event.stop(e);
             }
         }
     },
-    panel: function (response) {
+    panel: function (response, layerName) {
         _obj = this;
 
         if(dbkjs.options.featureInfoMaxScale && dbkjs.map.getScale() > dbkjs.options.featureInfoMaxScale) {
@@ -306,7 +308,7 @@ dbkjs.Layer = dbkjs.Class({
         features = g.read($.parseXML(response));
         console.log("Feature info for layer "+ _obj.layer.name + ": "+ features.length + " features returned");//, response.responseText);
         if (features.length > 0) {
-            var title = _obj.layer.name.split("\\");
+            var title = layerName.split("\\");
             $('#vectorclickpanel_h').html('<span class="h4"><i class="fa fa-info-circle"></i>&nbsp;' + title[title.length-1] + '</span>');
             var html = '<div class="table-responsive"><table class="table table-hover">';
             for (var feat in features) {
