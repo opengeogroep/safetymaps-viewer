@@ -56,7 +56,7 @@ function VehicleIncidentsController(options, featureSelector) {
     me.checkCrsLinks();
 
     $(me.incidentDetailsWindow).on("saveKladblokChatRow", function(e, row, incidentnr) {
-        me.saveKladblokChatRow(escape(row), incidentnr);
+        me.saveKladblokChatRow(row, incidentnr);
     });
 
     me.markerLayer = new IncidentMarkerLayer();
