@@ -287,7 +287,8 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
                 twitterIgnoredAccounts: me.options.twitterIgnoredAccounts,
                 logTwitter: me.options.logTwitter,
                 showSpeed: me.options.showSpeed,
-                excludeManuallyCreatedIncidents: me.options.excludeManuallyCreatedIncidents
+                excludeManuallyCreatedIncidents: me.options.excludeManuallyCreatedIncidents,
+                getIncidentsFromDaysInPast: me.options.getIncidentsFromDaysInPast,
             };
 
             me.incidentMonitorController = new IncidentMonitorController(incidentMonitorOptions);
@@ -1091,6 +1092,17 @@ VehicleIncidentsController.prototype.onInzetIncident = function(incidentInfo, fr
     console.log("inzetIncident (from IM: " + fromIncidentList + ")", incidentInfo);
 
     var me = this;
+    
+    var filterOutKladblokRegelsContaining = me.options.filterOutKladblokRegelsContaining;
+    if(incidentInfo.source === "SafetyConnect") {
+        incidentInfo.incident.Kladblokregels = incidentInfo.incident.Kladblokregels.filter(function(incidentFilter) {
+            return !filterOutKladblokRegelsContaining.some(function(s) { return incidentFilter.Inhoud.toLowerCase().indexOf(s) >= 0; });
+        });
+    } else {
+        incidentInfo.incident.kladblok = incidentInfo.incident.kladblok.filter(function(incidentFilter) {
+            return !filterOutKladblokRegelsContaining.some(function(s) { return incidentFilter.INHOUD_KLADBLOK_REGEL.toLowerCase().indexOf(s) >= 0; });
+        });
+    }
 
     // XXX update als incidentInfo.incident.nummer !== me.incidentNummer, is met timeout 30s...
 
