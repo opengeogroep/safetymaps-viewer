@@ -56,7 +56,7 @@ function VehicleIncidentsController(options, featureSelector) {
     me.checkCrsLinks();
 
     $(me.incidentDetailsWindow).on("saveKladblokChatRow", function(e, row, incidentnr) {
-        me.saveKladblokChatRow(escape(row), incidentnr);
+        me.saveKladblokChatRow(row, incidentnr);
     });
 
     me.markerLayer = new IncidentMarkerLayer();
@@ -1017,7 +1017,7 @@ VehicleIncidentsController.prototype.saveKladblokChatRow = function (row, incide
         $.ajax("api/kladblok/" + incidentnr + ".json", {
             method: 'POST',
             data: {
-                row: decodeURIComponent(row)
+                row: row
             },
             xhrFields: { withCredentials: true }, 
             crossDomain: true
