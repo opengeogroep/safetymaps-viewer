@@ -40,6 +40,7 @@ dbkjs.modules.drawing = {
 
         me.options = $.extend({
             showMeasureButtons: false,
+            keepExistingMeasureButtons: false,
             // Set by ViewerApiActionBean
             editAuthorized: false,
             colors: ["yellow", "green", "red", "rgb(45,45,255)", "black"],
