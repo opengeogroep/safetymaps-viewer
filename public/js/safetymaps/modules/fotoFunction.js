@@ -61,6 +61,7 @@ dbkjs.modules.fotoFunction = {
                     me.incidentNr = commonIncident.nummer || incident.IncidentNummer;
                     me.resetCarousel();
                     me.getFotoForIncident(incident, true);
+                    me.clearTimer();
                     me.updateFotoTimeout = window.setInterval(function() {
                         me.getFotoForIncident(incident, false);
                     }, me.options.interval);
@@ -69,15 +70,19 @@ dbkjs.modules.fotoFunction = {
                     me.incidentNr = null;
                     me.resetCarousel();
                     dbkjs.modules.incidents.controller.button.setFotoAlert(false);
-                    if(me.updateFotoTimeout) {
-                        window.clearInterval(me.updateFotoTimeout);
-                        me.updateFotoTimeout = null;
-                    }
+                    me.clearTimer();
                 });
             }
         });
         if(me.options.showGallery){
             $("#fotoConnector").removeAttr("capture");
+        }
+    },
+
+    clearTimer: function () {
+        if(me.updateFotoTimeout) {
+            window.clearInterval(me.updateFotoTimeout);
+            me.updateFotoTimeout = null;
         }
     },
 
@@ -161,6 +166,7 @@ dbkjs.modules.fotoFunction = {
             var windowURL = window.URL || window.webkitURL;
             var picURL = windowURL.createObjectURL(fileInput[0]);
             me.picture = fileInput[0];
+            me.resizePhoto(picURL);
             $("#pictured").attr({"src": picURL});
             $("#input_textfield").val("");
             me.showPopup();
@@ -177,6 +183,7 @@ dbkjs.modules.fotoFunction = {
         var windowURL = window.URL || window.webkitURL;
         var picURL = windowURL.createObjectURL(me.file);
         me.picture = me.file;
+        me.resizePhoto(picURL);
         $("#pictured").attr({"src": picURL});
         $("#input_textfield").val("");
         me.showPopup();
@@ -222,6 +229,47 @@ dbkjs.modules.fotoFunction = {
         xhr.send(formData);
     },
 
+    resizePhoto: function (photoUrl) {
+        var me = this;
+        var img = new Image();
+        var width = 800;
+
+        img.onload = function() {
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext("2d");
+            var oc = document.createElement('canvas');
+            var octx = oc.getContext('2d');
+         
+            canvas.width = width; 
+            canvas.height = canvas.width * img.height / img.width;
+         
+            var cur = {
+              width: Math.floor(img.width * 0.5),
+              height: Math.floor(img.height * 0.5)
+            }
+         
+            oc.width = cur.width;
+            oc.height = cur.height;
+         
+            octx.drawImage(img, 0, 0, cur.width, cur.height);
+         
+            while (cur.width * 0.5 > width) {
+              cur = {
+                width: Math.floor(cur.width * 0.5),
+                height: Math.floor(cur.height * 0.5)
+              };
+              octx.drawImage(oc, 0, 0, cur.width * 2, cur.height * 2, 0, 0, cur.width, cur.height);
+            }
+
+            ctx.drawImage(oc, 0, 0, cur.width, cur.height, 0, 0, canvas.width, canvas.height);
+
+            canvas.toBlob(function (file) {
+                me.picture = file;
+            });
+         }
+        img.src = photoUrl;
+    },
+
     getFotoForIncident: function (incidentInfo, isNew) {
         var me = this;
         $.ajax(me.options.apiPath, {
@@ -236,8 +284,10 @@ dbkjs.modules.fotoFunction = {
         })
         .done(function(result, textStatus, xhr) {
             var currentTitle = $("#t_foto_title").text();
-            if(xhr.status !== 200 && currentTitle.slice(-1) !== '!'){
-                $("#t_foto_title").text($("#t_foto_title").text() + ' !');
+            if(xhr.status !== 200) {
+                if (currentTitle.slice(-1) !== '!') {
+                    $("#t_foto_title").text($("#t_foto_title").text() + ' !');
+                }
             } else {
                 me.buildFotoWindow(result, isNew);
             }
