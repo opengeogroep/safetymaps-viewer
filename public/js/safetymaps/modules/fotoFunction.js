@@ -80,6 +80,7 @@ dbkjs.modules.fotoFunction = {
     },
 
     clearTimer: function () {
+        var me = this;
         if(me.updateFotoTimeout) {
             window.clearInterval(me.updateFotoTimeout);
             me.updateFotoTimeout = null;
