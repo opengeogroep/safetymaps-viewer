@@ -485,6 +485,11 @@ li.object img {
     padding: 3px !important;
 }
 
+#kladblokChatRow::placeholder {
+    font-weight: normal !important;
+    opacity: 0.4 !important;
+}
+
 #tab_kladblok {
     clear: both;
     padding-top: 10px;
