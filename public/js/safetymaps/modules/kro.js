@@ -113,7 +113,7 @@ dbkjs.modules.kro = {
         var bagPandId = null;
         var gfi = new OpenLayers.Format.WMSGetFeatureInfo();
 
-        features = gfi.read($.parseXML(getFeaturesResponse.responseText));
+        features = gfi.read($.parseXML(getFeaturesResponse));
         for (var feat in features) {
             for (var j in features[feat].attributes) {
                 if (typeof (features[feat].attributes[j]) !== "undefined" 

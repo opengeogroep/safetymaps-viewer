@@ -300,7 +300,7 @@ dbkjs.Layer = dbkjs.Class({
         //verwerk de featureinformatie
         g = new OpenLayers.Format.WMSGetFeatureInfo();
 
-        features = g.read($.parseXML(response.responseText));
+        features = g.read($.parseXML(response));
         console.log("Feature info for layer "+ _obj.layer.name + ": "+ features.length + " features returned");//, response.responseText);
         if (features.length > 0) {
             var title = _obj.layer.name.split("\\");
