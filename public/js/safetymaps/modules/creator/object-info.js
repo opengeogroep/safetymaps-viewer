@@ -27,14 +27,47 @@
 var safetymaps = safetymaps || {};
 safetymaps.creator = safetymaps.creator || {};
 
-safetymaps.creator.renderInfoTabs = function(object, windowId) {
+safetymaps.creator.renderInfoTabs = function(object, windowId, isIncident) {
+    if (typeof isIncident === "undefined" || !isIncident) {
+        isIncident = false;
+    }
 
     safetymaps.infoWindow.removeTabs(windowId, "info");
 
-    var rows;
+    var rows = safetymaps.creator.renderGeneral(object);
+    var d = $.Deferred();
 
-    rows = safetymaps.creator.renderGeneral(object);
-    safetymaps.infoWindow.addTab(windowId, "general", i18n.t("creator.general"), "info", safetymaps.creator.createInfoTabDiv(rows));
+    if(dbkjs.modules.kro.shouldShowKroForObject(object)) {
+        dbkjs.modules.kro.getObjectInfoForAddress(
+            object.straatnaam,
+            object.huisnummer,
+            object.huisletter || '',
+            object.toevoeging || '',
+            object.plaats
+        )
+        .fail(function(msg) { 
+            console.log("Error fetching KRO data in Creator Module: " + msg);
+        })
+        .done(function(kro) {
+            if(kro.length > 0) {
+                rows = dbkjs.modules.kro.mergeKroRowsIntoDbkRows(rows, kro[0],  isIncident);
+            }
+        })
+        .always(function() {
+            safetymaps.infoWindow.addTab(windowId, "general", i18n.t("creator.general"), "info", safetymaps.creator.createInfoTabDiv(rows));
+            safetymaps.creator.renderRemainingInfoTabs(object, windowId, isIncident);
+            d.resolve();
+        });
+    } else {
+        safetymaps.infoWindow.addTab(windowId, "general", i18n.t("creator.general"), "info", safetymaps.creator.createInfoTabDiv(rows));
+        safetymaps.creator.renderRemainingInfoTabs(object, windowId, isIncident);
+        d.resolve();
+    }
+    return d.promise();
+};
+
+safetymaps.creator.renderRemainingInfoTabs = function(object, windowId, isIncident) {
+    var rows;
 
     detailTabs = safetymaps.creator.renderDetails(object);
     $.each(detailTabs, function(i, detailTab) {
@@ -74,10 +107,9 @@ safetymaps.creator.renderInfoTabs = function(object, windowId) {
         rows = safetymaps.creator.renderSymbols(object);
         safetymaps.infoWindow.addTab(windowId, "symbols", i18n.t("creator.symbols"), "info", safetymaps.creator.createInfoTabDiv(rows));
     }
-};
+}
 
 safetymaps.creator.renderGeneral = function(object) {
-
     var lowestFloor = null, highestFloor = null;
     if(object.bouwlaag_min && object.bouwlaag_min !== "") {
         var n = Number(object.bouwlaag_min);
@@ -110,6 +142,7 @@ safetymaps.creator.renderGeneral = function(object) {
         {l: i18n.t("creator.lowestLevel") + " (" + i18n.t("creator.floor") + ")", t: lowestFloor},
         {l: i18n.t("creator.highestLevel") + " (" + i18n.t("creator.floor") + ")", t: highestFloor}
     ]);
+
     return result;
 };
 
@@ -299,7 +332,7 @@ safetymaps.creator.embedPDFs = function(element) {
             // Remove buttons from PDFJS toolbar
             // XXX hack, use PDFJS documentloaded event?
             function removeToolbar() {
-                var iframe = $("iframe").contents();
+                var iframe = $("iframe").first().contents();
                 if(iframe.find("#toolbarViewer")[0] ) {
                     console.log("Found PDFJS toolbar buttons, removing for URL " + url);    
                     iframe.find("#toolbarViewerLeft").remove();

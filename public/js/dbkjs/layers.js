@@ -175,13 +175,12 @@ dbkjs.layers = {
                 // Change baselayer to options.afterMaxZoomLevelSwitchToLayer based on options.switchAtZoomLevel                
                 if (bl.options.afterMaxZoomLevelSwitchToLayer || dbkjs.layers.switchedZoomBaseLayer) {
                     var zl = dbkjs.map.getZoom();
-                    var opt_zl = bl.options.switchAtZoomLevel;
-                    opt_zl = opt_zl ? opt_zl : 10;
-                    if (zl >= opt_zl) {
+                    var optionsZl = typeof bl.options.switchAtZoomLevel === "undefined" ? 10 : bl.options.switchAtZoomLevel;
+                    if (zl >= optionsZl) {
                         if (!dbkjs.layers.switchedZoomBaseLayer) {
                             dbkjs.map.setBaseLayer(dbkjs.map.getLayersByName(bl.options.afterMaxZoomLevelSwitchToLayer)[0]);
                             dbkjs.layers.switchedZoomBaseLayer = bl;
-                            dbkjs.layers.switchedAtZoomLevel = opt_zl;
+                            dbkjs.layers.switchedAtZoomLevel = optionsZl;
                         }
                     } else {
                         if (!bl.options.afterMaxZoomLevelSwitchToLayer && zl <= dbkjs.layers.switchedAtZoomLevel - 1) {
@@ -198,9 +197,8 @@ dbkjs.layers = {
                     var center = dbkjs.map.getCenter();
                     var point = new OpenLayers.Geometry.Point(center.lon, center.lat);
                     var meters = point.distanceTo(extent[0].geometry.transform(new OpenLayers.Projection("EPSG:4326"), dbkjs.map.getProjectionObject()), { edge: false }).toFixed(0);
-                    var opt_meters = dbkjs.options.organisationExtentBounderyInMeters;
-                    opt_meters = opt_meters ? opt_meters : 0;
-                    if (meters >= opt_meters) {
+                    var oebim = typeof dbkjs.options.organisationExtentBounderyInMeters === "undefined" ? 0 : dbkjs.options.organisationExtentBounderyInMeters;
+                    if (meters >= oebim) {
                         if (bl.options.outsideOrganisationExtentSwitchToLayer) {
                             dbkjs.map.setBaseLayer(dbkjs.map.getLayersByName(bl.options.outsideOrganisationExtentSwitchToLayer)[0]);
                             dbkjs.layers.switchedBaseLayer = bl;

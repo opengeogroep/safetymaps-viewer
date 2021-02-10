@@ -334,6 +334,38 @@ input.cross {
     overflow: auto;
 }
 
+.tabbable.tabs-bottom .tab-content--scroll-visible-on-ipad::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 7px;
+}
+
+.tabbable.tabs-bottom .tab-content--scroll-visible-on-ipad::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, .5);
+    box-shadow: 0 0 1px rgba(255, 255, 255, .5);
+}
+
+a.--without-effects {
+    color: #333 !important;
+    text-decoration: none !important;
+}
+a.--without-effects:hover {
+    text-decoration: none !important;
+}
+
+.table-small-text {
+    font-size: 13px;
+    width: 100%;
+}
+
+.table-small-text th {
+    padding: 3px !important;
+}
+
+.table-small-text tr.odd {
+    background-color: #efefef;
+}
+
 /* Info window table */
 
 table th {

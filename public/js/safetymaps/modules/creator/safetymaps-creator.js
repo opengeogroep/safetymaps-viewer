@@ -25,6 +25,8 @@ dbkjs.modules.safetymaps_creator = {
     clusteringLayer: null,
     selectedObject: null,
     selectedClusterFeature: null,
+    selectedClusterFeatureType: "",
+    selectedClusterFeatureObjectId: null,
     infoWindow: null,
     features:[],
     loading: null,
@@ -149,31 +151,20 @@ dbkjs.modules.safetymaps_creator = {
     },
 
     togglerButtonChanged: function(button, active, config) {
+        var me = this;
         if(typeof config.creatorType === "undefined") {
             return;
         }
-        var me = this;
-        var creatorTypeIsArray = Array.isArray(config.creatorType);
-        if(creatorTypeIsArray) {
-            config.creatorType.map(function(creatorType) {
-                me.toggleHiddenTypes(active, creatorType);
-            });
-        } else {
-            me.toggleHiddenTypes(active, config.creatorType);
+        var i = me.hiddenTypes.indexOf(config.creatorType);
+        if(active && i !== -1) {
+            me.hiddenTypes.splice(i, 1);
+        } else if(!active && i === -1) {
+            me.hiddenTypes.push(config.creatorType);
         }
         console.log("Hidden object types: " + me.hiddenTypes);
         me.clusteringLayer.redraw();
     },
 
-    toggleHiddenTypes: function(active, type) {
-        var me = this;
-        var i = me.hiddenTypes.indexOf(type);
-        if(active && i !== -1) {
-            me.hiddenTypes.splice(i, 1);
-        } else if(!active && i === -1) {
-            me.hiddenTypes.push(type);
-        }
-    },
 
     setupInterface: function() {
         var me = this;
@@ -263,7 +254,7 @@ dbkjs.modules.safetymaps_creator = {
                 },
                 resultSelected: function(result) {
                     console.log("Search result selected", result);
-
+                    me.selectedClusterFeature = result.clusterFeature;
                     me.selectObjectById(result.id, result.extent);
                 }
             }, true);
@@ -278,6 +269,7 @@ dbkjs.modules.safetymaps_creator = {
         });
 
         $(safetymaps).on("object_select", function(event, clusterFeature) {
+            me.selectedClusterFeature = clusterFeature;
             me.selectObjectById(clusterFeature.attributes.id, null, true);
         });
 
@@ -417,7 +409,13 @@ dbkjs.modules.safetymaps_creator = {
 
     selectObjectById: function(id, extent, isIncident /*ES2015 = false */) {
         isIncident = (typeof isIncident !== "undefined") ? isIncident : false;
+        
         var me = this;
+        
+        if(me.selectedClusterFeature) {
+            me.selectedClusterFeatureType = me.selectedClusterFeature.attributes.type;
+            me.selectedClusterFeatureObjectId = me.selectedClusterFeature.attributes.id;
+        }
 
         // Unselect current, if any
         me.unselectObject();
@@ -450,6 +448,9 @@ dbkjs.modules.safetymaps_creator = {
             $("#creator_object_info").text("Error: " + msg);
         })
         .done(function(object) {
+            object = $.extend({
+                type: me.selectedClusterFeatureObjectId === id ? me.selectedClusterFeatureType : ""
+            }, object);
             me.selectedObjectDetailsReceived(object, isIncident);
         });
     },
@@ -511,37 +512,37 @@ dbkjs.modules.safetymaps_creator = {
     updateInfoWindow: function(object,isIncident /*ES2015 = false*/) {
         isIncident = (typeof isIncident !== "undefined") ? isIncident : false;
         var me = this;
-
-        safetymaps.creator.renderInfoTabs(object, this.infoWindow.getName());
-        dbkjs.modules.vrh_objects.addLegendTrEventHandler("tab_danger_symbols", {
-            "safetymaps_creatorDangerSymbolsId:" : me.objectLayers.layerDangerSymbols
-        });
-        dbkjs.modules.vrh_objects.addLegendTrEventHandler("tab_symbols", {
-            "symbol" : me.objectLayers.layerSymbols
-        }, "code");
-
-        $("#tab_floors tr").click(function(e) {
-            var v = object.verdiepingen[$(e.currentTarget).index()-1];
-            console.log("Click floor index " + $(e.currentTarget).index(), v);
-            if(v.id !== object.id) {
-                me.selectObjectById(v.id);
-            }
-        });
         
-        $("#floor-box tr").click(function(e) {
-            me.floorVisible = me.infoWindow.visible;
-            var v = object.verdiepingen[$(e.currentTarget).index()];
-            console.log("Click floor index " + $(e.currentTarget).index(), v);
-            if(v.id !== object.id) {
-                me.selectObjectById(v.id,null,!me.floorVisible);
-            }           
+        safetymaps.creator.renderInfoTabs(object, this.infoWindow.getName(), isIncident).then(function() {
+            dbkjs.modules.vrh_objects.addLegendTrEventHandler("tab_danger_symbols", {
+                "safetymaps_creatorDangerSymbolsId:" : me.objectLayers.layerDangerSymbols
+            });
+            dbkjs.modules.vrh_objects.addLegendTrEventHandler("tab_symbols", {
+                "symbol" : me.objectLayers.layerSymbols
+            }, "code");
+    
+            $("#tab_floors tr").click(function(e) {
+                var v = object.verdiepingen[$(e.currentTarget).index()-1];
+                console.log("Click floor index " + $(e.currentTarget).index(), v);
+                if(v.id !== object.id) {
+                    me.selectObjectById(v.id);
+                }
+            });
+            
+            $("#floor-box tr").click(function(e) {
+                me.floorVisible = me.infoWindow.visible;
+                var v = object.verdiepingen[$(e.currentTarget).index()];
+                console.log("Click floor index " + $(e.currentTarget).index(), v);
+                if(v.id !== object.id) {
+                    me.selectObjectById(v.id,null,!me.floorVisible);
+                }           
+            });
+    
+            if(!isIncident) {
+                safetymaps.infoWindow.showTab(me.infoWindow.getName(), "general", true);
+            }
+            me.infoWindowTabsResize();
         });
-
-        if(!isIncident) {
-            safetymaps.infoWindow.showTab(me.infoWindow.getName(), "general", true);
-        }
-        this.infoWindowTabsResize();
-
     },
 
     objectLayerFeatureSelected: function(e) {

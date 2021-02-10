@@ -288,7 +288,12 @@ dbkjs.Layer = dbkjs.Class({
                     },
                     crossDomain: true
                 }).done(function(result) {
-                    _obj.panel(result, layerName);
+		    if (dbkjs.modules.kro && dbkjs.modules.kro.shouldShowKroForMapLayer(layerName)) {
+                        $('#vectorclickpanel').hide();
+			dbkjs.modules.kro.getBagPandIdFromLayerFeatureAndShowPopup(result);
+		    } else {
+                        _obj.panel(result, layerName);
+		    }
                 });
                 //OpenLayers.Request.GET({url: this.layer.url, "params": params, callback: this.panel, scope: _obj});
                 //OpenLayers.Event.stop(e);
