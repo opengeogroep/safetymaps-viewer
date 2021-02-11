@@ -1350,7 +1350,6 @@ VehicleIncidentsController.prototype.normalizeIncidentFields = function(incident
         incident.locatie2 =  incident.NAAM_LOCATIE2;
 
         incident.start = AGSIncidentService.prototype.getAGSMoment(incident.DTG_START_INCIDENT);
-        incident.beeindigdeInzet = incident.DTG_EINDE_INCIDENT !== null;
 
         incident.BetrokkenEenheden = [];
         if (incident.inzetEenheden) {
