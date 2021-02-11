@@ -35,7 +35,9 @@ function IncidentDetailsWindow(editKladblokChat, showKladblokChat) {
 
     this.window = safetymaps.infoWindow.addWindow("incident", "Incident", false);
     this.div = $("<div></div>");
-    this.kcDiv = "<div style='display:block; margin-bottom:15px; height:27px; border:1px solid #ff0000; color:#ff0000;'><input id='kladblokChatRow' style='border: 0; width:calc(100% - 30px); margin-right:15px; color: #ff0000;' /><i id='addKladblokChatRow' class='fa fa-plus' style='cursor:pointer' /></div>";
+    this.kcDiv = "<div style='display:block; margin-bottom:15px; height:27px; border:1px solid #ff0000; color:#ff0000;'><input id='kladblokChatRow' style='border: 0; width:calc(100% - 30px); margin-right:15px; color: #ff0000;' placeholder='Plaats hier uw chatbericht'/>" +
+            "<i id='addKladblokChatRow' class='fa fa-plus' style='cursor:pointer' />" +
+        "</div>";
     this.linkifyWords = null;
     this.crsLinkEnabled = false;
     this.addGoogleMapsNavigationLink = false;
