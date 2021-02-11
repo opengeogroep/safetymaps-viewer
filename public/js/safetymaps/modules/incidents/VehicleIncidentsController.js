@@ -115,10 +115,8 @@ function VehicleIncidentsController(options, featureSelector) {
     me.checkIncidentMonitor();
 
     $(dbkjs).one("dbkjs_init_complete", function() {
-        window.setTimeout(function() {
-            me.setVoertuignummer(me.voertuignummer, true);
-            me.options.showStatus && me.updateStatus();
-        }, 2000);
+        me.setVoertuignummer(me.voertuignummer, true);
+        me.options.showStatus && me.updateStatus();
     });
 };
 
