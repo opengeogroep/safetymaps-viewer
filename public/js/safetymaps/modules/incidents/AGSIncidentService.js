@@ -875,7 +875,7 @@ AGSIncidentService.prototype.getInzetEenheden = function(incidentIds, archief) {
             token: me.token,
             where: "INCIDENT_ID IN (" + incidentIds.join(",") + ") ",
             orderByFields: "DTG_OPDRACHT_INZET",
-            outFields: "INCIDENT_ID,DTG_OPDRACHT_INZET," + (archief ? "" : "DTG_EIND_ACTIE,") + "CODE_VOERTUIGSOORT,ROEPNAAM_EENHEID,KAZ_NAAM,T_IND_DISC_EENHEID"
+            outFields: "INCIDENT_ID,DTG_OPDRACHT_INZET," + (archief ? "" : "DTG_EIND_ACTIE,") + "CODE_VOERTUIGSOORT,ROL,ROEPNAAM_EENHEID,KAZ_NAAM,T_IND_DISC_EENHEID"
         }
     })
     .fail(function(e) {
@@ -1120,13 +1120,13 @@ AGSIncidentService.prototype.getInzetEenhedenStats = function(incident, ookBeein
         $.each(incident.inzetEenheden, function(j, eenheid) {
             if(ookBeeindigd || !eenheid.DTG_EIND_ACTIE) {
                 eenheidStats[eenheid.T_IND_DISC_EENHEID].total++;
-                var soort = eenheid.CODE_VOERTUIGSOORT;
-                if(soort !== null) {
-                    var soortCount = eenheidStats[eenheid.T_IND_DISC_EENHEID][soort];
-                    if(typeof soortCount === "undefined") {
-                        soortCount = 0;
+                var rol = eenheid.ROL;
+                if(rol !== null) {
+                    var rolCount = eenheidStats[eenheid.T_IND_DISC_EENHEID][rol];
+                    if(typeof rolCount === "undefined") {
+                        rolCount = 0;
                     }
-                    eenheidStats[eenheid.T_IND_DISC_EENHEID][soort] = soortCount + 1;
+                    eenheidStats[eenheid.T_IND_DISC_EENHEID][rol] = rolCount + 1;
                 }
             }
         });
