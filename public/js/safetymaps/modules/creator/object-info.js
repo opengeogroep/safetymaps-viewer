@@ -249,17 +249,18 @@ safetymaps.creator.renderMedia = function(object) {
         $.each(object.media, function(i, m) {
             var active = i === 0 ? "active" : "";
             var path = safetymaps.creator.api.mediaPath + m.filename;
+            var userFriendlyName = m.filename.substring(dbkjs.modules.safetymaps_creator.options.mediaPrefixLength, m.filename.length)
 
             if(path.match(/pdf$/i)) {
                 image_carousel_inner.append(
                     '<div class="item ' + active + '">' +
-                        '<h3 class="pdf-heading" style="margin: 0 15%; text-align: center; height: 28px; color: #d7d7d7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis ">' + m.filename + '</h3>' +
+                        '<h3 class="pdf-heading" style="margin: 0 15%; text-align: center; height: 28px; color: #d7d7d7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis ">' + userFriendlyName + '</h3>' +
                         '<div class="pdf-embed" id="pdf_embed_' + i + '" data-url="' + path + '"/>' +
                     '</div>'
                 );
             } else if(path.match(/(jpeg|gif|jpg|png)$/i)) {
                 image_carousel_inner.append('<div class="item ' + active + '"><img class="img-full" style="width: 100%" src="' + path +
-                        '"onerror="safetymaps.utils.setBrokenImage(this)"><div class="carousel-caption"><h3>' +  m.filename + '</h3></div></div>');
+                        '"onerror="safetymaps.utils.setBrokenImage(this)"><div class="carousel-caption"><h3>' +  userFriendlyName + '</h3></div></div>');
             } else {
                 image_carousel_inner.append('<div class="item ' + active + '"><img src="'+safetymaps.creator.api.imagePath+'missing.gif"><div class="carousel-caption"><a href="' + m.filename +
                         '" target="_blank"><h1><i class="fa fa-external-link fa-3"></i></h1><h2>' +

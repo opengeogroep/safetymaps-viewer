@@ -39,7 +39,8 @@ dbkjs.modules.safetymaps_creator = {
             mediaPath: "media/",
             showDbkToggleButton: false,
             apiPath: "api/",
-            imagePath: "assets/"
+            imagePath: "assets/",
+            mediaPrefixLength: 0
         }, this.options);
 
         // Setup API
