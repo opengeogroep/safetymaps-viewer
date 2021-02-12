@@ -499,7 +499,7 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
             }
             var beeindigd = inzet.DTG_EIND_ACTIE || incident.archief;
             html += "<tr title='" + tooltip + "' class='" + (beeindigd ? "beeindigd" : "") + "'>";
-            html += "<td align='right'>" + (inzet.CODE_VOERTUIGSOORT ? inzet.CODE_VOERTUIGSOORT : "") + "</td>";
+            html += "<td align='right'>" + (inzet.ROL || "") + "</td>";
             html += "<td>" + inzet.ROEPNAAM_EENHEID + "</td>";
             html += "<td>" + (inzet.KAZ_NAAM ? inzet.KAZ_NAAM : "") + "</td>";
             html += "</tr>";

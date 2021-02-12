@@ -119,7 +119,7 @@ IncidentListWindow.prototype.listIncidents = function(el, incidents, showInzetIn
         } else {
             $.each(incident.inzetEenheden, function(j, eenheid) {
                 if(!eenheid.DTG_EIND_ACTIE) {
-                    actueleInzet.push(eenheid.CODE_VOERTUIGSOORT + " " + eenheid.ROEPNAAM_EENHEID + (eenheid.KAZ_NAAM ? " (" + eenheid.KAZ_NAAM + ")" : ""));
+                    actueleInzet.push(eenheid.ROL + " " + eenheid.ROEPNAAM_EENHEID + (eenheid.KAZ_NAAM ? " (" + eenheid.KAZ_NAAM + ")" : ""));
                 }
             });
         }
