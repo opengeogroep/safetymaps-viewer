@@ -295,7 +295,7 @@ dbkjs.Layer = dbkjs.Class({
                     },
                     crossDomain: true
                 }).done(function(result) {
-                    if (dbkjs.modules.kro && dbkjs.modules.kro.shouldShowKroForMapLayer(this.layer.name)) {
+                    if (dbkjs.modules.kro && dbkjs.modules.kro.shouldShowKroForMapLayer(layerName)) {
                         $('#vectorclickpanel').hide();
                         dbkjs.modules.kro.getBagPandIdFromLayerFeatureAndShowPopup(result);
                     } else {
