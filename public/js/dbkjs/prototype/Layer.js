@@ -294,7 +294,6 @@ dbkjs.Layer = dbkjs.Class({
                     } else {
                         _obj.panel(result, layerName);
                     }
-                    _obj.panel(result, layerName);
                 });
                 //OpenLayers.Request.GET({url: this.layer.url, "params": params, callback: this.panel, scope: _obj});
                 //OpenLayers.Event.stop(e);
