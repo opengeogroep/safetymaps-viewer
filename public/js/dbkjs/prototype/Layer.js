@@ -280,13 +280,6 @@ dbkjs.Layer = dbkjs.Class({
                     params.y = Math.round(e.xy.y);
                 }
 
-                if (dbkjs.modules.kro && dbkjs.modules.kro.shouldShowKroForMapLayer(this.layer.name)) {
-                    $('#vectorclickpanel').hide();
-                    OpenLayers.Request.GET({url: this.layer.url, "params": params, callback: dbkjs.modules.kro.getBagPandIdFromLayerFeatureAndShowPopup, scope: _obj});
-                } else {
-                    OpenLayers.Request.GET({url: this.layer.url, "params": params, callback: this.panel, scope: _obj});
-                }
-
                 var layerName = this.layer.name;
                 $.ajax(this.layer.url, {
                     data: params,
