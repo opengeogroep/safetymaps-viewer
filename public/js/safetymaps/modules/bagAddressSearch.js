@@ -46,7 +46,11 @@
                     dbkjs.modules.search.showResults([]);
                 } else {
                     $.ajax(me.url + value, {
-                        term: value
+                        term: value,
+                        xhrFields: {
+                            withCredentials: true
+                        },
+                        crossDomain: true
                     })
                     .done(function(data) {
                         dbkjs.modules.search.showResults(data, function(a) {
