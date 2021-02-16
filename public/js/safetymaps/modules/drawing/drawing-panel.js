@@ -47,8 +47,13 @@ function DrawingPanelWindow(options) {
 
     if(options.showMeasureButtons) {
         $(dbkjs).one("dbkjs_init_complete", function() {
-            $("#btn_measure_area").prependTo(measure);
-            $("#btn_measure_distance").prependTo(measure);
+            if (options.keepExistingMeasureButtons) {
+                $("#btn_measure_area").clone(true).prependTo(measure);
+                $("#btn_measure_distance").clone(true).prependTo(measure);
+            } else {
+                $("#btn_measure_area").prependTo(measure);
+                $("#btn_measure_distance").prependTo(measure);
+            }
         });
 
         $(me).on("hide", function() {
@@ -252,7 +257,10 @@ DrawingPanelWindow.prototype.unselectSymbol = function() {
 DrawingPanelWindow.prototype.featureSelected = function(f) {   
     var me = this;
     
-    $("#drawing_feature_controls").show();
+    if (me.options.editAuthorized) {
+        $("#drawing_feature_controls").show();
+    }
+
     $("#drawing_feature_label").val(f.attributes.label);
 
     $("#drawing_feature_rotate").slider({

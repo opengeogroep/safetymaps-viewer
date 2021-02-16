@@ -17,7 +17,7 @@
  *  along with safetymaps-viewer. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* global dbkjs, safetymaps, OpenLayers, Proj4js, jsts, moment, i18n, Mustache, PDFObject, IncidentDetailsWindow */
+/* global dbkjs, safetymaps, OpenLayers, Proj4js, jsts, moment, i18n, Mustache, PDFObject, IncidentDetailsWindow, AGSIncidentService */
 
 /**
  * Controller for displaying incident info from multiple sources for a specific
@@ -45,7 +45,7 @@ function VehicleIncidentsController(options, featureSelector) {
         me.zoomToIncident();
     });
 
-    me.incidentDetailsWindow = new IncidentDetailsWindow();
+    me.incidentDetailsWindow = new IncidentDetailsWindow(me.options.editKladblokChatAuthorized, me.options.showKladblokChatAuthorized);
     me.incidentDetailsWindow.addGoogleMapsNavigationLink = (me.options.addGoogleMapsNavigationLink && me.options.googleMapsNavigationAuthorized);
     $(me.incidentDetailsWindow).on('show', function() {
         me.button.setAlerted(false);
@@ -54,6 +54,10 @@ function VehicleIncidentsController(options, featureSelector) {
 
     me.checkLinkifyWords();
     me.checkCrsLinks();
+
+    $(me.incidentDetailsWindow).on("saveKladblokChatRow", function(e, row, incidentnr) {
+        me.saveKladblokChatRow(row, incidentnr);
+    });
 
     me.markerLayer = new IncidentMarkerLayer();
     $(me.markerLayer).on('click', function(incident, marker) {
@@ -102,13 +106,8 @@ function VehicleIncidentsController(options, featureSelector) {
 
     if(me.options.incidentSource === "VrhAGS" || me.options.incidentSourceFallback === "VrhAGS") {
         // Initialize AGS service
-        this.service = new AGSIncidentService(me.options.apiPath + "vrhAGS", me.options.apiPath + "vrhAGSEenheden");
-
-        this.service.initialize(me.options.apiPath + "vrhAGSToken", null, null)
-        .fail(function(e) {
-            console.log("VrhAGS service failed to initialize", arguments);
-            return;
-        });
+        me.service = new AGSIncidentService(me.options.apiPath + "vrhAGS", me.options.apiPath + "vrhAGSEenheden");
+        me.initializeService();
     }
 
     me.incidentMonitorCode = window.localStorage.getItem("imcode");
@@ -116,12 +115,22 @@ function VehicleIncidentsController(options, featureSelector) {
     me.checkIncidentMonitor();
 
     $(dbkjs).one("dbkjs_init_complete", function() {
-        window.setTimeout(function() {
-            me.setVoertuignummer(me.voertuignummer, true);
-            me.options.showStatus && me.updateStatus();
-        }, 2000);
+        me.setVoertuignummer(me.voertuignummer, true);
+        me.options.showStatus && me.updateStatus();
     });
-}
+};
+
+VehicleIncidentsController.prototype.initializeService = function() {
+    var me = this;
+    me.service.initialize(me.options.apiPath + "vrhAGSToken", null, null)
+    .fail(function(e) {
+        console.log("VrhAGS service failed to initialize", arguments);
+        window.setTimeout(function() {
+            console.log('Retrying VrhAGS service initialization');
+            me.initializeService();
+        }, 10000);
+    });
+};
 
 VehicleIncidentsController.prototype.defaultOptions = function(options) {
     return $.extend({
@@ -275,7 +284,9 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
                 twitterUrlPrefix: me.options.twitterUrlPrefix,
                 twitterIgnoredAccounts: me.options.twitterIgnoredAccounts,
                 logTwitter: me.options.logTwitter,
-                showSpeed: me.options.showSpeed
+                showSpeed: me.options.showSpeed,
+                excludeManuallyCreatedIncidents: me.options.excludeManuallyCreatedIncidents,
+                getIncidentsFromDaysInPast: me.options.getIncidentsFromDaysInPast,
             };
 
             me.incidentMonitorController = new IncidentMonitorController(incidentMonitorOptions);
@@ -688,12 +699,12 @@ VehicleIncidentsController.prototype.showStatusVrhAGS = function() {
         if(status) {
             me.options.logStatus && console.log("VrhAGS: Voertuigstatus", status);
             var id = status.T_ACT_STATUS_CODE_EXT_BRW;
-            var code = status.T_ACT_STATUS_AFK_BRW;
+            var code = status.T_ACT_STATUS_AFK_BRW.toLowerCase();
 
             switch(code) {
-                case "UT": code = "UG"; break;
-                case "KZ": code = "OK"; break;
-                case "IR": code = "NI"; break;
+                case "ut": code = "ug"; break;
+                case "kz": code = "ok"; break;
+                case "ir": code = "ni"; break;
             }
 
             $("<div id='status'>" + id + ": " + code + "</div>").prependTo("body");
@@ -1007,10 +1018,89 @@ VehicleIncidentsController.prototype.geenInzet = function() {
     this.incidentDetailsWindow.hideMultipleFeatureMatches();
 };
 
+VehicleIncidentsController.prototype.saveKladblokChatRow = function (row, incidentnr) {
+    var me = this;
+    if (me.options.editKladblokChatAuthorized && row.length > 0) {
+        $.ajax("api/kladblok/" + incidentnr + ".json", {
+            method: 'POST',
+            data: {
+                row: row
+            },
+            xhrFields: { withCredentials: true }, 
+            crossDomain: true
+        })
+        .fail(function (jqXHR, textStatus, errorThrown) {
+            console.log("Error saving kladblok chat row.", jqXHR, textStatus, errorThrown);
+        })
+        .done(function () {
+            console.log("Kladblok chat row saved.")
+            me.inzetIncident({ incident: me.incident, source: me.options.incidentSource }, me.incidentFromIncidentList);
+        })
+    }
+}
+
 VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, fromIncidentList) {
+    var me = this;
+    if (me.options.showKladblokChatAuthorized) {
+        $.ajax("api/kladblok/" + incidentInfo.incident.nummer + ".json", {
+            dataType: 'json',
+            xhrFields: { withCredentials: true }, 
+            crossDomain: true
+        })
+        .fail(function (jqXHR, textStatus, errorThrown) {
+            console.log("Error getting kladblok chat rows.", jqXHR, textStatus, errorThrown);
+            me.onInzetIncident(incidentInfo, fromIncidentList);
+        })
+        .done(function (data) {
+            var chatRow;
+            if(incidentInfo.source === "SafetyConnect"){
+                chatRow = data.map(function (itm) {
+                    return { DTG: itm.dtg, Inhoud: itm.inhoud, IsChat: true };
+                });
+                incidentInfo.incident.Kladblokregels = incidentInfo.incident.Kladblokregels.filter(function (f) { return !f.IsChat; }).concat(chatRow);
+            } else {
+                chatRow = data.map(function (itm) {
+                    return { 
+                        INCIDENT_ID: null,
+                        KLADBLOK_REGEL_ID: null,
+                        VOLG_NR_KLADBLOK_REGEL: null,
+                        DTG_KLADBLOK_REGEL: AGSIncidentService.prototype.createAGSDtgFromMoment(moment(itm.dtg, "yyyy-MM-DD HH:mm:ss")),
+                        T_IND_DISC_KLADBLOK_REGEL: "-B-",
+                        TYPE_KLADBLOK_REGEL: null,
+                        CODE_KLADBLOK_REGEL: null,
+                        INHOUD_KLADBLOK_REGEL: itm.inhoud,
+                        LOGIN_NAAM: null,
+                        USER_NAAM: null,
+                        EXTERNE_SYSTEEM_TYPE: null,
+                        EXTERNE_SYSTEEM_CODE: null,
+                        ESRI_OID: null,
+                        MELDING_ID: null,
+                        IsChat: true };
+                });
+                incidentInfo.incident.kladblok = incidentInfo.incident.kladblok.filter(function (f) { return !f.IsChat; }).concat(chatRow);
+            }
+            me.onInzetIncident(incidentInfo, fromIncidentList);
+        });
+    } else {
+        me.onInzetIncident(incidentInfo, fromIncidentList);
+    }
+};
+
+VehicleIncidentsController.prototype.onInzetIncident = function(incidentInfo, fromIncidentList) {
     console.log("inzetIncident (from IM: " + fromIncidentList + ")", incidentInfo);
 
     var me = this;
+    
+    var filterOutKladblokRegelsContaining = me.options.filterOutKladblokRegelsContaining;
+    if(incidentInfo.source === "SafetyConnect") {
+        incidentInfo.incident.Kladblokregels = incidentInfo.incident.Kladblokregels.filter(function(incidentFilter) {
+            return !filterOutKladblokRegelsContaining.some(function(s) { return incidentFilter.Inhoud.toLowerCase().indexOf(s) >= 0; });
+        });
+    } else {
+        incidentInfo.incident.kladblok = incidentInfo.incident.kladblok.filter(function(incidentFilter) {
+            return !filterOutKladblokRegelsContaining.some(function(s) { return incidentFilter.INHOUD_KLADBLOK_REGEL.toLowerCase().indexOf(s) >= 0; });
+        });
+    }
 
     // XXX update als incidentInfo.incident.nummer !== me.incidentNummer, is met timeout 30s...
 
@@ -1260,7 +1350,6 @@ VehicleIncidentsController.prototype.normalizeIncidentFields = function(incident
         incident.locatie2 =  incident.NAAM_LOCATIE2;
 
         incident.start = AGSIncidentService.prototype.getAGSMoment(incident.DTG_START_INCIDENT);
-        incident.beeindigdeInzet = incident.DTG_EINDE_INCIDENT !== null;
 
         incident.BetrokkenEenheden = [];
         if (incident.inzetEenheden) {

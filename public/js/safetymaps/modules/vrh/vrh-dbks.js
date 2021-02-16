@@ -199,7 +199,8 @@ safetymaps.vrh.Dbks = function(options) {
             color1: "#000"
         },
         "Binnenmuur": {
-            color1: "#000"
+            color1: "#000",
+            thickness: 0.5,
         },
         "Blusleiding": {
             color1: "#0070ff"
@@ -432,7 +433,7 @@ safetymaps.vrh.Dbks.prototype.createLayers = function() {
                                 return feature.attributes.style.thickness;
                             }
                         } else {
-                            return 2;
+                            return feature.attributes.style && feature.attributes.style.thickness ? feature.attributes.style.thickness : 2;
                         }
                     },
                     dashstyle: function(feature) {

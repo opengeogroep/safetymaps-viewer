@@ -359,7 +359,8 @@ IncidentMonitorController.prototype.getIncidentListSC = function() {
         dataType: "json",
         data: {
             extended: true,
-            excludeTraining: me.options.excludeManuallyCreatedIncidents
+            excludeTraining: me.options.excludeManuallyCreatedIncidents,
+            daysInPast: me.options.getIncidentsFromDaysInPast,
         },
         cache: false,
         xhrFields: { withCredentials: true }, crossDomain: true
@@ -714,7 +715,7 @@ IncidentMonitorController.prototype.loadTweets = function(incident) {
     }
     if(incident.inzetEenheden) {
         $.each(incident.inzetEenheden, function(i, e) {
-            return checkSoort(e.CODE_VOERTUIGSOORT);
+            return checkSoort(e.ROL);
         });
     }
     if(incident.BetrokkenEenheden) {

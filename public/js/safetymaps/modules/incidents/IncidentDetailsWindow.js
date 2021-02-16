@@ -25,12 +25,24 @@
  * only one instance as it always uses modal popup name "incidentDetails".
  * @returns {IncidentDetailsWindow}
  */
-function IncidentDetailsWindow() {
+function IncidentDetailsWindow(editKladblokChat, showKladblokChat) {
+    if (typeof editKladblokChat === "undefined") {
+        editKladblokChat = false;
+    }
+    if (typeof showKladblokChat === "undefined") {
+        showKladblokChat = false;
+    }
+
     this.window = safetymaps.infoWindow.addWindow("incident", "Incident", false);
     this.div = $("<div></div>");
+    this.kcDiv = "<div style='display:block; margin-bottom:15px; height:27px; border:1px solid #ff0000; color:#ff0000;'><input id='kladblokChatRow' style='border: 0; width:calc(100% - 30px); margin-right:15px; color: #ff0000;' placeholder='Plaats hier uw chatbericht'/>" +
+            "<i id='addKladblokChatRow' class='fa fa-plus' style='cursor:pointer' />" +
+        "</div>";
     this.linkifyWords = null;
     this.crsLinkEnabled = false;
     this.addGoogleMapsNavigationLink = false;
+    this.showKladblokChat = showKladblokChat;
+    this.editKladblokChat = editKladblokChat;
     safetymaps.infoWindow.addTab("incident", "incident", "Incident", "incident", this.div, "first");
 };
 
@@ -239,6 +251,30 @@ IncidentDetailsWindow.prototype.data = function(incident, showInzet, restoreScro
     if(restoreScrollTop) {
         this.div.scrollTop(scrollTop);
     }
+
+    var me = this;
+    if (me.editKladblokChat) {
+        var incidentNr = (format === "vrh" ? incident.NR_INCIDENT : incident.IncidentNummer)
+        $("#addKladblokChatRow").on("click", function(e) {
+            $(me).triggerHandler("saveKladblokChatRow", [$("#kladblokChatRow").val(), incidentNr]);
+            $("#kladblokChatRow").val("");
+            me.kladblokChatRow = "";
+        });
+
+        $("#kladblokChatRow").keyup(function(e) {
+            if(e.keyCode == 13) {
+                $(me).triggerHandler("saveKladblokChatRow", [$("#kladblokChatRow").val(), incidentNr]);
+                $("#kladblokChatRow").val("");
+                me.kladblokChatRow = "";
+            }
+            me.kladblokChatRow = $("#kladblokChatRow").val();
+        })
+
+        $("#kladblokChatRow").val(me.kladblokChatRow);
+        if (me.kladblokChatRow && me.kladblokChatRow !== "" ) {
+            $("#kladblokChatRow").focus();
+        }
+    }
 };
 
 IncidentDetailsWindow.prototype.setMultipleFeatureMatches = function(matches, incidentLonLat) {
@@ -438,9 +474,6 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
         html += 'Eenheden: ';
         var s = [];
         $.each(incident.inzetEenheden, function(i, inzet) {
-            if(inzet.T_IND_DISC_EENHEID !== "B") {
-                return;
-            }
             var tooltip = inzet.KAZ_NAAM ? inzet.KAZ_NAAM : "";
             var span = (inzet.DTG_EIND_ACTIE || incident.archief ? "<span class='beeindigd' " : "<span ") + " title='" + tooltip + "'>" + dbkjs.util.htmlEncode(inzet.ROEPNAAM_EENHEID) + "</span>";
             s.push(span);
@@ -468,7 +501,7 @@ IncidentDetailsWindow.prototype.getIncidentHtml = function(incident, showInzet, 
             }
             var beeindigd = inzet.DTG_EIND_ACTIE || incident.archief;
             html += "<tr title='" + tooltip + "' class='" + (beeindigd ? "beeindigd" : "") + "'>";
-            html += "<td align='right'>" + (inzet.CODE_VOERTUIGSOORT ? inzet.CODE_VOERTUIGSOORT : "") + "</td>";
+            html += "<td align='right'>" + (inzet.ROL || "") + "</td>";
             html += "<td>" + inzet.ROEPNAAM_EENHEID + "</td>";
             html += "<td>" + (inzet.KAZ_NAAM ? inzet.KAZ_NAAM : "") + "</td>";
             html += "</tr>";
@@ -518,9 +551,25 @@ IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incid
             }
             break;
         case "falck":
-            $.each(incident.Kladblokregels, function(i, k) {
-                kladblokHTML += "<tr><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Inhoud)) + "</td></tr>";
-            });
+            if (this.editKladblokChat) {
+                kladblokHTML += this.kcDiv;
+            }
+            if (this.showKladblokChat) {
+                $.each(incident.Kladblokregels.sort(function (a, b) {
+                    var dateA = new moment(a.DTG);
+                    var dateB = new moment(b.DTG);
+                    return dateA._d - dateB._d;
+                }), function(i, k) {
+                    var styleClass = me.getKladblokRegelColor(k.Discipline);
+                    var style = k.IsChat ? "font-weight:normal !important; font-style:italic; !important" : "";
+                    kladblokHTML += "<tr class='" + styleClass + "' style='" + style + "'><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Inhoud)) + "</td></tr>";
+                });
+            } else {
+                $.each(incident.Kladblokregels, function(i, k) {
+                    var styleClass = me.getKladblokRegelColor(k.Discipline);
+                    kladblokHTML += "<tr class='" + styleClass + "'><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Inhoud)) + "</td></tr>";
+                });
+            }
             break;
         case "pharos":
             $.each(incident.kladblokregels, function(i, k) {
@@ -528,10 +577,24 @@ IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incid
             });
             break;
         default:
-            kladblokHTML = this.getIncidentKladblokDefaultHtml(incident.kladblok);
+            if (this.editKladblokChat) {
+                kladblokHTML += this.kcDiv;
+            }
+            kladblokHTML += this.getIncidentKladblokDefaultHtml(incident.kladblok);
     }
     return kladblokHTML;
 };
+
+IncidentDetailsWindow.prototype.getKladblokRegelColor = function(kladblokregelDiscipline) {
+    if (kladblokregelDiscipline.indexOf("B") === -1) {
+        if (kladblokregelDiscipline.indexOf("P") !== -1) {
+            return "pol";
+        } else if (kladblokregelDiscipline.indexOf("A") !== -1) {
+            return "ambu";
+        }
+    }
+    return "brw";
+}
 
 IncidentDetailsWindow.prototype.getIncidentKladblokDefaultHtml = function(kladblok) {
     var me = this;
@@ -539,9 +602,12 @@ IncidentDetailsWindow.prototype.getIncidentKladblokDefaultHtml = function(kladbl
         return "";
     }
     var kladblokHTML = "<table>";
-    $.each(kladblok, function(i, k) {
+    $.each(kladblok.sort(function (a, b) {
+        return a.DTG_KLADBLOK_REGEL - b.DTG_KLADBLOK_REGEL;
+    }), function(i, k) {
         var ind = k.T_IND_DISC_KLADBLOK_REGEL;
         var disclass = "brw";
+        var style = "";
         if(ind.indexOf("B") === -1) {
             if(ind.indexOf("P") !== -1) {
                 disclass = "pol";
@@ -550,7 +616,10 @@ IncidentDetailsWindow.prototype.getIncidentKladblokDefaultHtml = function(kladbl
             }
             //console.log("Kladblok andere discipline: " + k.T_IND_DISC_KLADBLOK_REGEL +": " + k.INHOUD_KLADBLOK_REGEL);
         }
-        kladblokHTML += "<tr class='" + disclass + "'><td>" + AGSIncidentService.prototype.getAGSMoment(k.DTG_KLADBLOK_REGEL).format("HH:mm") + "</td><td>" +
+        if (me.showKladblokChat && k.IsChat) {
+            style = "font-weight:normal !important; font-style:italic; !important";
+        }        
+        kladblokHTML += "<tr class='" + disclass + "' style='" + style + "'><td>" + AGSIncidentService.prototype.getAGSMoment(k.DTG_KLADBLOK_REGEL).format("HH:mm") + "</td><td>" +
             me.linkify(dbkjs.util.htmlEncode(k.INHOUD_KLADBLOK_REGEL)) + "</td></tr>";
     });
     return kladblokHTML + "</table>";
@@ -661,20 +730,18 @@ IncidentDetailsWindow.prototype.getIncidentHtmlFalck = function(incident, showIn
         html += '<tr class="detailed"><td style="display:'+showAllEenheden+';" colspan="2" id="allEenheden">';
         html += 'Eenheden: <span style="color: #A9A9A9">(Klik voor minder info)</span><br/><table>';
         $.each(incident.BetrokkenEenheden, function(i, inzet) {
-            if(inzet.Discipline === "B") {
-                var tooltip = "";
-                if(inzet.EindeActieDTG) {
-                    var einde = new moment(inzet.EindeActieDTG);
-                    tooltip = "actie be&euml;indigd om " + einde.format("HH:mm") + ", " + einde.fromNow();
-                }
-                var beeindigd = !inzet.IsActief;
-                html += "<tr title='" + tooltip + "' class='" + (beeindigd ? "beeindigd" : "") + "'>";
-                html += "<td align='right'>" + (inzet.InzetRol ? inzet.InzetRol : "") + "</td>";
-                html += "<td>" + inzet.Roepnaam + "</td>";
-                html += "<td>" + (inzet.BrwKazerne ? inzet.BrwKazerne : "") + "</td>";
-                html += "<td>" + (!compareMode && inzet.ETA && inzet.ETA.length > 0 ? me.calculateETA(inzet.ETA[0], true) : "") + "</td>";
-                html += "</tr>";
+            var tooltip = "";
+            if(inzet.EindeActieDTG) {
+                var einde = new moment(inzet.EindeActieDTG);
+                tooltip = "actie be&euml;indigd om " + einde.format("HH:mm") + ", " + einde.fromNow();
             }
+            var beeindigd = !inzet.IsActief;
+            html += "<tr title='" + tooltip + "' class='" + (beeindigd ? "beeindigd" : "") + "'>";
+            html += "<td align='right'>" + (inzet.InzetRol ? inzet.InzetRol : "") + "</td>";
+            html += "<td>" + inzet.Roepnaam + "</td>";
+            html += "<td>" + (inzet.BrwKazerne ? inzet.BrwKazerne : "") + "</td>";
+            html += "<td>" + (!compareMode && inzet.ETA && inzet.ETA.length > 0 ? me.calculateETA(inzet.ETA[0], true) : "") + "</td>";
+            html += "</tr>";
         });
         html += '</table></td></tr>';
         $(document).on('click', '#allEenheden', function(){

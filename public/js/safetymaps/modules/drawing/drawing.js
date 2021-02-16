@@ -40,6 +40,7 @@ dbkjs.modules.drawing = {
 
         me.options = $.extend({
             showMeasureButtons: false,
+            keepExistingMeasureButtons: false,
             // Set by ViewerApiActionBean
             editAuthorized: false,
             colors: ["yellow", "green", "red", "rgb(45,45,255)", "black"],
@@ -52,7 +53,8 @@ dbkjs.modules.drawing = {
             showAdvancedControls: false,
             rotation: ["polygon"],
             wideLineForSelectionExtraWidth: 6,
-            wideLineForSelectionOpacity: 0
+            wideLineForSelectionOpacity: 0,
+            apiPath: dbkjs.options.urls && dbkjs.options.urls.apiPath ? dbkjs.options.urls.apiPath + 'drawing/' : 'api/drawing/'
         }, me.options);
 
         me.color = me.options.defaultColor;
@@ -121,9 +123,11 @@ dbkjs.modules.drawing = {
     endIncident: function() {
         var me = this;
         me.options.log && console.log("drawing: end incident ");
+        me.modifiedSince[me.incidentNr] = null;
         me.incidentNr = null;
         window.clearInterval(me.updateInterval);
         me.button.hide();
+        me.layer.removeAllFeatures();
     },
 
     update: function() {
@@ -146,26 +150,38 @@ dbkjs.modules.drawing = {
             };
         }
 
-        me.updateJqXHR = $.ajax('api/drawing/' + me.incidentNr + '.json', {
-            dataType: 'json',
+        me.updateJqXHR = $.ajax(me.options.apiPath + me.incidentNr + '.json', {
+            //dataType: 'json',
             cache: true,
-            headers: headers,
+            //headers: headers,
+            xhrFields: {
+                withCredentials: true
+            },
+            crossDomain: true,
+            data: { features: "" }
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             if(jqXHR.status === 404) {
                 return;
             }
-            console.log("drawing: ajax failure: " + jqXHR.status + " " + textStatus, jqXHR.responseText);
+            // XXX server does not send CORS headers when returning 304
+            //console.log("drawing: ajax failure: " + jqXHR.status + " " + textStatus, jqXHR.responseText);
         })
         .done(function(drawing, textStatus, jqXHR) {
-            if(textStatus === "notmodified") {
+            if(textStatus === "notmodified" && !firstLoad) {
                 return;
             }
 
             var lastModified = jqXHR.getResponseHeader("last-modified");
-            console.log("drawing: got drawing, last modified " + lastModified, drawing);
-            if(lastModified) {
-                me.modifiedSince[me.incidentNr] = new Date(lastModified);
+			var dateLastModified = new Date(lastModified);
+
+            if (dateLastModified && me.modifiedSince[me.incidentNr] && (dateLastModified <= me.modifiedSince[me.incidentNr])) {
+                return;
+            } else {
+                console.log("drawing: got drawing, last modified " + lastModified, drawing);
+                if(lastModified) {
+                    me.modifiedSince[me.incidentNr] = new Date(lastModified);
+                }
             }
 
             var geoJsonFormatter = new OpenLayers.Format.GeoJSON();
@@ -219,8 +235,12 @@ dbkjs.modules.drawing = {
         }
 
         // TODO If-Unmodified-Since
-        me.saveJqXHR = $.ajax('api/drawing/' + me.incidentNr + '.json', {
+        me.saveJqXHR = $.ajax(me.options.apiPath + me.incidentNr + '.json', {
             method: 'POST',
+            xhrFields: {
+                withCredentials: true
+            },
+            crossDomain: true,
             data: { features: new OpenLayers.Format.GeoJSON().write(me.layer.features.filter(function (f) {
                 return !f.attributes.wideLineForSelectionTolerance;
             })) }
@@ -496,7 +516,7 @@ dbkjs.modules.drawing = {
 
         if(this.visible) {
             this.activate(true);
-            if(typeof optionalVisible === 'undefined') {
+            if(typeof optionalVisible === 'undefined' && me.options.editAuthorized) {
                 this.panel.selectColor(me.color);
             }
         } else {
