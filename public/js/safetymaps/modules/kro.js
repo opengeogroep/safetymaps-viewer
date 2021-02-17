@@ -377,7 +377,7 @@ dbkjs.modules.kro = {
         return rows
             .map(function(row) {
                 var configFound = me.rowConfig.filter(function(cr) { return cr.label === row.l; });
-                var order = row.source === "kro" ? 1 : 999; 
+                var order = typeof row.order === "undefined" ? row.source === "kro" ? 100 : 999 : row.order; 
                 var disabled = typeof row.disabled === "undefined" ? false : row.disabled;
                 if(configFound.length > 0) {
                     order = configFound[0].order;
