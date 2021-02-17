@@ -362,7 +362,8 @@ IncidentMonitorController.prototype.getIncidentListSC = function() {
             extended: true,
             excludeTraining: me.options.excludeManuallyCreatedIncidents,
             daysInPast: me.options.getIncidentsFromDaysInPast,
-            prio: maxPrio          
+            prio: maxPrio,
+            includeWithoutUnits: me.options.includeIncidentsWithoutUnits,
         },
         cache: false,
         xhrFields: { withCredentials: true }, crossDomain: true

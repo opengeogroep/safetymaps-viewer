@@ -288,6 +288,7 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
                 excludeManuallyCreatedIncidents: me.options.excludeManuallyCreatedIncidents,
                 getIncidentsFromDaysInPast: me.options.getIncidentsFromDaysInPast,
                 includePrio4And5Incidents: me.options.prio4and5Authorized,
+                includeIncidentsWithoutUnits: me.options.withoutUnitsAuthorized,
             };
 
             me.incidentMonitorController = new IncidentMonitorController(incidentMonitorOptions);
