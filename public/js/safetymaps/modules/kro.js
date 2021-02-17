@@ -194,7 +194,7 @@ dbkjs.modules.kro = {
 
     mergeKroRowsIntoDbkRows: function(dbkRows, kro, isIncident) {
         var me = dbkjs.modules.kro;
-        var kroRows = me.createGeneralRows(kro);
+        var kroRows = me.createGeneralRows(kro, true);
 
         if (isIncident) {
             kroRows.unshift({ l: "Incident adres", t: me.cache.incidentAddress, source: "kro" });
@@ -217,7 +217,7 @@ dbkjs.modules.kro = {
         if (kro.length > 0) {
             kro = kro[0];
 
-            rows = me.createGeneralRows(kro);
+            rows = me.createGeneralRows(kro, false);
 
             me.setScrollBar();
             me.addPandFeatures(kro.bagpandid);
@@ -237,10 +237,14 @@ dbkjs.modules.kro = {
         }, 500);
     },
 
-    createGeneralRows: function(kro) {
+    createGeneralRows: function(kro, mergeWithDbk) {
         var rows = [];
         var typeList = "-";
         var addressTypeList = "-";
+
+        if (typeof mergeWithDbk === "undefined") {
+            mergeWithDbk = false;
+        }
 
         if (kro.pand_objecttypering_ordered) {
             typeList = "<a class='--without-effects' href='#custompanel' data-toggle='modal'><table onClick='dbkjs.modules.kro.showPopup(\"" + kro.bagpandid + "\")'>";
@@ -258,6 +262,7 @@ dbkjs.modules.kro = {
             addressTypeList += "</table>";
         }
 
+        rows.push({ l: "<span class='objectinfo__header'>bron: basisregistratie</span>", html: "<br/>", source: "kro" });
         rows.push({ l: "Oppervlakte gebouw", t: kro.adres_oppervlak + "m2", source: "kro" });
         rows.push({ l: "Bouwjaar", t: kro.pand_bouwjaar, source: "kro" });
         rows.push({ l: "Maximale hoogte",t: ("" + kro.pand_maxhoogte + "").replace(".", ",") + "m", source: "kro" });
@@ -273,7 +278,9 @@ dbkjs.modules.kro = {
             rows.push({ l: "Monument", t: "Ja", source: "kro" });
         }
 
-        rows.push({ l: "", html: "<br/><br/>", source: "kro" });
+        if (mergeWithDbk) {
+            rows.push({ l: "<br/><span class='objectinfo__header'>bron: dbk brandweer</span>", html: "<br/><br/>", source: "kro" });
+        }
 
         return rows;
     },
