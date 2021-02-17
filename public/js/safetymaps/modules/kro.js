@@ -326,6 +326,11 @@ dbkjs.modules.kro = {
                             var containsWoTypering = (dataRow.adres_objecttypering
                                 ? dataRow.adres_objecttypering.split('||')
                                 : ["|"]).map(function(itm) { return itm.split('|')[0].includes("Wo") }).filter(function(itm) { return itm }).length > 0;
+
+                            containsWoTypering = containsWoTypering || (dataRow.aanzien_typering
+                                ? dataRow.aanzien_typering.split('||')
+                                : ["|"]).map(function(itm) { return itm.split('|')[0].includes("Wo") }).filter(function(itm) { return itm }).length > 0;
+
                             var adres_typering = (dataRow.adres_objecttypering
                                 ? dataRow.adres_objecttypering.split('||')
                                 : ["|"]).map(function(itm) { return itm.split('|')[1] }).join(', ');
