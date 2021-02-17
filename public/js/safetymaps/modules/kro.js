@@ -225,7 +225,7 @@ dbkjs.modules.kro = {
 
         rows.unshift({ l: "Incident adres", t: me.cache.incidentAddress, source: "kro" });
 
-        safetymaps.infoWindow.addTab('incident', "general", i18n.t("creator.general"), "kro", safetymaps.creator.createInfoTabDiv(rows));
+        safetymaps.infoWindow.addTab('incident', "general", i18n.t("creator.general"), "info", safetymaps.creator.createInfoTabDiv(rows));
     },
 
     setScrollBar: function() {
