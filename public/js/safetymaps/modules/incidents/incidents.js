@@ -37,6 +37,8 @@ dbkjs.modules.incidents = {
             excludeManuallyCreatedIncidents: false,
             addGoogleMapsNavigationLink: false,
             filterOutKladblokRegelsContaining: [],
+            prio4and5Authorized: false,
+            withoutUnitsAuthorized: false,
         }, this.options);
 
         this.featureSelector = new IncidentFeatureSelector(this.options.featureExactMatchHuisletter, this.options.featureExactMatchToevoeging);

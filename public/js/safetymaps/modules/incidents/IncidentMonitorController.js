@@ -354,6 +354,7 @@ IncidentMonitorController.prototype.getIncidentListVrhAGS = function() {
 
 IncidentMonitorController.prototype.getIncidentListSC = function() {
     var me = this;
+    var maxPrio = me.options.includePrio4And5Incidents ? 5 : 3;
 
     $.ajax(me.options.apiPath + "safetyconnect/incident", {
         dataType: "json",
@@ -361,6 +362,8 @@ IncidentMonitorController.prototype.getIncidentListSC = function() {
             extended: true,
             excludeTraining: me.options.excludeManuallyCreatedIncidents,
             daysInPast: me.options.getIncidentsFromDaysInPast,
+            prio: maxPrio,
+            includeWithoutUnits: me.options.includeIncidentsWithoutUnits,
         },
         cache: false,
         xhrFields: { withCredentials: true }, crossDomain: true
