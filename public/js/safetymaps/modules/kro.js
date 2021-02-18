@@ -52,8 +52,8 @@ dbkjs.modules.kro = {
             .fail(function(msg) {
                 console.log("Error fetching KRO row config in KRO module: " + msg);
                 me.rowConfig = [
-                    { label: i18n.t("creator.adress"), order: 2, source: "dbk", disabled: true },
-                    { label: i18n.t("creator.fireAlarmCode"), order: 7, source: "dbk", disabled: true },
+                    { lbl: i18n.t("creator.adress"), src: "dbk", disabled: true },
+                    { lbl: i18n.t("creator.fireAlarmCode"), src: "dbk", disabled: true },
                 ];
             })
             .done(function(config) {
@@ -366,9 +366,9 @@ dbkjs.modules.kro = {
 
         return rows
             .filter(function(row) {
-                var configFound = me.rowConfig.filter(function(cr) { return cr.label === row.l; });
+                var configFound = me.rowConfig.filter(function(cr) { return cr.lbl === row.l; });
                 if(configFound.length > 0) {
-                    return (typeof row.source === "undefined" ? "dbk" : row.source) === configFound[0].source;
+                    return (typeof row.source === "undefined" ? "dbk" : row.source) === configFound[0].src;
                 } else {
                     return true;
                 }
@@ -383,11 +383,11 @@ dbkjs.modules.kro = {
 
         return rows
             .map(function(row) {
-                var configFound = me.rowConfig.filter(function(cr) { return cr.label === row.l; });
+                var configFound = me.rowConfig.filter(function(cr) { return cr.lbl === row.l; });
                 var order = typeof row.order === "undefined" ? row.source === "kro" ? 100 : 999 : row.order; 
                 var disabled = typeof row.disabled === "undefined" ? false : row.disabled;
                 if(configFound.length > 0) {
-                    order = configFound[0].order;
+                    order = configFound[0].ord;
                     disabled = configFound[0].disabled;
                 }
                 return { l: row.l, t: row.t, html: row.html, o: order, disabled: disabled }
