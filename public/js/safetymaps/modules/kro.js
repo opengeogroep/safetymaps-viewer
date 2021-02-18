@@ -224,6 +224,7 @@ dbkjs.modules.kro = {
         }
 
         rows.unshift({ l: "Incident adres", t: me.cache.incidentAddress, source: "kro" });
+        rows = me.orderAndFilterObjectInfoRows(rows);
 
         safetymaps.infoWindow.addTab('incident', "general", i18n.t("creator.general"), "info", safetymaps.creator.createInfoTabDiv(rows));
     },
