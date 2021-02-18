@@ -573,6 +573,11 @@ dbkjs.modules.vrh_objects = {
         this.selectedClusterFeature = null;
         this.clusteringLayer.setSelectedIds([]);
         $("#vectorclickpanel").hide();
+        if(this.infoWindow) {
+            // XXX called by VehicleIncidentsController even when module not
+            // active. Should change to this module listening to event
+            safetymaps.infoWindow.removeTabs(this.infoWindow.getName(), "info");
+        }
     },
 
     selectedObjectDetailsReceived: function(type, id, object, isIncident) {
