@@ -381,6 +381,8 @@ table td.leftlabel {
 .objectinfo_header {
     font-style: italic;
     color: #999;
+    font-size: 14px;
+    font-variant: small-caps;
 }
 
 /* Layers window */

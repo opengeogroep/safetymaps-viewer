@@ -268,8 +268,8 @@ dbkjs.modules.kro = {
         rows.push({ l: "Bouwjaar", t: kro.pand_bouwjaar, source: "kro" });
         rows.push({ l: "Maximale hoogte",t: ("" + kro.pand_maxhoogte + "").replace(".", ",") + "m", source: "kro" });
         rows.push({ l: "Geschat aantal bouwlagen bovengronds",t: kro.pand_bouwlagen, source: "kro" });
-        rows.push({ l: "Functies binnen dit adres", html: addressTypeList, source: "kro" });
-        rows.push({ l: "Alle functies in dit gebouw <a href='#custompanel' data-toggle='modal'><span onClick='dbkjs.modules.kro.showPopup(\"" + kro.bagpandid + "\")'><br/>klik voor meer info</span></a>", html: typeList, source: "kro" },);
+        rows.push({ l: "Functies binnen dit adres <a href='#custompanel' data-toggle='modal'><i onClick='dbkjs.modules.kro.showFootnote(\"Uitleg: functies binnen dit adres\", \"kro_adres_functies.png\")' class='fa fa-info-circle'></i></a>", html: addressTypeList, source: "kro" });
+        rows.push({ l: "Alle functies in dit gebouw <a href='#custompanel' data-toggle='modal'><i onClick='dbkjs.modules.kro.showFootnote(\"Uitleg: alle functies in dit gebouw\", \"kro_gebouw_functies.png\")' class='fa fa-info-circle'></i></a> <a href='#custompanel' data-toggle='modal'><span onClick='dbkjs.modules.kro.showPopup(\"" + kro.bagpandid + "\")'><br/>klik voor meer info</span></a>", html: typeList, source: "kro" },);
 
         if (kro.pand_status.toLowerCase() !== "pand in gebruik") {
             rows.push({ l: "Status", t: kro.pand_status, source: "kro" });
@@ -284,6 +284,16 @@ dbkjs.modules.kro = {
         }
 
         return rows;
+    },
+
+    showFootnote: function(title, image) {
+        var $titleEl = $("#custom_title");
+        var $bodyEl = $("#custompanel_b");
+        var $bodyImg = $("<img style='width:500;' />");
+
+        $titleEl.html(title);
+        $bodyImg.attr('src', 'images/' + image);
+        $bodyEl.append($bodyImg);
     },
 
     showPopup: function(bagpandid, extended) {
