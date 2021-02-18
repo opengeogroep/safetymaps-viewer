@@ -293,6 +293,7 @@ dbkjs.modules.kro = {
 
         $titleEl.html(title);
         $bodyImg.attr('src', 'images/' + image);
+        $bodyEl.html("");
         $bodyEl.append($bodyImg);
     },
 
