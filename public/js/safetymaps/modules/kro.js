@@ -262,7 +262,7 @@ dbkjs.modules.kro = {
             addressTypeList += "</table>";
         }
 
-        rows.push({ l: "<span class='objectinfo__header'>bron: basisregistratie</span>", html: "<br/>", source: "kro" });
+        rows.push({ l: "<span class='objectinfo__header'>bron: basisregistratie</span>", html: "<br/>", source: "kro", order: '0' });
         rows.push({ l: "Oppervlakte gebouw", t: kro.adres_oppervlak + "m2", source: "kro" });
         rows.push({ l: "Bouwjaar", t: kro.pand_bouwjaar, source: "kro" });
         rows.push({ l: "Maximale hoogte",t: ("" + kro.pand_maxhoogte + "").replace(".", ",") + "m", source: "kro" });
@@ -279,7 +279,7 @@ dbkjs.modules.kro = {
         }
 
         if (mergeWithDbk) {
-            rows.push({ l: "<br/><span class='objectinfo__header'>bron: dbk brandweer</span>", html: "<br/><br/>", source: "kro" });
+            rows.push({ l: "<br/><span class='objectinfo__header'>bron: dbk brandweer</span>", html: "<br/><br/>", source: "kro", order: '900' });
         }
 
         return rows;
