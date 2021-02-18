@@ -51,32 +51,12 @@ dbkjs.modules.kro = {
         me.getObjectInfoRowConfig()
             .fail(function(msg) {
                 console.log("Error fetching KRO row config in KRO module: " + msg);
-                me.rowConfig = [
-                    { lbl: i18n.t("creator.adress"), src: "dbk", disabled: true },
-                    { lbl: i18n.t("creator.fireAlarmCode"), src: "dbk", disabled: true },
-                ];
             })
             .done(function(config) {
                 me.rowConfig = config;
             });
         
         dbkjs.map.addLayer(me.pandLayer);
-
-       /* me.rowConfig = [
-            { label: i18n.t("creator.formal_name"), order: 0, source: "dbk" },
-            { label: i18n.t("creator.informal_name"), order: 1, source: "dbk" },
-            { label: i18n.t("creator.adress"), order: 2, source: "dbk" },
-            { label: i18n.t("creator.check_date"), order: 3, source: "dbk" },
-            { label: i18n.t("creator.emergencyResponderPresent"), order: 4, source: "dbk" },
-            { label: i18n.t("creator.respondingProcedure"), order: 5, source: "dbk" },
-            { label: i18n.t("creator.buildingConstruction"), order: 6, source: "dbk" },
-            { label: i18n.t("creator.fireAlarmCode"), order: 7, source: "dbk" },
-            { label: i18n.t("creator.usage"), order: 8, source: "dbk" },
-            { label: i18n.t("creator.usage_specific"), order: 9, source: "dbk" },
-            { label: i18n.t("creator.level"), order: 10, source: "dbk" },
-            { label: i18n.t("creator.lowestLevel") + " (" + i18n.t("creator.floor") + ")", order: 11, source: "dbk" },
-            { label: i18n.t("creator.highestLevel") + " (" + i18n.t("creator.floor") + ")", order: 12, source: "dbk" },
-        ];*/
     },
 
     shouldShowKro: function() {
