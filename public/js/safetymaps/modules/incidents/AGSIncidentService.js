@@ -1185,7 +1185,7 @@ AGSIncidentService.prototype.getVehicle = function(roepnummer) {
 
 };
 
-AGSIncidentService.prototype.getVehiclePositions = function(incidentIds) {
+AGSIncidentService.prototype.getVehiclePositions = function(incidents) {
 
     var me = this;
 
@@ -1196,19 +1196,13 @@ AGSIncidentService.prototype.getVehiclePositions = function(incidentIds) {
     var d = $.Deferred();
 
     var where = "(IncidentID <> '' or Speed > 5)"; // Any vehicle on incident or no incident but moving
-    if(incidentIds) {
-        if(incidentIds.length === 0) {
+    if(incidents) {
+        if(incidents.length === 0) {
             where = "(IncidentID = '' and Speed > 5)"; // Only moving vehicles not on incident
         } else {
             // Use strings for IncidentIDs, because they are too big for 
             // integers and server table column type is string
-            var incidentStringIds = "";
-            for(var i = 0; i < incidentIds.length; i++) {
-                if(i > 0) {
-                    incidentStringIds += ",";
-                }
-                incidentStringIds += "'" + incidentIds[i] + "'";
-            }
+            var incidentStringIds = $.map(incidents, (i) => `'${i.id}'`).join(",");
             where = "(IncidentID in (" + incidentStringIds + ") or (IncidentID = '' and Speed > 5))"; // Only vehicles on given incident id or not on incident and moving
         }
     }
@@ -1238,6 +1232,19 @@ AGSIncidentService.prototype.getVehiclePositions = function(incidentIds) {
                 var dateTime = moment(f.attributes.PosDate + " " + f.attributes.PosTime, "DD-MM-YYYY HH:mm:ss");
                 // Altijd voertuig ingezet op incident tonen
                 if(dateTime.isAfter(cutoff) || f.attributes.IncidentID !== "") {
+
+                    // The features have the Voertuigsoort, but we want to display the ROL it has been assigned for the
+                    // incident instead. Find it in the incident and add the InzetRol attribute to the features
+                    const incidentID = Number(f.attributes.IncidentID);
+                    const roepnummer = f.attributes.Roepnummer;
+                    const incident = incidents.find(i => i.INCIDENT_ID === incidentID);
+                    if (incident) {
+                        const inzetEenheid = incident.inzetEenheden.find(iz => iz.ROEPNAAM_EENHEID === roepnummer);
+                        if (inzetEenheid) {
+                            f.attributes.InzetRol = inzetEenheid.ROL;
+                        }
+                    }
+
                     var p = new Proj4js.Point(f.geometry.x, f.geometry. y);
                     var t = Proj4js.transform(new Proj4js.Proj("EPSG:4326"), new Proj4js.Proj(dbkjs.options.projection.code), p);
                     var p = new OpenLayers.Geometry.Point(t.x, t.y);

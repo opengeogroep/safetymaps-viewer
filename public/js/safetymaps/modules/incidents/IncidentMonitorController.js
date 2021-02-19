@@ -544,9 +544,7 @@ IncidentMonitorController.prototype.updateVehiclePositionLayer = function(incide
     }
 
     if(me.options.incidentSource === "VrhAGS") {
-        var incidentIds = $.map(incidents, function(i) { return i.id; });
-
-        me.service.getVehiclePositions(incidentIds)
+        me.service.getVehiclePositions(incidents)
         .done(function(features) {
             me.vehiclePositionLayer.features(features);
         });
@@ -572,7 +570,7 @@ IncidentMonitorController.prototype.updateVehiclePositionLayer = function(incide
                     var props = f.properties;
                     var attributes = {
                         IncidentID: props.incidentNummer || "",
-                        Voertuigsoort: props.inzetRol || "",
+                        InzetRol: props.inzetRol,
                         Roepnummer: props.id,
                         Speed: me.options.showSpeed ? props.speed || 0 : 0,
                         Direction: props.heading

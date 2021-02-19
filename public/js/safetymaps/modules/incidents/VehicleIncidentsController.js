@@ -934,7 +934,7 @@ VehicleIncidentsController.prototype.updateVehiclePositions = function() {
 
 VehicleIncidentsController.prototype.updateVehiclePositionsVrhAGS = function() {
     var me = this;
-    me.service.getVehiclePositions([me.incident.INCIDENT_ID])
+    me.service.getVehiclePositions([me.incident])
     .always(function() {
         me.updateVehicleTimeout = window.setTimeout(function() {
             me.updateVehiclePositions();
