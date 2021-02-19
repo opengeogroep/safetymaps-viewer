@@ -70,6 +70,20 @@ IncidentFeatureSelector.prototype.findAndSelectMatches = function(matchInfo, inc
         safetymaps.selectObject(matches[0], false);
     } else if(me.matches.length > 1) {
         incidentDetailsWindow.setMultipleFeatureMatches(matches, new OpenLayers.LonLat(me.matchInfo.x, me.matchInfo.y));
+    } else if (dbkjs.modules.kro.shouldShowKro()) {
+        dbkjs.modules.kro.getObjectInfoForAddress(
+            matchInfo.straat,
+            matchInfo.huisnummer,
+            matchInfo.huisletter || '',
+            matchInfo.toevoeging || '',
+            matchInfo.woonplaats
+        )
+        .fail(function(msg) {
+            console.log("Error fetching KRO data in Incident Feature Selector: " + msg);
+        })
+        .done(function(kro) {
+            dbkjs.modules.kro.showKroForIncidentWithoutDbk(kro);
+        });
     }
 };
 

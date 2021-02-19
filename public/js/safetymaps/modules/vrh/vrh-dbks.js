@@ -931,7 +931,7 @@ safetymaps.vrh.Dbks.prototype.addFeaturesForObject = function(object) {
     console.log("Added DBK layer features", this.layers);
 };
 
-safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object) {
+safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, isIncident) {
     var me = this;
 
     safetymaps.infoWindow.removeTabs(windowId, "info");
@@ -995,9 +995,42 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object) {
 
     rows.push({l: "Brandinstallaties", html: o.brandinstallaties ? o.brandinstallaties.map(Mustache.escape).join("<br>") : null});
 
-    safetymaps.infoWindow.addTab(windowId, "algemeen", "Object info" , "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
+    var d = $.Deferred();
 
-    rows = [];
+    if(dbkjs.modules.kro.shouldShowKroForObject(object)) {
+        dbkjs.modules.kro.getObjectInfoForAddress(
+            object.straatnaam,
+            object.huisnummer,
+            object.huisletter || '',
+            object.toevoeging || '',
+            object.plaats
+        )
+        .fail(function(msg) { 
+            console.log("Error fetching KRO data in vrh-dbks module: " + msg);
+        })
+        .done(function(kro) {
+            if(kro.length > 0) {
+                rows = dbkjs.modules.kro.mergeKroRowsIntoDbkRows(rows, kro[0], isIncident);
+            }
+        })
+        .always(function() {
+            safetymaps.infoWindow.addTab(windowId, "algemeen", "Object info" , "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
+            safetymaps.vrh.Dbks.prototype.updateRemainingInfoWindow(windowId, object, me);
+            d.resolve();
+        });
+    } else {
+        safetymaps.infoWindow.addTab(windowId, "algemeen", "Object info" , "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
+        safetymaps.vrh.Dbks.prototype.updateRemainingInfoWindow(windowId, object, me);
+        d.resolve();
+    }
+    return d.promise();
+};
+
+safetymaps.vrh.Dbks.prototype.updateRemainingInfoWindow = function(windowId, object, me) {
+    var rows = [];
+    var o = object;
+    var p = o.hoofdpand;
+
     rows.push({l: "Sleutelbuisklus", t: p.sleutelbui});
     rows.push({l: "Compartimenten", t: p.compartime});
     rows.push({l: "WTS locatie", t: p.wts_locati});

@@ -382,6 +382,7 @@ dbkjs.modules.vrh_objects = {
         });
 
         $(safetymaps).on("object_select", function(event, clusterFeature) {
+            me.selectedClusterFeature = clusterFeature;
             me.selectObjectById(clusterFeature.attributes.type, clusterFeature.attributes.id, null, true);
         });
 
@@ -555,6 +556,9 @@ dbkjs.modules.vrh_objects = {
             //$("#creator_object_info").text("Error: " + msg);
         })
         .done(function(object) {
+            object = $.extend({
+                type: type
+            }, object);
             me.selectedObjectDetailsReceived(type, id, object, isIncident);
         });
     },
@@ -581,25 +585,30 @@ dbkjs.modules.vrh_objects = {
     },
 
     selectedObjectDetailsReceived: function(type, id, object, isIncident) {
+        var me = this;
         try {
+            var promise;
             if(type === "evenement") {
-                this.events.addFeaturesForObject(object);
-                this.events.updateInfoWindow(this.infoWindow.getName(), object);
+                me.events.addFeaturesForObject(object);
+                promise = me.events.updateInfoWindow(me.infoWindow.getName(), object, isIncident);
             } else if(type === "dbk") {
-                this.dbks.addFeaturesForObject(object);
-                this.dbks.updateInfoWindow(this.infoWindow.getName(), object);
+                me.dbks.addFeaturesForObject(object);
+                promise = me.dbks.updateInfoWindow(me.infoWindow.getName(), object, isIncident);
             } else if(type === "waterongevallenkaart") {
-                this.waterongevallen.addFeaturesForObject(object);
-                this.waterongevallen.updateInfoWindow(this.infoWindow.getName(), object);
-            }
-            if(!isIncident) {
-                safetymaps.infoWindow.showTab(this.infoWindow.getName(), "algemeen", true);
+                me.waterongevallen.addFeaturesForObject(object);
+                promise = me.waterongevallen.updateInfoWindow(me.infoWindow.getName(), object, isIncident);
             }
 
-            this.infoWindowTabsResize();
-
-            this.selectedObject = object;
-            this.clusteringLayer.setSelectedIds([id]);
+            promise.then(function() {
+                if(!isIncident) {
+                    safetymaps.infoWindow.showTab(me.infoWindow.getName(), "algemeen", true);
+                }
+    
+                me.infoWindowTabsResize();
+    
+                me.selectedObject = object;
+                me.clusteringLayer.setSelectedIds([id]);
+            });
         } catch(error) {
             console.log("Error creating layers for object", object);
             if(error.stack) {
