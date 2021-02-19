@@ -701,12 +701,12 @@ VehicleIncidentsController.prototype.showStatusVrhAGS = function() {
         if(status) {
             me.options.logStatus && console.log("VrhAGS: Voertuigstatus", status);
             var id = status.T_ACT_STATUS_CODE_EXT_BRW;
-            var code = status.T_ACT_STATUS_AFK_BRW.toLowerCase();
+            var code = status.T_ACT_STATUS_AFK_BRW;
 
             switch(code) {
-                case "ut": code = "ug"; break;
-                case "kz": code = "ok"; break;
-                case "ir": code = "ni"; break;
+                case "UT": code = "UG"; break;
+                case "KZ": code = "OK"; break;
+                case "IR": code = "NI"; break;
             }
 
             $("<div id='status'>" + id + ": " + code + "</div>").prependTo("body");
