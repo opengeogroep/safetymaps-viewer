@@ -89,9 +89,8 @@ dbkjs.modules.fotoFunction = {
 
     createButton: function () {
         var me = this;
-        $(".main-button-group").append($("<div class=\"btn-group pull-left\">" +
-                "<a id=\"btn_fotoFunc\" title=\"" + i18n.t("photo.photoButton") + "\" class=\"btn navbar-btn btn-default\">" +
-                "<i id=\"btn_fotoFuncIcon\" class=\"fa fa-camera\"></i></a>"));
+        $("<a id=\"btn_fotoFunc\" title=\"" + i18n.t("photo.photoButton") + "\" class=\"btn navbar-btn btn-default\"><i id=\"btn_fotoFuncIcon\" class=\"fa fa-camera\"></i></a>")
+            .prependTo("#btngrp_left");
         $("#btn_fotoFunc").click(function(e){
             e.preventDefault();
             me.takePicture();
