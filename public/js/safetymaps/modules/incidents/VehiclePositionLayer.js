@@ -54,7 +54,7 @@ function VehiclePositionLayer(options) {
                 context: {
                     label: function(feature) {
                         var speed = feature.attributes.Speed === 0 ? "" : feature.attributes.Speed + "km/h";
-                        var inzetRol = me.options.showInzetRol ? feature.attributes.Voertuigsoort || "" : "";
+                        var inzetRol = me.options.showInzetRol ? feature.attributes.InzetRol || feature.attributes.Voertuigsoort || "" : "";
                         return inzetRol + " " + feature.attributes.Roepnummer + " " + speed;
                     },
                     speed: function(feature) {
