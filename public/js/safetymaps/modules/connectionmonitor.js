@@ -38,7 +38,7 @@ dbkjs.modules.connectionmonitor = {
         this.connected = true;
 
         if(!this.options.hideButton) {
-            $(".main-button-group").append($("<div class=\"btn-group pull-left connection-btn-group\">" +
+            $("#btngrp_left").append($("<div class=\"btn-group pull-left connection-btn-group\">" +
                 "<a id=\"connection\" href=\"#\" title=\"" + i18n.t("connectionmonitor.button") + "\" class=\"btn navbar-btn btn-default\">" +
                 "<i id=\"connectionicon\" class=\"fa fa-signal\" style=\"color: green\"></i></a>"));
         }

@@ -39,7 +39,7 @@ function MDTIncidentsController(incidents) {
     }, incidents.options);
 
     me.button = new AlertableButton("btn_incident", "Incident", "bell-o");
-    me.button.getElement().prependTo('#btngrp_object');
+    me.button.getElement().appendTo('#btngrp_left');
 
     $(me.button).on('click', function() {
         me.incidentDetailsWindow.show();
