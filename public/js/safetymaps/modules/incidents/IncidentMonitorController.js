@@ -191,11 +191,16 @@ IncidentMonitorController.prototype.incidentRead = function(incidentId) {
  */
 IncidentMonitorController.prototype.getSafetyConnectIncident = function () {
     var me = this;
+    var maxPrio = me.options.includePrio4And5Incidents ? 5 : 3;
     // Get incident
     $.ajax(me.options.apiPath + "safetyconnect/incident/" + me.incident.IncidentNummer, {
         dataType: "json",
         data: {
-            extended: true
+            extended: true,
+            excludeTraining: me.options.excludeManuallyCreatedIncidents,
+            daysInPast: me.options.getIncidentsFromDaysInPast,
+            prio: maxPrio,
+            includeWithoutUnits: me.options.includeIncidentsWithoutUnits,
         },
         xhrFields: { withCredentials: true }, crossDomain: true
     })
