@@ -961,10 +961,6 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, isIn
     rows.push({l: "Gebruiksdoel BAG",           t: p.bag ? p.bag.verblijfsobjectgebruiksdoel : p.gebruiks_1});
     rows.push({l: "Verdiepingen ondergronds",      t: p.bouwlageno});
     rows.push({l: "Verdiepingen bovengronds",      t: p.bouwlagenb});
-    rows.push({l: "Afwijkende binnendekking",       t: p.afwijkende});
-    rows.push({l: "Aanvullende info binnendekking", t: p.binnendekk});
-    rows.push({l: "Operationele instructies",       t: p.inzetproce});
-    rows.push({l: "Aanvalsplan",                    t: p.aanvalspla});
 
     if(p.extra_info && (!p.datum_ei_1 || new moment(p.datum_ei_1).isBefore()) && (!p.eind_datum || new moment(p.eind_datum).isAfter())) {
         rows.push({l: "Extra info 1 " + (p.bron_ei_1 ? "(Bron: " + p.bron_ei_1 + ")" : ""), t: p.extra_info});
@@ -981,7 +977,7 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, isIn
     rows.push({l: "Max. Slaapplaatsen", t: o.slaapplaat});
     rows.push({l: "BHV aanwezig", t: p.aanwezig_1});
 
-    var bijzonderhedenAanwezigheid = o.bijzonde_2 ? [o.bijzonde_2] : [];
+    var bijzonderhedenAanwezigheid = [];
     $.each(o.bijzonderheden_aanwezigheid || [], function(i, bzh) {
         if(bijzonderhedenAanwezigheid.indexOf(bzh) === -1) {
             bijzonderhedenAanwezigheid.push(bzh);
