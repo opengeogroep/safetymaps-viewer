@@ -142,10 +142,10 @@ dbkjs.modules.kro = {
         return me.callApi(params);
     },
 
-    getObjectInfoForAddress: function(streetname, housnr, housletter, housaddition, city) {
+    getObjectInfoForAddress: function(streetname, housnr, housletter, housaddition, city, pc) {
         var me = dbkjs.modules.kro;
         var params = {
-            address: me.createAddressString(streetname, housnr, housletter, housaddition, city),
+            address: me.createAddressString(streetname, housnr, housletter, housaddition, city, pc),
         };
 
         me.cache.incidentAddress = me.createIncidentAddressString(streetname, housnr, housletter, housaddition, city);
@@ -438,12 +438,12 @@ dbkjs.modules.kro = {
             });
     },
 
-    createAddressString: function(streetname, housenr, houseletter, houseaddition, city) {
+    createAddressString: function(streetname, housenr, houseletter, houseaddition, city, pc) {
         if ((houseletter === null || houseletter === '') && (houseaddition !== null && houseaddition !== '')) {
             houseletter = houseaddition;
             houseaddition = '';
         }
-        return streetname + "|" + ((housenr === 0 ? '' : housenr) || '') + "|" + (houseletter || '') + "|" + (houseaddition || '') + "|" + city;
+        return streetname + "|" + ((housenr === 0 ? '' : housenr) || '') + "|" + (houseletter || '') + "|" + (houseaddition || '') + "|" + city + "|" + (pc || '');
     },
 
     createIncidentAddressString: function(streetname, housenr, houseletter, houseaddition, city) {
