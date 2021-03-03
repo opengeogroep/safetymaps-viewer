@@ -49,7 +49,7 @@ function IncidentMonitorController(options) {
     me.service = me.options.agsService;
 
     // Debug option to show incidents without units attached
-    me.options.toonZonderEenheden = OpenLayers.Util.getParameters().toonZonderEenheden === "true";
+    me.options.toonZonderEenheden = OpenLayers.Util.getParameters().toonZonderEenheden === "true" || me.options.includeIncidentsWithoutUnits;
 
     me.button = new AlertableButton("btn_incidentlist", "Incidentenlijst", "list");
     me.button.getElement().insertAfter('#btn_incident');
@@ -191,11 +191,16 @@ IncidentMonitorController.prototype.incidentRead = function(incidentId) {
  */
 IncidentMonitorController.prototype.getSafetyConnectIncident = function () {
     var me = this;
+    var maxPrio = me.options.includePrio4And5Incidents ? 5 : 3;
     // Get incident
     $.ajax(me.options.apiPath + "safetyconnect/incident/" + me.incident.IncidentNummer, {
         dataType: "json",
         data: {
-            extended: true
+            extended: true,
+            excludeTraining: me.options.excludeManuallyCreatedIncidents,
+            daysInPast: me.options.getIncidentsFromDaysInPast,
+            prio: maxPrio,
+            includeWithoutUnits: me.options.includeIncidentsWithoutUnits,
         },
         xhrFields: { withCredentials: true }, crossDomain: true
     })
@@ -449,7 +454,7 @@ IncidentMonitorController.prototype.updateInterface = function() {
     $.each(currentFiltered, function(i, incident) {
         if(incident.actueleInzet) {
             active.push(incident);
-        } else if(incident.beeindigdeInzet || me.toonZonderEenheden) {
+        } else if(incident.beeindigdeInzet || me.options.toonZonderEenheden) {
             inactive.push(incident);
         }
     });
