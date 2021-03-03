@@ -43,7 +43,8 @@ safetymaps.creator.renderInfoTabs = function(object, windowId, isIncident) {
             object.huisnummer,
             object.huisletter || '',
             object.toevoeging || '',
-            object.plaats
+            object.plaats,
+            object.postcode
         )
         .fail(function(msg) { 
             console.log("Error fetching KRO data in Creator Module: " + msg);

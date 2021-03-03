@@ -999,7 +999,8 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, isIn
             object.huisnummer,
             object.huisletter || '',
             object.toevoeging || '',
-            object.plaats
+            object.plaats,
+            object.postcode
         )
         .fail(function(msg) { 
             console.log("Error fetching KRO data in vrh-dbks module: " + msg);

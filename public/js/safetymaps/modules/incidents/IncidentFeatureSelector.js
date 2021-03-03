@@ -76,7 +76,8 @@ IncidentFeatureSelector.prototype.findAndSelectMatches = function(matchInfo, inc
             matchInfo.huisnummer,
             matchInfo.huisletter || '',
             matchInfo.toevoeging || '',
-            matchInfo.woonplaats
+            matchInfo.woonplaats,
+            matchInfo.postcode
         )
         .fail(function(msg) {
             console.log("Error fetching KRO data in Incident Feature Selector: " + msg);
