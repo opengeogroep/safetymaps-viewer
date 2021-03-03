@@ -130,7 +130,7 @@ VehiclePositionLayer.prototype.selectFeature = function(e) {
     var me = this;
     me.removePopup();
 
-    if(me.options.vehiclePopupTemplate) {
+    if(me.options.vehiclesShowVehiclePopup) {
         var f = e.feature;
         me.selectedFeature = f;
         function onPopupClose(evt) {
@@ -140,7 +140,7 @@ VehiclePositionLayer.prototype.selectFeature = function(e) {
         me.popup = new OpenLayers.Popup.FramedCloud(null,
                                  f.geometry.getBounds().getCenterLonLat(),
                                  null,
-                                 Mustache.render(me.options.popupTemplate, f.attributes),
+                                 Mustache.render(me.options.vehiclePopupTemplate, f.attributes),
                                  null, true, onPopupClose);
         f.popup = me.popup;
         dbkjs.map.addPopup(me.popup);

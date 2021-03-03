@@ -73,7 +73,8 @@ function IncidentMonitorController(options) {
         me.vehiclePositionLayer = new VehiclePositionLayer({
             showUnassignedButMoving: showUnassignedButMoving,
             showInzetRol: me.options.showInzetRol,
-            vehiclePopupTemplate: null
+            vehiclePopupTemplate: me.options.vehiclePopupTemplate,
+            vehiclesShowVehiclePopup: me.options.vehiclesShowVehiclePopup
         });
         if(me.options.enableUnassignedVehicles) {
             $("#settingspanel_b").append('<hr/><label><input id="im_showunassignedbutmoving" type="checkbox" ' + (showUnassignedButMoving ? 'checked' : '') + '>Toon bewegende voertuigen niet gekoppeld aan incident (grijs)</label>');
