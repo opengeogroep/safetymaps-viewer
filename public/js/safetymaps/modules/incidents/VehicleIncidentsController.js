@@ -94,7 +94,9 @@ function VehicleIncidentsController(options, featureSelector) {
     }, 2000);
 
     me.vehiclePositionLayer = new VehiclePositionLayer({
-        showInzetRol: me.options.vehiclesShowInzetRol
+        showInzetRol: me.options.vehiclesShowInzetRol,
+        vehiclePopupTemplate: me.options.vehiclePopupTemplate,
+        vehiclesShowVehiclePopup: me.options.vehiclesShowVehiclePopup
     });
     if(me.options.showVehicles) {
         dbkjs.selectControl.layers.push(me.vehiclePositionLayer.layer);
@@ -289,6 +291,8 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
                 getIncidentsFromDaysInPast: me.options.getIncidentsFromDaysInPast,
                 includePrio4And5Incidents: me.options.prio4and5Authorized,
                 includeIncidentsWithoutUnits: me.options.withoutUnitsAuthorized,
+                vehiclePopupTemplate: me.options.vehiclePopupTemplate,
+                vehiclesShowVehiclePopup: me.options.vehiclesShowVehiclePopup
             };
 
             me.incidentMonitorController = new IncidentMonitorController(incidentMonitorOptions);
