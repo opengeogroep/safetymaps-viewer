@@ -377,6 +377,7 @@ $(document).ready(function () {
         // dbkjs.options.splitScreenChecked: split screen is enabled
         if(dbkjs.options.enableSplitScreen) {
             $(".main-button-group").css({paddingRight: "10px", width: "auto", float: "right", right: "0%"});
+            $("#btngrp_4").css({"margin-right": "0%", "top": "50px"});
 
             $(dbkjs).one("dbkjs_init_complete", function() {
                 // Add config option to enable / disable split screen

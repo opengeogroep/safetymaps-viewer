@@ -144,6 +144,7 @@ function SplitScreenWindow(name) {
 
     // XXX always, also fixes cannot click map next to buttons
     $(".main-button-group").css({paddingRight: "10px", width: "auto", float: "right", "margin-right": "0%"});
+    $("#btngrp_4").css({"margin-right": "0%", "top": "50px"});
 
     // Listen to global event for user split screen setting
     var me = this;
@@ -217,6 +218,7 @@ SplitScreenWindow.prototype.hide = function(noMapAdjust) {
         if(!noMapAdjust) {
             // XXX move to dbkjs event 'split_screen_hide'
             $(".main-button-group").css({"margin-right": "0%"});
+            $("#btngrp_4").css({"margin-right": "0%", "top": "50px"});
             $("#vectorclickpanel").css({"width": "100%"});
 
             $("#map").css({width: "100%"});
@@ -250,6 +252,7 @@ SplitScreenWindow.prototype.show = function() {
         // XXX move to dbkjs event 'split_screen_show';
 
         $(".main-button-group").css({"margin-right": windowWidth});
+        $("#btngrp_4").css({"margin-right": windowWidth, "top": "50px"});
         $("#vectorclickpanel").css({width: remainderWidth});
 
         $("#map").css({width: remainderWidth});
