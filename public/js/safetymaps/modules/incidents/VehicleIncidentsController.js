@@ -99,10 +99,9 @@ function VehicleIncidentsController(options, featureSelector) {
         vehiclesShowVehiclePopup: me.options.vehiclesShowVehiclePopup
     });
     if(me.options.showVehicles) {
-        dbkjs.selectControl.layers.push(me.vehiclePositionLayer.layer);
-
         $(dbkjs).one("dbkjs_init_complete", function() {
             me.vehiclePositionLayer.raiseLayers();
+            dbkjs.selectControl.layers.push(me.vehiclePositionLayer.layer);
         });
     }
 

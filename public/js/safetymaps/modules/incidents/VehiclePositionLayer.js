@@ -181,9 +181,6 @@ VehiclePositionLayer.prototype.features = function(features) {
     if(!features) {
         return;
     }
-    if(me.selectedFeature) {
-        me.selectControl.unselectAll();
-    }
     this.layer.destroyFeatures();
     this.layer2.destroyFeatures();
     this.layer.addFeatures(features);
