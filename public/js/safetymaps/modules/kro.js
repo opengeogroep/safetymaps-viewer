@@ -310,9 +310,11 @@ dbkjs.modules.kro = {
                     }
                 }
 
+                var sortIcon = '<i class="fa fa-sort" aria-hidden="true"></i>';
+
                 $bodyEl.html(bodyHtml);
                 $bodyTable.addClass("table-small-text");
-                $bodyTable.append("<thead style='cursor: pointer;'><tr><th>Adres</th><th>Typering</th><th>Bedrijfs-<br/>naam</th><th>Telefoon</th><th>Indicatie<br/>aantal pers.</th></tr></thead><tbody>");
+                $bodyTable.append("<thead style='cursor: pointer;'><tr><th>Adres " + sortIcon + "</th><th>Typering " + sortIcon + "</th><th>Bedrijfs-<br/>naam " + sortIcon + "</th><th>Telefoon " + sortIcon + "</th><th>Indicatie " + sortIcon + "<br/>aantal pers. " + sortIcon + "</th></tr></thead><tbody>");
 
                 if(kroAddressesData.length > 0) {
                     kroAddressesData
