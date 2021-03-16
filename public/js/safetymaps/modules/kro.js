@@ -324,13 +324,12 @@ dbkjs.modules.kro = {
                             return 0;
                         })
                         .map(function(dataRow) {
-                            var containsWoTypering = (dataRow.adres_objecttypering
-                                ? dataRow.adres_objecttypering.split('||')
-                                : ["|"]).map(function(itm) { return itm.split('|')[0].includes("Wo") }).filter(function(itm) { return itm }).length > 0;
+                            var containsWoTypering = (dataRow.adres_objecttypering ? dataRow.adres_objecttypering.split('||') : ["|"])
+                                .filter(function(itm) { return itm.split('|')[0].includes("Wo") }).length > 0;
 
-                            containsWoTypering = containsWoTypering || (dataRow.aanzien_typering
-                                ? dataRow.aanzien_typering.split('||')
-                                : ["|"]).map(function(itm) { return itm.split('|')[0].includes("Wo") }).filter(function(itm) { return itm }).length > 0;
+                            containsWoTypering = containsWoTypering 
+                                || (dataRow.aanzien_objecttypering ? dataRow.aanzien_objecttypering.split('||') : ["|"])
+                                    .filter(function(itm) { return itm.split('|')[0].includes("Wo") }).length > 0;
 
                             var adres_typering = (dataRow.adres_objecttypering
                                 ? dataRow.adres_objecttypering.split('||')
