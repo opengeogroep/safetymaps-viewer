@@ -156,11 +156,19 @@ dbkjs.modules.safetymaps_creator = {
         if(typeof config.creatorType === "undefined") {
             return;
         }
-        var i = me.hiddenTypes.indexOf(config.creatorType);
-        if(active && i !== -1) {
-            me.hiddenTypes.splice(i, 1);
-        } else if(!active && i === -1) {
-            me.hiddenTypes.push(config.creatorType);
+        if (Array.isArray(config.creatorType)) {
+            if (active) {
+                me.hiddenTypes = [];
+            } else {
+                me.hiddenTypes = config.creatorType;
+            }
+        } else {
+            var i = me.hiddenTypes.indexOf(config.creatorType);
+            if(active && i !== -1) {
+                me.hiddenTypes.splice(i, 1);
+            } else if(!active && i === -1) {
+                me.hiddenTypes.push(config.creatorType);
+            }
         }
         console.log("Hidden object types: " + me.hiddenTypes);
         me.clusteringLayer.redraw();
