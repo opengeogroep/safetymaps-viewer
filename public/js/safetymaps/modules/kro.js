@@ -106,6 +106,7 @@ dbkjs.modules.kro = {
 
         if (bagPandId) {
             me.showPopup(bagPandId, true);
+            $('#vectorclickpanel').hide();
             $("#custompanel").modal('toggle');
         }
     },
