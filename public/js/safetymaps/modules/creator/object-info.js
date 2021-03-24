@@ -283,7 +283,9 @@ safetymaps.creator.renderMedia = function(object) {
         $.each(object.media, function(i, m) {
             var active = i === 0 ? "active" : "";
             var path = safetymaps.creator.api.mediaPath + m.filename;
-            var userFriendlyName = m.filename.substring(dbkjs.modules.safetymaps_creator.options.mediaPrefixLength, m.filename.length)
+            var userFriendlyName = (typeof dbkjs.modules.safetymaps_creator.options !== "undefined") 
+                ? m.filename.substring(dbkjs.modules.safetymaps_creator.options.mediaPrefixLength, m.filename.length)
+                : m.filename;
 
             if(path.match(/pdf$/i)) {
                 image_carousel_inner.append(
