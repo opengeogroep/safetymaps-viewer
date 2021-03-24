@@ -43,6 +43,7 @@ dbkjs.modules.kro = {
             enableForObjectTypes: ["object"],
             layerName: "KRO\\Pand risico score",
             bagPandIdFeature: "identificatie",
+            hideExtraInfoOnWoType: true,
         }, me.options);
 
         me.activated = true;
@@ -248,7 +249,7 @@ dbkjs.modules.kro = {
         rows.push({ l: "Oppervlakte gebouw", t: kro.adres_oppervlak + "m2", source: "kro" });
         rows.push({ l: "Bouwjaar", t: kro.pand_bouwjaar, source: "kro" });
         rows.push({ l: "Maximale hoogte",t: ("" + kro.pand_maxhoogte + "").replace(".", ",") + "m", source: "kro" });
-        rows.push({ l: "Geschat aantal bouwlagen bovengronds",t: kro.pand_bouwlagen, source: "kro" });
+        rows.push({ l: "Geschat aantal bouwlagen<br/>bovengronds",t: kro.pand_bouwlagen, source: "kro" });
         rows.push({ l: "Functies binnen dit adres <a href='#custompanel' data-toggle='modal'><i onClick='dbkjs.modules.kro.showFootnote(\"Uitleg: functies binnen dit adres\", \"kro_adres_functies.png\")' class='fa fa-info-circle'></i></a>", html: addressTypeList, source: "kro" });
         rows.push({ l: "Alle functies in dit gebouw <a href='#custompanel' data-toggle='modal'><i onClick='dbkjs.modules.kro.showFootnote(\"Uitleg: alle functies in dit gebouw\", \"kro_gebouw_functies.png\")' class='fa fa-info-circle'></i></a> <a href='#custompanel' data-toggle='modal'><span onClick='dbkjs.modules.kro.showPopup(\"" + kro.bagpandid + "\")'><br/>klik voor meer info</span></a>", html: typeList, source: "kro" },);
 
@@ -332,14 +333,17 @@ dbkjs.modules.kro = {
                                 || (dataRow.aanzien_objecttypering ? dataRow.aanzien_objecttypering.split('||') : ["|"])
                                     .filter(function(itm) { return itm.split('|')[0].includes("Wo") }).length > 0;
 
+                            containsWoTypering = containsWoTypering && me.options.hideExtraInfoOnWoType;
+
                             var adres_typering = (dataRow.adres_objecttypering
                                 ? dataRow.adres_objecttypering.split('||')
                                 : ["|"]).map(function(itm) { return itm.split('|')[1] }).join(', ');
                             var aanzien_typering = (dataRow.aanzien_objecttypering
                                 ? dataRow.aanzien_objecttypering.split('||')
                                 : ["|"]).map(function(itm) { return itm.split('|')[1] }).join(', ');
+                            var showTypering = (aanzien_typering + adres_typering).length > 0 ? (aanzien_typering + adres_typering) : dataRow.functies;
                             var adres = dataRow.straatnaam + (" " + dataRow.huisnr || "") + (" " + dataRow.huisletter || "") + (" " + dataRow.huistoevg || "") + dataRow.plaatsnaam;
-                            var rowHtml = "<tr class='" + rowCss + "'><td>" + (adres) + "</td><td>" + (aanzien_typering) + (adres_typering) +
+                            var rowHtml = "<tr class='" + rowCss + "'><td>" + (adres) + "</td><td>" + (showTypering) +
                                 "</td><td>" + (containsWoTypering ? '' : dataRow.adres_bedrijfsnaam || "") + "</td><td>" + (containsWoTypering ? '' : dataRow.adres_telefoonnummer || "") +
                                 "</td><td>" + (containsWoTypering ? '' : dataRow.adres_aantal_personen || "") + "</td></tr>";
 
