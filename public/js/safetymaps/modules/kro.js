@@ -240,7 +240,7 @@ dbkjs.modules.kro = {
         if (kro.address_objecttypering_ordered) {
             addressTypeList = "<table>";
             kro.address_objecttypering_ordered.map(function(type) {
-                addressTypeList += "<tr><td>" + type + "</td></tr>";
+                addressTypeList += "<tr><td>" + (type === "Onbekend" ? kro.functies : type) + "</td></tr>";
             });
             addressTypeList += "</table>";
         }
