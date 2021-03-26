@@ -232,7 +232,10 @@ dbkjs.modules.kro = {
             inPopup = false;
         }
 
-        var functies = kro.functies.split('|');
+        var functies = "|";
+        if (kro.functies) {
+            functies = kro.functies.split('|');
+        }
         typeList = functies[1];
 
         if (kro.pand_objecttypering_ordered) {
