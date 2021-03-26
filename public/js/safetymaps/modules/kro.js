@@ -232,10 +232,12 @@ dbkjs.modules.kro = {
             inPopup = false;
         }
 
+        var functies = kro.functies.split('|');
+
         if (kro.pand_objecttypering_ordered) {
             typeList = "<a class='--without-effects' href='#custompanel' data-toggle='modal'><table onClick='dbkjs.modules.kro.showPopup(\"" + kro.bagpandid + "\")'>";
             kro.pand_objecttypering_ordered.map(function(type) {
-                typeList += "<tr><td>" + type + "</td></tr>";
+                typeList += "<tr><td>" + (type === '-' ? functies[1] : type) + "</td></tr>";
             });
             typeList += "</table></a>";
         }
@@ -243,7 +245,7 @@ dbkjs.modules.kro = {
         if (kro.address_objecttypering_ordered) {
             addressTypeList = "<table>";
             kro.address_objecttypering_ordered.map(function(type) {
-                addressTypeList += "<tr><td>" + (type === "Onbekend" ? kro.functies : type) + "</td></tr>";
+                addressTypeList += "<tr><td>" + (type === "Onbekend" ? functies[0] : type) + "</td></tr>";
             });
             addressTypeList += "</table>";
         }
