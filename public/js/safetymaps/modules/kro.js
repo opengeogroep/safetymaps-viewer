@@ -232,7 +232,7 @@ dbkjs.modules.kro = {
             inPopup = false;
         }
 
-        var functies = "|";
+        var functies = ['', ''];
         if (kro.functies) {
             functies = kro.functies.split('|');
         }

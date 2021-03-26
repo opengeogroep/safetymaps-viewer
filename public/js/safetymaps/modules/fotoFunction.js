@@ -167,7 +167,7 @@ dbkjs.modules.fotoFunction = {
             var windowURL = window.URL || window.webkitURL;
             var picURL = windowURL.createObjectURL(fileInput[0]);
             me.picture = fileInput[0];
-            if (me.config.resizeBeforeUpload) {
+            if (me.options.resizeBeforeUpload) {
                 me.resizePhoto(picURL);
             }
             $("#pictured").attr({"src": picURL});
@@ -186,7 +186,7 @@ dbkjs.modules.fotoFunction = {
         var windowURL = window.URL || window.webkitURL;
         var picURL = windowURL.createObjectURL(me.file);
         me.picture = me.file;
-        if (me.config.resizeBeforeUpload) {
+        if (me.options.resizeBeforeUpload) {
             me.resizePhoto(picURL);
         }
         $("#pictured").attr({"src": picURL});
