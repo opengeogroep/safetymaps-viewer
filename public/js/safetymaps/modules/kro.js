@@ -220,13 +220,16 @@ dbkjs.modules.kro = {
         }, 500);
     },
 
-    createGeneralRows: function(kro, mergeWithDbk) {
+    createGeneralRows: function(kro, mergeWithDbk, inPopup) {
         var rows = [];
         var typeList = "-";
         var addressTypeList = "-";
 
         if (typeof mergeWithDbk === "undefined") {
             mergeWithDbk = false;
+        }
+        if (typeof inPopup === "undefined") {
+            inPopup = false;
         }
 
         if (kro.pand_objecttypering_ordered) {
@@ -246,7 +249,9 @@ dbkjs.modules.kro = {
         }
 
         rows.push({ l: "<span class='objectinfo__header'>bron: basisregistratie</span>", html: "<br/>", source: "kro", order: '0' });
-        rows.push({ l: "Oppervlakte gebouw", t: kro.adres_oppervlak + "m2", source: "kro" });
+        if (!inPopup) {
+            rows.push({ l: "Oppervlakte gebouw", t: kro.adres_oppervlak + "m2", source: "kro" });
+        }
         rows.push({ l: "Bouwjaar", t: kro.pand_bouwjaar, source: "kro" });
         rows.push({ l: "Maximale hoogte",t: ("" + kro.pand_maxhoogte + "").replace(".", ",") + "m", source: "kro" });
         rows.push({ l: "Geschat aantal bouwlagen<br/>bovengronds",t: kro.pand_bouwlagen, source: "kro" });
@@ -302,7 +307,7 @@ dbkjs.modules.kro = {
                 if (extended) {
                     if(kroAddressesData.length > 0) {
                         bodyHtml += "<table>";
-                        var kro = me.createGeneralRows(kroAddressesData[0]);
+                        var kro = me.createGeneralRows(kroAddressesData[0], false, true);
                         kro.filter(function(kroItm) { return !kroItm.html }).map(function(kroItm) {
                             bodyHtml += "<tr><td>" + kroItm.l + "</td><td>" + kroItm.t + "</td></tr>";
                         });
@@ -316,7 +321,7 @@ dbkjs.modules.kro = {
 
                 $bodyEl.html(bodyHtml);
                 $bodyTable.addClass("table-small-text");
-                $bodyTable.append("<thead style='cursor: pointer;'><tr><th>Adres " + sortIcon + "</th><th>Typering " + sortIcon + "</th><th>Bedrijfs-<br/>naam " + sortIcon + "</th><th>Telefoon " + sortIcon + "</th><th>Indicatie " + sortIcon + "<br/>aantal pers. " + sortIcon + "</th></tr></thead><tbody>");
+                $bodyTable.append("<thead style='cursor: pointer;'><tr><th>Adres " + sortIcon + "</th><th>Typering " + sortIcon + "</th><th>Oppvl. " + sortIcon + " </th><th>Bedrijfs-<br/>naam " + sortIcon + "</th><th>Telefoon " + sortIcon + "</th><th>Indicatie " + sortIcon + "<br/>aantal pers. " + sortIcon + "</th></tr></thead><tbody>");
 
                 if(kroAddressesData.length > 0) {
                     kroAddressesData
@@ -344,6 +349,7 @@ dbkjs.modules.kro = {
                             var showTypering = (aanzien_typering + adres_typering).length > 0 ? (aanzien_typering + adres_typering) : dataRow.functies;
                             var adres = dataRow.straatnaam + (" " + dataRow.huisnr || "") + (" " + dataRow.huisletter || "") + (" " + dataRow.huistoevg || "") + dataRow.plaatsnaam;
                             var rowHtml = "<tr class='" + rowCss + "'><td>" + (adres) + "</td><td>" + (showTypering) +
+                                "</td><td>" + dataRow.adres_oppervlak + "m2" +
                                 "</td><td>" + (containsWoTypering ? '' : dataRow.adres_bedrijfsnaam || "") + "</td><td>" + (containsWoTypering ? '' : dataRow.adres_telefoonnummer || "") +
                                 "</td><td>" + (containsWoTypering ? '' : dataRow.adres_aantal_personen || "") + "</td></tr>";
 
