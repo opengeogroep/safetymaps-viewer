@@ -99,10 +99,9 @@ function VehicleIncidentsController(options, featureSelector) {
         vehiclesShowVehiclePopup: me.options.vehiclesShowVehiclePopup
     });
     if(me.options.showVehicles) {
-        dbkjs.selectControl.layers.push(me.vehiclePositionLayer.layer);
-
         $(dbkjs).one("dbkjs_init_complete", function() {
             me.vehiclePositionLayer.raiseLayers();
+            dbkjs.selectControl.layers.push(me.vehiclePositionLayer.layer);
         });
     }
 
@@ -317,7 +316,7 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
     }
 };
 
-VehicleIncidentsController.prototype.incidentMonitorIncidentSelected = function(event, inzetInfo) {
+VehicleIncidentsController.prototype.incidentMonitorIncidentSelected = function(event, inzetInfo, fromIncidentList) {
     var me = this;
 
     var openedIncident = (me.incident && me.incident !== null);
@@ -328,7 +327,7 @@ VehicleIncidentsController.prototype.incidentMonitorIncidentSelected = function(
         this.inzetBeeindigd('Incident beeindigd');
     } else {
         this.inzetInfo = inzetInfo;
-        this.inzetIncident(inzetInfo, true);
+        this.inzetIncident(inzetInfo, fromIncidentList);
     }
 };
 
@@ -1116,7 +1115,7 @@ VehicleIncidentsController.prototype.onInzetIncident = function(incidentInfo, fr
         me.button.setIcon("bell");
     }
 
-    if(incidentInfo.incident.nummer !== me.incidentNummer) {
+    if(incidentInfo.incident.nummer !== me.incidentNummer || fromIncidentList) {
         me.geenInzet();
 
         me.incident = incidentInfo.incident;

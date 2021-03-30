@@ -190,7 +190,7 @@ IncidentMonitorController.prototype.incidentRead = function(incidentId) {
 /**
  * Get incident info from safetyconnect/incident/[me.incident.IncidentNummer]
  */
-IncidentMonitorController.prototype.getSafetyConnectIncident = function () {
+IncidentMonitorController.prototype.getSafetyConnectIncident = function (fromIncidentList) {
     var me = this;
     var maxPrio = me.options.includePrio4And5Incidents ? 5 : 3;
     // Get incident
@@ -219,7 +219,7 @@ IncidentMonitorController.prototype.getSafetyConnectIncident = function () {
         try {
             var incidentInfo = { source: me.options.incidentSource, incident: data[0]};
             VehicleIncidentsController.prototype.normalizeIncidentFields(incidentInfo);
-            $(me).triggerHandler("incident_selected", [incidentInfo]);
+            $(me).triggerHandler("incident_selected", [incidentInfo, fromIncidentList]);
         } catch(e) {
             console.log("IM SC: Error processing incident", e, data);
         }
@@ -229,7 +229,7 @@ IncidentMonitorController.prototype.getSafetyConnectIncident = function () {
 /**
  * Get incident info from VrhAGS service
  */
-IncidentMonitorController.prototype.getVrhAGSIncident = function () {
+IncidentMonitorController.prototype.getVrhAGSIncident = function (fromIncidentList) {
     var me = this;
     // Get incident
     me.service.getAllIncidentInfo(me.incidentId, me.incident.archief, false)
@@ -245,24 +245,28 @@ IncidentMonitorController.prototype.getVrhAGSIncident = function () {
         }
         var incidentInfo = { source: me.options.incidentSource, incidenten: [incident.NR_INCIDENT], incident: incident};
         VehicleIncidentsController.prototype.normalizeIncidentFields(incidentInfo);
-        $(me).triggerHandler("incident_selected", [incidentInfo]);
+        $(me).triggerHandler("incident_selected", [incidentInfo, fromIncidentList]);
     });
 }
 
 /**
  * Try get incident from me.options.incidentSource
  */
-IncidentMonitorController.prototype.tryGetIncident = function () {
+IncidentMonitorController.prototype.tryGetIncident = function (fromIncidentList) {
     var me = this;
-    // Only when there is an open incident
+    // Check params for null values
+    if (typeof fromIncidentList === "undefined") {
+        fromIncidentList = false;
+    }
+    // Only when there is no open incident
     if (!me.incident) {
         return;
     }
     // Try get
     if(me.options.incidentSource === "SafetyConnect") {
-        me.getSafetyConnectIncident();
+        me.getSafetyConnectIncident(fromIncidentList);
     } else if(me.options.incidentSource === "VrhAGS") {
-        me.getVrhAGSIncident();
+        me.getVrhAGSIncident(fromIncidentList);
     } else {
         throw new Error("Invalid incident source");
     }
@@ -282,7 +286,7 @@ IncidentMonitorController.prototype.selectIncident = function(obj) {
     }
 
     me.incidentRead(me.incidentId);
-    me.tryGetIncident();
+    me.tryGetIncident(true);
 };
 
 IncidentMonitorController.prototype.checkIncidentListOutdated = function() {

@@ -586,7 +586,7 @@ IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incid
 };
 
 IncidentDetailsWindow.prototype.getKladblokRegelColor = function(kladblokregelDiscipline) {
-    if (kladblokregelDiscipline.indexOf("B") === -1) {
+    if (kladblokregelDiscipline && kladblokregelDiscipline.indexOf("B") === -1) {
         if (kladblokregelDiscipline.indexOf("P") !== -1) {
             return "pol";
         } else if (kladblokregelDiscipline.indexOf("A") !== -1) {

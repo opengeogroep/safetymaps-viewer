@@ -289,14 +289,11 @@ dbkjs.Layer = dbkjs.Class({
                     crossDomain: true
                 }).done(function(result) {
                     if (dbkjs.modules.kro && dbkjs.modules.kro.shouldShowKroForMapLayer(layerName)) {
-                        $('#vectorclickpanel').hide();
                         dbkjs.modules.kro.getBagPandIdFromLayerFeatureAndShowPopup(result);
                     } else {
                         _obj.panel(result, layerName);
                     }
                 });
-                //OpenLayers.Request.GET({url: this.layer.url, "params": params, callback: this.panel, scope: _obj});
-                //OpenLayers.Event.stop(e);
             }
         }
     },
@@ -311,7 +308,7 @@ dbkjs.Layer = dbkjs.Class({
         g = new OpenLayers.Format.WMSGetFeatureInfo();
 
         features = g.read($.parseXML(response));
-        console.log("Feature info for layer "+ _obj.layer.name + ": "+ features.length + " features returned");//, response.responseText);
+        console.log("Feature info for layer "+ layerName + ": "+ features.length + " features returned");//, response.responseText);
         if (features.length > 0) {
             var title = layerName.split("\\");
             $('#vectorclickpanel_h').html('<span class="h4"><i class="fa fa-info-circle"></i>&nbsp;' + title[title.length-1] + '</span>');

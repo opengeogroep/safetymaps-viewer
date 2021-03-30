@@ -42,7 +42,8 @@ dbkjs.modules.fotoFunction = {
         this.options = $.extend({
             showGallery: false,
             apiPath: dbkjs.options.urls && dbkjs.options.urls.apiPath ? dbkjs.options.urls.apiPath + "foto" : "api/foto",
-            interval: 10000
+            interval: 10000,
+            resizeBeforeUpload: false,
         }, this.options);
 
         $('<input type="file" id="fotoConnector" accept="image/*" capture="camera" style="display: none;">').appendTo("body");
@@ -166,7 +167,9 @@ dbkjs.modules.fotoFunction = {
             var windowURL = window.URL || window.webkitURL;
             var picURL = windowURL.createObjectURL(fileInput[0]);
             me.picture = fileInput[0];
-            me.resizePhoto(picURL);
+            if (me.options.resizeBeforeUpload) {
+                me.resizePhoto(picURL);
+            }
             $("#pictured").attr({"src": picURL});
             $("#input_textfield").val("");
             me.showPopup();
@@ -183,7 +186,9 @@ dbkjs.modules.fotoFunction = {
         var windowURL = window.URL || window.webkitURL;
         var picURL = windowURL.createObjectURL(me.file);
         me.picture = me.file;
-        me.resizePhoto(picURL);
+        if (me.options.resizeBeforeUpload) {
+            me.resizePhoto(picURL);
+        }
         $("#pictured").attr({"src": picURL});
         $("#input_textfield").val("");
         me.showPopup();
