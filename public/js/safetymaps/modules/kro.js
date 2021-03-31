@@ -256,7 +256,7 @@ dbkjs.modules.kro = {
 
         rows.push({ l: "<span class='objectinfo__header'>bron: basisregistratie</span>", html: "<br/>", source: "kro", order: '0' });
         if (!inPopup) {
-            rows.push({ l: "Oppervlakte gebouw", t: kro.adres_oppervlak + "m2", source: "kro" });
+            rows.push({ l: "Oppervlakte adres", t: kro.adres_oppervlak + "m2", source: "kro" });
         }
         rows.push({ l: "Bouwjaar", t: kro.pand_bouwjaar, source: "kro" });
         rows.push({ l: "Maximale hoogte",t: ("" + kro.pand_maxhoogte + "").replace(".", ",") + "m", source: "kro" });
@@ -461,7 +461,7 @@ dbkjs.modules.kro = {
             houseletter = houseaddition;
             houseaddition = '';
         }
-        return streetname + "|" + ((housenr === 0 ? '' : housenr) || '') + "|" + (houseletter || '') + "|" + (houseaddition || '') + "|" + city + "|" + (pc || '');
+        return streetname + "|" + ((housenr === 0 ? '' : housenr) || '') + "|" + (houseletter.toLowerCase() || '') + "|" + (houseaddition || '') + "|" + city + "|" + (pc || '');
     },
 
     createIncidentAddressString: function(streetname, housenr, houseletter, houseaddition, city) {
