@@ -44,7 +44,7 @@ function IncidentMonitorController(options) {
         updateTries: 3,
         incidentSource: "SafetyConnect",
         agsService: null,
-        cacheArchivedIncidents: true
+        cacheArchivedIncidents: true,
     }, options);
     me.service = me.options.agsService;
 
@@ -202,6 +202,7 @@ IncidentMonitorController.prototype.getSafetyConnectIncident = function (fromInc
             daysInPast: me.options.getIncidentsFromDaysInPast,
             prio: maxPrio,
             includeWithoutUnits: me.options.includeIncidentsWithoutUnits,
+            excludeKladblokRowsWithPrefix: (me.options.logKladblokChatToGMS ? "(VTG:" : null),
         },
         xhrFields: { withCredentials: true }, crossDomain: true
     })

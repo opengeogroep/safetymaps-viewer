@@ -184,7 +184,9 @@ VehicleIncidentsController.prototype.defaultOptions = function(options) {
         // Customize incident monitor incident list: specify functions or names
         // of functions
         incidentListFooterFunction: null,
-        incidentListFunction: null
+        incidentListFunction: null,
+
+        logKladblokChatToGMS: false,
     }, options);
 };
 
@@ -291,7 +293,8 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
                 includePrio4And5Incidents: me.options.prio4and5Authorized,
                 includeIncidentsWithoutUnits: me.options.withoutUnitsAuthorized,
                 vehiclePopupTemplate: me.options.vehiclePopupTemplate,
-                vehiclesShowVehiclePopup: me.options.vehiclesShowVehiclePopup
+                vehiclesShowVehiclePopup: me.options.vehiclesShowVehiclePopup,
+                logKladblokChatToGMS: me.options.logKladblokChatToGMS,
             };
 
             me.incidentMonitorController = new IncidentMonitorController(incidentMonitorOptions);
