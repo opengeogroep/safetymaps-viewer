@@ -187,6 +187,7 @@ VehicleIncidentsController.prototype.defaultOptions = function(options) {
         incidentListFunction: null,
 
         logKladblokChatToGMS: false,
+        logKladblokChatToGMSPrefix: "(VTG:",
     }, options);
 };
 
@@ -295,6 +296,7 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
                 vehiclePopupTemplate: me.options.vehiclePopupTemplate,
                 vehiclesShowVehiclePopup: me.options.vehiclesShowVehiclePopup,
                 logKladblokChatToGMS: me.options.logKladblokChatToGMS,
+                logKladblokChatToGMSPrefix: me.options.logKladblokChatToGMSPrefix,
             };
 
             me.incidentMonitorController = new IncidentMonitorController(incidentMonitorOptions);
@@ -1046,6 +1048,10 @@ VehicleIncidentsController.prototype.saveKladblokChatRow = function (row, incide
             me.inzetIncident({ incident: me.incident, source: me.options.incidentSource }, me.incidentFromIncidentList);
         })
     }
+
+    if (me.options.logKladblokChatToGMS) {
+        // request to safetyconnect through api
+    }
 }
 
 VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, fromIncidentList) {
@@ -1086,7 +1092,7 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
                         MELDING_ID: null,
                         IsChat: true };
                 });
-                incidentInfo.incident.kladblok = incidentInfo.incident.kladblok.filter(function (f) { return !f.IsChat; }).concat(chatRow);
+                incidentInfo.incident.kladblok = incidentInfo.incident.kladblok.filter(function (f) { return !f.IsChat && f.INHOUD_KLADBLOK_REGEL.substring(0, me.options.logKladblokChatToGMSPrefix.length -1) !== me.options.logKladblokChatToGMSPrefix; }).concat(chatRow);
             }
             me.onInzetIncident(incidentInfo, fromIncidentList);
         });
