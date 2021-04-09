@@ -844,7 +844,11 @@ VehicleIncidentsController.prototype.getVoertuigIncidentSC = function(nummer) {
             $.ajax(me.options.apiPath + "safetyconnect/incident/" + incidenten[incidenten.length-1], {
                 dataType: "json",
                 data: {
-                    extended: false
+                    extended: true,
+                    excludeTraining: me.options.excludeManuallyCreatedIncidents,
+                    daysInPast: me.options.getIncidentsFromDaysInPast,
+                    prio: me.options.includePrio4And5Incidents ? 5 : 3,
+                    includeWithoutUnits: me.options.includeIncidentsWithoutUnits,
                 },
                 xhrFields: { withCredentials: true }, crossDomain: true
             })
