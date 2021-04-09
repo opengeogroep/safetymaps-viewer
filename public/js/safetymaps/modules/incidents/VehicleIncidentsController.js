@@ -845,10 +845,7 @@ VehicleIncidentsController.prototype.getVoertuigIncidentSC = function(nummer) {
                 dataType: "json",
                 data: {
                     extended: true,
-                    excludeTraining: me.options.excludeManuallyCreatedIncidents,
-                    daysInPast: me.options.getIncidentsFromDaysInPast,
-                    prio: me.options.includePrio4And5Incidents ? 5 : 3,
-                    includeWithoutUnits: me.options.includeIncidentsWithoutUnits,
+                    prio: 5,
                 },
                 xhrFields: { withCredentials: true }, crossDomain: true
             })
