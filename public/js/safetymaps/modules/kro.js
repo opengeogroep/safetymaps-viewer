@@ -256,7 +256,7 @@ dbkjs.modules.kro = {
 
         rows.push({ l: "<span class='objectinfo__header'>bron: basisregistratie</span>", html: "<br/>", source: "kro", order: '0' });
         if (!inPopup) {
-            rows.push({ l: "Oppervlakte gebouw", t: kro.adres_oppervlak + "m2", source: "kro" });
+            rows.push({ l: "Oppervlakte adres", t: kro.adres_oppervlak + "m2", source: "kro" });
         }
         rows.push({ l: "Bouwjaar", t: kro.pand_bouwjaar, source: "kro" });
         rows.push({ l: "Maximale hoogte",t: ("" + kro.pand_maxhoogte + "").replace(".", ",") + "m", source: "kro" });
@@ -352,7 +352,7 @@ dbkjs.modules.kro = {
                             var aanzien_typering = (dataRow.aanzien_objecttypering
                                 ? dataRow.aanzien_objecttypering.split('||')
                                 : ["|"]).map(function(itm) { return itm.split('|')[1] }).join(', ');
-                            var showTypering = (aanzien_typering + adres_typering).length > 0 ? (aanzien_typering + adres_typering) : dataRow.functies.split('|')[0];
+                            var showTypering = (aanzien_typering + adres_typering).length > 0 ? (aanzien_typering + adres_typering) : (dataRow.functies || '|').split('|')[0];
                             var adres = dataRow.straatnaam + (" " + dataRow.huisnr || "") + (" " + dataRow.huisletter || "") + (" " + dataRow.huistoevg || "") + dataRow.plaatsnaam;
                             var rowHtml = "<tr class='" + rowCss + "'><td>" + (adres) + "</td><td>" + (showTypering) +
                                 "</td><td>" + dataRow.adres_oppervlak + "m2" +
@@ -461,7 +461,7 @@ dbkjs.modules.kro = {
             houseletter = houseaddition;
             houseaddition = '';
         }
-        return streetname + "|" + ((housenr === 0 ? '' : housenr) || '') + "|" + (houseletter || '') + "|" + (houseaddition || '') + "|" + city + "|" + (pc || '');
+        return streetname + "|" + ((housenr === 0 ? '' : housenr) || '') + "|" + (houseletter.toLowerCase() || '') + "|" + (houseaddition || '') + "|" + city + "|" + (pc || '');
     },
 
     createIncidentAddressString: function(streetname, housenr, houseletter, houseaddition, city) {
