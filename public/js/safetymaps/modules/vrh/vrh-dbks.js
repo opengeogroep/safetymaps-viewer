@@ -683,10 +683,10 @@ safetymaps.vrh.Dbks.prototype.showGevaarlijkeStof = function(title, f) {
     $('#vectorclickpanel_h').html('<span class="h4"><i class="fa fa-info-circle">&nbsp;' + title + '</span>');
     var html = $('<div class="table-responsive"></div>');
     var table = $('<table class="table table-hover"></table>');
-    table.append('<tr><th width="100px">Symbool</th><th width="60px">Gevi</th><th>Naam</th><th>Hoeveelheid</th><th>Bijzonderheden</th><th>ERIC-kaart</th></tr>');
+    table.append('<tr><th width="100px">Symbool</th><th width="60px">Gevi</th><th>Naam</th><th>Hoeveelheid</th><th>Bijzonderheden</th></tr>');
     table.append('<tr><td><img src="' + f.symbol_noi + '" alt="' + f.symboolcod + '" title="' + f.symboolcod + '"></td>'
         + '<td><div class="gevicode">' + f.gevi_code + '</div><div class="unnummer">' + f.vn_nummer + '</div></td>'
-        + '<td>' + f.stofnaam + '</td><td>' + f.hoeveelhei + '</td><td>' + f.description + '</td><td>' + f.eric_kaart + '</td></tr>');
+        + '<td>' + f.stofnaam + '</td><td>' + f.hoeveelhei + '</td><td>' + f.description + '</td></tr>');
     html.append(table);
     $('#vectorclickpanel_b').html('').append(html);
     $('#vectorclickpanel').show();
@@ -1104,11 +1104,11 @@ safetymaps.vrh.Dbks.prototype.updateRemainingInfoWindow = function(windowId, obj
         rows.push(
                 '<tr><td width="100px"><img id="gevaarlijke_stof_idx_' + i + '" class="legend_symbol" src="' + a.symbol_noi + '" alt="' + a.symboolcod + '" title="' + a.symboolcod + '"></td>' +
                 '<td><div class="gevicode">' + a.gevi_code + '</div><div class="unnummer">' + a.vn_nummer + '</div></td>' +
-                '<td>' + a.stofnaam + '</td><td>' + a.hoeveelhei + '</td><td>' + a.description + '</td><td>' + a.eric_kaart + '</td></tr>'
+                '<td>' + a.stofnaam + '</td><td>' + a.hoeveelhei + '</td><td>' + a.description + '</td></tr>'
         );
     });
     if(rows.length > 0) {
-        rows.unshift(["<b>Symbool</b>", "<b>Gevi</b>", "<b>Naam</b>", "<b>Hoeveelheid</b>", "<b>Bijzonderheden</b>", "<b>ERIC-kaart</b>"]);
+        rows.unshift(["<b>Symbool</b>", "<b>Gevi</b>", "<b>Naam</b>", "<b>Hoeveelheid</b>", "<b>Bijzonderheden</b>"]);
     }
     safetymaps.infoWindow.addTab(windowId, "gevaarlijke_stoffen", "Gevaarlijke stoffen", "info", safetymaps.creator.createInfoTabDiv(rows));
     dbkjs.modules.vrh_objects.addLegendTrEventHandler("tab_gevaarlijke_stoffen", {"gevaarlijke_stof" : me.layerDangerSymbols});
