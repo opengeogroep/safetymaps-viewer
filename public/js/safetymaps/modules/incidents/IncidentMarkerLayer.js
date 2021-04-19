@@ -35,6 +35,7 @@ IncidentMarkerLayer.prototype.addIncident = function(incident, archief, singleMa
     var me = this;
     var xy = AGSIncidentService.prototype.getIncidentXY(incident);
     var x = xy.x, y = xy.y;
+    var isManuallyCreated = incident.IncidentId && incident.IncidentId.includes("FLK");
 
     if(singleMarker) {
         if(x === me.x && y === me.y) {
@@ -49,7 +50,9 @@ IncidentMarkerLayer.prototype.addIncident = function(incident, archief, singleMa
 
     var pos = new OpenLayers.LonLat(x, y);
 
-    var icon = !archief ? "images/bell.png" : "images/bell-gray.png";
+    var icon = !archief 
+        ? isManuallyCreated ? "images/bell-orange.png" : "images/bell.png" 
+        : "images/bell-gray.png";
 
     var marker = new OpenLayers.Marker(
         pos,
