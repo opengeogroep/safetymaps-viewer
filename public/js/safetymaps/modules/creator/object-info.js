@@ -60,7 +60,9 @@ safetymaps.creator.renderInfoTabs = function(object, windowId, isIncident) {
             }
         })
         .always(function() {
-            safetymaps.infoWindow.addTab(windowId, "general", i18n.t("creator.general"), "info", safetymaps.creator.createInfoTabDiv(rows));
+            if (rows.length > 1) {
+                safetymaps.infoWindow.addTab(windowId, "general", i18n.t("creator.general"), "info", safetymaps.creator.createInfoTabDiv(rows));
+            }
             safetymaps.creator.renderRemainingInfoTabs(object, windowId, isIncident);
             d.resolve();
         });

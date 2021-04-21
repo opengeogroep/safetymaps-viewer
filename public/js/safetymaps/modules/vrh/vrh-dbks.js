@@ -937,12 +937,10 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, isIn
     safetymaps.infoWindow.removeTabs(windowId, "info");
 
     var rows = [];
-
     var o = object;
-
     var p = o.hoofdpand;
-
     var adres = (p.adres || "") + (p.plaats ? "<br>" + p.plaats : "");
+    var is_SB_or_DBL_object = (typeof o.oms_nummer === "undefined") || o.oms_nummer.length === 0 || o.oms_nummer === '';
 
     if(!adres && o.straatnaam) {
         adres = Mustache.render("{{straatnaam}} {{huisnummer}} {{huisletter}} {{toevoeging}}{{#plaats}}<br>{{plaats}}{{/plaats}}", o);
@@ -1010,18 +1008,26 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, isIn
             console.log("Error fetching KRO data in vrh-dbks module: " + msg);
         })
         .done(function(kro) {
+            // Empty rows when object is SB or DBL because no DBK info has to be showed
+            if (is_SB_or_DBL_object) {
+                rows = [];
+            }
             if(kro.length > 0) {
                 rows = dbkjs.modules.kro.mergeKroRowsIntoDbkRows(rows, kro[0], isIncident);
             }
         })
         .always(function() {
-            safetymaps.infoWindow.addTab(windowId, "algemeen", "Object info" , "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
-            safetymaps.vrh.Dbks.prototype.updateRemainingInfoWindow(windowId, object, me);
+            if (!is_SB_or_DBL_object && rows.length > 1) {
+                safetymaps.infoWindow.addTab(windowId, "algemeen", "Object info" , "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
+                safetymaps.vrh.Dbks.prototype.updateRemainingInfoWindow(windowId, object, me);
+            }
             d.resolve();
         });
     } else {
-        safetymaps.infoWindow.addTab(windowId, "algemeen", "Object info" , "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
-        safetymaps.vrh.Dbks.prototype.updateRemainingInfoWindow(windowId, object, me);
+        if (!is_SB_or_DBL_object) {
+            safetymaps.infoWindow.addTab(windowId, "algemeen", "Object info" , "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
+            safetymaps.vrh.Dbks.prototype.updateRemainingInfoWindow(windowId, object, me);
+        }
         d.resolve();
     }
     return d.promise();
