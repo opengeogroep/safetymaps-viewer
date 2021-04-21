@@ -219,10 +219,12 @@ dbkjs.modules.kro = {
             me.addPandFeatures(kro.bagpandid);
         }
 
-        rows.unshift({ l: "Incident adres", t: me.cache.incidentAddressString, source: "kro" });
-        rows = me.orderAndFilterObjectInfoRows(rows);
+        if (rows.length > 0) {
+            rows.unshift({ l: "Incident adres", t: me.cache.incidentAddressString, source: "kro" });
+            rows = me.orderAndFilterObjectInfoRows(rows);
 
-        safetymaps.infoWindow.addTab('incident', "general", i18n.t("creator.general"), "info", safetymaps.creator.createInfoTabDiv(rows));
+            safetymaps.infoWindow.addTab('incident', "general", i18n.t("creator.general"), "info", safetymaps.creator.createInfoTabDiv(rows));
+        }
     },
 
     setScrollBar: function() {
