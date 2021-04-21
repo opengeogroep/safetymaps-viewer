@@ -993,15 +993,19 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, isIn
 
     var d = $.Deferred();
 
-    if(dbkjs.modules.kro.shouldShowKroForObject(object)) {
-        dbkjs.modules.kro.getObjectInfoForAddress(
-            object.straatnaam,
-            object.huisnummer,
-            object.huisletter || '',
-            object.toevoeging || '',
-            object.plaats,
-            object.postcode
-        )
+    if(dbkjs.modules.kro.shouldShowKroForObject(object, isIncident)) {
+        var kroPromise = isIncident 
+            ? dbkjs.modules.kro.getObjectInfoForIncidentAddress() 
+            : dbkjs.modules.kro.getObjectInfoForAddress(
+                object.straatnaam,
+                object.huisnummer,
+                object.huisletter || '',
+                object.toevoeging || '',
+                object.plaats,
+                object.postcode
+            );
+
+        kroPromise
         .fail(function(msg) { 
             console.log("Error fetching KRO data in vrh-dbks module: " + msg);
         })

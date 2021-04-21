@@ -33,6 +33,7 @@ dbkjs.modules.kro = {
     pandLayer: null,
     cache: {
         incidentAddress: null,
+        incidentAddressString: null,
     },
     
     register: function() {
@@ -66,7 +67,7 @@ dbkjs.modules.kro = {
         return me.activated;
     },
 
-    shouldShowKroForObject: function(object) {
+    shouldShowKroForObject: function(object, isIncident) {
         var me = dbkjs.modules.kro;
 
         if (!me.shouldShowKro()) {
@@ -76,7 +77,7 @@ dbkjs.modules.kro = {
         var objectTypeIsEnabled = object.type &&
             me.options.enableForObjectTypes.filter(function(type) { return type.toLowerCase() === object.type.toLowerCase(); }).length > 0;
 
-        return objectTypeIsEnabled;
+        return objectTypeIsEnabled || isIncident;
     },
 
     shouldShowKroForMapLayer: function(layerName) {
@@ -150,7 +151,7 @@ dbkjs.modules.kro = {
             address: me.createAddressString(streetname, housnr, housletter, housaddition, city, pc),
         };
 
-        me.cache.incidentAddress = me.createIncidentAddressString(streetname, housnr, housletter, housaddition, city);
+        me.cache.incidentAddressString = me.createIncidentAddressString(streetname, housnr, housletter, housaddition, city);
         
         return me.callApi(params);
     },
@@ -174,12 +175,27 @@ dbkjs.modules.kro = {
         return me.callApi(params);
     },
 
+    setIncidentAddress: function(streetname, housnr, housletter, housaddition, city, pc) {
+        var me = this;
+        me.cache.incidentAddress = me.createAddressString(streetname, housnr, housletter, housaddition, city, pc);
+        me.cache.incidentAddressString = me.createIncidentAddressString(streetname, housnr, housletter, housaddition, city);
+    },
+
+    getObjectInfoForIncidentAddress: function () {
+        var me = dbkjs.modules.kro;
+        var params = {
+            address: me.cache.incidentAddress,
+        };
+        
+        return me.callApi(params);
+    },
+
     mergeKroRowsIntoDbkRows: function(dbkRows, kro, isIncident) {
         var me = dbkjs.modules.kro;
         var kroRows = me.createGeneralRows(kro, true);
 
         if (isIncident) {
-            kroRows.unshift({ l: "Incident adres", t: me.cache.incidentAddress, source: "kro" });
+            kroRows.unshift({ l: "Incident adres", t: me.cache.incidentAddressString, source: "kro" });
         }
 
         dbkRows = kroRows.concat(dbkRows);
@@ -205,7 +221,7 @@ dbkjs.modules.kro = {
             me.addPandFeatures(kro.bagpandid);
         }
 
-        rows.unshift({ l: "Incident adres", t: me.cache.incidentAddress, source: "kro" });
+        rows.unshift({ l: "Incident adres", t: me.cache.incidentAddressString, source: "kro" });
         rows = me.orderAndFilterObjectInfoRows(rows);
 
         safetymaps.infoWindow.addTab('incident', "general", i18n.t("creator.general"), "info", safetymaps.creator.createInfoTabDiv(rows));

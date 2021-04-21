@@ -36,16 +36,21 @@ safetymaps.creator.renderInfoTabs = function(object, windowId, isIncident) {
 
     var rows = safetymaps.creator.renderGeneral(object);
     var d = $.Deferred();
+    
 
-    if(dbkjs.modules.kro.shouldShowKroForObject(object)) {
-        dbkjs.modules.kro.getObjectInfoForAddress(
-            object.straatnaam,
-            object.huisnummer,
-            object.huisletter || '',
-            object.toevoeging || '',
-            object.plaats,
-            object.postcode
-        )
+    if(dbkjs.modules.kro.shouldShowKroForObject(object, isIncident)) {
+        var kroPromise = isIncident 
+            ? dbkjs.modules.kro.getObjectInfoForIncidentAddress() 
+            : dbkjs.modules.kro.getObjectInfoForAddress(
+                object.straatnaam,
+                object.huisnummer,
+                object.huisletter || '',
+                object.toevoeging || '',
+                object.plaats,
+                object.postcode
+            );
+
+        kroPromise
         .fail(function(msg) { 
             console.log("Error fetching KRO data in Creator Module: " + msg);
         })
