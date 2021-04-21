@@ -475,7 +475,7 @@ dbkjs.modules.kro = {
             houseletter = houseaddition;
             houseaddition = '';
         }
-        return streetname + "|" + ((housenr === 0 ? '' : housenr) || '') + "|" + (houseletter.toLowerCase() || '') + "|" + (houseaddition || '') + "|" + city + "|" + (pc || '');
+        return streetname + "|" + (housnr || 0) + "|" + (houseletter.toLowerCase() || '') + "|" + (houseaddition || '') + "|" + city + "|" + (pc || '');
     },
 
     createIncidentAddressString: function(streetname, housenr, houseletter, houseaddition, city) {
