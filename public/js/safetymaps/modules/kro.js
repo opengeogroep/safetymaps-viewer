@@ -151,8 +151,6 @@ dbkjs.modules.kro = {
             address: me.createAddressString(streetname, housnr, housletter, housaddition, city, pc),
         };
 
-        me.cache.incidentAddressString = me.createIncidentAddressString(streetname, housnr, housletter, housaddition, city);
-        
         return me.callApi(params);
     },
 
