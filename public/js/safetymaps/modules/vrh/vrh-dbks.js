@@ -1017,7 +1017,7 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, isIn
             }
         })
         .always(function() {
-            if (!is_SB_or_DBL_object && rows.length > 1) {
+            if (rows.length > 1) {
                 safetymaps.infoWindow.addTab(windowId, "algemeen", "Object info" , "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
                 safetymaps.vrh.Dbks.prototype.updateRemainingInfoWindow(windowId, object, me);
             }
