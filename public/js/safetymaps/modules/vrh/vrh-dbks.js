@@ -948,17 +948,22 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, isIn
 
     rows.push({l: "OMS nummer",                     t: o.oms_nummer});
     rows.push({l: "Naam",                           t: o.naam});
-    rows.push({l: "Naam bedrijfspand", t: p.bedrijfsna});
-    rows.push({l: "Adres",                          html: adres});
+    rows.push({l: "Naam bedrijfspand",              t: p.bedrijfsna});
+
+    if (!isIncident) {
+        rows.push({l: "Adres", html: adres});
+    }
+
     var oppervlakte = p.bag ? p.bag.oppervlakteverblijfsobject : p.oppervlakt;
     if(oppervlakte) {
-        rows.push({l: "Oppervlakte",                html: Number(oppervlakte).toFixed(0) + " m&sup2;"});
+        rows.push({l: "Oppervlakte", html: Number(oppervlakte).toFixed(0) + " m&sup2;"});
     }
+    
     rows.push({l: "Bouwjaar",                       t: p.bag ? p.bag.pandbouwjaar : p.bouwjaar});
     rows.push({l: "Gebruik",                        t: p.gebruiksdo});
-    rows.push({l: "Gebruiksdoel BAG",           t: p.bag ? p.bag.verblijfsobjectgebruiksdoel : p.gebruiks_1});
-    rows.push({l: "Verdiepingen ondergronds",      t: p.bouwlageno});
-    rows.push({l: "Verdiepingen bovengronds",      t: p.bouwlagenb});
+    rows.push({l: "Gebruiksdoel BAG",               t: p.bag ? p.bag.verblijfsobjectgebruiksdoel : p.gebruiks_1});
+    rows.push({l: "Verdiepingen ondergronds",       t: p.bouwlageno});
+    rows.push({l: "Verdiepingen bovengronds",       t: p.bouwlagenb});
 
     if(p.extra_info && (!p.datum_ei_1 || new moment(p.datum_ei_1).isBefore()) && (!p.eind_datum || new moment(p.eind_datum).isAfter())) {
         rows.push({l: "Extra info 1 " + (p.bron_ei_1 ? "(Bron: " + p.bron_ei_1 + ")" : ""), t: p.extra_info});
