@@ -1019,6 +1019,9 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, isIn
             }
             if(kro.length > 0) {
                 rows = dbkjs.modules.kro.mergeKroRowsIntoDbkRows(rows, kro[0], isIncident);
+                if (is_SB_or_DBL_object) {
+                    rows.pop(); // Remove dbkrows header if no DBK info has to be showed
+                }
             }
         })
         .always(function() {
