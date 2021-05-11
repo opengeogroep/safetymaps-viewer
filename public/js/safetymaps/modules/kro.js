@@ -248,7 +248,7 @@ dbkjs.modules.kro = {
             inPopup = false;
         }
 
-        var functies = ['', ''];
+        var functies = ['Onbekend', 'Onbekend'];
         if (kro.functies) {
             functies = kro.functies.split('|');
         }
@@ -274,11 +274,11 @@ dbkjs.modules.kro = {
         if (!inPopup) {
             rows.push({ l: "Oppervlakte adres", t: kro.adres_oppervlak + "m2", source: "kro" });
         }
-        rows.push({ l: "Bouwjaar", t: kro.pand_bouwjaar, source: "kro" });
+        rows.push({ l: "Bouwjaar", t: ("" + kro.pand_bouwjaar + ""), source: "kro" });
         rows.push({ l: "Maximale hoogte",t: ("" + kro.pand_maxhoogte + "").replace(".", ",") + "m", source: "kro" });
         rows.push({ l: "Geschat aantal bouwlagen<br/>bovengronds",t: kro.pand_bouwlagen, source: "kro" });
         rows.push({ l: "Functies binnen dit adres <a href='#custompanel' data-toggle='modal'><i onClick='dbkjs.modules.kro.showFootnote(\"Uitleg: functies binnen dit adres\", \"kro_adres_functies.png\")' class='fa fa-info-circle'></i></a>", html: addressTypeList, source: "kro" });
-        rows.push({ l: "Alle functies in dit gebouw <a href='#custompanel' data-toggle='modal'><i onClick='dbkjs.modules.kro.showFootnote(\"Uitleg: alle functies in dit gebouw\", \"kro_gebouw_functies.png\")' class='fa fa-info-circle'></i></a> <a href='#custompanel' data-toggle='modal'><span onClick='dbkjs.modules.kro.showPopup(\"" + kro.bagpandid + "\")'><br/>klik voor meer info</span></a>", html: typeList, source: "kro" },);
+        rows.push({ l: "Alle functies in dit gebouw <a href='#custompanel' data-toggle='modal'><i onClick='dbkjs.modules.kro.showFootnote(\"Uitleg: alle functies in dit gebouw\", \"kro_gebouw_functies.png\")' class='fa fa-info-circle'></i></a> <a href='#custompanel' data-toggle='modal'><span onClick='dbkjs.modules.kro.showPopup(\"" + kro.bagpandid + "\")'><br/>klik voor meer info</span></a>", html: typeList, source: "kro" });
 
         if (kro.pand_status.toLowerCase() !== "pand in gebruik") {
             rows.push({ l: "Status", t: kro.pand_status, source: "kro" });
@@ -392,7 +392,7 @@ dbkjs.modules.kro = {
 
         return rows
             .filter(function(row) {
-                var configFound = me.rowConfig.filter(function(cr) { return cr.lbl === row.l; });
+                var configFound = me.rowConfig.filter(function(cr) { return cr.lbl === row.l && cr.src === (typeof row.source === "undefined" ? "dbk" : row.source); });
                 if(configFound.length > 0) {
                     return (typeof row.source === "undefined" ? "dbk" : row.source) === configFound[0].src;
                 } else {
@@ -409,7 +409,7 @@ dbkjs.modules.kro = {
 
         return rows
             .map(function(row) {
-                var configFound = me.rowConfig.filter(function(cr) { return cr.lbl === row.l; });
+                var configFound = me.rowConfig.filter(function(cr) { return cr.lbl === row.l && cr.src === (typeof row.source === "undefined" ? "dbk" : row.source); });
                 var order = typeof row.order === "undefined" ? row.source === "kro" ? 100 : 999 : row.order; 
                 var disabled = typeof row.disabled === "undefined" ? false : row.disabled;
                 if(configFound.length > 0) {
