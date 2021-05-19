@@ -368,7 +368,7 @@ dbkjs.modules.kro = {
                             var aanzien_typering = (dataRow.aanzien_objecttypering
                                 ? dataRow.aanzien_objecttypering.split('||')
                                 : ["|"]).filter(function(itm) { return itm !== '|'}).map(function(itm) { return itm.split('|')[1] }).join(', ');
-                            var showTypering = (aanzien_typering + adres_typering).length > 0 ? (aanzien_typering + adres_typering) : (dataRow.functies || '|').split('|')[0];
+                            var showTypering = (aanzien_typering + adres_typering).length > 0 ? (aanzien_typering + ', ' + adres_typering) : (dataRow.functies || '|').split('|')[0];
                             var adres = dataRow.straatnaam + (" " + dataRow.huisnr || "") + (" " + dataRow.huisletter || "") + (" " + dataRow.huistoevg || "") + dataRow.plaatsnaam;
                             var rowHtml = "<tr class='" + rowCss + "'><td>" + (adres) + "</td><td>" + (showTypering) +
                                 "</td><td>" + dataRow.adres_oppervlak + "m2" +
