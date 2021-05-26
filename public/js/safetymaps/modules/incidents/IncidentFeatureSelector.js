@@ -54,6 +54,8 @@ IncidentFeatureSelector.prototype.addFeatureProvider = function(provider) {
  */
 IncidentFeatureSelector.prototype.findAndSelectMatches = function(matchInfo, incidentDetailsWindow) {
     var me = this;
+    var shouldShowKro = dbkjs.modules.kro.shouldShowKro();
+
     if(!me.findMatches(matchInfo)) {
         // TODO: use events instead of timeout
         window.setTimeout(function() {
@@ -64,21 +66,25 @@ IncidentFeatureSelector.prototype.findAndSelectMatches = function(matchInfo, inc
 
     incidentDetailsWindow.hideMultipleFeatureMatches();
 
-    var matches = me.matches;
-    if(matches.length === 1) {
-        console.log("IncidentFeatureSelector: Selecting single match", matches[0]);
-        safetymaps.selectObject(matches[0], false);
-    } else if(me.matches.length > 1) {
-        incidentDetailsWindow.setMultipleFeatureMatches(matches, new OpenLayers.LonLat(me.matchInfo.x, me.matchInfo.y));
-    } else if (dbkjs.modules.kro.shouldShowKro()) {
-        dbkjs.modules.kro.getObjectInfoForAddress(
+    if (shouldShowKro) {
+        dbkjs.modules.kro.setIncidentAddress(
             matchInfo.straat,
             matchInfo.huisnummer,
             matchInfo.huisletter || '',
             matchInfo.toevoeging || '',
             matchInfo.woonplaats,
             matchInfo.postcode
-        )
+        );
+    }
+
+    var matches = me.matches;
+    if(matches.length === 1) {
+        console.log("IncidentFeatureSelector: Selecting single match", matches[0]);
+        safetymaps.selectObject(matches[0], false);
+    } else if(me.matches.length > 1) {
+        incidentDetailsWindow.setMultipleFeatureMatches(matches, new OpenLayers.LonLat(me.matchInfo.x, me.matchInfo.y));
+    } else if (shouldShowKro) {
+        dbkjs.modules.kro.getObjectInfoForIncidentAddress()
         .fail(function(msg) {
             console.log("Error fetching KRO data in Incident Feature Selector: " + msg);
         })
