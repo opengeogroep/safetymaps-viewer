@@ -447,7 +447,7 @@ VehicleIncidentsController.prototype.addConfigControls = function() {
         }
     });
 
-    $("#input_voertuignummer").val(me.voertuignummer);
+    $("#input_voertuignummer").val(window.localStorage.getItem("voertuignummer"));
 
     me.enableVoertuignummerTypeahead();
 
@@ -510,7 +510,9 @@ VehicleIncidentsController.prototype.setVoertuignummer = function(voertuignummer
 
     if(me.voertuignummer === voertuignummer && !noDuplicateCheck) {
         return;
-    }   
+    }  
+    
+    window.localStorage.setItem("voertuignummer", voertuignummer);
     
     var voertuignummers;
     if (!voertuignummer || voertuignummer === '') {
@@ -521,7 +523,6 @@ VehicleIncidentsController.prototype.setVoertuignummer = function(voertuignummer
     me.voertuignummers = voertuignummers;
 
     me.voertuignummer = me.voertuignummers[0];
-    window.localStorage.setItem("voertuignummer", voertuignummer);
 
     me.cancelGetInzetInfo();
     me.incident && me.geenInzet();
