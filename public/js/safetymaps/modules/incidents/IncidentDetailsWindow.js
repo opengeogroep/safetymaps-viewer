@@ -25,12 +25,18 @@
  * only one instance as it always uses modal popup name "incidentDetails".
  * @returns {IncidentDetailsWindow}
  */
-function IncidentDetailsWindow(editKladblokChat, showKladblokChat) {
+function IncidentDetailsWindow(editKladblokChat, showKladblokChat, showKladblokAmbu, showKladblokPol) {
     if (typeof editKladblokChat === "undefined") {
         editKladblokChat = false;
     }
     if (typeof showKladblokChat === "undefined") {
         showKladblokChat = false;
+    }
+    if (typeof showKladblokAmbu === "undefined") {
+        showKladblokAmbu = false;
+    }
+    if (typeof showKladblokPol === "undefined") {
+        showKladblokPol = false;
     }
 
     this.window = safetymaps.infoWindow.addWindow("incident", "Incident", false);
@@ -43,6 +49,9 @@ function IncidentDetailsWindow(editKladblokChat, showKladblokChat) {
     this.addGoogleMapsNavigationLink = false;
     this.showKladblokChat = showKladblokChat;
     this.editKladblokChat = editKladblokChat;
+    this.showKladblokAmbu = showKladblokAmbu;
+    this.showKladblokPol = showKladblokPol;
+
     safetymaps.infoWindow.addTab("incident", "incident", "Incident", "incident", this.div, "first");
 };
 
@@ -554,8 +563,10 @@ IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incid
             if (this.editKladblokChat) {
                 kladblokHTML += this.kcDiv;
             }
+            var filteredKladblok = incident.Kladblokregels.filter(function(k) { return this.getKladblokFilter(k.Discipline); });
+
             if (this.showKladblokChat) {
-                $.each(incident.Kladblokregels.sort(function (a, b) {
+                $.each(filteredKladblok.sort(function (a, b) {
                     var dateA = new moment(a.DTG);
                     var dateB = new moment(b.DTG);
                     return dateA._d - dateB._d;
@@ -565,7 +576,7 @@ IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incid
                     kladblokHTML += "<tr class='" + styleClass + "' style='" + style + "'><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Inhoud)) + "</td></tr>";
                 });
             } else {
-                $.each(incident.Kladblokregels, function(i, k) {
+                $.each(filteredKladblok, function(i, k) {
                     var styleClass = me.getKladblokRegelColor(k.Discipline);
                     kladblokHTML += "<tr class='" + styleClass + "'><td>" + new moment(k.DTG).format("HH:mm") + "</td><td>" + me.linkify(dbkjs.util.htmlEncode(k.Inhoud)) + "</td></tr>";
                 });
@@ -585,6 +596,12 @@ IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incid
     return kladblokHTML;
 };
 
+IncidentDetailsWindow.prototype.getKladblokFilter = function(kladblokregelDiscipline) {
+    return kladblokregelDiscipline.indexOf("B") !==  -1 ||
+        (kladblokregelDiscipline.indexOf("A") !==  -1 && me.showKladblokAmbu) ||
+        (kladblokregelDiscipline.indexOf("P") !==  -1 && me.showKladblokPol);
+}
+
 IncidentDetailsWindow.prototype.getKladblokRegelColor = function(kladblokregelDiscipline) {
     if (kladblokregelDiscipline && kladblokregelDiscipline.indexOf("B") === -1) {
         if (kladblokregelDiscipline.indexOf("P") !== -1) {
@@ -601,8 +618,9 @@ IncidentDetailsWindow.prototype.getIncidentKladblokDefaultHtml = function(kladbl
     if(!kladblok) {
         return "";
     }
+    var filteredKladblok = kladblok.filter(function(k) { return this.getKladblokFilter(k.T_IND_DISC_KLADBLOK_REGEL); });
     var kladblokHTML = "<table>";
-    $.each(kladblok.sort(function (a, b) {
+    $.each(filteredKladblok.sort(function (a, b) {
         return a.DTG_KLADBLOK_REGEL - b.DTG_KLADBLOK_REGEL;
     }), function(i, k) {
         var ind = k.T_IND_DISC_KLADBLOK_REGEL;

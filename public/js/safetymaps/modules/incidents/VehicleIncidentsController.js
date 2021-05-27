@@ -184,7 +184,10 @@ VehicleIncidentsController.prototype.defaultOptions = function(options) {
         // Customize incident monitor incident list: specify functions or names
         // of functions
         incidentListFooterFunction: null,
-        incidentListFunction: null
+        incidentListFunction: null,
+
+        kladblokAmbuAuthorized: false,
+        kladblokPolAuthorized: false,
     }, options);
 };
 
