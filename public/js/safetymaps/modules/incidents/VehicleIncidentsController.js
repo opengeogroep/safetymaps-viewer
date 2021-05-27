@@ -1284,8 +1284,8 @@ VehicleIncidentsController.prototype.normalizeIncidentFields = function(incident
         incident.id = incident.IncidentId; // Used for IncidentMonitorController.updateVehiclePositionLayer()
         incident.nummer = incident.IncidentNummer;
 
-        incident.x = !me.options.useMostAccurateXY ? incident.IncidentLocatie.XCoordinaatIncident : incident.IncidentLocatie.XCoordinaat;
-        incident.y = !me.options.useMostAccurateXY ? incident.IncidentLocatie.YCoordinaatIncident : incident.IncidentLocatie.YCoordinaat;
+        incident.x = (!me.options ? false : !me.options.useMostAccurateXY) ? incident.IncidentLocatie.XCoordinaatIncident : incident.IncidentLocatie.XCoordinaat;
+        incident.y = (!me.options ? false : !me.options.useMostAccurateXY) ? incident.IncidentLocatie.YCoordinaatIncident : incident.IncidentLocatie.YCoordinaat;
 
         var l = incident.IncidentLocatie;
         incident.postcode = l.Postcode;
