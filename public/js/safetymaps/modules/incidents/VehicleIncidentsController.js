@@ -184,7 +184,11 @@ VehicleIncidentsController.prototype.defaultOptions = function(options) {
         // Customize incident monitor incident list: specify functions or names
         // of functions
         incidentListFooterFunction: null,
-        incidentListFunction: null
+        incidentListFunction: null,
+
+        // From SafetyConnect default IncidentLocatie.XCoordinaat and .YCoordinaat are calculated as the mostAccurateXY.
+        // now also the real incident xy is available in IncidentLocatie.XCoordinaatIncident and .YCoordinaatIncident
+        useMostAccurateXY: true,
     }, options);
 };
 
@@ -1278,8 +1282,8 @@ VehicleIncidentsController.prototype.normalizeIncidentFields = function(incident
         incident.id = incident.IncidentId; // Used for IncidentMonitorController.updateVehiclePositionLayer()
         incident.nummer = incident.IncidentNummer;
 
-        incident.x = incident.IncidentLocatie.XCoordinaat;
-        incident.y = incident.IncidentLocatie.YCoordinaat;
+        incident.x = !this.defaultOptions.useMostAccurateXY ? incident.IncidentLocatie.XCoordinaatIncident : incident.IncidentLocatie.XCoordinaat;
+        incident.y = !this.defaultOptions.useMostAccurateXY ? incident.IncidentLocatie.YCoordinaatIncident : incident.IncidentLocatie.YCoordinaat;
 
         var l = incident.IncidentLocatie;
         incident.postcode = l.Postcode;
