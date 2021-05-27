@@ -1276,14 +1276,16 @@ VehicleIncidentsController.prototype.markerClick = function() {
 };
 
 VehicleIncidentsController.prototype.normalizeIncidentFields = function(incidentInfo) {
+    var me = this;
+
     var incident = incidentInfo.incident;
     if(incidentInfo.source === "SafetyConnect") {
 
         incident.id = incident.IncidentId; // Used for IncidentMonitorController.updateVehiclePositionLayer()
         incident.nummer = incident.IncidentNummer;
 
-        incident.x = !this.defaultOptions.useMostAccurateXY ? incident.IncidentLocatie.XCoordinaatIncident : incident.IncidentLocatie.XCoordinaat;
-        incident.y = !this.defaultOptions.useMostAccurateXY ? incident.IncidentLocatie.YCoordinaatIncident : incident.IncidentLocatie.YCoordinaat;
+        incident.x = !me.options.useMostAccurateXY ? incident.IncidentLocatie.XCoordinaatIncident : incident.IncidentLocatie.XCoordinaat;
+        incident.y = !me.options.useMostAccurateXY ? incident.IncidentLocatie.YCoordinaatIncident : incident.IncidentLocatie.YCoordinaat;
 
         var l = incident.IncidentLocatie;
         incident.postcode = l.Postcode;
