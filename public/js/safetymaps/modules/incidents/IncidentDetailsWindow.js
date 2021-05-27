@@ -563,7 +563,8 @@ IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incid
             if (this.editKladblokChat) {
                 kladblokHTML += this.kcDiv;
             }
-            var filteredKladblok = incident.Kladblokregels.filter(function(k) { return this.getKladblokFilter(k.Discipline); });
+            var me = this;
+            var filteredKladblok = incident.Kladblokregels.filter(function(k) { return me.getKladblokFilter(k.Discipline); });
 
             if (this.showKladblokChat) {
                 $.each(filteredKladblok.sort(function (a, b) {
@@ -597,6 +598,10 @@ IncidentDetailsWindow.prototype.getIncidentKladblokHtml = function(format, incid
 };
 
 IncidentDetailsWindow.prototype.getKladblokFilter = function(kladblokregelDiscipline) {
+    var me = this;
+    if (!kladblokregelDiscipline) {
+        return false;
+    }
     return kladblokregelDiscipline.indexOf("B") !==  -1 ||
         (kladblokregelDiscipline.indexOf("A") !==  -1 && me.showKladblokAmbu) ||
         (kladblokregelDiscipline.indexOf("P") !==  -1 && me.showKladblokPol);
@@ -618,7 +623,7 @@ IncidentDetailsWindow.prototype.getIncidentKladblokDefaultHtml = function(kladbl
     if(!kladblok) {
         return "";
     }
-    var filteredKladblok = kladblok.filter(function(k) { return this.getKladblokFilter(k.T_IND_DISC_KLADBLOK_REGEL); });
+    var filteredKladblok = kladblok.filter(function(k) { return me.getKladblokFilter(k.T_IND_DISC_KLADBLOK_REGEL); });
     var kladblokHTML = "<table>";
     $.each(filteredKladblok.sort(function (a, b) {
         return a.DTG_KLADBLOK_REGEL - b.DTG_KLADBLOK_REGEL;
