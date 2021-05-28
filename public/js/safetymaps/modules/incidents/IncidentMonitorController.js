@@ -737,7 +737,7 @@ IncidentMonitorController.prototype.loadTweets = function(incident) {
 
     var params = {
         incidentId: incident.id,
-        location: t.y + "," + t.x,
+        location: t.y.toFixed(8) + "," + t.x.toFixed(8),
         startTime: incident.start.format("X"),
         terms: JSON.stringify(terms),
         address: address
