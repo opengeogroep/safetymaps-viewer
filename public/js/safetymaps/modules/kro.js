@@ -33,6 +33,7 @@ dbkjs.modules.kro = {
     pandLayer: null,
     cache: {
         incidentAddress: null,
+        incidentAddressString: null,
     },
     
     register: function() {
@@ -66,7 +67,7 @@ dbkjs.modules.kro = {
         return me.activated;
     },
 
-    shouldShowKroForObject: function(object) {
+    shouldShowKroForObject: function(object, isIncident) {
         var me = dbkjs.modules.kro;
 
         if (!me.shouldShowKro()) {
@@ -76,7 +77,7 @@ dbkjs.modules.kro = {
         var objectTypeIsEnabled = object.type &&
             me.options.enableForObjectTypes.filter(function(type) { return type.toLowerCase() === object.type.toLowerCase(); }).length > 0;
 
-        return objectTypeIsEnabled;
+        return objectTypeIsEnabled || isIncident;
     },
 
     shouldShowKroForMapLayer: function(layerName) {
@@ -150,8 +151,6 @@ dbkjs.modules.kro = {
             address: me.createAddressString(streetname, housnr, housletter, housaddition, city, pc),
         };
 
-        me.cache.incidentAddress = me.createIncidentAddressString(streetname, housnr, housletter, housaddition, city);
-        
         return me.callApi(params);
     },
 
@@ -174,12 +173,27 @@ dbkjs.modules.kro = {
         return me.callApi(params);
     },
 
+    setIncidentAddress: function(streetname, housnr, housletter, housaddition, city, pc) {
+        var me = this;
+        me.cache.incidentAddress = me.createAddressString(streetname, housnr, housletter, housaddition, city, pc);
+        me.cache.incidentAddressString = me.createIncidentAddressString(streetname, housnr, housletter, housaddition, city);
+    },
+
+    getObjectInfoForIncidentAddress: function () {
+        var me = dbkjs.modules.kro;
+        var params = {
+            address: me.cache.incidentAddress,
+        };
+        
+        return me.callApi(params);
+    },
+
     mergeKroRowsIntoDbkRows: function(dbkRows, kro, isIncident) {
         var me = dbkjs.modules.kro;
         var kroRows = me.createGeneralRows(kro, true);
 
         if (isIncident) {
-            kroRows.unshift({ l: "Incident adres", t: me.cache.incidentAddress, source: "kro" });
+            kroRows.unshift({ l: "Incident adres", t: me.cache.incidentAddressString, source: "kro" });
         }
 
         dbkRows = kroRows.concat(dbkRows);
@@ -205,10 +219,12 @@ dbkjs.modules.kro = {
             me.addPandFeatures(kro.bagpandid);
         }
 
-        rows.unshift({ l: "Incident adres", t: me.cache.incidentAddress, source: "kro" });
-        rows = me.orderAndFilterObjectInfoRows(rows);
+        if (rows.length > 0) {
+            rows.unshift({ l: "Incident adres", t: me.cache.incidentAddressString, source: "kro" });
+            rows = me.orderAndFilterObjectInfoRows(rows);
 
-        safetymaps.infoWindow.addTab('incident', "general", i18n.t("creator.general"), "info", safetymaps.creator.createInfoTabDiv(rows));
+            safetymaps.infoWindow.addTab('incident', "general", i18n.t("creator.general"), "info", safetymaps.creator.createInfoTabDiv(rows));
+        }
     },
 
     setScrollBar: function() {
@@ -232,7 +248,7 @@ dbkjs.modules.kro = {
             inPopup = false;
         }
 
-        var functies = ['', ''];
+        var functies = ['Onbekend', 'Onbekend'];
         if (kro.functies) {
             functies = kro.functies.split('|');
         }
@@ -258,11 +274,11 @@ dbkjs.modules.kro = {
         if (!inPopup) {
             rows.push({ l: "Oppervlakte adres", t: kro.adres_oppervlak + "m2", source: "kro" });
         }
-        rows.push({ l: "Bouwjaar", t: kro.pand_bouwjaar, source: "kro" });
+        rows.push({ l: "Bouwjaar", t: ("" + kro.pand_bouwjaar + ""), source: "kro" });
         rows.push({ l: "Maximale hoogte",t: ("" + kro.pand_maxhoogte + "").replace(".", ",") + "m", source: "kro" });
         rows.push({ l: "Geschat aantal bouwlagen<br/>bovengronds",t: kro.pand_bouwlagen, source: "kro" });
         rows.push({ l: "Functies binnen dit adres <a href='#custompanel' data-toggle='modal'><i onClick='dbkjs.modules.kro.showFootnote(\"Uitleg: functies binnen dit adres\", \"kro_adres_functies.png\")' class='fa fa-info-circle'></i></a>", html: addressTypeList, source: "kro" });
-        rows.push({ l: "Alle functies in dit gebouw <a href='#custompanel' data-toggle='modal'><i onClick='dbkjs.modules.kro.showFootnote(\"Uitleg: alle functies in dit gebouw\", \"kro_gebouw_functies.png\")' class='fa fa-info-circle'></i></a> <a href='#custompanel' data-toggle='modal'><span onClick='dbkjs.modules.kro.showPopup(\"" + kro.bagpandid + "\")'><br/>klik voor meer info</span></a>", html: typeList, source: "kro" },);
+        rows.push({ l: "Alle functies in dit gebouw <a href='#custompanel' data-toggle='modal'><i onClick='dbkjs.modules.kro.showFootnote(\"Uitleg: alle functies in dit gebouw\", \"kro_gebouw_functies.png\")' class='fa fa-info-circle'></i></a> <a href='#custompanel' data-toggle='modal'><span onClick='dbkjs.modules.kro.showPopup(\"" + kro.bagpandid + "\")'><br/>klik voor meer info</span></a>", html: typeList, source: "kro" });
 
         if (kro.pand_status.toLowerCase() !== "pand in gebruik") {
             rows.push({ l: "Status", t: kro.pand_status, source: "kro" });
@@ -348,11 +364,11 @@ dbkjs.modules.kro = {
 
                             var adres_typering = (dataRow.adres_objecttypering
                                 ? dataRow.adres_objecttypering.split('||')
-                                : ["|"]).map(function(itm) { return itm.split('|')[1] }).join(', ');
+                                : ["|"]).filter(function(itm) { return itm !== '|'}).map(function(itm) { return itm.split('|')[1] }).join(', ');
                             var aanzien_typering = (dataRow.aanzien_objecttypering
                                 ? dataRow.aanzien_objecttypering.split('||')
-                                : ["|"]).map(function(itm) { return itm.split('|')[1] }).join(', ');
-                            var showTypering = (aanzien_typering + adres_typering).length > 0 ? (aanzien_typering + adres_typering) : (dataRow.functies || '|').split('|')[0];
+                                : ["|"]).filter(function(itm) { return itm !== '|'}).map(function(itm) { return itm.split('|')[1] }).join(', ');
+                            var showTypering = (aanzien_typering + adres_typering).length > 0 ? (aanzien_typering + ', ' + adres_typering) : (dataRow.functies || '|').split('|')[0];
                             var adres = dataRow.straatnaam + (" " + dataRow.huisnr || "") + (" " + dataRow.huisletter || "") + (" " + dataRow.huistoevg || "") + dataRow.plaatsnaam;
                             var rowHtml = "<tr class='" + rowCss + "'><td>" + (adres) + "</td><td>" + (showTypering) +
                                 "</td><td>" + dataRow.adres_oppervlak + "m2" +
@@ -376,7 +392,7 @@ dbkjs.modules.kro = {
 
         return rows
             .filter(function(row) {
-                var configFound = me.rowConfig.filter(function(cr) { return cr.lbl === row.l; });
+                var configFound = me.rowConfig.filter(function(cr) { return cr.lbl === row.l && cr.src === (typeof row.source === "undefined" ? "dbk" : row.source); });
                 if(configFound.length > 0) {
                     return (typeof row.source === "undefined" ? "dbk" : row.source) === configFound[0].src;
                 } else {
@@ -393,7 +409,7 @@ dbkjs.modules.kro = {
 
         return rows
             .map(function(row) {
-                var configFound = me.rowConfig.filter(function(cr) { return cr.lbl === row.l; });
+                var configFound = me.rowConfig.filter(function(cr) { return cr.lbl === row.l && cr.src === (typeof row.source === "undefined" ? "dbk" : row.source); });
                 var order = typeof row.order === "undefined" ? row.source === "kro" ? 100 : 999 : row.order; 
                 var disabled = typeof row.disabled === "undefined" ? false : row.disabled;
                 if(configFound.length > 0) {
@@ -461,7 +477,7 @@ dbkjs.modules.kro = {
             houseletter = houseaddition;
             houseaddition = '';
         }
-        return streetname + "|" + ((housenr === 0 ? '' : housenr) || '') + "|" + (houseletter.toLowerCase() || '') + "|" + (houseaddition || '') + "|" + city + "|" + (pc || '');
+        return streetname + "|" + (housenr || 0) + "|" + (houseletter.toLowerCase() || '') + "|" + (houseaddition || '') + "|" + city + "|" + (pc || '');
     },
 
     createIncidentAddressString: function(streetname, housenr, houseletter, houseaddition, city) {

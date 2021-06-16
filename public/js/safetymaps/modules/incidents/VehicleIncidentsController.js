@@ -82,9 +82,17 @@ function VehicleIncidentsController(options, featureSelector) {
         me.incidentDetailsWindow.show();
         if(me.featureSelector.matches.length === 1) {
             safetymaps.selectObject(me.featureSelector.matches[0], false);
-        } else {
+        } else if (me.featureSelector.matches.length > 1) {
             safetymaps.deselectObject();
             me.incidentDetailsWindow.showMultipleFeatureMatches();
+        } else if (dbkjs.modules.kro.shouldShowKro()) {
+            dbkjs.modules.kro.getObjectInfoForIncidentAddress()
+            .fail(function(msg) {
+                console.log("Error fetching KRO data after clicking on #incident_bottom_right: " + msg);
+            })
+            .done(function(kro) {
+                dbkjs.modules.kro.showKroForIncidentWithoutDbk(kro);
+            });
         }
     });
 

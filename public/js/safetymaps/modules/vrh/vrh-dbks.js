@@ -937,12 +937,10 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, isIn
     safetymaps.infoWindow.removeTabs(windowId, "info");
 
     var rows = [];
-
     var o = object;
-
     var p = o.hoofdpand;
-
     var adres = (p.adres || "") + (p.plaats ? "<br>" + p.plaats : "");
+    var is_SB_or_DBL_object = (typeof o.oms_nummer === "undefined") || o.oms_nummer.length === 0 || o.oms_nummer === '';
 
     if(!adres && o.straatnaam) {
         adres = Mustache.render("{{straatnaam}} {{huisnummer}} {{huisletter}} {{toevoeging}}{{#plaats}}<br>{{plaats}}{{/plaats}}", o);
@@ -950,17 +948,22 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, isIn
 
     rows.push({l: "OMS nummer",                     t: o.oms_nummer});
     rows.push({l: "Naam",                           t: o.naam});
-    rows.push({l: "Naam bedrijfspand", t: p.bedrijfsna});
-    rows.push({l: "Adres",                          html: adres});
+    rows.push({l: "Naam bedrijfspand",              t: p.bedrijfsna});
+
+    if (!isIncident) {
+        rows.push({l: "Adres", html: adres});
+    }
+
     var oppervlakte = p.bag ? p.bag.oppervlakteverblijfsobject : p.oppervlakt;
     if(oppervlakte) {
-        rows.push({l: "Oppervlakte",                html: Number(oppervlakte).toFixed(0) + " m&sup2;"});
+        rows.push({l: "Oppervlakte", html: Number(oppervlakte).toFixed(0) + " m&sup2;"});
     }
+    
     rows.push({l: "Bouwjaar",                       t: p.bag ? p.bag.pandbouwjaar : p.bouwjaar});
     rows.push({l: "Gebruik",                        t: p.gebruiksdo});
-    rows.push({l: "Gebruiksdoel BAG",           t: p.bag ? p.bag.verblijfsobjectgebruiksdoel : p.gebruiks_1});
-    rows.push({l: "Verdiepingen ondergronds",      t: p.bouwlageno});
-    rows.push({l: "Verdiepingen bovengronds",      t: p.bouwlagenb});
+    rows.push({l: "Gebruiksdoel BAG",               t: p.bag ? p.bag.verblijfsobjectgebruiksdoel : p.gebruiks_1});
+    rows.push({l: "Verdiepingen ondergronds",       t: p.bouwlageno});
+    rows.push({l: "Verdiepingen bovengronds",       t: p.bouwlagenb});
 
     if(p.extra_info && (!p.datum_ei_1 || new moment(p.datum_ei_1).isBefore()) && (!p.eind_datum || new moment(p.eind_datum).isAfter())) {
         rows.push({l: "Extra info 1 " + (p.bron_ei_1 ? "(Bron: " + p.bron_ei_1 + ")" : ""), t: p.extra_info});
@@ -993,31 +996,46 @@ safetymaps.vrh.Dbks.prototype.updateInfoWindow = function(windowId, object, isIn
 
     var d = $.Deferred();
 
-    if(dbkjs.modules.kro.shouldShowKroForObject(object)) {
-        dbkjs.modules.kro.getObjectInfoForAddress(
-            object.straatnaam,
-            object.huisnummer,
-            object.huisletter || '',
-            object.toevoeging || '',
-            object.plaats,
-            object.postcode
-        )
+    if(dbkjs.modules.kro.shouldShowKroForObject(object, isIncident)) {
+        var kroPromise = isIncident 
+            ? dbkjs.modules.kro.getObjectInfoForIncidentAddress() 
+            : dbkjs.modules.kro.getObjectInfoForAddress(
+                object.straatnaam,
+                object.huisnummer,
+                object.huisletter || '',
+                object.toevoeging || '',
+                object.plaats,
+                object.postcode
+            );
+
+        kroPromise
         .fail(function(msg) { 
             console.log("Error fetching KRO data in vrh-dbks module: " + msg);
         })
         .done(function(kro) {
+            // Empty rows when object is SB or DBL because no DBK info has to be showed
+            if (is_SB_or_DBL_object) {
+                rows = [];
+            }
             if(kro.length > 0) {
                 rows = dbkjs.modules.kro.mergeKroRowsIntoDbkRows(rows, kro[0], isIncident);
+                if (is_SB_or_DBL_object) {
+                    rows.pop(); // Remove dbkrows header if no DBK info has to be showed
+                }
             }
         })
         .always(function() {
-            safetymaps.infoWindow.addTab(windowId, "algemeen", "Object info" , "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
-            safetymaps.vrh.Dbks.prototype.updateRemainingInfoWindow(windowId, object, me);
+            if (rows.length > 1) {
+                safetymaps.infoWindow.addTab(windowId, "algemeen", "Object info" , "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
+                safetymaps.vrh.Dbks.prototype.updateRemainingInfoWindow(windowId, object, me);
+            }
             d.resolve();
         });
     } else {
-        safetymaps.infoWindow.addTab(windowId, "algemeen", "Object info" , "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
-        safetymaps.vrh.Dbks.prototype.updateRemainingInfoWindow(windowId, object, me);
+        if (!is_SB_or_DBL_object) {
+            safetymaps.infoWindow.addTab(windowId, "algemeen", "Object info" , "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
+            safetymaps.vrh.Dbks.prototype.updateRemainingInfoWindow(windowId, object, me);
+        }
         d.resolve();
     }
     return d.promise();
