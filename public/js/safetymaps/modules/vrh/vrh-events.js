@@ -1003,18 +1003,17 @@ safetymaps.vrh.Events.prototype.addFeaturesForObject = function(object) {
     console.log("Added event layers", this.layers);
 };
 
-safetymaps.vrh.Events.prototype.updateInfoWindow = function(windowId, object) {
+safetymaps.vrh.Events.prototype.updateInfoWindow = function(windowId, object, isIncident) {
     var me = this;
+    var rows = [];
+    var t = object.terrein;
 
     safetymaps.infoWindow.removeTabs(windowId, "info");
-
-    var rows = [];
 
     //rows.push({l: "Gemeente",                               t: t.gemeente});
     //rows.push({l: "Begindatum",                             t: t.sbegin});
     //rows.push({l: "Aanvrager",                              t: t.aanvrager});
-
-    var t = object.terrein;
+    
     rows.push({l: "Naam evenement",                         t: t.evnaam});
     rows.push({l: "Locatie",                                t: t.locatie});
     rows.push({l: "Adres",                                  t: t.adres});
@@ -1022,9 +1021,38 @@ safetymaps.vrh.Events.prototype.updateInfoWindow = function(windowId, object) {
     rows.push({l: "Contactpersoon organisatie",             t: t.contactper});
     rows.push({l: "Programma",                              t: t.programma});
     rows.push({l: "Bijzonderheden",                         t: t.bijzonderh});
-    safetymaps.infoWindow.addTab(windowId, "algemeen", "Evenementgegevens algemeen", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
 
-    rows = [];
+    if(dbkjs.modules.kro.shouldShowKroForObject(object, isIncident) && isIncident) {
+        var kroPromise = dbkjs.modules.kro.getObjectInfoForIncidentAddress();
+
+        kroPromise
+            .fail(function(msg) { 
+                console.log("Error fetching KRO data in vrh-events module: " + msg);
+            })
+            .done(function(kro) {
+                if(kro.length > 0) {
+                    rows = dbkjs.modules.kro.mergeKroRowsIntoDbkRows(rows, kro[0], isIncident);
+                }
+            })
+            .always(function() {
+                if (rows.length > 1) {
+                    safetymaps.infoWindow.addTab(windowId, "algemeen", "Evenementgegevens algemeen" , "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
+                    safetymaps.vrh.Events.prototype.updateRemainingInfoWindow(windowId, object, me);
+                }
+                d.resolve();
+            });
+    } else {
+        safetymaps.infoWindow.addTab(windowId, "algemeen", "Evenementgegevens algemeen" , "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
+        safetymaps.vrh.Events.prototype.updateRemainingInfoWindow(windowId, object, me);
+        d.resolve();
+    }
+    return d.promise();
+}
+
+safetymaps.vrh.Events.prototype.updateRemainingInfoWindow = function(windowId, object, me) {
+    var rows = [];
+    var t = object.terrein;
+
     rows.push({l: "Tijden",                                 t: t.tijden});
     rows.push({l: "Aantal bezoekers",                       t: t.aantal_bez});
     rows.push({l: "Personeel EHBO",                         t: t.personeel_});
