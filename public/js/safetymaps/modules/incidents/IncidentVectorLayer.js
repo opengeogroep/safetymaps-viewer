@@ -78,6 +78,7 @@ IncidentVectorLayer.prototype.setHideLabel = function(hideLabel) {
 IncidentVectorLayer.prototype.addIncident = function(incident, gray, singleMarker) {
     var me = this;
     var falck = incident.IncidentNummer;
+    var isManuallyCreated = incident.IncidentId && incident.IncidentId.includes("FLK");
 
     var x, y;
 
@@ -103,7 +104,9 @@ IncidentVectorLayer.prototype.addIncident = function(incident, gray, singleMarke
         me.y = y;
     }
 
-    var icon = !gray ? "images/bell.png" : "images/bell-gray.png";
+    var icon = !gray 
+        ? isManuallyCreated ? "images/bell-orange.png" : "images/bell.png" 
+        : "images/bell-gray.png";
 
     var classificatie = incident.classificaties;
     if(classificatie && classificatie.indexOf(",") !== -1) {
