@@ -370,7 +370,7 @@ dbkjs.modules.kro = {
                                 : ["|"]).filter(function(itm) { return itm !== '|'}).map(function(itm) { return itm.split('|')[1] }).join(', ');
                             var showTypering = (aanzien_typering + adres_typering).length > 0 ? (aanzien_typering + ', ' + adres_typering) : (dataRow.functies || '|').split('|')[0];
                             var adres = dataRow.straatnaam + (" " + dataRow.huisnr || "") + (" " + dataRow.huisletter || "") + (" " + dataRow.huistoevg || "") + dataRow.plaatsnaam;
-                            var rowHtml = "<tr class='" + rowCss + "'><td>" + (adres) + "</td><td>" + (showTypering) +
+                            var rowHtml = "<tr class='" + rowCss + "'><td>" + (adres) + "</td><td>" + (showTypering.replace(/[, ]/g, ' ')).trim() +
                                 "</td><td>" + dataRow.adres_oppervlak + "m2" +
                                 "</td><td>" + (containsWoTypering ? '' : dataRow.adres_bedrijfsnaam || "") + "</td><td>" + (containsWoTypering ? '' : dataRow.adres_telefoonnummer || "") +
                                 "</td><td>" + (containsWoTypering ? '' : dataRow.adres_aantal_personen || "") + "</td></tr>";
