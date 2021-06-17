@@ -52,10 +52,36 @@ function IncidentMonitorController(options) {
     me.options.toonZonderEenheden = OpenLayers.Util.getParameters().toonZonderEenheden === "true" || me.options.includeIncidentsWithoutUnits;
 
     me.button = new AlertableButton("btn_incidentlist", "Incidentenlijst", "list");
-    me.button.getElement().insertAfter('#btn_incident');
+    if (me.options.incidentMonitorOnly) {
+        $(dbkjs).one('dbkjs_init_complete', () => {
+            me.button.getElement().insertBefore('#c_settings');
+        });
+    } else {
+        me.button.getElement().insertAfter('#btn_incident');
+    }
     $(me.button).on('click', function() {
         me.incidentListWindow.show();
     });
+
+    if(me.options.incidentMonitorOnly) {
+        $('<a></a>')
+        .attr({
+            'id': 'btn_openreset',
+            'class': 'btn btn-default navbar-btn',
+            'href': '#',
+            'title': 'Reset'
+        })
+        .append('<i class="fa fa-repeat" style="width: 27.5px"></i>')
+        .click(function(e) {
+            me.getIncidentList();
+            $(me).triggerHandler("incident_empty");
+            if(me.selectedIncidentMarker) {
+                me.markerLayer.removeMarker(me.selectedIncidentMarker);
+                me.selectedIncidentMarker = null;
+            }
+        })
+        .appendTo('#btngrp_3');
+    }
 
     me.incidentListWindow = new IncidentListWindow();
     me.incidentListWindow.createElements("Incidenten");
