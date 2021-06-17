@@ -38,6 +38,9 @@ function VehicleIncidentsController(options, featureSelector) {
     me.handlingInzetInfo = false;
 
     me.button = new AlertableButton("btn_incident", "Incident", "bell-o");
+    if (me.options.incidentMonitorOnly) {
+        $(me.button.getElement()).css("display", "none");
+    }
     me.button.getElement().appendTo('#btngrp_left');
 
     $(me.button).on('click', function() {
@@ -70,7 +73,7 @@ function VehicleIncidentsController(options, featureSelector) {
     } else {
         me.voertuignummer = window.localStorage.getItem("voertuignummer");
         // Empty string not set to default - means disable!
-        if(me.voertuignummer === "undefined" || me.voertuignummer === null || me.voertuignummer === "") {
+        if(me.voertuignummer === "undefined" || me.voertuignummer === null || me.voertuignummer === "null" || me.voertuignummer === "") {
             me.voertuignummer = me.options.userVoertuignummer;
         }
     }
@@ -123,10 +126,12 @@ function VehicleIncidentsController(options, featureSelector) {
     // Create incidentmonitor after setting this.service
     me.checkIncidentMonitor();
 
-    $(dbkjs).one("dbkjs_init_complete", function() {
-        me.setVoertuignummer(me.voertuignummer, true);
-        me.options.showStatus && me.updateStatus();
-    });
+    if (!me.options.incidentMonitorOnly) {
+        $(dbkjs).one("dbkjs_init_complete", function () {
+            me.setVoertuignummer(me.voertuignummer, true);
+            me.options.showStatus && me.updateStatus();
+        });
+    }
 };
 
 VehicleIncidentsController.prototype.initializeService = function() {
@@ -166,6 +171,8 @@ VehicleIncidentsController.prototype.defaultOptions = function(options) {
         incidentMonitorAuthorized: false,
         // ViewerApiActionBean sets this to true for users with incidentmonitor_kladblok role
         incidentMonitorKladblokAuthorized: false,
+        // Show only incident monitor, no vehicle mode
+        incidentMonitorOnly: false,
         // User can only enable IM entering this code, if set
         incidentMonitorCode: null,
         // Show eenheden for active incidents? Defaults to showVehicles option
@@ -279,28 +286,12 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
             me.incidentMonitorController.enable();
         } else {
 
-            var incidentMonitorOptions = {
+            const incidentMonitorOptions = $.extend(me.options, {
                 showVehicles: me.options.incidentMonitorShowVehicles !== null ? me.options.incidentMonitorShowVehicles : me.options.showVehicles,
                 showInzetRol: me.options.vehiclesShowInzetRol,
                 enableUnassignedVehicles: me.options.incidentMonitorEnableUnassignedVehicles,
-                incidentListFunction: me.options.incidentListFunction,
-                incidentListFooterFunction: me.options.incidentListFooterFunction,
                 agsService: me.service,
-                incidentSource: me.options.incidentSource,
-                vehicleSource: me.options.vehicleSource,
-                vehicleSourceURL: me.options.vehicleSourceURL,
-                logVehicles: me.options.logVehicles,
-                twitterUrlPrefix: me.options.twitterUrlPrefix,
-                twitterIgnoredAccounts: me.options.twitterIgnoredAccounts,
-                logTwitter: me.options.logTwitter,
-                showSpeed: me.options.showSpeed,
-                excludeManuallyCreatedIncidents: me.options.excludeManuallyCreatedIncidents,
-                getIncidentsFromDaysInPast: me.options.getIncidentsFromDaysInPast,
-                includePrio4And5Incidents: me.options.prio4and5Authorized,
-                includeIncidentsWithoutUnits: me.options.withoutUnitsAuthorized,
-                vehiclePopupTemplate: me.options.vehiclePopupTemplate,
-                vehiclesShowVehiclePopup: me.options.vehiclesShowVehiclePopup
-            };
+            });
 
             me.incidentMonitorController = new IncidentMonitorController(incidentMonitorOptions);
             me.incidentMonitorController.incidentListWindow.setSplitScreen(false);
@@ -313,7 +304,7 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
             $(me.incidentMonitorController).on("incident_selected", function() { me.incidentMonitorIncidentSelected.apply(me, arguments); });
             $(me.incidentMonitorController).on("incident_empty", function () { 
                 if (me.inzetInfo) {
-                    me.inzetBeeindigd('Incident beeindigd'); 
+                    me.inzetBeeindigd();
                 }
             });
         }
@@ -344,6 +335,13 @@ VehicleIncidentsController.prototype.incidentMonitorIncidentSelected = function(
  */
 VehicleIncidentsController.prototype.addConfigControls = function() {
     var me = this;
+
+    if (me.options.incidentMonitorOnly) {
+        // HACK, remove hardcoded module setting...
+        $("#checkbox_scaleStyle").parent().remove();
+
+        return;
+    }
 
     var incidentCodeHtml = "";
 
@@ -451,7 +449,7 @@ VehicleIncidentsController.prototype.addConfigControls = function() {
 
     me.enableVoertuignummerTypeahead();
 
-    if(!me.voertuignummer && me.options.eigenVoertuignummerAuthorized) {
+    if(!me.voertuignummer && me.options.eigenVoertuignummerAuthorized && !me.options.incidentMonitorOnly) {
         // Open config window when voertuignummer not configured
         $("#c_settings").click();
     }
@@ -1230,14 +1228,18 @@ VehicleIncidentsController.prototype.inzetBeeindigd = function(melding) {
     var me = this;
     dbkjs.zoomToInitialExtent();
 
-    // Wait for layer loading messages to clear...
-    window.setTimeout(function() {
-        dbkjs.util.alert('Melding', melding);
-        window.setTimeout(function() {
-            $('#systeem_meldingen').hide();
-        }, 10000);
-    }, 3000);
-    me.resetVoertuignummer(me.voertuignummers[0]);
+    if (melding) {
+        // Wait for layer loading messages to clear...
+        window.setTimeout(function () {
+            dbkjs.util.alert('Melding', melding);
+            window.setTimeout(function () {
+                $('#systeem_meldingen').hide();
+            }, 10000);
+        }, 3000);
+    }
+    if (me.voertuignummers) {
+        me.resetVoertuignummer(me.voertuignummers[0]);
+    }
     me.geenInzet();
 };
 
