@@ -76,7 +76,19 @@ create or replace view viewer.viewer_object_map as
             --st_astext(pand.pand_centroid) as pand_centroid,
             -- ipv st_collect() zou st_extent() ook kunnen
             (select st_astext(st_centroid(st_collect(the_geom))) from wfs."Polygon" where "DBK_ID" = vo.id) as pand_centroid,
-            st_astext(selectiekader.the_geom) as selectiekader,
+            
+            -- Omdat een selectiekader kan bestaan uit meerdere gebieden de left join vervangen voor een subquery.
+            --st_astext(selectiekader.the_geom) AS selectiekader,
+            --st_astext(st_centroid(selectiekader.the_geom)) AS selectiekader_centroid,
+            (select st_astext(st_extent("Gebied".the_geom))
+                from wfs."Gebied"
+                where "Gebied"."DBK_ID" = vo.id
+            ) as selectiekader,
+            (select st_astext(st_centroid(st_collect("Gebied".the_geom))) as st_astext
+                from wfs."Gebied"
+                where "Gebied"."DBK_ID" = vo.id
+            ) as selectiekader_centroid,
+
             st_astext(st_centroid(selectiekader.the_geom)) as selectiekader_centroid,
             (select st_extent(the_geom)::varchar from (
                 select the_geom from wfs."Gebied" where "DBK_ID" = vo.id
@@ -107,7 +119,7 @@ create or replace view viewer.viewer_object_map as
         from viewer.viewer_object vo
         left join wfs."Adres" a on (a."Adres_ID" = vo.adres_id)
         --left join (select "DBK_ID", st_centroid(st_collect(the_geom)) as pand_centroid from wfs."Polygon" group by "DBK_ID") pand on (pand."DBK_ID" = vo.id)
-        left join wfs."Gebied" selectiekader on (selectiekader."DBK_ID" = vo.id)
+        --left join wfs."Gebied" selectiekader on (selectiekader."DBK_ID" = vo.id)
         left join viewer.viewer_object_selectieadressen sa on (sa.id = vo.id)
         where 
 	    -- alleen hoofdobjecten, geen verdiepingen
@@ -199,7 +211,7 @@ create or replace view viewer.viewer_object_details as
         ) as fire_compartmentation,
         
         -- Gebied
-        (select st_astext(the_geom) from wfs."Gebied" where "DBK_ID" = vo.id and the_geom is not null limit 1) as select_area,
+        (select st_astext(st_union("Gebied".the_geom)) AS st_astext from wfs."Gebied" where "DBK_ID" = vo.id and the_geom is not null) as select_area,
 
         -- Custom_Polygon
         (select array_to_json(array_agg(row_to_json(r.*))) as array_to_json
