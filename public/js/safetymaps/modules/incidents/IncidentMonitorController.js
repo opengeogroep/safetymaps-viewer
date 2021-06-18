@@ -32,6 +32,7 @@ function IncidentMonitorController(options) {
         showVehicles: true,
         vehicleSource: "incidentService",
         vehicleSourceURL: null,
+        showVehiclesConfigOption: false,
         incidentListIcon: 'list',
         logVehicles: false,
         showInzetRol: true,
@@ -103,6 +104,16 @@ function IncidentMonitorController(options) {
             vehiclePopupTemplate: me.options.vehiclePopupTemplate,
             vehiclesShowVehiclePopup: me.options.vehiclesShowVehiclePopup
         });
+        let showVehicles = window.localStorage.getItem("imShowVehicles") != null ? !!window.localStorage.getItem("imShowVehicles") : true;
+        me.vehiclePositionLayer.setVisibility(showVehicles);
+        if(me.options.showVehiclesConfigOption) {
+            $("#settingspanel_b").append('<hr/><label><input id="im_showvehicles" type="checkbox" ' + (showVehicles ? 'checked' : '') + '>Toon voertuigposities</label>');
+            $("#im_showvehicles").on("click", function(event) {
+                showVehicles = event.target.checked;
+                window.localStorage.setItem("imShowVehicles", showVehicles);
+                me.vehiclePositionLayer.setVisibility(showVehicles);
+            });
+        }
         if(me.options.enableUnassignedVehicles) {
             $("#settingspanel_b").append('<hr/><label><input id="im_showunassignedbutmoving" type="checkbox" ' + (showUnassignedButMoving ? 'checked' : '') + '>Toon bewegende voertuigen niet gekoppeld aan incident (grijs)</label>');
             $("#im_showunassignedbutmoving").on("click", function(event) {
