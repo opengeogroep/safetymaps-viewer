@@ -32,6 +32,7 @@ function IncidentMonitorController(options) {
         showVehicles: true,
         vehicleSource: "incidentService",
         vehicleSourceURL: null,
+        incidentListIcon: 'list',
         logVehicles: false,
         showInzetRol: true,
         showTwitter: false,
@@ -51,7 +52,7 @@ function IncidentMonitorController(options) {
     // Debug option to show incidents without units attached
     me.options.toonZonderEenheden = OpenLayers.Util.getParameters().toonZonderEenheden === "true" || me.options.includeIncidentsWithoutUnits;
 
-    me.button = new AlertableButton("btn_incidentlist", "Incidentenlijst", "list");
+    me.button = new AlertableButton("btn_incidentlist", "Incidentenlijst", me.options.incidentListIcon);
     if (me.options.incidentMonitorOnly) {
         $(dbkjs).one('dbkjs_init_complete', () => {
             me.button.getElement().insertBefore('#c_settings');
