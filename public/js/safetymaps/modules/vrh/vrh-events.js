@@ -1007,6 +1007,7 @@ safetymaps.vrh.Events.prototype.updateInfoWindow = function(windowId, object, is
     var me = this;
     var rows = [];
     var t = object.terrein;
+    var d = $.Deferred();
 
     safetymaps.infoWindow.removeTabs(windowId, "info");
 

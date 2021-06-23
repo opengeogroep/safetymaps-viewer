@@ -308,6 +308,7 @@ safetymaps.vrh.Waterongevallen.prototype.updateInfoWindow = function(windowId, o
     var me = this;
     var t = object.attributes;
     var rows = [];
+    var d = $.Deferred();
 
     safetymaps.infoWindow.removeTabs(windowId, "info");
 
