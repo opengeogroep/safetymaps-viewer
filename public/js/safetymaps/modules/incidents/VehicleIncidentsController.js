@@ -125,7 +125,10 @@ function VehicleIncidentsController(options, featureSelector) {
 
     $(dbkjs).one("dbkjs_init_complete", function() {
         me.setVoertuignummer(me.voertuignummer, true);
-        me.options.showStatus && me.updateStatus();
+        // Make sure service is initialized before try to get status for vehicle
+        window.setTimeout(function () {
+            me.options.showStatus && me.updateStatus();
+        }, 1000);
     });
 };
 
