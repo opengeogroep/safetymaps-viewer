@@ -322,7 +322,7 @@ safetymaps.vrh.Waterongevallen.prototype.updateInfoWindow = function(windowId, o
 
         kroPromise
             .fail(function(msg) { 
-                console.log("Error fetching KRO data in vrh-events module: " + msg);
+                console.log("Error fetching KRO data in vrh-waterongevallen module: " + msg);
             })
             .done(function(kro) {
                 if(kro.length > 0) {
@@ -331,13 +331,13 @@ safetymaps.vrh.Waterongevallen.prototype.updateInfoWindow = function(windowId, o
             })
             .always(function() {
                 if (rows.length > 1) {
-                    safetymaps.infoWindow.addTab(windowId, "algemeen", "Algemeen", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
+                    safetymaps.infoWindow.addTab(windowId, "algemeen", "Object Info", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
                     safetymaps.vrh.Waterongevallen.prototype.updateRemainingInfoWindow(windowId, object, me);
                 }
                 d.resolve();
             });
     } else {
-        safetymaps.infoWindow.addTab(windowId, "algemeen", "Algemeen", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
+        safetymaps.infoWindow.addTab(windowId, "algemeen", "Object Info", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
         safetymaps.vrh.Waterongevallen.prototype.updateRemainingInfoWindow(windowId, object, me);
         d.resolve();
     }
