@@ -403,7 +403,7 @@ $(document).ready(function () {
             var a = $("<a/>")
                 .attr("id", "toggleBaselayers")
                 .attr("title", "Baselayer toggle")
-                .addClass("btn btn-default navbar-btn")
+                .addClass("btn btn-default")
                 .on("click", function () {
                     dbkjs.options.baselayerActive += 1;
                     checkResetBaselayerActive();
@@ -413,11 +413,16 @@ $(document).ready(function () {
                     checkResetBaselayerActive();
                     dbkjs.layers.toggleBaseLayer(dbkjs.options.baselayerActive);
                 });
-        $("<img/>")
-                .attr("src","images/baselayer-toggle.svg")
+            $("<img/>")
+                .attr("src",dbkjs.options.separateBaseLayerSwitcherImage || "images/baselayer-toggle.svg")
                 .attr("style","style='position: relative; width: 32px; top: -3px'").appendTo(a);
-        
-        a.prependTo("#btngrp_3");
+            if (dbkjs.options.separateBaseLayerSwitcherBottomLeft) {
+                a.addClass("olButton");
+                $(dbkjs).one("dbkjs_init_complete", () => a.prependTo("#bottom_left_buttons"));
+            } else {
+                a.addClass("navbar-btn");
+                a.prependTo("#btngrp_3");
+            }
         }
         
         if(dbkjs.options.extraButtonGroupDropdown){
