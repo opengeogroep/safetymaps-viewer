@@ -663,7 +663,8 @@ IncidentMonitorController.prototype.updateVehiclePositionLayer = function(incide
                         InzetRol: props.inzetRol,
                         Roepnummer: props.id,
                         Speed: me.options.showSpeed ? props.speed || 0 : 0,
-                        Direction: props.heading
+                        Direction: props.heading,
+                        Status: props.statusCode
                         //PositionTimeFromNow: not available
                     };
                     var geometry = new OpenLayers.Geometry.Point(f.geometry.coordinates[0], f.geometry.coordinates[1]);

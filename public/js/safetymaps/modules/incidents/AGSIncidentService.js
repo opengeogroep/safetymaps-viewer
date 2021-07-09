@@ -1230,6 +1230,7 @@ AGSIncidentService.prototype.getVehiclePositions = function(incidents) {
             var cutoff = new moment().subtract(2, 'hours');
             $.each(data.features, function(i, f) {
                 var dateTime = moment(f.attributes.PosDate + " " + f.attributes.PosTime, "DD-MM-YYYY HH:mm:ss");
+                f.attributes.PositionTimeFromNow = dateTime.fromNow();
                 // Altijd voertuig ingezet op incident tonen
                 if(dateTime.isAfter(cutoff) || f.attributes.IncidentID !== "") {
 

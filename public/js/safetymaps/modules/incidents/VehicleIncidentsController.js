@@ -164,7 +164,12 @@ VehicleIncidentsController.prototype.defaultOptions = function(options) {
         vehiclesShowInzetRol: true,
         vehiclesShowSpeed: true,
         vehiclesShowVehiclePopup: false,
-        vehiclePopupTemplate: "<div style='font-size: 12px; overflow: hidden'>Pos. van {{PositionTimeFromNow}}<br>Status: {{Status}}<br>Mobile ID: {{MobileID}}</div>",
+        vehiclePopupTemplate: "<div style='font-size: 12px; overflow: hidden'>" +
+            "{{#PositionTimeFromNow}}Pos. van {{.}}<br>{{/PositionTimeFromNow}}" +
+            "{{#Status}}Status: {{.}}<br>{{/Status}}" +
+            "{{#MobileID}}Mobile ID: {{.}}<br>{{/MobileID}}" +
+            "{{#ETA}}ETA: {{.}}<br>{{/ETA}}" +
+            "</div>",
         logVehicles: false,
 
         // ViewerApiActionBean sets this to true for users with incidentmonitor role
@@ -958,10 +963,6 @@ VehicleIncidentsController.prototype.updateVehiclePositionsVrhAGS = function() {
         if(!features) {
             features = [];
         }
-        $.each(features, function(i, f) {
-             var dateTime = moment(f.attributes.PosDate + " " + f.attributes.PosTime, "DD-MM-YYYY HH:mm:ss");
-             f.attributes.PositionTimeFromNow = dateTime.fromNow();
-        });
         me.vehiclePositionLayer.features(features);
     });
 };
