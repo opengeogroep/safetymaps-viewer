@@ -26,6 +26,7 @@ window.dbkjs = dbkjs;
 dbkjs.modules = dbkjs.modules || {};
 dbkjs.modules.vrh_waterwinning = {
     id: "dbk.module.vrh_waterwinning",
+    requestIsBuzy: false,
     options: null,
     infoWindow: null,
     div: null,
@@ -70,10 +71,20 @@ dbkjs.modules.vrh_waterwinning = {
                         me.newIncident(incident);
                     });
                     $(dbkjs.modules.incidents.controller).on("end_incident", function () {
-                        me.resetTab();
+                        me.afterRequestIsBuzy(me.resetTab);
                     });
                 }
             });
+        }
+    },
+    afterRequestIsBuzy: function (callback) {
+        var me = this;
+        if (me.requestIsBuzy) {
+            window.setTimeout(me.afterRequestIsBuzy, 100);
+        } else  {
+            if (typeof callback === "function") {
+                callback();
+            }
         }
     },
     createLayer: function () {
@@ -159,6 +170,7 @@ dbkjs.modules.vrh_waterwinning = {
     },
     newIncident: function(incident, zoom, addTestMarker) {
         var me = this;
+        me.requestIsBuzy = true;
         me.incident = incident;
         me.resetTab();
         me.div.html("<i>Ophalen gegevens...</i>");
@@ -174,6 +186,7 @@ dbkjs.modules.vrh_waterwinning = {
         me.requestData(incident)
         .done(function(data) {
             me.renderData(data);
+            me.requestIsBuzy = false;
             if(zoom) {
                 dbkjs.map.setCenter(new OpenLayers.LonLat(me.incident.x, me.incident.y), dbkjs.options.zoom);
             }
