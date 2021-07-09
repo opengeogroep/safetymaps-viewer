@@ -1032,18 +1032,18 @@ safetymaps.vrh.Events.prototype.updateInfoWindow = function(windowId, object, is
             })
             .done(function(kro) {
                 if(kro.length > 0) {
-                    rows = dbkjs.modules.kro.mergeKroRowsIntoDbkRows(rows, kro[0], isIncident);
+                    rows = dbkjs.modules.kro.mergeKroRowsIntoDbkRows(rows, kro[0], isIncident, "edbk");
                 }
             })
             .always(function() {
                 if (rows.length > 1) {
-                    safetymaps.infoWindow.addTab(windowId, "algemeen", "Evenementgegevens algemeen" , "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
+                    safetymaps.infoWindow.addTab(windowId, "algemeen", "Object Info" , "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
                     safetymaps.vrh.Events.prototype.updateRemainingInfoWindow(windowId, object, me);
                 }
                 d.resolve();
             });
     } else {
-        safetymaps.infoWindow.addTab(windowId, "algemeen", "Evenementgegevens algemeen" , "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
+        safetymaps.infoWindow.addTab(windowId, "algemeen", "Object Info" , "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
         safetymaps.vrh.Events.prototype.updateRemainingInfoWindow(windowId, object, me);
         d.resolve();
     }

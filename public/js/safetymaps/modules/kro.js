@@ -188,9 +188,14 @@ dbkjs.modules.kro = {
         return me.callApi(params);
     },
 
-    mergeKroRowsIntoDbkRows: function(dbkRows, kro, isIncident) {
+    mergeKroRowsIntoDbkRows: function(dbkRows, kro, isIncident, dbkTypeString) {
         var me = dbkjs.modules.kro;
-        var kroRows = me.createGeneralRows(kro, true);
+
+        if (typeof dbkTypeString === "undefined") {
+            dbkTypeString = 'dbk';
+        }
+
+        var kroRows = me.createGeneralRows(kro, true, undefined, dbkTypeString);
 
         if (isIncident) {
             kroRows.unshift({ l: "Incident adres", t: me.cache.incidentAddressString, source: "kro" });
@@ -236,7 +241,7 @@ dbkjs.modules.kro = {
         }, 500);
     },
 
-    createGeneralRows: function(kro, mergeWithDbk, inPopup) {
+    createGeneralRows: function(kro, mergeWithDbk, inPopup, dbkTypeString) {
         var rows = [];
         var typeList = "-";
         var addressTypeList = "-";
@@ -246,6 +251,9 @@ dbkjs.modules.kro = {
         }
         if (typeof inPopup === "undefined") {
             inPopup = false;
+        }
+        if (typeof dbkTypeString === "undefined") {
+            dbkTypeString = 'dbk';
         }
 
         var functies = ['Onbekend', 'Onbekend'];
@@ -289,7 +297,7 @@ dbkjs.modules.kro = {
         }
 
         if (mergeWithDbk) {
-            rows.push({ l: "<br/><span class='objectinfo__header'>bron: dbk brandweer</span>", html: "<br/><br/>", source: "kro", order: '900' });
+            rows.push({ l: "<br/><span class='objectinfo__header'>bron: " + dbkTypeString + " brandweer</span>", html: "<br/><br/>", source: "kro", order: '900' });
         }
 
         return rows;
