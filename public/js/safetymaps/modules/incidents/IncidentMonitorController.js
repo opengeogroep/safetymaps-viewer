@@ -162,6 +162,7 @@ IncidentMonitorController.prototype.disable = function() {
     me.incident = null;
     window.clearInterval(this.updateInterval);
     window.clearTimeout(this.getIncidentListTimeout);
+    window.clearTimeout(this.updateIncidentTimeout);
     $("#btn_incidentlist").hide();
     this.markerLayer.layer.setVisibility(false);
 };
@@ -231,7 +232,7 @@ IncidentMonitorController.prototype.incidentRead = function(incidentId) {
 /**
  * Get incident info from safetyconnect/incident/[me.incident.IncidentNummer]
  */
-IncidentMonitorController.prototype.getSafetyConnectIncident = function (fromIncidentList) {
+IncidentMonitorController.prototype.getSafetyConnectIncident = function (fromIncidentList, isUpdate) {
     var me = this;
     var maxPrio = me.options.includePrio4And5Incidents ? 5 : 3;
     // Get incident
@@ -252,6 +253,7 @@ IncidentMonitorController.prototype.getSafetyConnectIncident = function (fromInc
     })
     .done(function(data) {
         me.incidentTimerFails = 0;
+        me.updateIncidentTimeout = setTimeout(() => me.tryGetIncident(fromIncidentList, true), me.options.updateInterval/2);
         if(data.length === 0 || !data[0].IncidentId) {
             console.log("IM SC: Error getting incident data (empty result)", arguments);
             $(me).triggerHandler("incident_empty");
@@ -260,7 +262,7 @@ IncidentMonitorController.prototype.getSafetyConnectIncident = function (fromInc
         try {
             var incidentInfo = { source: me.options.incidentSource, incident: data[0]};
             VehicleIncidentsController.prototype.normalizeIncidentFields(incidentInfo);
-            $(me).triggerHandler("incident_selected", [incidentInfo, fromIncidentList]);
+            $(me).triggerHandler(isUpdate ? "incident_updated" : "incident_selected", [incidentInfo, me.options.updateInterval/2]);
         } catch(e) {
             console.log("IM SC: Error processing incident", e, data);
         }
@@ -270,7 +272,7 @@ IncidentMonitorController.prototype.getSafetyConnectIncident = function (fromInc
 /**
  * Get incident info from VrhAGS service
  */
-IncidentMonitorController.prototype.getVrhAGSIncident = function (fromIncidentList) {
+IncidentMonitorController.prototype.getVrhAGSIncident = function (fromIncidentList, isUpdate) {
     var me = this;
     // Get incident
     me.service.getAllIncidentInfo(me.incidentId, me.incident.archief, false)
@@ -280,20 +282,21 @@ IncidentMonitorController.prototype.getVrhAGSIncident = function (fromIncidentLi
     })
     .done(function(incident) {
         me.incidentTimerFails = 0;
+        me.updateIncidentTimeout = setTimeout(() => me.tryGetIncident(fromIncidentList, true), 5000);
         if(!incident || !incident.NR_INCIDENT) {
             console.log("IM VrhAGS: invalid incident", incident);
             return;
         }
         var incidentInfo = { source: me.options.incidentSource, incidenten: [incident.NR_INCIDENT], incident: incident};
         VehicleIncidentsController.prototype.normalizeIncidentFields(incidentInfo);
-        $(me).triggerHandler("incident_selected", [incidentInfo, fromIncidentList]);
+        $(me).triggerHandler(isUpdate ? "incident_updated" : "incident_selected", [incidentInfo, fromIncidentList]);
     });
 }
 
 /**
  * Try get incident from me.options.incidentSource
  */
-IncidentMonitorController.prototype.tryGetIncident = function (fromIncidentList) {
+IncidentMonitorController.prototype.tryGetIncident = function (fromIncidentList, isUpdate) {
     var me = this;
     // Check params for null values
     if (typeof fromIncidentList === "undefined") {
@@ -305,9 +308,9 @@ IncidentMonitorController.prototype.tryGetIncident = function (fromIncidentList)
     }
     // Try get
     if(me.options.incidentSource === "SafetyConnect") {
-        me.getSafetyConnectIncident(fromIncidentList);
+        me.getSafetyConnectIncident(fromIncidentList, isUpdate);
     } else if(me.options.incidentSource === "VrhAGS") {
-        me.getVrhAGSIncident(fromIncidentList);
+        me.getVrhAGSIncident(fromIncidentList, isUpdate);
     } else {
         throw new Error("Invalid incident source");
     }
@@ -316,9 +319,8 @@ IncidentMonitorController.prototype.tryGetIncident = function (fromIncidentList)
 IncidentMonitorController.prototype.selectIncident = function(obj) {
     var me = this;
 
-    if(me.selectedIncidentMarker) {
-        me.markerLayer.removeMarker(me.selectedIncidentMarker);
-    }
+    me.deselectIncident();
+
     me.incident = obj.incident;
     me.incidentId = me.incident.INCIDENT_ID || me.incident.IncidentNummer;
     console.log("IM: Select incident " + me.incidentId + ", addMarker=" + obj.addMarker);
@@ -328,6 +330,17 @@ IncidentMonitorController.prototype.selectIncident = function(obj) {
 
     me.incidentRead(me.incidentId);
     me.tryGetIncident(true);
+};
+
+IncidentMonitorController.prototype.deselectIncident = function() {
+    var me = this;
+
+    window.clearTimeout(me.updateIncidentTimeout);
+    if(me.selectedIncidentMarker) {
+        me.markerLayer.removeMarker(me.selectedIncidentMarker);
+    }
+    me.incident = null;
+    me.incidentId = null;
 };
 
 IncidentMonitorController.prototype.checkIncidentListOutdated = function() {

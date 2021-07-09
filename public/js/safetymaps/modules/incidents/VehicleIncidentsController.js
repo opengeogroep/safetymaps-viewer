@@ -306,8 +306,13 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
                 me.incidentMonitorController.incidentListWindow.setSplitScreen(false);
             });
 
-            $(me.incidentMonitorController).on("incident_selected", function() { me.incidentMonitorIncidentSelected.apply(me, arguments); });
-            $(me.incidentMonitorController).on("incident_empty", function () { 
+            $(me.incidentMonitorController).on("incident_selected", function(event, inzetInfo, fromIncidentList) {
+                me.incidentMonitorIncidentSelected(event, inzetInfo, fromIncidentList, false);
+            });
+            $(me.incidentMonitorController).on("incident_updated", function(event, inzetInfo, fromIncidentList) {
+                me.incidentMonitorIncidentSelected(event, inzetInfo, fromIncidentList, true);
+            });
+            $(me.incidentMonitorController).on("incident_empty", function () {
                 if (me.inzetInfo) {
                     me.inzetBeeindigd();
                 }
@@ -320,7 +325,7 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
     }
 };
 
-VehicleIncidentsController.prototype.incidentMonitorIncidentSelected = function(event, inzetInfo, fromIncidentList) {
+VehicleIncidentsController.prototype.incidentMonitorIncidentSelected = function(event, inzetInfo, fromIncidentList, isIncidentListUpdate) {
     var me = this;
 
     var openedIncident = (me.incident && me.incident !== null);
@@ -331,7 +336,7 @@ VehicleIncidentsController.prototype.incidentMonitorIncidentSelected = function(
         this.inzetBeeindigd('Incident beeindigd');
     } else {
         this.inzetInfo = inzetInfo;
-        this.inzetIncident(inzetInfo, fromIncidentList);
+        this.inzetIncident(inzetInfo, fromIncidentList, isIncidentListUpdate);
     }
 };
 
@@ -624,6 +629,7 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
     } 
     else if (!openedIncident && incidentFoundForVehicle) {
         me.incidentMonitorController && me.incidentMonitorController.markerLayer.layer.setVisibility(false);
+        me.incidentMonitorController.deselectIncident();
         me.inzetIncident(inzetInfo, false);
         me.handlingInzetInfo = false;
     } 
@@ -633,6 +639,7 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
     } 
     else if (openedIncident && openedIncidentIsEnded && incidentFoundForVehicle) { 
         me.incidentMonitorController && me.incidentMonitorController.markerLayer.layer.setVisibility(false);
+        me.incidentMonitorController.deselectIncident();
         me.inzetIncident(inzetInfo, false);
         me.handlingInzetInfo = false;
     } 
@@ -642,6 +649,7 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
     } 
     else if (openedIncident && !openedIncidentIsEnded && !openedIncidentIsForVehicle && incidentFoundForVehicle) {
         me.incidentMonitorController && me.incidentMonitorController.markerLayer.layer.setVisibility(false);
+        me.incidentMonitorController.deselectIncident();
         me.inzetIncident(inzetInfo, false);
         me.handlingInzetInfo = false;
     } 
@@ -651,6 +659,7 @@ VehicleIncidentsController.prototype.handleInzetInfo = function(inzetInfo) {
     } 
     else if (openedIncident && !openedIncidentIsEnded && openedIncidentIsForVehicle && incidentFoundForVehicle) {
         me.incidentMonitorController && me.incidentMonitorController.markerLayer.layer.setVisibility(false);
+        me.incidentMonitorController.deselectIncident();
         me.inzetIncident(inzetInfo, false);
         me.handlingInzetInfo = false;
     }
@@ -1052,7 +1061,7 @@ VehicleIncidentsController.prototype.saveKladblokChatRow = function (row, incide
     }
 }
 
-VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, fromIncidentList) {
+VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, fromIncidentList, isIncidentListUpdate) {
     var me = this;
     if (me.options.showKladblokChatAuthorized) {
         $.ajax("api/kladblok/" + incidentInfo.incident.nummer + ".json", {
@@ -1092,14 +1101,14 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
                 });
                 incidentInfo.incident.kladblok = incidentInfo.incident.kladblok.filter(function (f) { return !f.IsChat; }).concat(chatRow);
             }
-            me.onInzetIncident(incidentInfo, fromIncidentList);
+            me.onInzetIncident(incidentInfo, fromIncidentList, isIncidentListUpdate);
         });
     } else {
-        me.onInzetIncident(incidentInfo, fromIncidentList);
+        me.onInzetIncident(incidentInfo, fromIncidentList, isIncidentListUpdate);
     }
 };
 
-VehicleIncidentsController.prototype.onInzetIncident = function(incidentInfo, fromIncidentList) {
+VehicleIncidentsController.prototype.onInzetIncident = function(incidentInfo, fromIncidentList, isIncidentListUpdate) {
     console.log("inzetIncident (from IM: " + fromIncidentList + ")", incidentInfo);
 
     var me = this;
@@ -1123,7 +1132,7 @@ VehicleIncidentsController.prototype.onInzetIncident = function(incidentInfo, fr
         me.button.setIcon("bell");
     }
 
-    if(incidentInfo.incident.nummer !== me.incidentNummer || fromIncidentList) {
+    if(incidentInfo.incident.nummer !== me.incidentNummer || (fromIncidentList && !isIncidentListUpdate)) {
         me.geenInzet();
 
         me.incident = incidentInfo.incident;
