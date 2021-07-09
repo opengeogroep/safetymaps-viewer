@@ -71,16 +71,16 @@ dbkjs.modules.vrh_waterwinning = {
                         me.newIncident(incident);
                     });
                     $(dbkjs.modules.incidents.controller).on("end_incident", function () {
-                        me.afterRequestIsBuzy(me.resetTab);
+                        me.afterRequestIsDone(me.resetTab.bind(me));
                     });
                 }
             });
         }
     },
-    afterRequestIsBuzy: function (callback) {
+    afterRequestIsDone: function (callback) {
         var me = this;
         if (me.requestIsBuzy) {
-            window.setTimeout(me.afterRequestIsBuzy, 100);
+            window.setTimeout(me.afterRequestIsDone, 100);
         } else  {
             if (typeof callback === "function") {
                 callback();
