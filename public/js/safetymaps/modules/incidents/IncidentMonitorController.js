@@ -76,6 +76,7 @@ function IncidentMonitorController(options) {
         })
         .append('<i class="fa fa-repeat" style="width: 27.5px"></i>')
         .click(function(e) {
+            me.deselectIncident();
             me.getIncidentList();
             $(me).triggerHandler("incident_empty");
             if(me.selectedIncidentMarker) {
