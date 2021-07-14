@@ -116,7 +116,9 @@ function VehicleIncidentsController(options, featureSelector) {
     if(me.options.incidentSource === "VrhAGS" || me.options.incidentSourceFallback === "VrhAGS") {
         // Initialize AGS service
         me.service = new AGSIncidentService(me.options.apiPath + "vrhAGS", me.options.apiPath + "vrhAGSEenheden");
-        me.initializeService();
+        me.initializeService(function() {
+            me.options.showStatus && me.updateStatus();
+        });
     }
 
     me.incidentMonitorCode = window.localStorage.getItem("imcode");
@@ -125,22 +127,24 @@ function VehicleIncidentsController(options, featureSelector) {
 
     $(dbkjs).one("dbkjs_init_complete", function() {
         me.setVoertuignummer(me.voertuignummer, true);
-        // Make sure service is initialized before try to get status for vehicle
-        window.setTimeout(function () {
-            me.options.showStatus && me.updateStatus();
-        }, 1000);
+        me.options.showStatus && me.updateStatus();
     });
 };
 
-VehicleIncidentsController.prototype.initializeService = function() {
+VehicleIncidentsController.prototype.initializeService = function(onDone) {
     var me = this;
     me.service.initialize(me.options.apiPath + "vrhAGSToken", null, null)
     .fail(function(e) {
         console.log("VrhAGS service failed to initialize", arguments);
         window.setTimeout(function() {
             console.log('Retrying VrhAGS service initialization');
-            me.initializeService();
+            me.initializeService(onDone);
         }, 10000);
+    })
+    .done(function() {
+        if (typeof onDone === "function") {
+            onDone();
+        }
     });
 };
 
