@@ -26,7 +26,7 @@ window.dbkjs = dbkjs;
 dbkjs.modules = dbkjs.modules || {};
 dbkjs.modules.vrh_waterwinning = {
     id: "dbk.module.vrh_waterwinning",
-    requestIsBuzy: false,
+    request: null,
     options: null,
     infoWindow: null,
     div: null,
@@ -71,20 +71,13 @@ dbkjs.modules.vrh_waterwinning = {
                         me.newIncident(incident);
                     });
                     $(dbkjs.modules.incidents.controller).on("end_incident", function () {
-                        me.afterRequestIsDone(me.resetTab.bind(me));
+                        if (me.request) {
+                            me.request.abort();
+                        }
+                        me.resetTab();
                     });
                 }
             });
-        }
-    },
-    afterRequestIsDone: function (callback) {
-        var me = this;
-        if (me.requestIsBuzy) {
-            window.setTimeout(me.afterRequestIsDone, 100);
-        } else  {
-            if (typeof callback === "function") {
-                callback();
-            }
         }
     },
     createLayer: function () {
@@ -170,7 +163,6 @@ dbkjs.modules.vrh_waterwinning = {
     },
     newIncident: function(incident, zoom, addTestMarker) {
         var me = this;
-        me.requestIsBuzy = true;
         me.incident = incident;
         me.resetTab();
         me.div.html("<i>Ophalen gegevens...</i>");
@@ -186,7 +178,7 @@ dbkjs.modules.vrh_waterwinning = {
         me.requestData(incident)
         .done(function(data) {
             me.renderData(data);
-            me.requestIsBuzy = false;
+            me.request = null;
             if(zoom) {
                 dbkjs.map.setCenter(new OpenLayers.LonLat(me.incident.x, me.incident.y), dbkjs.options.zoom);
             }
@@ -341,7 +333,7 @@ dbkjs.modules.vrh_waterwinning = {
         var d = $.Deferred();
         me.options.log && console.log("vrh-waterwinning: requesting data", incident);
 
-        $.ajax(me.options.url, {
+        me.request = $.ajax(me.options.url, {
             data: {
                 x: Number(incident.x).toFixed(),
                 y: Number(incident.y).toFixed(),
