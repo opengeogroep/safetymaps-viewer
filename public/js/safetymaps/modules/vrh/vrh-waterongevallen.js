@@ -304,22 +304,50 @@ safetymaps.vrh.Waterongevallen.prototype.addFeaturesForObject = function(object)
     this.layerSymbolen.addFeatures(object.teksten.map(wktReader));
 };
 
-safetymaps.vrh.Waterongevallen.prototype.updateInfoWindow = function(windowId, object) {
+safetymaps.vrh.Waterongevallen.prototype.updateInfoWindow = function(windowId, object, isIncident) {
     var me = this;
+    var t = object.attributes;
+    var rows = [];
+    var d = $.Deferred();
 
     safetymaps.infoWindow.removeTabs(windowId, "info");
 
-    var t = object.attributes;
-    var rows;
-
-    rows = [];
     rows.push({l: "Locatie",        t: t.locatie});
     rows.push({l: "Adres",          t: t.adres});
     rows.push({l: "Plaatsnaam",     t: t.plaatsnaam});
     rows.push({l: "Gebruik boot",   t: t.gebruik_bo});
-    safetymaps.infoWindow.addTab(windowId, "algemeen", "Algemeen", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
 
-    rows = [];
+    if(dbkjs.modules.kro.shouldShowKroForObject(object, isIncident) && isIncident) {
+        var kroPromise = dbkjs.modules.kro.getObjectInfoForIncidentAddress();
+
+        kroPromise
+            .fail(function(msg) { 
+                console.log("Error fetching KRO data in vrh-waterongevallen module: " + msg);
+            })
+            .done(function(kro) {
+                if(kro.length > 0) {
+                    rows = dbkjs.modules.kro.mergeKroRowsIntoDbkRows(rows, kro[0], isIncident, "wdbk");
+                }
+            })
+            .always(function() {
+                if (rows.length > 1) {
+                    safetymaps.infoWindow.addTab(windowId, "algemeen", "Object Info", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
+                    safetymaps.vrh.Waterongevallen.prototype.updateRemainingInfoWindow(windowId, object, me);
+                }
+                d.resolve();
+            });
+    } else {
+        safetymaps.infoWindow.addTab(windowId, "algemeen", "Object Info", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
+        safetymaps.vrh.Waterongevallen.prototype.updateRemainingInfoWindow(windowId, object, me);
+        d.resolve();
+    }
+    return d.promise();
+}
+
+safetymaps.vrh.Waterongevallen.prototype.updateRemainingInfoWindow = function(windowId, object, me) {
+    var t = object.attributes;
+    var rows = [];
+
     rows.push({l: "Beroepsvaart",   t: t.beroepsvaa});
     rows.push({l: "Recreatievaart", t: t.recreatiev});
     rows.push({l: "Zeilboten",      t: t.zeilboten});
@@ -367,7 +395,7 @@ safetymaps.vrh.Waterongevallen.prototype.updateInfoWindow = function(windowId, o
     rows.push({l: "",               t: t.bijzonde_3});
     safetymaps.infoWindow.addTab(windowId, "bijzonderheden", "Bijzonderheden", "info", safetymaps.creator.createInfoTabDiv(rows, null, ["leftlabel"]));
 
-    safetymaps.infoWindow.addTab(windowId, "symbolen", "Symbolen", "info",  safetymaps.creator.createInfoTabDiv(me.createLegend(), null, ["leftlabel", "leftlabel"]));
+    safetymaps.infoWindow.addTab(windowId, "symbolen", "Legenda", "info",  safetymaps.creator.createInfoTabDiv(me.createLegend(), null, ["leftlabel", "leftlabel"]));
     dbkjs.modules.vrh_objects.addLegendTrEventHandler("tab_symbolen", {
         "symbool" : me.layerSymbolen
     }, "symboolcod");

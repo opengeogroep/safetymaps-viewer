@@ -26,6 +26,7 @@ window.dbkjs = dbkjs;
 dbkjs.modules = dbkjs.modules || {};
 dbkjs.modules.vrh_waterwinning = {
     id: "dbk.module.vrh_waterwinning",
+    request: null,
     options: null,
     infoWindow: null,
     div: null,
@@ -70,6 +71,9 @@ dbkjs.modules.vrh_waterwinning = {
                         me.newIncident(incident);
                     });
                     $(dbkjs.modules.incidents.controller).on("end_incident", function () {
+                        if (me.request) {
+                            me.request.abort();
+                        }
                         me.resetTab();
                     });
                 }
@@ -174,6 +178,7 @@ dbkjs.modules.vrh_waterwinning = {
         me.requestData(incident)
         .done(function(data) {
             me.renderData(data);
+            me.request = null;
             if(zoom) {
                 dbkjs.map.setCenter(new OpenLayers.LonLat(me.incident.x, me.incident.y), dbkjs.options.zoom);
             }
@@ -328,7 +333,7 @@ dbkjs.modules.vrh_waterwinning = {
         var d = $.Deferred();
         me.options.log && console.log("vrh-waterwinning: requesting data", incident);
 
-        $.ajax(me.options.url, {
+        me.request = $.ajax(me.options.url, {
             data: {
                 x: Number(incident.x).toFixed(),
                 y: Number(incident.y).toFixed(),

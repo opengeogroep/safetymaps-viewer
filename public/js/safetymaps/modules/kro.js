@@ -188,9 +188,14 @@ dbkjs.modules.kro = {
         return me.callApi(params);
     },
 
-    mergeKroRowsIntoDbkRows: function(dbkRows, kro, isIncident) {
+    mergeKroRowsIntoDbkRows: function(dbkRows, kro, isIncident, dbkTypeString) {
         var me = dbkjs.modules.kro;
-        var kroRows = me.createGeneralRows(kro, true);
+
+        if (typeof dbkTypeString === "undefined") {
+            dbkTypeString = 'dbk';
+        }
+
+        var kroRows = me.createGeneralRows(kro, true, undefined, dbkTypeString);
 
         if (isIncident) {
             kroRows.unshift({ l: "Incident adres", t: me.cache.incidentAddressString, source: "kro" });
@@ -236,7 +241,7 @@ dbkjs.modules.kro = {
         }, 500);
     },
 
-    createGeneralRows: function(kro, mergeWithDbk, inPopup) {
+    createGeneralRows: function(kro, mergeWithDbk, inPopup, dbkTypeString) {
         var rows = [];
         var typeList = "-";
         var addressTypeList = "-";
@@ -246,6 +251,9 @@ dbkjs.modules.kro = {
         }
         if (typeof inPopup === "undefined") {
             inPopup = false;
+        }
+        if (typeof dbkTypeString === "undefined") {
+            dbkTypeString = 'dbk';
         }
 
         var functies = ['Onbekend', 'Onbekend'];
@@ -272,15 +280,15 @@ dbkjs.modules.kro = {
 
         rows.push({ l: "<span class='objectinfo__header'>bron: basisregistratie</span>", html: "<br/>", source: "kro", order: '0' });
         if (!inPopup) {
-            rows.push({ l: "Oppervlakte adres", t: kro.adres_oppervlak + "m2", source: "kro" });
+            rows.push({ l: "Oppervlakte adres", t: kro.adres_oppervlak ? kro.adres_oppervlak + "m2" : "Onbekend", source: "kro" });
         }
-        rows.push({ l: "Bouwjaar", t: ("" + kro.pand_bouwjaar + ""), source: "kro" });
-        rows.push({ l: "Maximale hoogte",t: ("" + kro.pand_maxhoogte + "").replace(".", ",") + "m", source: "kro" });
+        rows.push({ l: "Bouwjaar", t: ("" + kro.pand_bouwjaar ? kro.pand_bouwjaar : "Onbekend" + ""), source: "kro" });
+        rows.push({ l: "Maximale hoogte",t: kro.pand_maxhoogte ? ("" + kro.pand_maxhoogte + "").replace(".", ",") + "m" : "Onbekend", source: "kro" });
         rows.push({ l: "Geschat aantal bouwlagen<br/>bovengronds",t: kro.pand_bouwlagen, source: "kro" });
         rows.push({ l: "Functies binnen dit adres <a href='#custompanel' data-toggle='modal'><i onClick='dbkjs.modules.kro.showFootnote(\"Uitleg: functies binnen dit adres\", \"kro_adres_functies.png\")' class='fa fa-info-circle'></i></a>", html: addressTypeList, source: "kro" });
         rows.push({ l: "Alle functies in dit gebouw <a href='#custompanel' data-toggle='modal'><i onClick='dbkjs.modules.kro.showFootnote(\"Uitleg: alle functies in dit gebouw\", \"kro_gebouw_functies.png\")' class='fa fa-info-circle'></i></a> <a href='#custompanel' data-toggle='modal'><span onClick='dbkjs.modules.kro.showPopup(\"" + kro.bagpandid + "\")'><br/>klik voor meer info</span></a>", html: typeList, source: "kro" });
 
-        if (kro.pand_status.toLowerCase() !== "pand in gebruik") {
+        if (kro.pand_status && kro.pand_status.toLowerCase() !== "pand in gebruik") {
             rows.push({ l: "Status", t: kro.pand_status, source: "kro" });
         }
 
@@ -289,7 +297,7 @@ dbkjs.modules.kro = {
         }
 
         if (mergeWithDbk) {
-            rows.push({ l: "<br/><span class='objectinfo__header'>bron: dbk brandweer</span>", html: "<br/><br/>", source: "kro", order: '900' });
+            rows.push({ l: "<br/><span class='objectinfo__header'>bron: " + dbkTypeString + " brandweer</span>", html: "<br/><br/>", source: "kro", order: '900' });
         }
 
         return rows;
@@ -370,7 +378,7 @@ dbkjs.modules.kro = {
                                 : ["|"]).filter(function(itm) { return itm !== '|'}).map(function(itm) { return itm.split('|')[1] }).join(', ');
                             var showTypering = (aanzien_typering + adres_typering).length > 0 ? (aanzien_typering + ', ' + adres_typering) : (dataRow.functies || '|').split('|')[0];
                             var adres = dataRow.straatnaam + (" " + dataRow.huisnr || "") + (" " + dataRow.huisletter || "") + (" " + dataRow.huistoevg || "") + dataRow.plaatsnaam;
-                            var rowHtml = "<tr class='" + rowCss + "'><td>" + (adres) + "</td><td>" + (showTypering) +
+                            var rowHtml = "<tr class='" + rowCss + "'><td>" + (adres) + "</td><td>" + (showTypering.replace(/[, ]/g, ' ')).trim() +
                                 "</td><td>" + dataRow.adres_oppervlak + "m2" +
                                 "</td><td>" + (containsWoTypering ? '' : dataRow.adres_bedrijfsnaam || "") + "</td><td>" + (containsWoTypering ? '' : dataRow.adres_telefoonnummer || "") +
                                 "</td><td>" + (containsWoTypering ? '' : dataRow.adres_aantal_personen || "") + "</td></tr>";
