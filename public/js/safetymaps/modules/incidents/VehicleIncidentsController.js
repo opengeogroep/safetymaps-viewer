@@ -131,6 +131,7 @@ function VehicleIncidentsController(options, featureSelector) {
 
 VehicleIncidentsController.prototype.initializeService = function() {
     var me = this;
+
     me.service.initialize(me.options.apiPath + "vrhAGSToken", null, null)
     .fail(function(e) {
         console.log("VrhAGS service failed to initialize", arguments);
@@ -138,6 +139,11 @@ VehicleIncidentsController.prototype.initializeService = function() {
             console.log('Retrying VrhAGS service initialization');
             me.initializeService();
         }, 10000);
+    })
+    .done(function() {
+        // (re)init updateStatus timer because initializing service could be slower then ...
+        // ... dbkjs_init_complete and resulting in status shown far later then app is ready
+        me.options.showStatus && me.updateStatus();
     });
 };
 
