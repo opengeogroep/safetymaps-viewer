@@ -1112,6 +1112,7 @@ safetymaps.vrh.Events.prototype.createEventLegend = function() {
 
     var rows = [];
     var rowsWithInfo = [], rowsWithoutInfo = [];
+
     function legendTrSort(lhs, rhs) {
         return lhs[1].localeCompare(rhs[1]);
     };
@@ -1156,6 +1157,7 @@ safetymaps.vrh.Events.prototype.createEventLegend = function() {
         rows = rows.concat(rowsWithInfo).concat(rowsWithoutInfo);
     }
     rowsWithoutInfo = [];
+    rowsWithInfo = [];
 
     if(me.layerRoutePolygon.features.length > 0) {
         rows.push([
@@ -1197,6 +1199,7 @@ safetymaps.vrh.Events.prototype.createEventLegend = function() {
         rows = rows.concat(rowsWithInfo).concat(rowsWithoutInfo);
     }
     rowsWithoutInfo = [];
+    rowsWithInfo = [];
 
     if(me.layerLocationLine.features.length > 0) {
         rows.push([
@@ -1238,6 +1241,7 @@ safetymaps.vrh.Events.prototype.createEventLegend = function() {
         rows = rows.concat(rowsWithInfo).concat(rowsWithoutInfo);
     }
     rowsWithoutInfo = [];
+    rowsWithInfo = [];
 
     if(me.layerRouteLine.features.length > 0) {
         rows.push([
@@ -1278,6 +1282,7 @@ safetymaps.vrh.Events.prototype.createEventLegend = function() {
         rows = rows.concat(rowsWithInfo).concat(rowsWithoutInfo);
     }
     rowsWithoutInfo = [];
+    rowsWithInfo = [];
 
     if(me.layerLocationSymbols.features.length > 0) {
         rows.push([
@@ -1318,6 +1323,7 @@ safetymaps.vrh.Events.prototype.createEventLegend = function() {
         rows = rows.concat(rowsWithInfo).concat(rowsWithoutInfo);
     }
     rowsWithoutInfo = [];
+    rowsWithInfo = [];
 
     if(me.layerRouteSymbols.features.length > 0) {
         rows.push([
