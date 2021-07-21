@@ -280,15 +280,15 @@ dbkjs.modules.kro = {
 
         rows.push({ l: "<span class='objectinfo__header'>bron: basisregistratie</span>", html: "<br/>", source: "kro", order: '0' });
         if (!inPopup) {
-            rows.push({ l: "Oppervlakte adres", t: kro.adres_oppervlak + "m2", source: "kro" });
+            rows.push({ l: "Oppervlakte adres", t: kro.adres_oppervlak ? kro.adres_oppervlak + "m2" : "Onbekend", source: "kro" });
         }
-        rows.push({ l: "Bouwjaar", t: ("" + kro.pand_bouwjaar + ""), source: "kro" });
-        rows.push({ l: "Maximale hoogte",t: ("" + kro.pand_maxhoogte + "").replace(".", ",") + "m", source: "kro" });
+        rows.push({ l: "Bouwjaar", t: ("" + kro.pand_bouwjaar ? kro.pand_bouwjaar : "Onbekend" + ""), source: "kro" });
+        rows.push({ l: "Maximale hoogte",t: kro.pand_maxhoogte ? ("" + kro.pand_maxhoogte + "").replace(".", ",") + "m" : "Onbekend", source: "kro" });
         rows.push({ l: "Geschat aantal bouwlagen<br/>bovengronds",t: kro.pand_bouwlagen, source: "kro" });
         rows.push({ l: "Functies binnen dit adres <a href='#custompanel' data-toggle='modal'><i onClick='dbkjs.modules.kro.showFootnote(\"Uitleg: functies binnen dit adres\", \"kro_adres_functies.png\")' class='fa fa-info-circle'></i></a>", html: addressTypeList, source: "kro" });
         rows.push({ l: "Alle functies in dit gebouw <a href='#custompanel' data-toggle='modal'><i onClick='dbkjs.modules.kro.showFootnote(\"Uitleg: alle functies in dit gebouw\", \"kro_gebouw_functies.png\")' class='fa fa-info-circle'></i></a> <a href='#custompanel' data-toggle='modal'><span onClick='dbkjs.modules.kro.showPopup(\"" + kro.bagpandid + "\")'><br/>klik voor meer info</span></a>", html: typeList, source: "kro" });
 
-        if (kro.pand_status.toLowerCase() !== "pand in gebruik") {
+        if (kro.pand_status && kro.pand_status.toLowerCase() !== "pand in gebruik") {
             rows.push({ l: "Status", t: kro.pand_status, source: "kro" });
         }
 
