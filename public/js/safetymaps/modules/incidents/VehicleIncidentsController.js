@@ -1103,7 +1103,7 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
             var chatRow;
             if(incidentInfo.source === "SafetyConnect"){
                 chatRow = data.map(function (itm) {
-                    return { DTG: itm.dtg, Inhoud: itm.inhoud, IsChat: true };
+                    return { DTG: itm.dtg, Inhoud: itm.inhoud, IsChat: true, Discipline: "-B-" };
                 });
                 incidentInfo.incident.Kladblokregels = incidentInfo.incident.Kladblokregels.filter(function (f) { return !f.IsChat; }).concat(chatRow);
             } else {
@@ -1125,7 +1125,7 @@ VehicleIncidentsController.prototype.inzetIncident = function(incidentInfo, from
                         MELDING_ID: null,
                         IsChat: true };
                 });
-                incidentInfo.incident.kladblok = incidentInfo.incident.kladblok.filter(function (f) { return !f.IsChat && f.INHOUD_KLADBLOK_REGEL.substring(0, me.options.logKladblokToGmsPrefix.length -1) !== me.options.logKladblokToGmsPrefix; }).concat(chatRow);
+                incidentInfo.incident.kladblok = incidentInfo.incident.kladblok.filter(function (f) { return !f.IsChat; }).concat(chatRow);
             }
             me.onInzetIncident(incidentInfo, fromIncidentList);
         });
