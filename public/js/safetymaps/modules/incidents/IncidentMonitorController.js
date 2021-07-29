@@ -202,7 +202,6 @@ IncidentMonitorController.prototype.getSafetyConnectIncident = function (fromInc
             daysInPast: me.options.getIncidentsFromDaysInPast,
             prio: maxPrio,
             includeWithoutUnits: me.options.includeIncidentsWithoutUnits,
-            excludeKladblokRowsWithPrefix: (me.options.logKladblokToGmsAuthorized ? me.options.logKladblokToGmsPrefix : null),
         },
         xhrFields: { withCredentials: true }, crossDomain: true
     })

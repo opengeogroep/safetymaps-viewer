@@ -186,8 +186,10 @@ VehicleIncidentsController.prototype.defaultOptions = function(options) {
         incidentListFooterFunction: null,
         incidentListFunction: null,
 
+        filterOutKladblokRegelsContaining: [],
         logKladblokToGmsAuthorized: false,
-        logKladblokToGmsPrefix: "(VTG:",
+        logKladblokToGmsPrefix: "VTG:",
+        logKladblokToGmsThemas: ["BRW","BRW_Alg"],
     }, options);
 };
 
@@ -295,8 +297,6 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
                 includeIncidentsWithoutUnits: me.options.withoutUnitsAuthorized,
                 vehiclePopupTemplate: me.options.vehiclePopupTemplate,
                 vehiclesShowVehiclePopup: me.options.vehiclesShowVehiclePopup,
-                logKladblokToGmsAuthorized: me.options.logKladblokToGmsAuthorized,
-                logKladblokToGmsPrefix: me.options.logKladblokToGmsPrefix,
             };
 
             me.incidentMonitorController = new IncidentMonitorController(incidentMonitorOptions);
@@ -1036,7 +1036,7 @@ VehicleIncidentsController.prototype.saveKladblokChatRow = function (row, incide
             method: 'POST',
             data: {
                 row: row,
-                vehicle: me.voertuignummers[0],
+                vehicle: me.getVoertuignummerOrUsername(),
             },
             xhrFields: { withCredentials: true }, 
             crossDomain: true
@@ -1049,22 +1049,33 @@ VehicleIncidentsController.prototype.saveKladblokChatRow = function (row, incide
             me.inzetIncident({ incident: me.incident, source: me.options.incidentSource }, me.incidentFromIncidentList);
 
             if (me.options.logKladblokToGmsAuthorized) {
-                me.logKladblokChatRowToGMS(row, incidentnr, me.voertuignummers[0]);
+                me.logKladblokChatRowToGMS(row, incidentnr, me.getVoertuignummerOrUsername(), me.incident.id);
             }
         })
     }
 }
 
-VehicleIncidentsController.prototype.logKladblokChatRowToGMS = function (row, incidentnr, vehicle) {
+VehicleIncidentsController.prototype.getVoertuignummerOrUsername = function () {
+    var me = this;
+
+    return me.voertuignummers.length > 0
+        ? me.voertuignummers[0]
+        : dbkjs.options.organisation.username.split("@")[0];
+}
+
+VehicleIncidentsController.prototype.logKladblokChatRowToGMS = function (row, incidentNr, vehicle, incidentId, ) {
     var me = this;
     
-    row = me.options.logKladblokToGmsPrefix + vehicle + ") " + row;
+    row = me.options.logKladblokToGmsPrefix + vehicle + ' - ' + row;
 
     $.ajax(me.options.apiPath + "safetyconnect/kladblokregel", {
         dataType: "json",
         data: {
-            incidentNumber: incidentnr,
-            content: row
+            incidentNumber: incidentNr,
+            incidentId: incidentId,
+            content: row,
+            themas: me.options.logKladblokToGmsThemas,
+            publisher: "safetymaps-viewer",
         },
         xhrFields: { withCredentials: true }, crossDomain: true
     })
@@ -1129,6 +1140,11 @@ VehicleIncidentsController.prototype.onInzetIncident = function(incidentInfo, fr
     var me = this;
     
     var filterOutKladblokRegelsContaining = me.options.filterOutKladblokRegelsContaining;
+
+    if (me.options.logKladblokToGmsAuthorized) {
+        filterOutKladblokRegelsContaining.push(me.options.logKladblokToGmsPrefix);
+    }
+
     if(incidentInfo.source === "SafetyConnect") {
         incidentInfo.incident.Kladblokregels = incidentInfo.incident.Kladblokregels.filter(function(incidentFilter) {
             return !filterOutKladblokRegelsContaining.some(function(s) { return incidentFilter.Inhoud.toLowerCase().indexOf(s) >= 0; });
