@@ -313,6 +313,7 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
                 me.incidentMonitorIncidentSelected(event, inzetInfo, fromIncidentList, true);
             });
             $(me.incidentMonitorController).on("incident_empty", function () {
+                this.incidentMonitorController.vehiclePositionLayer.setVisibility(true);
                 if (me.inzetInfo) {
                     me.inzetBeeindigd();
                 }
@@ -331,6 +332,9 @@ VehicleIncidentsController.prototype.incidentMonitorIncidentSelected = function(
     var openedIncident = (me.incident && me.incident !== null);
     var openedIncidentIsEnded = (openedIncident && me.incident.beeindigdeInzet);
     var selectedIncidentIsEnded = inzetInfo.incident.beeindigdeInzet;
+
+    // Avoid double vehicles on map, only show vehicles for incident
+    this.incidentMonitorController.vehiclePositionLayer.setVisibility(false);
 
     if (openedIncident && !openedIncidentIsEnded && selectedIncidentIsEnded) {
         this.inzetBeeindigd('Incident beeindigd');
