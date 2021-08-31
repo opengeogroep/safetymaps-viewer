@@ -283,7 +283,7 @@ IncidentMonitorController.prototype.getVrhAGSIncident = function (fromIncidentLi
     })
     .done(function(incident) {
         me.incidentTimerFails = 0;
-        me.updateIncidentTimeout = setTimeout(() => me.tryGetIncident(fromIncidentList, true), 5000);
+        me.updateIncidentTimeout = setTimeout(() => me.tryGetIncident(fromIncidentList, true), me.options.updateInterval);
         if(!incident || !incident.NR_INCIDENT) {
             console.log("IM VrhAGS: invalid incident", incident);
             return;
