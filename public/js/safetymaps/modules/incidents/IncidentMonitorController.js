@@ -30,8 +30,8 @@ function IncidentMonitorController(options) {
         apiPath: dbkjs.options.urls && dbkjs.options.urls.apiPath ? dbkjs.options.urls.apiPath : "api/",
 
         showVehicles: true,
-        vehicleSource: "incidentService",
-        vehicleSourceURL: null,
+        showVehiclesConfigOption: false,
+        incidentListIcon: 'list',
         logVehicles: false,
         showInzetRol: true,
         showTwitter: false,
@@ -43,19 +43,51 @@ function IncidentMonitorController(options) {
         updateIntervalError: 5000,
         updateTries: 3,
         incidentSource: "SafetyConnect",
+        originalIncidentSource: null,
+        useSCIncidentListIfAuthorized: false,
         agsService: null,
         cacheArchivedIncidents: true
     }, options);
     me.service = me.options.agsService;
+    me.options.originalIncidentSource = me.options.incidentSource;
 
     // Debug option to show incidents without units attached
     me.options.toonZonderEenheden = OpenLayers.Util.getParameters().toonZonderEenheden === "true" || me.options.includeIncidentsWithoutUnits;
 
-    me.button = new AlertableButton("btn_incidentlist", "Incidentenlijst", "list");
-    me.button.getElement().insertAfter('#btn_incident');
+    me.button = new AlertableButton("btn_incidentlist", "Incidentenlijst", me.options.incidentListIcon);
+    if (me.options.incidentMonitorOnly) {
+        $(dbkjs).one('dbkjs_init_complete', () => {
+            me.button.getElement().insertBefore('#c_settings');
+        });
+    } else {
+        me.button.getElement().insertAfter('#btn_incident');
+    }
     $(me.button).on('click', function() {
         me.incidentListWindow.show();
     });
+
+    if(me.options.incidentMonitorOnly) {
+        $('<a></a>')
+        .attr({
+            'id': 'btn_openreset',
+            'class': 'btn btn-default navbar-btn',
+            'href': '#',
+            'title': 'Reset'
+        })
+        .append('<i class="fa fa-repeat" style="width: 27.5px"></i>')
+        .click(function(e) {
+            me.deselectIncident();
+            me.getIncidentList();
+            $(me).triggerHandler("incident_empty");
+            if(me.selectedIncidentMarker) {
+                me.markerLayer.removeMarker(me.selectedIncidentMarker);
+                me.selectedIncidentMarker = null;
+            }
+        })
+        .appendTo('#btngrp_3');
+
+        $("<div id='incidentSource'></div>").appendTo("#settingspanel_b");
+    }
 
     me.incidentListWindow = new IncidentListWindow();
     me.incidentListWindow.createElements("Incidenten");
@@ -76,6 +108,16 @@ function IncidentMonitorController(options) {
             vehiclePopupTemplate: me.options.vehiclePopupTemplate,
             vehiclesShowVehiclePopup: me.options.vehiclesShowVehiclePopup
         });
+        let showVehicles = window.localStorage.getItem("imShowVehicles") != null ? !!window.localStorage.getItem("imShowVehicles") : true;
+        me.vehiclePositionLayer.setVisibility(showVehicles);
+        if(me.options.showVehiclesConfigOption) {
+            $("#settingspanel_b").append('<hr/><label><input id="im_showvehicles" type="checkbox" ' + (showVehicles ? 'checked' : '') + '>Toon voertuigposities</label>');
+            $("#im_showvehicles").on("click", function(event) {
+                showVehicles = event.target.checked;
+                window.localStorage.setItem("imShowVehicles", showVehicles);
+                me.vehiclePositionLayer.setVisibility(showVehicles);
+            });
+        }
         if(me.options.enableUnassignedVehicles) {
             $("#settingspanel_b").append('<hr/><label><input id="im_showunassignedbutmoving" type="checkbox" ' + (showUnassignedButMoving ? 'checked' : '') + '>Toon bewegende voertuigen niet gekoppeld aan incident (grijs)</label>');
             $("#im_showunassignedbutmoving").on("click", function(event) {
@@ -121,6 +163,7 @@ IncidentMonitorController.prototype.disable = function() {
     me.incident = null;
     window.clearInterval(this.updateInterval);
     window.clearTimeout(this.getIncidentListTimeout);
+    window.clearTimeout(this.updateIncidentTimeout);
     $("#btn_incidentlist").hide();
     this.markerLayer.layer.setVisibility(false);
 };
@@ -190,7 +233,7 @@ IncidentMonitorController.prototype.incidentRead = function(incidentId) {
 /**
  * Get incident info from safetyconnect/incident/[me.incident.IncidentNummer]
  */
-IncidentMonitorController.prototype.getSafetyConnectIncident = function (fromIncidentList) {
+IncidentMonitorController.prototype.getSafetyConnectIncident = function (fromIncidentList, isUpdate) {
     var me = this;
     var maxPrio = me.options.includePrio4And5Incidents ? 5 : 3;
     // Get incident
@@ -211,6 +254,7 @@ IncidentMonitorController.prototype.getSafetyConnectIncident = function (fromInc
     })
     .done(function(data) {
         me.incidentTimerFails = 0;
+        me.updateIncidentTimeout = setTimeout(() => me.tryGetIncident(fromIncidentList, true), me.options.updateInterval/2);
         if(data.length === 0 || !data[0].IncidentId) {
             console.log("IM SC: Error getting incident data (empty result)", arguments);
             $(me).triggerHandler("incident_empty");
@@ -219,7 +263,7 @@ IncidentMonitorController.prototype.getSafetyConnectIncident = function (fromInc
         try {
             var incidentInfo = { source: me.options.incidentSource, incident: data[0]};
             VehicleIncidentsController.prototype.normalizeIncidentFields(incidentInfo);
-            $(me).triggerHandler("incident_selected", [incidentInfo, fromIncidentList]);
+            $(me).triggerHandler(isUpdate ? "incident_updated" : "incident_selected", [incidentInfo, me.options.updateInterval/2]);
         } catch(e) {
             console.log("IM SC: Error processing incident", e, data);
         }
@@ -229,7 +273,7 @@ IncidentMonitorController.prototype.getSafetyConnectIncident = function (fromInc
 /**
  * Get incident info from VrhAGS service
  */
-IncidentMonitorController.prototype.getVrhAGSIncident = function (fromIncidentList) {
+IncidentMonitorController.prototype.getVrhAGSIncident = function (fromIncidentList, isUpdate) {
     var me = this;
     // Get incident
     me.service.getAllIncidentInfo(me.incidentId, me.incident.archief, false)
@@ -239,20 +283,21 @@ IncidentMonitorController.prototype.getVrhAGSIncident = function (fromIncidentLi
     })
     .done(function(incident) {
         me.incidentTimerFails = 0;
+        me.updateIncidentTimeout = setTimeout(() => me.tryGetIncident(fromIncidentList, true), me.options.updateInterval);
         if(!incident || !incident.NR_INCIDENT) {
             console.log("IM VrhAGS: invalid incident", incident);
             return;
         }
         var incidentInfo = { source: me.options.incidentSource, incidenten: [incident.NR_INCIDENT], incident: incident};
         VehicleIncidentsController.prototype.normalizeIncidentFields(incidentInfo);
-        $(me).triggerHandler("incident_selected", [incidentInfo, fromIncidentList]);
+        $(me).triggerHandler(isUpdate ? "incident_updated" : "incident_selected", [incidentInfo, fromIncidentList]);
     });
 }
 
 /**
  * Try get incident from me.options.incidentSource
  */
-IncidentMonitorController.prototype.tryGetIncident = function (fromIncidentList) {
+IncidentMonitorController.prototype.tryGetIncident = function (fromIncidentList, isUpdate) {
     var me = this;
     // Check params for null values
     if (typeof fromIncidentList === "undefined") {
@@ -264,9 +309,9 @@ IncidentMonitorController.prototype.tryGetIncident = function (fromIncidentList)
     }
     // Try get
     if(me.options.incidentSource === "SafetyConnect") {
-        me.getSafetyConnectIncident(fromIncidentList);
+        me.getSafetyConnectIncident(fromIncidentList, isUpdate);
     } else if(me.options.incidentSource === "VrhAGS") {
-        me.getVrhAGSIncident(fromIncidentList);
+        me.getVrhAGSIncident(fromIncidentList, isUpdate);
     } else {
         throw new Error("Invalid incident source");
     }
@@ -275,9 +320,8 @@ IncidentMonitorController.prototype.tryGetIncident = function (fromIncidentList)
 IncidentMonitorController.prototype.selectIncident = function(obj) {
     var me = this;
 
-    if(me.selectedIncidentMarker) {
-        me.markerLayer.removeMarker(me.selectedIncidentMarker);
-    }
+    me.deselectIncident();
+
     me.incident = obj.incident;
     me.incidentId = me.incident.INCIDENT_ID || me.incident.IncidentNummer;
     console.log("IM: Select incident " + me.incidentId + ", addMarker=" + obj.addMarker);
@@ -289,6 +333,17 @@ IncidentMonitorController.prototype.selectIncident = function(obj) {
     me.tryGetIncident(true);
 };
 
+IncidentMonitorController.prototype.deselectIncident = function() {
+    var me = this;
+
+    window.clearTimeout(me.updateIncidentTimeout);
+    if(me.selectedIncidentMarker) {
+        me.markerLayer.removeMarker(me.selectedIncidentMarker);
+    }
+    me.incident = null;
+    me.incidentId = null;
+};
+
 IncidentMonitorController.prototype.checkIncidentListOutdated = function() {
     var me = this;
     var lastUpdate = new Date().getTime() - me.lastGetIncidentList;
@@ -298,18 +353,48 @@ IncidentMonitorController.prototype.checkIncidentListOutdated = function() {
     }
 };
 
-IncidentMonitorController.prototype.getIncidentList = function() {
-    var me = this;
+IncidentMonitorController.prototype.getIncidentList = function(isRetry) {
+    const me = this;
 
     window.clearTimeout(me.getIncidentListTimeout);
     me.lastGetIncidentList = new Date().getTime();
 
-    if(me.options.incidentSource === "SafetyConnect") {
-        me.getIncidentListSC();
-    } else if(me.options.incidentSource === "VrhAGS") {
-        me.service.whenInitialized().done(function() {
-            me.getIncidentListVrhAGS();
+    if(!isRetry && me.options.originalIncidentSource === "VrhAGS" && me.options.useSCIncidentListIfAuthorized) {
+        // Check whether SC is authorized and use it if available, to enable admin toggle by authorizing SC
+        me.getSCIncidentListPromise()
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            if (jqXHR.status === 403) {
+                if (me.options.incidentSource === "SafetyConnect") {
+                    // SC is forbidden again when it was not before -- we must clear list of archived incidents otherwise
+                    // we get incidents from different sources mixed
+                    me.archivedIncidents = [];
+                }
+
+                me.options.incidentSource = me.options.originalIncidentSource;
+
+                $("#incidentSource").text("Bron incidentgegevens en voertuigposities: ArcGIS GMS replica VRH");
+
+                me.service.whenInitialized().done(function() {
+                    me.getIncidentListVrhAGS();
+                });
+            }
+        })
+        .done(function(data) {
+            // Change incident source also for getting incident details
+            me.options.incidentSource = "SafetyConnect";
+            $("#incidentSource").text("Bron incidentgegevens en voertuigposities: SC&T SafetyConnect webservice");
+            const scIncidentsList$ = $.Deferred();
+            me.handleSCIncidentListPromise(scIncidentsList$.promise())
+            scIncidentsList$.resolve(data);
         });
+    } else {
+        if (me.options.incidentSource === "SafetyConnect") {
+            me.getIncidentListSC();
+        } else if (me.options.incidentSource === "VrhAGS") {
+            me.service.whenInitialized().done(function () {
+                me.getIncidentListVrhAGS();
+            });
+        }
     }
 };
 
@@ -362,11 +447,10 @@ IncidentMonitorController.prototype.getIncidentListVrhAGS = function() {
     });
 };
 
-IncidentMonitorController.prototype.getIncidentListSC = function() {
-    var me = this;
-    var maxPrio = me.options.includePrio4And5Incidents ? 5 : 3;
-
-    $.ajax(me.options.apiPath + "safetyconnect/incident", {
+IncidentMonitorController.prototype.getSCIncidentListPromise = function() {
+    const me = this;
+    const maxPrio = me.options.includePrio4And5Incidents ? 5 : 3;
+    return $.ajax(me.options.apiPath + "safetyconnect/incident", {
         dataType: "json",
         data: {
             extended: true,
@@ -377,7 +461,12 @@ IncidentMonitorController.prototype.getIncidentListSC = function() {
         },
         cache: false,
         xhrFields: { withCredentials: true }, crossDomain: true
-    })
+    });
+};
+
+IncidentMonitorController.prototype.handleSCIncidentListPromise = function(scIncidentList$) {
+    const me = this;
+    scIncidentList$
     .fail(function(jqXHR, textStatus, errorThrown) {
         me.failedUpdateTries = me.failedUpdateTries + 1;
         var triesExceeded = me.failedUpdateTries > me.options.updateTries;
@@ -386,7 +475,7 @@ IncidentMonitorController.prototype.getIncidentListSC = function() {
         // after normal update time
         window.clearTimeout(me.getIncidentListTimeout);
         me.getIncidentListTimeout = window.setTimeout(function() {
-            me.getIncidentList();
+            me.getIncidentList(true);
         }, triesExceeded ? me.options.updateInterval : me.options.updateIntervalError);
 
         var e = AGSIncidentService.prototype.getAjaxError(jqXHR, textStatus, errorThrown);
@@ -413,6 +502,11 @@ IncidentMonitorController.prototype.getIncidentListSC = function() {
         me.updateInterface();
         me.checkUnreadIncidents(me.actueleIncidentIds);
     });
+}
+
+IncidentMonitorController.prototype.getIncidentListSC = function() {
+    const me = this;
+    me.handleSCIncidentListPromise(me.getSCIncidentListPromise());
 };
 
 IncidentMonitorController.prototype.processSCIncidents = function() {
@@ -583,7 +677,8 @@ IncidentMonitorController.prototype.updateVehiclePositionLayer = function(incide
                         InzetRol: props.inzetRol,
                         Roepnummer: props.id,
                         Speed: me.options.showSpeed ? props.speed || 0 : 0,
-                        Direction: props.heading
+                        Direction: props.heading,
+                        Status: props.statusCode
                         //PositionTimeFromNow: not available
                     };
                     var geometry = new OpenLayers.Geometry.Point(f.geometry.coordinates[0], f.geometry.coordinates[1]);

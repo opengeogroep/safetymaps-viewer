@@ -65,5 +65,9 @@ dbkjs.options = {
     
     showLayerLoadingPanel: true,
 
-    extendedLogout: false
+    extendedLogout: false,
+
+    separateBaseLayerSwitcher: false,
+    separateBaseLayerSwitcherBottomLeft: false,
+    separateBaseLayerSwitcherImage: null,
 };
