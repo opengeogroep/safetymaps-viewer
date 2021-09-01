@@ -1075,7 +1075,6 @@ VehicleIncidentsController.prototype.logKladblokChatRowToGMS = function (row, in
             incidentId: incidentId,
             content: row,
             themas: me.options.logKladblokToGmsThemas.length > 0 ? me.options.logKladblokToGmsThemas[0] : '',
-            themas: me.options.logKladblokToGmsThemas.length > 1 ? me.options.logKladblokToGmsThemas[1] : '',
             publisher: "safetymaps-viewer",
         },
         xhrFields: { withCredentials: true }, crossDomain: true
