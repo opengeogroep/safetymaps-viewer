@@ -1147,11 +1147,11 @@ VehicleIncidentsController.prototype.onInzetIncident = function(incidentInfo, fr
 
     if(incidentInfo.source === "SafetyConnect") {
         incidentInfo.incident.Kladblokregels = incidentInfo.incident.Kladblokregels.filter(function(incidentFilter) {
-            return !filterOutKladblokRegelsContaining.some(function(s) { return incidentFilter.Inhoud.toLowerCase().indexOf(s) >= 0; });
+            return !filterOutKladblokRegelsContaining.some(function(s) { return incidentFilter.Inhoud.toLowerCase().indexOf(s.toLowerCase()) >= 0; });
         });
     } else {
         incidentInfo.incident.kladblok = incidentInfo.incident.kladblok.filter(function(incidentFilter) {
-            return !filterOutKladblokRegelsContaining.some(function(s) { return incidentFilter.INHOUD_KLADBLOK_REGEL.toLowerCase().indexOf(s) >= 0; });
+            return !filterOutKladblokRegelsContaining.some(function(s) { return incidentFilter.INHOUD_KLADBLOK_REGEL.toLowerCase().indexOf(s.toLowerCase()) >= 0; });
         });
     }
 
