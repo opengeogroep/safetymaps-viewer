@@ -313,7 +313,7 @@ VehicleIncidentsController.prototype.checkIncidentMonitor = function() {
                 me.incidentMonitorIncidentSelected(event, inzetInfo, fromIncidentList, true);
             });
             $(me.incidentMonitorController).on("incident_empty", function () {
-                this.incidentMonitorController.vehiclePositionLayer.setVisibility(true);
+                me.incidentMonitorController.vehiclePositionLayer.setVisibility(true);
                 if (me.inzetInfo) {
                     me.inzetBeeindigd();
                 }
