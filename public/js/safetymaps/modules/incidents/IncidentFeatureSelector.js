@@ -162,6 +162,7 @@ IncidentFeatureSelector.prototype.updateBalkRechtsonder = function(titleOverride
     $('#incident_bottom_right')
         .html(me.title)
         .css('visibility', 'visible');
+    $(window).trigger('resize');
 };
 
 IncidentFeatureSelector.prototype.hideBalkRechtsonder = function() {
